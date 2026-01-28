@@ -1,0 +1,9 @@
+# Gradle build files
+/build
+/.gradle
+/convention/build
+# IDE specific files (if opening as separate project)
+/.idea
+/*.iml
+/out
+/bin
