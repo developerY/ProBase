@@ -1,5 +1,7 @@
 pluginManagement {
     repositories {
+        // ADD THIS LINE:
+        includeBuild("build-logic")
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
