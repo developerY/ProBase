@@ -23,12 +23,12 @@ constraintLayout = "2.2.1"
 # -- Jetpack Compose --
 composeBom = "2026.01.01"
 composeMaterial = "1.8.0" # Used for Icons
-composeMaterial3Expressive = "1.5.0-alpha12"
+composeMaterial3Expressive = "1.5.0-alpha13"
 
 # -- Nav3 --
 nav3Core = "1.0.0"
 lifecycleViewmodelNav3 = "2.10.0"
-material3AdaptiveNav3 = "1.3.0-alpha06"
+material3AdaptiveNav3 = "1.3.0-alpha07"
 
 # -- Dependency Injection (Hilt) --
 hilt = "2.59"
@@ -40,14 +40,14 @@ hiltWork = "1.3.0"
 kotlinxSerializationCore = "1.10.0"
 kotlinSerialization = "2.3.0" # Matches Kotlin version for plugin
 immutableCollections = "0.4.0"
-coroutines = "1.10.1"
+coroutines = "1.10.2"
 
 # -- Data Persistence --
 room = "2.8.4"
 datastore = "1.2.0"
 
 # -- Background --
-work = "2.11.0"
+work = "2.11.1"
 
 # -- Networking (Rest & GQL) --
 okhttp = "5.3.2"
@@ -59,10 +59,10 @@ coil = "2.7.0"
 accompanistPermissions = "0.37.3"
 
 # -- Camera --
-cameraX = "1.5.2"
+cameraX = "1.5.3"
 
 # -- Maps & Location --
-mapsCompose = "7.0.0"
+mapsCompose = "8.0.0"
 mapsplatformSecretsPlugin = "2.0.1"
 playServicesMaps = "20.0.0"
 playServicesLocation = "21.3.0"
@@ -71,8 +71,8 @@ playServicesLocation = "21.3.0"
 healthConnect = "1.1.0"
 healthServices = "1.1.0-alpha05"
 wearOngoing = "1.1.0"
-wearComposeMaterial3 = "1.6.0-alpha08"
-wearComposeNavigation = "1.6.0-alpha08"
+wearComposeMaterial3 = "1.6.0-alpha09"
+wearComposeNavigation = "1.6.0-alpha09"
 wearCompose = "1.6.0-alpha08"
 playServicesWearable = "19.0.0"
 wearToolingPreview = "1.0.0"
@@ -81,8 +81,8 @@ horologist = "0.7.15"
 watchfaceComplicationsDataSourceKtx = "1.2.1"
 
 # -- XR & Glass --
-glimmer = "1.0.0-alpha04"
-projectedXR = "1.0.0-alpha03"
+glimmer = "1.0.0-alpha05"
+projectedXR = "1.0.0-alpha04"
 
 # -- Google Services & Firebase --
 playServicesCoroutines = "1.10.2"
