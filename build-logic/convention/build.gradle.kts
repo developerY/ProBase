@@ -23,7 +23,7 @@ gradlePlugin {
         }
         register("androidApplicationCompose") {
             id = "composetemplate.android.application.compose"
-            implementationClass = "com.zoewave.probase.convention.AndroidComposeConventionPlugin"
+            implementationClass = "com.zoewave.probase.convention.AndroidApplicationComposeConventionPlugin"
         }
         register("androidLibrary") {
             id = "composetemplate.android.library"
@@ -31,7 +31,7 @@ gradlePlugin {
         }
         register("androidLibraryCompose") {
             id = "composetemplate.android.library.compose"
-            implementationClass = "com.zoewave.probase.convention.AndroidComposeConventionPlugin"
+            implementationClass = "com.zoewave.probase.convention.AndroidLibraryComposeConventionPlugin"
         }
         register("androidHilt") {
             id = "composetemplate.android.hilt"

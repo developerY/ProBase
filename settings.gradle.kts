@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ProBase"
 include(":app")
- 
+include(":features:nav3")
+include(":features:ble")
