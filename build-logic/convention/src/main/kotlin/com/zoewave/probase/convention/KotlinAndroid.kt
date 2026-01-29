@@ -24,14 +24,14 @@ internal fun Project.configureKotlinAndroid(
 
         // 3. Java Version (Property of CompileOptions)
         // REQUIRED: AGP 9+ requires Java 17. If you remove this, builds will fail.
-        compileOptions.sourceCompatibility = JavaVersion.VERSION_17
-        compileOptions.targetCompatibility = JavaVersion.VERSION_17
+        compileOptions.sourceCompatibility = JavaVersion.VERSION_21
+        compileOptions.targetCompatibility = JavaVersion.VERSION_21
     }
 
-    // Configure Kotlin JVM Target to match Java 17
+    // Configure Kotlin JVM Target to match Java 21
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
 }
