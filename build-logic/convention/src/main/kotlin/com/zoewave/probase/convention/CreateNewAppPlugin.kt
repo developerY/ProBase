@@ -1,4 +1,4 @@
-package com.zoewave.probase.convertion
+package com.zoewave.probase.convention
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project

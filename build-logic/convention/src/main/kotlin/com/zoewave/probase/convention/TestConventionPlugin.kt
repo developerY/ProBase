@@ -1,4 +1,4 @@
-package com.zoewave.probase.convertion
+package com.zoewave.probase.convention
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -11,6 +11,7 @@ class TestConventionPlugin : Plugin<Project> {
                 add("testImplementation", libs.findLibrary("junit").get())
                 add("testImplementation", libs.findLibrary("truth").get())
                 add("testImplementation", libs.findLibrary("mockk").get())
+                // Ensure this exists in TOML or remove if unused
                 add("testImplementation", libs.findLibrary("kotlinx-coroutines-test").get())
 
                 add("androidTestImplementation", libs.findLibrary("androidx-junit").get())

@@ -1,46 +1,38 @@
 [versions]
-# -- User Provided Versions (Project Core) --
+# -- Project Configuration --
+android-compileSdk = "35"
+android-minSdk = "24"
+android-targetSdk = "35"
+
+# -- Build Tools --
 agp = "9.1.0-alpha06"
-coreKtx = "1.17.0"
+kotlin = "2.0.21"
+# KSP version must match Kotlin version exactly (2.0.21 -> 1.0.26)
+ksp = "2.0.21-1.0.26"
+
+# -- Android Libraries --
+coreKtx = "1.15.0"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.9.3"
+composeBom = "2024.10.01"
+
+# -- Testing --
 junit = "4.13.2"
-junitVersion = "1.3.0"
-espressoCore = "3.7.0"
-lifecycleRuntimeKtx = "2.10.0"
-activityCompose = "1.12.2"
-kotlin = "2.3.0"
-composeBom = "2026.01.00"
-
-# -- Added Missing Versions --
-# Build Tools (Must match Kotlin version)
-ksp = "2.3.0-1.0.30"
-kotlinxSerializationPlugin = "2.3.0"
-
-# Navigation 3 (Experimental / Type-Safe)
-navigation3 = "1.0.0-alpha07"
-lifecycleNavigation3 = "2.10.0"
-material3AdaptiveNavigation3 = "1.0.0-alpha07"
-
-# Data & Network
-datastore = "1.1.1"
-retrofit = "2.11.0"
-gson = "2.11.0"
-loggingInterceptor = "4.12.0"
-kotlinxSerialization = "1.7.3"
-
-# Dependency Injection
-hilt = "2.51.1"
-hiltNavigationCompose = "1.2.0"
-
-# Testing Extras
-truth = "1.4.2"
-mockk = "1.13.12"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+appcompat = "1.7.1"
+material = "1.13.0"
 
 [libraries]
-# -- User Provided Libraries --
+# -- Build Logic Dependencies (REQUIRED for build-logic to compile) --
+android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
+# Added KSP Gradle Plugin here so build-logic can access it
+ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
+
+# -- Android App Libraries --
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -52,52 +44,16 @@ androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 
-# -- Added Missing Libraries --
-
-# Build Logic Dependencies (Required for Convention Plugins)
-# These are used as libraries inside build-logic/convention/build.gradle.kts
-android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
-kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
-compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
-
-# Navigation 3
-androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3" }
-androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
-androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycleNavigation3" }
-androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "material3AdaptiveNavigation3" }
-
-# Data Storage
-androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
-
-# Network
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "gson" }
-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "loggingInterceptor" }
-
-# Dependency Injection
-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
-hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
-androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-
-# Kotlin Extensions
-kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
-
-# Testing Extras
-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+# -- Testing --
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
-# -- User Provided Plugins --
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
-# -- Added Missing Plugins --
-# Required for build-logic to apply these plugins to modules
-android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinxSerializationPlugin" }
+# Added KSP Plugin ID here
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-# Used inside build-logic/build.gradle.kts
-kotlin-dsl = { id = "org.gradle.kotlin.kotlin-dsl", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }

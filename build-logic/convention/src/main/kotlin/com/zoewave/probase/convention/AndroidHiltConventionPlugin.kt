@@ -1,4 +1,4 @@
-package com.zoewave.probase.convertion
+package com.zoewave.probase.convention
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -15,7 +15,11 @@ class AndroidHiltConventionPlugin : Plugin<Project> {
             dependencies {
                 add("implementation", libs.findLibrary("hilt-android").get())
                 add("ksp", libs.findLibrary("hilt-android-compiler").get())
-                add("implementation", libs.findLibrary("androidx-hilt-navigation-compose").get())
+
+                // OPTIONAL: I removed hilt-navigation-compose from here.
+                // It is better to add that only in modules that actually use Compose UI.
+                // If you want it everywhere, you can uncomment the line below:
+                // add("implementation", libs.findLibrary("androidx-hilt-navigation-compose").get())
             }
         }
     }

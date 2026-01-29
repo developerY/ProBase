@@ -5,10 +5,10 @@ plugins {
 group = "com.zoewave.probase.convention"
 
 dependencies {
-    compileOnly(libs.android.gradle.plugin)
-    compileOnly(libs.kotlin.gradle.plugin)
-    compileOnly(libs.ksp.gradle.plugin)
-    compileOnly(libs.compose.compiler.gradle.plugin)
+    compileOnly(libs.android.gradlePlugin)
+    compileOnly(libs.kotlin.gradlePlugin)
+    compileOnly(libs.ksp.gradlePlugin)
+    compileOnly(libs.compose.compiler.gradlePlugin)
 }
 
 gradlePlugin {

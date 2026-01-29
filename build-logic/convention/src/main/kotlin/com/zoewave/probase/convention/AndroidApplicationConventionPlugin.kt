@@ -1,4 +1,4 @@
-package com.zoewave.probase.convertion
+package com.zoewave.probase.convention
 
 import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.Plugin
@@ -15,7 +15,8 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
-                defaultConfig.targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
+                // Fix: Look for "android-targetSdk" to match the TOML update above
+                defaultConfig.targetSdk = libs.findVersion("android-targetSdk").get().toString().toInt()
 
                 packaging {
                     resources {
