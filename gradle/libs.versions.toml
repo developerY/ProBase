@@ -6,20 +6,20 @@ android-targetSdk = "35"
 
 # -- Build Tools --
 agp = "9.1.0-alpha06"
-kotlin = "2.0.21"
+kotlin = "2.3.0"
 # KSP version must match Kotlin version exactly (2.0.21 -> 1.0.26)
-ksp = "2.0.21-1.0.26"
+ksp = "2.3.3"
 
 # -- Android Libraries --
-coreKtx = "1.15.0"
-lifecycleRuntimeKtx = "2.8.7"
-activityCompose = "1.9.3"
-composeBom = "2024.10.01"
+coreKtx = "1.17.0"
+lifecycleRuntimeKtx = "2.10.0"
+activityCompose = "1.12.3"
+composeBom = "2026.01.01"
 
 # -- Testing --
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
 appcompat = "1.7.1"
 material = "1.13.0"
 
