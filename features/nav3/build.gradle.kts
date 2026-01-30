@@ -31,6 +31,7 @@ dependencies {
 
     // Serialization for Keys
     implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.serialization.json)
 
     // Optional: ViewModel support (You have this in TOML, good to include)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
