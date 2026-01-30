@@ -29,7 +29,6 @@
             <option value="$PROJECT_DIR$/features" />
             <option value="$PROJECT_DIR$/features/ble" />
             <option value="$PROJECT_DIR$/features/nav3" />
-            <option value="$PROJECT_DIR$/mobile" />
           </set>
         </option>
       </GradleProjectSettings>
