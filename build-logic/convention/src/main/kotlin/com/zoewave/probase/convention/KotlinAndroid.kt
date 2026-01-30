@@ -8,30 +8,49 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
- * Configures basic Android settings (SDK versions, Java version).
- * AGP 9 Rule: Use dot syntax (e.g. compileOptions.sourceCompatibility) instead of blocks { }.
+ * 1. Base Android & Kotlin Configuration
+ * Applied to BOTH Libraries and Applications.
  */
 internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension,
 ) {
-    commonExtension.apply {
-        // 1. Compile SDK (Property of CommonExtension)
-        compileSdk = libs.findVersion("android-compileSdk").get().toString().toInt()
+    // 1. Compile SDK (Direct Property Access)
+    commonExtension.compileSdk = libs.findVersion("android-compileSdk").get().toString().toInt()
 
-        // 2. Min SDK (Property of DefaultConfig)
-        // We use 'defaultConfig.minSdk' because the 'defaultConfig { }' block doesn't exist here.
-        defaultConfig.minSdk = libs.findVersion("android-minSdk").get().toString().toInt()
+    // 2. Min SDK (Direct Property Access on defaultConfig)
+    commonExtension.defaultConfig.minSdk = libs.findVersion("android-minSdk").get().toString().toInt()
 
-        // 3. Java Version (Property of CompileOptions)
-        // REQUIRED: AGP 9+ requires Java 17. If you remove this, builds will fail.
-        compileOptions.sourceCompatibility = JavaVersion.VERSION_21
-        compileOptions.targetCompatibility = JavaVersion.VERSION_21
-    }
+    // 3. Java 21 Toolchain (Direct Property Access on compileOptions)
+    commonExtension.compileOptions.sourceCompatibility = JavaVersion.VERSION_21
+    commonExtension.compileOptions.targetCompatibility = JavaVersion.VERSION_21
 
-    // Configure Kotlin JVM Target to match Java 21
+    // 4. Align Kotlin compiler with JVM 21
     tasks.withType<KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
-        }
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
     }
+}
+
+/**
+ * 2. Build Type Configuration
+ * Separated so we can toggle minification based on the module type.
+ */
+internal fun Project.configureBuildTypes(
+    commonExtension: CommonExtension,
+) {
+    // 1. Configure Release (Get object -> Set properties)
+    val release = commonExtension.buildTypes.getByName("release")
+
+    // Use providers.gradleProperty for safe caching support
+    release.isMinifyEnabled = providers.gradleProperty("isMinifyForRelease")
+        .getOrElse("false")
+        .toBoolean()
+
+    release.proguardFiles(
+        commonExtension.getDefaultProguardFile("proguard-android-optimize.txt"),
+        "proguard-rules.pro"
+    )
+
+    // 2. Configure Debug (Get object -> Set properties)
+    val debug = commonExtension.buildTypes.getByName("debug")
+    debug.isMinifyEnabled = false
 }
