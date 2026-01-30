@@ -3,6 +3,8 @@ plugins {
     id("composetemplate.android.library.compose")
     // From your TOML: [plugins] jetbrains-kotlin-serialization
     alias(libs.plugins.jetbrains.kotlin.serialization)
+    // ✅ ADD THIS: Enables Hilt & KSP for this module
+    id("composetemplate.android.hilt")
 }
 
 android {
@@ -16,9 +18,16 @@ kotlin {
 }
 
 dependencies {
+
+    // ✅ ADD THIS: Core UI Module
+    implementation(project(":core:ui"))
     // Nav 3 Libraries from your TOML
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
+
+    // Icons
+    implementation(libs.androidx.compose.material.icons.extended)
+
 
     // Serialization for Keys
     implementation(libs.kotlinx.serialization.core)

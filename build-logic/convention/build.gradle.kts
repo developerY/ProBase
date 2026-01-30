@@ -9,6 +9,11 @@ dependencies {
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.compose.compiler.gradlePlugin)
+
+    // ✅ ADD THESE TWO LINES
+    // This makes the KSP and Hilt plugins available to your convention plugins
+    implementation(libs.ksp.gradlePlugin)
+    implementation(libs.hilt.gradlePlugin)
 }
 
 gradlePlugin {

@@ -8,7 +8,7 @@ android-targetSdk = "35"
 agp = "9.1.0-alpha06"
 kotlin = "2.3.0"
 # KSP version must match Kotlin version exactly
-ksp = "2.3.3"
+ksp = "2.3.4"
 
 # -- Android Libraries --
 coreKtx = "1.17.0"
@@ -22,7 +22,7 @@ constraintLayout = "2.2.1"
 
 # -- Jetpack Compose --
 composeBom = "2026.01.01"
-composeMaterial = "1.8.0" # Used for Icons
+composeMaterial = "1.7.8"  # Jetpack Compose Material (used for icons, wear material)
 composeMaterial3Expressive = "1.5.0-alpha13"
 
 # -- Nav3 --
@@ -139,7 +139,7 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 androidx-compose-material3-window-size = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 androidx-compose-material3-expressive = { group = "androidx.compose.material3", name = "material3-android", version.ref = "composeMaterial3Expressive" }
 # Explicit Material Icons
-androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "composeMaterial" }
+androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "composeMaterial" }
 
 # -- Navigation 3 --
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }

@@ -16,10 +16,9 @@ class AndroidHiltConventionPlugin : Plugin<Project> {
                 add("implementation", libs.findLibrary("hilt-android").get())
                 add("ksp", libs.findLibrary("hilt-android-compiler").get())
 
-                // OPTIONAL: I removed hilt-navigation-compose from here.
-                // It is better to add that only in modules that actually use Compose UI.
-                // If you want it everywhere, you can uncomment the line below:
-                // add("implementation", libs.findLibrary("androidx-hilt-navigation-compose").get())
+                // OPTIONAL: Better to keep this in feature modules, but if you need it:
+                // Note: Updated alias to match our new TOML ("hilt-navigation-compose")
+                // add("implementation", libs.findLibrary("hilt-navigation-compose").get())
             }
         }
     }
