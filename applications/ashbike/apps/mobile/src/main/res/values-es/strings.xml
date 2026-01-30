@@ -1,0 +1,33 @@
+<resources>
+
+
+    <string name="bike_bottom_nav_ride">Viaje</string> <!-- Or "Paseo" or whatever fits best -->
+    <!-- other strings specific to ashbike in Spanish -->
+
+
+    <!-- ... other strings ... -->
+    <string name="top_bar_title_ashbike">AshBike</string> <!-- Or "Mi Bici Ash" if you want to translate the brand too -->
+    <string name="top_bar_title_trips">Viajes</string>
+    <string name="top_bar_title_ride_details">Detalles del Viaje</string>
+
+
+    <string name="app_name">AshBike</string>
+
+    <!-- Title for the weather detail dialog -->
+    <string name="weather_details_title">Detalles del Clima</string>
+
+    <!-- Formatting for the main temperature display -->
+    <string name="temperature_format">%1$d°C</string>
+
+    <!-- “Feels like” label -->
+    <string name="feels_like_format">Sensación térmica %1$d°C</string>
+
+    <!-- Humidity, note the double %% to escape a literal percent sign -->
+    <string name="humidity_format">Humedad: %1$d%%</string>
+
+    <!-- Wind speed and direction -->
+    <string name="wind_format">Viento: %1$dkm/h a %2$d°</string>
+
+    <!-- Content description for accessibility -->
+    <string name="weather_content_desc">Clima actual: %1$s, %2$d°C</string>
+</resources>
