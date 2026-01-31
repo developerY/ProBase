@@ -38,6 +38,10 @@ gradlePlugin {
             id = "composetemplate.android.library.compose"
             implementationClass = "com.zoewave.probase.convention.AndroidLibraryComposeConventionPlugin"
         }
+        register("androidRoom") {
+            id = "composetemplate.android.room"
+            implementationClass = "com.zoewave.probase.convention.AndroidRoomConventionPlugin"
+        }
         register("androidHilt") {
             id = "composetemplate.android.hilt"
             implementationClass = "com.zoewave.probase.convention.AndroidHiltConventionPlugin"
