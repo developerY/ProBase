@@ -52,7 +52,7 @@ work = "2.11.1"
 # -- Networking (Rest & GQL) --
 okhttp = "5.3.2"
 squareupRetrofit = "3.0.0"
-apollo = "4.0.0-beta.7"
+apollo = "4.1.1"
 
 # -- UI Utilities --
 coil = "2.7.0"
@@ -171,8 +171,8 @@ squareup-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref
 squareup-okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 squareup-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareupRetrofit" }
 squareup-retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareupRetrofit" }
-apollo-graphql-runtime = { group = "com.apollographql.apollo3", name = "apollo-runtime", version.ref = "apollo" }
-apollo-graphql-normalized-cache = { group = "com.apollographql.apollo3", name = "apollo-normalized-cache", version.ref = "apollo" }
+apollo-graphql-runtime = { group = "com.apollographql.apollo", name = "apollo-runtime", version.ref = "apollo" }
+apollo-graphql-normalized-cache = { group = "com.apollographql.apollo", name = "apollo-normalized-cache", version.ref = "apollo" }
 
 # -- Kotlin Coroutines --
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -254,7 +254,7 @@ hilt-gradle = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 mapsplatform-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "mapsplatformSecretsPlugin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
-apollo-graphql = { id = "com.apollographql.apollo3", version.ref = "apollo" }
+apollo-graphql = { id = "com.apollographql.apollo", version.ref = "apollo" }
 android-test = { id = "com.android.test", version.ref = "agp" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidxProfiling" }
 jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerialization"}

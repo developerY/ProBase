@@ -23,10 +23,22 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ProBase"
+
+// --- Main App ---
 include(":app")
+
+// --- Core Modules (The Foundation) ---
+include(":core:ui")
+include(":core:model")   // ✅ Added
+include(":core:network")    // ✅ Added
+include(":core:database")
+include(":core:util")    // ✅ Added
+
+// --- Standalone Features ---
 include(":features:nav3")
 include(":features:ble")
-include(":core:ui")
+
+// --- AshBike Product Line ---
 include(":applications:ashbike:apps:mobile")
 include(":applications:ashbike:apps:wear")
 include(":applications:ashbike:features:main")
