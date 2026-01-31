@@ -1,70 +1,44 @@
-import com.android.build.api.dsl.LibraryExtension
-
 plugins {
-    alias(libs.plugins.android.library)
-    // ✅ REMOVED: AGP 9.0 Built-in Kotlin handles compilation.
-    // // alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hilt.gradle) // ✅ ADDED: Required for Hilt
-    alias(libs.plugins.ksp)
+    // ✅ 1. Apply Convention Plugins
+    // These handle AGP, Kotlin 2.1, Hilt, and Room setup automatically
+    id("composetemplate.android.library")
+    id("composetemplate.android.hilt")
+    id("composetemplate.android.room")
 }
 
-// FIX: Use strict configuration for AGP 9.0
-extensions.configure<LibraryExtension> {
-    namespace = "com.zoewave.probase.core.data"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+android {
+    // ✅ 2. Update Namespace
+    namespace = "com.zoewave.probase.core.database"
 
     defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
+        // minSdk & compileSdk are handled by the plugin
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            consumerProguardFiles("proguard-rules.pro")
-        }
-        // This debug block ensures a fast development cycle
-        debug {
-            isMinifyEnabled = false
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-}
-
-// FIX: Use 'java' block for Toolchain
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
+    // Removed 'compileOptions', 'buildTypes', 'java' toolchain
+    // -> These are all standard in your Convention Plugin now.
 }
 
 dependencies {
+    // --- Internal Modules ---
     implementation(project(":core:model"))
-    // implementation(project(":applications:ashbike:database"))
+    // implementation(project(":applications:ashbike:database")) // Keep commented if not ready
 
+    // --- Core Android ---
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material.legacy)
+    // Note: 'appcompat' and 'material.legacy' are usually not needed in a pure data module
+    // unless you are using specific Android resource classes.
+    // implementation(libs.androidx.appcompat)
+    // implementation(libs.material.legacy)
 
-    // Hilt Dependency Injection
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
+    // --- Hilt & Room ---
+    // Dependencies are AUTOMATICALLY added by:
+    // - id("composetemplate.android.hilt")
+    // - id("composetemplate.android.room")
+    // You do NOT need to list them here again unless you need specific extras.
 
-    // Room
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
-
-    // Testing
+    // --- Testing ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

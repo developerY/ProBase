@@ -1,54 +1,33 @@
-import com.android.build.api.dsl.LibraryExtension
-
 plugins {
-    alias(libs.plugins.android.library)
-    // REMOVE this to fix the AGP 9.0 crash:
+    // ✅ 1. Apply Convention Plugin
+    // Handles AGP 9, Java 21, and standard Android configuration
+    id("composetemplate.android.library")
 }
 
-// FIX: Use strict configuration to avoid deprecation warnings
-extensions.configure<LibraryExtension> {
+android {
+    // ✅ 2. Update Namespace
     namespace = "com.zoewave.probase.core.util"
-    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-
+        // compileSdk & minSdk are handled automatically by the plugin
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = providers.gradleProperty("isMinifyForRelease").get().toBoolean()
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            consumerProguardFiles("proguard-rules.pro")
-        }
-        // This debug block ensures a fast development cycle
-        debug {
-            isMinifyEnabled = false
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-}
-
-// FIX: Use 'java' block for Toolchain (works without the kotlin-android plugin)
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
+    // ✅ 3. Cleanup
+    // Removed 'buildTypes', 'compileOptions', and 'java { toolchain }'
+    // because 'composetemplate.android.library' configures them for you.
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material.legacy)
+
+    // Kept these as they were in your original file,
+    // but if this is a "pure" utility module (no UI), you might not need them.
+    // implementation(libs.androidx.appcompat)
+    // implementation(libs.material.legacy)
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
