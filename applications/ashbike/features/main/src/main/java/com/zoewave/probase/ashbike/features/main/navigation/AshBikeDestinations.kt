@@ -1,9 +1,8 @@
 package com.zoewave.probase.ashbike.features.main.navigation
 
-
 import kotlinx.serialization.Serializable
 
-// ✅ Shared Logic: Both Phone and Watch know these screens exist.
+// ✅ Nav3 uses standard Kotlin Serialization
 @Serializable
 sealed interface AshBikeDestination {
     @Serializable data object Home : AshBikeDestination

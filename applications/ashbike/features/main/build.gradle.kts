@@ -3,8 +3,7 @@ plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.library.compose")
     id("composetemplate.android.hilt")
-
-    // 2. Apply Serialization Plugin
+    // ✅ Required for Type-Safe Navigation
     alias(libs.plugins.jetbrains.kotlin.serialization)
 }
 
@@ -13,29 +12,29 @@ android {
 }
 
 dependencies {
-    // --- Project Modules ---
+    // --- Shared Projects ---
     // implementation(project(":core:model"))
-    implementation(project(":core:ui"))   // For shared themes/components
-    // implementation(project(":core:util")) // For standard utilities
+    implementation(project(":core:ui"))
+    // implementation(project(":core:util"))
 
-    // --- Serialization (Required for Nav3) ---
+    // --- Serialization (The backbone of Nav3) ---
     implementation(libs.kotlinx.serialization.json)
 
-    // --- UI & Navigation ---
-    // Note: 'composetemplate' adds basic Compose, but we add specific needs here
-    implementation(libs.androidx.compose.material.icons.extended) // For the specific icons in your design
-
-
-    // ✅ ADD THESE (The Nav3 libraries from your TOML)
+    // --- Navigation 3 (Strict) ---
+    // We use the exact accessors generated from your TOML keys
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
-    // Note: If you still need Hilt integration, check if 'libs.hilt.navigation.compose'
-    // is compatible or if you need to update that as well.
+    // --- UI Components ---
+    // ✅ FIXED: Correct accessor for icons based on your TOML
+    // Key: androidx-compose-material-icons-extended -> libs.androidx.compose.material.icons.extended
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // --- Hilt ---
-    // (Core Hilt is added by the plugin, but if you use Hilt Navigation)
-    implementation(libs.hilt.navigation.compose)
+    // Note: Standard Hilt works fine. We don't need 'hilt-navigation-compose' (Nav2)
+    // unless you are scoping ViewModels to backstack entries, which Nav3 handles differently.
+    // implementation(libs.hilt.navigation.compose)
 
     // --- Testing ---
     testImplementation(libs.junit)
