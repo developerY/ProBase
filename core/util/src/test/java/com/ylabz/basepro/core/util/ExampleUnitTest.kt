@@ -1,4 +1,4 @@
-package com.ylabz.basepro.core.util
+package com.zoewave.probase.core.util
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

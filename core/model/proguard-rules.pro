@@ -24,4 +24,4 @@
 # core/model/proguard-rules.pro
 
 # Keep all data model classes.
--keep class com.ylabz.basepro.core.model.** { *; }
+-keep class com.zoewave.probase.core.model.** { *; }

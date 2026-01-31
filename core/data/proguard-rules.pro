@@ -24,7 +24,7 @@
 # core/data/proguard-rules.pro
 
 # Keep all data models and repository interfaces/implementations.
--keep class com.ylabz.basepro.core.data.** { *; }
+-keep class com.zoewave.probase.core.data.** { *; }
 
 # Networking Libraries (OkHttp, Retrofit, Apollo)
 -dontwarn okhttp3.**

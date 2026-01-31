@@ -21,4 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 # Rule from missing_rules.txt for ashbike app (core.util module classes)
--keep class com.ylabz.basepro.core.util.Logging { *; }
+-keep class com.zoewave.probase.core.util.Logging { *; }

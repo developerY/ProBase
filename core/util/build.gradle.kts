@@ -7,7 +7,7 @@ plugins {
 
 // FIX: Use strict configuration to avoid deprecation warnings
 extensions.configure<LibraryExtension> {
-    namespace = "com.ylabz.basepro.core.util"
+    namespace = "com.zoewave.probase.core.util"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {

@@ -1,4 +1,4 @@
-package com.ylabz.basepro.core.util
+package com.zoewave.probase.core.util
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -17,6 +17,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.ylabz.basepro.core.util.test", appContext.packageName)
+        assertEquals("com.zoewave.probase.core.util.test", appContext.packageName)
     }
 }

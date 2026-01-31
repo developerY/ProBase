@@ -10,7 +10,7 @@ plugins {
 
 // FIX: Use strict configuration for AGP 9.0
 extensions.configure<LibraryExtension> {
-    namespace = "com.ylabz.probase.core.data"
+    namespace = "com.zoewave.probase.core.data"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {

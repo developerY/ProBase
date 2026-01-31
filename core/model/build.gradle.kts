@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.ylabz.basepro.core.model"
+    namespace = "com.zoewave.probase.core.model"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
