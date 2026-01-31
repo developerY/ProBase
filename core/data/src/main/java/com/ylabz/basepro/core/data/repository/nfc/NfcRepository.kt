@@ -1,0 +1,30 @@
+package com.ylabz.basepro.core.data.repository.nfc
+
+
+import android.nfc.Tag
+import kotlinx.coroutines.flow.Flow
+
+interface NfcRepository {
+    /**
+     * Emits the scanned NFC data (e.g. as text) whenever a new tag is read.
+     */
+    val scannedDataFlow: Flow<String>
+
+    /**
+     * Called when a new NFC tag is scanned.
+     */
+    fun onTagScanned(tag: Tag)
+
+    fun isNfcSupported(): Boolean
+
+    fun isNfcEnabled(): Boolean
+
+    // fun onNfcTagScanned(tag: Tag)
+
+    fun clearScannedData()
+
+    suspend fun writeTag(tag: Tag, text: String): Boolean
+
+
+}
+

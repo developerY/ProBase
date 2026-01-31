@@ -1,0 +1,22 @@
+<resources>
+    <string name="action_settings">Ajustes</string>
+    <string name="action_connect">Conectar</string>
+    <string name="action_collapse">Contraer</string>
+    <string name="action_expand">Expandir</string>
+    <string name="text_na">N/D</string>
+    <string name="text_unknown">Desconocido</string>
+    <string name="action_ok">Aceptar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="title_error">Error</string>
+    <string name="action_grant_permissions">Otorgar Permisos</string>
+    <string name="action_open_settings">Abrir Ajustes</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_edit">Editar</string>
+    <string name="action_delete">Eliminar</string>
+    <string name="action_start">Iniciar</string>
+    <string name="action_stop">Detener</string>
+    <string name="action_pause">Pausar</string>
+    <string name="action_resume">Reanudar</string>
+    <string name="cd_navigate_back">Atrás</string>
+    <string name="navigation_home">Inicio</string>
+</resources>

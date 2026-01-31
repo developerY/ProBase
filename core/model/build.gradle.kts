@@ -1,0 +1,59 @@
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.jetbrains.kotlin.serialization)
+}
+
+android {
+    namespace = "com.ylabz.basepro.core.model"
+    compileSdk = libs.versions.compileSdk.get().toInt()
+
+    defaultConfig {
+        minSdk = libs.versions.minSdk.get().toInt() // UPDATED
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = providers.gradleProperty("isMinifyForRelease").get().toBoolean()
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            consumerProguardFiles("proguard-rules.pro") // Added this line
+        }
+        // This debug block ensures a fast development cycle
+        debug {
+            isMinifyEnabled = false
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+}
+
+dependencies {
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material.legacy)
+
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.material3)
+
+    implementation(libs.kotlinx.collections.immutable)
+
+    implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.androidx.health.connect.client)
+
+    //maps
+    implementation(libs.google.maps.compose)
+
+    debugImplementation(libs.androidx.ui.tooling)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+}
