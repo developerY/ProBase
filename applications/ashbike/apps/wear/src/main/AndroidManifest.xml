@@ -70,7 +70,7 @@
         </service -->
 
         <!-- service
-            android:name="com.ylabz.basepro.ashbike.features.main.service.BikeForegroundService"
+            android:name="com.zoewave.probase.ashbike.features.main.service.BikeForegroundService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location|health" / -->
