@@ -50,8 +50,8 @@ android {
         }
     }
 
-    // ✅ 4. Wear Specific SDK
-    useLibrary("android.wear")
+    // ✅ 4. Wear Specific SDK Old and not needed
+    // useLibrary("android.wear")
 
     // Enable Build Config if you need it (disabled by default in AGP 9)
     buildFeatures {
@@ -62,8 +62,8 @@ android {
 dependencies {
     // --- Project Modules ---
     // Share the exact same logic/database as Mobile!
-    /* implementation(project(":applications:ashbike:features:main"))
-    implementation(project(":applications:ashbike:database"))
+    implementation(project(":applications:ashbike:features:main"))
+    /* implementation(project(":applications:ashbike:database"))
 
     // Core
     implementation(project(":core:model"))

@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
+import com.zoewave.probase.ashbike.features.main.ui.AshBikeSharedScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -29,8 +30,7 @@ class MainActivity : ComponentActivity() {
                     contentAlignment = Alignment.Center
                 ) {
                     // ✅ Reusing the EXACT same screen code as Mobile!
-                    Text("Hello, World!")
-                    //AshBikeSharedScreen(platformName = "AshBike Watch")
+                    AshBikeSharedScreen("AshBike Watch")
                 }
             }
         }
