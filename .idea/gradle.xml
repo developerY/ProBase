@@ -27,6 +27,8 @@
             <option value="$PROJECT_DIR$/applications/ashbike/apps" />
             <option value="$PROJECT_DIR$/applications/ashbike/apps/mobile" />
             <option value="$PROJECT_DIR$/applications/ashbike/apps/wear" />
+            <option value="$PROJECT_DIR$/applications/ashbike/features" />
+            <option value="$PROJECT_DIR$/applications/ashbike/features/main" />
             <option value="$PROJECT_DIR$/build-logic" />
             <option value="$PROJECT_DIR$/build-logic/convention" />
             <option value="$PROJECT_DIR$/core" />
