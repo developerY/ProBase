@@ -85,8 +85,8 @@ baselineProfile {
 dependencies {
     // --- Project Modules ---
     // AshBike Specific Features
-    /*implementation(project(":applications:ashbike:features:core"))
     implementation(project(":applications:ashbike:features:main"))
+    /*implementation(project(":applications:ashbike:features:core"))
     implementation(project(":applications:ashbike:features:trips"))
     implementation(project(":applications:ashbike:features:settings"))
     implementation(project(":applications:ashbike:database"))
@@ -130,7 +130,7 @@ dependencies {
     // Note: Hilt, Compose, and Core KTX are already added by the
     // 'composetemplate' plugins, but adding specific libraries like
     // icons or navigation explicitly is fine for clarity.
-    //implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.compose.material.icons.extended)
     //implementation(libs.androidx.navigation.compose)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.kotlinx.serialization.json)

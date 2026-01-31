@@ -7,8 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import com.zoewave.probase.ashbike.mobile.ui.AshBikeMainScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -27,8 +27,8 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     // Call the shared code we created earlier
-                    Text("hi from AshBike")
                     //AshBikeSharedScreen(platformName = "AshBike Mobile")
+                    AshBikeMainScreen()
                 }
             }
         }
