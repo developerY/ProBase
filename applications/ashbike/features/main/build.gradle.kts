@@ -13,7 +13,7 @@ android {
 
 dependencies {
     // --- Shared Projects ---
-    // implementation(project(":core:model"))
+    implementation(project(":core:model"))
     implementation(project(":core:ui"))
     // implementation(project(":core:util"))
 
