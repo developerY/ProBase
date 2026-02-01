@@ -1,7 +1,7 @@
 package com.zoewave.probase.core.data.repository.travel
 
 import android.util.Log
-import com.zoewave.probase.core.networkapi.interfaces.MapsAPI
+import com.zoewave.probase.core.network.api.interfaces.MapsAPI
 import javax.inject.Inject
 
 class DrivingPtsRepImp @Inject constructor(

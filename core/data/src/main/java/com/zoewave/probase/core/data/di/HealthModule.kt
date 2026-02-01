@@ -1,7 +1,7 @@
 package com.zoewave.probase.core.data.di
 
 import android.content.Context
-import com.zoewave.probase.core.network.service.health.HealthSessionManager
+import com.zoewave.probase.core.data.service.health.HealthSessionManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

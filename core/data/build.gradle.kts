@@ -25,6 +25,19 @@ dependencies {
     implementation(libs.androidx.health.connect.client)
     implementation(libs.androidx.health.services.client)
 
+    // Maps
+    implementation(libs.google.maps.compose)
+    implementation(libs.google.play.services.location)
+
+    implementation(libs.kotlinx.coroutines.play.services)
+
+
+    // Datastore
+    implementation(libs.androidx.datastore.preferences)
+    // optional:
+    implementation(libs.androidx.datastore.core)
+    implementation(libs.kotlinx.serialization.json)
+
     // --- External Utilities (Optional, based on your Repos) ---
     // If your repositories parse dates/times:
     // implementation(libs.kotlinx.datetime)
