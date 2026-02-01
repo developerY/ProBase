@@ -1,4 +1,4 @@
-package com.zoewave.probase.applications.ashbike.database
+package com.zoewave.probase.ashbike.database
 
 import com.ylabz.basepro.core.model.bike.BikeRide
 import kotlinx.coroutines.flow.Flow

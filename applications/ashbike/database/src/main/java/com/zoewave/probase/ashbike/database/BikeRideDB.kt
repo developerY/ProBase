@@ -1,11 +1,11 @@
-package com.zoewave.probase.applications.ashbike.database
+package com.zoewave.probase.ashbike.database
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.zoewave.probase.applications.ashbike.database.converter.Converters
+import com.zoewave.probase.ashbike.database.converter.Converters
 
 @Database(
     entities = [BikeRideEntity::class, RideLocationEntity::class],

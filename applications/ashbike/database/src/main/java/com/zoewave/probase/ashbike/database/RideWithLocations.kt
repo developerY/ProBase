@@ -1,4 +1,4 @@
-package com.zoewave.probase.applications.ashbike.database
+package com.zoewave.probase.ashbike.database
 
 import androidx.room.Embedded
 import androidx.room.Relation

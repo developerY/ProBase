@@ -1,8 +1,8 @@
-package com.zoewave.probase.applications.ashbike.database.mapper
+package com.zoewave.probase.ashbike.database.mapper
 
-import com.zoewave.probase.applications.ashbike.database.BikeRideEntity
-import com.zoewave.probase.applications.ashbike.database.RideLocationEntity
-import com.zoewave.probase.applications.ashbike.database.RideWithLocations
+import com.zoewave.probase.ashbike.database.BikeRideEntity
+import com.zoewave.probase.ashbike.database.RideLocationEntity
+import com.zoewave.probase.ashbike.database.RideWithLocations
 import com.ylabz.basepro.core.model.bike.BikeRide
 import com.ylabz.basepro.core.model.bike.LocationPoint
 

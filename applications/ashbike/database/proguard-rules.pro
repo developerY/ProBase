@@ -24,4 +24,4 @@
 # applications/ashbike/database/proguard-rules.pro
 
 # Keep all Room database entities, DAOs, and TypeConverters.
--keep class com.zoewave.probase.applications.ashbike.database.** { *; }
+-keep class com.zoewave.probase.ashbike.database.** { *; }

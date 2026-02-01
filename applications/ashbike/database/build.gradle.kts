@@ -7,7 +7,7 @@ plugins {
 
 android {
     // ✅ 2. Update Namespace
-    namespace = "com.zoewave.probase.applications.ashbike.database"
+    namespace = "com.zoewave.probase.ashbike.database"
 
     defaultConfig {
         // minSdk & compileSdk are handled by the Convention Plugin

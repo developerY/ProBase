@@ -1,6 +1,6 @@
-package com.zoewave.probase.applications.ashbike.database.repository
+package com.zoewave.probase.ashbike.database.repository
 
-import com.zoewave.probase.applications.ashbike.database.ProfileData
+import com.zoewave.probase.ashbike.database.ProfileData
 import kotlinx.coroutines.flow.Flow
 
 // 1) Repository interface (contract)

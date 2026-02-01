@@ -1,11 +1,11 @@
-package com.zoewave.probase.applications.ashbike.database.di
+package com.zoewave.probase.ashbike.database.di
 
 import android.content.Context
 import androidx.room.Room
-import com.zoewave.probase.applications.ashbike.database.BikeRideDao
-import com.zoewave.probase.applications.ashbike.database.BikeRideDatabase
-import com.zoewave.probase.applications.ashbike.database.BikeRideRepo
-import com.zoewave.probase.applications.ashbike.database.repository.BikeRideRepoImpl
+import com.zoewave.probase.ashbike.database.BikeRideDao
+import com.zoewave.probase.ashbike.database.BikeRideDatabase
+import com.zoewave.probase.ashbike.database.BikeRideRepo
+import com.zoewave.probase.ashbike.database.repository.BikeRideRepoImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

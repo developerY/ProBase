@@ -1,4 +1,4 @@
-package com.zoewave.probase.applications.ashbike.database.converter
+package com.zoewave.probase.ashbike.database.converter
 
 import android.net.Uri
 import androidx.core.net.toUri

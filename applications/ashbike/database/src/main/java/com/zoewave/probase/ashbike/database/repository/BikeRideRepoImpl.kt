@@ -1,14 +1,14 @@
-package com.zoewave.probase.applications.ashbike.database.repository
+package com.zoewave.probase.ashbike.database.repository
 
-// com.zoewave.probase.applications.ashbike.database.repository.BikeRideRepoImpl.kt
+// com.zoewave.probase.ashbike.database.repository.BikeRideRepoImpl.kt
 
 import androidx.annotation.WorkerThread
-import com.zoewave.probase.applications.ashbike.database.BikeRideDao
-import com.zoewave.probase.applications.ashbike.database.BikeRideEntity
-import com.zoewave.probase.applications.ashbike.database.BikeRideRepo
-import com.zoewave.probase.applications.ashbike.database.RideLocationEntity
-import com.zoewave.probase.applications.ashbike.database.mapper.toBikeRide
-import com.zoewave.probase.applications.ashbike.database.mapper.toEntity
+import com.zoewave.probase.ashbike.database.BikeRideDao
+import com.zoewave.probase.ashbike.database.BikeRideEntity
+import com.zoewave.probase.ashbike.database.BikeRideRepo
+import com.zoewave.probase.ashbike.database.RideLocationEntity
+import com.zoewave.probase.ashbike.database.mapper.toBikeRide
+import com.zoewave.probase.ashbike.database.mapper.toEntity
 import com.ylabz.basepro.core.model.bike.BikeRide
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull

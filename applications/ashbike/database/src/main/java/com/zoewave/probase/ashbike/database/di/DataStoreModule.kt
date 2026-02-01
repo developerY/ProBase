@@ -1,13 +1,13 @@
-package com.zoewave.probase.applications.ashbike.database.di
+package com.zoewave.probase.ashbike.database.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
-import com.zoewave.probase.applications.ashbike.database.repository.AppSettingsRepository
-import com.zoewave.probase.applications.ashbike.database.repository.DataStoreAppSettingsRepository
-import com.zoewave.probase.applications.ashbike.database.repository.DataStoreUserProfileRepository
-import com.zoewave.probase.applications.ashbike.database.repository.UserProfileRepository
+import com.zoewave.probase.ashbike.database.repository.AppSettingsRepository
+import com.zoewave.probase.ashbike.database.repository.DataStoreAppSettingsRepository
+import com.zoewave.probase.ashbike.database.repository.DataStoreUserProfileRepository
+import com.zoewave.probase.ashbike.database.repository.UserProfileRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

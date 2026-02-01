@@ -1,4 +1,4 @@
-package com.zoewave.probase.applications.ashbike.database.repository
+package com.zoewave.probase.ashbike.database.repository
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
