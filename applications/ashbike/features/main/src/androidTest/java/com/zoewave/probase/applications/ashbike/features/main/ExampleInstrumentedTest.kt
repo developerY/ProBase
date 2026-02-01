@@ -1,4 +1,4 @@
-package com.zoewave.probase.applications.ashbike.features.main
+package com.zoewave.probase.ashbike.features.main
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -20,7 +20,7 @@ class ExampleInstrumentedTest {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals(
-            "com.zoewave.probase.applications.ashbike.features.main.test",
+            "com.zoewave.probase.ashbike.features.main.test",
             appContext.packageName
         )
     }

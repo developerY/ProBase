@@ -1,4 +1,4 @@
-package com.zoewave.probase.applications.ashbike.features.main
+package com.zoewave.probase.ashbike.features.main
 
 import org.junit.Test
 

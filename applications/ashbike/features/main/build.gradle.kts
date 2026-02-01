@@ -15,7 +15,7 @@ dependencies {
     // --- Shared Projects ---
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
-    // implementation(project(":core:util"))
+    implementation(project(":core:database"))
 
     // --- Serialization (The backbone of Nav3) ---
     implementation(libs.kotlinx.serialization.json)
