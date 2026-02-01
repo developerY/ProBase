@@ -39,6 +39,9 @@ include(":features:nav3")
 include(":features:ble")
 
 // --- AshBike Product Line ---
+include(":applications:ashbike:database")
 include(":applications:ashbike:apps:mobile")
 include(":applications:ashbike:apps:wear")
 include(":applications:ashbike:features:main")
+//include(":applications:ashbike:features:settings")
+
