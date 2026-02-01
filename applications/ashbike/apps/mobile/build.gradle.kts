@@ -84,6 +84,8 @@ baselineProfile {
 
 dependencies {
     // --- Project Modules ---
+    implementation(project(":core:data"))    // Shared Data Models
+
     // AshBike Specific Features
     implementation(project(":applications:ashbike:features:main"))
     /*implementation(project(":applications:ashbike:features:core"))
