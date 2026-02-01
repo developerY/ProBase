@@ -45,3 +45,4 @@ include(":applications:ashbike:apps:wear")
 include(":applications:ashbike:features:main")
 //include(":applications:ashbike:features:settings")
 
+include(":core:data")
