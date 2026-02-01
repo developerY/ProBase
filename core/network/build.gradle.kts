@@ -27,7 +27,7 @@ android {
     }
 
     // ✅ 4. Update Apollo Package
-    /*apollo {
+    /* apollo {
         service("service") {
             // Essential: Tells Apollo to generate classes in this package
             packageName.set("com.zoewave.probase.core.network")
@@ -35,7 +35,7 @@ android {
             // Optional Tip: If you want to see the generated files easily in the IDE
             // warnOnDeprecatedUsages.set(true)
         }
-    }*/
+    } */
 
     secrets {
         defaultPropertiesFileName = "secrets.defaults.properties"
@@ -51,11 +51,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     // Note: Removed 'appcompat' & 'material.legacy' unless you specifically need Views.
     // Ideally, a pure network module shouldn't depend on UI libraries.
-
-    // --- Data Persistence ---
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.datastore.core)
-    implementation(libs.kotlinx.serialization.json)
 
     // --- Lifecycle ---
     implementation(libs.androidx.lifecycle.runtime.ktx)

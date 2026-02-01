@@ -1,7 +1,7 @@
 package com.zoewave.probase.core.network.repository.weather
 
 import android.util.Log
-import com.zoewave.probase.core.networkapi.interfaces.OpenWeatherService
+import com.zoewave.probase.core.network.api.interfaces.OpenWeatherService
 import com.zoewave.probase.core.model.weather.OpenWeatherResponse
 import com.zoewave.probase.core.network.BuildConfig.OPEN_WEATHER_API_KEY
 import okhttp3.OkHttpClient
@@ -9,6 +9,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import kotlin.jvm.java
 
 
 suspend fun openFetchWeatherByCityData(cityName: String): OpenWeatherResponse? {

@@ -1,12 +1,10 @@
 package com.zoewave.probase.core.network.mappers
 
 
-import com.zoewave.probase.core.model.yelp.BusinessInfo
-import com.zoewave.probase.core.model.yelp.Category
-import com.zoewave.probase.core.model.yelp.Coordinates
-import com.zoewave.probase.core.network.SearchYelpQuery
+// import com.zoewave.probase.core.network.SearchYelpQuery
 
 
+/*
 fun SearchYelpQuery.Business.toBusinessInfo(): BusinessInfo {
     return BusinessInfo(
         id = id ?: "No ID",
@@ -22,3 +20,4 @@ fun SearchYelpQuery.Business.toBusinessInfo(): BusinessInfo {
         categories = categories?.mapNotNull { Category(it?.title) }
     )
 }
+*/
