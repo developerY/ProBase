@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.zoewave.probase.ashbike.database.ProfileData
-import com.ylabz.basepro.core.model.bike.LocationEnergyLevel
+import com.zoewave.probase.core.model.bike.LocationEnergyLevel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject

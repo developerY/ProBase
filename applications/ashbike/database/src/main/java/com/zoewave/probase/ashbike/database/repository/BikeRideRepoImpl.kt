@@ -9,7 +9,7 @@ import com.zoewave.probase.ashbike.database.BikeRideRepo
 import com.zoewave.probase.ashbike.database.RideLocationEntity
 import com.zoewave.probase.ashbike.database.mapper.toBikeRide
 import com.zoewave.probase.ashbike.database.mapper.toEntity
-import com.ylabz.basepro.core.model.bike.BikeRide
+import com.zoewave.probase.core.model.bike.BikeRide
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
