@@ -82,10 +82,10 @@
             </intent-filter>
         </activity-->
 
-        <!--service
+        <service
             android:name="com.zoewave.probase.ashbike.features.main.service.BikeForegroundService"
             android:exported="false"
-            android:foregroundServiceType="location|connectedDevice" /-->
+            android:foregroundServiceType="location|connectedDevice" />
 
     </application>
 
