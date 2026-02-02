@@ -1,4 +1,4 @@
-package com.zoewave.probase.core.model.bike
+package com.zoewave.ashbike.model.bike
 
 /**
  * Represents a completed bike ride. This is the primary domain model for historical trip data,

@@ -1,4 +1,4 @@
-package com.zoewave.probase.core.model.bike
+package com.zoewave.ashbike.model.bike
 
 // You can set all GPS tracking intervals by modifying this single constant:
 // THE SINGLE NUMBER: You can set all GPS tracking intervals by modifying this single constant:

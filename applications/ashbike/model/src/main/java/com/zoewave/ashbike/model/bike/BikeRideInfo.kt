@@ -1,8 +1,8 @@
-package com.zoewave.probase.core.model.bike
+package com.zoewave.ashbike.model.bike
 
 import com.google.android.gms.maps.model.LatLng
-import com.zoewave.probase.core.model.location.GpsFix // Added import
-import com.zoewave.probase.core.model.weather.BikeWeatherInfo
+import com.ylabz.basepro.core.model.location.GpsFix // Added import
+import com.ylabz.basepro.core.model.weather.BikeWeatherInfo
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
