@@ -88,12 +88,13 @@ dependencies {
 
     // AshBike Specific Features
     implementation(project(":applications:ashbike:features:main"))
-    /*implementation(project(":applications:ashbike:features:core"))
-    implementation(project(":applications:ashbike:features:trips"))
-    implementation(project(":applications:ashbike:features:settings"))
+    implementation(project(":applications:ashbike:apps:mobile:features:home"))
+    implementation(project(":applications:ashbike:apps:mobile:features:rides"))
+    implementation(project(":applications:ashbike:apps:mobile:features:settings"))
+
     implementation(project(":applications:ashbike:database"))
 
-    // Shared Features (Assuming these paths exist in your monorepo)
+    /* Shared Features (Assuming these paths exist in your monorepo)
     implementation(project(":feature:listings"))
     implementation(project(":feature:camera"))
     implementation(project(":feature:places"))
@@ -114,6 +115,28 @@ dependencies {
     implementation(project(":core:util"))*/
 
     // --- Third Party & AndroidX ---
+
+
+    // Nav 3 Libraries from your TOML
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+
+    // Icons
+    implementation(libs.androidx.compose.material.icons.extended)
+
+
+    // Serialization for Keys
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.serialization.json)
+
+    // Optional: ViewModel support (You have this in TOML, good to include)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
+    // The library containing the Adaptive APIs
+    implementation(libs.androidx.material3.adaptive.navigation3)
+
+
+    // Optional: ViewModel support (You have this in TOML, good to include)
 
     // Firebase
     implementation(platform(libs.firebase.bom))

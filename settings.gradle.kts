@@ -46,3 +46,6 @@ include(":applications:ashbike:features:main")
 //include(":applications:ashbike:features:settings")
 
 include(":core:data")
+include(":applications:ashbike:apps:mobile:features:home")
+include(":applications:ashbike:apps:mobile:features:rides")
+include(":applications:ashbike:apps:mobile:features:settings")
