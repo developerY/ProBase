@@ -31,9 +31,11 @@
             <option value="$PROJECT_DIR$/applications/ashbike/apps/mobile/features/rides" />
             <option value="$PROJECT_DIR$/applications/ashbike/apps/mobile/features/settings" />
             <option value="$PROJECT_DIR$/applications/ashbike/apps/wear" />
+            <option value="$PROJECT_DIR$/applications/ashbike/data" />
             <option value="$PROJECT_DIR$/applications/ashbike/database" />
             <option value="$PROJECT_DIR$/applications/ashbike/features" />
             <option value="$PROJECT_DIR$/applications/ashbike/features/main" />
+            <option value="$PROJECT_DIR$/applications/ashbike/model" />
             <option value="$PROJECT_DIR$/build-logic" />
             <option value="$PROJECT_DIR$/build-logic/convention" />
             <option value="$PROJECT_DIR$/core" />
