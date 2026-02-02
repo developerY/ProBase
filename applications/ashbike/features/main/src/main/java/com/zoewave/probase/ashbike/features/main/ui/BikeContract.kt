@@ -1,6 +1,6 @@
 package com.zoewave.probase.ashbike.features.main.ui
 
-import com.zoewave.probase.core.model.bike.BikeRideInfo
+import com.zoewave.ashbike.model.bike.BikeRideInfo
 
 
 // Minimal Events

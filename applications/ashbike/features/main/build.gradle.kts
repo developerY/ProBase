@@ -19,6 +19,8 @@ dependencies {
     implementation(project(":core:data"))
 
     implementation(project(":applications:ashbike:database"))
+    implementation(project(":applications:ashbike:model"))
+    implementation(project(":applications:ashbike:data"))
 
     // --- Serialization (The backbone of Nav3) ---
     implementation(libs.kotlinx.serialization.json)

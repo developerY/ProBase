@@ -32,6 +32,11 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
+import com.zoewave.ashbike.data.repository.bike.BikeRepository
+import com.zoewave.ashbike.data.repository.bike.DemoModeSimulator
+import com.zoewave.ashbike.model.bike.BikeRideInfo
+import com.zoewave.ashbike.model.bike.LocationEnergyLevel
+import com.zoewave.ashbike.model.bike.RideState
 import com.zoewave.probase.ashbike.database.BikeRideEntity
 import com.zoewave.probase.ashbike.database.BikeRideRepo
 import com.zoewave.probase.ashbike.database.RideLocationEntity
@@ -40,12 +45,7 @@ import com.zoewave.probase.ashbike.database.repository.UserProfileRepository
 import com.zoewave.probase.ashbike.features.main.R
 import com.zoewave.probase.ashbike.features.main.usecase.CalculateCaloriesUseCase
 import com.zoewave.probase.ashbike.features.main.usecase.UserStats
-import com.zoewave.probase.core.data.repository.bike.BikeRepository
-import com.zoewave.probase.core.data.repository.bike.DemoModeSimulator
 import com.zoewave.probase.core.data.repository.sensor.heart.HeartRateRepository
-import com.zoewave.probase.core.model.bike.BikeRideInfo
-import com.zoewave.probase.core.model.bike.LocationEnergyLevel
-import com.zoewave.probase.core.model.bike.RideState
 import com.zoewave.probase.core.model.location.GpsFix
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.collections.immutable.persistentMapOf

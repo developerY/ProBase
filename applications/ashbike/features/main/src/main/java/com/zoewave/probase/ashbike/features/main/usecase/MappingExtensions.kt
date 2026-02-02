@@ -3,10 +3,10 @@ package com.zoewave.probase.ashbike.features.main.usecase
 // in RideSession.kt or MappingExtensions.kt
 import android.location.Location
 import com.google.android.gms.maps.model.LatLng
+import com.zoewave.ashbike.model.bike.BikeRideInfo
+import com.zoewave.ashbike.model.bike.RideState
 import com.zoewave.probase.ashbike.database.BikeRideEntity
 import com.zoewave.probase.ashbike.database.RideLocationEntity
-import com.zoewave.probase.core.model.bike.BikeRideInfo
-import com.zoewave.probase.core.model.bike.RideState
 import com.zoewave.probase.core.model.weather.BikeWeatherInfo
 import kotlinx.collections.immutable.persistentMapOf
 
