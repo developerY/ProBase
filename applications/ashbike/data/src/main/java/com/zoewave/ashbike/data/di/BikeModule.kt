@@ -1,8 +1,8 @@
-package com.zoewave.probase.core.data.di
+package com.zoewave.ashbike.data.di
 
-import com.zoewave.probase.core.data.repository.bike.BikeConnectivityRepository
-import com.zoewave.probase.core.data.repository.bike.BikeConnectivityRepositoryImpl
-import com.zoewave.probase.core.data.repository.bike.DemoBikeConnectivityRepositoryImpl
+import com.zoewave.ashbike.data.repository.bike.BikeConnectivityRepository
+import com.zoewave.ashbike.data.repository.bike.BikeConnectivityRepositoryImpl
+import com.zoewave.ashbike.data.repository.bike.DemoBikeConnectivityRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
