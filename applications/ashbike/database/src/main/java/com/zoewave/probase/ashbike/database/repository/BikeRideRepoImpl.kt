@@ -3,13 +3,13 @@ package com.zoewave.probase.ashbike.database.repository
 // com.zoewave.probase.ashbike.database.repository.BikeRideRepoImpl.kt
 
 import androidx.annotation.WorkerThread
+import com.zoewave.ashbike.model.bike.BikeRide
 import com.zoewave.probase.ashbike.database.BikeRideDao
 import com.zoewave.probase.ashbike.database.BikeRideEntity
 import com.zoewave.probase.ashbike.database.BikeRideRepo
 import com.zoewave.probase.ashbike.database.RideLocationEntity
 import com.zoewave.probase.ashbike.database.mapper.toBikeRide
 import com.zoewave.probase.ashbike.database.mapper.toEntity
-import com.zoewave.probase.core.model.bike.BikeRide
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map

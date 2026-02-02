@@ -20,7 +20,7 @@ android {
 
 dependencies {
     // --- Internal Modules ---
-    implementation(project(":core:model"))
+    implementation(project(":applications:ashbike:model"))
 
     // --- Core Android ---
     implementation(libs.androidx.core.ktx)

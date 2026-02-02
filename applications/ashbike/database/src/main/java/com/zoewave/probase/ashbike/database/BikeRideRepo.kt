@@ -1,7 +1,7 @@
 package com.zoewave.probase.ashbike.database
 
-import com.zoewave.probase.core.model.bike.BikeRide
 
+import com.zoewave.ashbike.model.bike.BikeRide
 import kotlinx.coroutines.flow.Flow
 
 interface BikeRideRepo {

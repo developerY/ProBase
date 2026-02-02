@@ -1,10 +1,11 @@
 package com.zoewave.probase.ashbike.database.mapper
 
+import com.zoewave.ashbike.model.bike.BikeRide
+import com.zoewave.ashbike.model.bike.LocationPoint
 import com.zoewave.probase.ashbike.database.BikeRideEntity
 import com.zoewave.probase.ashbike.database.RideLocationEntity
 import com.zoewave.probase.ashbike.database.RideWithLocations
-import com.zoewave.probase.core.model.bike.BikeRide
-import com.zoewave.probase.core.model.bike.LocationPoint
+
 
 /**
  * Converts a database [RideWithLocations] object (entity + locations) to a [BikeRide] domain model.
