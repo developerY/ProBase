@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.zoewave.probase.ashbike.mobile.ui.components.AshBikeMainScreen
+import com.zoewave.ashbike.mobile.ui.components.AshBikeMainScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
