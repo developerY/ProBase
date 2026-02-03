@@ -1,5 +1,7 @@
 package com.zoewave.ashbike.mobile.glass.ui
 
+import com.zoewave.ashbike.model.bike.SuspensionState
+
 
 // 1. Define the status types (The "What")
 enum class BatteryZone {

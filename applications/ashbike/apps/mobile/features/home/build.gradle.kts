@@ -22,6 +22,9 @@ dependencies {
 
     // Database (If Home needs direct DB access, otherwise access via :core:data)
     implementation(project(":applications:ashbike:database"))
+    implementation(project(":applications:ashbike:model"))
+    implementation(project(":applications:ashbike:data"))
+    implementation(project(":applications:ashbike:features:main"))
 
     // --- Serialization (The backbone of Nav3) ---
     implementation(libs.kotlinx.serialization.json)
@@ -34,6 +37,19 @@ dependencies {
     // --- Maps & Location (For the Dashboard/Speedometer) ---
     implementation(libs.google.play.services.location)
     implementation(libs.google.maps.compose)
+
+    // --- 4. Standard UI & Compose ---
+    // Note: 'library.compose' plugin adds the BOM and basic UI/Tooling automatically.
+    // We only add specific extras here.
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.material3) // If using M3 components alongside Glimmer
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    // --- 5. Hilt ---
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    // Note: The Hilt Convention Plugin handles 'ksp(libs.hilt.compiler)' automatically
 
     // --- Lifecycle ---
     implementation(libs.androidx.lifecycle.viewmodel.compose)
