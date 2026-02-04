@@ -1,4 +1,4 @@
-package com.ylabz.basepro.ashbike.mobile.features.glass
+package com.zoewave.ashbike.mobile.glass
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -6,8 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
 import androidx.xr.glimmer.GlimmerTheme
 import com.zoewave.ashbike.data.repository.bike.BikeRepository
-import com.zoewave.ashbike.mobile.glass.AudioInterface
-import com.zoewave.ashbike.mobile.glass.R
 import com.zoewave.ashbike.mobile.glass.ui.GlassApp
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay

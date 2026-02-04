@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.glass.R
-import com.zoewave.ashbike.mobile.glass.ui.model.GlassButtonState
+import com.zoewave.ashbike.model.glass.GlassButtonState
 
 @Composable
 fun LaunchGlassButton(
