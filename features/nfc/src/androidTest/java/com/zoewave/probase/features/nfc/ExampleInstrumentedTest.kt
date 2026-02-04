@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.nfc.
+package com.zoewave.probase.features.nfc
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

@@ -1,5 +1,4 @@
-package com.zoewave.probase.features.nfc.
-
+package com.zoewave.probase.features.nfc
 import org.junit.Test
 
 import org.junit.Assert.*
