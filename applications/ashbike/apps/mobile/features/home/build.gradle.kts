@@ -19,12 +19,17 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:network"))
     implementation(project(":core:data"))
+    implementation(project(":features:weather"))
+    implementation(project(":features:places"))
+
 
     // Database (If Home needs direct DB access, otherwise access via :core:data)
     implementation(project(":applications:ashbike:database"))
     implementation(project(":applications:ashbike:model"))
     implementation(project(":applications:ashbike:data"))
     implementation(project(":applications:ashbike:features:main"))
+    implementation(project(":applications:ashbike:features:places"))
+    implementation(project(":applications:ashbike:apps:mobile:features:glass"))
 
     // --- Serialization (The backbone of Nav3) ---
     implementation(libs.kotlinx.serialization.json)
@@ -57,12 +62,16 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.lifecycle.service)
 
+    // Permissions
+    implementation(libs.google.accompanist.permissions)
+
     // --- UI Components ---
     // ✅ Icons for the dashboard
     implementation(libs.androidx.compose.material.icons.extended)
 
     // --- Collections ---
     implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.androidx.projected)
 
     // --- Testing ---
     testImplementation(libs.junit)

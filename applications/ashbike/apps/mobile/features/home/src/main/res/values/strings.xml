@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">bike</string>
+
+    <!-- Title for the weather detail dialog -->
+    <string name="weather_details_title">Weather Details</string>
+
+    <!-- Formatting for the main temperature display -->
+    <string name="temperature_format">%1$d°C</string>
+
+    <!-- “Feels like” label -->
+    <string name="feels_like_format">Feels like %1$d°C</string>
+
+    <!-- Humidity, note the double %% to escape a literal percent sign -->
+    <string name="humidity_format">Humidity: %1$d%%</string>
+
+    <!-- Wind speed and direction -->
+    <string name="wind_format">Wind: %1$dkm/h at %2$d°</string>
+
+    <!-- Content description for accessibility -->
+    <string name="waiting_for_GPS_content_desc">Waiting for GPS…</string>
+    <string name="weather_content_desc">Current weather: %1$s, %2$d°C</string>
+    <string name="feature_main_ebike_stats_title">E-bike Stats</string>
+    <string name="feature_main_action_collapse">Collapse</string>
+    <string name="feature_main_action_expand">Expand</string>
+    <string name="feature_main_label_battery">Battery</string>
+    <string name="feature_main_label_motor">Motor</string>
+    <string name="feature_main_label_heart_rate">Heart Rate</string>
+    <string name="feature_main_label_calories">Calories</string>
+    <string name="feature_trips_all_bike_trips_title">All Bike Trips</string>
+    <string name="feature_main_stats_label_distance">Distance</string>
+    <string name="feature_main_stats_value_km_format">%.1f km</string>
+    <string name="feature_main_stats_label_duration">Duration</string>
+    <string name="feature_main_stats_label_avg_speed">Avg Speed</string>
+    <string name="feature_main_stats_value_kmh_format">%.1f km/h</string>
+    <string name="feature_main_stats_label_elevation">Elevation</string>
+    <string name="feature_main_stats_value_meters_format">%.0f m</string>
+
+
+    <!-- ... existing strings ... -->
+    <string name="bike_action_pause">Pause</string>
+    <string name="bike_action_start">Start</string>
+    <string name="bike_action_stop">Stop</string>
+    <string name="bike_dialog_set_distance_title">Enter total distance (km)</string>
+    <string name="bike_dialog_set_distance_label">Distance in km</string>
+    <string name="bike_configuration">Bike Configuration</string>
+    <string name="motor_assistance">Motor Assistance</string>
+    <string name="advanced_bike_settings">Advanced Bike Settings</string>
+    <string name="gearing_level">Gearing Level: %1$d</string>
+
+
+</resources>
