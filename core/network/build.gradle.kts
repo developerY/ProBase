@@ -25,22 +25,23 @@ android {
         buildConfig = true
         // aidl, renderScript, shaders are disabled by default in AGP 9
     }
+}
 
-    // ✅ 4. Update Apollo Package
-    /* apollo {
-        service("service") {
-            // Essential: Tells Apollo to generate classes in this package
-            packageName.set("com.zoewave.probase.core.network")
+// ✅ 4. Update Apollo Package
+apollo {
+    service("service") {
+        // Essential: Tells Apollo to generate classes in this package
+        packageName.set("com.zoewave.probase.core.network")
 
-            // Optional Tip: If you want to see the generated files easily in the IDE
-            // warnOnDeprecatedUsages.set(true)
-        }
-    } */
-
-    secrets {
-        defaultPropertiesFileName = "secrets.defaults.properties"
+        // Optional Tip: If you want to see the generated files easily in the IDE
+        // warnOnDeprecatedUsages.set(true)
     }
 }
+
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
+}
+
 
 dependencies {
     // --- Internal Modules ---
@@ -63,6 +64,7 @@ dependencies {
     implementation(libs.squareup.okhttp3.logging.interceptor)
 
     // --- Networking (GraphQL) ---
+    implementation(libs.squareup.okhttp)
     implementation(libs.apollo.graphql.runtime)
     implementation(libs.apollo.graphql.normalized.cache)
 
