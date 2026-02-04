@@ -1,0 +1,121 @@
+package com.zoewave.ashbike.mobile.home.components.dials
+
+// GpsFix import might not be strictly needed here anymore if not directly used,
+// but FallbackPathDisplay uses it.
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
+import com.zoewave.ashbike.features.places.MapPathScreen
+import com.zoewave.ashbike.mobile.home.ui.HomeUiState
+import com.zoewave.probase.core.model.yelp.BusinessInfo
+
+@Composable
+fun SlidableGoogleMap(
+    modifier: Modifier = Modifier,
+    uiState: HomeUiState.Success,
+    onClose: () -> Unit,
+    showMapContent: Boolean = true,
+    placeName: String? = null, // Added parameter
+    coffeeShops: List<BusinessInfo>, // Added parameter
+    onFindCafes: () -> Unit // Added parameter
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(300.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = MaterialTheme.shapes.large
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (showMapContent) {
+                val currentLocation = remember(uiState.bikeData.location) {
+                    uiState.bikeData.location ?: LatLng(0.0, 0.0)
+                }
+                var isMapReady by remember { mutableStateOf(false) }
+                val cameraPositionState = rememberCameraPositionState {
+                    position = CameraPosition.fromLatLngZoom(currentLocation, 15f)
+                }
+                val markerState = rememberMarkerState(position = currentLocation)
+
+                LaunchedEffect(currentLocation, isMapReady) {
+                    if (isMapReady) {
+                        cameraPositionState.animate(
+                            CameraUpdateFactory.newLatLngZoom(currentLocation, 15f),
+                            durationMs = 700
+                        )
+                        markerState.position = currentLocation
+                    }
+                }
+
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState,
+                    onMapLoaded = { isMapReady = true }
+                ) {
+                    Marker(
+                        state = markerState,
+                        title = "Current Location"
+                    )
+                }
+            } else {
+                MapPathScreen(
+                    fixes = uiState.bikeData.ridePath ?: emptyList(),
+                    placeName = placeName ?: "",
+                    coffeeShops = coffeeShops, // Passed parameter
+                    onFindCafes = onFindCafes // Passed parameter
+                )
+                // Use the new FallbackPathDisplay composable
+                /*FallbackPathDisplay(
+                    modifier = Modifier.fillMaxSize(),
+                    fixes =
+                    // You can customize colors here if needed, e.g.:
+                    // backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                    // gridColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+                    // slowColor = Color.Yellow,
+                    // fastColor = Color.Red,
+                    // textColor = MaterialTheme.colorScheme.onSurface
+                )*/
+            }
+
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), shape = MaterialTheme.shapes.small)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Close Map",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
+}
