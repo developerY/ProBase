@@ -1,4 +1,4 @@
-package com.zoewave.probase.feature.health.ui
+package com.zoewave.probase.features.health.ui
 
 ////import androidx.compose.ui.tooling.preview.Preview
 import android.content.Intent
@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.HealthConnectClient
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.zoewave.probase.features.health.R
-import com.zoewave.probase.feature.health.ui.components.ErrorScreen
+import com.zoewave.probase.features.health.ui.components.ErrorScreen
 
 @Composable
 fun HealthRoute(

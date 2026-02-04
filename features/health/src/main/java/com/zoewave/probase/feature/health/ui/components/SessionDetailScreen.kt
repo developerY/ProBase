@@ -1,4 +1,4 @@
-package com.zoewave.probase.feature.health.ui.components
+package com.zoewave.probase.features.health.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.zoewave.probase.core.data.service.health.ExerciseSessionData
-import com.zoewave.probase.feature.health.ui.HealthViewModel
+import com.zoewave.probase.features.health.ui.HealthViewModel
 import java.time.Duration
 
 @OptIn(ExperimentalMaterial3Api::class)

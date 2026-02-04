@@ -1,4 +1,4 @@
-package com.zoewave.probase.feature.health.ui.components.notused
+package com.zoewave.probase.features.health.ui.components.notused
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn

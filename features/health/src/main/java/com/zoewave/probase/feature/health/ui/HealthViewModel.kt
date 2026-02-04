@@ -1,4 +1,4 @@
-package com.zoewave.probase.feature.health.ui
+package com.zoewave.probase.features.health.ui
 
 // ... other imports ...
 // BikeRideRepository import is removed

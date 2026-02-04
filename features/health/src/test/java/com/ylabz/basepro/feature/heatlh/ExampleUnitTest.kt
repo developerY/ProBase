@@ -1,4 +1,4 @@
-package com.zoewave.probase.feature.health
+package com.zoewave.probase.features.health
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

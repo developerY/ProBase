@@ -1,4 +1,4 @@
-package com.zoewave.probase.feature.health.ui.components
+package com.zoewave.probase.features.health.ui.components
 
 // //import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.clickable

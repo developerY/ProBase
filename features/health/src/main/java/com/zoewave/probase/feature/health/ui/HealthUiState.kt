@@ -1,4 +1,4 @@
-package com.zoewave.probase.feature.health.ui
+package com.zoewave.probase.features.health.ui
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import java.util.UUID

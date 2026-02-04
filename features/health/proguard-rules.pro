@@ -21,4 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 # Rules from missing_rules.txt for ashbike app (feature.health module classes)
--keep class com.zoewave.probase.feature.health.** { *; }
+-keep class com.zoewave.probase.features.health.** { *; }
