@@ -1,6 +1,6 @@
 package com.zoewave.ashbike.data.usecases
 
-// import com.ylabz.basepro.core.database.BaseProRepo  // Import your repository
+// import com.zoewave.probase.core.database.BaseProRepo  // Import your repository
 import com.zoewave.probase.core.model.weather.BikeWeatherInfo
 import com.zoewave.probase.core.model.weather.OpenWeatherResponse
 import com.zoewave.probase.core.network.repository.weather.WeatherRepo
