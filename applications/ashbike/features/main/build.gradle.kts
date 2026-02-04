@@ -21,6 +21,8 @@ dependencies {
     implementation(project(":applications:ashbike:database"))
     implementation(project(":applications:ashbike:model"))
     implementation(project(":applications:ashbike:data"))
+    implementation(project(":applications:ashbike:apps:mobile:features:glass"))
+
 
     // --- Serialization (The backbone of Nav3) ---
     implementation(libs.kotlinx.serialization.json)
@@ -40,6 +42,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.lifecycle.service)
+
+    // Permissions
+    implementation(libs.google.accompanist.permissions)
 
     // --- UI Components ---
     // ✅ FIXED: Correct accessor for icons based on your TOML

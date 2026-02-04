@@ -1,4 +1,4 @@
-package com.ylabz.basepro.applications.bike.features.main.ui.components
+package com.zoewave.probase.ashbike.features.main.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
