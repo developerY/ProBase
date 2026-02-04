@@ -31,6 +31,16 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.play.services)
 
+    // GraphQL
+    implementation(libs.squareup.okhttp)
+    implementation(libs.apollo.graphql.runtime)
+    implementation(libs.apollo.graphql.normalized.cache)
+
+    // Retrofit
+    implementation(libs.squareup.retrofit)
+    implementation(libs.squareup.retrofit.converter.gson)
+    implementation(libs.squareup.okhttp3.logging.interceptor)
+
 
     // Datastore
     implementation(libs.androidx.datastore.preferences)
