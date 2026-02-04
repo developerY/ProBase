@@ -42,19 +42,21 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
-import com.zoewave.ashbike.mobile.home.ui.HomeRoute
+import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
 import com.zoewave.ashbike.mobile.rides.RidesRoute
 import com.zoewave.ashbike.mobile.settings.SettingsRoute
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.ashbike.mobile.ui.MainUiEvent
 import com.zoewave.probase.ashbike.mobile.ui.MainViewModel
 import com.zoewave.probase.ashbike.mobile.ui.components.AshBikeBottomBar
+import com.zoewave.probaseapplications.bike.features.main.ui.HomeUiRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AshBikeMainScreen(
     viewModel: MainViewModel = hiltViewModel()
 ) {
+    val homeViewModel : HomeViewModel = hiltViewModel()
     // 1. THE SOURCE OF TRUTH (The Back Stack)
     // In Nav3, the back stack is just a standard Compose MutableList.
     // We initialize it with 'Home' as the first screen.
@@ -146,11 +148,15 @@ fun AshBikeMainScreen(
                     NavEntry(key) {
                         when (key) {
                             is AshBikeDestination.Home -> {
-                                HomeRoute(
+                                /*HomeRoute(
                                     // Navigation Action: Simply add to the list!
                                     onNavigateToSettings = {
                                         backStack.add(AshBikeDestination.Settings)
                                     }
+                                )*/
+                                HomeUiRoute(
+                                    viewModel = homeViewModel,
+                                    navTo = { backStack.add(AshBikeDestination.Settings) }
                                 )
                             }
 
