@@ -1,0 +1,75 @@
+package com.zoewave.ashbike.mobile.rides.ui.components.health
+
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.SyncDisabled
+import androidx.compose.material.icons.outlined.SyncProblem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+//import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+
+enum class SyncHealthConnectState {
+    HEALTH_UNAVAILABLE,     // never enabled
+    NO_RECORDS_ADDED,       // enabled but nothing written
+    ALL_SYNCED              // has at least one session in GHC
+}
+
+
+@Composable
+fun SyncStatusIcon(state: SyncHealthConnectState, modifier: Modifier = Modifier) {
+    val (icon, tint, description) = when (state) {
+        SyncHealthConnectState.HEALTH_UNAVAILABLE -> Triple(
+            Icons.Default.SyncDisabled,
+            MaterialTheme.colorScheme.error,
+            "Health Connect off"
+        )
+
+        SyncHealthConnectState.NO_RECORDS_ADDED -> Triple(
+            Icons.Outlined.SyncProblem,
+            MaterialTheme.colorScheme.secondary,
+            "No sessions synced"
+        )
+
+        SyncHealthConnectState.ALL_SYNCED -> Triple(
+            Icons.Default.Sync,
+            MaterialTheme.colorScheme.onSurfaceVariant,
+            "All sessions synced"
+        )
+    }
+
+    Icon(
+        imageVector = icon,
+        contentDescription = description,
+        tint = tint,
+        modifier = modifier.size(24.dp)
+    )
+}
+/*
+@Preview
+@Composable
+fun SyncStatusIconPreviewHealthUnavailable() {
+    SyncStatusIcon(state = SyncHealthConnectState.HEALTH_UNAVAILABLE)
+}
+
+@Preview
+@Composable
+fun SyncStatusIconPreviewNoRecordsAdded() {
+    SyncStatusIcon(state = SyncHealthConnectState.NO_RECORDS_ADDED)
+}
+
+@Preview
+@Composable
+fun SyncStatusIconPreviewAllSynced() {
+    SyncStatusIcon(state = SyncHealthConnectState.ALL_SYNCED)
+}
+
+@Preview
+@Composable
+fun SyncStatusIconPreviewWithModifier() {
+    SyncStatusIcon(state = SyncHealthConnectState.ALL_SYNCED, modifier = Modifier.size(48.dp))
+}
+*/

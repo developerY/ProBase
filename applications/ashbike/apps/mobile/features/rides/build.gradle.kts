@@ -20,8 +20,12 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:data"))
 
+    implementation(project(":features:health"))
+
     // Database (If Home needs direct DB access, otherwise access via :core:data)
     implementation(project(":applications:ashbike:database"))
+    implementation(project(":applications:ashbike:model"))
+    implementation(project(":applications:ashbike:features:places"))
 
     // --- Serialization (The backbone of Nav3) ---
     implementation(libs.kotlinx.serialization.json)
@@ -34,6 +38,14 @@ dependencies {
     // --- Maps & Location (For the Dashboard/Speedometer) ---
     implementation(libs.google.play.services.location)
     implementation(libs.google.maps.compose)
+
+    // Health Connect
+    implementation(libs.androidx.health.connect.client)
+
+    // --- 5. Hilt ---
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    // Note: The Hilt Convention Plugin handles 'ksp(libs.hilt.compiler)' automatically
 
     // --- Lifecycle ---
     implementation(libs.androidx.lifecycle.viewmodel.compose)
