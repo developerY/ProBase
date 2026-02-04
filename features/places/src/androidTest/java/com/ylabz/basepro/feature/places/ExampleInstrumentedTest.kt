@@ -1,4 +1,4 @@
-package com.ylabz.basepro.feature.places
+package com.zoewave.probase.feature.places
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -17,6 +17,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.ylabz.basepro.feature.places.test", appContext.packageName)
+        assertEquals("com.zoewave.probase.feature.places.test", appContext.packageName)
     }
 }

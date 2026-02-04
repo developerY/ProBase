@@ -1,4 +1,4 @@
-package com.ylabz.basepro.feature.places
+package com.zoewave.probase.feature.places
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

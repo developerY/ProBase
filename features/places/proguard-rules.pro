@@ -21,4 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 # Rules from missing_rules.txt for ashbike app (feature.places module classes)
--keep class com.ylabz.basepro.feature.places.** { *; }
+-keep class com.zoewave.probase.feature.places.** { *; }
