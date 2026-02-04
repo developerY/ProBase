@@ -1,0 +1,91 @@
+<resources>
+    <!-- Strings for StatusBar.kt -->
+    <string name="ble_status_bar_title">BLE Status</string>
+    <string name="ble_text_scan_state_not_scanning">Not Scanning</string>
+    <string name="ble_text_scan_state_scanning">Scanning…</string>
+    <string name="ble_text_scan_state_stopping">Stopping…</string>
+    <!-- Assuming cd_scan_state can use the text_scan_state if appropriate, or keep separate if descriptions must differ -->
+    <string name="ble_cd_scan_state_not_scanning">Scan State: Not Scanning</string>
+    <string name="ble_cd_scan_state_scanning">Scan State: Scanning</string>
+    <string name="ble_cd_scan_state_stopping">Scan State: Stopping</string>
+
+    <string name="ble_status_bar_cd_manage_permissions">Manage Permissions</string>
+    <string name="ble_status_bar_legend_title">Legend:</string>
+    <string name="ble_status_bar_legend_granted">Granted</string>
+    <string name="ble_status_bar_legend_denied">Permanently Denied</string>
+    <string name="ble_status_bar_legend_not_requested">Not Yet Requested</string>
+    <string name="ble_status_bar_perm_scan_nearby">Scan Nearby</string>
+    <string name="ble_status_bar_perm_advertise">Advertise</string>
+    <string name="ble_status_bar_perm_coarse_location">Coarse Location</string>
+    <string name="ble_status_bar_perm_fine_location">Fine Location</string>
+    <string name="ble_status_bar_perm_unknown">Unknown Permission</string>
+
+    <!-- Strings for ScanControls.kt -->
+    <string name="ble_scan_controls_start_scan_button">Start Scan</string>
+    <string name="ble_scan_controls_stop_scan_button">Stop Scan</string>
+    <string name="ble_scan_controls_status_label">Scan Status:</string> <!-- More generic -->
+    <string name="ble_scan_controls_scan_status_error">Status: Error - %1$s</string>
+    <string name="ble_scan_controls_scan_status_unknown_error">Status: Unknown Error</string>
+    <!-- The following might be redundant if the above `ble_text_scan_state_` are used with a prefix in code -->
+    <!-- Keeping for now if specific casing/context is needed -->
+    <string name="ble_scan_controls_status_display_not_scanning">NOT SCANNING</string>
+    <string name="ble_scan_controls_status_display_scanning">SCANNING</string>
+    <string name="ble_scan_controls_status_display_stopping">STOPPING</string>
+
+    <!-- Strings for BluetoothLeSuccessScreen.kt & DiscoveredDeviceItem -->
+    <string name="ble_text_unnamed_device">Unnamed Device</string>
+    <string name="ble_action_read_values">Read Values</string>
+    <string name="ble_text_status_label">Status: %1$s</string>
+    <string name="ble_title_discovered_devices">Discovered Devices (%1$d)</string>
+    <string name="ble_text_scanning_for_devices">Scanning for devices…</string>
+    <string name="ble_text_no_devices_found">No devices found.</string>
+    <string name="ble_text_no_named_devices_found">No usable named devices found. (Total scanned: %1$d)</string>
+    <string name="ble_title_gatt_services">GATT Services</string>
+    <string name="ble_text_service_uuid">Service: %1$s</string>
+    <string name="ble_text_characteristic_details">	Char: %1$s - Value: %2$s</string>
+    <string name="ble_error_no_services_discovered">No services discovered or available for this device.</string>
+    <string name="ble_text_device_address">Address: %1$s</string>
+    <string name="ble_text_device_rssi">RSSI: %1$d dBm</string>
+
+    <!-- Simple labels (if needed separately from formatted strings) -->
+    <string name="ble_label_service">Service:</string>
+    <string name="ble_label_characteristic">Characteristic:</string>
+    <string name="ble_label_value">Value:</string>
+    <string name="ble_label_address">Address:</string>
+    <string name="ble_label_rssi">RSSI:</string>
+    <string name="ble_unit_rssi_dbm">dBm</string>
+
+    <!-- Strings for PermissionsRationale.kt -->
+    <string name="ble_title_permissions_rationale">Bluetooth Permissions Required</string>
+    <string name="ble_message_permissions_rationale_scan_connect_location">This app needs Bluetooth scan, connect, and location permissions to discover and interact with nearby BLE devices. Android requires location for Bluetooth scanning.</string>
+    <string name="ble_message_permissions_rationale_scan_connect">This app needs Bluetooth scan and connect permissions to discover and interact with nearby BLE devices.</string>
+    <string name="ble_message_permissions_rationale_scan_location">This app needs Bluetooth scan and location permissions to discover nearby BLE devices. Android requires location for Bluetooth scanning.</string>
+    <string name="ble_message_permissions_rationale_scan">This app needs Bluetooth scan permission to discover nearby BLE devices.</string>
+    <string name="ble_message_permissions_rationale_connect_location">This app needs Bluetooth connect and location permissions to interact with BLE devices. Location might be needed for full functionality with some devices.</string>
+    <string name="ble_message_permissions_rationale_connect">This app needs Bluetooth connect permission to interact with BLE devices.</string>
+    <string name="ble_message_permissions_rationale_location">This app needs location permission for Bluetooth functionality as required by Android.</string>
+    <string name="ble_message_permissions_rationale_advertise">This app needs Bluetooth advertise permission to broadcast information.</string>
+    <string name="ble_message_permissions_rationale_generic">This app needs Bluetooth permissions to function correctly.</string>
+    <string name="ble_title_bluetooth_disabled">Bluetooth Disabled</string>
+    <string name="ble_message_bluetooth_disabled">Bluetooth is currently disabled. Please enable it in settings to allow BLE functionality.</string>
+    <string name="ble_action_open_settings">Open Settings</string>
+
+    <!-- Strings for PermissionsDenied.kt -->
+    <string name="ble_message_permissions_denied">Bluetooth permissions are denied. Please enable them in settings.</string>
+    <string name="ble_action_enable_permissions">Please enable permissions</string> <!-- Kept specific wording -->
+
+    <!-- Strings for GattCharTable.kt & related GATT details -->
+    <string name="ble_label_uuid">UUID:</string> <!-- Generic UUID label -->
+    <string name="ble_title_characteristics">Characteristics:</string>
+    <string name="ble_action_read_battery_level">Read Battery Level</string>
+    <string name="ble_text_characteristic_name">Characteristic: %1$s</string> <!-- Added this line -->
+    <string name="ble_cd_read_characteristic">Read characteristic</string>
+    <string name="ble_title_sensor_tag_details">Sensor Tag Details</string>
+    <string name="ble_label_battery_level_formatted">Battery Level: %1$d%%</string>
+    <string name="ble_label_temperature_formatted">Temperature: %1$s</string>
+    <string name="ble_label_humidity_formatted">Humidity: %1$s</string>
+    <string name="ble_label_last_synced_formatted">Last Synced: %1$s</string>
+    <string name="ble_text_characteristic_value_label">Value: %1$s</string> <!-- Added this line -->
+    <string name="ble_unit_percent">%%</string>
+    <string name="ble_unit_celsius">°C</string>
+</resources>

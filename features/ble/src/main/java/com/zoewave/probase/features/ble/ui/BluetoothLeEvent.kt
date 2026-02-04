@@ -1,0 +1,43 @@
+package com.zoewave.probase.features.ble.ui
+
+import com.zoewave.probase.core.model.ble.BluetoothDeviceInfo
+
+sealed interface BluetoothLeEvent {
+    object RequestEnableBluetooth : BluetoothLeEvent
+    object StartScan : BluetoothLeEvent
+    object StopScan : BluetoothLeEvent
+    object FetchDevices : BluetoothLeEvent
+    object RequestPermissions : BluetoothLeEvent
+    object PermissionsGranted : BluetoothLeEvent
+    object PermissionsDenied : BluetoothLeEvent
+    object ConnectToSensorTag : BluetoothLeEvent // This is used to connect to the active device
+    object GattCharacteristicList : BluetoothLeEvent
+
+    // Add this new event for battery level reading
+    object ReadCharacteristics : BluetoothLeEvent
+
+    data class SetActiveDevice(val device: BluetoothDeviceInfo) :
+        BluetoothLeEvent // Added event for setting the active device
+
+
+    //object FetchGattServices : BluetoothLeEvent
+
+    // Read characteristic value
+    /*data class GetCharacteristicValue(
+        val service: DeviceService,
+        val characteristic: DeviceCharacteristic
+    ) : BluetoothLeEvent*/
+
+    /* Optional: Enable notification
+    data class EnableNotification(
+        val service: DeviceService,
+        val characteristic: DeviceCharacteristic
+    ) : BluetoothLeEvent
+
+    // Optional: Write characteristic value
+    data class WriteCharacteristicValue(
+        val service: DeviceService,
+        val characteristic: DeviceCharacteristic,
+        val value: String
+    ) : BluetoothLeEvent*/
+}
