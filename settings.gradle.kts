@@ -37,6 +37,9 @@ include(":core:util")    // ✅ Added
 // --- Standalone Features ---
 include(":features:nav3")
 include(":features:ble")
+include(":features:weather")
+include(":features:places")
+include(":features:health")
 
 // --- AshBike Product Line ---
 include(":applications:ashbike:database")
@@ -52,3 +55,4 @@ include(":applications:ashbike:apps:mobile:features:settings")
 include(":applications:ashbike:data")
 include(":applications:ashbike:model")
 include(":applications:ashbike:apps:mobile:features:glass")
+include(":applications:ashbike:features:places")

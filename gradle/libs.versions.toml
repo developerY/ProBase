@@ -52,7 +52,7 @@ work = "2.11.1"
 # -- Networking (Rest & GQL) --
 okhttp = "5.3.2"
 squareupRetrofit = "3.0.0"
-apollo = "4.1.1"
+apollo = "4.4.1"
 
 # -- UI Utilities --
 coil = "2.7.0"

@@ -36,6 +36,7 @@
             <option value="$PROJECT_DIR$/applications/ashbike/database" />
             <option value="$PROJECT_DIR$/applications/ashbike/features" />
             <option value="$PROJECT_DIR$/applications/ashbike/features/main" />
+            <option value="$PROJECT_DIR$/applications/ashbike/features/places" />
             <option value="$PROJECT_DIR$/applications/ashbike/model" />
             <option value="$PROJECT_DIR$/build-logic" />
             <option value="$PROJECT_DIR$/build-logic/convention" />
@@ -48,7 +49,10 @@
             <option value="$PROJECT_DIR$/core/util" />
             <option value="$PROJECT_DIR$/features" />
             <option value="$PROJECT_DIR$/features/ble" />
+            <option value="$PROJECT_DIR$/features/health" />
             <option value="$PROJECT_DIR$/features/nav3" />
+            <option value="$PROJECT_DIR$/features/places" />
+            <option value="$PROJECT_DIR$/features/weather" />
           </set>
         </option>
       </GradleProjectSettings>
