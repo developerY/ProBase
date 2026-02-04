@@ -1,6 +1,7 @@
 package usecase
 
-import com.zoewave.probase.core.data.repository.weather.WeatherRepo
+
+import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 import javax.inject.Inject
 
 class GetCurrentWeatherUseCase @Inject constructor(

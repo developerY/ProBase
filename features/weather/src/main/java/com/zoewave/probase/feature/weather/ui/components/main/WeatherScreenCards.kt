@@ -22,10 +22,10 @@ import com.zoewave.probase.feature.weather.ui.components.wind.WindCard
 
 // Import your custom cards from their packages
 // For example:
-// import com.ylabz.windwatersnow.wind.ui.components.cards.temp.TemperatureCardAI
-// import com.ylabz.windwatersnow.wind.ui.components.cards.rain.RainVolumeCardAI
-// import com.ylabz.windwatersnow.wind.ui.components.cards.snow.BetterSnowVolumeCardAI
-// import com.ylabz.windwatersnow.wind.ui.components.cards.Wind.ImprovedWindCard
+// import com.zoewave.windwatersnow.wind.ui.components.cards.temp.TemperatureCardAI
+// import com.zoewave.windwatersnow.wind.ui.components.cards.rain.RainVolumeCardAI
+// import com.zoewave.windwatersnow.wind.ui.components.cards.snow.BetterSnowVolumeCardAI
+// import com.zoewave.windwatersnow.wind.ui.components.cards.Wind.ImprovedWindCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -4,9 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.travel.LocationRepository
-import com.zoewave.probase.core.data.repository.weather.WeatherRepo
 import com.zoewave.probase.core.database.BaseProRepo
 import com.zoewave.probase.core.model.weather.Weather
+import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

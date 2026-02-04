@@ -7,7 +7,7 @@ plugins {
 
 android {
     // 2. Updated Namespace for Zoewave
-    namespace = "com.zoewave.probase.ashbike.feature.weather"
+    namespace = "com.zoewave.probase.ashbike.features.weather"
 }
 
 dependencies {
@@ -15,6 +15,8 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:data"))
     implementation(project(":core:ui"))
+    implementation(project(":core:network"))
+
 
     // Check if you still need these legacy modules in the new arch:
     implementation(project(":core:database"))
@@ -24,19 +26,19 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.android)
+    // implementation(libs.androidx.lifecycle.viewmodel.android)
 
     // --- 3. UI & Compose ---
     // Note: 'library.compose' plugin adds the BOM and basic tooling.
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // Legacy Material (Only keep if you strictly need old XML views or Theme.MaterialComponents)
-    implementation(libs.material.legacy)
+    // implementation(libs.material.legacy)
 
     // --- 4. Hilt ---
     implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.hilt.navigation.compose)
     // Compiler is handled automatically by the Hilt Convention Plugin
 
     // --- 5. Maps & Location ---
