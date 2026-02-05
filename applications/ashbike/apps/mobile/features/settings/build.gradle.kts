@@ -19,9 +19,16 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:network"))
     implementation(project(":core:data"))
+    implementation(project(":core:util"))
+
+    implementation(project(":features:health"))
+    implementation(project(":features:ble"))
+    implementation(project(":features:nfc"))
+    implementation(project(":features:qrscanner"))
 
     // Database (If Home needs direct DB access, otherwise access via :core:data)
     implementation(project(":applications:ashbike:database"))
+    implementation(project(":applications:ashbike:model"))
 
     // --- Serialization (The backbone of Nav3) ---
     implementation(libs.kotlinx.serialization.json)
@@ -47,6 +54,12 @@ dependencies {
 
     // --- Collections ---
     implementation(libs.kotlinx.collections.immutable)
+
+    // Hilt Dependency Injection
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    // kapt(libs.hilt.compiler)
 
     // --- Testing ---
     testImplementation(libs.junit)
