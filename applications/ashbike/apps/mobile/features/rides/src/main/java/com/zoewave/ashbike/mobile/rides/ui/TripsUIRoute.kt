@@ -15,10 +15,10 @@ import androidx.lifecycle.Lifecycle
 import com.zoewave.ashbike.mobile.rides.ui.components.BikeTripsCompose
 import com.zoewave.ashbike.mobile.rides.ui.components.ErrorScreen
 import com.zoewave.ashbike.mobile.rides.ui.components.LoadingScreen
-import com.zoewave.probase.feature.health.ui.HealthEvent
-import com.zoewave.probase.feature.health.ui.HealthSideEffect
-import com.zoewave.probase.feature.health.ui.HealthUiState
-import com.zoewave.probase.feature.health.ui.HealthViewModel
+import com.zoewave.probase.features.health.ui.HealthEvent
+import com.zoewave.probase.features.health.ui.HealthSideEffect
+import com.zoewave.probase.features.health.ui.HealthUiState
+import com.zoewave.probase.features.health.ui.HealthViewModel
 import kotlinx.coroutines.launch
 
 @Composable
