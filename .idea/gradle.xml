@@ -51,7 +51,9 @@
             <option value="$PROJECT_DIR$/features/ble" />
             <option value="$PROJECT_DIR$/features/health" />
             <option value="$PROJECT_DIR$/features/nav3" />
+            <option value="$PROJECT_DIR$/features/nfc" />
             <option value="$PROJECT_DIR$/features/places" />
+            <option value="$PROJECT_DIR$/features/qrscanner" />
             <option value="$PROJECT_DIR$/features/weather" />
           </set>
         </option>
