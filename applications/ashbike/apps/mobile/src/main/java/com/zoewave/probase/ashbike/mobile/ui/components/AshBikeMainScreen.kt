@@ -8,6 +8,9 @@ package com.zoewave.ashbike.mobile.ui.components
 //import com.zoewave.probase.ashbike.mobile.ui.MainUiEvent
 
 // --- Feature Screens ---
+/**
+ * built from current
+ */
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -29,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -43,8 +47,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
-import com.zoewave.ashbike.mobile.rides.RidesRoute
-import com.zoewave.ashbike.mobile.settings.SettingsRoute
+import com.zoewave.ashbike.mobile.rides.ui.RidesUIRoute
+import com.zoewave.ashbike.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.ashbike.mobile.ui.MainUiEvent
 import com.zoewave.probase.ashbike.mobile.ui.MainViewModel
@@ -57,6 +61,8 @@ fun AshBikeMainScreen(
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val homeViewModel : HomeViewModel = hiltViewModel()
+
+    val unsyncedRidesCount by viewModel.unsyncedRidesCount.collectAsState()
     // 1. THE SOURCE OF TRUTH (The Back Stack)
     // In Nav3, the back stack is just a standard Compose MutableList.
     // We initialize it with 'Home' as the first screen.
@@ -64,6 +70,28 @@ fun AshBikeMainScreen(
         mutableStateListOf<AshBikeDestination>(AshBikeDestination.Home)
     }
 
+    // Helper to push a new screen
+    fun navigateTo(destination: AshBikeDestination) {
+        backStack.add(destination)
+    }
+
+    // Helper to handle "Back"
+    fun navigateBack() {
+        if (backStack.size > 1) {
+            backStack.removeAt(backStack.lastIndex)
+        }
+    }
+
+    // Helper for Bottom Bar (Tab Switching)
+    fun switchTab(destination: AshBikeDestination) {
+        backStack.clear()
+        backStack.add(destination)
+    }
+
+    // 2. Handle System Back Button
+    BackHandler(enabled = backStack.size > 1) {
+        navigateBack()
+    }
     // Helper to determine what tab is active (last item in the list)
     // val currentDestination = backStack.lastOrNull()
 
@@ -111,9 +139,10 @@ fun AshBikeMainScreen(
                     title = {
                         val title = when (currentDestination) {
                             AshBikeDestination.Home -> "AshBike Dashboard"
-                            AshBikeDestination.RideHistory -> "Ride History"
-                            AshBikeDestination.Settings -> "Settings"
-                            null -> "AshBike"
+                            AshBikeDestination.Trips -> "Ride History"
+                            is AshBikeDestination.Settings -> "Settings"
+                            is AshBikeDestination.RideDetail -> "Detailed Ride"
+
                         }
                         Text(title)
                     }
@@ -132,7 +161,8 @@ fun AshBikeMainScreen(
                             backStack.clear()
                             backStack.add(newDestination)
                         }
-                    }
+                    },
+                    unsyncedRidesCount = unsyncedRidesCount,
                 )
             }
         ) { innerPadding ->
@@ -160,22 +190,41 @@ fun AshBikeMainScreen(
                                 )
                             }
 
-                            is AshBikeDestination.RideHistory -> {
+                            is AshBikeDestination.Trips -> {
+                                RidesUIRoute (
+                                    navTo = { rideId ->
+                                        navigateTo(AshBikeDestination.RideDetail(rideId))
+                                    }
+                                )
+
+                                /*
                                 RidesRoute(
                                     // Navigation Action: Simply add to the list!
                                     onNavigateToSettings = {
                                         backStack.add(AshBikeDestination.Settings)
                                     }
                                 )
+                                */
                             }
 
                             is AshBikeDestination.Settings -> {
-                                SettingsRoute(
+                                /* SettingsRoute(
                                     // Navigation Action: Simply add to the list!
                                     onNavigateToSettings = {
                                         backStack.add(AshBikeDestination.Settings)
                                     }
+                                ) */
+                                SettingsUiRoute(
+                                    navTo = { rideId ->
+                                        navigateTo(AshBikeDestination.RideDetail(rideId))
+                                    },
+                                    initialCardKeyToExpand = null
                                 )
+                            }
+
+                            is AshBikeDestination.RideDetail -> {
+                                //RideDetailRoute(
+
                             }
                         }
                     }
