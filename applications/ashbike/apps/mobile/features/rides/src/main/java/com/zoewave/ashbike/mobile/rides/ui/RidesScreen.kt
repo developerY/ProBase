@@ -16,9 +16,9 @@ import com.zoewave.ashbike.mobile.rides.ui.components.LoadingScreen
  * The stateless, presentational composable that is responsible for the UI layout.
  */
 @Composable
-fun TripsScreen(
+fun RidesScreen(
     modifier: Modifier = Modifier,
-    tripsUiState: TripsUIState,
+    ridesUiState: RidesUIState,
     snackbarHostState: SnackbarHostState,
     onDeleteClick: (String) -> Unit,
     onSyncClick: (String) -> Unit,
@@ -29,15 +29,15 @@ fun TripsScreen(
         modifier = modifier,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
-        when (val state = tripsUiState) {
-            is TripsUIState.Loading -> LoadingScreen()//modifier = Modifier.padding(innerPadding))
-            is TripsUIState.Error -> ErrorScreen(
+        when (val state = ridesUiState) {
+            is RidesUIState.Loading -> LoadingScreen()//modifier = Modifier.padding(innerPadding))
+            is RidesUIState.Error -> ErrorScreen(
                 //modifier = Modifier.padding(innerPadding),
                 errorMessage = state.message,
                 onRetry = onRetry
             )
 
-            is TripsUIState.Success -> {
+            is RidesUIState.Success -> {
                 /*
                 modifier      = modifier,
                 bikeRides     = (uiState as TripsUIState.Success).bikeRides,

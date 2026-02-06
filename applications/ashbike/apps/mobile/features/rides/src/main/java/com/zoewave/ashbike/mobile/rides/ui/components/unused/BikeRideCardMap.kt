@@ -28,7 +28,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.zoewave.ashbike.mobile.rides.R
-import com.zoewave.ashbike.mobile.rides.ui.TripsEvent
+import com.zoewave.ashbike.mobile.rides.ui.RidesEvent
 import com.zoewave.probase.ashbike.database.BikeRideEntity
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -39,7 +39,7 @@ import kotlin.text.isNotBlank
 @Composable
 fun BikeRideCardMap(
     ride: BikeRideEntity,
-    onEvent: (TripsEvent) -> Unit,
+    onEvent: (RidesEvent) -> Unit,
     navTo: (String) -> Unit
 ) {
     // 1) parse your JSON‐serialized route into LatLngs

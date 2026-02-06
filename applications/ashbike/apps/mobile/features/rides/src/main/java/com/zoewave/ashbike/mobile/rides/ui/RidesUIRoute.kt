@@ -22,15 +22,15 @@ import com.zoewave.probase.features.health.ui.HealthViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun TripsUIRoute(
+fun RidesUIRoute(
     modifier: Modifier = Modifier,
     navTo: (String) -> Unit,
     // Ask Hilt for both viewmodels
-    tripsViewModel: TripsViewModel = hiltViewModel(),
+    ridesViewModel: RidesViewModel = hiltViewModel(),
     healthViewModel: HealthViewModel = hiltViewModel(),
 ) {
     // 1. Collect state from BOTH ViewModels
-    val tripsUiState by tripsViewModel.uiState.collectAsState()
+    val tripsUiState by ridesViewModel.uiState.collectAsState()
     val healthUiState by healthViewModel.uiState.collectAsState()
 
     // 2. Observe the set of already-synced IDs from HealthViewModel
@@ -91,7 +91,7 @@ fun TripsUIRoute(
                         "TripsUIRoute",
                         "BikeRideSyncedToHealth side effect received. Marking ride ${effect.rideId} as synced."
                     )
-                    tripsViewModel.markRideAsSyncedInLocalDb(
+                    ridesViewModel.markRideAsSyncedInLocalDb(
                         rideId = effect.rideId,
                         healthConnectId = effect.healthConnectId
                     )
@@ -102,7 +102,7 @@ fun TripsUIRoute(
 
     // Effect handler for TripsViewModel
     LaunchedEffect(Unit) {
-        tripsViewModel.sideEffect.collect { effect ->
+        ridesViewModel.sideEffect.collect { effect ->
             when (effect) {
                 is TripsSideEffect.RequestHealthConnectSync -> {
                     Log.d(
@@ -123,27 +123,27 @@ fun TripsUIRoute(
 
     // Render based on your trips state
     when (val state = tripsUiState) {
-        TripsUIState.Loading -> LoadingScreen()
+        RidesUIState.Loading -> LoadingScreen()
 
-        is TripsUIState.Error -> ErrorScreen(
+        is RidesUIState.Error -> ErrorScreen(
             errorMessage = state.message,
-            onRetry = { tripsViewModel.onEvent(TripsEvent.OnRetry) }
+            onRetry = { ridesViewModel.onEvent(RidesEvent.OnRetry) }
         )
 
-        is TripsUIState.Success -> {
+        is RidesUIState.Success -> {
             // Note the simplified parameters passed to BikeTripsCompose
             BikeTripsCompose(
                 modifier = modifier,
                 bikeRides = state.rides, // This is now List<BikeRideUiModel>
-                bikeEvent = tripsViewModel::onEvent,
+                bikeEvent = ridesViewModel::onEvent,
                 syncedIds = syncedIds,
                 healthEvent = healthViewModel::onEvent,
                 onDeleteClick = { rideId ->
-                    tripsViewModel.onEvent(TripsEvent.DeleteItem(rideId))
+                    ridesViewModel.onEvent(RidesEvent.DeleteItem(rideId))
                 },
                 onSyncClick = { rideId ->
                     // This triggers the new side effect flow in TripsViewModel
-                    tripsViewModel.onEvent(TripsEvent.SyncRide(rideId))
+                    ridesViewModel.onEvent(RidesEvent.SyncRide(rideId))
                 },
                 healthUiState = healthUiState,
                 navTo = navTo

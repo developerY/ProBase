@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.LatLng
 import com.zoewave.ashbike.features.places.MapPathScreen
 import com.zoewave.ashbike.mobile.rides.R
-import com.zoewave.ashbike.mobile.rides.ui.TripsEvent
+import com.zoewave.ashbike.mobile.rides.ui.RidesEvent
 import com.zoewave.ashbike.mobile.rides.ui.components.maps.lookupPlaceName
 import com.zoewave.probase.ashbike.database.RideWithLocations
 import com.zoewave.probase.core.model.location.GpsFix
@@ -65,7 +65,7 @@ fun RideDetailScreen(
     rideWithLocs: RideWithLocations?,
     coffeeShops: List<BusinessInfo> = emptyList(),
     onFindCafes: () -> Unit = {},
-    onEvent: (TripsEvent) -> Unit,
+    onEvent: (RidesEvent) -> Unit,
 ) {
     if (rideWithLocs == null) {
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -252,7 +252,7 @@ fun RideDetailScreen(
             trailingIcon = {
                 if (isDirty) {
                     IconButton(onClick = {
-                        onEvent(TripsEvent.UpdateRideNotes(ride.rideId, notesState))
+                        onEvent(RidesEvent.UpdateRideNotes(ride.rideId, notesState))
                         isDirty = false
                     }) {
                         Icon(

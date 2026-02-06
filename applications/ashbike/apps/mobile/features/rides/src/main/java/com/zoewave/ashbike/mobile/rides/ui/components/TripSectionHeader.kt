@@ -24,14 +24,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 //import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.ashbike.mobile.rides.ui.TripsEvent
+import com.zoewave.ashbike.mobile.rides.ui.RidesEvent
 
 // —————————————————————————————————————————————————————————
 //  SECTION HEADER (Rounded + Elevation)
 // —————————————————————————————————————————————————————————
 @Composable
 fun TripSectionHeader(
-    onEvent: (TripsEvent) -> Unit,
+    onEvent: (RidesEvent) -> Unit,
     title: String,
     bgColor: Color,
     count: Int? = null,
@@ -89,7 +89,7 @@ fun TripSectionHeader(
 
             Spacer(Modifier.weight(1f))
 
-            IconButton(onClick = { onEvent(TripsEvent.DeleteAll) }) {
+            IconButton(onClick = { onEvent(RidesEvent.DeleteAll) }) {
                 Icon(
                     imageVector = Icons.Default.DeleteSweep,
                     contentDescription = "Delete all"

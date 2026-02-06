@@ -5,10 +5,10 @@ import com.zoewave.ashbike.mobile.rides.ui.model.BikeRideUiModel
 /**
  * Represents the different states for the Trips screen UI.
  */
-sealed interface TripsUIState {
-    object Loading : TripsUIState
-    data class Error(val message: String) : TripsUIState
+sealed interface RidesUIState {
+    object Loading : RidesUIState
+    data class Error(val message: String) : RidesUIState
     data class Success(
         val rides: List<BikeRideUiModel> = emptyList()
-    ) : TripsUIState
+    ) : RidesUIState
 }

@@ -31,14 +31,14 @@ sealed interface TripsSideEffect {
 }
 
 @HiltViewModel
-class TripsViewModel @Inject constructor(
+class RidesViewModel @Inject constructor(
     private val application: Application, // <-- Inject Application
     private val bikeRideRepo: BikeRideRepo,
     private val syncRideUseCase: SyncRideUseCase,
     private val markRideAsSyncedUseCase: MarkRideAsSyncedUseCase
 ) : ViewModel() {
 
-    private val _uiState: StateFlow<TripsUIState> =
+    private val _uiState: StateFlow<RidesUIState> =
         bikeRideRepo.getAllRidesWithLocations()
             .map { rides ->
                 val uiModels = rides.map {
@@ -46,15 +46,15 @@ class TripsViewModel @Inject constructor(
                         resources = application.resources // <-- Use application.resources
                     )
                 }
-                TripsUIState.Success(uiModels) as TripsUIState
+                RidesUIState.Success(uiModels) as RidesUIState
             }
-            .catch { e -> emit(TripsUIState.Error(e.localizedMessage ?: "Unknown error")) }
+            .catch { e -> emit(RidesUIState.Error(e.localizedMessage ?: "Unknown error")) }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = TripsUIState.Loading
+                initialValue = RidesUIState.Loading
             )
-    val uiState: StateFlow<TripsUIState> = _uiState
+    val uiState: StateFlow<RidesUIState> = _uiState
 
     // Side-effect channel and flow
     private val _sideEffect = Channel<TripsSideEffect>()
@@ -64,23 +64,23 @@ class TripsViewModel @Inject constructor(
     var isTracking by mutableStateOf(false)
         private set
 
-    fun onEvent(event: TripsEvent) {
+    fun onEvent(event: RidesEvent) {
         when (event) {
-            is TripsEvent.LoadData -> { /* Data is loaded reactively by the uiState flow */
+            is RidesEvent.LoadData -> { /* Data is loaded reactively by the uiState flow */
             }
 
-            is TripsEvent.UpdateRideNotes -> updateRideNotes(event.itemId, event.notes)
-            is TripsEvent.DeleteItem -> deleteItem(event.itemId)
-            is TripsEvent.DeleteAll -> deleteAll()
-            is TripsEvent.OnRetry -> { /* Handled by reactive flow */
+            is RidesEvent.UpdateRideNotes -> updateRideNotes(event.itemId, event.notes)
+            is RidesEvent.DeleteItem -> deleteItem(event.itemId)
+            is RidesEvent.DeleteAll -> deleteAll()
+            is RidesEvent.OnRetry -> { /* Handled by reactive flow */
             }
 
-            is TripsEvent.StopSaveRide -> {
+            is RidesEvent.StopSaveRide -> {
                 isTracking = false
             }
 
-            is TripsEvent.SyncRide -> handleSyncRide(event.rideId)
-            is TripsEvent.BuildBikeRec -> { /* This event might be obsolete now */
+            is RidesEvent.SyncRide -> handleSyncRide(event.rideId)
+            is RidesEvent.BuildBikeRec -> { /* This event might be obsolete now */
             }
         }
     }

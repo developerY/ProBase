@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.rides.R
-import com.zoewave.ashbike.mobile.rides.ui.TripsEvent
+import com.zoewave.ashbike.mobile.rides.ui.RidesEvent
 import com.zoewave.ashbike.mobile.rides.ui.model.BikeRideUiModel
 import com.zoewave.probase.features.health.ui.HealthEvent
 import com.zoewave.probase.features.health.ui.HealthUiState
@@ -25,7 +25,7 @@ import com.zoewave.probase.features.health.ui.HealthUiState
 fun BikeTripsCompose(
     modifier: Modifier = Modifier,
     bikeRides: List<BikeRideUiModel>,
-    bikeEvent: (TripsEvent) -> Unit,
+    bikeEvent: (RidesEvent) -> Unit,
     syncedIds: Set<String>,
     healthEvent: (HealthEvent) -> Unit,
     onDeleteClick: (String) -> Unit,
