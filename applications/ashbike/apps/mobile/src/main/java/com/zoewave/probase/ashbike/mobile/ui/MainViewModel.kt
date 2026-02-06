@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
+import com.zoewave.probase.ashbike.mobile.usecase.GetUnsyncedRidesCountUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,9 +17,19 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
+
     // Inject Repositories here, not other ViewModels!
-    // private val settingsRepository: SettingsRepository
+    // private val settingsRepository: SettingsRepository,
+    getUnsyncedRidesCountUseCase: GetUnsyncedRidesCountUseCase
 ) : ViewModel() {
+
+    // Use the injected use case
+    val unsyncedRidesCount: StateFlow<Int> = getUnsyncedRidesCountUseCase() // Invoke the use case
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = 0
+        )
 
     // 1. Navigation State (Persisted via SavedStateHandle)
     // We use a custom setter to update both SavedState and Flow
