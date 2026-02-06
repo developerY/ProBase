@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.health.connect.client.records.Record
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.ashbike.mobile.rides.domain.MarkRideAsSyncedUseCase
@@ -99,7 +100,7 @@ class RidesViewModel @Inject constructor(
             val records = syncRideUseCase(domainRide)
 
             // 3. Emit the side effect for the UI to handle
-            // _sideEffect.send(TripsSideEffect.RequestHealthConnectSync(rideId, records))
+            _sideEffect.send(TripsSideEffect.RequestHealthConnectSync(rideId, records))
         }
     }
 
