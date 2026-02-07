@@ -41,6 +41,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
 
     <!-- android:dataExtractionRules="@xml/data_extraction_rules" -->
+    <!-- android:enableOnBackInvokedCallback="true" -->
     <application
         android:name=".AshBikeApp"
         android:icon="@mipmap/ic_launcher"
