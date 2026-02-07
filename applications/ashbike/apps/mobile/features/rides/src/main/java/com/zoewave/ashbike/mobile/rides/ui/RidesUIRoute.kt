@@ -110,11 +110,10 @@ fun RidesUIRoute(
                         "Sync requested for rideId: ${effect.rideId}. Sending HealthEvent.Insert to HealthViewModel."
                     )
                     healthViewModel.onEvent(
-                        { } as HealthEvent
-                        /*HealthEvent.Insert(
+                        HealthEvent.Insert(
                             rideId = effect.rideId,
                             records = effect.records
-                        )*/
+                        )
                     )
                 }
             }
