@@ -86,6 +86,8 @@ dependencies {
     // --- Project Modules ---
     implementation(project(":core:data"))    // Shared Data Models
     implementation(project(":core:ui"))
+    implementation(project(":core:util"))
+    implementation(project(":core:model"))
 
     // AshBike Specific Features
     implementation(project(":applications:ashbike:features:main"))
@@ -95,6 +97,7 @@ dependencies {
 
     implementation(project(":applications:ashbike:database"))
 
+    implementation(project(":features:places"))
     /* Shared Features (Assuming these paths exist in your monorepo)
     implementation(project(":feature:listings"))
     implementation(project(":feature:camera"))

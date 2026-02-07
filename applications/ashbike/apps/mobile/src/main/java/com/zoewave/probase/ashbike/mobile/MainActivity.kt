@@ -37,7 +37,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
 import com.zoewave.ashbike.mobile.settings.ui.SettingsViewModel
-import com.zoewave.ashbike.mobile.ui.components.AshBikeMainScreen
+import com.zoewave.probase.ashbike.mobile.ui.components.AshBikeMainScreen
 import com.zoewave.probase.core.ui.theme.AshBikeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
