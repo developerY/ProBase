@@ -73,15 +73,16 @@
             </intent-filter>
         </activity>
 
-        <!--activity
-            android:name=".features.glass.GlassesMainActivity"
+        <!-- must match package name for GlassesMainActivity -->
+        <activity
+            android:name="com.zoewave.ashbike.mobile.glass.GlassesMainActivity"
             android:exported="true"
             android:label="AshBike Glass"
             android:requiredDisplayCategory="xr_projected">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
-        </activity-->
+        </activity>
 
         <service
             android:name="com.zoewave.probase.ashbike.features.main.service.BikeForegroundService"
