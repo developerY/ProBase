@@ -1,4 +1,4 @@
-package com.zoewave.ashbike.mobile.ui.components
+package com.zoewave.probase.ashbike.mobile.ui.components
 
 
 // --- App Logic Imports ---
@@ -44,16 +44,12 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
-import com.zoewave.ashbike.mobile.rides.ui.RidesUIRoute
-import com.zoewave.ashbike.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.ashbike.mobile.ui.MainUiEvent
 import com.zoewave.probase.ashbike.mobile.ui.MainViewModel
-import com.zoewave.probase.ashbike.mobile.ui.components.AshBikeBottomBar
-import com.zoewave.probaseapplications.bike.features.main.ui.HomeUiRoute
+import com.zoewave.probase.ashbike.mobile.ui.navigation.ashBikeNavEntryProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -174,60 +170,13 @@ fun AshBikeMainScreen(
                 modifier = Modifier.padding(innerPadding),
                 onBack = { backStack.removeLastOrNull() }, // Default back action
                 entryProvider = { key ->
-                    // Map the Destination Object -> NavEntry Wrapper
-                    NavEntry(key) {
-                        when (key) {
-                            is AshBikeDestination.Home -> {
-                                /*HomeRoute(
-                                    // Navigation Action: Simply add to the list!
-                                    onNavigateToSettings = {
-                                        backStack.add(AshBikeDestination.Settings)
-                                    }
-                                )*/
-                                HomeUiRoute(
-                                    viewModel = homeViewModel,
-                                    navTo = { backStack.add(AshBikeDestination.Settings) }
-                                )
-                            }
-
-                            is AshBikeDestination.Trips -> {
-                                RidesUIRoute (
-                                    navTo = { rideId ->
-                                        navigateTo(AshBikeDestination.RideDetail(rideId))
-                                    }
-                                )
-
-                                /*
-                                RidesRoute(
-                                    // Navigation Action: Simply add to the list!
-                                    onNavigateToSettings = {
-                                        backStack.add(AshBikeDestination.Settings)
-                                    }
-                                )
-                                */
-                            }
-
-                            is AshBikeDestination.Settings -> {
-                                /* SettingsRoute(
-                                    // Navigation Action: Simply add to the list!
-                                    onNavigateToSettings = {
-                                        backStack.add(AshBikeDestination.Settings)
-                                    }
-                                ) */
-                                SettingsUiRoute(
-                                    navTo = { rideId ->
-                                        navigateTo(AshBikeDestination.RideDetail(rideId))
-                                    },
-                                    initialCardKeyToExpand = null
-                                )
-                            }
-
-                            is AshBikeDestination.RideDetail -> {
-                                //RideDetailRoute(
-
-                            }
-                        }
-                    }
+                    // ✅ DELEGATE: Call the provider function we wrote earlier.
+                    // This keeps your MainScreen clean and logic-free.
+                    ashBikeNavEntryProvider(
+                        key = key,
+                        navigateTo = { dest -> navigateTo(dest) },
+                        homeViewModel = homeViewModel,
+                    )
                 }
             )
         }
