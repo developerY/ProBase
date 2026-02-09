@@ -39,6 +39,7 @@ include(":features:nav3")
 include(":features:weather")
 include(":features:places")
 include(":features:health")
+include(":features:ml")
 
 // --- AshBike Product Line ---
 include(":applications:ashbike:database")
