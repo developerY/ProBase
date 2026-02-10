@@ -10,8 +10,8 @@ import com.zoewave.ashbike.model.bike.BikeRideInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,7 +25,7 @@ class BikeServiceManager @Inject constructor(
     // If service is null -> emptyFlow
     // If service is bound -> service.rideInfo
     val rideInfo: Flow<BikeRideInfo> = _service.flatMapLatest { service ->
-        service?.rideInfo ?: emptyFlow()
+        service?.rideInfo ?: flowOf(BikeForegroundService.getInitialRideInfo())
     }
 
     private val connection = object : ServiceConnection {
@@ -64,4 +64,19 @@ class BikeServiceManager @Inject constructor(
         }
         context.startService(intent)
     }
+
+    /**
+     * Demo Code to be removed after video.
+     */
+    fun toggleDemoMode() {
+        val service = _service.value
+        if (service != null) {
+            // Calls the method inside the Service
+            Log.w("BikeServiceManager", "toggle demo: Service bound")
+            service.toggleDemoMode()
+        } else {
+            Log.w("BikeServiceManager", "Cannot toggle demo: Service not bound")
+        }
+    }
+
 }

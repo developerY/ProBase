@@ -33,7 +33,6 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
 import com.zoewave.ashbike.data.repository.bike.BikeRepository
-import com.zoewave.ashbike.data.repository.bike.DemoModeSimulator
 import com.zoewave.ashbike.model.bike.BikeRideInfo
 import com.zoewave.ashbike.model.bike.LocationEnergyLevel
 import com.zoewave.ashbike.model.bike.RideState
@@ -65,6 +64,7 @@ import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.math.max
+import kotlin.random.Random
 import com.google.android.gms.location.LocationRequest as GmsLocationRequest
 
 @AndroidEntryPoint
@@ -129,7 +129,9 @@ class BikeForegroundService : LifecycleService() {
 
     // 1. Instantiate the Simulator
     // NOTE: Remove after video.
-    private val demoSimulator = DemoModeSimulator()
+    // Local flag kept in sync with the Repo
+    private var isDemoModeActive = false
+    // private val demoSimulator = DemoModeSimulator() -- not used
 
 
     inner class LocalBinder : Binder() {
@@ -174,7 +176,7 @@ class BikeForegroundService : LifecycleService() {
                     _rideInfo.value = current.copy(
                         heartbeat = bpm
                     )
-                    Log.v("BikeForegroundService", "❤ Heart Rate: $bpm")
+                    // Log.v("BikeForegroundService", "❤ Heart Rate: $bpm")
                 }
             }
         }
@@ -277,6 +279,31 @@ class BikeForegroundService : LifecycleService() {
         }
     }
 
+
+    // The Simple Public Method
+    fun toggleDemoMode() { // only to Demos --- not production code!
+        isDemoModeActive = !isDemoModeActive
+        val current = _rideInfo.value
+
+        if (isDemoModeActive) {
+            // ✅ 1. Force the connection TRUE immediately
+            // This makes the UI switch from "Scanning..." to "Connected" instantly.
+            _rideInfo.value = current.copy(
+                isBikeConnected = true,
+                // Optional: Set a starting battery so it doesn't show 0%
+                batteryLevel = Random.nextInt(0, 100),
+                motorPower = Random.nextInt(210, 290).toFloat()
+            )
+        } else {
+            _rideInfo.value = current.copy(
+                isBikeConnected = false,
+            )
+
+        }
+
+        Log.d("BikeService", "Demo Mode is now: $isDemoModeActive")
+    }
+
     private fun updateRideInfo(location: Location) {
         val speedKph = location.speed * 3.6
         val isFormalRideActive = _rideInfo.value.rideState == RideState.Riding
@@ -371,22 +398,13 @@ class BikeForegroundService : LifecycleService() {
             ridePath = currentRidePath // Assign the mapped GpsFix list or emptyList
         )
 
-        // =================================================================
-        // DEMO VIDEO LOGIC: INTERCEPT HERE
-        // =================================================================
-        // This takes the Real Emulator Speed + Toggles the Connection
-        demoSimulator.process(newInfo)
-        // =================================================================
-
-        val newRideInfo = newInfo // videoReadyInfo
-
         // 1. Update Local State (for Notification)
-        _rideInfo.value = newRideInfo
+        _rideInfo.value = newInfo
 
         // 2. PUSH TO REPOSITORY (So Glass can see it!)
         lifecycleScope.launch {
-            Log.d("DEBUG_PATH", "1. SERVICE: Pushing speed ${newRideInfo.currentSpeed} to Repo") // <--- ADD THIS
-            bikeRepository.updateRideInfo(newRideInfo)
+            Log.d("DEBUG_PATH", "1. SERVICE: Pushing speed ${newInfo.currentSpeed} to Repo") // <--- ADD THIS
+            bikeRepository.updateRideInfo(newInfo)
         }
 
         if (isFormalRideActive) {
