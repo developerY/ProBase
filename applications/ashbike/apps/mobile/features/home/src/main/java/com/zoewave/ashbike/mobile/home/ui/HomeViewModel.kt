@@ -291,6 +291,12 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
+            is HomeEvent.ToggleDemo -> {
+                Log.d("BikeViewModel", "ToggleDemo event received.")
+                bikeServiceManager.toggleDemoMode()
+            }
+
+
             // 5. HANDLE GLASS EVENTS
             // If the Phone UI has controls to change gears (e.g. testing buttons), handle them here.
             // If the 'Launch' logic is purely UI-side (Activity start), you might not need an event here,

@@ -36,6 +36,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -130,8 +132,14 @@ fun BikeDashboardContent(
                     ) {
                         Text(
                             text = stringResource(R.string.feature_main_ebike_stats_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            style = if (uiState.bikeData.isBikeConnected) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
+                            color = if (uiState.bikeData.isBikeConnected) Color(0xFF03645A) else MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp)) // Optional: Makes the ripple rounded
+                                .clickable {
+                                    onHomeEvent(HomeEvent.ToggleDemo)
+                                }
+                                .padding(8.dp) // Padding AFTER clickable increases the touch target
                         )
                         Icon(
                             imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,

@@ -5,6 +5,8 @@ sealed class HomeEvent {
     object StartRide : HomeEvent()
     object StopRide : HomeEvent()
 
+    object ToggleDemo : HomeEvent()
+
     // Bike Dashboard Interactions
     object OnBikeClick : HomeEvent()
     data class SetTotalDistance(val distanceKm: Float) : HomeEvent()
