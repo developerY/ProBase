@@ -474,7 +474,8 @@ class BikeForegroundService : LifecycleService() {
         formalRideElevationLossMeters = 0.0
         formalRideSegmentStartOffsetDistanceMeters = continuousDistanceMeters
         formalRideSegmentMaxSpeedKph = 0.0
-        _rideInfo.value = _rideInfo.value.copy(
+
+        val newFormalState = _rideInfo.value.copy(
             rideState = RideState.Riding,
             currentTripDistance = 0f,
             caloriesBurned = 0,
@@ -485,6 +486,17 @@ class BikeForegroundService : LifecycleService() {
             elevationLoss = 0.0,
             ridePath = emptyList() // Clear path when new ride starts
         )
+        _rideInfo.value = newFormalState
+
+        // ---------------------------------------------------------
+        // ✅ 2. FIX: FORCE IMMEDIATE REPOSITORY UPDATE
+        // This makes the UI turn Green INSTANTLY (0ms delay)
+        // ---------------------------------------------------------
+        lifecycleScope.launch {
+            bikeRepository.updateRideInfo(newFormalState)
+        }
+
+
         startOrRestartCalorieCalculation(isFormalRideActive = true)
         startForegroundService()
     }
