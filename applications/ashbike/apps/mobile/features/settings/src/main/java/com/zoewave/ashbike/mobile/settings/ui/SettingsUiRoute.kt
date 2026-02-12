@@ -4,9 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.zoewave.probase.core.ui.components.status.ErrorScreen
+import com.zoewave.probase.core.ui.components.status.LoadingScreen
 import com.zoewave.probase.features.ble.ui.BluetoothLeViewModel
 import com.zoewave.probase.features.nfc.ui.NfcViewModel
-import com.zoewave.probase.features.nfc.ui.components.screens.LoadingScreen
 
 internal const val ROUTE_NAME =
     "settings_ui_route" // Assuming this was intended to be here or is defined elsewhere for navigation
@@ -34,7 +35,7 @@ fun SettingsUiRoute(
         }
 
         is SettingsUiState.Error -> {
-            // ErrorScreen(errorMessage = state.message)
+            ErrorScreen(errorMessage = state.message)
         }
 
         is SettingsUiState.Success -> {
