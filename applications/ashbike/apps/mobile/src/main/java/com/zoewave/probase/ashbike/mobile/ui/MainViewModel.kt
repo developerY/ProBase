@@ -3,6 +3,7 @@ package com.zoewave.probase.ashbike.mobile.ui
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.ashbike.database.repository.UserProfileRepository
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.ashbike.mobile.usecase.GetUnsyncedRidesCountUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
@@ -19,7 +21,7 @@ class MainViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 
     // Inject Repositories here, not other ViewModels!
-    // private val settingsRepository: SettingsRepository,
+    userProfileRepository: UserProfileRepository,
     getUnsyncedRidesCountUseCase: GetUnsyncedRidesCountUseCase
 ) : ViewModel() {
 
@@ -40,7 +42,10 @@ class MainViewModel @Inject constructor(
     private val _hasPermission = MutableStateFlow(false)
 
     // Simulate data from repositories
-    private val _showSettingsBadge = MutableStateFlow(true) // Replace with repo flow
+    // We observe the EXACT same flow that SettingsViewModel updates.
+    // If 'profileReviewedOrSavedFlow' is true, the badge is HIDDEN (false).
+    private val _showSettingsBadge = userProfileRepository.profileReviewedOrSavedFlow
+        .map { isSaved -> !isSaved }
     private val _unsyncedCount = MutableStateFlow(0)        // Replace with repo flow
 
     // 2. Combine all sources into one UiState

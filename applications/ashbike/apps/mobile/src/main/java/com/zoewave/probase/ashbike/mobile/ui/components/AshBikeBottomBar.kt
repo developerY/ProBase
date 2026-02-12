@@ -17,19 +17,19 @@ import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 @Composable
 fun AshBikeBottomBar(
     currentDestination: AshBikeDestination,
-    showSettingsBadge: Boolean,
     onNavigate: (AshBikeDestination) -> Unit,
-    unsyncedRidesCount: Int
+    unsyncedRidesCount: Int,
+    showSettingsBadge: Boolean,
 ) {
     NavigationBar {
         NavigationBarItem(
-            selected = currentDestination == AshBikeDestination.Home,
+            selected = currentDestination is AshBikeDestination.Home,
             onClick = { onNavigate(AshBikeDestination.Home) },
             icon = { Icon(Icons.Default.Home, "Home") },
             label = { Text("Home") }
         )
         NavigationBarItem(
-            selected = currentDestination == AshBikeDestination.Trips,
+            selected = currentDestination is AshBikeDestination.Trips,
             onClick = { onNavigate(AshBikeDestination.Trips) },
             icon = {
                 if (unsyncedRidesCount > 0) {
@@ -49,7 +49,7 @@ fun AshBikeBottomBar(
             label = { Text("History") }
         )
         NavigationBarItem(
-            selected = currentDestination == AshBikeDestination.Settings,
+            selected = currentDestination is AshBikeDestination.Settings,
             onClick = { onNavigate(AshBikeDestination.Settings) },
             icon = {
                 if (showSettingsBadge) {

@@ -46,6 +46,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.ui.NavDisplay
 import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
+import com.zoewave.ashbike.mobile.settings.ui.SettingsUiState
+import com.zoewave.ashbike.mobile.settings.ui.SettingsViewModel
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.ashbike.mobile.ui.MainUiEvent
 import com.zoewave.probase.ashbike.mobile.ui.MainViewModel
@@ -54,11 +56,18 @@ import com.zoewave.probase.ashbike.mobile.ui.navigation.ashBikeNavEntryProvider
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AshBikeMainScreen(
-    viewModel: MainViewModel = hiltViewModel()
+    viewModel: MainViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val homeViewModel : HomeViewModel = hiltViewModel()
 
     val unsyncedRidesCount by viewModel.unsyncedRidesCount.collectAsState()
+
+    val settingsUiState by settingsViewModel.uiState.collectAsState()
+    val showProfileAlert = when (val state = settingsUiState) {
+        is SettingsUiState.Success -> state.isProfileIncomplete
+        else -> true // Default to true (show alert) if state is not Success (e.g., Loading)
+    }
     // 1. THE SOURCE OF TRUTH (The Back Stack)
     // In Nav3, the back stack is just a standard Compose MutableList.
     // We initialize it with 'Home' as the first screen.
@@ -147,7 +156,6 @@ fun AshBikeMainScreen(
             bottomBar = {
                 AshBikeBottomBar(
                     currentDestination = currentDestination,
-                    showSettingsBadge = state.showSettingsBadge,
                     onNavigate = { newDestination ->
                         // --- Bottom Navigation Logic ---
                         // 1. If we are already on this tab, do nothing (or scroll to top)
@@ -159,7 +167,8 @@ fun AshBikeMainScreen(
                         }
                     },
                     unsyncedRidesCount = unsyncedRidesCount,
-                )
+                    showSettingsBadge = state.showSettingsBadge,
+                    )
             }
         ) { innerPadding ->
 
