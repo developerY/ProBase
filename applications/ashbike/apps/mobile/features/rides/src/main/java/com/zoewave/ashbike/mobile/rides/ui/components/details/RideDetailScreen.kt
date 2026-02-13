@@ -1,4 +1,4 @@
-package com.zoewave.ashbike.mobile.rides.ui.components
+package com.zoewave.ashbike.mobile.rides.ui.components.details
 
 
 ////import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +39,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.zoewave.ashbike.features.places.MapPathScreen
 import com.zoewave.ashbike.mobile.rides.R
 import com.zoewave.ashbike.mobile.rides.ui.RidesEvent
+import com.zoewave.ashbike.mobile.rides.ui.components.ElevationProfileSection
 import com.zoewave.ashbike.mobile.rides.ui.components.maps.lookupPlaceName
 import com.zoewave.probase.ashbike.database.RideWithLocations
 import com.zoewave.probase.core.model.location.GpsFix
@@ -352,7 +353,7 @@ fun StatCardPreview() {
 }
 */
 @Composable
-private fun StatCard(
+fun StatCard(
     label: String,
     value: String,
     modifier: Modifier = Modifier

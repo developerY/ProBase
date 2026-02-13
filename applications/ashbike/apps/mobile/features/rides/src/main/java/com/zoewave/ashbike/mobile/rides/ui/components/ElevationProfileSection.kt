@@ -31,7 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.rides.R
-import com.zoewave.ashbike.mobile.rides.R.string.feature_trips_elevation_profile_title
+import com.zoewave.ashbike.mobile.rides.ui.components.details.LatLngWithElev
 import com.zoewave.ashbike.mobile.rides.ui.components.maps.ElevationProfile
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +57,7 @@ fun ElevationProfileSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(feature_trips_elevation_profile_title),
+                    text = stringResource(R.string.feature_trips_elevation_profile_title),
                     style = MaterialTheme.typography.titleSmall
                 )
                 Spacer(Modifier.weight(1f))

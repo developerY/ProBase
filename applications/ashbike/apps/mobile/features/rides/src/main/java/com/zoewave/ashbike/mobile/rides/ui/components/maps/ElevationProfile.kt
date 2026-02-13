@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.rides.R
-import com.zoewave.ashbike.mobile.rides.ui.components.LatLngWithElev
+import com.zoewave.ashbike.mobile.rides.ui.components.details.LatLngWithElev
 import com.zoewave.ashbike.mobile.rides.ui.components.haversineMeters
 
 // reuse your haversineMeters(...) from before

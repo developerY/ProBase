@@ -1,4 +1,4 @@
-package com.zoewave.ashbike.mobile.rides.ui.components
+package com.zoewave.ashbike.mobile.rides.ui.components.details
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel

@@ -10,12 +10,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
 import com.zoewave.ashbike.mobile.rides.ui.RidesUIRoute
-import com.zoewave.ashbike.mobile.rides.ui.components.RideDetailScreen
-import com.zoewave.ashbike.mobile.rides.ui.components.RideDetailViewModel
+import com.zoewave.ashbike.mobile.rides.ui.components.details.RideDetailScreen
+import com.zoewave.ashbike.mobile.rides.ui.components.details.RideDetailViewModel
 import com.zoewave.ashbike.mobile.rides.ui.components.haversineMeters
 import com.zoewave.ashbike.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
