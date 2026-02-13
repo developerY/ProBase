@@ -22,10 +22,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -87,6 +89,16 @@ fun AshBikeMainScreen(
         }
     }
 
+
+
+    // TODO : Get rid of this
+    // 1. Define your tabs purely as data
+    val MainTabs = listOf(
+        AshBikeDestination.Home,
+        AshBikeDestination.Trips,
+        AshBikeDestination.Settings
+    )
+
     // Helper for Bottom Bar (Tab Switching)
     fun switchTab(destination: AshBikeDestination) {
         backStack.clear()
@@ -104,6 +116,9 @@ fun AshBikeMainScreen(
     val currentDestination by remember {
         derivedStateOf { backStack.lastOrNull() ?: AshBikeDestination.Home }
     }
+
+    // 2. In your MainScreen
+    val isRootScreen = currentDestination in MainTabs
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -150,6 +165,26 @@ fun AshBikeMainScreen(
 
                         }
                         Text(title)
+                    },
+                    navigationIcon = {
+
+                        // Stat
+                        if (!isRootScreen) {
+                            IconButton(onClick = {
+                                // Pop the specific detail screen off the stack
+                                if (backStack.size > 1) {
+                                    backStack.removeAt(backStack.lastIndex)
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        }
+
+                        // End
+
                     }
                 )
             },
