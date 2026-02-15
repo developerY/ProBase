@@ -14,4 +14,5 @@ sealed class SettingsEvent {
     data class UpdateEnergyLevel(val level: LocationEnergyLevel) : SettingsEvent()
     data class UpdateLongRideEnabled(val enabled: Boolean) : SettingsEvent() // New event for short ride
     // data class OnShowGpsCountdownChanged(val show: Boolean) : SettingsEvent() // New event
+    data class OnSetExpandedSection(val sectionId: String?) : SettingsEvent()
 }

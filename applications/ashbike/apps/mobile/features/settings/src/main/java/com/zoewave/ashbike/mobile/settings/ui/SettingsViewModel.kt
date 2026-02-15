@@ -29,6 +29,9 @@ class SettingsViewModel @Inject constructor(
     // MINIMAL CHANGE 1 of 2: Add a temporary holder for the UI's selection.
     private val _locallySelectedEnergyLevel = MutableStateFlow<LocationEnergyLevel?>(null)
 
+    // ✅ NEW: Temporary holder for which section is expanded (e.g., "app_prefs")
+    private val _expandedSection = MutableStateFlow<String?>(null)
+
     val theme: StateFlow<String> = appRepo.themeFlow
         .stateIn(
             scope = viewModelScope,
@@ -85,8 +88,9 @@ class SettingsViewModel @Inject constructor(
             profileData,
             profileRepo.profileReviewedOrSavedFlow,
             appRepo.gpsAccuracyFlow,
-            appRepo.longRideEnabledFlow // Added for isLongRideEnabled
-        ) { localOverride, selections, profile, profileHasBeenReviewedOrSaved, savedEnergyLevel, isLongRideEnabled -> // Added isLongRideEnabled
+            appRepo.longRideEnabledFlow, // Added for isLongRideEnabled
+            _expandedSection // ✅ 1. Add this flow to the combine block
+        ) { localOverride, selections, profile, profileHasBeenReviewedOrSaved, savedEnergyLevel, isLongRideEnabled, expandedSectionId -> // Added isLongRideEnabled
 
             // This is the key change: Use the local selection if it exists, otherwise use the saved one.
             // This prevents the UI from "snapping back" while the save is in progress.
@@ -118,7 +122,8 @@ class SettingsViewModel @Inject constructor(
                 profile = profile,
                 isProfileIncomplete = actuallyIncomplete,
                 currentEnergyLevel = energyLevel,
-                isLongRideEnabled = isLongRideEnabled // Added for isLongRideEnabled
+                isLongRideEnabled = isLongRideEnabled, // Added for isLongRideEnabled
+                expandedSectionId = expandedSectionId // ✅ 3. Pass it to the UI State
             )
         }
             .map { successState -> successState as SettingsUiState }
@@ -201,6 +206,14 @@ class SettingsViewModel @Inject constructor(
                     }
                 }
             }
+
+            // ✅ 4. Handle the new event to set/clear the expanded section
+            is SettingsEvent.OnSetExpandedSection -> {
+                Log.d("DEBUG_NAV", "ViewModel received OnSetExpandedSection: ${event.sectionId}")
+                _expandedSection.value = event.sectionId
+            }
+
+
             /* Handle the new event
             is SettingsEvent.OnShowGpsCountdownChanged -> {
                 viewModelScope.launch {

@@ -42,6 +42,7 @@ import com.zoewave.ashbike.mobile.settings.ui.components.QrExpandableEx
 import com.zoewave.ashbike.mobile.settings.ui.components.SectionHeader
 import com.zoewave.ashbike.mobile.settings.ui.components.ThemeSettingsCard
 import com.zoewave.ashbike.mobile.settings.ui.components.health.HealthExpandableEx
+import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.features.ble.ui.BluetoothLeEvent
 import com.zoewave.probase.features.ble.ui.BluetoothLeUiState
 import com.zoewave.probase.features.nfc.ui.NfcRwEvent
@@ -78,7 +79,7 @@ fun SettingsScreenEx(
     nfcEvent: (NfcRwEvent) -> Unit,
     bleUiState: BluetoothLeUiState,
     bleEvent: (BluetoothLeEvent) -> Unit,
-    navTo: (String) -> Unit,
+    navTo: (AshBikeDestination) -> Unit,
     initialCardKeyToExpand: String? = null // Added parameter
 ) {
     val expandedSections = remember { mutableStateSetOf<SectionKey>() }
@@ -87,9 +88,23 @@ fun SettingsScreenEx(
 
     // Effect to expand the card specified by the navigation argument
     LaunchedEffect(initialCardKeyToExpand) {
-        if (initialCardKeyToExpand == CardKey.AppPrefs.name) {
-            expandedSections.add(SectionKey.App) // Expand the parent section
-            expandedCards.add(CardKey.AppPrefs)  // Expand the AppPrefs card
+        if (initialCardKeyToExpand != null) {
+            // Normalize to lowercase for safer comparison
+            when (initialCardKeyToExpand.lowercase()) {
+                "app_prefs", "appprefs" -> {
+                    expandedSections.add(SectionKey.App)       // Open Parent
+                    expandedCards.add(CardKey.AppPrefs)        // Open Card
+                }
+                "bike_config", "bikeconfig" -> {
+                    expandedSections.add(SectionKey.Bike)      // Open Parent
+                    expandedCards.add(CardKey.BikeConfig)      // Open Card
+                }
+                "theme" -> {
+                    expandedSections.add(SectionKey.App)
+                    expandedCards.add(CardKey.Theme)
+                }
+                // Add other deep links here...
+            }
         }
     }
 
@@ -174,7 +189,6 @@ fun SettingsScreenEx(
                 HealthExpandableEx(
                     expanded = expandedCards.contains(CardKey.Health),
                     onExpandToggle = { toggle(expandedCards, CardKey.Health) },
-                    navTo = navTo
                 )
             }
             item {
@@ -183,7 +197,6 @@ fun SettingsScreenEx(
                     nfcEvent = nfcEvent,
                     expanded = expandedCards.contains(CardKey.Nfc),
                     onExpandToggle = { toggle(expandedCards, CardKey.Nfc) },
-                    navTo = navTo
                 )
             }
             item {
