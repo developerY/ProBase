@@ -34,7 +34,6 @@ fun NfcExpandableEx(
     nfcEvent: (NfcRwEvent) -> Unit,
     expanded: Boolean,
     onExpandToggle: () -> Unit,
-    navTo: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -73,7 +72,6 @@ fun NfcExpandableEx(
                     NfcScanScreen(
                         uiState = nfcUiState,
                         onEvent = nfcEvent,
-                        navTo = navTo
                     )
                 }
             }

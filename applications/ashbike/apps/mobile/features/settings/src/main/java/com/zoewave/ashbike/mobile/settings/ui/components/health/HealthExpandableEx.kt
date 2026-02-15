@@ -32,7 +32,6 @@ import com.zoewave.probase.features.health.ui.HealthRoute
 fun HealthExpandableEx(
     expanded: Boolean,
     onExpandToggle: () -> Unit,
-    navTo: (String) -> Unit,
 ) {
     Card(
         modifier = Modifier
