@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.home.ui.HomeEvent
 import com.zoewave.ashbike.mobile.home.ui.HomeUiState
 import com.zoewave.ashbike.model.bike.LocationEnergyLevel
-import com.zoewave.probase.core.ui.NavigationCommand
+import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import kotlinx.coroutines.launch
 
 // WORKAROUND: Manually define the Color VectorConverter because it cannot be found
@@ -55,7 +55,7 @@ fun GpsLevelIndicator(
     modifier: Modifier = Modifier,
     uiState: HomeUiState.Success,
     onEvent: (HomeEvent) -> Unit, // Modified signature
-    navTo: (NavigationCommand) -> Unit, // MODIFIED: Changed from onEvent to navTomodifier: Modifier = Modifier
+    navTo: (AshBikeDestination) -> Unit, // Open settings
 ) {
     val bikeData = uiState.bikeData
     val lastUpdateTime = bikeData.lastGpsUpdateTime
@@ -65,23 +65,20 @@ fun GpsLevelIndicator(
 
     // Determine initial color based on currentEnergyLevel
     val initialAnimatedColor = when (currentEnergyLevel) {
-        LocationEnergyLevel.POWER_SAVER -> _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.LowEnergyColor
-        LocationEnergyLevel.BALANCED -> _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.MidEnergyColor
-        LocationEnergyLevel.HIGH_ACCURACY -> _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.HighEnergyColor
-        LocationEnergyLevel.AUTO -> _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.MidEnergyColor // Defaulting AUTO to MidEnergyColor
-        else -> MaterialTheme.colorScheme.onSurface // Fallback for any other state
+        LocationEnergyLevel.POWER_SAVER -> LowEnergyColor
+        LocationEnergyLevel.BALANCED -> MidEnergyColor
+        LocationEnergyLevel.HIGH_ACCURACY -> HighEnergyColor
+        LocationEnergyLevel.AUTO -> MidEnergyColor // Defaulting AUTO to MidEnergyColor
     }
-    val animatedColor = remember { Animatable(initialAnimatedColor,
-        _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.ColorToVectorConverter
-    ) }
+
+    val animatedColor = remember { Animatable(initialAnimatedColor, ColorToVectorConverter) }
 
     LaunchedEffect(lastUpdateTime, currentEnergyLevel) {
         val targetColor = when (currentEnergyLevel) {
-            LocationEnergyLevel.POWER_SAVER -> _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.LowEnergyColor
-            LocationEnergyLevel.BALANCED -> _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.MidEnergyColor
-            LocationEnergyLevel.HIGH_ACCURACY -> _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.HighEnergyColor
-            LocationEnergyLevel.AUTO -> _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.MidEnergyColor // Defaulting AUTO to MidEnergyColor
-            //else -> MaterialTheme.colorScheme.onSurface
+            LocationEnergyLevel.POWER_SAVER -> LowEnergyColor
+            LocationEnergyLevel.BALANCED -> MidEnergyColor
+            LocationEnergyLevel.HIGH_ACCURACY -> HighEnergyColor
+            LocationEnergyLevel.AUTO -> MidEnergyColor // Defaulting AUTO to MidEnergyColor
         }
 
         if (lastUpdateTime > 0L) {
@@ -120,7 +117,7 @@ fun GpsLevelIndicator(
                 "GpsLevelIndicator",
                 "Satellite icon clicked. Sending NavigateToSettingsRequested event."
             )
-            onEvent(HomeEvent.NavigateToSettingsRequested(cardKey = "AppPrefs"))
+            navTo(AshBikeDestination.Settings(sectionToExpand = "app_prefs"))
         },
         contentAlignment = Alignment.Center
     ) {
@@ -131,7 +128,7 @@ fun GpsLevelIndicator(
             contentAlignment = Alignment.Center
         ) {
             if (showCountdown && lastUpdateTime > 0L && gpsUpdateInterval > 0) {
-                _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.GpsCountdownIndicator(
+                GpsCountdownIndicator(
                     lastGpsUpdateTime = lastUpdateTime,
                     gpsUpdateIntervalMillis = gpsUpdateInterval,
                     modifier = Modifier.matchParentSize(),
@@ -162,7 +159,7 @@ fun GpsCountdownIndicator(
     // Create the Stroke style. Since DefaultCountdownStrokeWidth is a constant Dp,
     // and Density is locally constant within a composition, this effectively remembers
     // the Stroke style unless the density changes.
-    val strokeWidthInPx = LocalDensity.current.run { _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.DefaultCountdownStrokeWidth.toPx() }
+    val strokeWidthInPx = LocalDensity.current.run { DefaultCountdownStrokeWidth.toPx() }
     val countdownStrokeStyle = remember(strokeWidthInPx) {
         Stroke(width = strokeWidthInPx)
     }

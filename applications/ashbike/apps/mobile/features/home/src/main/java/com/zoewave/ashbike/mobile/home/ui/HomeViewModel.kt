@@ -9,6 +9,7 @@ import com.zoewave.ashbike.model.bike.BikeRideInfo
 import com.zoewave.ashbike.model.bike.LocationEnergyLevel
 import com.zoewave.ashbike.model.glass.GlassButtonState
 import com.zoewave.probase.ashbike.database.repository.AppSettingsRepository
+import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.ashbike.features.main.service.BikeForegroundService
 import com.zoewave.probase.ashbike.features.main.service.BikeServiceManager
 import com.zoewave.probase.core.model.weather.BikeWeatherInfo
@@ -38,6 +39,11 @@ class HomeViewModel @Inject constructor(
     // 1. INJECT THE GLASS REPO (Even if it's an object, injecting it is cleaner for testing)
     private val bikeRepository: BikeRepository
 ) : ViewModel() {
+
+    // (Channel is better than SharedFlow for navigation because it buffers
+    // the event if the UI isn't ready to receive it immediately)
+    private val _navigationChannel = Channel<AshBikeDestination>()
+    val navigationChannel = _navigationChannel.receiveAsFlow()
 
     // 2. Create a Channel for Side Effects
     // Channels are perfect for one-off events (navigation, toasts)
@@ -268,18 +274,19 @@ class HomeViewModel @Inject constructor(
                 _showSetDistanceDialog.value = false
             }
 
+            // The UI intercepts this event directly (in the eventHandler), so the VM ignores it.
+            // ✅ 2. Handle the event here
             is HomeEvent.NavigateToSettingsRequested -> {
-                // Primarily handled by BikeUiRoute for navigation.
-                // ViewModel can perform other actions if needed (e.g., logging, analytics).
-                Log.d(
-                    "BikeViewModel",
-                    "NavigateToSettingsRequested event received. CardKey: ${event.cardKey}"
-                )
-                // TODO: Add any ViewModel-specific logic for this event if required in the future.
+                Log.d("BikeViewModel", "Handling Nav Request for: ${event.cardKey}")
+
+                // You can do logic here! (e.g. Analytics.log("Settings Clicked"))
+
                 viewModelScope.launch {
-                    _navigateTo.emit("settings/${event.cardKey}")
+                    // Send the Type-Safe Object
+                    _navigationChannel.send(
+                        AshBikeDestination.Settings(sectionToExpand = event.cardKey)
+                    )
                 }
-                // TODO: Add any ViewModel-specific logic for this event if required in the future.
             }
 
 

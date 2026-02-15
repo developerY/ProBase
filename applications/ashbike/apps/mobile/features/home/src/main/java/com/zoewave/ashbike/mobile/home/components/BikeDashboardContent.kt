@@ -51,8 +51,8 @@ import com.zoewave.ashbike.mobile.home.components.main.StatsRow
 import com.zoewave.ashbike.mobile.home.ui.HomeEvent
 import com.zoewave.ashbike.mobile.home.ui.HomeUiState
 import com.zoewave.ashbike.model.bike.RideState
+import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.core.model.yelp.BusinessInfo
-import com.zoewave.probase.core.ui.NavigationCommand
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @Composable
@@ -60,7 +60,7 @@ fun BikeDashboardContent(
     modifier: Modifier = Modifier,
     uiState: HomeUiState.Success,
     onHomeEvent: (HomeEvent) -> Unit,
-    navTo: (NavigationCommand) -> Unit,
+    navTo: (AshBikeDestination) -> Unit,
     coffeeShops: List<BusinessInfo>, // Added parameter
     placeName: String?, // Added parameter
     onFindCafes: () -> Unit // Added parameter

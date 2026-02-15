@@ -12,14 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.home.ui.HomeEvent
 import com.zoewave.ashbike.mobile.home.ui.HomeUiState
-import com.zoewave.probase.core.ui.NavigationCommand
+import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 
 @Composable
 fun RideMap(
     modifier: Modifier = Modifier,
     uiState: HomeUiState.Success, // Kept for potential future use or consistency
     onEvent: (HomeEvent) -> Unit,  // Kept for potential future use or consistency
-    navTo: (NavigationCommand) -> Unit, // Kept for potential future use or consistency
+    navTo: (AshBikeDestination) -> Unit, // Kept for potential future use or consistency
     onMapIconClick: () -> Unit      // New callback for map icon click
 ) {
     Box(

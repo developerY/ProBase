@@ -1,12 +1,12 @@
 package com.zoewave.ashbike.mobile.home.components.main
 
-import androidx.compose.animation.AnimatedVisibility 
+// Removed slideInVertically and slideOutVertically as they are no longer used here
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-// Removed slideInVertically and slideOutVertically as they are no longer used here
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember // Keep for weatherIconsVisible
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +37,7 @@ import com.zoewave.ashbike.mobile.home.components.dials.path.BikePathWithControl
 import com.zoewave.ashbike.mobile.home.components.dials.weather.WeatherBadgeWithDetails
 import com.zoewave.ashbike.mobile.home.ui.HomeEvent
 import com.zoewave.ashbike.mobile.home.ui.HomeUiState
-import com.zoewave.probase.core.ui.NavigationCommand
+import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.feature.weather.ui.components.combine.WindDirectionDialWithSpeed
 
 @Composable
@@ -45,7 +45,7 @@ fun SpeedAndProgressCard(
     modifier: Modifier = Modifier.fillMaxSize(),
     uiState: HomeUiState.Success,
     onHomeEvent: (HomeEvent) -> Unit,
-    navTo: (NavigationCommand) -> Unit,
+    navTo: (AshBikeDestination) -> Unit,
     containerColor: Color,
     contentColor: Color,
     onShowMapPanel: () -> Unit // New parameter to trigger map panel from parent

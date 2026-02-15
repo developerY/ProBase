@@ -32,6 +32,7 @@ import com.zoewave.ashbike.mobile.home.ui.BikeSideEffect
 import com.zoewave.ashbike.mobile.home.ui.HomeEvent
 import com.zoewave.ashbike.mobile.home.ui.HomeUiState
 import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
+import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.ashbike.features.main.ui.ErrorScreen
 import com.zoewave.probase.ashbike.features.main.ui.LoadingScreen
 import kotlinx.coroutines.flow.collectLatest
@@ -42,7 +43,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun HomeUiRoute(
     modifier: Modifier = Modifier,
-    navTo: (NavigationCommand) -> Unit,
+    navTo: (AshBikeDestination) -> Unit,
     viewModel: HomeViewModel
 ) {
     // val healthViewModel = hiltViewModel<HealthViewModel>()
@@ -74,6 +75,15 @@ fun HomeUiRoute(
         viewModel.bikeServiceManager.bindService(context)
         onDispose {
             viewModel.bikeServiceManager.unbindService(context)
+        }
+    }
+
+    // --- 4. NAV 3: LISTEN FOR NAVIGATION EVENTS ---
+    // When the VM says "Go to Settings", this block runs and calls navTo().
+    LaunchedEffect(viewModel) {
+        viewModel.navigationChannel.collect { destination ->
+            Log.d("HomeUiRoute", "Received Nav 3 Event: $destination")
+            navTo(destination)
         }
     }
 
@@ -111,17 +121,10 @@ fun HomeUiRoute(
         Manifest.permission.ACCESS_FINE_LOCATION
     )
 
+    // We removed the manual navigation logic here. We just forward the event
+    // to the ViewModel. The VM will emit to 'navigationChannel' if needed.
     val eventHandler = { event: HomeEvent ->
-        when (event) {
-            is HomeEvent.NavigateToSettingsRequested -> {
-                val route = BikeScreen.SettingsBikeScreen.createRoute(event.cardKey)
-                Log.d("BikeUiRoute", "Requesting TAB navigation to: $route")
-                navTo(NavigationCommand.ToTab(route))
-            }
-            else -> {
-                viewModel.onEvent(event)
-            }
-        }
+        viewModel.onEvent(event)
     }
 
     // --- G. UI RENDER LOGIC ---
