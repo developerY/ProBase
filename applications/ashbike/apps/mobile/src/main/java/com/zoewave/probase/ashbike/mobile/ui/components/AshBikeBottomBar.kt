@@ -50,7 +50,7 @@ fun AshBikeBottomBar(
         )
         NavigationBarItem(
             selected = currentDestination is AshBikeDestination.Settings,
-            onClick = { onNavigate(AshBikeDestination.Settings) },
+            onClick = { onNavigate(AshBikeDestination.Settings()) },
             icon = {
                 if (showSettingsBadge) {
                     BadgedBox(badge = { Badge() }) { Icon(Icons.Default.Settings, "Settings") }

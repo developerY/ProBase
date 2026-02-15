@@ -10,8 +10,11 @@ sealed interface AshBikeDestination {
     @Serializable
     data object Trips : AshBikeDestination
     @Serializable
-    data object Settings : AshBikeDestination
+    data class Settings(val sectionToExpand: String? = null) : AshBikeDestination
     // data class Settings(val cardToExpand: String? = null) : AshBikeDestination
+
+    @Serializable data object AdvancedBikeSettings : AshBikeDestination
+
     @Serializable
     data class RideDetail(val rideId: String) : AshBikeDestination
 }

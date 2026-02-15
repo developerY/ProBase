@@ -162,7 +162,7 @@ fun AshBikeMainScreen(
                             AshBikeDestination.Trips -> "Ride History"
                             is AshBikeDestination.Settings -> "Settings"
                             is AshBikeDestination.RideDetail -> "Detailed Ride"
-
+                            is AshBikeDestination.AdvancedBikeSettings -> "Advanced Bike Settings"
                         }
                         Text(title)
                     },

@@ -50,6 +50,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BasePro"
         android:fullBackupContent="true"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="36">
 
         <activity

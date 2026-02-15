@@ -5,6 +5,7 @@ package com.zoewave.probase.ashbike.mobile.ui.navigation
 
 // --- Logic & Core ---
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,7 +20,6 @@ import com.zoewave.ashbike.mobile.rides.ui.components.details.RideDetailViewMode
 import com.zoewave.ashbike.mobile.rides.ui.components.haversineMeters
 import com.zoewave.ashbike.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
-import com.zoewave.probase.core.ui.NavigationCommand
 import com.zoewave.probase.core.util.Logging
 import com.zoewave.probase.feature.places.ui.CoffeeShopEvent
 import com.zoewave.probase.feature.places.ui.CoffeeShopUIState
@@ -44,23 +44,7 @@ fun ashBikeNavEntryProvider(
                 HomeUiRoute(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = homeViewModel,
-                    navTo = { command ->
-                        // Bridge Legacy "NavigationCommand" to Nav3 Objects
-                        when (command) {
-                            is NavigationCommand.To -> {
-                                // Example: Handle specific string routes if needed,
-                                // or log that legacy strings are deprecated.
-                                Logging.w(
-                                    "Nav3",
-                                    "Received legacy string command: ${command.route}"
-                                )
-                            }
-                            // If you added 'ToScreen' to NavigationCommand as discussed:
-                            // is NavigationCommand.ToScreen -> navigateTo(command.destination)
-                            else -> { /* Handle Back, etc */
-                            }
-                        }
-                    }
+                    navTo = navigateTo,
                 )
             }
 
@@ -144,15 +128,22 @@ fun ashBikeNavEntryProvider(
             // -----------------------------------------------------------------
             is AshBikeDestination.Settings -> {
                 // The 'cardToExpand' arg is available directly on the key.
+                // 1. Check if the Navigation System actually received the data
+                Log.d("DEBUG_NAV", "Provider received Settings Key. Section to expand: ${key.sectionToExpand}")
                 SettingsUiRoute(
                     modifier = Modifier.fillMaxSize(),
-                    initialCardKeyToExpand = "", // emptyList<List<BusinessInfo>>(),// key.cardToExpand,
-                    navTo = { path ->
-                        // Handle internal settings navigation if needed
-                        // or use navigateTo(...) to go elsewhere.
-                        Logging.d("Nav3", "Settings requested nav to: $path")
-                    }
+                    initialCardKeyToExpand = key.sectionToExpand, // key.sectionToExpand,
+                    // Pass navigation down if Settings needs to open other screens
+                    navTo = navigateTo
                 )
+            }
+
+
+            is AshBikeDestination.AdvancedBikeSettings -> {
+                // Replace with your actual Advanced Settings Screen Composable
+                /*AdvancedSettingsScreen(
+                    onBack = { navigateTo(AshBikeDestination.Settings()) }
+                )*/
             }
         }
     }
