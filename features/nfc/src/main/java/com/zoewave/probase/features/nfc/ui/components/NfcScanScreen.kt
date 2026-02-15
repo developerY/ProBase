@@ -28,7 +28,6 @@ fun NfcScanScreen(
     modifier: Modifier = Modifier,
     uiState: NfcUiState,
     onEvent: (NfcRwEvent) -> Unit,
-    navTo: (String) -> Unit,
 ) {
     val innerPadding = PaddingValues(0.dp)
     Column(
