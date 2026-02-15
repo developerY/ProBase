@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.core.ui.components.status.ErrorScreen
 import com.zoewave.probase.core.ui.components.status.LoadingScreen
 import com.zoewave.probase.features.ble.ui.BluetoothLeViewModel
@@ -16,7 +17,7 @@ internal const val ARG_CARD_TO_EXPAND = "cardToExpandArg" // Added argument name
 @Composable
 fun SettingsUiRoute(
     modifier: Modifier = Modifier,
-    navTo: (String) -> Unit,
+    navTo: (AshBikeDestination) -> Unit,
     //nfcUiState : NfcUiState,
     //nfcEvent : (NfcRwEvent) -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),

@@ -26,9 +26,12 @@ dependencies {
     implementation(project(":features:nfc"))
     implementation(project(":features:qrscanner"))
 
+
+
     // Database (If Home needs direct DB access, otherwise access via :core:data)
     implementation(project(":applications:ashbike:database"))
     implementation(project(":applications:ashbike:model"))
+    implementation(project(":applications:ashbike:features:main"))
 
     // --- Serialization (The backbone of Nav3) ---
     implementation(libs.kotlinx.serialization.json)

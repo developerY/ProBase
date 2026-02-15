@@ -31,12 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.settings.R
+import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 
 @Composable
 fun BikeConfigurationEx(
     expanded: Boolean,
     onExpandToggle: () -> Unit,
-    navTo: (String) -> Unit
+    navTo: (AshBikeDestination) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -98,7 +99,7 @@ fun BikeConfigurationEx(
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         enabled = false,
-                        onClick = { navTo("settings_bike_advanced") }
+                        onClick = { navTo(AshBikeDestination.AdvancedBikeSettings) }
                     ) {
                         Text(stringResource(R.string.settings_advanced_bike_settings_button))
                     }
