@@ -46,6 +46,7 @@ dependencies {
     // ✅ FEATURE MODULES
     // This connects your MainActivity to the Feature code we just wrote.
     implementation(project(":features:nav3"))
+    implementation(project(":features:health"))
     // implementation(project(":core:ui"))
 
     // ✅ CORE DEPENDENCIES
