@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Warning
@@ -40,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -93,7 +96,9 @@ fun HealthRoute(
     ) {
         when (val state = healthUiState) {
             is HealthUiState.Success -> {
-                HealthDataScreen(weeklySteps = state.weeklySteps)
+                HealthDataScreen(weeklySteps = state.weeklySteps,
+                    weeklyDistance = state.weeklyDistance,
+                    weeklyCalories = state.weeklyCalories)
             }
 
             is HealthUiState.PermissionsRequired -> {
@@ -144,21 +149,27 @@ private fun PermissionsNotGrantedScreen(onEnableClick: () -> Unit) {
 }
 
 @Composable
-private fun HealthDataScreen(weeklySteps: Map<String, Long>) {
+private fun HealthDataScreen(
+    weeklySteps: Map<String, Long>,
+    weeklyDistance: Map<String, Double>,
+    weeklyCalories: Map<String, Double>
+) {
     val settingsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = { }
     )
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()), // Make screen scrollable
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Success Header
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .padding(bottom = 24.dp)
+                .padding(top = 16.dp, bottom = 24.dp)
                 .background(Color(0xFFE8F5E9), RoundedCornerShape(16.dp))
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
@@ -176,102 +187,121 @@ private fun HealthDataScreen(weeklySteps: Map<String, Long>) {
             )
         }
 
-        // Data Section
         Text(
             text = "Last 7 Days Activity",
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier
                 .align(Alignment.Start)
-                .padding(bottom = 16.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        if (weeklySteps.isNotEmpty() && weeklySteps.values.sum() > 0) {
-            WeeklyStepsChart(stepsData = weeklySteps)
-        } else {
-            // Empty State
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp).fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("No Step Data Found", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        "Permissions are working, but no step data exists for this week.",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-        }
+        // 1. Steps Chart
+        GenericWeeklyChart(
+            title = "Steps",
+            data = weeklySteps.mapValues { it.value.toDouble() },
+            color = MaterialTheme.colorScheme.primary,
+            formatValue = { v -> if (v > 999) "${(v / 1000).toInt()}k" else "${v.toInt()}" }
+        )
 
-        Spacer(modifier = Modifier.weight(1f))
+        // 2. Calories Chart
+        GenericWeeklyChart(
+            title = "Calories (kcal)",
+            data = weeklyCalories,
+            color = Color(0xFFFF9800), // Orange
+            formatValue = { v -> "${v.toInt()}" }
+        )
+
+        // 3. Distance Chart
+        GenericWeeklyChart(
+            title = "Distance (km)",
+            data = weeklyDistance,
+            color = Color(0xFF03A9F4), // Blue
+            formatValue = { v -> String.format("%.1f", v / 1000) } // Convert meters to km
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedButton(
             onClick = {
                 val intent = Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS)
                 settingsLauncher.launch(intent)
             },
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 32.dp)
         ) {
             Text("Manage Permissions")
         }
     }
 }
 
+/**
+ * Reusable Chart Component
+ */
 @Composable
-fun WeeklyStepsChart(stepsData: Map<String, Long>) {
-    val maxSteps = stepsData.values.maxOrNull() ?: 1L
-    val sortedData = stepsData.toSortedMap()
+fun GenericWeeklyChart(
+    title: String,
+    data: Map<String, Double>,
+    color: Color,
+    formatValue: (Double) -> String
+) {
+    val maxVal = data.values.maxOrNull() ?: 1.0
+    val sortedData = data.toSortedMap()
 
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         ),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-                .height(200.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.Bottom
-        ) {
-            sortedData.forEach { (dateStr, steps) ->
-                val dayLabel = try {
-                    LocalDate.parse(dateStr).dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-                } catch (e: Exception) {
-                    dateStr.takeLast(2)
-                }
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.height(16.dp))
 
-                val barHeightFraction = (steps.toFloat() / maxSteps).coerceAtLeast(0.02f)
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
+            if (data.values.sum() == 0.0) {
+                Text("No data", style = MaterialTheme.typography.bodySmall)
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.Bottom
                 ) {
-                    Text(
-                        text = if (steps > 999) "${steps / 1000}k" else steps.toString(),
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Box(
-                        modifier = Modifier
-                            .width(16.dp)
-                            .fillMaxHeight(barHeightFraction)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(MaterialTheme.colorScheme.primary)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = dayLabel,
-                        style = MaterialTheme.typography.labelSmall
-                    )
+                    sortedData.forEach { (dateStr, value) ->
+                        val dayLabel = try {
+                            LocalDate.parse(dateStr).dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                        } catch (e: Exception) {
+                            dateStr.takeLast(2)
+                        }
+
+                        val barHeightFraction = (value.toFloat() / maxVal.toFloat()).coerceAtLeast(0.02f)
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = formatValue(value),
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                fontSize = 10.sp
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .width(12.dp)
+                                    .fillMaxHeight(barHeightFraction)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(color)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = dayLabel,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
                 }
             }
         }

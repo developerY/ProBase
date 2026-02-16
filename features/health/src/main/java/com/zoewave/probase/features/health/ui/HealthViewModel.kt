@@ -134,16 +134,32 @@ class HealthViewModel @Inject constructor(
             }
             try {
                 if (healthSessionManager.hasAllPermissions(permissions)) {
-                    // 1. Fetch Sessions
                     val sessions = readSessionInputs()
 
-                    // 2. Fetch Weekly Steps (using the new method in Manager)
-                    val stepsMap = readWeeklySteps()
+                    // Define the range once
+                    val end = Instant.now()
+                    val start = ZonedDateTime.now().minusDays(7).truncatedTo(ChronoUnit.DAYS).toInstant()
 
-                    // 3. Update State
+                    // 1. Fetch Steps
+                    val stepsMap = healthSessionManager.readSteps(start, end)
+                        .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
+                        .mapValues { entry -> entry.value.sumOf { it.count } }
+
+                    // 2. Fetch Distance (Sum in Meters)
+                    val distMap = healthSessionManager.readDistance(start, end)
+                        .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
+                        .mapValues { entry -> entry.value.sumOf { it.distance.inMeters } }
+
+                    // 3. Fetch Calories (Sum in Kcal)
+                    val calMap = healthSessionManager.readTotalCalories(start, end)
+                        .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
+                        .mapValues { entry -> entry.value.sumOf { it.energy.inKilocalories } }
+
                     _uiState.value = HealthUiState.Success(
                         sessions = sessions,
-                        weeklySteps = stepsMap
+                        weeklySteps = stepsMap,
+                        weeklyDistance = distMap,
+                        weeklyCalories = calMap
                     )
 
                     observeHealthConnectChanges()

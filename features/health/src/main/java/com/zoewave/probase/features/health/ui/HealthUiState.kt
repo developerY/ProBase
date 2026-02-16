@@ -7,18 +7,14 @@ sealed interface HealthUiState {
     object Uninitialized : HealthUiState
     object Loading : HealthUiState
     object Disabled : HealthUiState
-
     data class PermissionsRequired(val message: String) : HealthUiState
+    data class Error(val message: String, val uuid: UUID = UUID.randomUUID()) : HealthUiState
 
     data class Success(
-        // Renamed 'healthData' to 'sessions' to match the ViewModel and be more specific
         val sessions: List<ExerciseSessionRecord>,
-        // Added this field to hold the data for your weekly graph
-        val weeklySteps: Map<String, Long> = emptyMap()
-    ) : HealthUiState
-
-    data class Error(
-        val message: String,
-        val uuid: UUID = UUID.randomUUID()
+        val weeklySteps: Map<String, Long> = emptyMap(),
+        // Add these two new fields:
+        val weeklyDistance: Map<String, Double> = emptyMap(), // Meters
+        val weeklyCalories: Map<String, Double> = emptyMap()  // Kcal
     ) : HealthUiState
 }

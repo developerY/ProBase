@@ -111,6 +111,28 @@ class HealthSessionManager(private val context: Context) {
     }
 
     /**
+     * Reads distance records for a specific time range.
+     */
+    suspend fun readDistance(start: Instant, end: Instant): List<DistanceRecord> =
+        healthConnectClient.readRecords(
+            ReadRecordsRequest(
+                recordType = DistanceRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(start, end)
+            )
+        ).records
+
+    /**
+     * Reads total calories burned records for a specific time range.
+     */
+    suspend fun readTotalCalories(start: Instant, end: Instant): List<TotalCaloriesBurnedRecord> =
+        healthConnectClient.readRecords(
+            ReadRecordsRequest(
+                recordType = TotalCaloriesBurnedRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(start, end)
+            )
+        ).records
+
+    /**
      * Reads in existing [StepsRecord]s for a specific time range.
      */
     suspend fun readSteps(start: Instant, end: Instant): List<StepsRecord> =
