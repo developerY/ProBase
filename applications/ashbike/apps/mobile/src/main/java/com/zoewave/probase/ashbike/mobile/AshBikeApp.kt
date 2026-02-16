@@ -1,15 +1,13 @@
 package com.zoewave.probase.ashbike.mobile
 
 import android.app.Application
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import com.zoewave.probase.ashbike.features.main.service.BikeForegroundService
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class AshBikeApp : Application() {
 
-    override fun onCreate() {
+    // TODO: REMOVE DEAD CODE
+    /* override fun onCreate() {
         super.onCreate()
         createNotificationChannels()
     }
@@ -30,5 +28,5 @@ class AshBikeApp : Application() {
         val notificationManager: NotificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(bikeServiceChannel)
-    }
+    }*/
 }
