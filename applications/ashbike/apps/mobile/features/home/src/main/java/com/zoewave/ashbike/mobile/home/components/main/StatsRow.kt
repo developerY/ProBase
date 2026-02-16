@@ -59,6 +59,12 @@ fun StatsRow(
     val avgSpeed = bikeData.averageSpeed
     val elevationValue: Double? = bikeData.elevation.takeIf { it > 0.0 }
 
+    val avgSpeedText = if (avgSpeed < 0) {
+        "--" // ✅ The Sentinel Value triggers this
+    } else {
+        stringResource(R.string.feature_main_stats_value_kmh_format, avgSpeed) // Normal formatting (e.g., "22.5")
+    }
+
     val stats = mutableListOf(
         StatItem(
             icon = Icons.Filled.Straight,
@@ -75,7 +81,7 @@ fun StatsRow(
         StatItem(
             icon = Icons.Filled.Speed,
             label = stringResource(R.string.feature_main_stats_label_avg_speed),
-            value = stringResource(R.string.feature_main_stats_value_kmh_format, avgSpeed),
+            value = avgSpeedText,
             activeColor = if (isBikeComputerOn) MaterialTheme.colorScheme.iconColorAvgSpeed else null
         )
     ).apply {

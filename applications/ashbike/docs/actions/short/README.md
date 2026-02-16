@@ -4,6 +4,8 @@
 
 * **Total Distance:** ~2.32 km (approx. 1.44 miles)
 * **Total Time:** 3 minutes and 43 seconds
+* **Estimated Burn:** 45 – 65 calories
+* **Average Speed:** 37.21 km/h
 
 ---
 

@@ -265,10 +265,10 @@ class BikeForegroundService : LifecycleService() {
             formalRideSegmentMaxSpeedKph = max(formalRideSegmentMaxSpeedKph, speedKph)
             displayMaxSpeed = formalRideSegmentMaxSpeedKph
 
-            displayAverageSpeed = if (segmentDurationSeconds > 0 && segmentDistMeters > 0) {
+            displayAverageSpeed = if (segmentDurationSeconds > MIN_TIME_FOR_AVG_SPEED_SECONDS && segmentDistMeters > 0) {
                 (segmentDistMeters / segmentDurationSeconds) * 3.6
             } else {
-                0.0
+                -1.0 // Code for "Show --"
             }
 
             // Map path for UI
@@ -285,10 +285,10 @@ class BikeForegroundService : LifecycleService() {
             displayDuration = formatDuration(sessionDurationMillis)
             displayMaxSpeed = continuousMaxSpeedKph
 
-            displayAverageSpeed = if (sessionDurationSeconds > 0 && continuousDistanceMeters > 0) {
+            displayAverageSpeed = if (sessionDurationSeconds > MIN_TIME_FOR_AVG_SPEED_SECONDS && continuousDistanceMeters > 0) {
                 (continuousDistanceMeters / sessionDurationSeconds) * 3.6
             } else {
-                0.0
+                -1.0 // Code for "Show --"
             }
         }
 
@@ -505,6 +505,8 @@ class BikeForegroundService : LifecycleService() {
         private const val MAX_ACCURACY_THRESHOLD_METERS = 30f
         private const val MIN_DISTANCE_THRESHOLD_METERS = 5f
         private const val MIN_ALLOWED_GPS_INTERVAL_MS = 1000L
+
+        private const val MIN_TIME_FOR_AVG_SPEED_SECONDS = 5
 
         fun getInitialRideInfo() = BikeRideInfo(
             location = null, currentSpeed = 0.0, averageSpeed = 0.0, maxSpeed = 0.0,
