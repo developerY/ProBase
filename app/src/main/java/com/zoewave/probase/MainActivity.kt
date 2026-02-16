@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.zoewave.probase.features.nav3.ui.Nav3Main // Import your feature composable
+import com.zoewave.probase.features.health.ui.HealthRoute
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -22,7 +22,10 @@ class MainActivity : ComponentActivity() {
                 ) {
                     // ✅ Just call the Feature Entry Point
                     // It handles its own BackStack, Strategy, and Display internally.
-                    Nav3Main()
+                    // Nav3Main()
+                    // BasicActivity()
+                    // Call the composable function you provided
+                    HealthRoute()
                 }
             }
         }

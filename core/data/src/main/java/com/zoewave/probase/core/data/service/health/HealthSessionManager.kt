@@ -1,8 +1,5 @@
 package com.zoewave.probase.core.data.service.health
 
-/**
- * Manager for accessing and aggregating health data from Health Connect.
- */
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -49,22 +46,20 @@ import java.time.temporal.ChronoUnit
 import kotlin.random.Random
 import kotlin.reflect.KClass
 
-//finished/src/main/java/com/example/healthconnect/codelab/data/HealthConnectManager.kt
-// The minimum android level that can use Health Connect
 const val MIN_SUPPORTED_SDK = Build.VERSION_CODES.O_MR1
-
 private const val TAG = "HealthSessionManager"
 
-
-/** Demonstrates reading and writing from Health Connect. */
+/**
+ * Manager for accessing and aggregating health data from Health Connect.
+ */
 class HealthSessionManager(private val context: Context) {
-    private val healthConnectClient by lazy { HealthConnectClient.getOrCreate(context) }
-    // private val healthConnectClient by lazy { HealthConnectClient.getOrCreate(context) }
 
+    private val healthConnectClient by lazy { HealthConnectClient.getOrCreate(context) }
 
     val healthConnectCompatibleApps by lazy {
         val intent = Intent("androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE")
 
+        // FIX: Call queryIntentActivities inside the if/else to handle the different parameter types
         val packages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.packageManager.queryIntentActivities(
                 intent,
@@ -94,105 +89,76 @@ class HealthSessionManager(private val context: Context) {
         }
     }
 
-    /*var availability = mutableStateOf(SDK_UNAVAILABLE)
-        private set*/
-    // Replace mutableStateOf with MutableStateFlow
-    private val _availability = MutableStateFlow(SDK_UNAVAILABLE) // Mutable internal state
-    val availability: StateFlow<Int> get() = _availability // Expose as immutable
-
-
-    fun checkAvailability() {
-        val sdkStatus = HealthConnectClient.getSdkStatus(context)
-        _availability.value = sdkStatus // Properly modify the mutable state flow
-    }
+    private val _availability = MutableStateFlow(SDK_UNAVAILABLE)
+    val availability: StateFlow<Int> get() = _availability
 
     init {
         checkAvailability()
     }
 
-    /**
-     * Determines whether all the specified permissions are already granted. It is recommended to
-     * call [androidx.health.connect.client.PermissionController.getGrantedPermissions] first in the permissions flow, as if the
-     * permissions are already granted then there is no need to request permissions via
-     * [androidx.health.connect.client.PermissionController.Companion.createRequestPermissionResultContract].
-     */
-    suspend fun hasAllPermissions(permissions: Set<String>): Boolean {
-        return healthConnectClient.permissionController.getGrantedPermissions()
-            .containsAll(permissions)
+    fun checkAvailability() {
+        _availability.value = HealthConnectClient.getSdkStatus(context)
     }
 
-    fun requestPermissionsActivityContract(): ActivityResultContract<Set<String>, Set<String>> {
-        return PermissionController.createRequestPermissionResultContract()
-    }
+    suspend fun hasAllPermissions(permissions: Set<String>): Boolean =
+        healthConnectClient.permissionController.getGrantedPermissions().containsAll(permissions)
+
+    fun requestPermissionsActivityContract(): ActivityResultContract<Set<String>, Set<String>> =
+        PermissionController.createRequestPermissionResultContract()
 
     suspend fun revokeAllPermissions() {
         healthConnectClient.permissionController.revokeAllPermissions()
     }
 
     /**
-     * Obtains a list of [androidx.health.connect.client.records.ExerciseSessionRecord]s in a specified time frame. An Exercise Session Record is a
-     * period of time given to an activity, that would make sense to a user, e.g. "Afternoon run"
-     * etc. It does not necessarily mean, however, that the user was *running* for that entire time,
-     * more that conceptually, this was the activity being undertaken.
+     * Reads in existing [StepsRecord]s for a specific time range.
      */
-    suspend fun readExerciseSessions(start: Instant, end: Instant): List<ExerciseSessionRecord> {
-        val request = ReadRecordsRequest(
-            recordType = ExerciseSessionRecord::class,
-            timeRangeFilter = TimeRangeFilter.between(start, end)
-        )
-        val response = healthConnectClient.readRecords(request)
-        return response.records
-    }
+    suspend fun readSteps(start: Instant, end: Instant): List<StepsRecord> =
+        healthConnectClient.readRecords(
+            ReadRecordsRequest(
+                recordType = StepsRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(start, end)
+            )
+        ).records
+
+    /**
+     * Obtains a list of [ExerciseSessionRecord]s in a specified time frame.
+     */
+    suspend fun readExerciseSessions(start: Instant, end: Instant): List<ExerciseSessionRecord> =
+        healthConnectClient.readRecords(
+            ReadRecordsRequest(
+                recordType = ExerciseSessionRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(start, end)
+            )
+        ).records
 
     suspend fun insertRecords(records: List<Record>): InsertRecordsResponse {
-        //val res = healthConnectClient.insertRecords(records)
+        Log.d("DebugSync", "HealthSessionManager.insertRecords → ${records.map { it::class.simpleName }}")
 
-        Log.d(
-            "DebugSync",
-            "HealthSessionManager.insertRecords → ${records.map { it::class.simpleName }}"
-        )
         val res = healthConnectClient.insertRecords(records)
-        Log.d("DebugSync", "HealthSessionManager.insertRecords ← ${res.recordIdsList}")
-        // Build a detailed mapping of record type -> (clientId? -> serverId)
-        val details = records
-            .mapIndexed { index, record ->
-                val typeName = record::class.simpleName
-                // If you populated a clientRecordId in metadata, you can grab it:
-                val clientId = record.metadata.clientRecordId
-                val serverId = res.recordIdsList.getOrNull(index)
-                "$typeName(clientId=$clientId)->serverId=$serverId"
-            }
-            .joinToString(separator = "\n    ", prefix = "\n    ")
 
-        Log.d("HealthSessionManager", buildString {
-            append("insertRecords: inserted ${res.recordIdsList.size} record(s):")
-            append(details)
-        })
-        // showAllRecs() // This might be excessive for every insert, consider if needed
+        Log.d("DebugSync", "HealthSessionManager.insertRecords ← ${res.recordIdsList}")
+
+        val details = records.mapIndexed { index, record ->
+            val typeName = record::class.simpleName
+            val clientId = record.metadata.clientRecordId
+            val serverId = res.recordIdsList.getOrNull(index)
+            "$typeName(clientId=$clientId)->serverId=$serverId"
+        }.joinToString(separator = "\n    ", prefix = "\n    ")
+
+        Log.d(TAG, "insertRecords: inserted ${res.recordIdsList.size} record(s):$details")
         return res
     }
 
     suspend fun insertBikeRideWithAssociatedData(rideId: String, records: List<Record>): String {
-        Log.d(
-            TAG,
-            "Attempting to insert bike ride data for rideId: $rideId consisting of ${records.map { it::class.simpleName }}"
-        )
+        Log.d(TAG, "Attempting to insert bike ride data for rideId: $rideId consisting of ${records.map { it::class.simpleName }}")
         try {
             val response = healthConnectClient.insertRecords(records)
-            Log.d(
-                TAG,
-                "Successfully inserted ${response.recordIdsList.size} records for rideId $rideId. HC IDs: ${response.recordIdsList}"
-            )
-            // We return the original rideId. It's assumed to be the clientRecordId for the main session,
-            // or at least the identifier the ViewModel layer needs to update the local database.
-            // If you need the specific Health Connect generated ID for the ExerciseSessionRecord,
-            // you would find it in response.recordIdsList. This requires identifying the
-            // ExerciseSessionRecord within the 'records' list and getting its corresponding ID
-            // from the response.recordIdsList using its index or clientRecordId if set.
+            Log.d(TAG, "Successfully inserted ${response.recordIdsList.size} records for rideId $rideId. HC IDs: ${response.recordIdsList}")
             return rideId
         } catch (e: Exception) {
             Log.e(TAG, "Error inserting bike ride data for rideId $rideId into Health Connect", e)
-            throw e // Propagate the error to be handled by the caller (HealthViewModel)
+            throw e
         }
     }
 
@@ -202,81 +168,32 @@ class HealthSessionManager(private val context: Context) {
     @SuppressLint("RestrictedApi")
     suspend fun showAllRecs() {
         val now = Instant.now()
+        val filter = TimeRangeFilter.before(now)
 
-        // 1) Exercise sessions
-        val sessionRequest = ReadRecordsRequest(
-            recordType = ExerciseSessionRecord::class,
-            timeRangeFilter = TimeRangeFilter.before(now)
-        )
-        val sessionResponse = healthConnectClient.readRecords(sessionRequest)
-        Log.d(
-            "HealthSessionManager",
-            "ExerciseSessionRecord: ${sessionResponse.records.size} record(s)"
-        )
-        sessionResponse.records.forEach { Log.d("HealthSessionManager", it.toString()) }
+        suspend fun logType(type: KClass<out Record>) {
+            val response = healthConnectClient.readRecords(ReadRecordsRequest(type, filter))
+            Log.d(TAG, "${type.simpleName}: ${response.records.size} record(s)")
+            response.records.forEach { Log.d(TAG, it.toString()) }
+        }
 
-        // 2) Steps
-        val stepsRequest = ReadRecordsRequest(
-            recordType = StepsRecord::class,
-            timeRangeFilter = TimeRangeFilter.before(now)
-        )
-        val stepsResponse = healthConnectClient.readRecords(stepsRequest)
-        Log.d("HealthSessionManager", "StepsRecord: ${stepsResponse.records.size} record(s)")
-        stepsResponse.records.forEach { Log.d("HealthSessionManager", it.toString()) }
-
-        // 3) Distance
-        val distanceRequest = ReadRecordsRequest(
-            recordType = DistanceRecord::class,
-            timeRangeFilter = TimeRangeFilter.before(now)
-        )
-        val distanceResponse = healthConnectClient.readRecords(distanceRequest)
-        Log.d("HealthSessionManager", "DistanceRecord: ${distanceResponse.records.size} record(s)")
-        distanceResponse.records.forEach { Log.d("HealthSessionManager", it.toString()) }
-
-        // 4) Calories
-        val caloriesRequest = ReadRecordsRequest(
-            recordType = TotalCaloriesBurnedRecord::class,
-            timeRangeFilter = TimeRangeFilter.before(now)
-        )
-        val caloriesResponse = healthConnectClient.readRecords(caloriesRequest)
-        Log.d(
-            "HealthSessionManager",
-            "TotalCaloriesBurnedRecord: ${caloriesResponse.records.size} record(s)"
-        )
-        caloriesResponse.records.forEach { Log.d("HealthSessionManager", it.toString()) }
-
-        // 5) Heart rate
-        val hrRequest = ReadRecordsRequest(
-            recordType = HeartRateRecord::class,
-            timeRangeFilter = TimeRangeFilter.before(now)
-        )
-        val hrResponse = healthConnectClient.readRecords(hrRequest)
-        Log.d("HealthSessionManager", "HeartRateRecord: ${hrResponse.records.size} record(s)")
-        hrResponse.records.forEach { Log.d("HealthSessionManager", it.toString()) }
+        logType(ExerciseSessionRecord::class)
+        logType(StepsRecord::class)
+        logType(DistanceRecord::class)
+        logType(TotalCaloriesBurnedRecord::class)
+        logType(HeartRateRecord::class)
     }
 
-
-    /**
-     * Writes an [androidx.health.connect.client.records.ExerciseSessionRecord] to Health Connect, and additionally writes underlying data for
-     * the session too, such as [androidx.health.connect.client.records.StepsRecord], [androidx.health.connect.client.records.DistanceRecord] etc.
-     */
-    suspend fun writeExerciseSessionNotUse(
-        start: ZonedDateTime,
-        end: ZonedDateTime
-    ): InsertRecordsResponse {
-        Log.d("HealthSessionManager", "Writing exercise session")
+    suspend fun writeExerciseSessionNotUse(start: ZonedDateTime, end: ZonedDateTime): InsertRecordsResponse {
+        Log.d(TAG, "Writing exercise session")
         return healthConnectClient.insertRecords(
-            listOf<Record>(
+            listOf(
                 StepsRecord(
                     startTime = start.toInstant(),
                     startZoneOffset = start.offset,
                     endTime = end.toInstant(),
                     endZoneOffset = end.offset,
                     count = (1000 + 1000 * Random.nextInt(3)).toLong(),
-                    metadata = Metadata.autoRecorded(
-                        device = Device(type = Device.TYPE_WATCH)
-                    )
-
+                    metadata = Metadata.autoRecorded(device = Device(type = Device.TYPE_WATCH))
                 ),
                 DistanceRecord(
                     startTime = start.toInstant(),
@@ -284,9 +201,7 @@ class HealthSessionManager(private val context: Context) {
                     endTime = end.toInstant(),
                     endZoneOffset = end.offset,
                     distance = Length.meters((1000 + 100 * Random.nextInt(20)).toDouble()),
-                    metadata = Metadata.autoRecorded(
-                        device = Device(type = Device.TYPE_WATCH)
-                    )
+                    metadata = Metadata.autoRecorded(device = Device(type = Device.TYPE_WATCH))
                 ),
                 TotalCaloriesBurnedRecord(
                     startTime = start.toInstant(),
@@ -294,30 +209,22 @@ class HealthSessionManager(private val context: Context) {
                     endTime = end.toInstant(),
                     endZoneOffset = end.offset,
                     energy = Energy.calories(140 + (Random.nextInt(20)) * 0.01),
-                    metadata = Metadata.autoRecorded(
-                        device = Device(type = Device.TYPE_WATCH)
-                    )
+                    metadata = Metadata.autoRecorded(device = Device(type = Device.TYPE_WATCH))
                 )
             ) + buildHeartRateSeries(start, end)
         )
     }
 
-
-    /**
-     * TODO: Writes an [androidx.health.connect.client.records.ExerciseSessionRecord] to Health Connect.
-     */
     @SuppressLint("RestrictedApi")
-    suspend fun writeExerciseSessionTest() {//start: ZonedDateTime, end: ZonedDateTime) {
+    suspend fun writeExerciseSessionTest() {
         val start = ZonedDateTime.now()
-        val sessionStartTime = Instant.now()
         val sessionDuration = Duration.ofMinutes(20)
-        sessionStartTime.plus(sessionDuration)
         val end = start.plus(sessionDuration)
 
-        Log.d("HealthSessionManager", "Writing exercise session START")
+        Log.d(TAG, "Writing exercise session START")
 
         healthConnectClient.insertRecords(
-            listOf<Record>(
+            listOf(
                 ExerciseSessionRecord(
                     metadata = Metadata.manualEntry(),
                     startTime = start.toInstant(),
@@ -346,7 +253,7 @@ class HealthSessionManager(private val context: Context) {
             ) + buildHeartRateSeries(start, end)
         )
 
-        Log.d("HealthSessionManager", "Writing exercise session END")
+        Log.d(TAG, "Writing exercise session END")
     }
 
     @SuppressLint("RestrictedApi")
@@ -356,7 +263,6 @@ class HealthSessionManager(private val context: Context) {
         title: String = "Bike Ride",
         notes: String? = null
     ): InsertRecordsResponse {
-        // 1) Build the ExerciseSessionRecord for BIKING
         val session = ExerciseSessionRecord(
             metadata = Metadata.manualEntry(),
             startTime = start.toInstant(),
@@ -367,15 +273,9 @@ class HealthSessionManager(private val context: Context) {
             title = title,
             notes = notes
         )
-
-        // 2) Insert it into Health Connect
         return healthConnectClient.insertRecords(listOf(session))
     }
 
-
-    /**
-     * Writes a “bike ride” as an ExerciseSessionRecord + underlying metrics.
-     */
     @SuppressLint("RestrictedApi")
     suspend fun insertBikeExerciseSession(
         start: ZonedDateTime,
@@ -383,8 +283,6 @@ class HealthSessionManager(private val context: Context) {
         title: String = "Bike Ride",
         notes: String? = null
     ): InsertRecordsResponse {
-
-        // 1) Build the ExerciseSessionRecord itself
         val session = ExerciseSessionRecord(
             startTime = start.toInstant(),
             startZoneOffset = start.offset,
@@ -393,19 +291,15 @@ class HealthSessionManager(private val context: Context) {
             exerciseType = ExerciseSessionRecord.EXERCISE_TYPE_BIKING,
             title = title,
             notes = notes,
-            // metadata tags it as auto-recorded by this app
-            metadata = Metadata.autoRecorded(
-                device = Device(type = Device.TYPE_PHONE)
-            )
+            metadata = Metadata.autoRecorded(device = Device(type = Device.TYPE_PHONE))
         )
 
-        // 2) Underlying raw and aggregate records
         val steps = StepsRecord(
             startTime = start.toInstant(),
             startZoneOffset = start.offset,
             endTime = end.toInstant(),
             endZoneOffset = end.offset,
-            count = /* your total step count, e.g. tracker.steps() */ 1L,
+            count = 1L,
             metadata = Metadata.autoRecorded(device = Device(type = Device.TYPE_PHONE))
         )
 
@@ -414,7 +308,7 @@ class HealthSessionManager(private val context: Context) {
             startZoneOffset = start.offset,
             endTime = end.toInstant(),
             endZoneOffset = end.offset,
-            distance = Length.meters(/* your total meters */ 0.0),
+            distance = Length.meters(0.0),
             metadata = Metadata.autoRecorded(device = Device(type = Device.TYPE_PHONE))
         )
 
@@ -423,23 +317,17 @@ class HealthSessionManager(private val context: Context) {
             startZoneOffset = start.offset,
             endTime = end.toInstant(),
             endZoneOffset = end.offset,
-            energy = Energy.calories(/* your calories */ 0.0),
+            energy = Energy.calories(0.0),
             metadata = Metadata.autoRecorded(device = Device(type = Device.TYPE_PHONE))
         )
 
-        // 3) Heart-rate series—use your existing builder
         val heartRate = buildHeartRateSeries(start, end)
 
-        // 4) Insert them all in one batch
         return healthConnectClient.insertRecords(
-            listOf<Record>(session, steps, distance, calories, heartRate)
+            listOf(session, steps, distance, calories, heartRate)
         )
     }
 
-
-    /**
-     * Deletes an [androidx.health.connect.client.records.ExerciseSessionRecord] and underlying data.
-     */
     suspend fun deleteExerciseSession(uid: String) {
         val exerciseSession = healthConnectClient.readRecord(ExerciseSessionRecord::class, uid)
         healthConnectClient.deleteRecords(
@@ -451,7 +339,7 @@ class HealthSessionManager(private val context: Context) {
             exerciseSession.record.startTime,
             exerciseSession.record.endTime
         )
-        val rawDataTypes: Set<KClass<out Record>> = setOf(
+        val rawDataTypes = setOf(
             HeartRateRecord::class,
             SpeedRecord::class,
             DistanceRecord::class,
@@ -463,14 +351,8 @@ class HealthSessionManager(private val context: Context) {
         }
     }
 
-    /**
-     * Reads aggregated data and raw data for selected data types, for a given [androidx.health.connect.client.records.ExerciseSessionRecord].
-     */
-    suspend fun readAssociatedSessionData(
-        uid: String
-    ): ExerciseSessionData {
+    suspend fun readAssociatedSessionData(uid: String): ExerciseSessionData {
         val exerciseSession = healthConnectClient.readRecord(ExerciseSessionRecord::class, uid)
-        // Use the start time and end time from the session, for reading raw and aggregate data.
         val timeRangeFilter = TimeRangeFilter.between(
             startTime = exerciseSession.record.startTime,
             endTime = exerciseSession.record.endTime
@@ -484,9 +366,6 @@ class HealthSessionManager(private val context: Context) {
             HeartRateRecord.BPM_MAX,
             HeartRateRecord.BPM_MIN,
         )
-        // Limit the data read to just the application that wrote the session. This may or may not
-        // be desirable depending on the use case: In some cases, it may be useful to combine with
-        // data written by other apps.
         val dataOriginFilter = setOf(exerciseSession.record.metadata.dataOrigin)
         val aggregateRequest = AggregateRequest(
             metrics = aggregateDataTypes,
@@ -495,9 +374,9 @@ class HealthSessionManager(private val context: Context) {
         )
         val aggregateData = healthConnectClient.aggregate(aggregateRequest)
 
+        Log.d(TAG, "aggregateData: $aggregateData")
+        Log.d(TAG, "exerciseSession: ${exerciseSession.record.title}")
 
-        Log.d("HealthSessionManager", "aggregateData: $aggregateData")
-        Log.d("HealthSessionManager", "exerciseSession: ${exerciseSession.record.title}")
         return ExerciseSessionData(
             uid = uid,
             totalActiveTime = aggregateData[ExerciseSessionRecord.EXERCISE_DURATION_TOTAL],
@@ -510,22 +389,15 @@ class HealthSessionManager(private val context: Context) {
         )
     }
 
-    /**
-     * Deletes all existing sleep data.
-     */
     suspend fun deleteAllSleepData() {
-        val now = Instant.now()
-        healthConnectClient.deleteRecords(SleepSessionRecord::class, TimeRangeFilter.before(now))
+        healthConnectClient.deleteRecords(
+            SleepSessionRecord::class,
+            TimeRangeFilter.before(Instant.now())
+        )
     }
 
-
-    suspend fun <T : Record> deleteRecordsOfType(
-        type: KClass<T>,
-        sessionRange: TimeRangeFilter
-    ) {
-        // build a properly‐typed ReadRecordsRequest<T>
+    suspend fun <T : Record> deleteRecordsOfType(type: KClass<T>, sessionRange: TimeRangeFilter) {
         val request = ReadRecordsRequest(type, sessionRange)
-        // now `records` comes back as List<T> (e.g. List<StepsRecord>)
         val existing: List<T> = healthConnectClient.readRecords(request).records
 
         Log.d(TAG, "Found ${existing.size} ${type.simpleName} to delete")
@@ -544,7 +416,6 @@ class HealthSessionManager(private val context: Context) {
         }
     }
 
-
     suspend fun deleteAllSessionData() {
         val now = Instant.now()
         val sessionRange = TimeRangeFilter.before(now)
@@ -558,7 +429,6 @@ class HealthSessionManager(private val context: Context) {
         deleteAllHealthData()
     }
 
-
     /**
      * Deletes ALL existing session data.
      */
@@ -566,103 +436,53 @@ class HealthSessionManager(private val context: Context) {
         val now = Instant.now()
         val sessionRange = TimeRangeFilter.before(now)
 
-        // The record types you want to purge:
         val typesToDelete = listOf(
             ExerciseSessionRecord::class,
             StepsRecord::class,
             DistanceRecord::class,
             TotalCaloriesBurnedRecord::class,
             HeartRateRecord::class,
-            //SpeedRecord::class,
-            //ExerciseRoute::class,
         )
 
         typesToDelete.forEach { recordType ->
             try {
-                // 1️⃣ Read existing records in the time range
                 Log.d(TAG, "⏳ Reading ${recordType.simpleName} before $now…")
-                ReadRecordsRequest(
-                    recordType = recordType,
-                    timeRangeFilter = sessionRange,
-                    ascendingOrder = false
-                )
-                val existing = healthConnectClient
-                    .readRecords(ReadRecordsRequest(recordType, sessionRange))
-                    .records
-
-                Log.d(TAG, "🔎 Found ${existing.size} ${recordType.simpleName} records to delete")
-
-                if (existing.isNotEmpty()) {
-                    // 2️⃣ Collect both system IDs and client IDs
-                    // force‐cast each item into the public class
-                    val recordIds = existing.map { record ->
-                        recordType.java.cast(record)   // -> T
-                        (recordType.java.cast(record) as Record).metadata.id
-                    }
-
-                    val clientIds = existing.mapNotNull { record ->
-                        recordType.java.cast(record)   // -> T
-                        (recordType.java.cast(record) as Record).metadata.clientRecordId
-                    }
-
-
-                    // 3️⃣ Delete by IDs
-                    Log.d(
-                        TAG,
-                        "🗑 Deleting ${recordType.simpleName} (records=${recordIds.size}, clientIds=${clientIds.size})…"
-                    )
-                    healthConnectClient.deleteRecords(
-                        recordType = recordType,
-                        recordIdsList = recordIds,
-                        clientRecordIdsList = clientIds
-                    )
-                    Log.d(TAG, "✅ Deleted ${recordType.simpleName} records successfully")
-                } else {
-                    Log.d(TAG, "⚪ No ${recordType.simpleName} records to delete")
-                }
+                deleteRecordsOfType(recordType, sessionRange)
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Error deleting ${recordType.simpleName}", e)
             }
         }
-
         Log.d(TAG, "🏁 deleteAllSessionData() completed")
     }
 
     /**
      * Deletes *all* records of the common Health Connect types up until now.
-     * Any records you have written (sessions, steps, distance, calories, heart-rate, etc.) will be removed.
      */
     @SuppressLint("RestrictedApi")
     suspend fun deleteAllHealthData() {
         val now = Instant.now()
         val filter = TimeRangeFilter.before(now)
 
-        // List every Record type you want to purge
-        val recordTypes: List<KClass<out Record>> = listOf(
+        val recordTypes = listOf(
             ExerciseSessionRecord::class,
             StepsRecord::class,
             DistanceRecord::class,
             TotalCaloriesBurnedRecord::class,
             HeartRateRecord::class,
-            // SleepSessionRecord::class,
             WeightRecord::class
-            // …add any other types your app uses…
         )
 
         recordTypes.forEach { type ->
             try {
                 Log.d(TAG, "🗑 Deleting all ${type.simpleName} records before $now…")
-                // This call deletes *all* records matching the filter for that type
                 healthConnectClient.deleteRecords(type, filter)
                 Log.d(TAG, "✅ Deleted all ${type.simpleName} records")
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Failed to delete ${type.simpleName}", e)
             }
         }
-
         Log.d(TAG, "🏁 deleteAllHealthData() complete")
     }
-
 
     /**
      * Reads and logs *all* records of the common Health Connect types up until now.
@@ -672,14 +492,12 @@ class HealthSessionManager(private val context: Context) {
         val now = Instant.now()
         val filter = TimeRangeFilter.before(now)
 
-        // Add any other types your app uses:
-        val recordTypes: List<KClass<out Record>> = listOf(
+        val recordTypes = listOf(
             ExerciseSessionRecord::class,
             StepsRecord::class,
             DistanceRecord::class,
             TotalCaloriesBurnedRecord::class,
             HeartRateRecord::class,
-            //SleepSessionRecord::class,
             WeightRecord::class
         )
 
@@ -701,38 +519,21 @@ class HealthSessionManager(private val context: Context) {
                 Log.e(TAG, "❌ Error reading ${type.simpleName}", e)
             }
         }
-
         Log.d(TAG, "🏁 logAllHealthData() complete")
     }
 
-
-    /**
-     * Deletes all existing sleep data.
-     */
     suspend fun deleteExerciseSessionData() {
-        val now = Instant.now()
-        healthConnectClient.deleteRecords(ExerciseSessionRecord::class, TimeRangeFilter.before(now))
+        healthConnectClient.deleteRecords(
+            ExerciseSessionRecord::class,
+            TimeRangeFilter.before(Instant.now())
+        )
     }
 
-    /**
-     * Generates a week's worth of sleep data using a [androidx.health.connect.client.records.SleepSessionRecord] to describe the overall
-     * period of sleep, with multiple [androidx.health.connect.client.records.SleepSessionRecord.Stage] periods which cover the entire
-     * [androidx.health.connect.client.records.SleepSessionRecord]. For the purposes of this sample, the sleep stage data is generated randomly.
-     */
     suspend fun generateSleepData() {
         val records = mutableListOf<Record>()
-        // Make yesterday the last day of the sleep data
         val lastDay = ZonedDateTime.now().minusDays(1).truncatedTo(ChronoUnit.DAYS)
-        val notes = arrayOf(
-            "good",
-            "bad",
-            "ok",
-            "good",
-            "bad",
-            "ok",
-            "good"
-        )//NOTE: context.resources.getStringArray(R.array.sleep_notes_array)
-        // Create 7 days-worth of sleep data
+        val notes = arrayOf("good", "bad", "ok", "good", "bad", "ok", "good")
+
         for (i in 0..7) {
             val wakeUp = lastDay.minusDays(i.toLong())
                 .withHour(Random.nextInt(7, 10))
@@ -747,28 +548,18 @@ class HealthSessionManager(private val context: Context) {
                 endTime = wakeUp.toInstant(),
                 endZoneOffset = wakeUp.offset,
                 stages = generateSleepStages(bedtime, wakeUp),
-                metadata = Metadata.autoRecorded(
-                    device = Device(type = Device.TYPE_WATCH)
-                )
+                metadata = Metadata.autoRecorded(device = Device(type = Device.TYPE_WATCH))
             )
             records.add(sleepSession)
         }
         healthConnectClient.insertRecords(records)
     }
 
-    /**
-     * Reads sleep sessions for the previous seven days (from yesterday) to show a week's worth of
-     * sleep data.
-     *
-     * In addition to reading [androidx.health.connect.client.records.SleepSessionRecord]s, for each session, the duration is calculated to
-     * demonstrate aggregation, and the underlying [androidx.health.connect.client.records.SleepSessionRecord.Stage] data is also read.
-     */
     suspend fun readSleepSessions(): List<SleepSessionData> {
         val lastDay = ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS)
             .minusDays(1)
             .withHour(12)
-        val firstDay = lastDay
-            .minusDays(7)
+        val firstDay = lastDay.minusDays(7)
 
         val sessions = mutableListOf<SleepSessionData>()
         val sleepSessionRequest = ReadRecordsRequest(
@@ -801,34 +592,20 @@ class HealthSessionManager(private val context: Context) {
         return sessions
     }
 
-    /**
-     * Writes [androidx.health.connect.client.records.WeightRecord] to Health Connect.
-     */
     suspend fun writeWeightInput(weight: WeightRecord) {
-        val records = listOf(weight)
-        healthConnectClient.insertRecords(records)
+        healthConnectClient.insertRecords(listOf(weight))
     }
 
-    /**
-     * Reads in existing [androidx.health.connect.client.records.WeightRecord]s.
-     */
-    suspend fun readWeightInputs(start: Instant, end: Instant): List<WeightRecord> {
-        val request = ReadRecordsRequest(
-            recordType = WeightRecord::class,
-            timeRangeFilter = TimeRangeFilter.between(start, end)
-        )
-        val response = healthConnectClient.readRecords(request)
-        return response.records
-    }
+    suspend fun readWeightInputs(start: Instant, end: Instant): List<WeightRecord> =
+        healthConnectClient.readRecords(
+            ReadRecordsRequest(
+                recordType = WeightRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(start, end)
+            )
+        ).records
 
-
-    /**
-     *
-     */
     suspend fun readSessionInputs(): List<ExerciseSessionRecord> {
-        // “All‐time” filter: everything up until now
         val allTime = TimeRangeFilter.before(Instant.now())
-
         Log.d("DebugSync", "Reading all sessions before ${Instant.now()}")
 
         val recs = healthConnectClient.readRecords(
@@ -842,21 +619,14 @@ class HealthSessionManager(private val context: Context) {
         return recs
     }
 
-    /**
-     * Returns the weekly average of [androidx.health.connect.client.records.WeightRecord]s.
-     */
     suspend fun computeWeeklyAverage(start: Instant, end: Instant): Mass? {
         val request = AggregateRequest(
             metrics = setOf(WeightRecord.WEIGHT_AVG),
             timeRangeFilter = TimeRangeFilter.between(start, end)
         )
-        val response = healthConnectClient.aggregate(request)
-        return response[WeightRecord.WEIGHT_AVG]
+        return healthConnectClient.aggregate(request)[WeightRecord.WEIGHT_AVG]
     }
 
-    /**
-     * Deletes a [androidx.health.connect.client.records.WeightRecord]s.
-     */
     suspend fun deleteWeightInput(uid: String) {
         healthConnectClient.deleteRecords(
             WeightRecord::class,
@@ -865,29 +635,14 @@ class HealthSessionManager(private val context: Context) {
         )
     }
 
-    /**
-     * Obtains a changes token for the specified record types.
-     */
-    suspend fun getChangesToken(dataTypes: Set<KClass<out Record>>): String {
-        val request = ChangesTokenRequest(dataTypes)
-        return healthConnectClient.getChangesToken(request)
-    }
+    suspend fun getChangesToken(dataTypes: Set<KClass<out Record>>): String =
+        healthConnectClient.getChangesToken(ChangesTokenRequest(dataTypes))
 
-    /**
-     * Creates a [Flow] of change messages, using a changes token as a start point. The flow will
-     * terminate when no more changes are available, and the final message will contain the next
-     * changes token to use.
-     */
     suspend fun getChanges(token: String): Flow<ChangesMessage> = flow {
         var nextChangesToken = token
         do {
             val response = healthConnectClient.getChanges(nextChangesToken)
             if (response.changesTokenExpired) {
-                // As described here: https://developer.android.com/guide/health-and-fitness/health-connect/data-and-data-types/differential-changes-api
-                // tokens are only valid for 30 days. It is important to check whether the token has
-                // expired. As well as ensuring there is a fallback to using the token (for example
-                // importing data since a certain date), more importantly, the app should ensure
-                // that the changes API is used sufficiently regularly that tokens do not expire.
                 throw IOException("Changes token has expired")
             }
             emit(ChangesMessage.ChangeList(response.changes))
@@ -896,11 +651,7 @@ class HealthSessionManager(private val context: Context) {
         emit(ChangesMessage.NoMoreChanges(nextChangesToken))
     }
 
-    /** Creates a random sleep stage that spans the specified [start] to [end] time. */
-    private fun generateSleepStages(
-        start: ZonedDateTime,
-        end: ZonedDateTime
-    ): List<SleepSessionRecord.Stage> {
+    private fun generateSleepStages(start: ZonedDateTime, end: ZonedDateTime): List<SleepSessionRecord.Stage> {
         val sleepStages = mutableListOf<SleepSessionRecord.Stage>()
         var stageStart = start
         while (stageStart < end) {
@@ -918,64 +669,44 @@ class HealthSessionManager(private val context: Context) {
         return sleepStages
     }
 
-    /**
-     * Convenience function to fetch a time-based record and return series data based on the record.
-     * Record types compatible with this function must be declared in the
-     * [com.example.healthconnectsample.presentation.screen.recordlist.RecordType] enum.
-     */
     suspend fun fetchSeriesRecordsFromUid(
         recordType: KClass<out Record>,
         uid: String,
         seriesRecordsType: KClass<out Record>
     ): List<Record> {
         val recordResponse = healthConnectClient.readRecord(recordType, uid)
-        // Use the start time and end time from the session, for reading raw and aggregate data.
-        val timeRangeFilter =
-            when (recordResponse.record) {
-                // Change to use series record instead
-                is ExerciseSessionRecord -> {
-                    val record = recordResponse.record as ExerciseSessionRecord
-                    TimeRangeFilter.between(startTime = record.startTime, endTime = record.endTime)
-                }
-
-                is SleepSessionRecord -> {
-                    val record = recordResponse.record as SleepSessionRecord
-                    TimeRangeFilter.between(startTime = record.startTime, endTime = record.endTime)
-                }
-
-                else -> {
-                    throw InvalidObjectException("Record with unregistered data type returned")
-                }
+        val timeRangeFilter = when (recordResponse.record) {
+            is ExerciseSessionRecord -> {
+                val record = recordResponse.record as ExerciseSessionRecord
+                TimeRangeFilter.between(startTime = record.startTime, endTime = record.endTime)
             }
+            is SleepSessionRecord -> {
+                val record = recordResponse.record as SleepSessionRecord
+                TimeRangeFilter.between(startTime = record.startTime, endTime = record.endTime)
+            }
+            else -> {
+                throw InvalidObjectException("Record with unregistered data type returned")
+            }
+        }
 
-        // Limit the data read to just the application that wrote the session. This may or may not
-        // be desirable depending on the use case: In some cases, it may be useful to combine with
-        // data written by other apps.
         val dataOriginFilter = setOf(recordResponse.record.metadata.dataOrigin)
-        val request =
-            ReadRecordsRequest(
-                recordType = seriesRecordsType,
-                dataOriginFilter = dataOriginFilter,
-                timeRangeFilter = timeRangeFilter
-            )
+        val request = ReadRecordsRequest(
+            recordType = seriesRecordsType,
+            dataOriginFilter = dataOriginFilter,
+            timeRangeFilter = timeRangeFilter
+        )
         return healthConnectClient.readRecords(request).records
     }
 
-    /**
-     * Reads the most recent HeartRateRecord sample, if any.
-     */
     suspend fun readLatestHeartRateSample(): HeartRateRecord.Sample? {
-        // 1) Read the latest record (we only need the most recent record)
         val request = ReadRecordsRequest(
             recordType = HeartRateRecord::class,
             timeRangeFilter = TimeRangeFilter.before(Instant.now()),
-            ascendingOrder = false,     // get newest first
-            pageSize = 1          // only need one record
+            ascendingOrder = false,
+            pageSize = 1
         )
         val response = healthConnectClient.readRecords(request)
         val record = response.records.firstOrNull() ?: return null
-
-        // 2) Extract the last Sample from that record’s series
         return record.samples.maxByOrNull { it.time }
     }
 
@@ -988,7 +719,8 @@ class HealthSessionManager(private val context: Context) {
         while (time.isBefore(sessionEndTime)) {
             samples.add(
                 HeartRateRecord.Sample(
-                    time = time.toInstant(), beatsPerMinute = (80 + Random.nextInt(80)).toLong()
+                    time = time.toInstant(),
+                    beatsPerMinute = (80 + Random.nextInt(80)).toLong()
                 )
             )
             time = time.plusSeconds(30)
@@ -999,22 +731,15 @@ class HealthSessionManager(private val context: Context) {
             endTime = sessionEndTime.toInstant(),
             endZoneOffset = sessionEndTime.offset,
             samples = samples,
-            metadata = Metadata.autoRecorded(
-                device = Device(type = Device.TYPE_WATCH)
-            )
+            metadata = Metadata.autoRecorded(device = Device(type = Device.TYPE_WATCH))
         )
     }
 
-    fun isFeatureAvailable(feature: Int): Boolean {
-        return healthConnectClient
-            .features
-            .getFeatureStatus(feature) == HealthConnectFeatures.FEATURE_STATUS_AVAILABLE
-    }
+    fun isFeatureAvailable(feature: Int): Boolean =
+        healthConnectClient.features.getFeatureStatus(feature) == HealthConnectFeatures.FEATURE_STATUS_AVAILABLE
 
-    // Represents the two types of messages that can be sent in a Changes flow.
     sealed class ChangesMessage {
         data class NoMoreChanges(val nextChangesToken: String) : ChangesMessage()
-
         data class ChangeList(val changes: List<Change>) : ChangesMessage()
     }
 }
