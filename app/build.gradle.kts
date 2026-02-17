@@ -54,6 +54,27 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
+    // ✅ ADD THIS: Core UI Module
+    implementation(project(":core:ui"))
+    // Nav 3 Libraries from your TOML
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+
+    // Icons
+    implementation(libs.androidx.compose.material.icons.extended)
+
+
+    // Serialization for Keys
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.serialization.json)
+
+    // Optional: ViewModel support (You have this in TOML, good to include)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
+    // The library containing the Adaptive APIs
+    implementation(libs.androidx.material3.adaptive.navigation3)
+
+
     // ✅ TESTING
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
