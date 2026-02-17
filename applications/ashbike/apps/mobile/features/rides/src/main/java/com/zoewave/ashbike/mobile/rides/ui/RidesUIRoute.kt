@@ -2,13 +2,21 @@ package com.zoewave.ashbike.mobile.rides.ui
 
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -40,7 +48,10 @@ fun RidesUIRoute(
     val scope = rememberCoroutineScope()
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 
-    // 3. Setup permissions launcher locally (Required because ViewModel cannot hold this)
+    // --- NEW: State for the Success Alert Dialog ---
+    var showSyncSuccessDialog by remember { mutableStateOf(false) }
+
+    // 3. Setup permissions launcher locally
     val permissionsLauncher = rememberLauncherForActivityResult(
         contract = PermissionController.createRequestPermissionResultContract(),
         onResult = {
@@ -71,15 +82,14 @@ fun RidesUIRoute(
                         rideId = effect.rideId,
                         healthConnectId = effect.healthConnectId
                     )
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Ride synced to Health Connect!")
-                    }
+                    // --- CHANGED: Trigger the Alert Dialog instead of Snackbar ---
+                    showSyncSuccessDialog = true
                 }
             }
         }
     }
 
-    // 5. Handle side effects from RidesViewModel (The Bridge)
+    // 5. Handle side effects from RidesViewModel
     LaunchedEffect(Unit) {
         ridesViewModel.sideEffect.collect { effect ->
             when (effect) {
@@ -135,5 +145,22 @@ fun RidesUIRoute(
                 navTo = navTo
             )
         }
+    }
+
+    // --- NEW: Render the Alert Dialog when active ---
+    if (showSyncSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = { showSyncSuccessDialog = false },
+            icon = { Icon(Icons.Filled.CheckCircle, contentDescription = null) },
+            title = { Text(text = "Sync Complete") },
+            text = { Text(text = "Your ride has been successfully synced to Health Connect.") },
+            confirmButton = {
+                TextButton(
+                    onClick = { showSyncSuccessDialog = false }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
