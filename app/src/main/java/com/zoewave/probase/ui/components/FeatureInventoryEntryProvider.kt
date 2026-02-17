@@ -12,7 +12,8 @@ import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventoryScreen
 
 fun featureInventoryEntryProvider(
     key: NavKey,
-    navigateTo: (NavKey) -> Unit
+    navigateTo: (NavKey) -> Unit,
+    navigateBack: () -> Unit // ✅ Receive the back action
 ): NavEntry<NavKey> {
 
     // We wrap the content in a NavEntry, casting the key back to our specific type
@@ -28,18 +29,23 @@ fun featureInventoryEntryProvider(
             }
 
             is FeatureInventory.Health -> {
-                HealthRoute()
+                FeatureScaffold(title = "Health", onBack = navigateBack) {
+                    HealthRoute()
+                }
             }
 
             is FeatureInventory.Rides -> {
+                FeatureScaffold(title = "Rides", onBack = navigateBack) {}
                 // RidesUIRoute(navTo = { /* Handle internal navigation */ })
             }
 
             is FeatureInventory.Settings -> {
+                FeatureScaffold(title = "Settings", onBack = navigateBack) {}
                 // SettingsUiRoute()
             }
 
             is FeatureInventory.Weather -> {
+                FeatureScaffold(title = "Weather", onBack = navigateBack) {}
                 // WeatherUiRoute()
             }
 
