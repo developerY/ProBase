@@ -21,6 +21,9 @@ fun FeatureInventoryNavHost(
         backStack.add(dest)
     }
 
+    // Define the Back Action
+    val navigateBack: () -> Unit = { backStack.removeLastOrNull() }
+
     // 3. Back Handler
     // NavBackStack usually implements List/Collection, so checking size works
     BackHandler(enabled = backStack.size > 1) {
@@ -37,7 +40,8 @@ fun FeatureInventoryNavHost(
             // ✅ DELEGATE: Call the provider function
             featureInventoryEntryProvider(
                 key = key,
-                navigateTo = navigateTo
+                navigateTo = navigateTo,
+                navigateBack = navigateBack
             )
         }
     )
