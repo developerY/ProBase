@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.health.connect.client.PermissionController
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import com.zoewave.ashbike.mobile.rides.ui.components.BikeTripsCompose
@@ -25,7 +26,6 @@ import kotlinx.coroutines.launch
 fun RidesUIRoute(
     modifier: Modifier = Modifier,
     navTo: (String) -> Unit,
-    // Ask Hilt for both viewmodels
     ridesViewModel: RidesViewModel = hiltViewModel(),
     healthViewModel: HealthViewModel = hiltViewModel(),
 ) {
@@ -33,82 +33,59 @@ fun RidesUIRoute(
     val tripsUiState by ridesViewModel.uiState.collectAsState()
     val healthUiState by healthViewModel.uiState.collectAsState()
 
-    // 2. Observe the set of already-synced IDs from HealthViewModel
-    val syncedIds by healthViewModel.syncedIds.collectAsState() // This line was present in an earlier version you showed, ensure it's still needed or remove if not.
+    // 2. Observe the set of already-synced IDs to update icons
+    val syncedIds by healthViewModel.syncedIds.collectAsState()
 
-    // 2. Setup Snackbar for showing errors from HealthViewModel
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 
-    // 3. Setup permissions launcher for Health Connect permissions
+    // 3. Setup permissions launcher locally (Required because ViewModel cannot hold this)
     val permissionsLauncher = rememberLauncherForActivityResult(
-        contract = healthViewModel.permissionsLauncher,
-        onResult = { healthViewModel.onEvent(HealthEvent.LoadHealthData) }
+        contract = PermissionController.createRequestPermissionResultContract(),
+        onResult = {
+            // When user returns from permission screen, tell ViewModel to retry/load
+            healthViewModel.onEvent(HealthEvent.LoadHealthData)
+        }
     )
 
-    // 4. Handle side effects from BOTH ViewModels
-
-    val lifecycleOwner =
-        androidx.lifecycle.compose.LocalLifecycleOwner.current // Get the lifecycle owner for the check
-
-    // Effect handler for HealthViewModel
-    LaunchedEffect(Unit) { // Changed key from (healthUiState, snackbarHostState) to Unit for consistency if only collecting side effects
-        // Error handling for healthUiState can be separate if needed, or kept if healthUiState changes should re-trigger collection logic
-        if (healthUiState is HealthUiState.Error) { // This will only be checked when the LaunchedEffect initially runs or if its keys change.
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = (healthUiState as HealthUiState.Error).message
-                )
-            }
-        }
-
+    // 4. Handle side effects from HealthViewModel
+    LaunchedEffect(Unit) {
         healthViewModel.sideEffect.collect { effect ->
             when (effect) {
                 is HealthSideEffect.LaunchPermissions -> {
-                    // CRITICAL: This check is necessary to prevent this TripsUIRoute,
-                    // which shares HealthViewModel with other screens (e.g., Settings),
-                    // from attempting to launch the Health Connect permissions dialog
-                    // when it's not the active, resumed screen. Without this, if TripsUIRoute
-                    // is in the backstack but still composed, it can interfere with the
-                    // foreground screen's attempt to launch the same permissions dialog,
-                    // causing the dialog to not appear or behave unpredictably.
+                    // CRITICAL: Only launch permissions if this screen is actually visible (RESUMED).
+                    // This prevents conflicts if HealthViewModel emits this while the user
+                    // is on the "Settings" or "Health" tab.
                     if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.RESUMED) {
-                        Log.d(
-                            "TripsUIRoute",
-                            "LaunchPermissions side effect received IN TRIPS UI (RESUMED). Launching its own permissionsLauncher."
-                        )
+                        Log.d("RidesUIRoute", "Launching permissions request from Rides screen.")
                         permissionsLauncher.launch(effect.permissions)
                     } else {
-                        Log.d(
-                            "TripsUIRoute",
-                            "LaunchPermissions side effect received IN TRIPS UI (NOT RESUMED - Current state: ${lifecycleOwner.lifecycle.currentState}). Ignoring."
-                        )
+                        Log.d("RidesUIRoute", "Ignoring permission request (Screen not RESUMED).")
                     }
                 }
 
                 is HealthSideEffect.BikeRideSyncedToHealth -> {
-                    Log.d(
-                        "TripsUIRoute",
-                        "BikeRideSyncedToHealth side effect received. Marking ride ${effect.rideId} as synced."
-                    )
+                    Log.d("RidesUIRoute", "Ride ${effect.rideId} synced. Updating local DB.")
                     ridesViewModel.markRideAsSyncedInLocalDb(
                         rideId = effect.rideId,
                         healthConnectId = effect.healthConnectId
                     )
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Ride synced to Health Connect!")
+                    }
                 }
             }
         }
     }
 
-    // Effect handler for TripsViewModel
+    // 5. Handle side effects from RidesViewModel (The Bridge)
     LaunchedEffect(Unit) {
         ridesViewModel.sideEffect.collect { effect ->
             when (effect) {
+                // When RidesViewModel says "Sync this!", we forward it to HealthViewModel
                 is TripsSideEffect.RequestHealthConnectSync -> {
-                    Log.d(
-                        "TripsUIRoute",
-                        "Sync requested for rideId: ${effect.rideId}. Sending HealthEvent.Insert to HealthViewModel."
-                    )
+                    Log.d("RidesUIRoute", "Forwarding sync request for ${effect.rideId} to HealthViewModel")
                     healthViewModel.onEvent(
                         HealthEvent.Insert(
                             rideId = effect.rideId,
@@ -120,7 +97,18 @@ fun RidesUIRoute(
         }
     }
 
-    // Render based on your trips state
+    // 6. Handle UI State Errors (Optional: Show Snackbar if Health fails)
+    LaunchedEffect(healthUiState) {
+        if (healthUiState is HealthUiState.Error) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = (healthUiState as HealthUiState.Error).message
+                )
+            }
+        }
+    }
+
+    // 7. Render UI
     when (val state = tripsUiState) {
         RidesUIState.Loading -> LoadingScreen()
 
@@ -130,18 +118,17 @@ fun RidesUIRoute(
         )
 
         is RidesUIState.Success -> {
-            // Note the simplified parameters passed to BikeTripsCompose
             BikeTripsCompose(
                 modifier = modifier,
-                bikeRides = state.rides, // This is now List<BikeRideUiModel>
+                bikeRides = state.rides,
                 bikeEvent = ridesViewModel::onEvent,
-                syncedIds = syncedIds,
+                syncedIds = syncedIds, // Pass the synced IDs here
                 healthEvent = healthViewModel::onEvent,
                 onDeleteClick = { rideId ->
                     ridesViewModel.onEvent(RidesEvent.DeleteItem(rideId))
                 },
                 onSyncClick = { rideId ->
-                    // This triggers the new side effect flow in TripsViewModel
+                    // This triggers the side effect flow -> HealthViewModel
                     ridesViewModel.onEvent(RidesEvent.SyncRide(rideId))
                 },
                 healthUiState = healthUiState,
