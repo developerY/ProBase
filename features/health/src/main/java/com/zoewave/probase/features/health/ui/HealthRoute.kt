@@ -24,11 +24,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
@@ -40,13 +41,19 @@ fun HealthRoute(
     modifier: Modifier = Modifier,
     viewModel: HealthViewModel = hiltViewModel()
 ) {
-    val healthUiState by viewModel.uiState.collectAsState()
+    // 1. Collect State & Context
+    val state by viewModel.uiState.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
 
-    // 1. Create Launcher Here
+    // 2. Setup Launchers
+    // Launcher for opening Health Connect Settings
     val settingsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
-        onResult = { }
+        onResult = {
+            // When user returns from settings, reload data to check if permissions changed
+            viewModel.onEvent(HealthEvent.LoadHealthData)
+        }
     )
 
     // Launcher for requesting permissions
@@ -58,40 +65,44 @@ fun HealthRoute(
         }
     )
 
-    // Initial Load & Lifecycle Observer
+    // 3. Handle Side Effects
+    LaunchedEffect(Unit) {
+        viewModel.sideEffect.collect { effect ->
+            when (effect) {
+                is HealthSideEffect.LaunchPermissions -> {
+                    Log.d("HealthRoute", "Launching Permissions Contract")
+                    permissionsLauncher.launch(effect.permissions)
+                }
+                is HealthSideEffect.OpenHealthConnectSettings -> {
+                    // Create the intent to open Health Connect settings
+                    val intent = Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS)
+                    settingsLauncher.launch(intent)
+                }
+                // Handle other effects if necessary (e.g. Sync success toast)
+                else -> { /* No-op for now */ }
+            }
+        }
+    }
+
+    // 4. Lifecycle Observer (Auto-reload on Resume)
     LaunchedEffect(lifecycleOwner) {
-        // Reload data whenever the app comes to the foreground (e.g. returning from Settings)
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             viewModel.onEvent(HealthEvent.LoadHealthData)
         }
     }
 
-    // Side Effect Listener
-    LaunchedEffect(Unit) {
-        viewModel.sideEffect.collect { effect ->
-            if (effect is HealthSideEffect.LaunchPermissions) {
-                Log.d("HealthRoute", "Launching Permissions Contract")
-                permissionsLauncher.launch(effect.permissions)
-            }
-        }
-    }
-
+    // 5. Render UI
     Box(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        when (val state = healthUiState) {
+        when (val uiState = state) {
             is HealthUiState.Success -> {
                 HealthDataScreen(
-                    weeklySteps = state.weeklySteps,
-                    weeklyDistance = state.weeklyDistance,
-                    weeklyCalories = state.weeklyCalories,
-                    onManagePermissionsClick = {
-                        val intent = Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS)
-                        settingsLauncher.launch(intent)
-                    }
+                    state = uiState,             // ✅ Pass the Success State
+                    onEvent = viewModel::onEvent // ✅ Pass the Event Handler
                 )
             }
 
@@ -103,12 +114,13 @@ fun HealthRoute(
 
             is HealthUiState.Error -> {
                 ErrorScreen(
-                    message = state.message,
+                    message = uiState.message, // Ensure ErrorScreen parameter matches "errorMessage"
                     onRetry = { viewModel.onEvent(HealthEvent.Retry) }
                 )
             }
 
-            else -> { // Loading
+            // Loading or Initial state
+            else -> {
                 CircularProgressIndicator()
             }
         }

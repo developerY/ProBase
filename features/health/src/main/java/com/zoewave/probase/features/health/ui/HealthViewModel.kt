@@ -13,6 +13,8 @@ import androidx.health.connect.client.records.WeightRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
+import com.zoewave.probase.features.health.domain.HealthRideRequest
+import com.zoewave.probase.features.health.domain.SyncRideUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,25 +31,30 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 import javax.inject.Inject
 
+// 1. Define Side Effects
 sealed interface HealthSideEffect {
     data class LaunchPermissions(val permissions: Set<String>) : HealthSideEffect
-    data class BikeRideSyncedToHealth(val rideId: String, val healthConnectId: String) : HealthSideEffect
+    data class BikeRideSyncedToHealth(val rideId: String, val healthConnectId: String, val stats: String) : HealthSideEffect
+    data object OpenHealthConnectSettings : HealthSideEffect
 }
 
 @HiltViewModel
 class HealthViewModel @Inject constructor(
-    val healthSessionManager: HealthSessionManager
+    val healthSessionManager: HealthSessionManager,
+    private val syncRideUseCase: SyncRideUseCase
 ) : ViewModel() {
 
+    // 2. State & Events
     private val _uiState = MutableStateFlow<HealthUiState>(HealthUiState.Uninitialized)
     val uiState = _uiState.asStateFlow()
 
     private val _sideEffect = MutableSharedFlow<HealthSideEffect>()
     val sideEffect = _sideEffect.asSharedFlow()
 
-    // Defined permissions
+    // 3. Define Permissions
     val permissions = setOf(
         HealthPermission.getWritePermission(ExerciseSessionRecord::class),
         HealthPermission.getReadPermission(ExerciseSessionRecord::class),
@@ -63,12 +70,12 @@ class HealthViewModel @Inject constructor(
         HealthPermission.getReadPermission(WeightRecord::class)
     )
 
-    // Note: Generally prefer keeping UI state in the StateFlow, but this is acceptable for specific flags
+    // Note: Acceptable for specific UI toggles, though Flow is preferred for data
     var backgroundReadAvailable = mutableStateOf(false)
         private set
     var backgroundReadGranted = mutableStateOf(false)
 
-    // Tracks which local rides have been synced
+    // 4. Track Synced IDs (Reactive)
     val syncedIds: StateFlow<Set<String>> = uiState
         .map { state ->
             (state as? HealthUiState.Success)
@@ -79,6 +86,7 @@ class HealthViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
+    // 5. Main Event Handler
     fun onEvent(event: HealthEvent) {
         when (event) {
             is HealthEvent.LoadHealthData,
@@ -87,8 +95,16 @@ class HealthViewModel @Inject constructor(
             is HealthEvent.Insert -> insertBikeRideSessionAndEmitEffect(event)
             is HealthEvent.DeleteAll -> delData()
             is HealthEvent.ReadAll -> readAllData()
+            is HealthEvent.WriteTestRide -> writeTestCityRide()
+            is HealthEvent.ManagePermissions -> {
+                viewModelScope.launch {
+                    _sideEffect.emit(HealthSideEffect.OpenHealthConnectSettings)
+                }
+            }
         }
     }
+
+    // --- Private Actions ---
 
     private fun requestPermissionsOnClick() {
         viewModelScope.launch {
@@ -109,10 +125,19 @@ class HealthViewModel @Inject constructor(
                         event.rideId,
                         event.records
                     )
+
+                    // Calculate stats for the alert
+                    val totalDist = event.records.filterIsInstance<DistanceRecord>()
+                        .sumOf { it.distance.inKilometers }
+                    val totalCals = event.records.filterIsInstance<TotalCaloriesBurnedRecord>()
+                        .sumOf { it.energy.inKilocalories }
+                    val statsMsg = "Distance: %.2f km\nEnergy: %.0f kcal".format(totalDist, totalCals)
+
                     _sideEffect.emit(
                         HealthSideEffect.BikeRideSyncedToHealth(
                             rideId = clientRideId,
-                            healthConnectId = clientRideId
+                            healthConnectId = clientRideId,
+                            stats = statsMsg
                         )
                     )
                     // Refresh data after insert
@@ -136,7 +161,7 @@ class HealthViewModel @Inject constructor(
                 if (healthSessionManager.hasAllPermissions(permissions)) {
                     val sessions = readSessionInputs()
 
-                    // Define the range once
+                    // Define the range
                     val end = Instant.now()
                     val start = ZonedDateTime.now().minusDays(7).truncatedTo(ChronoUnit.DAYS).toInstant()
 
@@ -145,12 +170,12 @@ class HealthViewModel @Inject constructor(
                         .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
                         .mapValues { entry -> entry.value.sumOf { it.count } }
 
-                    // 2. Fetch Distance (Sum in Meters)
+                    // 2. Fetch Distance (Meters)
                     val distMap = healthSessionManager.readDistance(start, end)
                         .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
                         .mapValues { entry -> entry.value.sumOf { it.distance.inMeters } }
 
-                    // 3. Fetch Calories (Sum in Kcal)
+                    // 3. Fetch Calories (Kcal)
                     val calMap = healthSessionManager.readTotalCalories(start, end)
                         .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
                         .mapValues { entry -> entry.value.sumOf { it.energy.inKilocalories } }
@@ -179,26 +204,6 @@ class HealthViewModel @Inject constructor(
         return healthSessionManager.readExerciseSessions(sevenDaysAgo.toInstant(), now)
     }
 
-    /**
-     * Reads raw steps and aggregates them by day for the graph.
-     */
-    private suspend fun readWeeklySteps(): Map<String, Long> {
-        val end = Instant.now()
-        val start = ZonedDateTime.now().minusDays(7).truncatedTo(ChronoUnit.DAYS).toInstant()
-
-        return try {
-            val steps = healthSessionManager.readSteps(start, end)
-            // Group by Date (YYYY-MM-DD) and sum the count
-            steps.groupBy {
-                it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString()
-            }.mapValues { entry ->
-                entry.value.sumOf { it.count }
-            }
-        } catch (e: Exception) {
-            emptyMap()
-        }
-    }
-
     private suspend fun tryWithPermissionsCheck(block: suspend () -> Unit) {
         if (healthSessionManager.availability.value != HealthConnectClient.SDK_AVAILABLE) {
             _uiState.value = HealthUiState.Error("Health Connect SDK not available.")
@@ -217,20 +222,46 @@ class HealthViewModel @Inject constructor(
         }
     }
 
+    private fun writeTestCityRide() {
+        viewModelScope.launch {
+            // 1. Create Dummy Data (A 25-minute city commute)
+            val end = System.currentTimeMillis()
+            val start = end - (25 * 60 * 1000) // 25 mins ago
+
+            val dummyRide = HealthRideRequest(
+                id = UUID.randomUUID().toString(),
+                startEpochMillis = start,
+                endEpochMillis = end,
+                distanceMeters = 4500.0, // 4.5 km
+                caloriesKcal = 210.0,    // 210 kcal
+                title = "Test City Ride \uD83D\uDEB4", // 🚴
+                notes = "Simulated ride created via Debug Menu",
+                avgHeartRate = 115,
+                maxHeartRate = 130
+            )
+
+            // 2. Convert to Health Connect Records
+            val records = syncRideUseCase(dummyRide)
+
+            // 3. Insert into Health Connect
+            tryWithPermissionsCheck {
+                healthSessionManager.insertRecords(records)
+                onEvent(HealthEvent.LoadHealthData)
+            }
+        }
+    }
+
     private var isObservingChanges = false
     private fun observeHealthConnectChanges() {
         if (isObservingChanges || healthSessionManager.availability.value != HealthConnectClient.SDK_AVAILABLE) return
         viewModelScope.launch {
             isObservingChanges = true
             try {
-                // Monitor both Sessions and Steps
                 val token = healthSessionManager.getChangesToken(
                     setOf(ExerciseSessionRecord::class, StepsRecord::class)
                 )
                 healthSessionManager.getChanges(token)
-                    .catch {
-                        isObservingChanges = false
-                    }
+                    .catch { isObservingChanges = false }
                     .filterIsInstance<HealthSessionManager.ChangesMessage.ChangeList>()
                     .collect {
                         initialLoad()

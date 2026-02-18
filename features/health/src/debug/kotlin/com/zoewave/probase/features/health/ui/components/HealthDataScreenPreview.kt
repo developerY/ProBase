@@ -4,13 +4,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.zoewave.probase.features.health.ui.HealthUiState
 import java.time.LocalDate
 
-@Preview(showBackground = true, name = "Health Data Light", heightDp = 800)
+@Preview(showBackground = true, name = "Health Data Light", heightDp = 1000)
 @Preview(showBackground = true, name = "Health Data Dark", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun HealthDataScreenPreview() {
-    // Generate mock data for the last 7 days
+    // 1. Generate mock data for the last 7 days
     val today = LocalDate.now()
     val mockSteps = mutableMapOf<String, Long>()
     val mockDistance = mutableMapOf<String, Double>() // Meters
@@ -29,13 +30,19 @@ fun HealthDataScreenPreview() {
     mockSteps[spikeDate] = 15000L
     mockDistance[spikeDate] = 12500.0
 
+    // 2. Create the Mock State
+    val mockState = HealthUiState.Success(
+        sessions = emptyList(), // Can be empty for this preview
+        weeklySteps = mockSteps,
+        weeklyDistance = mockDistance,
+        weeklyCalories = mockCalories
+    )
+
     MaterialTheme {
         Surface {
             HealthDataScreen(
-                weeklySteps = mockSteps,
-                weeklyDistance = mockDistance,
-                weeklyCalories = mockCalories,
-                onManagePermissionsClick = {}
+                state = mockState,
+                onEvent = {} // No-op for preview
             )
         }
     }

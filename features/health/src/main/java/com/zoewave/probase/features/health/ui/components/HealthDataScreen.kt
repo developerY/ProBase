@@ -1,10 +1,12 @@
 package com.zoewave.probase.features.health.ui.components
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -13,7 +15,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -23,22 +28,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.health.ui.HealthEvent
+import com.zoewave.probase.features.health.ui.HealthUiState
 
 @Composable
 fun HealthDataScreen(
-    weeklySteps: Map<String, Long>,
-    weeklyDistance: Map<String, Double>,
-    weeklyCalories: Map<String, Double>,
-    onManagePermissionsClick: () -> Unit // <--- 1. Add Lambda
+    state: HealthUiState.Success, // ✅ ONLY State
+    onEvent: (HealthEvent) -> Unit // ✅ ONLY Event Handler
 ) {
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()), // Make screen scrollable
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Success Header
+        // --- Header ---
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -68,34 +72,52 @@ fun HealthDataScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        // 1. Steps Chart
+        // --- Charts ---
         GenericWeeklyChart(
             title = "Steps",
-            data = weeklySteps.mapValues { it.value.toDouble() },
+            data = state.weeklySteps.mapValues { it.value.toDouble() },
             color = MaterialTheme.colorScheme.primary,
             formatValue = { v -> if (v > 999) "${(v / 1000).toInt()}k" else "${v.toInt()}" }
         )
 
-        // 2. Calories Chart
         GenericWeeklyChart(
             title = "Calories (kcal)",
-            data = weeklyCalories,
-            color = Color(0xFFFF9800), // Orange
+            data = state.weeklyCalories,
+            color = Color(0xFFFF9800),
             formatValue = { v -> "${v.toInt()}" }
         )
 
-        // 3. Distance Chart
         GenericWeeklyChart(
             title = "Distance (km)",
-            data = weeklyDistance,
-            color = Color(0xFF03A9F4), // Blue
-            formatValue = { v -> String.format("%.1f", v / 1000) } // Convert meters to km
+            data = state.weeklyDistance,
+            color = Color(0xFF03A9F4),
+            formatValue = { v -> String.format("%.1f", v / 1000) }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
+        // --- Actions ---
+
+        // 1. Write Test Data (Triggered via Event)
+        Button(
+            onClick = { onEvent(HealthEvent.WriteTestRide) },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.tertiary
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Add Test City Ride (4.5km)")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 2. Manage Permissions (Triggered via Event)
         OutlinedButton(
-            onClick = onManagePermissionsClick,
+            onClick = { onEvent(HealthEvent.ManagePermissions) },
             modifier = Modifier.padding(bottom = 32.dp)
         ) {
             Text("Manage Permissions")
