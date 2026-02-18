@@ -14,7 +14,6 @@ import com.zoewave.probase.features.nfc.ui.components.screens.NfcAppScreen
 @Composable
 fun NfcUiRoute(
     modifier: Modifier = Modifier,
-    navTo: (String) -> Unit,
     viewModel: NfcViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -42,7 +41,6 @@ fun NfcUiRoute(
             NfcAppScreen(
                 modifier = modifier,
                 uiState = uiState,
-                navTo = navTo,
                 onEvent = { event -> viewModel.onEvent(event) }
             )
         }

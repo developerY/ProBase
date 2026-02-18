@@ -50,7 +50,6 @@ fun WeatherScreen(
     settings: Map<String, List<String>>,
     location: LatLng?,
     onEvent: (WeatherEvent) -> Unit,
-    navTo: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
