@@ -1,5 +1,6 @@
 package com.zoewave.probase.features.health.ui.components
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,8 +33,8 @@ import com.zoewave.probase.features.health.ui.HealthUiState
 
 @Composable
 fun HealthDataScreen(
-    state: HealthUiState.Success,
-    onEvent: (HealthEvent) -> Unit
+    state: HealthUiState.Success, // ✅ ONLY State
+    onEvent: (HealthEvent) -> Unit // ✅ ONLY Event Handler
 ) {
     Column(
         modifier = Modifier
@@ -41,7 +42,7 @@ fun HealthDataScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Success Header
+        // --- Header ---
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -71,7 +72,7 @@ fun HealthDataScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        // 1. Steps Chart
+        // --- Charts ---
         GenericWeeklyChart(
             title = "Steps",
             data = state.weeklySteps.mapValues { it.value.toDouble() },
@@ -79,7 +80,6 @@ fun HealthDataScreen(
             formatValue = { v -> if (v > 999) "${(v / 1000).toInt()}k" else "${v.toInt()}" }
         )
 
-        // 2. Calories Chart
         GenericWeeklyChart(
             title = "Calories (kcal)",
             data = state.weeklyCalories,
@@ -87,7 +87,6 @@ fun HealthDataScreen(
             formatValue = { v -> "${v.toInt()}" }
         )
 
-        // 3. Distance Chart
         GenericWeeklyChart(
             title = "Distance (km)",
             data = state.weeklyDistance,
@@ -97,11 +96,17 @@ fun HealthDataScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // --- ADD TEST RIDE ---
+        // --- Actions ---
+
+        // 1. Write Test Data (Triggered via Event)
         Button(
-            onClick = { onEvent(HealthEvent.WriteTestRide) }, // ✅ Event
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+            onClick = { onEvent(HealthEvent.WriteTestRide) },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.tertiary
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         ) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(Modifier.width(8.dp))
@@ -110,9 +115,9 @@ fun HealthDataScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- MANAGE PERMISSIONS ---
+        // 2. Manage Permissions (Triggered via Event)
         OutlinedButton(
-            onClick = { onEvent(HealthEvent.ManagePermissions) }, // ✅ Event
+            onClick = { onEvent(HealthEvent.ManagePermissions) },
             modifier = Modifier.padding(bottom = 32.dp)
         ) {
             Text("Manage Permissions")
