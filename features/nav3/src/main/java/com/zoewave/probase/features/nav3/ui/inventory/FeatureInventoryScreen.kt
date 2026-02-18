@@ -14,8 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsBike
+import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.DirectionsBike
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -37,7 +38,8 @@ fun FeatureInventoryScreen(
     onNavigateToHealth: () -> Unit,
     onNavigateToRides: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToWeather: () -> Unit
+    onNavigateToWeather: () -> Unit,
+    onNavigateToBle: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -65,7 +67,7 @@ fun FeatureInventoryScreen(
                 FeatureCard(
                     title = "Bike Rides",
                     description = "GPS tracking, speed, and ride history.",
-                    icon = Icons.Default.DirectionsBike,
+                    icon = Icons.AutoMirrored.Filled.DirectionsBike,
                     onClick = onNavigateToRides
                 )
             }
@@ -85,6 +87,15 @@ fun FeatureInventoryScreen(
                     onClick = onNavigateToSettings
                 )
             }
+            item {
+                FeatureCard(
+                    title = "Bluetooth / BLE",
+                    description = "Scan for devices, connect, and read characteristics.",
+                    icon = Icons.Default.Bluetooth, // Uses the built-in Bluetooth icon
+                    onClick = onNavigateToBle
+                )
+            }
+
         }
     }
 }

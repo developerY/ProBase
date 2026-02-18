@@ -17,7 +17,6 @@ import com.zoewave.probase.feature.weather.ui.components.WeatherScreen
 @Composable
 fun WeatherUiRoute(
     modifier: Modifier = Modifier,
-    navTo: (String) -> Unit,
     viewModel: WeatherViewModel = hiltViewModel()
 ) {
     val uiState = viewModel.uiState.collectAsState().value
@@ -50,7 +49,6 @@ fun WeatherUiRoute(
                 settings = uiState.settings,
                 location = uiState.location,   // <-- Pass the location here
                 onEvent = { event -> viewModel.onEvent(event) },
-                navTo = navTo
             )
 
 

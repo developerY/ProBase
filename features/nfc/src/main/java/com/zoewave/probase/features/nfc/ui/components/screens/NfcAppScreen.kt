@@ -35,7 +35,6 @@ import com.zoewave.probase.features.nfc.ui.NfcUiState
 fun NfcAppScreen(
     modifier: Modifier = Modifier,
     uiState: NfcUiState,
-    navTo: (String) -> Unit,
     onEvent: (NfcRwEvent) -> Unit
 ) {
     var selectedTab by remember { mutableStateOf("scan") }

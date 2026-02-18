@@ -20,4 +20,7 @@ sealed interface FeatureInventory : NavKey {
 
     @Serializable
     data object Weather : FeatureInventory
+    @Serializable
+    data object BLE : FeatureInventory
+
 }
