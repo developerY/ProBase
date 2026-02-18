@@ -1,6 +1,5 @@
 package com.zoewave.probase.features.qrscanner.ui
 
-//import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
@@ -29,13 +27,17 @@ import com.zoewave.probase.features.qrscanner.R
 @Composable
 fun QRCodeScannerScreen() {
     val context = LocalContext.current
-    var scanResult by remember { mutableStateOf(context.getString(R.string.qr_scanner_initial_result)) }
 
-    // Build options for scanning QR and Aztec codes
-    val options = remember {
-        GmsBarcodeScannerOptions.Builder()
+    // State management
+    var scanResult by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Initialize the scanner once
+    val scanner = remember(context) {
+        val options = GmsBarcodeScannerOptions.Builder()
             .setBarcodeFormats(Barcode.FORMAT_QR_CODE, Barcode.FORMAT_AZTEC)
             .build()
+        GmsBarcodeScanning.getClient(context, options)
     }
 
     Column(
@@ -45,32 +47,38 @@ fun QRCodeScannerScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Button(onClick = {
-            // NOTE: The correct call for Play Services Code Scanner is GmsBarcodeScanning.getClient
-            val scanner = GmsBarcodeScanning.getClient(context, options)
-            val result: Task<Barcode> = scanner.startScan()
-            result.addOnSuccessListener { barcode ->
-                // barcode.rawValue contains the scanned text
-                scanResult =
-                    barcode.rawValue ?: context.getString(R.string.qr_scanner_no_value_found)
-            }.addOnFailureListener { exception ->
-                scanResult = context.getString(
-                    R.string.qr_scanner_error_prefix,
-                    exception.message ?: "Unknown error"
-                )
+        Button(
+            onClick = {
+                scanner.startScan()
+                    .addOnSuccessListener { barcode ->
+                        // Success: Update result and clear errors
+                        scanResult = barcode.rawValue
+                        errorMessage = null
+                    }
+                    .addOnFailureListener { e ->
+                        // Failure: Show error message
+                        scanResult = null
+                        errorMessage = e.message ?: "Unknown error occurred"
+                    }
+                    .addOnCanceledListener {
+                        // Canceled: Reset or show a specific message
+                        scanResult = null
+                        errorMessage = "Scan canceled"
+                    }
             }
-        }) {
+        ) {
             Text(stringResource(id = R.string.qr_scanner_button_text))
         }
+
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = stringResource(id = R.string.qr_scanner_result_prefix, scanResult))
+
+        // Logic for what text to display (Safe to use stringResource here)
+        val displayText = when {
+            errorMessage != null -> stringResource(R.string.qr_scanner_error_prefix, errorMessage!!)
+            scanResult != null -> stringResource(R.string.qr_scanner_result_prefix, scanResult!!)
+            else -> stringResource(R.string.qr_scanner_initial_result)
+        }
+
+        Text(text = displayText)
     }
 }
-
-/*
-@Preview
-@Composable
-fun QRCodeScannerScreenPreview() {
-    QRCodeScannerScreen()
-}
-*/

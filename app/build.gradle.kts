@@ -50,6 +50,7 @@ dependencies {
     implementation(project(":features:ble"))
     implementation(project(":features:weather"))
     implementation(project(":features:nfc"))
+    implementation(project(":features:qrscanner"))
     // implementation(project(":core:ui"))
 
     // ✅ CORE DEPENDENCIES

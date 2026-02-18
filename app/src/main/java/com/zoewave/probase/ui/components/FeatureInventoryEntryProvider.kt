@@ -14,6 +14,7 @@ import com.zoewave.probase.features.health.ui.HealthRoute
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventory
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventoryScreen
 import com.zoewave.probase.features.nfc.ui.NfcUiRoute
+import com.zoewave.probase.features.qrscanner.ui.QRCodeScannerScreen
 
 
 fun featureInventoryEntryProvider(
@@ -31,6 +32,7 @@ fun featureInventoryEntryProvider(
                     onNavigateToWeather = { navigateTo(FeatureInventory.Weather) },
                     onNavigateToBle = { navigateTo(FeatureInventory.Ble) },
                     onNavigateToNfc = { navigateTo(FeatureInventory.Nfc) },
+                    onNavigateToQrScanner = { navigateTo(FeatureInventory.QrScanner) }
                 )
             }
 
@@ -57,6 +59,12 @@ fun featureInventoryEntryProvider(
             is FeatureInventory.Nfc -> {
                 FeatureScaffold(title = "NFC", onBack = navigateBack) {
                     NfcUiRoute()
+                }
+            }
+
+            is FeatureInventory.QrScanner -> {
+                FeatureScaffold(title = "QR Scanner", onBack = navigateBack) {
+                    QRCodeScannerScreen()
                 }
             }
 

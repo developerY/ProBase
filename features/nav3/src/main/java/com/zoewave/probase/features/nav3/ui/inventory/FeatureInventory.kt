@@ -18,4 +18,7 @@ sealed interface FeatureInventory : NavKey {
     data object Ble : FeatureInventory
     @Serializable
     data object Nfc : FeatureInventory
+
+    @Serializable
+    data object QrScanner : FeatureInventory
 }

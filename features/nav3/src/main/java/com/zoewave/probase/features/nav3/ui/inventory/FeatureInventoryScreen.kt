@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Nfc
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,7 +38,8 @@ fun FeatureInventoryScreen(
     onNavigateToHealth: () -> Unit,
     onNavigateToWeather: () -> Unit,
     onNavigateToBle: () -> Unit,
-    onNavigateToNfc: () -> Unit
+    onNavigateToNfc: () -> Unit,
+    onNavigateToQrScanner: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -84,6 +86,14 @@ fun FeatureInventoryScreen(
                     icon = Icons.Default.Nfc, // Uses the built-in Bluetooth icon
                     onClick = onNavigateToNfc
 
+                )
+            }
+            item {
+                FeatureCard(
+                    title = "QR Scanner",
+                    description = "Scan QR codes and barcodes.",
+                    icon = Icons.Default.QrCodeScanner, // Uses the built-in Bluetooth icon
+                    onClick = onNavigateToQrScanner
                 )
             }
 
