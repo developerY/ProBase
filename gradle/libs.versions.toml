@@ -68,12 +68,12 @@ playServicesMaps = "20.0.0"
 playServicesLocation = "21.3.0"
 
 # -- Health & Wear --
-healthConnect = "1.1.0"
-healthServices = "1.1.0-alpha05"
+healthConnect = "1.2.0-alpha02"
+healthServices = "1.1.0-beta01"
 wearOngoing = "1.1.0"
-wearComposeMaterial3 = "1.6.0-alpha09"
-wearComposeNavigation = "1.6.0-alpha09"
-wearCompose = "1.6.0-alpha08"
+wearComposeMaterial3 = "1.6.0-alpha10"
+wearComposeNavigation = "1.6.0-alpha10"
+wearCompose = "1.6.0-alpha10"
 playServicesWearable = "19.0.0"
 wearToolingPreview = "1.0.0"
 tiles = "1.5.0"
@@ -81,7 +81,7 @@ horologist = "0.7.15"
 watchfaceComplicationsDataSourceKtx = "1.2.1"
 
 # -- XR & Glass --
-glimmer = "1.0.0-alpha05"
+glimmer = "1.0.0-alpha06"
 projectedXR = "1.0.0-alpha04"
 
 # -- Google Services & Firebase --

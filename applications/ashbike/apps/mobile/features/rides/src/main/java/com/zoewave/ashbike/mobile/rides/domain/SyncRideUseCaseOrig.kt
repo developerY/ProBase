@@ -20,7 +20,7 @@ import javax.inject.Singleton
 
 // 1) A pure sync use-case in your domain layer:
 @Singleton
-class SyncRideUseCase @Inject constructor(
+class SyncRideUseCase_Orig @Inject constructor(
 ) {
     @SuppressLint("RestrictedApi")
     operator fun invoke(ride: BikeRide): List<Record> {
