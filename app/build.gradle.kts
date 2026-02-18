@@ -49,6 +49,7 @@ dependencies {
     implementation(project(":features:health"))
     implementation(project(":features:ble"))
     implementation(project(":features:weather"))
+    implementation(project(":features:nfc"))
     // implementation(project(":core:ui"))
 
     // ✅ CORE DEPENDENCIES

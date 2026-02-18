@@ -14,11 +14,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsBike
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,10 +35,9 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FeatureInventoryScreen(
     onNavigateToHealth: () -> Unit,
-    onNavigateToRides: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     onNavigateToWeather: () -> Unit,
-    onNavigateToBle: () -> Unit
+    onNavigateToBle: () -> Unit,
+    onNavigateToNfc: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -65,14 +63,6 @@ fun FeatureInventoryScreen(
             }
             item {
                 FeatureCard(
-                    title = "Bike Rides",
-                    description = "GPS tracking, speed, and ride history.",
-                    icon = Icons.AutoMirrored.Filled.DirectionsBike,
-                    onClick = onNavigateToRides
-                )
-            }
-            item {
-                FeatureCard(
                     title = "Weather",
                     description = "Live weather updates and forecasts.",
                     icon = Icons.Default.Cloud,
@@ -81,18 +71,19 @@ fun FeatureInventoryScreen(
             }
             item {
                 FeatureCard(
-                    title = "Settings",
-                    description = "App configuration and profile.",
-                    icon = Icons.Default.Settings,
-                    onClick = onNavigateToSettings
-                )
-            }
-            item {
-                FeatureCard(
                     title = "Bluetooth / BLE",
                     description = "Scan for devices, connect, and read characteristics.",
                     icon = Icons.Default.Bluetooth, // Uses the built-in Bluetooth icon
                     onClick = onNavigateToBle
+                )
+            }
+            item {
+                FeatureCard(
+                    title = "NFC",
+                    description = "Read and write NFC tags.",
+                    icon = Icons.Default.Nfc, // Uses the built-in Bluetooth icon
+                    onClick = onNavigateToNfc
+
                 )
             }
 

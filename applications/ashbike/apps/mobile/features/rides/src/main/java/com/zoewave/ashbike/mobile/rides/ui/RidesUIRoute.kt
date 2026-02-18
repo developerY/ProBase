@@ -2,13 +2,7 @@ package com.zoewave.ashbike.mobile.rides.ui
 
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -147,7 +141,7 @@ fun RidesUIRoute(
         }
     }
 
-    // --- NEW: Render the Alert Dialog when active ---
+    /* --- NEW: Render the Alert Dialog when active ---
     if (showSyncSuccessDialog) {
         AlertDialog(
             onDismissRequest = { showSyncSuccessDialog = false },
@@ -162,5 +156,5 @@ fun RidesUIRoute(
                 }
             }
         )
-    }
+    }*/
 }
