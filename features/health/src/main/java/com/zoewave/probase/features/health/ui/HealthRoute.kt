@@ -85,13 +85,8 @@ fun HealthRoute(
         when (val state = healthUiState) {
             is HealthUiState.Success -> {
                 HealthDataScreen(
-                    weeklySteps = state.weeklySteps,
-                    weeklyDistance = state.weeklyDistance,
-                    weeklyCalories = state.weeklyCalories,
-                    onManagePermissionsClick = {
-                        val intent = Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS)
-                        settingsLauncher.launch(intent)
-                    }
+                    state = uiState,         // ✅ Pass State
+                    onEvent = viewModel::onEvent // ✅ Pass Event Handler
                 )
             }
 

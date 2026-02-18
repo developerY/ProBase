@@ -13,6 +13,8 @@ import androidx.health.connect.client.records.WeightRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
+import com.zoewave.probase.features.health.domain.HealthRideRequest
+import com.zoewave.probase.features.health.domain.SyncRideUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +31,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 import javax.inject.Inject
 
 sealed interface HealthSideEffect {
@@ -38,7 +41,8 @@ sealed interface HealthSideEffect {
 
 @HiltViewModel
 class HealthViewModel @Inject constructor(
-    val healthSessionManager: HealthSessionManager
+    val healthSessionManager: HealthSessionManager,
+    private val syncRideUseCase: SyncRideUseCase // <--- Hilt finds this automatically!
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HealthUiState>(HealthUiState.Uninitialized)
@@ -87,6 +91,7 @@ class HealthViewModel @Inject constructor(
             is HealthEvent.Insert -> insertBikeRideSessionAndEmitEffect(event)
             is HealthEvent.DeleteAll -> delData()
             is HealthEvent.ReadAll -> readAllData()
+            is HealthEvent.WriteTestRide -> writeTestCityRide()
         }
     }
 
@@ -214,6 +219,40 @@ class HealthViewModel @Inject constructor(
         } else {
             _sideEffect.emit(HealthSideEffect.LaunchPermissions(permissions))
             _uiState.value = HealthUiState.PermissionsRequired("Action requires Health Connect permissions.")
+        }
+    }
+
+    private fun writeTestCityRide() {
+        viewModelScope.launch {
+            // 1. Create Dummy Data (A 25-minute city commute)
+            val end = System.currentTimeMillis()
+            val start = end - (25 * 60 * 1000) // 25 mins ago
+
+            // ✅ Use the local domain model (HealthRideRequest), not the external BikeRide
+            val dummyRide = HealthRideRequest(
+                id = UUID.randomUUID().toString(),
+                startEpochMillis = start,
+                endEpochMillis = end,
+                distanceMeters = 4500.0, // 4.5 km
+                caloriesKcal = 210.0,    // 210 kcal
+                title = "Test City Ride \uD83D\uDEB4", // 🚴
+                notes = "Simulated ride created via Debug Menu",
+                avgHeartRate = 115,
+                maxHeartRate = 130
+            )
+
+            // 2. Convert to Health Connect Records
+            // (Using the local SyncRideUseCase which now accepts HealthRideRequest)
+            val records = syncRideUseCase(dummyRide)
+
+            // 3. Insert into Health Connect
+            tryWithPermissionsCheck {
+                // Ensure you use your injected manager (e.g. healthConnectManager or healthSessionManager)
+                healthSessionManager.insertRecords(records)
+
+                // Trigger a reload to see the new data immediately
+                onEvent(HealthEvent.LoadHealthData)
+            }
         }
     }
 
