@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.health.ui.components.notused.usecase.health
+package com.zoewave.probase.features.health.ui.zout.usecase.health
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
