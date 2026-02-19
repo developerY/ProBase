@@ -36,7 +36,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.zoewave.probase.features.health.ui.components.ErrorScreen
 import com.zoewave.probase.features.health.ui.components.HealthConnectionStatus
-import com.zoewave.probase.features.health.ui.components.HealthDashboardTabs
+import com.zoewave.probase.features.health.ui.components.HealthDashboard
 
 @Composable
 fun HealthRoute(
@@ -109,7 +109,7 @@ fun HealthRoute(
                         modifier = Modifier.padding(16.dp)
                     )
                 } else {
-                    HealthDashboardTabs(
+                    HealthDashboard(
                         state = uiState,
                         onEvent = viewModel::onEvent
                     )
