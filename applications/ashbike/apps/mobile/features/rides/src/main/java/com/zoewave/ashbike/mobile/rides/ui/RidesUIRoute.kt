@@ -1,7 +1,9 @@
 package com.zoewave.ashbike.mobile.rides.ui
 
+import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -42,8 +45,19 @@ fun RidesUIRoute(
     val scope = rememberCoroutineScope()
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 
+    // 2. Setup Launchers
+    // Launcher for opening Health Connect Settings
+    val settingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = {
+            // When user returns from settings, reload data to check if permissions changed
+            healthViewModel.onEvent(HealthEvent.LoadHealthData)
+        }
+    )
+
     // --- NEW: State for the Success Alert Dialog ---
     var showSyncSuccessDialog by remember { mutableStateOf(false) }
+    var syncSuccessMessage by remember { mutableStateOf("") } // <--- NEW: Holds the "4.5km / 210kcal" string
 
     // 3. Setup permissions launcher locally
     val permissionsLauncher = rememberLauncherForActivityResult(
@@ -76,8 +90,18 @@ fun RidesUIRoute(
                         rideId = effect.rideId,
                         healthConnectId = effect.healthConnectId
                     )
+
+                    // 2. Capture the stats string for the UI
+                    syncSuccessMessage = effect.stats // <--- NEW: Get the stats string
+
                     // --- CHANGED: Trigger the Alert Dialog instead of Snackbar ---
                     showSyncSuccessDialog = true
+                }
+
+                // --- NEW CASE: Handle "Manage Permissions" clicks ---
+                is HealthSideEffect.OpenHealthConnectSettings -> {
+                    val intent = Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS)
+                    settingsLauncher.launch(intent)
                 }
             }
         }
@@ -156,5 +180,22 @@ fun RidesUIRoute(
                 }
             }
         )
+
+   if (showSyncSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = { showSyncSuccessDialog = false },
+            icon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            title = { Text("Sync Successful") },
+            text = {
+                // Display the dynamic stats here
+                Text("Your ride has been written to Health Connect!\n\n$syncSuccessMessage")
+            },
+            confirmButton = {
+                TextButton(onClick = { showSyncSuccessDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
+
     }*/
 }
