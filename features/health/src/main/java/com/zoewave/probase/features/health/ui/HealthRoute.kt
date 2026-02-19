@@ -34,9 +34,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
-import com.zoewave.probase.features.health.ui.components.ErrorScreen
-import com.zoewave.probase.features.health.ui.components.HealthConnectionStatus
 import com.zoewave.probase.features.health.ui.components.HealthDashboard
+import com.zoewave.probase.features.health.ui.components.common.ErrorScreen
+import com.zoewave.probase.features.health.ui.settings.HealthConnectionStatus
 
 @Composable
 fun HealthRoute(

@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.health.ui.components
+package com.zoewave.probase.features.health.ui.components.charts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.health.ui.components
+package com.zoewave.probase.features.health.ui.zout.stage
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import com.zoewave.probase.features.health.ui.HealthEvent
 import com.zoewave.probase.features.health.ui.HealthUiState
+import com.zoewave.probase.features.health.ui.settings.HealthConnectionStatus
+import com.zoewave.probase.features.health.ui.components.charts.GenericWeeklyChart
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
