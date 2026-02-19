@@ -13,6 +13,8 @@ sealed interface HealthEvent {
     data object WriteTestRide : HealthEvent
     data object ManagePermissions : HealthEvent // <--- Added this
 
+    data class DeleteSession(val uid: String) : HealthEvent // <--- NEW
+
     /** Insert a prepared list of Health Connect Record objects */
     data class Insert(
         val rideId: String,

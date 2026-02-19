@@ -140,6 +140,16 @@ fun HealthDashboard(
                 onDismiss = { selectedSession = null }
             )
         }
+
+        if (selectedSession != null) {
+            SessionDetailDialog(
+                session = selectedSession!!,
+                onDismiss = { selectedSession = null },
+                onDelete = { uid ->
+                    onEvent(HealthEvent.DeleteSession(uid)) // <--- Trigger Event
+                }
+            )
+        }
     }
 }
 

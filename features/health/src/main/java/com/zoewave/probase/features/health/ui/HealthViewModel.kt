@@ -101,10 +101,26 @@ class HealthViewModel @Inject constructor(
                     _sideEffect.emit(HealthSideEffect.OpenHealthConnectSettings)
                 }
             }
+            is HealthEvent.DeleteSession -> deleteSession(event.uid)
         }
     }
 
     // --- Private Actions ---
+
+    private fun deleteSession(uid: String) {
+        viewModelScope.launch {
+            tryWithPermissionsCheck {
+                // Assuming your HealthSessionManager has a delete method.
+                // If not, this is the standard Health Connect call:
+                // healthConnectClient.deleteRecords(ExerciseSessionRecord::class, listOf(uid), emptyList())
+
+                healthSessionManager.deleteExerciseSession(uid)
+
+                // Reload data to reflect the deletion
+                initialLoad()
+            }
+        }
+    }
 
     private fun requestPermissionsOnClick() {
         viewModelScope.launch {
