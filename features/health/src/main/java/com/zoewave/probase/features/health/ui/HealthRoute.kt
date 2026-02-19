@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
@@ -34,11 +35,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.zoewave.probase.features.health.ui.components.ErrorScreen
-import com.zoewave.probase.features.health.ui.components.HealthDataScreen
+import com.zoewave.probase.features.health.ui.components.HealthConnectionStatus
+import com.zoewave.probase.features.health.ui.components.HealthDashboard
 
 @Composable
 fun HealthRoute(
     modifier: Modifier = Modifier,
+    statusOnly : Boolean = false,
     viewModel: HealthViewModel = hiltViewModel()
 ) {
     // 1. Collect State & Context
@@ -94,16 +97,23 @@ fun HealthRoute(
     // 5. Render UI
     Box(
         modifier = modifier
-            .fillMaxSize()
+            .then(if (statusOnly) Modifier.wrapContentHeight() else Modifier.fillMaxSize()) // <--- Optimization
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
         when (val uiState = state) {
             is HealthUiState.Success -> {
-                HealthDataScreen(
-                    state = uiState,             // ✅ Pass the Success State
-                    onEvent = viewModel::onEvent // ✅ Pass the Event Handler
-                )
+                if (statusOnly) {
+                    HealthConnectionStatus(
+                        onEvent = viewModel::onEvent,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    HealthDashboard(
+                        state = uiState,
+                        onEvent = viewModel::onEvent
+                    )
+                }
             }
 
             is HealthUiState.PermissionsRequired -> {

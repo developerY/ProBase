@@ -66,7 +66,7 @@ fun HealthExpandableEx(
             // Expanded content
             if (expanded) {
                 HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
-                HealthRoute()
+                HealthRoute(statusOnly = true)
             }
         }
     }
