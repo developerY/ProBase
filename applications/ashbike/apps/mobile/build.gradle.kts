@@ -17,8 +17,8 @@ android {
 
     defaultConfig {
         applicationId = "com.zoewave.probase.ashbike.mobile"
-        versionCode = 11
-        versionName = "0.2.1"
+        versionCode = 1
+        versionName = "0.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
