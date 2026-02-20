@@ -169,7 +169,7 @@ fun AshBikeMainScreen(
                     navigationIcon = {
 
                         // Stat
-                        if (!isRootScreen) {
+                        if (currentDestination is AshBikeDestination.RideDetail) {
                             IconButton(onClick = {
                                 // Pop the specific detail screen off the stack
                                 if (backStack.size > 1) {
@@ -181,7 +181,7 @@ fun AshBikeMainScreen(
                                     contentDescription = "Back"
                                 )
                             }
-                        }
+                       }
 
                         // End
 
