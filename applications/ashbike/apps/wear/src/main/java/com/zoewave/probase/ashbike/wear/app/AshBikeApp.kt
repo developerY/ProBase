@@ -6,8 +6,9 @@ import androidx.compose.runtime.remember
 import androidx.navigation3.ui.NavDisplay
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.navigation3.SwipeDismissableSceneStrategy // ✅ Wear OS swipe wrapper
-import com.zoewave.probase.ashbike.wear.presentation.screens.ride.BikeUiEvent
-import com.zoewave.probase.ashbike.wear.presentation.screens.ride.BikeUiState
+import com.zoewave.probase.ashbike.wear.features.rides.BikeUiEvent
+import com.zoewave.probase.ashbike.wear.features.rides.BikeUiState
+
 import com.zoewave.probase.ashbike.wear.ui.navigation.AshBikeRoute
 import com.zoewave.probase.ashbike.wear.ui.navigation.ashBikeWearNavEntryProvider
 

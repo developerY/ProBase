@@ -1,13 +1,10 @@
 package com.zoewave.probase.ashbike.wear.ui.navigation
 
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.probase.ashbike.wear.presentation.screens.history.RideDetailScreen
-import com.zoewave.probase.ashbike.wear.presentation.screens.ride.BikeUiEvent
-import com.zoewave.probase.ashbike.wear.presentation.screens.ride.BikeUiState
-import com.zoewave.probase.ashbike.wear.presentation.screens.ride.WearBikeScreen
-
-// import com.zoewave.probase.ashbike.wear.presentation.screens.ride.BikeUiState
-// import com.zoewave.probase.ashbike.wear.presentation.screens.ride.BikeUiEvent
+import com.zoewave.probase.ashbike.wear.features.rides.BikeUiEvent
+import com.zoewave.probase.ashbike.wear.features.rides.BikeUiState
+import com.zoewave.probase.ashbike.wear.features.rides.RideDetailScreen
+import com.zoewave.probase.ashbike.wear.features.rides.WearBikeScreen
 
 fun ashBikeWearNavEntryProvider(
     key: AshBikeRoute,
