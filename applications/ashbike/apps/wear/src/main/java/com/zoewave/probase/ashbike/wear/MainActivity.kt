@@ -3,14 +3,9 @@ package com.zoewave.probase.ashbike.wear
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.wear.compose.material3.MaterialTheme
-import androidx.wear.compose.material3.Text
-import com.zoewave.probase.ashbike.features.main.ui.AshBikeSharedScreen
+import com.zoewave.probase.ashbike.wear.app.AshBikeUiRoute
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -24,14 +19,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             // Use Material 3 for Wear OS
             MaterialTheme {
-                // Box + Alignment.Center handles round screens correctly
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // ✅ Reusing the EXACT same screen code as Mobile!
-                    AshBikeSharedScreen("AshBike Watch")
-                }
+                // The Box is removed. AshBikeApp contains the AppScaffold,
+                // which handles centering, curved text, and swipe gestures natively.
+                AshBikeUiRoute()
             }
         }
     }

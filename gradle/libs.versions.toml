@@ -72,8 +72,8 @@ healthConnect = "1.2.0-alpha02"
 healthServices = "1.1.0-beta01"
 wearOngoing = "1.1.0"
 wearComposeMaterial3 = "1.6.0-alpha10"
-wearComposeNavigation = "1.6.0-alpha10"
 wearCompose = "1.6.0-alpha10"
+wearComposeNav3 = "1.6.0-alpha10"
 playServicesWearable = "19.0.0"
 wearToolingPreview = "1.0.0"
 tiles = "1.5.0"
@@ -99,6 +99,7 @@ espressoCore = "3.7.0"
 uiautomator = "2.3.0"
 androidxProfiling = "1.4.1"
 runner = "1.7.0"
+navigation3Ui = "1.0.1"
 
 
 [libraries]
@@ -202,7 +203,7 @@ google-play-services-wearable = { group = "com.google.android.gms", name = "play
 
 # -- Wear OS - Compose
 androidx-wear-compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "wearComposeMaterial3" }
-androidx-wear-compose-navigation = { group = "androidx.wear.compose", name = "compose-navigation", version.ref = "wearComposeNavigation" }
+androidx-wear-compose-navigation3 = { group = "androidx.wear.compose", name = "compose-navigation3", version.ref = "wearComposeNav3" }
 # OPTIONAL: Add Foundation (useful for scaling lazy lists etc)
 androidx-wear-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "wearCompose" }
 androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview", version.ref = "wearToolingPreview" }
@@ -243,6 +244,7 @@ androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomato
 androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
 androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "androidxProfiling" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "androidxProfiling" }
+navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3Ui" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

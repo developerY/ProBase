@@ -63,12 +63,13 @@ dependencies {
     // --- Project Modules ---
     // Share the exact same logic/database as Mobile!
     implementation(project(":applications:ashbike:features:main"))
-    /* implementation(project(":applications:ashbike:database"))
+    implementation(project(":applications:ashbike:model"))
+    // implementation(project(":applications:ashbike:database"))
 
     // Core
     implementation(project(":core:model"))
     implementation(project(":core:data"))
-    implementation(project(":core:util"))*/
+    implementation(project(":core:util"))
 
     // --- Wear OS Specifics ---
 
@@ -79,10 +80,15 @@ dependencies {
     implementation(libs.androidx.wear.ongoing)
 
     // UI & Navigation
+    implementation(libs.androidx.navigation3.runtime) // Core state/list logic
+    implementation(libs.androidx.wear.compose.navigation3) // Wear-specific swipe-to-dismiss UI
+
     implementation(libs.androidx.wear.compose.material3)
     implementation(libs.androidx.wear.compose.foundation)
-    implementation(libs.androidx.wear.compose.navigation)
+
     implementation(libs.androidx.core.splashscreen)
+
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // Google Services
     implementation(libs.google.play.services.wearable)
@@ -105,6 +111,7 @@ dependencies {
     // Room (Local Database)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(libs.navigation3.ui)
     ksp(libs.room.compiler)
 
     // Lifecycle
