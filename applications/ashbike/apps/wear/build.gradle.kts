@@ -66,6 +66,11 @@ dependencies {
     implementation(project(":applications:ashbike:model"))
     // implementation(project(":applications:ashbike:database"))
 
+    // module
+    implementation(project(":applications:ashbike:apps:wear:features:home"))
+    implementation(project(":applications:ashbike:apps:wear:features:rides"))
+    implementation(project(":applications:ashbike:apps:wear:features:settings"))
+
     // Core
     implementation(project(":core:model"))
     implementation(project(":core:data"))
