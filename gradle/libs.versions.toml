@@ -99,6 +99,7 @@ espressoCore = "3.7.0"
 uiautomator = "2.3.0"
 androidxProfiling = "1.4.1"
 runner = "1.7.0"
+navigation3Ui = "1.0.1"
 
 
 [libraries]
@@ -243,6 +244,7 @@ androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomato
 androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
 androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "androidxProfiling" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "androidxProfiling" }
+navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3Ui" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
