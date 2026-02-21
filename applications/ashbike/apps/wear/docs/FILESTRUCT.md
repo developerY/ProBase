@@ -1,3 +1,34 @@
+# With Features 
+
+wear/
+├── app/                           # The main application wireframe
+│   ├── build.gradle.kts           # Depends on the feature modules below
+│   ├── src/main/.../MainActivity.kt
+│   ├── src/main/.../AshBikeUiRoute.kt
+│   └── src/main/.../AshBikeApp.kt # Houses the NavDisplay
+│
+└── features/
+    ├── home/                      # The Dashboard
+    │   ├── build.gradle.kts
+    │   └── src/main/.../WearHomeScreen.kt
+    │   
+    ├── rides/                     # The active ride tracking feature
+    │   ├── build.gradle.kts
+    │   ├── src/main/.../WearBikeScreen.kt
+    │   └── src/main/.../WearBikeViewModel.kt
+    │
+    ├── history/                   # Past rides and detail views
+    │   ├── build.gradle.kts
+    │   └── src/main/.../RideDetailScreen.kt
+    │
+    └── settings/                  # Watch-specific settings
+        ├── build.gradle.kts
+        └── src/main/.../WearSettingsScreen.kt
+
+
+
+---
+
 com.ylabz.basepro.ashbike.wear
 ├── app
 │   └── BaseProWearApp.kt          <-- (NEW) Hilt Application Entry Point
@@ -19,3 +50,4 @@ com.ylabz.basepro.ashbike.wear
 │   └── MainTileService.kt         <-- @AndroidEntryPoint
 └── complication
 └── MainComplicationService.kt <-- @AndroidEntryPoint
+
