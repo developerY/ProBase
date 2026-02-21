@@ -1,4 +1,4 @@
-package com.zoewave.probase.ashbike.wear.presentation.screens.ride
+package com.zoewave.probase.ashbike.wear.features.rides
 
 // --- UI EVENTS ---
 // Represents every action the user can take on the Wear screen

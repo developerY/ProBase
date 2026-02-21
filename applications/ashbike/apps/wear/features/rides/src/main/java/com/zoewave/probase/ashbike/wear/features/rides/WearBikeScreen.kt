@@ -1,4 +1,4 @@
-package com.zoewave.probase.ashbike.wear.presentation.screens.ride
+package com.zoewave.probase.ashbike.wear.features.rides
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

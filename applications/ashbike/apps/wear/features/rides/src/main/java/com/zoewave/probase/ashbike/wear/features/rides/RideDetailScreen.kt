@@ -1,7 +1,5 @@
-package com.zoewave.probase.ashbike.wear.presentation.screens.history
+package com.zoewave.probase.ashbike.wear.features.rides
 
-import com.zoewave.probase.ashbike.wear.presentation.screens.ride.BikeUiEvent
-import com.zoewave.probase.ashbike.wear.presentation.screens.ride.BikeUiState
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer

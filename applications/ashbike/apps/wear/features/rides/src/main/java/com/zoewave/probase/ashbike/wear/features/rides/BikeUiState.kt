@@ -1,4 +1,4 @@
-package com.zoewave.probase.ashbike.wear.presentation.screens.ride
+package com.zoewave.probase.ashbike.wear.features.rides
 
 // Represents everything the Wear UI needs to draw itself
 data class BikeUiState(

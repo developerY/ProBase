@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.ashbike.wear.presentation.screens.ride.WearBikeViewModel
+import com.zoewave.probase.ashbike.wear.features.rides.WearBikeViewModel
 
 /**
  * The Route is a state-hoisting wrapper. It has NO UI of its own.

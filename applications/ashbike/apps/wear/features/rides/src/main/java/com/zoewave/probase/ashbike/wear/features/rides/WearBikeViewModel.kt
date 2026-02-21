@@ -1,4 +1,4 @@
-package com.zoewave.probase.ashbike.wear.presentation.screens.ride
+package com.zoewave.probase.ashbike.wear.features.rides
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
