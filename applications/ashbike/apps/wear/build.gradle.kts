@@ -79,10 +79,15 @@ dependencies {
     implementation(libs.androidx.wear.ongoing)
 
     // UI & Navigation
+    implementation(libs.androidx.navigation3.runtime) // Core state/list logic
+    implementation(libs.androidx.wear.compose.navigation3) // Wear-specific swipe-to-dismiss UI
+
     implementation(libs.androidx.wear.compose.material3)
     implementation(libs.androidx.wear.compose.foundation)
-    implementation(libs.androidx.wear.compose.navigation)
+
     implementation(libs.androidx.core.splashscreen)
+
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // Google Services
     implementation(libs.google.play.services.wearable)

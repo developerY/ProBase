@@ -72,8 +72,8 @@ healthConnect = "1.2.0-alpha02"
 healthServices = "1.1.0-beta01"
 wearOngoing = "1.1.0"
 wearComposeMaterial3 = "1.6.0-alpha10"
-wearComposeNavigation = "1.6.0-alpha10"
 wearCompose = "1.6.0-alpha10"
+wearComposeNav3 = "1.6.0-alpha10"
 playServicesWearable = "19.0.0"
 wearToolingPreview = "1.0.0"
 tiles = "1.5.0"
@@ -202,7 +202,7 @@ google-play-services-wearable = { group = "com.google.android.gms", name = "play
 
 # -- Wear OS - Compose
 androidx-wear-compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "wearComposeMaterial3" }
-androidx-wear-compose-navigation = { group = "androidx.wear.compose", name = "compose-navigation", version.ref = "wearComposeNavigation" }
+androidx-wear-compose-navigation3 = { group = "androidx.wear.compose", name = "compose-navigation3", version.ref = "wearComposeNav3" }
 # OPTIONAL: Add Foundation (useful for scaling lazy lists etc)
 androidx-wear-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "wearCompose" }
 androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview", version.ref = "wearToolingPreview" }
