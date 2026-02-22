@@ -25,19 +25,38 @@ import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 
+/**
+ * Zone 1 (Resting/Warmup - Under 110): Gray/Muted Blue
+ *
+ * Zone 2 (Fat Burn - 110 to 135): Soft Green
+ *
+ * Zone 3 (Cardio/Aerobic - 135 to 155): Orange
+ *
+ * Zone 4/5 (Peak/Anaerobic - 155+): Deep, glowing Red
+ */
+
 @Composable
 fun PulsingHeartRate(
-    heartRate: String,
+    heartRate: Int, // Changed to Int for zone math
     modifier: Modifier = Modifier,
-    isTracking: Boolean = true // We can use this to pause the pulse when stopped!
+    isTracking: Boolean = true
 ) {
-    // 1. The Heartbeat Animation setup
+    // 1. Determine the Heart Rate Zone Color
+    val zoneColor = when {
+        heartRate == 0 -> Color.DarkGray // No data
+        heartRate < 110 -> Color(0xFF90CAF9) // Light Blue (Resting/Warmup)
+        heartRate < 135 -> Color(0xFF81C784) // Green (Fat Burn)
+        heartRate < 155 -> Color(0xFFFFB74D) // Orange (Aerobic)
+        else -> Color(0xFFE53935)            // Deep Red (Peak)
+    }
+
+    // 2. The Smooth "Breathing" Animation (1 steady beat per second)
     val infiniteTransition = rememberInfiniteTransition(label = "heart_pulse")
     val scale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.15f, // Expands by 15%
+        initialValue = .7f,
+        targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+            animation = tween(durationMillis = 500, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "scale_animation"
@@ -47,49 +66,47 @@ fun PulsingHeartRate(
         contentAlignment = Alignment.Center,
         modifier = modifier
     ) {
-        // 2. The Pulsing Background Icon
+        // 3. The Colored Background Icon
         Icon(
             imageVector = Icons.Filled.Favorite,
             contentDescription = "Heart Rate",
-            tint = Color(0xFFE53935).copy(alpha = 0.85f), // Nice deep translucent red
+            tint = zoneColor.copy(alpha = 0.85f), // Uses our dynamic zone color!
             modifier = Modifier
-                .size(48.dp) // Large enough to hold the text
+                .size(52.dp)
                 .graphicsLayer {
-                    // Only pulse if the ride is active
-                    scaleX = if (isTracking) scale else 1f
-                    scaleY = if (isTracking) scale else 1f
+                    // Only pulse if actively tracking AND we have a valid reading
+                    val shouldPulse = isTracking && heartRate > 0
+                    scaleX = if (shouldPulse) scale else .5f
+                    scaleY = if (shouldPulse) scale else .5f
                 }
         )
 
-        // 3. The Number Overlay
+        // 4. The Number Overlay
         Text(
-            text = heartRate,
+            text = if (heartRate > 0) heartRate.toString() else "--",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
-            // The default Favorite icon visually holds weight at the top.
-            // A tiny bottom padding optical-centers the text perfectly inside the heart!
             modifier = Modifier.padding(bottom = 2.dp)
         )
     }
 }
 
 // ==========================================
-// Previews
+// Previews (Test all the zones!)
 // ==========================================
-@Preview(name = "Tracking (Pulsing)", backgroundColor = 0xFF000000, showBackground = true)
+@Preview(name = "Zone 1 (Blue)", backgroundColor = 0xFF000000, showBackground = true)
 @Composable
-fun PulsingHeartRateTrackingPreview() {
-    MaterialTheme {
-        // Look at the preview window, you will actually see it beating!
-        PulsingHeartRate(heartRate = "125", isTracking = true)
-    }
-}
+fun PreviewZone1() { MaterialTheme { PulsingHeartRate(heartRate = 95) } }
 
-@Preview(name = "Stopped (Static)", backgroundColor = 0xFF000000, showBackground = true)
+@Preview(name = "Zone 2 (Green)", backgroundColor = 0xFF000000, showBackground = true)
 @Composable
-fun PulsingHeartRateStoppedPreview() {
-    MaterialTheme {
-        PulsingHeartRate(heartRate = "125", isTracking = false)
-    }
-}
+fun PreviewZone2() { MaterialTheme { PulsingHeartRate(heartRate = 125) } }
+
+@Preview(name = "Zone 3 (Orange)", backgroundColor = 0xFF000000, showBackground = true)
+@Composable
+fun PreviewZone3() { MaterialTheme { PulsingHeartRate(heartRate = 145) } }
+
+@Preview(name = "Zone 4 (Red)", backgroundColor = 0xFF000000, showBackground = true)
+@Composable
+fun PreviewZone4() { MaterialTheme { PulsingHeartRate(heartRate = 165) } }
