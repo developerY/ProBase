@@ -1,15 +1,19 @@
 package com.zoewave.probase.ashbike.wear.features.home
 
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,28 +22,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material3.Button
 import androidx.wear.compose.material3.ButtonDefaults
+import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 
 @Composable
-fun WearHomeScreen(
-    // We will eventually pass your ViewModel here to get live data
-) {
-    // Hardcoded for now to see the UI in action
+fun WearHomeScreen() {
     val currentSpeed = 24f
+
+    // 1. A simple state to track if the ride is active.
+    // (This will eventually live in your ViewModel)
+    var isTracking by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        // 1. The Background Layer: Your custom Canvas Speedometer
+        // The Background Canvas Speedometer
         WearSpeedometer(
             currentSpeed = currentSpeed,
-            maxSpeed = 40f,
             modifier = Modifier.fillMaxSize()
         )
 
-        // 2. The Middle Layer: The Data Dashboard
+        // The Data Dashboard
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -57,7 +62,7 @@ fun WearHomeScreen(
 
             Text(
                 text = currentSpeed.toInt().toString(),
-                fontSize = 48.sp, // Massive font for quick glanceability
+                fontSize = 48.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
@@ -75,35 +80,27 @@ fun WearHomeScreen(
             )
         }
 
-        // 3. The Foreground Layer: Action Buttons
-        // Placed at the bottom gap of your 240-degree sweep angle
-        Row(
+        // 3. The Single Toggle Button
+        Button(
+            onClick = { isTracking = !isTracking },
+            colors = ButtonDefaults.buttonColors(
+                // Toggle between soft Green for Go, and soft Red for Stop
+                containerColor = if (isTracking) Color(0xFFE57373) else Color(0xFF81C784),
+                contentColor = Color.Black
+            ),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.Center
+                .padding(bottom = 24.dp) // Pushed up slightly so it doesn't touch the dots
+                .size(48.dp) // Makes it a perfect, compact circle
         ) {
-            Button(
-                onClick = { /* TODO: Start Ride */ },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFE6E6FA), // Light Lavender from your mockup
-                    contentColor = Color.Black
-                )
-            ) {
-                Text("Go")
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Button(
-                onClick = { /* TODO: Stop Ride */ },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.DarkGray,
-                    contentColor = Color.White
-                )
-            ) {
-                Text("Stop")
-            }
+            Icon(
+                // Swap the icon based on the state
+                imageVector = if (isTracking) Icons.Filled.Stop else Icons.Filled.PlayArrow,
+                contentDescription = if (isTracking) "Stop Ride" else "Start Ride",
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
+
+// (Keep your WearSpeedometer Composable exactly the same below this)
