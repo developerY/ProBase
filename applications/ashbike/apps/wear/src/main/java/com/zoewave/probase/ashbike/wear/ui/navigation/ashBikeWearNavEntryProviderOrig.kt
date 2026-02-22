@@ -28,6 +28,7 @@ fun ashBikeWearNavEntryProviderOrig(
             AshBikeRoute.Home -> TODO()
             AshBikeRoute.Rides -> TODO()
             AshBikeRoute.Settings -> TODO()
+            AshBikeRoute.Menu -> TODO()
         }
     }
 }

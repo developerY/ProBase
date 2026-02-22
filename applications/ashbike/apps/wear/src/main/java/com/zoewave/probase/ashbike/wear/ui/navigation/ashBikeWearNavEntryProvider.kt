@@ -2,6 +2,7 @@ package com.zoewave.probase.ashbike.wear.ui.navigation
 
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.ashbike.wear.features.home.WearHomeScreen
+import com.zoewave.probase.ashbike.wear.features.home.WearMenuScreen
 import com.zoewave.probase.ashbike.wear.features.rides.WearRidesScreen
 import com.zoewave.probase.ashbike.wear.features.settings.WearSettingsScreen
 
@@ -16,8 +17,7 @@ fun ashBikeWearNavEntryProvider(
         when (key) {
             AshBikeRoute.Home -> {
                 WearHomeScreen(
-                    onNavigateToRides = { navigateTo(AshBikeRoute.Rides) },
-                    onNavigateToSettings = { navigateTo(AshBikeRoute.Settings) }
+                    onNavigateToMenu = { navigateTo(AshBikeRoute.Menu) }
                 )
             }
 
@@ -28,8 +28,14 @@ fun ashBikeWearNavEntryProvider(
             AshBikeRoute.Settings -> {
                 WearSettingsScreen()
             }
+            AshBikeRoute.Menu -> {
+                WearMenuScreen(
+                    onNavigateToRides = { navigateTo(AshBikeRoute.Rides) },
+                    onNavigateToSettings = { navigateTo(AshBikeRoute.Settings) }
+                )
+            }
 
-            AshBikeRoute.ActiveRide -> {}//TODO()
+            AshBikeRoute.ActiveRide -> {} //TODO()
         }
     }
 }

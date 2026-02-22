@@ -14,6 +14,8 @@ sealed interface AshBikeRoute {
 
     @Serializable
     data object Settings : AshBikeRoute  // The settings menu
+    @Serializable
+    data object Menu : AshBikeRoute // New overflow menu destination
 
     @Serializable
     data object ActiveRide : AshBikeRoute    // The ride detail screen
