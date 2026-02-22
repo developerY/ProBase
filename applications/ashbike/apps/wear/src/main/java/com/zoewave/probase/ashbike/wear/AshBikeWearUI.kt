@@ -18,13 +18,10 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.zoewave.probase.ashbike.wear.ui.navigation.AshBikeRoute
 import com.zoewave.probase.ashbike.wear.ui.navigation.ashBikeWearNavEntryProvider
 
-
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun AshBikeWearUI() {
-    // 1. The Gatekeeper: Check for required hardware permissions
-    // Note: We only ask for foreground permissions initially.
-    // Background permissions (if needed) must be requested in a separate step later.
+    // 1. The Gatekeeper: Define required hardware sensors
     val permissionState = rememberMultiplePermissionsState(
         permissions = listOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -34,9 +31,9 @@ fun AshBikeWearUI() {
     )
 
     // 2. The Permission Wall
+    // If permissions are missing, show a dedicated screen to ask for them.
+    // This completely blocks access to the Pager and ViewModels until granted.
     if (!permissionState.allPermissionsGranted) {
-        // If permissions are missing, show a dedicated screen to ask for them.
-        // This completely blocks access to the rest of the app until granted.
         AppScaffold {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -47,19 +44,20 @@ fun AshBikeWearUI() {
                 }
             }
         }
-        return // Stop executing the rest of the UI until permissions are granted
+        return // Halt UI composition here until the user taps 'Allow'
     }
 
-    // 3. The Source of Truth
-    // This code is ONLY reached once the user has approved the permissions above.
+    // 3. The Source of Truth for Nav3
+    // We explicitly set the starting destination to your new Pager
     val backStack = remember {
-        mutableStateListOf<AshBikeRoute>(AshBikeRoute.Home)
+        mutableStateListOf<AshBikeRoute>(AshBikeRoute.HomePager)
     }
 
-    // 4. The Wear OS Scaffold & Nav3 Display Engine
+    // 4. The Main App Scaffold & Navigation Engine
     AppScaffold {
         NavDisplay(
             backStack = backStack,
+            // Enables native Wear OS swipe-to-dismiss behavior for drill-down screens
             sceneStrategy = SwipeDismissableSceneStrategy(),
             onBack = {
                 if (backStack.size > 1) {
@@ -69,6 +67,8 @@ fun AshBikeWearUI() {
             entryProvider = { key ->
                 ashBikeWearNavEntryProvider(
                     key = key,
+                    // When the Pager requests a drill-down (like RideDetail),
+                    // add it to the top of the Navigation 3 backStack
                     navigateTo = { dest -> backStack.add(dest) }
                 )
             }
