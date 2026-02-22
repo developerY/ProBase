@@ -46,23 +46,23 @@ fun WearHomeScreen() {
             modifier = Modifier.fillMaxSize()
         )
 
-        // 2. Left Side Data (HR) - Aligned to Start (Left)
-        PulsingHeartRate(heartRate = heartRate,
+        // 2. Left Side Data (Pulsing HR) moved to the bottom-left "cheek"
+        PulsingHeartRate(
+            heartRate = 125, // Or your heartRate variable
             isTracking = isTracking,
             modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 20.dp) // Mirrors the padding of the Heart Rate!
+                .align(Alignment.BottomStart) // Anchors it to the bottom-left quadrant
+                // start pushes it safely past the curve, bottom pushes it up above the swipe dots
+                .padding(start = 36.dp, bottom = 52.dp)
         )
 
-
-        // 3. Right Side Data (Kcal) - Aligned to End (Right)
-        // 3. Right Side Data (Flickering Calories)
+        // 3. Right Side Data (Flickering Calories) moved to the bottom-right "cheek"
         BurningCalories(
-            calories = 150, // Pass in your Int data here
+            calories = 150, // Or your calories variable
             isTracking = isTracking,
             modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 20.dp) // Mirrors the padding of the Heart Rate!
+                .align(Alignment.BottomEnd) // Anchors it to the bottom-right quadrant
+                .padding(end = 36.dp, bottom = 52.dp) // Perfect symmetry with the left side
         )
 
         // 4. Center Dashboard (Distance & Speed)

@@ -25,16 +25,6 @@ import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 
-/**
- * Zone 1 (Resting/Warmup - Under 110): Gray/Muted Blue
- *
- * Zone 2 (Fat Burn - 110 to 135): Soft Green
- *
- * Zone 3 (Cardio/Aerobic - 135 to 155): Orange
- *
- * Zone 4/5 (Peak/Anaerobic - 155+): Deep, glowing Red
- */
-
 @Composable
 fun PulsingHeartRate(
     heartRate: Int, // Changed to Int for zone math
@@ -53,8 +43,8 @@ fun PulsingHeartRate(
     // 2. The Smooth "Breathing" Animation (1 steady beat per second)
     val infiniteTransition = rememberInfiniteTransition(label = "heart_pulse")
     val scale by infiniteTransition.animateFloat(
-        initialValue = .7f,
-        targetValue = 1f,
+        initialValue = 1f,
+        targetValue = 1.15f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 500, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
@@ -72,12 +62,12 @@ fun PulsingHeartRate(
             contentDescription = "Heart Rate",
             tint = zoneColor.copy(alpha = 0.85f), // Uses our dynamic zone color!
             modifier = Modifier
-                .size(52.dp)
+                .size(48.dp)
                 .graphicsLayer {
                     // Only pulse if actively tracking AND we have a valid reading
                     val shouldPulse = isTracking && heartRate > 0
-                    scaleX = if (shouldPulse) scale else .5f
-                    scaleY = if (shouldPulse) scale else .5f
+                    scaleX = if (shouldPulse) scale else 1f
+                    scaleY = if (shouldPulse) scale else 1f
                 }
         )
 
