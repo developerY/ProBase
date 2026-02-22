@@ -1,12 +1,7 @@
 package com.zoewave.probase.ashbike.wear.features.home
 
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -31,20 +26,17 @@ fun BurningCalories(
     modifier: Modifier = Modifier,
     isTracking: Boolean = true
 ) {
-    // 1. The Flame Color (Gets "hotter" as you burn more)
     val flameColor = when {
         calories == 0 -> Color.DarkGray
-        calories < 200 -> Color(0xFFFFCA28) // Amber/Yellow
-        calories < 500 -> Color(0xFFFF9800) // Bright Orange
-        else -> Color(0xFFFF5722)           // Deep Red-Orange
+        calories < 200 -> Color(0xFFFFCA28)
+        calories < 500 -> Color(0xFFFF9800)
+        else -> Color(0xFFFF5722)
     }
 
-    // 2. The Flicker Animation
-    // We use a faster duration (300ms) and Linear easing to simulate a dancing flame
     val infiniteTransition = rememberInfiniteTransition(label = "fire_flicker")
     val scale by infiniteTransition.animateFloat(
-        initialValue = 0.92f,
-        targetValue = 1.08f,
+        initialValue = 0.9f,
+        targetValue = 1.1f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 300, easing = FastOutLinearInEasing),
             repeatMode = RepeatMode.Reverse
@@ -52,37 +44,33 @@ fun BurningCalories(
         label = "scale_animation"
     )
 
-    Box(
-        contentAlignment = Alignment.Center,
+    // The Minimalist Vertical Stack
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        // 3. The Flame Icon
         Icon(
             imageVector = Icons.Filled.LocalFireDepartment,
             contentDescription = "Calories Burned",
-            tint = flameColor.copy(alpha = 0.85f),
+            tint = flameColor,
             modifier = Modifier
-                .size(48.dp)
+                .size(22.dp)
                 .graphicsLayer {
                     val shouldFlicker = isTracking && calories > 0
                     scaleX = if (shouldFlicker) scale else 1f
                     scaleY = if (shouldFlicker) scale else 1f
                 }
+                .padding(bottom = 2.dp)
         )
 
-        // 4. The Number Overlay
         Text(
             text = if (calories > 0) calories.toString() else "--",
-            fontSize = 15.sp, // Slightly smaller to fit the tapered shape of a flame
+            fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
-            // Optical Centering: A flame is wide at the bottom and pointy at the top.
-            // We push the text down so it sits securely in the "belly" of the fire!
-            modifier = Modifier.padding(top = 10.dp)
+            color = Color.White
         )
     }
 }
-
 // ==========================================
 // Previews
 // ==========================================
