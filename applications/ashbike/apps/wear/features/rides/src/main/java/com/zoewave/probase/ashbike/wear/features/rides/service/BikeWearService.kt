@@ -1,4 +1,4 @@
-package com.zoewave.probase.ashbike.wear.service
+package com.zoewave.probase.ashbike.wear.features.rides.service
 
 import android.content.Intent
 import android.os.Binder

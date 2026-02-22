@@ -7,11 +7,14 @@ import kotlinx.serialization.Serializable
 sealed interface AshBikeRoute {
 
     @Serializable
-    data object ActiveRide : AshBikeRoute
+    data object Home : AshBikeRoute      // The main speedometer screen
 
     @Serializable
-    data class RideDetail(val rideId: String) : AshBikeRoute
+    data object Rides : AshBikeRoute     // The list of past ride cards
 
     @Serializable
-    data object Summary : AshBikeRoute
+    data object Settings : AshBikeRoute  // The settings menu
+
+    @Serializable
+    data object ActiveRide : AshBikeRoute    // The ride detail screen
 }

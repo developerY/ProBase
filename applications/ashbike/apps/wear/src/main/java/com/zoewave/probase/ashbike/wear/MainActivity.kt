@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.wear.compose.material3.MaterialTheme
-import com.zoewave.probase.ashbike.wear.app.AshBikeUiRoute
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -21,7 +20,7 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 // The Box is removed. AshBikeApp contains the AppScaffold,
                 // which handles centering, curved text, and swipe gestures natively.
-                AshBikeUiRoute()
+                AshBikeWearUI()
             }
         }
     }
