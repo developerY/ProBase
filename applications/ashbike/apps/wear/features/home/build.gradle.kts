@@ -72,6 +72,15 @@ dependencies {
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.androidx.projected)
 
+    // -- preview
+    // The lightweight annotations (Required for the compiler to read your code)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.wear.tooling.preview)
+
+    // The heavy rendering engine (Only used by Android Studio)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+
+
     // --- Testing ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

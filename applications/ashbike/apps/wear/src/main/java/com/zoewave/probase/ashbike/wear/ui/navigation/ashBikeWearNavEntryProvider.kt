@@ -1,35 +1,28 @@
 package com.zoewave.probase.ashbike.wear.ui.navigation
 
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.probase.ashbike.wear.features.home.WearHomeScreen
-import com.zoewave.probase.ashbike.wear.features.rides.WearRidesScreen
-import com.zoewave.probase.ashbike.wear.features.settings.WearSettingsScreen
 
-
-// Note: This is NOT a @Composable function. It's a simple factory.
 fun ashBikeWearNavEntryProvider(
     key: AshBikeRoute,
     navigateTo: (AshBikeRoute) -> Unit
 ): NavEntry<AshBikeRoute> {
     return NavEntry(key) {
-        // The Composable content lives inside this lambda
         when (key) {
-            AshBikeRoute.Home -> {
-                WearHomeScreen(
-                    onNavigateToRides = { navigateTo(AshBikeRoute.Rides) },
-                    onNavigateToSettings = { navigateTo(AshBikeRoute.Settings) }
+            // 1. The Root Pager
+            is AshBikeRoute.HomePager -> {
+                AshBikeWearPager(
+                    // If the user taps a ride on Page 1, trigger this Nav3 routing action
+                    onNavigateToRideDetail = { rideId ->
+                        navigateTo(AshBikeRoute.RideDetail(rideId))
+                    }
                 )
             }
 
-            AshBikeRoute.Rides -> {
-                WearRidesScreen()
+            // 2. The Drill-Down Detail Screen
+            is AshBikeRoute.RideDetail -> {
+                // Your RideDetailScreen logic goes here
+                // e.g., RideDetailScreen(rideId = key.rideId)
             }
-
-            AshBikeRoute.Settings -> {
-                WearSettingsScreen()
-            }
-
-            AshBikeRoute.ActiveRide -> {}//TODO()
         }
     }
 }
