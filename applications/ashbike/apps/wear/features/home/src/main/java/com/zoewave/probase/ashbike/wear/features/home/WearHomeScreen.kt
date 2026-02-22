@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 
@@ -27,8 +32,8 @@ fun WearHomeScreen() {
     val currentSpeed = 24f
     val distance = "1.66 km"
     val heartRate = "125"
+    val calories = "150" // New metric for the right side
 
-    // Track the active state
     var isTracking by remember { mutableStateOf(false) }
 
     Box(
@@ -45,7 +50,7 @@ fun WearHomeScreen() {
         Column(
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(start = 28.dp), // Pushed in so it doesn't get clipped by the curved screen
+                .padding(start = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -60,13 +65,31 @@ fun WearHomeScreen() {
             )
         }
 
-        // 3. The Main Center Dashboard
+        // 3. Cals pinned to the right side (3 o'clock position)
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Kcal",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.LightGray
+            )
+            Text(
+                text = calories,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White
+            )
+        }
+
+        // 4. The Main Center Dashboard
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            // Distance replaces HR at the top
             Text(
                 text = distance,
                 style = MaterialTheme.typography.titleMedium,
@@ -75,18 +98,32 @@ fun WearHomeScreen() {
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // The Tappable Speed Number
-            val speedColor = if (isTracking) Color(0xFF81C784) else Color.White // Green when active
+            val speedColor = if (isTracking) Color(0xFF81C784) else Color.White
 
-            Text(
-                text = currentSpeed.toInt().toString(),
-                fontSize = 56.sp, // Bumped up slightly since there's more room
-                fontWeight = FontWeight.Bold,
-                color = speedColor,
+            // The Tappable Box containing the Watermark and the Speed
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .clickable { isTracking = !isTracking } // The magic interaction!
-                    .padding(8.dp) // Adds a slightly larger invisible touch target area
-            )
+                    .clickable { isTracking = !isTracking }
+                    .padding(8.dp) // Large touch target
+            ) {
+                // The Watermark Icon (Behind the text)
+                Icon(
+                    imageVector = if (isTracking) Icons.Filled.Stop else Icons.Filled.PlayArrow,
+                    contentDescription = if (isTracking) "Stop Ride" else "Start Ride",
+                    // Use a low alpha so it acts as a subtle background element
+                    tint = if (isTracking) Color(0xFFE57373).copy(alpha = 0.2f) else Color.White.copy(alpha = 0.2f),
+                    modifier = Modifier.size(90.dp) // Massive icon size
+                )
+
+                // The Speed Text (In front of the icon)
+                Text(
+                    text = currentSpeed.toInt().toString(),
+                    fontSize = 56.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = speedColor
+                )
+            }
 
             Text(
                 text = "km/h",
@@ -97,6 +134,7 @@ fun WearHomeScreen() {
     }
 }
 
+// (WearSpeedometer canvas code remains exactly the same below)
 // (WearSpeedometer canvas code remains exactly the same below)
 
 // (Keep your WearSpeedometer Composable exactly the same below this)
