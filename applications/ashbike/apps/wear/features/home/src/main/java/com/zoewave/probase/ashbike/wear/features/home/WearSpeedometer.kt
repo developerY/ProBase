@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.tooling.preview.devices.WearDevices
+import androidx.compose.ui.graphics.Path
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
@@ -42,67 +43,97 @@ fun WearSpeedometer(
 ) {
     val textMeasurer = rememberTextMeasurer()
 
-    Box(modifier = modifier.aspectRatio(1f).padding(2.dp)) {
+    Box(modifier = modifier.aspectRatio(1f).padding(12.dp)) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val w = size.width
             val h = size.height
             val center = Offset(w / 2, h / 2)
 
-            val strokeWidthPx = 22.dp.toPx()
-            val radius = (min(w, h) - strokeWidthPx) / 2
+            // 1. Define the Tapering Thickness
+            val minThicknessPx = 6.dp.toPx()  // Thin at 0 km/h
+            val maxThicknessPx = 28.dp.toPx() // Thick at 40 km/h
+
+            // The outer edge remains a perfect circle
+            val radius = min(w, h) / 2
 
             val startAngle = 135f
             val sweepAngle = 270f
 
-            // 1. Draw Background Track
-            drawArc(
-                color = trackColor,
-                startAngle = startAngle,
-                sweepAngle = sweepAngle,
-                useCenter = false,
-                topLeft = Offset(center.x - radius, center.y - radius),
-                size = Size(radius * 2, radius * 2),
-                style = Stroke(width = strokeWidthPx, cap = StrokeCap.Butt)
+            // Helper function to build a tapered path
+            fun buildTaperedPath(targetSweep: Float): Path {
+                val path = Path()
+                if (targetSweep <= 0f) return path
+
+                // Use steps to calculate points along the curve smoothly
+                val steps = (targetSweep / 2f).toInt().coerceAtLeast(1)
+
+                // Draw Outer Curve (Forward)
+                for (i in 0..steps) {
+                    val fraction = i.toFloat() / steps
+                    val angle = startAngle + fraction * targetSweep
+                    val rad = Math.toRadians(angle.toDouble())
+                    val x = center.x + radius * cos(rad).toFloat()
+                    val y = center.y + radius * sin(rad).toFloat()
+                    if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                }
+
+                // Draw Inner Curve (Backward)
+                for (i in steps downTo 0) {
+                    val fraction = i.toFloat() / steps
+                    val angle = startAngle + fraction * targetSweep
+
+                    // Thickness is based on the fraction of the TOTAL 270 deg sweep
+                    val totalFraction = (fraction * targetSweep) / sweepAngle
+                    val currentThickness = minThicknessPx + totalFraction * (maxThicknessPx - minThicknessPx)
+
+                    val innerRadius = radius - currentThickness
+                    val rad = Math.toRadians(angle.toDouble())
+                    val x = center.x + innerRadius * cos(rad).toFloat()
+                    val y = center.y + innerRadius * sin(rad).toFloat()
+                    path.lineTo(x, y)
+                }
+                path.close()
+                return path
+            }
+
+            // 2. Draw Background Tapered Track
+            drawPath(
+                path = buildTaperedPath(sweepAngle),
+                color = trackColor
             )
 
-            // 2. Draw Active Gradient Arc
+            // 3. Draw Active Gradient Tapered Track
             val speedFraction = (currentSpeed / maxSpeed).coerceIn(0f, 1f)
             val activeSweep = sweepAngle * speedFraction
 
             if (currentSpeed > 0) {
-                drawArc(
-                    brush = indicatorBrush,
-                    startAngle = startAngle,
-                    sweepAngle = activeSweep,
-                    useCenter = false,
-                    topLeft = Offset(center.x - radius, center.y - radius),
-                    size = Size(radius * 2, radius * 2),
-                    style = Stroke(width = strokeWidthPx, cap = StrokeCap.Butt)
+                drawPath(
+                    path = buildTaperedPath(activeSweep),
+                    brush = indicatorBrush
                 )
             }
 
-            // 3. Draw "Cutout" Ticks and Inner Numbers
+            // 4. Draw Cutouts and Contour Numbers
             val tickStep = 2
             val majorTickStep = 10
 
             for (i in 0..maxSpeed.toInt() step tickStep) {
                 val fraction = i / maxSpeed
                 val angleRad = Math.toRadians((startAngle + fraction * sweepAngle).toDouble())
-
                 val isMajor = i % majorTickStep == 0
 
-                // THE CUTOUT TRICK:
-                // Draw ticks exactly the width of the track, using Black to "slice" it
+                // Calculate the exact thickness of the track at this specific angle
+                val currentThickness = minThicknessPx + fraction * (maxThicknessPx - minThicknessPx)
+                val innerRadius = radius - currentThickness
+
+                // Draw Black Cutout Ticks
                 val tickStroke = if (isMajor) 4.dp.toPx() else 1.5.dp.toPx()
-                val startTickRadius = radius + (strokeWidthPx / 2)
-                val endTickRadius = radius - (strokeWidthPx / 2)
 
-                val startX = center.x + startTickRadius * cos(angleRad).toFloat()
-                val startY = center.y + startTickRadius * sin(angleRad).toFloat()
-                val endX = center.x + endTickRadius * cos(angleRad).toFloat()
-                val endY = center.y + endTickRadius * sin(angleRad).toFloat()
+                val startX = center.x + (innerRadius - 2.dp.toPx()) * cos(angleRad).toFloat()
+                val startY = center.y + (innerRadius - 2.dp.toPx()) * sin(angleRad).toFloat()
+                val endX = center.x + (radius + 2.dp.toPx()) * cos(angleRad).toFloat()
+                val endY = center.y + (radius + 2.dp.toPx()) * sin(angleRad).toFloat()
 
-                // Use Color.Black to create the negative space segments
                 drawLine(
                     color = Color.Black,
                     start = Offset(startX, startY),
@@ -111,19 +142,16 @@ fun WearSpeedometer(
                     cap = StrokeCap.Butt
                 )
 
-                // 4. Draw Numbers INSIDE the track
-                // We only draw numbers for 10, 20, 30 to prevent UI clutter
+                // Draw Numbers dynamically contoured to the sloped inner edge
                 if (isMajor && i > 0 && i < maxSpeed.toInt()) {
-
-                    // Push the text inward into the black background
-                    val textRadius = radius - (strokeWidthPx / 2) - 14.dp.toPx()
+                    val textRadius = innerRadius - 14.dp.toPx() // Push text safely into the void
                     val textX = center.x + textRadius * cos(angleRad).toFloat()
                     val textY = center.y + textRadius * sin(angleRad).toFloat()
 
                     val textLayoutResult = textMeasurer.measure(
                         text = i.toString(),
                         style = TextStyle(
-                            color = Color.LightGray, // Safe to use here since background is black
+                            color = Color.White, // Crisp white fixes the "hard to see gray" issue
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -139,9 +167,11 @@ fun WearSpeedometer(
                 }
             }
 
-            // 5. Draw Indicator Dot
+            // 5. Draw Indicator Dot (Riding the center of the current thickness)
             val currentAngleRad = Math.toRadians((startAngle + activeSweep).toDouble())
-            val dotRadius = radius + (strokeWidthPx / 2)
+            val activeThickness = minThicknessPx + speedFraction * (maxThicknessPx - minThicknessPx)
+            val dotRadius = radius - (activeThickness / 2) // Perfect center line
+
             val dotX = center.x + dotRadius * cos(currentAngleRad).toFloat()
             val dotY = center.y + dotRadius * sin(currentAngleRad).toFloat()
 
