@@ -24,7 +24,7 @@ fun WearHomeScreen() {
     // Placeholder data (Will eventually come from ViewModel)
     val currentSpeed = 24f
     val distance = "1.66 km"
-    val heartRate = "125"
+    val heartRate = 125
     val calories = "150"
 
     // Local state for the UI toggle
@@ -47,26 +47,23 @@ fun WearHomeScreen() {
         )
 
         // 2. Left Side Data (HR) - Aligned to Start (Left)
-        Column(
+        PulsingHeartRate(heartRate = heartRate,
+            isTracking = isTracking,
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(start = 26.dp),
-            horizontalAlignment = Alignment.Start // <= Hugs left edge
-        ) {
-            Text(text = "HR", style = MaterialTheme.typography.labelSmall, color = Color.LightGray)
-            Text(text = heartRate, style = MaterialTheme.typography.titleMedium, color = Color.White)
-        }
+                .padding(start = 20.dp) // Mirrors the padding of the Heart Rate!
+        )
+
 
         // 3. Right Side Data (Kcal) - Aligned to End (Right)
-        Column(
+        // 3. Right Side Data (Flickering Calories)
+        BurningCalories(
+            calories = 150, // Pass in your Int data here
+            isTracking = isTracking,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 26.dp),
-            horizontalAlignment = Alignment.End // <= Hugs right edge
-        ) {
-            Text(text = "Kcal", style = MaterialTheme.typography.labelSmall, color = Color.LightGray)
-            Text(text = calories, style = MaterialTheme.typography.titleMedium, color = Color.White)
-        }
+                .padding(end = 20.dp) // Mirrors the padding of the Heart Rate!
+        )
 
         // 4. Center Dashboard (Distance & Speed)
         Column(
