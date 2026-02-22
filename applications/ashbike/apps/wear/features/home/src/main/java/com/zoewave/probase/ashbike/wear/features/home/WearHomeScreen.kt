@@ -1,15 +1,10 @@
 package com.zoewave.probase.ashbike.wear.features.home
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,14 +13,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.tooling.preview.devices.WearDevices
@@ -96,45 +85,12 @@ fun WearHomeScreen() {
             )
 
             // The Tappable Speed Box
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .clickable { isTracking = !isTracking }
-                    .padding(4.dp)
-            ) {
-                // Background Icon
-                Icon(
-                    imageVector = if (isTracking) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-                    contentDescription = if (isTracking) "Stop Ride" else "Start Ride",
-                    tint = iconTintColor,
-                    modifier = Modifier.size(85.dp)
-                )
-
-                // Text Stack (Border + Fill)
-                Box(contentAlignment = Alignment.Center) {
-                    // Dark Border outline
-                    Text(
-                        text = currentSpeed.toInt().toString(),
-                        fontSize = 56.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black,
-                        style = TextStyle(
-                            drawStyle = Stroke(
-                                miter = 10f,
-                                width = 10f,
-                                join = StrokeJoin.Round
-                            )
-                        )
-                    )
-                    // Solid foreground text
-                    Text(
-                        text = currentSpeed.toInt().toString(),
-                        fontSize = 56.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = speedTextColor
-                    )
-                }
-            }
+            // Drop in your new isolated component here!
+            TappableSpeedBox(
+                currentSpeed = currentSpeed,
+                isTracking = isTracking,
+                onToggle = { isTracking = !isTracking }
+            )
 
             // Unit Label
             Text(
