@@ -1,51 +1,66 @@
 package com.zoewave.probase.ashbike.wear.ui.navigation
 
+
+
+// ✅ Import the specific Material components you requested
+
+// Import your feature screens
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.unit.dp
 import androidx.wear.compose.foundation.pager.HorizontalPager
 import androidx.wear.compose.foundation.pager.rememberPagerState
+import androidx.wear.compose.material.HorizontalPageIndicator
+import androidx.wear.compose.material.PageIndicatorState
 import com.zoewave.probase.ashbike.wear.features.home.WearHomeScreen
-import com.zoewave.probase.ashbike.wear.features.rides.WearBikeViewModel
 import com.zoewave.probase.ashbike.wear.features.rides.WearRidesScreen
 import com.zoewave.probase.ashbike.wear.features.settings.WearSettingsScreen
 
-// Import the UI from your isolated feature modules
 
 @Composable
 fun AshBikeWearPager(
-    onNavigateToRideDetail: (String) -> Unit // The parameter passed from Nav3
+    onNavigateToRideDetail: (String) -> Unit
 ) {
+    // 1. The state that controls the actual swipeable pager
     val pagerState = rememberPagerState(pageCount = { 3 })
 
-    HorizontalPager(
-        state = pagerState,
-        modifier = Modifier.fillMaxSize()
-    ) { page ->
+    // 2. The adapter that feeds the pager's position to the dots
+    val indicatorState = remember(pagerState) {
+        object : PageIndicatorState {
+            override val pageOffset: Float
+                get() = pagerState.currentPageOffsetFraction
+            override val selectedPage: Int
+                get() = pagerState.currentPage
+            override val pageCount: Int
+                get() = pagerState.pageCount
+        }
+    }
 
-        when (page) {
-            0 -> {
-                // Inject HomeViewModel and pass it to the Home UI
-                // val viewModel: HomeViewModel = hiltViewModel()
-                WearHomeScreen()//viewModel = viewModel)
-            }
+    // 3. A Box lets us draw the dots floating on top of the screens
+    Box(modifier = Modifier.fillMaxSize()) {
 
-            1 -> {
-                // Inject WearBikeViewModel and pass it to the Rides UI
-                val viewModel: WearBikeViewModel = hiltViewModel()
-                WearRidesScreen(
-                    //viewModel = viewModel,
-                    // Pass the Nav3 callback down to the feature
-                    // onRideSelected = { rideId -> onNavigateToRideDetail(rideId) }
-                )
-            }
-
-            2 -> {
-                // Inject SettingsViewModel and pass it to the Settings UI
-                //val viewModel: SettingsViewModel = hiltViewModel()
-                WearSettingsScreen()//viewModel = viewModel)
+        // The Swipeable Carousel
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            when (page) {
+                0 -> WearHomeScreen()
+                1 -> WearRidesScreen()// onRideSelected = onNavigateToRideDetail)
+                2 -> WearSettingsScreen()
             }
         }
+
+        // The Native Page Indicators (The dots!)
+        HorizontalPageIndicator(
+            pageIndicatorState = indicatorState,
+            modifier = Modifier
+                //.align(Alignment.BottomCenter)
+                .padding(bottom = 10.dp) // Pushes the dots slightly up from the very bottom curve
+        )
     }
 }
