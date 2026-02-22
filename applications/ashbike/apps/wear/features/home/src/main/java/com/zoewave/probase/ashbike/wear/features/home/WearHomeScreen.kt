@@ -47,22 +47,14 @@ fun WearHomeScreen() {
         )
 
         // 2. Left Side Data (Pulsing HR) moved to the bottom-left "cheek"
-        PulsingHeartRate(
-            heartRate = 125, // Or your heartRate variable
+        // 2. The Tap-to-Cycle Data Complication (Left Cheek)
+        DataCycler(
+            heartRate = 125,
+            calories = 150,
             isTracking = isTracking,
             modifier = Modifier
-                .align(Alignment.BottomStart) // Anchors it to the bottom-left quadrant
-                // start pushes it safely past the curve, bottom pushes it up above the swipe dots
+                .align(Alignment.BottomStart)
                 .padding(start = 36.dp, bottom = 52.dp)
-        )
-
-        // 3. Right Side Data (Flickering Calories) moved to the bottom-right "cheek"
-        BurningCalories(
-            calories = 150, // Or your calories variable
-            isTracking = isTracking,
-            modifier = Modifier
-                .align(Alignment.BottomEnd) // Anchors it to the bottom-right quadrant
-                .padding(end = 36.dp, bottom = 52.dp) // Perfect symmetry with the left side
         )
 
         // 4. Center Dashboard (Distance & Speed)
