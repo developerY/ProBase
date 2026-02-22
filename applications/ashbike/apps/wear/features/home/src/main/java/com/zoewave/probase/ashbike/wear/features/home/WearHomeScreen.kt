@@ -46,17 +46,23 @@ fun WearHomeScreen() {
             modifier = Modifier.fillMaxSize()
         )
 
-        // 2. Left Side Data (Pulsing HR) moved to the bottom-left "cheek"
-        // 2. The Tap-to-Cycle Data Complication (Left Cheek)
-        DataCycler(
+        // 2. Left Side Data (Pulsing HR Stack)
+        PulsingHeartRate(
             heartRate = 125,
-            calories = 150,
             isTracking = isTracking,
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = 36.dp, bottom = 52.dp)
+                .padding(start = 42.dp, bottom = 48.dp) // Tweak these to fit perfectly!
         )
 
+        // 3. Right Side Data (Flickering Flame Stack)
+        BurningCalories(
+            calories = 150,
+            isTracking = isTracking,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 42.dp, bottom = 48.dp)
+        )
         // 4. Center Dashboard (Distance & Speed)
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
