@@ -1,14 +1,13 @@
 package com.zoewave.probase.ashbike.wear.features.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,35 +19,34 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.wear.compose.material3.Button
-import androidx.wear.compose.material3.ButtonDefaults
-import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 
 @Composable
 fun WearHomeScreen() {
     val currentSpeed = 24f
+    val distance = "1.66 km"
+    val heartRate = "125"
 
-    // 1. A simple state to track if the ride is active.
-    // (This will eventually live in your ViewModel)
+    // Track the active state
     var isTracking by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        // The Background Canvas Speedometer
+        // 1. The Background Canvas Speedometer
         WearSpeedometer(
             currentSpeed = currentSpeed,
             modifier = Modifier.fillMaxSize()
         )
 
-        // The Data Dashboard
+        // 2. HR pinned to the left side (9 o'clock position)
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(start = 28.dp), // Pushed in so it doesn't get clipped by the curved screen
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "HR",
@@ -56,15 +54,38 @@ fun WearHomeScreen() {
                 color = Color.LightGray
             )
             Text(
-                text = "--",
-                style = MaterialTheme.typography.titleMedium
+                text = heartRate,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White
             )
+        }
+
+        // 3. The Main Center Dashboard
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Distance replaces HR at the top
+            Text(
+                text = distance,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // The Tappable Speed Number
+            val speedColor = if (isTracking) Color(0xFF81C784) else Color.White // Green when active
 
             Text(
                 text = currentSpeed.toInt().toString(),
-                fontSize = 48.sp,
+                fontSize = 56.sp, // Bumped up slightly since there's more room
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = speedColor,
+                modifier = Modifier
+                    .clickable { isTracking = !isTracking } // The magic interaction!
+                    .padding(8.dp) // Adds a slightly larger invisible touch target area
             )
 
             Text(
@@ -72,35 +93,10 @@ fun WearHomeScreen() {
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.LightGray
             )
-
-            Text(
-                text = "1.66 km",
-                style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-        }
-
-        // 3. The Single Toggle Button
-        Button(
-            onClick = { isTracking = !isTracking },
-            colors = ButtonDefaults.buttonColors(
-                // Toggle between soft Green for Go, and soft Red for Stop
-                containerColor = if (isTracking) Color(0xFFE57373) else Color(0xFF81C784),
-                contentColor = Color.Black
-            ),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp) // Pushed up slightly so it doesn't touch the dots
-                .size(48.dp) // Makes it a perfect, compact circle
-        ) {
-            Icon(
-                // Swap the icon based on the state
-                imageVector = if (isTracking) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-                contentDescription = if (isTracking) "Stop Ride" else "Start Ride",
-                modifier = Modifier.size(24.dp)
-            )
         }
     }
 }
+
+// (WearSpeedometer canvas code remains exactly the same below)
 
 // (Keep your WearSpeedometer Composable exactly the same below this)
