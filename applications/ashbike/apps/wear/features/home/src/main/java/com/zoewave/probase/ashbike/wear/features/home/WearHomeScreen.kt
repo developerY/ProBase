@@ -4,9 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -34,111 +32,123 @@ import androidx.wear.tooling.preview.devices.WearDevices
 
 @Composable
 fun WearHomeScreen() {
+    // Placeholder data (Will eventually come from ViewModel)
     val currentSpeed = 24f
     val distance = "1.66 km"
     val heartRate = "125"
     val calories = "150"
 
+    // Local state for the UI toggle
     var isTracking by remember { mutableStateOf(false) }
+
+    // Define colors based on tracking state
+    val activeColor = Color(0xFF81C784) // Soft Green
+    val stopColor = Color(0xFFFF5252)   // Bright Red
+    val speedTextColor = if (isTracking) Color.White else activeColor
+    val iconTintColor = if (isTracking) stopColor.copy(alpha = 0.5f) else activeColor.copy(alpha = 0.5f)
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        // 1. Background Speedometer
+        // 1. Background Canvas Speedometer
         WearSpeedometer(
             currentSpeed = currentSpeed,
             modifier = Modifier.fillMaxSize()
         )
 
-        // 2. Left Side Data (HR)
+        // 2. Left Side Data (HR) - Aligned to Start (Left)
         Column(
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(start = 28.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(start = 26.dp),
+            horizontalAlignment = Alignment.Start // <= Hugs left edge
         ) {
             Text(text = "HR", style = MaterialTheme.typography.labelSmall, color = Color.LightGray)
             Text(text = heartRate, style = MaterialTheme.typography.titleMedium, color = Color.White)
         }
 
-        // 3. Right Side Data (Kcal)
+        // 3. Right Side Data (Kcal) - Aligned to End (Right)
         Column(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 28.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(end = 26.dp),
+            horizontalAlignment = Alignment.End // <= Hugs right edge
         ) {
             Text(text = "Kcal", style = MaterialTheme.typography.labelSmall, color = Color.LightGray)
             Text(text = calories, style = MaterialTheme.typography.titleMedium, color = Color.White)
         }
 
-        // 4. Center Dashboard
+        // 4. Center Dashboard (Distance & Speed)
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 12.dp) // <= Moves the whole central stack down a little
         ) {
+            // Distance Text
             Text(
                 text = distance,
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White
+                style = MaterialTheme.typography.titleSmall, // Slightly smaller hierarchy
+                color = Color.White,
+                modifier = Modifier.padding(bottom = 2.dp) // Space between distance and speed box
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // The speed text color now also changes to match the state
-            val speedColor = if (isTracking) Color.White else Color(0xFF81C784)
-
-            // ... (Inside your main Column)
-
-            // The Tappable Box containing the Background Icon and the Speed
+            // The Tappable Speed Box
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .clickable { isTracking = !isTracking }
-                    .padding(8.dp) // Large touch target
+                    .padding(4.dp)
             ) {
-                // 1. The Background Icon (Play/Stop)
+                // Background Icon
                 Icon(
                     imageVector = if (isTracking) Icons.Filled.Stop else Icons.Filled.PlayArrow,
                     contentDescription = if (isTracking) "Stop Ride" else "Start Ride",
-                    tint = if (isTracking) Color(0xFFFF5252).copy(alpha = 0.6f) else Color(0xFF81C784).copy(alpha = 0.6f),
-                    modifier = Modifier.size(180.dp)
+                    tint = iconTintColor,
+                    modifier = Modifier.size(85.dp)
                 )
 
-                // 2. The Text Stack (Border + Fill)
+                // Text Stack (Border + Fill)
                 Box(contentAlignment = Alignment.Center) {
-                    // Background Text: The Dark Border
+                    // Dark Border outline
                     Text(
                         text = currentSpeed.toInt().toString(),
                         fontSize = 56.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black, // The border color
+                        color = Color.Black,
                         style = TextStyle(
                             drawStyle = Stroke(
                                 miter = 10f,
-                                width = 12f, // Adjust this to make the border thicker/thinner
-                                join = StrokeJoin.Round // Rounds the corners of the outline
+                                width = 10f,
+                                join = StrokeJoin.Round
                             )
                         )
                     )
-
-                    // Foreground Text: The Solid Fill
+                    // Solid foreground text
                     Text(
                         text = currentSpeed.toInt().toString(),
                         fontSize = 56.sp,
                         fontWeight = FontWeight.Bold,
-                        // color = speedColor // Your existing dynamic color (White/Green)
+                        color = speedTextColor
                     )
                 }
             }
+
+            // Unit Label
+            Text(
+                text = "km/h",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.LightGray
+            )
         }
     }
 }
-// (WearSpeedometer canvas code remains below)
 
-// Stack multiple previews to see how it scales on small vs. large watches
+// KEEP YOUR WearSpeedometer COMPOSABLE HERE
+
+// Previews
 @Preview(
     device = WearDevices.SMALL_ROUND,
     showSystemUi = true,
@@ -155,7 +165,6 @@ fun WearHomeScreen() {
 )
 @Composable
 fun WearHomeScreenPreview() {
-    // Wrap it in your theme if you have one, otherwise MaterialTheme is fine
     MaterialTheme {
         WearHomeScreen()
     }
