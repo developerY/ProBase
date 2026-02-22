@@ -5,12 +5,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.navigation3.ui.NavDisplay
 import androidx.wear.compose.material3.AppScaffold
-import androidx.wear.compose.navigation3.SwipeDismissableSceneStrategy // ✅ Wear OS swipe wrapper
+import androidx.wear.compose.navigation3.SwipeDismissableSceneStrategy
 import com.zoewave.probase.ashbike.wear.features.rides.BikeUiEvent
 import com.zoewave.probase.ashbike.wear.features.rides.BikeUiState
-
 import com.zoewave.probase.ashbike.wear.ui.navigation.AshBikeRoute
-import com.zoewave.probase.ashbike.wear.ui.navigation.ashBikeWearNavEntryProvider
+import com.zoewave.probase.ashbike.wear.ui.navigation.ashBikeWearNavEntryProviderOrig
 
 @Composable
 fun AshBikeApp(
@@ -41,7 +40,7 @@ fun AshBikeApp(
             onBack = { navigateBack() },
             entryProvider = { key ->
                 // 3. DELEGATE ROUTING
-                ashBikeWearNavEntryProvider(
+                ashBikeWearNavEntryProviderOrig(
                     key = key,
                     navigateTo = { dest -> navigateTo(dest) },
                     navigateBack = { navigateBack() },

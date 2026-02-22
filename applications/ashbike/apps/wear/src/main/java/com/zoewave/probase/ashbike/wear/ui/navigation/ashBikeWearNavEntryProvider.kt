@@ -1,43 +1,35 @@
 package com.zoewave.probase.ashbike.wear.ui.navigation
 
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.probase.ashbike.wear.features.rides.BikeUiEvent
-import com.zoewave.probase.ashbike.wear.features.rides.BikeUiState
-import com.zoewave.probase.ashbike.wear.features.rides.RideDetailScreen
-import com.zoewave.probase.ashbike.wear.features.rides.WearBikeScreen
+import com.zoewave.probase.ashbike.wear.features.home.WearHomeScreen
+import com.zoewave.probase.ashbike.wear.features.rides.WearRidesScreen
+import com.zoewave.probase.ashbike.wear.features.settings.WearSettingsScreen
 
+
+// Note: This is NOT a @Composable function. It's a simple factory.
 fun ashBikeWearNavEntryProvider(
     key: AshBikeRoute,
-    navigateTo: (AshBikeRoute) -> Unit,
-    navigateBack: () -> Unit,
-    uiState: BikeUiState,           // Assuming hoisted state
-    onEvent: (BikeUiEvent) -> Unit  // Assuming hoisted events
+    navigateTo: (AshBikeRoute) -> Unit
 ): NavEntry<AshBikeRoute> {
-
     return NavEntry(key) {
+        // The Composable content lives inside this lambda
         when (key) {
-            is AshBikeRoute.ActiveRide -> {
-                WearBikeScreen(
-                    uiState = uiState,
-                    onEvent = onEvent,
-                    onNavigateToDetail = { rideId ->
-                        navigateTo(AshBikeRoute.RideDetail(rideId))
-                    }
+            AshBikeRoute.Home -> {
+                WearHomeScreen(
+                    onNavigateToRides = { navigateTo(AshBikeRoute.Rides) },
+                    onNavigateToSettings = { navigateTo(AshBikeRoute.Settings) }
                 )
             }
 
-            is AshBikeRoute.RideDetail -> {
-                RideDetailScreen(
-                    rideId = key.rideId,
-                    uiState = uiState,
-                    onEvent = onEvent,
-                    onDeleteSuccess = { navigateBack() }
-                )
+            AshBikeRoute.Rides -> {
+                WearRidesScreen()
             }
 
-            is AshBikeRoute.Summary -> {
-                // SummaryScreen(uiState, onEvent)
+            AshBikeRoute.Settings -> {
+                WearSettingsScreen()
             }
+
+            AshBikeRoute.ActiveRide -> {}//TODO()
         }
     }
 }
