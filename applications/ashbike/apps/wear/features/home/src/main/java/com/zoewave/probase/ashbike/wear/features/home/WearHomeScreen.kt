@@ -20,12 +20,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
+import androidx.wear.tooling.preview.devices.WearDevices
 
 @Composable
 fun WearHomeScreen() {
@@ -82,42 +87,76 @@ fun WearHomeScreen() {
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // ✅ The speed text color now also changes to match the state
+            // The speed text color now also changes to match the state
             val speedColor = if (isTracking) Color.White else Color(0xFF81C784)
 
+            // ... (Inside your main Column)
+
+            // The Tappable Box containing the Background Icon and the Speed
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .clickable { isTracking = !isTracking }
-                    .padding(8.dp)
+                    .padding(8.dp) // Large touch target
             ) {
-                // ✅ UPDATED ICON VISIBILITY
+                // 1. The Background Icon (Play/Stop)
                 Icon(
                     imageVector = if (isTracking) Icons.Filled.Stop else Icons.Filled.PlayArrow,
                     contentDescription = if (isTracking) "Stop Ride" else "Start Ride",
-                    // We increased alpha from 0.2f to 0.6f and used brighter colors
-                    tint = if (isTracking) {
-                        Color(0xFFFF5252).copy(alpha = 0.7f) // Bright Red for STOP
-                    } else {
-                        Color(0xFF81C784).copy(alpha = 0.7f) // Soft Green for PLAY
-                    },
-                    modifier = Modifier.size(130.dp)
+                    tint = if (isTracking) Color(0xFFFF5252).copy(alpha = 0.6f) else Color(0xFF81C784).copy(alpha = 0.6f),
+                    modifier = Modifier.size(180.dp)
                 )
 
-                Text(
-                    text = currentSpeed.toInt().toString(),
-                    fontSize = 56.sp,
-                    fontWeight = FontWeight.Bold,
-                    // color = speedColor // Text color now reacts too
-                )
+                // 2. The Text Stack (Border + Fill)
+                Box(contentAlignment = Alignment.Center) {
+                    // Background Text: The Dark Border
+                    Text(
+                        text = currentSpeed.toInt().toString(),
+                        fontSize = 56.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black, // The border color
+                        style = TextStyle(
+                            drawStyle = Stroke(
+                                miter = 10f,
+                                width = 12f, // Adjust this to make the border thicker/thinner
+                                join = StrokeJoin.Round // Rounds the corners of the outline
+                            )
+                        )
+                    )
+
+                    // Foreground Text: The Solid Fill
+                    Text(
+                        text = currentSpeed.toInt().toString(),
+                        fontSize = 56.sp,
+                        fontWeight = FontWeight.Bold,
+                        // color = speedColor // Your existing dynamic color (White/Green)
+                    )
+                }
             }
-
-            Text(
-                text = "km/h",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.LightGray
-            )
         }
     }
 }
 // (WearSpeedometer canvas code remains below)
+
+// Stack multiple previews to see how it scales on small vs. large watches
+@Preview(
+    device = WearDevices.SMALL_ROUND,
+    showSystemUi = true,
+    backgroundColor = 0xFF000000,
+    showBackground = true,
+    name = "Small Watch"
+)
+@Preview(
+    device = WearDevices.LARGE_ROUND,
+    showSystemUi = true,
+    backgroundColor = 0xFF000000,
+    showBackground = true,
+    name = "Large Watch"
+)
+@Composable
+fun WearHomeScreenPreview() {
+    // Wrap it in your theme if you have one, otherwise MaterialTheme is fine
+    MaterialTheme {
+        WearHomeScreen()
+    }
+}
