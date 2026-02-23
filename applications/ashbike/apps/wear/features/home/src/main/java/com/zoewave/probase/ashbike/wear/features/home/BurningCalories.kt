@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +37,7 @@ fun BurningCalories(
     modifier: Modifier = Modifier,
     isTracking: Boolean = true
 ) {
-    // 1. Dynamic Color (Kept from before, gets hotter with more calories)
+    // 1. Dynamic Color (Gets hotter with more calories)
     val flameColor = when {
         calories == 0 -> Color.DarkGray
         calories < 200 -> Color(0xFFFFCA28) // Amber
@@ -44,17 +45,26 @@ fun BurningCalories(
         else -> Color(0xFFFF5722)           // Red-Orange
     }
 
-    // 2. State to toggle between Fire and Metabolism icons
+    // 2. The Proportional Speed Math
+    // Calculate how intense the workout is (0.0 to 1.0 fraction, assuming 1000 is a massive burn)
+    val intensityFraction = (calories.toFloat() / 1000f).coerceIn(0f, 1f)
+
+    // How long to wait before swapping icons (4000ms at start, drops to 800ms at peak intensity)
+    val currentDelayMs = (4000f - (intensityFraction * 3200f)).toLong()
+
+    // How fast the crossfade animation itself should play (1500ms down to 400ms)
+    val crossfadeDuration = (1500f - (intensityFraction * 1100f)).toInt()
+
+    // 3. Keep the loop updated WITHOUT restarting it every time calories change
+    val activeDelay by rememberUpdatedState(currentDelayMs)
     var showFireIcon by remember { mutableStateOf(true) }
 
-    // 3. The Timer Loop
-    // This launches a coroutine that swaps the icon state every 3 seconds
-    // ONLY while tracking is active and calories > 0.
-    LaunchedEffect(isTracking, calories > 0) {
-        if (isTracking && calories > 0) {
+    // 4. The Timer Loop
+    LaunchedEffect(isTracking) {
+        if (isTracking) {
             while (true) {
-                delay(2000) // Wait 3 seconds
-                showFireIcon = !showFireIcon // Toggle state
+                delay(activeDelay) // Reads the dynamically changing delay!
+                showFireIcon = !showFireIcon
             }
         } else {
             // Reset to fire icon when stopped
@@ -70,9 +80,10 @@ fun BurningCalories(
         AnimatedContent(
             targetState = showFireIcon,
             transitionSpec = {
-                // A smooth, slow crossfade with a subtle scale effect for energy
-                (fadeIn(animationSpec = tween(1000)) + scaleIn(initialScale = 0.8f, animationSpec = tween(1000)))
-                    .togetherWith(fadeOut(animationSpec = tween(1000)))
+                // Pass our dynamic crossfade duration into the tweens!
+                (fadeIn(animationSpec = tween(crossfadeDuration)) +
+                        scaleIn(initialScale = 0.8f, animationSpec = tween(crossfadeDuration)))
+                    .togetherWith(fadeOut(animationSpec = tween(crossfadeDuration)))
             },
             label = "icon_transition"
         ) { showingFire ->
@@ -99,19 +110,19 @@ fun BurningCalories(
 // ==========================================
 // Previews
 // ==========================================
-@Preview(name = "Stopped (Static Fire)", backgroundColor = 0xFF000000, showBackground = true)
+@Preview(name = "Warmup (Slow, 120 cal)", backgroundColor = 0xFF000000, showBackground = true)
 @Composable
-fun PreviewCaloriesStopped() {
-    MaterialTheme { BurningCalories(calories = 0, isTracking = false) }
+fun PreviewCaloriesSlow() {
+    // Fades very slowly (approx 3.5 seconds)
+    MaterialTheme { BurningCalories(calories = 120, isTracking = true) }
 }
 
-@Preview(name = "Tracking (Animating)", backgroundColor = 0xFF000000, showBackground = true)
+@Preview(name = "Crushing It (Fast, 850 cal)", backgroundColor = 0xFF000000, showBackground = true)
 @Composable
-fun PreviewCaloriesTracking() {
-    // In the preview, you will see it slowly fade between the Fire and the Bolt icon.
-    MaterialTheme { BurningCalories(calories = 350, isTracking = true) }
+fun PreviewCaloriesFast() {
+    // Fades rapidly, showing high metabolic burn!
+    MaterialTheme { BurningCalories(calories = 850, isTracking = true) }
 }
-
 // ==========================================
 // Previews
 // ==========================================
