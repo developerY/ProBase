@@ -1,4 +1,4 @@
-package com.zoewave.probase.ashbike.wear.features.home
+package com.zoewave.probase.ashbike.wear.features.home.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth

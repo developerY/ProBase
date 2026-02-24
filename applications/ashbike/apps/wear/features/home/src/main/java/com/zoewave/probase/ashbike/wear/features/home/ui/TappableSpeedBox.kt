@@ -1,4 +1,4 @@
-package com.zoewave.probase.ashbike.wear.features.home
+package com.zoewave.probase.ashbike.wear.features.home.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box

@@ -1,4 +1,4 @@
-package com.zoewave.probase.ashbike.wear.features.home
+package com.zoewave.probase.ashbike.wear.features.home.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -213,7 +213,7 @@ fun WearSpeedometerPreview() {
         // Wrapping it in a Box with fillMaxSize to simulate the full watch face
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = androidx.compose.ui.Alignment.Center
+            contentAlignment = Alignment.Center
         ) {
             WearSpeedometer(
                 currentSpeed = 24f, // Set a test speed so the gauge lights up

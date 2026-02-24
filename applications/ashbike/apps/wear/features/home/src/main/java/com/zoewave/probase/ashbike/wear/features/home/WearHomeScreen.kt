@@ -1,93 +1,89 @@
 package com.zoewave.probase.ashbike.wear.features.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.tooling.preview.devices.WearDevices
+import com.zoewave.probase.ashbike.wear.features.home.ui.BurningCalories
+import com.zoewave.probase.ashbike.wear.features.home.ui.PulsingHeartRate
+import com.zoewave.probase.ashbike.wear.features.home.ui.TappableSpeedBox
+import com.zoewave.probase.ashbike.wear.features.home.ui.WearSpeedometer
+
 
 @Composable
-fun WearHomeScreen() {
-    // Placeholder data (Will eventually come from ViewModel)
-    val currentSpeed = 24f
-    val distance = "1.66 km"
-    val heartRate = 125
-    val calories = "150"
+fun WearHomeScreen(
+    viewModel: WearBikeViewModel = hiltViewModel()
+) {
+    // 1. Collect the state from the ViewModel
+    val uiState by viewModel.uiState.collectAsState()
 
-    // Local state for the UI toggle
-    var isTracking by remember { mutableStateOf(false) }
-
-    // Define colors based on tracking state
-    val activeColor = Color(0xFF81C784) // Soft Green
-    val stopColor = Color(0xFFFF5252)   // Bright Red
-    val speedTextColor = if (isTracking) Color.White else activeColor
-    val iconTintColor = if (isTracking) stopColor.copy(alpha = 0.5f) else activeColor.copy(alpha = 0.5f)
-
+    // 2. Pass the dynamic state into your UI components
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center,
+
     ) {
-        // 1. Background Canvas Speedometer
         WearSpeedometer(
-            currentSpeed = currentSpeed,
+            currentSpeed = uiState.currentSpeed,
+            maxSpeed = uiState.maxSpeed,
             modifier = Modifier.fillMaxSize()
         )
 
-        // 2. Left Side Data (Pulsing HR Stack)
+        // Left Cheek - Heart Rate
         PulsingHeartRate(
-            heartRate = 125,
-            isTracking = isTracking,
+            heartRate = uiState.heartRate,
+            isTracking = uiState.isTracking,
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = 42.dp, bottom = 48.dp) // Tweak these to fit perfectly!
+                .padding(start = 42.dp, bottom = 48.dp)
         )
 
-        // 3. Right Side Data (Flickering Flame Stack)
+        // Right Cheek - Calories
         BurningCalories(
-            calories = 150,
-            isTracking = isTracking,
+            calories = uiState.calories,
+            isTracking = uiState.isTracking,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 42.dp, bottom = 48.dp)
         )
-        // 4. Center Dashboard (Distance & Speed)
+
+        // Center Dashboard
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 12.dp) // <= Moves the whole central stack down a little
+                .padding(top = 12.dp)
         ) {
-            // Distance Text
             Text(
-                text = distance,
-                style = MaterialTheme.typography.titleSmall, // Slightly smaller hierarchy
+                text = uiState.distance,
+                style = MaterialTheme.typography.titleSmall,
                 color = Color.White,
-                modifier = Modifier.padding(bottom = 2.dp) // Space between distance and speed box
+                modifier = Modifier.padding(bottom = 2.dp)
             )
 
-            // The Tappable Speed Box
-            // Drop in your new isolated component here!
+            // Pass the toggle action to your box
             TappableSpeedBox(
-                currentSpeed = currentSpeed,
-                isTracking = isTracking,
-                onToggle = { isTracking = !isTracking }
+                currentSpeed = uiState.currentSpeed,
+                isTracking = uiState.isTracking,
+                onToggle = { viewModel.toggleTracking(uiState.isTracking) }
             )
 
-            // Unit Label
             Text(
                 text = "km/h",
                 style = MaterialTheme.typography.labelSmall,
