@@ -9,16 +9,25 @@ import com.zoewave.ashbike.model.bike.BikeRide
 // ==========================================
 // 1. The Route (Handles State & Module Isolation)
 // ==========================================
+
 @Composable
 fun RideHistoryRoute(
     viewModel: RidesViewModel = hiltViewModel(),
     onNavigateToDetail: (String) -> Unit
 ) {
-    // Now safely collecting domain models
+    // Safely collecting domain models from the ViewModel
     val rides: List<BikeRide> by viewModel.ridesState.collectAsState()
 
     RideHistoryPage(
         rides = rides,
-        onRideClick = onNavigateToDetail
+        onRideClick = { ride ->
+            // Map the full BikeRide object to just its ID for the navigation graph
+            onNavigateToDetail(ride.rideId)
+        },
+        onDeleteClick = { ride ->
+            // Assuming your ViewModel takes the full object to delete it.
+            // (If your ViewModel expects a String instead, use ride.rideId here too).
+            viewModel.deleteRide(ride.rideId)
+        }
     )
 }
