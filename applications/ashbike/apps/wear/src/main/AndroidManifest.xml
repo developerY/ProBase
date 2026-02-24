@@ -37,7 +37,7 @@
             </intent-filter>
         </activity>
 
-        <!-- service
+        <service
             android:name=".complication.AshBikeComplicationService"
             android:icon="@mipmap/ic_launcher"
             android:label="AshBike Shortcut"
@@ -53,9 +53,9 @@
             <meta-data
                 android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
                 android:value="0" />
-        </service -->
+        </service>
 
-        <!-- service
+        <!--service
             android:name=".tile.AshBikeTileService"
             android:exported="true"
             android:label="@string/tile_label"
@@ -69,11 +69,11 @@
                 android:resource="@drawable/tile_preview" />
         </service -->
 
-        <!-- service
+        <service
             android:name="com.zoewave.probase.ashbike.features.main.service.BikeForegroundService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="location|health" / -->
+            android:foregroundServiceType="location|health" />
 
         <uses-library
             android:name="com.google.android.wearable"

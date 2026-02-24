@@ -1,4 +1,4 @@
-package com.zoewave.probase.ashbike.wear.features.home
+package com.zoewave.probase.ashbike.wear.features.home.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -6,11 +6,12 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
@@ -22,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.tooling.preview.devices.WearDevices
-import androidx.compose.ui.graphics.Path
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
@@ -32,12 +32,14 @@ fun WearSpeedometer(
     currentSpeed: Float,
     maxSpeed: Float = 40f,
     modifier: Modifier = Modifier,
+    // ✅ THE FIX: We map the exact fractions (0.0 to 1.0) of a 360-degree circle
+    // to match our 135-degree to 405-degree sweep!
     indicatorBrush: Brush = Brush.sweepGradient(
-        colors = listOf(
-            Color(0xFF81C784), // Green
-            Color(0xFFFFF176), // Yellow
-            Color(0xFFFF5252)  // Red
-        )
+        0.0f to Color(0xFFFF875E),   // 3 o'clock: Interpolated Orange
+        0.125f to Color(0xFFFF5252), // 4:30 (45 degrees): End of Arc -> RED
+        0.375f to Color(0xFF81C784), // 7:30 (135 degrees): Start of Arc -> GREEN
+        0.75f to Color(0xFFFFF176),  // 12 o'clock (270 degrees): Top of Arc -> YELLOW
+        1.0f to Color(0xFFFF875E)    // Wrap back to 0.0f
     ),
     trackColor: Color = Color.DarkGray.copy(alpha = 0.3f)
 ) {
@@ -170,8 +172,23 @@ fun WearSpeedometer(
             // 5. Draw Indicator Dot (Riding the center of the current thickness)
             val currentAngleRad = Math.toRadians((startAngle + activeSweep).toDouble())
             val activeThickness = minThicknessPx + speedFraction * (maxThicknessPx - minThicknessPx)
-            val dotRadius = radius - (activeThickness / 2) // Perfect center line
 
+            // The needle stops just short of the inner track edge
+            val innerTrackRadius = radius - activeThickness
+            val needleEndX = center.x + (innerTrackRadius - 4.dp.toPx()) * cos(currentAngleRad).toFloat()
+            val needleEndY = center.y + (innerTrackRadius - 4.dp.toPx()) * sin(currentAngleRad).toFloat()
+
+            // Draw a sleek, semi-transparent line from the exact center
+            drawLine(
+                color = Color.White.copy(alpha = 0.35f), // "Ghost" white so it doesn't clash with the main text
+                start = center,
+                end = Offset(needleEndX, needleEndY),
+                strokeWidth = 2.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+
+
+            val dotRadius = radius - (activeThickness / 2) // Perfect center line
             val dotX = center.x + dotRadius * cos(currentAngleRad).toFloat()
             val dotY = center.y + dotRadius * sin(currentAngleRad).toFloat()
 
@@ -213,10 +230,10 @@ fun WearSpeedometerPreview() {
         // Wrapping it in a Box with fillMaxSize to simulate the full watch face
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = androidx.compose.ui.Alignment.Center
+            contentAlignment = Alignment.Center
         ) {
             WearSpeedometer(
-                currentSpeed = 24f, // Set a test speed so the gauge lights up
+                currentSpeed = 38f, // Set high to test the Red section!
                 modifier = Modifier.fillMaxSize()
             )
         }
