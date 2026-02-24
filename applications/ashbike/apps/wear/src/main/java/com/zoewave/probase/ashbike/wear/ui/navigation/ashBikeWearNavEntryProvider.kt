@@ -1,6 +1,7 @@
 package com.zoewave.probase.ashbike.wear.ui.navigation
 
 import androidx.navigation3.runtime.NavEntry
+import com.zoewave.probase.ashbike.wear.features.rides.RideDetailRoute
 
 fun ashBikeWearNavEntryProvider(
     key: AshBikeRoute,
@@ -20,8 +21,10 @@ fun ashBikeWearNavEntryProvider(
 
             // 2. The Drill-Down Detail Screen
             is AshBikeRoute.RideDetail -> {
-                // Your RideDetailScreen logic goes here
-                // e.g., RideDetailScreen(rideId = key.rideId)
+                RideDetailRoute(
+                    rideId = key.rideId,
+
+                )
             }
         }
     }
