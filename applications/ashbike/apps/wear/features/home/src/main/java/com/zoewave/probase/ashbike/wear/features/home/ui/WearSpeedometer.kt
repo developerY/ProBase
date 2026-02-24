@@ -172,8 +172,23 @@ fun WearSpeedometer(
             // 5. Draw Indicator Dot (Riding the center of the current thickness)
             val currentAngleRad = Math.toRadians((startAngle + activeSweep).toDouble())
             val activeThickness = minThicknessPx + speedFraction * (maxThicknessPx - minThicknessPx)
-            val dotRadius = radius - (activeThickness / 2) // Perfect center line
 
+            // The needle stops just short of the inner track edge
+            val innerTrackRadius = radius - activeThickness
+            val needleEndX = center.x + (innerTrackRadius - 4.dp.toPx()) * cos(currentAngleRad).toFloat()
+            val needleEndY = center.y + (innerTrackRadius - 4.dp.toPx()) * sin(currentAngleRad).toFloat()
+
+            // Draw a sleek, semi-transparent line from the exact center
+            drawLine(
+                color = Color.White.copy(alpha = 0.35f), // "Ghost" white so it doesn't clash with the main text
+                start = center,
+                end = Offset(needleEndX, needleEndY),
+                strokeWidth = 2.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+
+
+            val dotRadius = radius - (activeThickness / 2) // Perfect center line
             val dotX = center.x + dotRadius * cos(currentAngleRad).toFloat()
             val dotY = center.y + dotRadius * sin(currentAngleRad).toFloat()
 
