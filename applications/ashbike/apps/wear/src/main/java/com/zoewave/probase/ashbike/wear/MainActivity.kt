@@ -1,5 +1,4 @@
 package com.zoewave.probase.ashbike.wear
-import com.zoewave.probase.ashbike.wear.features.home.WearHomeScreen
 
 
 import android.os.Bundle
@@ -21,7 +20,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             // Your Compose UI theme wrapper goes here
-            WearHomeScreen()
+            AshBikeWearUI()
         }
     }
 
