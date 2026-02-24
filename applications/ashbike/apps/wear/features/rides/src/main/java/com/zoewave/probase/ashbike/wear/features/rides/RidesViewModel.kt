@@ -2,7 +2,7 @@ package com.zoewave.probase.ashbike.wear.features.rides
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zoewave.ashbike.model.bike.BikeRide // ✅ Using your Domain Model
+import com.zoewave.ashbike.model.bike.BikeRide
 import com.zoewave.probase.ashbike.database.BikeRideRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,7 +16,7 @@ class RidesViewModel @Inject constructor(
     private val repo: BikeRideRepo
 ) : ViewModel() {
 
-    // ✅ Uses your exact repo method and maps to the Domain Model
+    // Uses your exact repo method and maps to the Domain Model
     val ridesState: StateFlow<List<BikeRide>> = repo.getAllRides()
         .stateIn(
             scope = viewModelScope,
@@ -24,9 +24,17 @@ class RidesViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    /**
+     * One-shot fetch for a historical ride.
+     * Suspends until the database returns the specific BikeRide.
+     */
+    suspend fun getRide(rideId: String): BikeRide? {
+        return repo.getRideById(rideId)
+    }
+
     fun deleteRide(rideId: String) {
         viewModelScope.launch {
-            // ✅ Uses your exact delete method
+            // Uses your exact delete method
             repo.deleteById(rideId)
         }
     }

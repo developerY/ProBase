@@ -100,6 +100,7 @@ uiautomator = "2.3.0"
 androidxProfiling = "1.4.1"
 runner = "1.7.0"
 navigation3Ui = "1.0.1"
+composeMaterialVersion = "1.5.6"
 
 
 [libraries]
@@ -204,8 +205,11 @@ google-play-services-wearable = { group = "com.google.android.gms", name = "play
 # -- Wear OS - Compose
 androidx-wear-compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "wearComposeMaterial3" }
 androidx-wear-compose-navigation3 = { group = "androidx.wear.compose", name = "compose-navigation3", version.ref = "wearComposeNav3" }
-# OPTIONAL: Add Foundation (useful for scaling lazy lists etc)
+androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterialVersion" }
 androidx-wear-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "wearCompose" }
+
+
+# OPTIONAL: Add Foundation (useful for scaling lazy lists etc)
 androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview", version.ref = "wearToolingPreview" }
 androidx-wear-ongoing = { group = "androidx.wear", name = "wear-ongoing", version.ref = "wearOngoing" }
 androidx-tiles = { group = "androidx.wear.tiles", name = "tiles", version.ref = "tiles" }
