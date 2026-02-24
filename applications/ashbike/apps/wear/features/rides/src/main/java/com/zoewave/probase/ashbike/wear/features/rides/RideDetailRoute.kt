@@ -18,10 +18,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.ChipDefaults
@@ -41,7 +42,7 @@ import java.util.Locale
 fun RideDetailRoute(
     rideId: String,
     viewModel: RidesViewModel = hiltViewModel(), // Assuming you use the same VM or a specific one
-    //onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit
 ) {
     // Fetch the specific ride based on the ID passed from the Navigation 3 graph
     // (You'll need a function in your ViewModel like `getRideById(rideId)`)
@@ -53,17 +54,19 @@ fun RideDetailRoute(
         ride = viewModel.getRide(rideId)
     }
 
-    if (ride != null) {
+    ride?.let { safeRide ->
+        // This block ONLY executes if ride is not null.
+        // safeRide is a guaranteed non-null BikeRide.
         RideDetailPage(
-            ride = ride!!,
-            /*onDeleteClick = {
-                viewModel.deleteRide(ride.rideId)
-                onNavigateBack() // Pop back to the history list after deleting
-            }*/
+            ride = safeRide,
+            onDeleteClick = {
+                viewModel.deleteRide(safeRide.rideId)
+                onNavigateBack()
+            }
         )
-    } else {
-        // Loading state
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+    } ?: run {
+        // The ?: (Elvis operator) handles the 'else' (null) case
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Loading...")
         }
     }
@@ -75,7 +78,7 @@ fun RideDetailRoute(
 @Composable
 fun RideDetailPage(
     ride: BikeRide,
-    //onDeleteClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val dateFormatter = SimpleDateFormat("EEEE, MMM dd", Locale.getDefault())
@@ -151,7 +154,7 @@ fun RideDetailPage(
         item { Spacer(modifier = Modifier.height(16.dp)) }
         item {
             Chip(
-                onClick = {},//onDeleteClick,
+                onClick = onDeleteClick,
                 colors = ChipDefaults.primaryChipColors(backgroundColor = Color(0xFFB3261E)), // Material Red
                 icon = {
                     Icon(

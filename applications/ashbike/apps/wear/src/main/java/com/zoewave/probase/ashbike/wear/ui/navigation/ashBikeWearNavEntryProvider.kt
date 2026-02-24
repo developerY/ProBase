@@ -23,7 +23,7 @@ fun ashBikeWearNavEntryProvider(
             is AshBikeRoute.RideDetail -> {
                 RideDetailRoute(
                     rideId = key.rideId,
-
+                    onNavigateBack = { navigateTo(AshBikeRoute.HomePager) }
                 )
             }
         }
