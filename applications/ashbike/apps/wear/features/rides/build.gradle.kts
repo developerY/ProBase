@@ -65,6 +65,7 @@ dependencies {
 
     // --- Collections ---
     implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.androidx.wear.tooling.preview)
 
     // --- Testing ---
     testImplementation(libs.junit)

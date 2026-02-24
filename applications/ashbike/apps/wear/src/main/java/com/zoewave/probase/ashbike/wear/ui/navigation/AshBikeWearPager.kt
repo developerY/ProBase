@@ -17,7 +17,7 @@ import androidx.wear.compose.foundation.pager.rememberPagerState
 import androidx.wear.compose.material.HorizontalPageIndicator
 import androidx.wear.compose.material.PageIndicatorState
 import com.zoewave.probase.ashbike.wear.features.home.WearHomeScreen
-import com.zoewave.probase.ashbike.wear.features.rides.WearRidesScreen
+import com.zoewave.probase.ashbike.wear.features.rides.RideHistoryRoute
 import com.zoewave.probase.ashbike.wear.features.settings.WearSettingsScreen
 
 
@@ -50,7 +50,9 @@ fun AshBikeWearPager(
         ) { page ->
             when (page) {
                 0 -> WearHomeScreen()
-                1 -> WearRidesScreen()// onRideSelected = onNavigateToRideDetail)
+                1 -> RideHistoryRoute { rideId ->
+                    onNavigateToRideDetail(rideId)
+                }
                 2 -> WearSettingsScreen()
             }
         }
