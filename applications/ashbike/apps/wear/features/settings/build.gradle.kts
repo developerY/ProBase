@@ -68,6 +68,7 @@ dependencies {
     // --- Hilt Dependency Injection ---
     implementation(libs.hilt.navigation.compose)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.compose.material)
     // Note: If your `composetemplate.android.hilt` plugin applies KSP automatically,
     // you can safely remove this line to avoid duplicate processing.
     ksp(libs.hilt.android.compiler)
