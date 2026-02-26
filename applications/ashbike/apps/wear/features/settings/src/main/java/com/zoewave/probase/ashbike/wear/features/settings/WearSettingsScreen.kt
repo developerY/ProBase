@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ElectricBike
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.runtime.Composable
@@ -15,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.ChipDefaults
+import androidx.wear.compose.material.CompactChip
 import androidx.wear.compose.material.Switch
 import androidx.wear.compose.material.ToggleChip
 import androidx.wear.compose.material3.Icon
@@ -25,6 +27,7 @@ import androidx.wear.compose.material3.Text
 
 @Composable
 fun WearSettingsPage(
+    modifier: Modifier = Modifier,
     isHealthConnectEnabled: Boolean,
     onHealthConnectToggled: (Boolean) -> Unit,
     isMetricUnits: Boolean,
@@ -32,7 +35,7 @@ fun WearSettingsPage(
     isAutoPauseEnabled: Boolean,
     onAutoPauseToggled: (Boolean) -> Unit,
     onManageEBikeClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onNavigateToExperiments:  () -> Unit
 ) {
     ScalingLazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -116,5 +119,25 @@ fun WearSettingsPage(
                 }
             )
         }
+
+        // --- The Entry to the Experimental Hub ---
+        // Put this as the absolute last item in the list
+        item {
+            CompactChip(
+                onClick = onNavigateToExperiments, // Triggers Nav3 to push the new screen over the pager
+                label = { Text("AshBike Labs", color = Color.Gray) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Science,
+                        contentDescription = "Experiments",
+                        tint = Color.Gray
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+
+
     }
 }
