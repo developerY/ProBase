@@ -50,7 +50,7 @@ fun AshBikeWearUI() {
     // 3. The Source of Truth for Nav3
     // We explicitly set the starting destination to your new Pager
     val backStack = remember {
-        mutableStateListOf<AshBikeRoute>(AshBikeRoute.HomePager)
+        mutableStateListOf<AshBikeRoute>(AshBikeRoute.Core.HomePager)
     }
 
     // 4. The Main App Scaffold & Navigation Engine

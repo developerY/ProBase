@@ -1,13 +1,22 @@
 package com.zoewave.probase.ashbike.wear.ui.navigation
 
-import kotlinx.serialization.Serializable
 
-
-@Serializable
+// The parent interface for EVERYTHING in the Wear app
 sealed interface AshBikeRoute {
-    @Serializable
-    data object HomePager : AshBikeRoute // The single root destination
 
-    @Serializable
-    data class RideDetail(val rideId: String) : AshBikeRoute // ✅ Depth navigation
+    // --- ZONE 1: Core App Routes ---
+    sealed interface Core : AshBikeRoute {
+        data object HomePager : Core
+        data class RideDetail(val rideId: String) : Core
+        data object ActiveRide : Core
+    }
+
+    // --- ZONE 2: Experimental / Info Routes ---
+    sealed interface Info : AshBikeRoute {
+        data object FeatureHub : Info
+        data object Weather : Info
+        data object Elevation : Info
+        data object HrGraph : Info
+        data object RideMap : Info
+    }
 }
