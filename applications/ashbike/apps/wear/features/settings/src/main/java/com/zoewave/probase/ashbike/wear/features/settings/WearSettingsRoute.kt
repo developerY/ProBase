@@ -3,12 +3,13 @@ package com.zoewave.probase.ashbike.wear.features.settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
 fun WearSettingsRoute(
     viewModel: SettingsViewModel = hiltViewModel(),
-    onNavigateToEBikeSetup: () -> Unit = {}
+    onNavigateToEBikeSetup: () -> Unit = {},
+    onNavigateToExperiments: () -> Unit
 ) {
     // Collecting state from DataStore via the ViewModel
     val isAutoPause by viewModel.isAutoPauseEnabled.collectAsState(initial = false)
@@ -22,6 +23,7 @@ fun WearSettingsRoute(
         onMetricUnitsToggled = { viewModel.setMetricUnits(it) },
         isHealthConnectEnabled = isHealthSync,
         onHealthConnectToggled = { viewModel.setHealthConnect(it) },
-        onManageEBikeClick = onNavigateToEBikeSetup
+        onManageEBikeClick = onNavigateToEBikeSetup,
+        onNavigateToExperiments = onNavigateToExperiments
     )
 }
