@@ -1,7 +1,7 @@
 package com.zoewave.probase.ashbike.wear.ui.navigation
 
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.probase.ashbike.wear.features.rides.RideDetailRoute
+import com.zoewave.probase.ashbike.wear.features.rides.ui.RideDetailRoute
 
 fun ashBikeWearNavEntryProvider(
     key: AshBikeRoute,

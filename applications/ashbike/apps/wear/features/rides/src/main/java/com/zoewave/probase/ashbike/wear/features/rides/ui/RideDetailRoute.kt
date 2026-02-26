@@ -1,4 +1,4 @@
-package com.zoewave.probase.ashbike.wear.features.rides
+package com.zoewave.probase.ashbike.wear.features.rides.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +31,7 @@ import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.TitleCard
 import com.zoewave.ashbike.model.bike.BikeRide
+import com.zoewave.probase.ashbike.wear.features.rides.RidesViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -94,7 +95,7 @@ fun RideDetailPage(
     ) {
         // --- Header ---
         item {
-            Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = dateString, style = MaterialTheme.typography.titleMedium)//.title3)
                 Text(text = timeString, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                 Spacer(modifier = Modifier.height(8.dp))

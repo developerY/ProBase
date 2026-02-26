@@ -1,5 +1,6 @@
-package com.zoewave.probase.ashbike.wear.features.rides
+package com.zoewave.probase.ashbike.wear.features.rides.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -21,7 +22,7 @@ fun RideHistoryPage(
     ScalingLazyColumn(
         modifier = modifier.fillMaxSize(),
         // Adds padding so the top/bottom items don't get cut off by the round screen
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+        contentPadding = PaddingValues(
             top = 32.dp,
             bottom = 32.dp,
             start = 8.dp,
