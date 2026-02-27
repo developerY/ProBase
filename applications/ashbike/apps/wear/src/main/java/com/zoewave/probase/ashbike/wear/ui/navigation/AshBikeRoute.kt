@@ -8,7 +8,8 @@ sealed interface AshBikeRoute {
     sealed interface Core : AshBikeRoute {
         data object HomePager : Core
         data class RideDetail(val rideId: String) : Core
-        data object ActiveRide : Core
+        // Add the new Map route!
+        data class RideMap(val rideId: String) : Core
     }
 
     // --- ZONE 2: Experimental / Info Routes ---

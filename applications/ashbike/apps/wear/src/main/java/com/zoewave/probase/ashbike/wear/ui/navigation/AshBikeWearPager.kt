@@ -51,13 +51,9 @@ fun AshBikeWearPager(
         ) { page ->
             when (page) {
                 0 -> WearHomeScreen()
-                1 -> RideHistoryRoute { rideId ->
-                    onNavigateToRideDetail(rideId)
-                }
+                1 -> RideHistoryRoute { rideId -> onNavigateToRideDetail(rideId) }
                 2 -> WearSettingsRoute(
-                    onNavigateToEBikeSetup = {
-                    /* Handle this later */
-                    },
+                    onNavigateToEBikeSetup = {/* Handle this later */ },
                     onNavigateToExperiments = onNavigateToExperiments
                 )
             }
