@@ -5,8 +5,10 @@ import com.zoewave.probase.ashbike.wear.features.rides.ui.RideDetailRoute
 import com.zoewave.probase.ashbike.wear.features.rides.ui.dash.FeatureHubScreen
 import com.zoewave.probase.ashbike.wear.features.rides.ui.graphs.ElevationProfileScreen
 import com.zoewave.probase.ashbike.wear.features.rides.ui.health.WeeklyHeartRateGraphScreen
-import com.zoewave.probase.ashbike.wear.features.rides.ui.maps.WearRideMapScreen
+import com.zoewave.probase.ashbike.wear.features.rides.ui.maps.WearRideMapRoute
 import com.zoewave.probase.ashbike.wear.features.rides.ui.weather.PreRideWeatherScreen
+import com.zoewave.probase.ashbike.wear.ui.navigation.AshBikeRoute.Core.RideDetail
+import com.zoewave.probase.ashbike.wear.ui.navigation.AshBikeRoute.Core.RideMap
 
 fun ashBikeWearNavEntryProvider(
     key: AshBikeRoute,
@@ -19,23 +21,20 @@ fun ashBikeWearNavEntryProvider(
             // ==========================================
             is AshBikeRoute.Core.HomePager -> {
                 AshBikeWearPager(
-                    onNavigateToRideDetail = { rideId ->
-                        navigateTo(AshBikeRoute.Core.RideDetail(rideId))
-                    },
+                    onNavigateToRideDetail = { rideId -> navigateTo(RideDetail(rideId)) },
                     // Add a button somewhere in the pager to open the hub
-                    onNavigateToExperiments = {
-                        navigateTo(AshBikeRoute.Info.FeatureHub)
-                    }
+                    onNavigateToExperiments = { navigateTo(AshBikeRoute.Info.FeatureHub) }
                 )
             }
-            is AshBikeRoute.Core.RideDetail -> {
+            is RideDetail -> {
                 RideDetailRoute(
                     rideId = key.rideId,
-                    onNavigateBack = { navigateTo(AshBikeRoute.Core.HomePager) }
+                    onWearRideMapRoute = { navigateTo(RideMap(key.rideId)) },
+                    onNavigateBack = { navigateTo(AshBikeRoute.Core.HomePager) },
                 )
             }
-            is AshBikeRoute.Core.ActiveRide -> {
-                // Future live tracking screen
+            is RideMap -> {
+                WearRideMapRoute(rideId = key.rideId)
             }
 
             // ==========================================
@@ -58,7 +57,7 @@ fun ashBikeWearNavEntryProvider(
             }
             is AshBikeRoute.Info.Elevation -> ElevationProfileScreen(locations = emptyList())
             is AshBikeRoute.Info.HrGraph -> WeeklyHeartRateGraphScreen(weeklyData = emptyList())
-            is AshBikeRoute.Info.RideMap -> WearRideMapScreen(locations = emptyList())
+            AshBikeRoute.Info.RideMap -> TODO()
         }
     }
 }
