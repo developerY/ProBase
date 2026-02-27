@@ -16,6 +16,7 @@ fun RideHistoryPage(
     rides: List<BikeRide>, // The list of data from your Room DB
     onRideClick: (BikeRide) -> Unit, // What happens when a user taps a card
     onDeleteClick: (BikeRide) -> Unit, // What happens when a user taps the trash can
+    // onMapClick: (String) -> Unit, // <-- New Map Callback
     modifier: Modifier = Modifier
 ) {
     // ScalingLazyColumn is the standard scrolling list for Wear OS

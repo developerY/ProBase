@@ -43,6 +43,7 @@ import java.util.Locale
 fun RideDetailRoute(
     rideId: String,
     viewModel: RidesViewModel = hiltViewModel(), // Assuming you use the same VM or a specific one
+    onWearRideMapRoute: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     // Fetch the specific ride based on the ID passed from the Navigation 3 graph
@@ -60,6 +61,7 @@ fun RideDetailRoute(
         // safeRide is a guaranteed non-null BikeRide.
         RideDetailPage(
             ride = safeRide,
+            onWearRideMapRoute = onWearRideMapRoute,
             onDeleteClick = {
                 viewModel.deleteRide(safeRide.rideId)
                 onNavigateBack()
@@ -79,6 +81,7 @@ fun RideDetailRoute(
 @Composable
 fun RideDetailPage(
     ride: BikeRide,
+    onWearRideMapRoute: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -105,7 +108,7 @@ fun RideDetailPage(
         // --- Core Stats Card ---
         item {
             TitleCard(
-                onClick = { /* Do nothing or expand */ },
+                onClick = onWearRideMapRoute,
                 title = { Text("Performance") },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
             ) {

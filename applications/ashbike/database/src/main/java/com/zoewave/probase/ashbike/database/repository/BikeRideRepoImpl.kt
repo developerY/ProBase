@@ -11,7 +11,6 @@ import com.zoewave.probase.ashbike.database.RideLocationEntity
 import com.zoewave.probase.ashbike.database.mapper.toBikeRide
 import com.zoewave.probase.ashbike.database.mapper.toEntity
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -22,15 +21,6 @@ class BikeRideRepoImpl @Inject constructor(
 
     override fun getAllRidesWithLocations() = bikeRideDao.getAllRidesWithLocations()
     override fun getRideWithLocations(id: String) = bikeRideDao.getRideWithLocations(id)
-
-    /** Convert the Room Flow<List<RideEntity>> into Flow<List<Ride>> */
-    @WorkerThread
-    override fun getAllRides(): Flow<List<BikeRide>> =
-        bikeRideDao
-            .getAllRidesWithLocations()     // this returns Flow<List<RideWithLocations>>
-            .map { list ->
-                list.map { it.bikeRideEnt.toBikeRide() } // drop locations for now
-            }
 
     @WorkerThread
     override suspend fun insert(ride: BikeRide) {
@@ -46,14 +36,6 @@ class BikeRideRepoImpl @Inject constructor(
     override suspend fun deleteById(rideId: String) {
         bikeRideDao.deleteRide(rideId)
     }
-
-    @WorkerThread
-    override suspend fun getRideById(rideId: String): BikeRide? =
-        bikeRideDao
-            .getRideWithLocations(rideId)
-            .firstOrNull()
-            ?.bikeRideEnt
-            ?.toBikeRide()
 
     @WorkerThread
     override suspend fun deleteAll() {
@@ -87,5 +69,40 @@ class BikeRideRepoImpl @Inject constructor(
     @WorkerThread // Added @WorkerThread for consistency, though Flow might not strictly need it here
     override fun getUnsyncedRidesCount(): Flow<Int> {
         return bikeRideDao.getUnsyncedRidesCount()
+    }
+
+    /** * OPTIMIZED FOR WEAR OS HISTORY LIST
+     * Uses the lightweight DAO method to prevent OOM crashes on the watch.
+     */
+    @WorkerThread
+    override fun getAllRides(): Flow<List<BikeRide>> =
+        bikeRideDao
+            .getAllRidesBasic() // <-- Use the new lightweight query!
+            .map { list ->
+                list.map { it.toBikeRide() }
+            }
+
+    /** * OPTIMIZED FOR WEAR OS MAP
+     * Fetches the heavy relation and ACTUALLY MAPS the locations array!
+     */
+    @WorkerThread
+    override suspend fun getRideById(rideId: String): BikeRide? {
+        // 1. Fetch the heavy relational data using the new suspend DAO method
+        val relation = bikeRideDao.getRideWithLocationsSuspend(rideId) ?: return null
+
+        // 2. Convert the base entity to your domain model
+        val baseRide = relation.bikeRideEnt.toBikeRide()
+
+        // 3. Attach the mapped locations so the Canvas has data to draw!
+        return baseRide.copy(
+            locations = relation.locations.map { locEntity ->
+                com.zoewave.ashbike.model.bike.LocationPoint(
+                    latitude = locEntity.lat,
+                    longitude = locEntity.lng,
+                    altitude = locEntity.elevation?.toFloat(),
+                    timestamp = locEntity.timestamp
+                )
+            }
+        )
     }
 }

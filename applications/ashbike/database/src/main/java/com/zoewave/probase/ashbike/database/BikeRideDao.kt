@@ -41,4 +41,21 @@ interface BikeRideDao {
     /** Gets the count of rides that are not yet synced to Health Connect. */
     @Query("SELECT COUNT(*) FROM bike_rides_table WHERE isHealthDataSynced = 0")
     fun getUnsyncedRidesCount(): Flow<Int>
+
+
+    /** * Lightweight List Fetch (For Wear OS History Pager)
+    * Fetches ONLY the base ride stats. Ignores the heavy locations table.
+    * Prevents watch memory crashes!
+    */
+    @Query("SELECT * FROM bike_rides_table ORDER BY startTime DESC")
+    fun getAllRidesBasic(): Flow<List<BikeRideEntity>>
+
+    /** * 2. Heavy One-Shot Fetch (For Wear OS Map Route)
+     * Fetches the heavy relation (stats + GPS list) for exactly ONE ride.
+     * Uses 'suspend' instead of 'Flow' so it fetches once and stops.
+     */
+    @Transaction
+    @Query("SELECT * FROM bike_rides_table WHERE rideId = :id")
+    suspend fun getRideWithLocationsSuspend(id: String): RideWithLocations?
+
 }
