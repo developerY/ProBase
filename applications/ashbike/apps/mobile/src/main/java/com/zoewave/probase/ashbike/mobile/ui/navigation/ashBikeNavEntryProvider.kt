@@ -17,7 +17,7 @@ import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
 import com.zoewave.ashbike.mobile.rides.ui.RidesUIRoute
 import com.zoewave.ashbike.mobile.rides.ui.components.details.RideDetailScreen
 import com.zoewave.ashbike.mobile.rides.ui.components.details.RideDetailViewModel
-import com.zoewave.ashbike.mobile.rides.ui.components.haversineMeters
+import com.zoewave.ashbike.mobile.rides.ui.components.unused.haversineMeters
 import com.zoewave.ashbike.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.core.util.Logging

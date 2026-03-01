@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,10 +21,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps.model.LatLng
 import com.zoewave.ashbike.mobile.rides.R
 import com.zoewave.ashbike.mobile.rides.ui.components.details.LatLngWithElev
-import com.zoewave.ashbike.mobile.rides.ui.components.haversineMeters
+import com.zoewave.ashbike.mobile.rides.ui.components.unused.haversineMeters
 
 // reuse your haversineMeters(...) from before
 
@@ -136,7 +139,7 @@ fun ElevationProfile(
     }
 }
 
-/*
+
 @Preview(showBackground = true)
 @Composable
 fun ElevationProfilePreview() {
@@ -149,5 +152,5 @@ fun ElevationProfilePreview() {
     )
     ElevationProfile(points = sample, modifier = Modifier.size(320.dp, 100.dp))
 }
-*/
+
 

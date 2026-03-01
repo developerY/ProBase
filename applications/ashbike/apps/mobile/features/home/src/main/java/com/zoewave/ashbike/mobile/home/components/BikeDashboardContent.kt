@@ -182,6 +182,7 @@ fun BikeDashboardContent(
         }
 
         // Slidable Google Map Panel, aligned to the bottom of the Box
+        // Must be a live Flow
         AnimatedVisibility(
             visible = isMapPanelVisible,
             modifier = Modifier.align(Alignment.BottomCenter), // Ensures it's at the bottom of the Box

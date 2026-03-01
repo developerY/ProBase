@@ -1,4 +1,4 @@
-package com.zoewave.ashbike.mobile.rides.ui.components
+package com.zoewave.ashbike.mobile.rides.ui.components.unused
 
 ////import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.Canvas
@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextMeasurer
@@ -414,7 +415,7 @@ private fun DrawScope.drawRidePath(
 
 @Composable
 private fun MapMarker(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     position: Offset,
     size: Dp,
     color: Color

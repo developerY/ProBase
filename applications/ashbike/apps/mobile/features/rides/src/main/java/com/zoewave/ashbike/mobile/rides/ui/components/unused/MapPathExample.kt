@@ -34,7 +34,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.zoewave.ashbike.mobile.rides.ui.components.haversineMeters
 import com.zoewave.probase.core.model.location.GpsFix
 import com.zoewave.probase.core.model.yelp.BusinessInfo
 import kotlin.math.roundToInt

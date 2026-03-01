@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -108,7 +109,10 @@ fun SlidableGoogleMap(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), shape = MaterialTheme.shapes.small)
+                    .background(
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                        shape = MaterialTheme.shapes.small
+                    )
             ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
@@ -118,4 +122,68 @@ fun SlidableGoogleMap(
             }
         }
     }
+}
+
+@Preview(showBackground = true, name = "Map View")
+@Composable
+private fun SlidableGoogleMapPreview_MapView() {
+    MaterialTheme {
+        SlidableGoogleMap(
+            modifier = Modifier.padding(16.dp),
+            uiState = getDummyUiState(),
+            onClose = {},
+            showMapContent = true,
+            placeName = "Sunnyvale Downtown",
+            coffeeShops = emptyList(), // Pass an empty list or mock BusinessInfo objects here
+            onFindCafes = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Path View")
+@Composable
+private fun SlidableGoogleMapPreview_PathView() {
+    MaterialTheme {
+        SlidableGoogleMap(
+            modifier = Modifier.padding(16.dp),
+            uiState = getDummyUiState(),
+            onClose = {},
+            showMapContent = false,
+            placeName = "Sunnyvale Downtown",
+            coffeeShops = emptyList(),
+            onFindCafes = {}
+        )
+    }
+}
+
+// --- Helper function to generate mock state for the preview ---
+@Composable
+private fun getDummyUiState(): HomeUiState.Success {
+    // Note: Adjust the imports and default values if your data classes have changed slightly
+    val dummyBikeData = com.zoewave.ashbike.model.bike.BikeRideInfo(
+        location = LatLng(37.3861, -122.0839), // Defaulting to Sunnyvale
+        currentSpeed = 22.5,
+        averageSpeed = 18.0,
+        maxSpeed = 35.0,
+        currentTripDistance = 5.2f,
+        totalTripDistance = null,
+        remainingDistance = null,
+        elevationGain = 120.0,
+        elevationLoss = 10.0,
+        caloriesBurned = 350,
+        rideDuration = "00:45:00",
+        settings = kotlinx.collections.immutable.persistentMapOf(),
+        heading = 90f,
+        elevation = 30.0,
+        isBikeConnected = true,
+        batteryLevel = 85,
+        motorPower = null,
+        rideState = com.zoewave.ashbike.model.bike.RideState.Riding,
+        bikeWeatherInfo = null,
+        heartbeat = 145,
+        gpsUpdateIntervalMillis = 1000L,
+        ridePath = emptyList() // Add dummy GpsFix items here if you want to preview the drawn path
+    )
+
+    return HomeUiState.Success(bikeData = dummyBikeData)
 }
