@@ -68,12 +68,25 @@ interface BikeRideDao {
     suspend fun getRideWithLocationsSuspend(id: String): RideWithLocations?
 
     /**
-     * One-Shot Lightweight Fetch (Alternative Mobile approach)
+     * One-Shot Lightweight Fetch (Mobile/Wear OS Alternative)
      * Gets all basic ride info just ONE TIME (no reactive stream).
-     * Great for background sync workers or explicit refresh buttons.
+     * * Use Case: Great for background sync workers, checking if the database
+     * is empty on startup, or explicit "pull-to-refresh" buttons where
+     * you don't want to incur the overhead of an active Flow.
      */
-    @Query("SELECT * FROM bike_rides_table")
-    suspend fun getAllRidesWithLocationsOnce(): List<BikeRideEntity>
+    @Query("SELECT * FROM bike_rides_table ORDER BY startTime DESC")
+    suspend fun getAllRidesBasicOnce(): List<BikeRideEntity>
+
+    /**
+     * One-Shot Heavy Fetch (Mobile/Wear OS Alternative)
+     * Fetches all rides WITH their heavy GPS location lists ONE TIME.
+     * * Use Case: Ideal for bulk data exports, one-time bulk syncs to Health Connect,
+     * or scenarios where you need all the data at once but the UI does not
+     * need to react to real-time database changes.
+     */
+    @Transaction
+    @Query("SELECT * FROM bike_rides_table ORDER BY startTime DESC")
+    suspend fun getAllRidesWithLocationsOnce(): List<RideWithLocations>
 
 
     // ========================================================================
