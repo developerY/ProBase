@@ -32,6 +32,7 @@
             <option value="$PROJECT_DIR$/applications/ashbike/apps/mobile/features/rides" />
             <option value="$PROJECT_DIR$/applications/ashbike/apps/mobile/features/settings" />
             <option value="$PROJECT_DIR$/applications/ashbike/apps/wear" />
+            <option value="$PROJECT_DIR$/applications/ashbike/apps/wear/data" />
             <option value="$PROJECT_DIR$/applications/ashbike/apps/wear/features" />
             <option value="$PROJECT_DIR$/applications/ashbike/apps/wear/features/home" />
             <option value="$PROJECT_DIR$/applications/ashbike/apps/wear/features/rides" />
