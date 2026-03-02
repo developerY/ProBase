@@ -69,7 +69,7 @@ playServicesLocation = "21.3.0"
 
 # -- Health & Wear --
 healthConnect = "1.2.0-alpha02"
-healthServices = "1.1.0-beta01"
+wearHealthServices = "1.1.0-rc01"
 wearOngoing = "1.1.0"
 wearComposeMaterial3 = "1.6.0-alpha10"
 wearCompose = "1.6.0-alpha10"
@@ -199,7 +199,7 @@ google-maps-compose = { group = "com.google.maps.android", name = "maps-compose"
 
 # -- Health & Wear --
 androidx-health-connect-client = { group = "androidx.health.connect", name = "connect-client", version.ref = "healthConnect" }
-androidx-health-wear-services-client = { group = "androidx.health", name = "health-services-client", version.ref = "healthServices" }
+androidx-health-wear-services-client = { group = "androidx.health", name = "health-services-client", version.ref = "wearHealthServices" }
 google-play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
 
 # -- Wear OS - Compose
