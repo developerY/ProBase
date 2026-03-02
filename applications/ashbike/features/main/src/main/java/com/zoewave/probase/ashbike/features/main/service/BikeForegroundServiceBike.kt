@@ -4,14 +4,20 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.location.Location
 import android.os.Binder
+import android.os.HandlerThread
 import android.os.IBinder
+import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
 import com.zoewave.ashbike.data.repository.bike.BikeRepository
-import com.zoewave.ashbike.data.services.RideTrackingEngine
 import com.zoewave.ashbike.model.bike.BikeRideInfo
 import com.zoewave.ashbike.model.bike.LocationEnergyLevel
 import com.zoewave.ashbike.model.bike.RideState
@@ -24,7 +30,6 @@ import com.zoewave.probase.ashbike.features.main.usecase.CalculateCaloriesUseCas
 import com.zoewave.probase.ashbike.features.main.usecase.UserStats
 import com.zoewave.probase.core.data.repository.sensor.heart.HeartRateRepository
 import com.zoewave.probase.core.model.location.GpsFix
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -43,9 +48,10 @@ import java.util.UUID
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.random.Random
+import com.google.android.gms.location.LocationRequest as GmsLocationRequest
 
-@AndroidEntryPoint
-class BikeForegroundService : LifecycleService() {
+
+class BikeForegroundServiceBike : LifecycleService() {
 
     // --- Injections ---
     @Inject lateinit var repo: BikeRideRepo
@@ -56,7 +62,9 @@ class BikeForegroundService : LifecycleService() {
     @Inject lateinit var heartRateRepository: HeartRateRepository
 
     // --- System & Hardware ---
-    @Inject lateinit var trackingEngine: RideTrackingEngine
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationProcessingThread: HandlerThread
+    private lateinit var backgroundLooper: Looper
     private lateinit var notificationManager: BikeNotificationManager
     private var wakeLock: PowerManager.WakeLock? = null
     private val binder = LocalBinder()
@@ -93,7 +101,7 @@ class BikeForegroundService : LifecycleService() {
     // --- Lifecycle ---
 
     inner class LocalBinder : Binder() {
-        fun getService(): BikeForegroundService = this@BikeForegroundService
+        fun getService(): BikeForegroundServiceBike = this@BikeForegroundServiceBike
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -105,6 +113,10 @@ class BikeForegroundService : LifecycleService() {
         super.onCreate()
         Log.d(TAG, "Creating Service...")
 
+        // 1. Hardware Init
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        locationProcessingThread = HandlerThread("LocationProcessingThread").apply { start() }
+        backgroundLooper = locationProcessingThread.looper
         notificationManager = BikeNotificationManager(this)
 
         // 2. WakeLock (Prevents CPU sleep during rides)
@@ -147,27 +159,6 @@ class BikeForegroundService : LifecycleService() {
                 startLocationUpdates(interval, minInterval, isLongRide)
             }
         }
-
-        // ADD: Listen to the new Engine's GPS stream
-        lifecycleScope.launch {
-            trackingEngine.currentLocation.collect { point ->
-                if (point != null) {
-                    // Convert domain model back to Android Location for your math
-                    val loc = Location("AshBikeEngine").apply {
-                        latitude = point.latitude
-                        longitude = point.longitude
-                        altitude = point.altitude?.toDouble() ?: 0.0
-                        time = point.timestamp
-                        // Note: You might need to add speed/accuracy to LocationPoint
-                        // if your math heavily relies on loc.speed and loc.accuracy
-                    }
-                    updateRideInfo(loc) // Feed it into your existing math!
-                }
-            }
-        }
-
-
-
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -185,6 +176,8 @@ class BikeForegroundService : LifecycleService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+        locationProcessingThread.quitSafely()
         wakeLock?.takeIf { it.isHeld }?.release()
     }
 
@@ -200,10 +193,22 @@ class BikeForegroundService : LifecycleService() {
         actualMinInterval = max(actualMinInterval, MIN_ALLOWED_GPS_INTERVAL_MS)
         currentActualGpsIntervalMillis = actualInterval
 
+        val request = GmsLocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, actualInterval)
+            .setMinUpdateIntervalMillis(actualMinInterval)
+            .setMaxUpdateDelayMillis(actualInterval)
+            .build()
+
         try {
-            trackingEngine.startRide(actualInterval, actualMinInterval)
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+            fusedLocationClient.requestLocationUpdates(request, locationCallback, backgroundLooper)
         } catch (e: SecurityException) {
             Log.e(TAG, "Location permission missing", e)
+        }
+    }
+
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(result: LocationResult) {
+            result.lastLocation?.let { updateRideInfo(it) }
         }
     }
 
@@ -490,7 +495,7 @@ class BikeForegroundService : LifecycleService() {
     }
 
     companion object {
-        const val TAG = "BikeForegroundService"
+        const val TAG = "BikeForegroundServiceBike"
         private const val PKG_PREFIX = "com.zoewave.probase.ashbike.features.main.service."
         const val ACTION_START_RIDE = PKG_PREFIX + "action.START_RIDE"
         const val ACTION_STOP_RIDE = PKG_PREFIX + "action.STOP_RIDE"
