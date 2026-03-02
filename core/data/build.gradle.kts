@@ -23,7 +23,7 @@ dependencies {
 
     // Health Connect
     implementation(libs.androidx.health.connect.client)
-    implementation(libs.androidx.health.services.client)
+    implementation(libs.androidx.health.wear.services.client)
 
     // Maps
     implementation(libs.google.maps.compose)

@@ -79,7 +79,7 @@ dependencies {
     // --- Wear OS Specifics ---
 
     // Health Services (Tracking rides)
-    implementation(libs.androidx.health.services.client)
+    implementation(libs.androidx.health.wear.services.client)
 
     // Ongoing Activity (The running icon)
     implementation(libs.androidx.wear.ongoing)

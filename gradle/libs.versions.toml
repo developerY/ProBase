@@ -199,7 +199,7 @@ google-maps-compose = { group = "com.google.maps.android", name = "maps-compose"
 
 # -- Health & Wear --
 androidx-health-connect-client = { group = "androidx.health.connect", name = "connect-client", version.ref = "healthConnect" }
-androidx-health-services-client = { group = "androidx.health", name = "health-services-client", version.ref = "healthServices" }
+androidx-health-wear-services-client = { group = "androidx.health", name = "health-services-client", version.ref = "healthServices" }
 google-play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
 
 # -- Wear OS - Compose

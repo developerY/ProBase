@@ -44,7 +44,7 @@ dependencies {
 
     // --- Health & Wear Sensors ---
     // ✅ Replaced Health Connect with Health Services for live hardware sensor reading
-    implementation(libs.androidx.health.services.client)
+    implementation(libs.androidx.health.wear.services.client)
 
     // --- Wear OS UI & Compose ---
     // ✅ Use Wear Material 3 and Wear Foundation instead of Mobile Material

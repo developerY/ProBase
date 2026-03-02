@@ -70,7 +70,7 @@ dependencies {
 
     // --- Platform Integration ---
     implementation(libs.androidx.health.connect.client)
-    implementation(libs.androidx.health.services.client)
+    implementation(libs.androidx.health.wear.services.client)
     implementation(libs.google.maps.compose)
     implementation(libs.google.play.services.location)
     implementation(libs.kotlinx.coroutines.play.services)
