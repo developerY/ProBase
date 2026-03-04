@@ -30,6 +30,9 @@
       <SelectionState runConfigName="applications.photodo.apps.mobile">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="applications.ashbike.apps.mobile.data">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>
