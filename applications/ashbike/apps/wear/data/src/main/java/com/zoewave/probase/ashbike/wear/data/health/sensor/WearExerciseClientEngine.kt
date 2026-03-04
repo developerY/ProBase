@@ -60,13 +60,15 @@ class WearExerciseClientEngine @Inject constructor(
                     latitude = latestLoc.latitude,
                     longitude = latestLoc.longitude,
                     altitude = latestLoc.altitude?.toFloat(),
+                    // TODO: Make sure your LocationPoint model has fields for speed and accuracy!
+                    // Your BikeForegroundService math heavily relies on these two fields.
                     timestamp = locationTimestamp
                 )
             }
         }
 
         override fun onLapSummaryReceived(lapSummary: ExerciseLapSummary) {
-            // Optional: Handle auto-laps if you configure them (e.g., every 1 mile)
+            // Optional: Handle auto-laps if you configure them
         }
 
         override fun onRegistered() {
@@ -84,8 +86,11 @@ class WearExerciseClientEngine @Inject constructor(
         }
     }
 
-    override fun startRide() {
-        // 1. Define what we are doing
+    // ✅ ADDED THE MISSING INTERVAL PARAMETERS HERE
+    override fun startRide(intervalMs: Long, minIntervalMs: Long) {
+        // 1. Define what we are doing.
+        // Notice we ignore the intervalMs because Health Services handles its
+        // own battery optimizations based on ExerciseType.BIKING.
         val config = ExerciseConfig(
             exerciseType = ExerciseType.BIKING,
             dataTypes = setOf(
@@ -93,7 +98,7 @@ class WearExerciseClientEngine @Inject constructor(
                 DataType.LOCATION,
                 DataType.DISTANCE_TOTAL
             ),
-            isAutoPauseAndResumeEnabled = false, // Set to true if you want the watch to handle stops at red lights
+            isAutoPauseAndResumeEnabled = false,
             isGpsEnabled = true
         )
 

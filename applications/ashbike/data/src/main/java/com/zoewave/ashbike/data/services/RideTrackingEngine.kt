@@ -25,7 +25,7 @@ interface RideTrackingEngine {
     /** * Commands the underlying hardware (ExerciseClient or LocationManager)
      * to power up the GNSS chip and heart rate sensors and begin streaming data.
      */
-    fun startRide()
+    fun startRide(intervalMs: Long, minIntervalMs: Long)
 
     /** * Commands the underlying hardware to shut down the sensors, unregister
      * callbacks, and conserve battery.

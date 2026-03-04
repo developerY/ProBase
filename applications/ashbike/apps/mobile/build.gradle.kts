@@ -91,6 +91,7 @@ dependencies {
 
     // AshBike Specific Features
     implementation(project(":applications:ashbike:features:main"))
+    implementation(project(":applications:ashbike:data"))
     implementation(project(":applications:ashbike:apps:mobile:features:home"))
     implementation(project(":applications:ashbike:apps:mobile:features:rides"))
     implementation(project(":applications:ashbike:apps:mobile:features:settings"))
