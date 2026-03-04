@@ -1,6 +1,6 @@
 plugins {
     // Swap this for your exact build-logic library plugin ID (e.g., "probase.android.library")
-    alias(libs.plugins.android.library)
+    id("composetemplate.android.library")
     id("composetemplate.android.hilt")
 }
 

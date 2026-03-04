@@ -76,6 +76,9 @@ class BikeForegroundService : LifecycleService() {
     private var continuousElevationGainMeters: Double = 0.0
     private var continuousElevationLossMeters: Double = 0.0
 
+    // Put this near your other Session State variables
+    private var lastLocationForMath: Location? = null
+
     // 2. Formal (Active Recording)
     private var currentFormalRideId: String? = null
     private val formalRideTrackPoints = mutableListOf<Location>()
@@ -162,6 +165,45 @@ class BikeForegroundService : LifecycleService() {
                         // if your math heavily relies on loc.speed and loc.accuracy
                     }
                     updateRideInfo(loc) // Feed it into your existing math!
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            trackingEngine.currentLocation.collect { point ->
+                if (point != null) {
+                    // 1. Convert domain model to Android Location
+                    val newLoc = Location("AshBikeEngine").apply {
+                        latitude = point.latitude
+                        longitude = point.longitude
+                        altitude = point.altitude?.toDouble() ?: 0.0
+                        time = point.timestamp
+                    }
+
+                    // 2. Calculate the speed dynamically!
+                    if (lastLocationForMath != null) {
+                        val distanceMeters = newLoc.distanceTo(lastLocationForMath!!)
+                        val timeDeltaSeconds = (newLoc.time - lastLocationForMath!!.time) / 1000f
+
+                        // Safety Check: Prevent dividing by zero and filter out crazy GPS spikes (like the 119km/h bug)
+                        if (timeDeltaSeconds > 0.5f) {
+                            val calculatedSpeedMps = distanceMeters / timeDeltaSeconds
+
+                            // Cap unrealistic speeds (e.g., above 30 m/s or 108 km/h on a bike)
+                            newLoc.speed = if (calculatedSpeedMps < 30f) calculatedSpeedMps else 0f
+                        } else {
+                            // If points arrive too fast, reuse the last known speed
+                            newLoc.speed = lastLocationForMath!!.speed
+                        }
+                    } else {
+                        newLoc.speed = 0f // First point of the ride
+                    }
+
+                    // 3. Save for the next calculation
+                    lastLocationForMath = newLoc
+
+                    // 4. Feed it into your existing math!
+                    updateRideInfo(newLoc)
                 }
             }
         }

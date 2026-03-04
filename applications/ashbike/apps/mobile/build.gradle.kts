@@ -96,6 +96,8 @@ dependencies {
     implementation(project(":applications:ashbike:apps:mobile:features:rides"))
     implementation(project(":applications:ashbike:apps:mobile:features:settings"))
 
+    implementation(project(":applications:ashbike:apps:mobile:data"))
+
     implementation(project(":applications:ashbike:database"))
 
     implementation(project(":features:places"))
