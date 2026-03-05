@@ -7,9 +7,11 @@ import androidx.health.services.client.ExerciseClient
 import androidx.health.services.client.HealthServices
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.zoewave.ashbike.data.services.RideSyncEngine
 import com.zoewave.ashbike.data.services.RideTrackingEngine
 import com.zoewave.probase.ashbike.wear.data.health.sensor.WearEmulatorTrackingEngine
 import com.zoewave.probase.ashbike.wear.data.health.sensor.WearExerciseClientEngine
+import com.zoewave.probase.ashbike.wear.data.sync.WearRideSyncEngine
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -53,5 +55,11 @@ object WearTrackingModule {
             // Inject the pure, battery-optimized production engine
             WearExerciseClientEngine(exerciseClient)
         }
+    }
+
+    @Provides
+    @Singleton
+    fun provideRideSyncEngine(@ApplicationContext context: Context): RideSyncEngine {
+        return WearRideSyncEngine(context)
     }
 }

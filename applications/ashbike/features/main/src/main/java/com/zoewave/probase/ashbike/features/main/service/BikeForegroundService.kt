@@ -11,6 +11,7 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps.model.LatLng
 import com.zoewave.ashbike.data.repository.bike.BikeRepository
+import com.zoewave.ashbike.data.services.RideSyncEngine
 import com.zoewave.ashbike.data.services.RideTrackingEngine
 import com.zoewave.ashbike.model.bike.BikeRideInfo
 import com.zoewave.ashbike.model.bike.LocationEnergyLevel
@@ -54,6 +55,7 @@ class BikeForegroundService : LifecycleService() {
     @Inject lateinit var appSettingsRepository: AppSettingsRepository
     @Inject lateinit var bikeRepository: BikeRepository
     @Inject lateinit var heartRateRepository: HeartRateRepository
+    @Inject lateinit var syncEngine: RideSyncEngine
 
     // --- System & Hardware ---
     @Inject lateinit var trackingEngine: RideTrackingEngine
@@ -426,6 +428,11 @@ class BikeForegroundService : LifecycleService() {
             // 2. Save DB
             withContext(Dispatchers.IO) {
                 repo.insertRideWithLocations(rideEntity, locEntities)
+            }
+            // 2. Beam it!
+            // (On the watch, this fires over Bluetooth. On the phone, it does nothing).
+            withContext(Dispatchers.IO) {
+                syncEngine.syncCompletedRide(rideEntity, locEntities)
             }
             // 3. ✅ IMMEDIATE RESET (Stop + Zero)
             resetDashboardData()
