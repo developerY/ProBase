@@ -164,6 +164,7 @@ class BikeForegroundService : LifecycleService() {
                         // Pipe the smooth hardware speed directly to your UI.
                         // (Defaults to 0f if a specific device/watch can't provide it)
                         speed = point.speed ?: 0f
+                        point.bearing?.let { bearing = it }
                     }
 
                     // --- The UI Coasting Buffer ---

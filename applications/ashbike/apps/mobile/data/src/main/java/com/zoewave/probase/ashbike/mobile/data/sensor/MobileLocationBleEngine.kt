@@ -59,7 +59,8 @@ class MobileLocationBleEngine @Inject constructor(
                     longitude = loc.longitude,
                     altitude = if (loc.hasAltitude()) loc.altitude.toFloat() else null,
                     timestamp = loc.time,
-                    speed = if (loc.hasSpeed()) loc.speed else null // Capture the smooth hardware speed!
+                    speed = if (loc.hasSpeed()) loc.speed else null,
+                    bearing = if (loc.hasBearing()) loc.bearing else null // <-- Pipe it through!
                 )
             }
         }

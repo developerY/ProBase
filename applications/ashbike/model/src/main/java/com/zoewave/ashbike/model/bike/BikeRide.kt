@@ -40,5 +40,6 @@ data class LocationPoint(
     val longitude: Double,
     val altitude: Float?,
     val timestamp: Long,
-    val speed: Float? = null // <-- Added for native Doppler speed
+    val speed: Float? = null, // <-- Added for native Doppler speed
+    val bearing: Float? = null // <-- Add this to capture the GPS heading
 )
