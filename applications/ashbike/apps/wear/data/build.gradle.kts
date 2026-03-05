@@ -32,6 +32,7 @@ dependencies {
 
     // --- Android Base ---
     implementation(libs.androidx.core.ktx)
+    implementation(libs.google.play.services.location)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

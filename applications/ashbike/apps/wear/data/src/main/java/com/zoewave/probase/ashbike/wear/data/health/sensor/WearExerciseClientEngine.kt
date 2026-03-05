@@ -29,6 +29,7 @@ class WearExerciseClientEngine @Inject constructor(
 
     private val _currentLocation = MutableStateFlow<LocationPoint?>(null)
     override val currentLocation: StateFlow<LocationPoint?> = _currentLocation.asStateFlow()
+    private var latestWatchSpeedMps: Float? = null
 
     /**
      * The callback that receives batched hardware updates from the watch's sensor chip.
@@ -60,9 +61,11 @@ class WearExerciseClientEngine @Inject constructor(
                     latitude = latestLoc.latitude,
                     longitude = latestLoc.longitude,
                     altitude = latestLoc.altitude?.toFloat(),
-                    // TODO: Make sure your LocationPoint model has fields for speed and accuracy!
-                    // Your BikeForegroundService math heavily relies on these two fields.
-                    timestamp = locationTimestamp
+                    timestamp = locationTimestamp,
+
+                    // Pipe the watch's native hardware data directly to your engine
+                    speed = latestWatchSpeedMps,
+                    bearing = latestLoc.bearing.toFloat()
                 )
             }
         }
@@ -96,7 +99,8 @@ class WearExerciseClientEngine @Inject constructor(
             dataTypes = setOf(
                 DataType.HEART_RATE_BPM,
                 DataType.LOCATION,
-                DataType.DISTANCE_TOTAL
+                DataType.DISTANCE_TOTAL,
+                DataType.SPEED
             ),
             isAutoPauseAndResumeEnabled = false,
             isGpsEnabled = true

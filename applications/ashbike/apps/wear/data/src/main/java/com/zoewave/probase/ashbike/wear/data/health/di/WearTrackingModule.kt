@@ -1,11 +1,15 @@
 package com.zoewave.probase.ashbike.wear.data.health.di
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.health.services.client.ExerciseClient
 import androidx.health.services.client.HealthServices
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.zoewave.ashbike.data.services.RideTrackingEngine
+import com.zoewave.probase.ashbike.wear.data.health.sensor.WearEmulatorTrackingEngine
 import com.zoewave.probase.ashbike.wear.data.health.sensor.WearExerciseClientEngine
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,23 +19,39 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class WearTrackingModule {
+object WearTrackingModule {
 
-    // 1. Bind the Interface to the Wear OS Implementation
-    @Binds
+    @Provides
     @Singleton
-    abstract fun bindTrackingEngine(
-        impl: WearExerciseClientEngine
-    ): RideTrackingEngine
+    fun provideExerciseClient(@ApplicationContext context: Context): ExerciseClient {
+        return HealthServices.getClient(context).exerciseClient
+    }
 
-    // 2. Provide the actual Google Health Services ExerciseClient
-    companion object {
-        @Provides
-        @Singleton
-        fun provideExerciseClient(
-            @ApplicationContext context: Context
-        ): ExerciseClient {
-            return HealthServices.getClient(context).exerciseClient
+    @Provides
+    @Singleton
+    fun provideFusedLocationClient(@ApplicationContext context: Context): FusedLocationProviderClient {
+        return LocationServices.getFusedLocationProviderClient(context)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    @Provides
+    @Singleton
+    fun provideRideTrackingEngine(
+        exerciseClient: ExerciseClient,
+        fusedLocationClient: FusedLocationProviderClient
+    ): RideTrackingEngine {
+
+        // Check if we are running on an Android Studio Emulator
+        val isEmulator = Build.FINGERPRINT.contains("generic") ||
+                Build.MODEL.contains("Emulator") ||
+                Build.MODEL.contains("sdk_gwear")
+
+        return if (isEmulator) {
+            // Inject the hacky hybrid engine so your mock routes work
+            WearEmulatorTrackingEngine(exerciseClient, fusedLocationClient)
+        } else {
+            // Inject the pure, battery-optimized production engine
+            WearExerciseClientEngine(exerciseClient)
         }
     }
 }
