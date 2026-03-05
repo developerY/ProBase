@@ -31,6 +31,9 @@ dependencies {
 
     // --- Coroutines ---
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.google.play.services.wearable)
+
+    implementation(libs.squareup.retrofit.converter.gson)
 
     // --- Testing ---
     testImplementation(libs.junit)
