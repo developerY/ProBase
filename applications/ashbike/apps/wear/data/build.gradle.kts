@@ -24,8 +24,6 @@ dependencies {
     implementation(project(":applications:ashbike:model"))
     implementation(project(":applications:ashbike:data"))
 
-
-
     // --- Health & Wear Sensors ---
     // Replaced Health Connect with Health Services for live hardware sensor reading
     implementation(libs.androidx.health.wear.services.client)
@@ -33,6 +31,10 @@ dependencies {
     // --- Android Base ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.google.play.services.location)
+    implementation(libs.google.play.services.wearable)
+
+    implementation(libs.squareup.retrofit.converter.gson)
+    implementation((libs.kotlinx.coroutines.play.services))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
