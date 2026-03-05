@@ -39,5 +39,6 @@ data class LocationPoint(
     val latitude: Double,
     val longitude: Double,
     val altitude: Float?,
-    val timestamp: Long
+    val timestamp: Long,
+    val speed: Float? = null // <-- Added for native Doppler speed
 )

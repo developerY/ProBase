@@ -155,60 +155,22 @@ class BikeForegroundService : LifecycleService() {
         lifecycleScope.launch {
             trackingEngine.currentLocation.collect { point ->
                 if (point != null) {
-                    // Convert domain model back to Android Location for your math
-                    val loc = Location("AshBikeEngine").apply {
-                        latitude = point.latitude
-                        longitude = point.longitude
-                        altitude = point.altitude?.toDouble() ?: 0.0
-                        time = point.timestamp
-                        // Note: You might need to add speed/accuracy to LocationPoint
-                        // if your math heavily relies on loc.speed and loc.accuracy
-                    }
-                    updateRideInfo(loc) // Feed it into your existing math!
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            trackingEngine.currentLocation.collect { point ->
-                if (point != null) {
-                    // 1. Convert domain model to Android Location
                     val newLoc = Location("AshBikeEngine").apply {
                         latitude = point.latitude
                         longitude = point.longitude
                         altitude = point.altitude?.toDouble() ?: 0.0
                         time = point.timestamp
+
+                        // Pipe the smooth hardware speed directly to your UI.
+                        // (Defaults to 0f if a specific device/watch can't provide it)
+                        speed = point.speed ?: 0f
                     }
 
-                    // 2. Calculate the speed dynamically!
-                    if (lastLocationForMath != null) {
-                        val distanceMeters = newLoc.distanceTo(lastLocationForMath!!)
-                        val timeDeltaSeconds = (newLoc.time - lastLocationForMath!!.time) / 1000f
-
-                        // Safety Check: Prevent dividing by zero and filter out crazy GPS spikes (like the 119km/h bug)
-                        if (timeDeltaSeconds > 0.5f) {
-                            val calculatedSpeedMps = distanceMeters / timeDeltaSeconds
-
-                            // Cap unrealistic speeds (e.g., above 30 m/s or 108 km/h on a bike)
-                            newLoc.speed = if (calculatedSpeedMps < 30f) calculatedSpeedMps else 0f
-                        } else {
-                            // If points arrive too fast, reuse the last known speed
-                            newLoc.speed = lastLocationForMath!!.speed
-                        }
-                    } else {
-                        newLoc.speed = 0f // First point of the ride
-                    }
-
-                    // 3. Save for the next calculation
-                    lastLocationForMath = newLoc
-
-                    // 4. Feed it into your existing math!
+                    // Feed it straight into your existing UI state and DB logic!
                     updateRideInfo(newLoc)
                 }
             }
         }
-
-
 
     }
 
