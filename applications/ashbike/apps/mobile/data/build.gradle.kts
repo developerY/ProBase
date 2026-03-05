@@ -13,9 +13,11 @@ dependencies {
     // --- Shared Projects ---
     // Contains the RideTrackingEngine interface
     implementation(project(":applications:ashbike:data"))
+    implementation(project(":applications:ashbike:database"))
 
     // Contains the LocationPoint domain model
     implementation(project(":applications:ashbike:model"))
+
 
     // Contains your HeartRateRepository for the BLE chest strap
     implementation(project(":core:data"))
