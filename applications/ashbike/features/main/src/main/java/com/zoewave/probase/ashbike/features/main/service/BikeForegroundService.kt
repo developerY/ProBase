@@ -166,6 +166,27 @@ class BikeForegroundService : LifecycleService() {
                         speed = point.speed ?: 0f
                     }
 
+                    // --- The UI Coasting Buffer ---
+                    /* Used to coast the speedometer if GPS drops momentarily under trees/bridges
+                    private var lastNonZeroSpeed: Float = 0f
+                    private var timeOfLastNonZeroSpeed: Long = 0L
+                    if (newLoc.speed > 0f) {
+                        // We have a valid Doppler speed. Save it as our anchor.
+                        lastNonZeroSpeed = newLoc.speed
+                        timeOfLastNonZeroSpeed = newLoc.time
+                    } else {
+                        // Hardware speed is 0. Did we stop, or did we lose the satellites?
+                        val timeSinceGoodSpeed = (newLoc.time - timeOfLastNonZeroSpeed) / 1000f
+
+                        if (timeSinceGoodSpeed < 3.0f && lastNonZeroSpeed > 0f) {
+                            // It's been less than 3 seconds. Coast the UI to hide the drop.
+                            newLoc.speed = lastNonZeroSpeed
+                        } else {
+                            // We have been at 0 for over 3 seconds. It's a genuine stop.
+                            lastNonZeroSpeed = 0f
+                        }
+                    }*/
+
                     // Feed it straight into your existing UI state and DB logic!
                     updateRideInfo(newLoc)
                 }
