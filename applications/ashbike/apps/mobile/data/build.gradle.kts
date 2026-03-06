@@ -34,6 +34,7 @@ dependencies {
     implementation(libs.google.play.services.wearable)
 
     implementation(libs.squareup.retrofit.converter.gson)
+    implementation((libs.kotlinx.coroutines.play.services))
 
     // --- Testing ---
     testImplementation(libs.junit)
