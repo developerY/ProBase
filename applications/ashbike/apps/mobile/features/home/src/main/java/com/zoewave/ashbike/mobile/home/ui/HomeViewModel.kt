@@ -182,7 +182,7 @@ class HomeViewModel @Inject constructor(
                 //    Crucially, its return type is declared as the supertype, 'HomeUiState'.
                 .map<CombinedData, HomeUiState> { data ->
                     // Log inside the map lambda
-                    Log.d("BikeViewModel_DEBUG", "Map lambda. Input CombinedData: $data.")
+                    // Log.d("BikeViewModel_DEBUG", "Map lambda. Input CombinedData: $data.")
                     val stateToEmit = HomeUiState.Success(
                         bikeData = data.rideInfo.copy(
                             totalTripDistance = data.totalDistance,
