@@ -45,8 +45,6 @@ fun RideHistoryPage(
                 ride = ride,
                 // Pass the clicks up to the parent screen/ViewModel
                 onRideClick = { onRideClick(ride) },
-                onDeleteClick = { onDeleteClick(ride) },
-                onForceSyncClick = {} // Spacing between cards
             )
         }
     }
