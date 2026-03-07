@@ -5,18 +5,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
-import androidx.wear.compose.material3.Text
+import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.Text
 import com.zoewave.ashbike.model.bike.BikeRide
+import com.zoewave.probase.ashbike.wear.features.rides.RidesEvent
 
 @Composable
 fun RideHistoryPage(
-    rides: List<BikeRide>, // The list of data from your Room DB
-    onRideClick: (BikeRide) -> Unit, // What happens when a user taps a card
-    onDeleteClick: (BikeRide) -> Unit, // What happens when a user taps the trash can
-    // onMapClick: (String) -> Unit, // <-- New Map Callback
+    rides: List<BikeRide>,
+    onEvent: (RidesEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // ScalingLazyColumn is the standard scrolling list for Wear OS
@@ -30,22 +31,30 @@ fun RideHistoryPage(
             end = 8.dp
         )
     ) {
-        // Optional: A title at the top of the list
-        item {
-            Text(
-                text = "Recent Rides",
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
+        if (rides.isEmpty()) {
+            item {
+                Text(
+                    text = "No recent rides",
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    color = Color.Gray
+                )
+            }
+        } else {
+            item {
+                Text(
+                    text = "Recent Rides",
+                    style = MaterialTheme.typography.title3,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
 
-        // Loop through your list of rides and create a card for each one
-        items(rides) { ride ->
-            RideHistoryCard(
-                modifier = Modifier.padding(bottom = 4.dp),
-                ride = ride,
-                // Pass the clicks up to the parent screen/ViewModel
-                onRideClick = { onRideClick(ride) },
-            )
+            items(rides) { ride ->
+                RideHistoryCard(
+                    ride = ride,
+                    onEvent = onEvent, // Pass the single dispatcher down
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+            }
         }
     }
 }
