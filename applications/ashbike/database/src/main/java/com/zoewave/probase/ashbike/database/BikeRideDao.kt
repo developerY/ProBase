@@ -44,6 +44,15 @@ interface BikeRideDao {
     @Query("SELECT * FROM bike_rides_table WHERE rideId = :id")
     fun getRideWithLocations(id: String): Flow<RideWithLocations?>
 
+    @Query("UPDATE bike_rides_table SET is_acknowledged = 1 WHERE rideId = :rideId")
+    suspend fun markRideAsAcknowledged(rideId: String)
+
+    // 💡 CRITICAL FOR UI UPDATES:
+    // We need a Flow that returns a single domain ride so Compose can observe it.
+    // Assuming your table is named 'bike_rides'
+    @Query("SELECT * FROM bike_rides_table WHERE rideId = :rideId")
+    fun getRideFlow(rideId: String): Flow<BikeRideEntity?>
+
 
     // ========================================================================
     // 3. WEAR OS & PERFORMANCE QUERIES (One-Shot & Lightweight)

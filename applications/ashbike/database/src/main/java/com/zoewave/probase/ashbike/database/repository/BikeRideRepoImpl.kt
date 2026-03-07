@@ -1,8 +1,9 @@
 package com.zoewave.probase.ashbike.database.repository
 
+import androidx.annotation.WorkerThread
+
 // com.zoewave.probase.ashbike.database.repository.BikeRideRepoImpl.kt
 
-import androidx.annotation.WorkerThread
 import com.zoewave.ashbike.model.bike.BikeRide
 import com.zoewave.probase.ashbike.database.BikeRideDao
 import com.zoewave.probase.ashbike.database.BikeRideEntity
@@ -14,37 +15,18 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-
 class BikeRideRepoImpl @Inject constructor(
     private val bikeRideDao: BikeRideDao
 ) : BikeRideRepo {
 
     override fun getAllRidesWithLocations() = bikeRideDao.getAllRidesWithLocations()
+
     override fun getRideWithLocations(id: String) = bikeRideDao.getRideWithLocations(id)
 
-    @WorkerThread
     override suspend fun insert(ride: BikeRide) {
         bikeRideDao.insertRide(ride.toEntity())
     }
 
-    @WorkerThread
-    override suspend fun delete(ride: BikeRide) {
-        bikeRideDao.deleteRide(ride.rideId)
-    }
-
-    @WorkerThread
-    override suspend fun deleteById(rideId: String) {
-        bikeRideDao.deleteRide(rideId)
-    }
-
-    @WorkerThread
-    override suspend fun deleteAll() {
-        // you’ll need to add this to BikeRideDao:
-        // @Query("DELETE FROM rides") suspend fun deleteAllRides()
-        bikeRideDao.deleteAllBikeRides()
-    }
-
-    @WorkerThread
     override suspend fun insertRideWithLocations(
         ride: BikeRideEntity,
         locations: List<RideLocationEntity>
@@ -53,31 +35,61 @@ class BikeRideRepoImpl @Inject constructor(
         bikeRideDao.insertLocations(locations)
     }
 
-    /** New: update just the notes text */
-    @WorkerThread
+    override suspend fun delete(ride: BikeRide) {
+        bikeRideDao.deleteRide(ride.rideId)
+    }
+
+    override suspend fun deleteById(rideId: String) {
+        bikeRideDao.deleteRide(rideId)
+    }
+
+    override suspend fun deleteAll() {
+        // you’ll need to add this to BikeRideDao:
+        // @Query("DELETE FROM rides") suspend fun deleteAllRides()
+        bikeRideDao.deleteAllBikeRides()
+    }
+
     override suspend fun updateRideNotes(rideId: String, notes: String) {
         bikeRideDao.updateNotes(rideId, notes)
     }
 
     /** Marks a ride as synced to Health Connect and stores the Health Connect ID. */
-    @WorkerThread
     override suspend fun markRideAsSyncedToHealthConnect(rideId: String, healthConnectId: String?) {
         bikeRideDao.markRideAsSyncedToHealthConnect(rideId, healthConnectId)
     }
 
     /** Gets the count of rides that are not yet synced to Health Connect. */
-    @WorkerThread // Added @WorkerThread for consistency, though Flow might not strictly need it here
+    // Added @WorkerThread for consistency, though Flow might not strictly need it here
     override fun getUnsyncedRidesCount(): Flow<Int> {
         return bikeRideDao.getUnsyncedRidesCount()
     }
 
+    // =========================================================================
+    // NEW: BLUETOOTH SYNC ACKNOWLEDGEMENT (PHONE CATCH)
+    // =========================================================================
+
+    /** Marks a ride as successfully caught and acknowledged by the phone over Bluetooth. */
+    override suspend fun markRideAsAcknowledged(rideId: String) {
+        bikeRideDao.markRideAsAcknowledged(rideId)
+    }
+
+    /** Returns a continuous stream of a single ride so the Compose UI updates instantly. */
+    override fun getRideFlow(rideId: String): Flow<BikeRide?> {
+        return bikeRideDao.getRideFlow(rideId).map { entity ->
+            entity?.toBikeRide()
+        }
+    }
+
+    // =========================================================================
+    // OPTIMIZED WEAR OS QUERIES
+    // =========================================================================
+
     /** * OPTIMIZED FOR WEAR OS HISTORY LIST
      * Uses the lightweight DAO method to prevent OOM crashes on the watch.
      */
-    @WorkerThread
     override fun getAllRides(): Flow<List<BikeRide>> =
         bikeRideDao
-            .getAllRidesBasic() // <-- Use the new lightweight query!
+            .getAllRidesBasic()
             .map { list ->
                 list.map { it.toBikeRide() }
             }
@@ -85,7 +97,6 @@ class BikeRideRepoImpl @Inject constructor(
     /** * OPTIMIZED FOR WEAR OS MAP
      * Fetches the heavy relation and ACTUALLY MAPS the locations array!
      */
-    @WorkerThread
     override suspend fun getRideById(rideId: String): BikeRide? {
         // 1. Fetch the heavy relational data using the new suspend DAO method
         val relation = bikeRideDao.getRideWithLocationsSuspend(rideId) ?: return null

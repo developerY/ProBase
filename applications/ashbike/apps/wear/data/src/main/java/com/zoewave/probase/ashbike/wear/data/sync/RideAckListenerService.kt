@@ -36,7 +36,7 @@ class RideAckListenerService : WearableListenerService() {
                     try {
                         // NOTE: You will need to add this simple update function to your DAO/Repo
                         // e.g., @Query("UPDATE bike_rides SET isSynced = 1 WHERE rideId = :id")
-                        // repo.markRideAsSynced(rideId)
+                        repo.markRideAsAcknowledged(rideId)
 
                         Log.i(TAG, "✅ WATCH successfully marked Ride ID: $rideId as fully synced!")
                     } catch (e: Exception) {
