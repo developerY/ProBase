@@ -17,6 +17,7 @@ data class BikeRide(
     val avgHeartRate: Int?,
     val maxHeartRate: Int?,
     val isHealthDataSynced: Boolean,
+    val isAcknowledged: Boolean,
     val healthConnectRecordId: String?,
     val weatherCondition: String?,
     val rideType: String?,
