@@ -1,10 +1,14 @@
 package com.zoewave.probase.ashbike.wear.features.rides.ui
+
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -16,6 +20,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
@@ -29,16 +35,17 @@ import com.zoewave.ashbike.model.bike.BikeRide
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 
 @Composable
 fun RideHistoryCard(
     ride: BikeRide,
     onRideClick: () -> Unit,
     onDeleteClick: (BikeRide) -> Unit,
-    onForceSyncClick: (BikeRide) -> Unit, // 👈 New sync callback
+    onForceSyncClick: (BikeRide) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // 1. PERFORMANCE: Cache the formatter and the resulting string
+    // Cache the formatter and the resulting string
     val formatter = remember { SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()) }
     val dateString = remember(ride.startTime) { formatter.format(Date(ride.startTime)) }
 
@@ -73,7 +80,7 @@ fun RideHistoryCard(
 
                     Spacer(modifier = Modifier.width(6.dp))
 
-                    // Delete Button (48dp touch target, 20dp visual)
+                    // Delete Button
                     Button(
                         onClick = { onDeleteClick(ride) },
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
@@ -91,39 +98,38 @@ fun RideHistoryCard(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Stats Body
+            // Stats Body - Formatted to 1 decimal place to handle Floats cleanly
             Text(
-                text = "Distance: ${ride.totalDistance} km",
+                text = "Distance: ${String.format(Locale.getDefault(), "%.1f", ride.totalDistance)} km",
                 style = MaterialTheme.typography.display1,//.bodySmall,
                 color = Color.LightGray
             )
             Text(
-                text = "Avg: ${ride.averageSpeed} km/h",
+                text = "Avg: ${String.format(Locale.getDefault(), "%.1f", ride.averageSpeed)} km/h",
                 style = MaterialTheme.typography.display1,//.bodySmall,
                 color = Color.LightGray
             )
             Text(
-                text = "Max: ${ride.maxSpeed} km/h",
+                text = "Max: ${String.format(Locale.getDefault(), "%.1f", ride.maxSpeed)} km/h",
                 style = MaterialTheme.typography.display1,//.bodySmall,
                 color = Color.LightGray
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // 2. THE NEW SYNC UI LOGIC
+            // Sync UI Logic
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
                 if (ride.isAcknowledged) {
-                    // State: Confirmed by Phone
                     CompactChip(
                         onClick = { /* Disabled visually, already synced */ },
                         label = { Text("Synced", color = Color.White) },
                         icon = {
                             Icon(
                                 imageVector = Icons.Default.Check,
-                                contentDescription = "Synced to Phone",
+                                contentDescription = "Acknowledged by Phone",
                                 tint = Color.Green
                             )
                         },
@@ -132,7 +138,6 @@ fun RideHistoryCard(
                         )
                     )
                 } else {
-                    // State: Stuck on Watch
                     CompactChip(
                         onClick = { onForceSyncClick(ride) },
                         label = { Text("Tap to Sync", color = Color.White) },
@@ -140,7 +145,7 @@ fun RideHistoryCard(
                             Icon(
                                 imageVector = Icons.Default.Sync,
                                 contentDescription = "Force Sync",
-                                tint = Color(0xFF64B5F6) // Light Blue
+                                tint = Color(0xFF64B5F6)
                             )
                         },
                         colors = ChipDefaults.primaryChipColors()
@@ -155,3 +160,73 @@ fun RideHistoryCard(
 // PREVIEWS
 // -------------------------------------------------------------------------
 
+private fun getMockRide(isAcknowledged: Boolean): BikeRide {
+    return BikeRide(
+        rideId = UUID.randomUUID().toString(),
+        startTime = System.currentTimeMillis() - 60000,
+        endTime = System.currentTimeMillis(),
+        totalDistance = 12.4f,
+        averageSpeed = 22.1f,
+        maxSpeed = 35.6f,
+        elevationGain = 120f,
+        elevationLoss = 110f,
+        caloriesBurned = 350,
+        avgHeartRate = 145,
+        maxHeartRate = 165,
+        isHealthDataSynced = false,
+        isAcknowledged = isAcknowledged,
+        healthConnectRecordId = null,
+        weatherCondition = "Sunny",
+        rideType = "Fitness",
+        notes = null,
+        rating = null,
+        bikeId = null,
+        batteryStart = 100,
+        batteryEnd = 85,
+        startLat = 37.3697,
+        startLng = -122.0821,
+        endLat = 37.3697,
+        endLng = -122.0821,
+        locations = emptyList() // Empty list to satisfy the compiler for the preview
+    )
+}
+
+@Preview(
+    device = Devices.WEAR_OS_SMALL_ROUND,
+    showSystemUi = true,
+    backgroundColor = 0xFF000000,
+    showBackground = true
+)
+@Composable
+fun PreviewRideHistoryCard_PendingSync() {
+    MaterialTheme {
+        Box(modifier = Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.Center) {
+            RideHistoryCard(
+                ride = getMockRide(isAcknowledged = false), // Pending state
+                onRideClick = {},
+                onDeleteClick = {},
+                onForceSyncClick = {}
+            )
+        }
+    }
+}
+
+@Preview(
+    device = Devices.WEAR_OS_SMALL_ROUND,
+    showSystemUi = true,
+    backgroundColor = 0xFF000000,
+    showBackground = true
+)
+@Composable
+fun PreviewRideHistoryCard_Acknowledged() {
+    MaterialTheme {
+        Box(modifier = Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.Center) {
+            RideHistoryCard(
+                ride = getMockRide(isAcknowledged = true), // Synced state
+                onRideClick = {},
+                onDeleteClick = {},
+                onForceSyncClick = {}
+            )
+        }
+    }
+}
