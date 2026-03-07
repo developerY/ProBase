@@ -41,11 +41,12 @@ fun RideHistoryPage(
         // Loop through your list of rides and create a card for each one
         items(rides) { ride ->
             RideHistoryCard(
+                modifier = Modifier.padding(bottom = 4.dp),
                 ride = ride,
                 // Pass the clicks up to the parent screen/ViewModel
                 onRideClick = { onRideClick(ride) },
                 onDeleteClick = { onDeleteClick(ride) },
-                modifier = Modifier.padding(bottom = 4.dp) // Spacing between cards
+                onForceSyncClick = {} // Spacing between cards
             )
         }
     }

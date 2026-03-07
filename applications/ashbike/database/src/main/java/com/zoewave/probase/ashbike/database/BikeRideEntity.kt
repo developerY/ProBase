@@ -1,5 +1,6 @@
 package com.zoewave.probase.ashbike.database
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.UUID
@@ -33,7 +34,10 @@ data class BikeRideEntity(
     // User Feedback
     val notes: String? = null,
     val rating: Int? = null,
+    @ColumnInfo(name = "is_synced_to_health_connect")
     val isSynced: Boolean = false,
+    @ColumnInfo(name = "is_acknowledged")
+    var isAcknowledged: Boolean = false,
 
     // Bike & Battery
     val bikeId: String? = null,

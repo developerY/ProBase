@@ -176,6 +176,7 @@ fun RideHistoryPagePreview() {
             elevationLoss = 0.0f, // Added 'f'
             caloriesBurned = 0,
             isHealthDataSynced = false,
+            isAcknowledged = false,
             // 3. Added all missing required parameters
             avgHeartRate = null, maxHeartRate = null, healthConnectRecordId = null,
             weatherCondition = null, rideType = null, notes = null, rating = null,
@@ -194,6 +195,7 @@ fun RideHistoryPagePreview() {
             elevationLoss = 110.0f, // Added 'f'
             caloriesBurned = 540,
             isHealthDataSynced = true,
+            isAcknowledged = true,
             // 3. Added all missing required parameters
             avgHeartRate = 145, maxHeartRate = 165, healthConnectRecordId = "hc_123",
             weatherCondition = "Sunny", rideType = "Gravel", notes = "Morning spin", rating = 5,

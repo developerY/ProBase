@@ -34,6 +34,7 @@ fun BikeRideEntity.toBikeRide(): BikeRide {
         avgHeartRate = this.avgHeartRate,
         maxHeartRate = this.maxHeartRate,
         isHealthDataSynced = this.isHealthDataSynced,
+        isAcknowledged = this.isAcknowledged,
         healthConnectRecordId = this.healthConnectRecordId,
         weatherCondition = this.weatherCondition,
         rideType = this.rideType,
