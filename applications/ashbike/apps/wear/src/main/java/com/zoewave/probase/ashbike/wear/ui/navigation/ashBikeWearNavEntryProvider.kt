@@ -1,7 +1,7 @@
 package com.zoewave.probase.ashbike.wear.ui.navigation
 
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.probase.ashbike.wear.features.rides.ui.RideDetailRoute
+import com.zoewave.probase.ashbike.wear.features.rides.ui.detail.RideDetailRoute
 import com.zoewave.probase.ashbike.wear.features.rides.ui.dash.FeatureHubScreen
 import com.zoewave.probase.ashbike.wear.features.rides.ui.graphs.ElevationProfileScreen
 import com.zoewave.probase.ashbike.wear.features.rides.ui.health.WeeklyHeartRateGraphScreen

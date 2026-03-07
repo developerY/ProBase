@@ -23,34 +23,33 @@ import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.zoewave.ashbike.model.bike.BikeRide
+import com.zoewave.probase.ashbike.wear.features.rides.RidesEvent
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
+// 1. The Card only takes the data it needs and a single event dispatcher
 @Composable
 fun RideHistoryCard(
     ride: BikeRide,
-    onRideClick: () -> Unit,
+    onEvent: (RidesEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Cache the formatter and the resulting string
     val formatter = remember { SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()) }
     val dateString = remember(ride.startTime) { formatter.format(Date(ride.startTime)) }
 
-    // Convert to readable minutes instead of raw seconds
     val durationStr = remember(ride.startTime, ride.endTime) {
         val mins = ((ride.endTime - ride.startTime) / 60000)
         if (mins <= 0) "< 1m" else "${mins}m"
     }
 
     Card(
-        onClick = onRideClick,
+        onClick = { onEvent(RidesEvent.OnRideClick(ride.rideId)) }, // Dispatches the event!
         modifier = modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-
-            // Header Row: Date (Left) & Duration (Right) - No Delete Button!
+            // Header Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -76,21 +75,21 @@ fun RideHistoryCard(
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = String.format(Locale.getDefault(), "%.1f", ride.totalDistance),
-                    style = MaterialTheme.typography.display3, // Make it pop!
-                    color = Color(0xFF64B5F6) // Light Blue accent
+                    style = MaterialTheme.typography.display3,
+                    color = Color(0xFF64B5F6)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "km",
                     style = MaterialTheme.typography.body2,
                     color = Color.LightGray,
-                    modifier = Modifier.padding(bottom = 2.dp) // Align the "km" to the baseline
+                    modifier = Modifier.padding(bottom = 2.dp)
                 )
             }
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Secondary Stats: Avg and Max Speed on one row
+            // Secondary Stats
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -157,7 +156,7 @@ fun PreviewRideHistoryCard() {
         Box(modifier = Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.Center) {
             RideHistoryCard(
                 ride = getMockRide(),
-                onRideClick = {}
+                onEvent = {},
             )
         }
     }
