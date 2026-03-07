@@ -67,7 +67,7 @@ fun RideHistoryCard(
             ) {
                 Text(
                     text = dateString,
-                    style = MaterialTheme.typography.title2,//.titleMedium,
+                    style = MaterialTheme.typography.caption1,//.titleMedium,
                     color = Color.White
                 )
 
@@ -101,17 +101,17 @@ fun RideHistoryCard(
             // Stats Body - Formatted to 1 decimal place to handle Floats cleanly
             Text(
                 text = "Distance: ${String.format(Locale.getDefault(), "%.1f", ride.totalDistance)} km",
-                style = MaterialTheme.typography.display1,//.bodySmall,
+                style = MaterialTheme.typography.caption2,//.bodySmall,
                 color = Color.LightGray
             )
             Text(
                 text = "Avg: ${String.format(Locale.getDefault(), "%.1f", ride.averageSpeed)} km/h",
-                style = MaterialTheme.typography.display1,//.bodySmall,
+                style = MaterialTheme.typography.caption2,//.bodySmall,
                 color = Color.LightGray
             )
             Text(
                 text = "Max: ${String.format(Locale.getDefault(), "%.1f", ride.maxSpeed)} km/h",
-                style = MaterialTheme.typography.display1,//.bodySmall,
+                style = MaterialTheme.typography.caption2,//.bodySmall,
                 color = Color.LightGray
             )
 
