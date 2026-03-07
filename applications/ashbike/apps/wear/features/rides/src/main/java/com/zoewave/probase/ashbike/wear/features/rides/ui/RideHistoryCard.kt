@@ -9,10 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,10 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.Button
-import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Card
-import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.zoewave.ashbike.model.bike.BikeRide
@@ -38,15 +32,16 @@ import java.util.UUID
 fun RideHistoryCard(
     ride: BikeRide,
     onRideClick: () -> Unit,
-    onDeleteClick: (BikeRide) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Cache the formatter and the resulting string for scrolling performance
+    // Cache the formatter and the resulting string
     val formatter = remember { SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()) }
     val dateString = remember(ride.startTime) { formatter.format(Date(ride.startTime)) }
 
-    val durationSeconds = remember(ride.startTime, ride.endTime) {
-        ((ride.endTime - ride.startTime) / 1000).coerceAtLeast(0)
+    // Convert to readable minutes instead of raw seconds
+    val durationStr = remember(ride.startTime, ride.endTime) {
+        val mins = ((ride.endTime - ride.startTime) / 60000)
+        if (mins <= 0) "< 1m" else "${mins}m"
     }
 
     Card(
@@ -55,11 +50,11 @@ fun RideHistoryCard(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
 
-            // Header Row: Date + (Duration & Delete)
+            // Header Row: Date (Left) & Duration (Right) - No Delete Button!
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically//.Baseline
             ) {
                 Text(
                     text = dateString,
@@ -68,49 +63,49 @@ fun RideHistoryCard(
                     color = Color.White
                 )
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "${durationSeconds}s",
-                        style = MaterialTheme.typography.caption1,
-                        color = Color.LightGray
-                    )
-
-                    Spacer(modifier = Modifier.width(4.dp))
-
-                    // Delete Button
-                    Button(
-                        onClick = { onDeleteClick(ride) },
-                        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
-                        modifier = Modifier.size(36.dp) // Large enough to tap, small enough to keep the row tight
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete Ride",
-                            tint = Color.Gray,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
+                Text(
+                    text = durationStr,
+                    style = MaterialTheme.typography.caption1,
+                    color = Color.Gray
+                )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Stats Body - Formatted to 1 decimal place to handle Floats cleanly
-            Text(
-                text = "Distance: ${String.format(Locale.getDefault(), "%.1f", ride.totalDistance)} km",
-                style = MaterialTheme.typography.body2,
-                color = Color.LightGray
-            )
-            Text(
-                text = "Avg: ${String.format(Locale.getDefault(), "%.1f", ride.averageSpeed)} km/h",
-                style = MaterialTheme.typography.body2,
-                color = Color.LightGray
-            )
-            Text(
-                text = "Max: ${String.format(Locale.getDefault(), "%.1f", ride.maxSpeed)} km/h",
-                style = MaterialTheme.typography.body2,
-                color = Color.LightGray
-            )
+            // Hero Metric: Distance
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                    text = String.format(Locale.getDefault(), "%.1f", ride.totalDistance),
+                    style = MaterialTheme.typography.display3, // Make it pop!
+                    color = Color(0xFF64B5F6) // Light Blue accent
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "km",
+                    style = MaterialTheme.typography.body2,
+                    color = Color.LightGray,
+                    modifier = Modifier.padding(bottom = 2.dp) // Align the "km" to the baseline
+                )
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Secondary Stats: Avg and Max Speed on one row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Avg: ${String.format(Locale.getDefault(), "%.1f", ride.averageSpeed)}",
+                    style = MaterialTheme.typography.caption1,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "Max: ${String.format(Locale.getDefault(), "%.1f", ride.maxSpeed)}",
+                    style = MaterialTheme.typography.caption1,
+                    color = Color.Gray
+                )
+            }
         }
     }
 }
@@ -122,9 +117,9 @@ fun RideHistoryCard(
 private fun getMockRide(): BikeRide {
     return BikeRide(
         rideId = UUID.randomUUID().toString(),
-        startTime = System.currentTimeMillis() - 60000,
+        startTime = System.currentTimeMillis() - (1000 * 60 * 45), // 45 mins ago
         endTime = System.currentTimeMillis(),
-        totalDistance = 12.4f,
+        totalDistance = 18.4f,
         averageSpeed = 22.1f,
         maxSpeed = 35.6f,
         elevationGain = 120f,
@@ -162,8 +157,7 @@ fun PreviewRideHistoryCard() {
         Box(modifier = Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.Center) {
             RideHistoryCard(
                 ride = getMockRide(),
-                onRideClick = {},
-                onDeleteClick = {}
+                onRideClick = {}
             )
         }
     }
