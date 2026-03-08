@@ -25,6 +25,27 @@ The route consists of 12 track points forming a tight, high-turn loop. Because t
 * **Speed Profile:** The average speed is roughly **37.5 km/h**, fitting the 20–50 km/h variation mentioned in the metadata.
 * **Navigation:** Given the density of these turns in such a short window (12 points in under 4 minutes), this is definitely an intensive test for GPS smoothing or navigation logic.
 
+| Segment | Distance (m) | Time (s) | Average Speed (km/h) |
+| ------: | -----------: | -------: | -------------------: |
+|       1 |       260.73 |       25 |                37.55 |
+|       2 |        92.47 |       15 |                22.19 |
+|       3 |       260.73 |       18 |                52.15 |
+|       4 |        92.48 |        9 |                36.99 |
+|       5 |       260.73 |       43 |                21.83 |
+|       6 |        92.48 |        6 |                55.49 |
+|       7 |       260.74 |       25 |                37.55 |
+|       8 |        92.48 |       15 |                22.19 |
+|       9 |       260.74 |       18 |                52.15 |
+|      10 |       369.90 |       24 |                55.49 |
+|      11 |       260.73 |       25 |                37.55 |
+
+
+| Metric             | Value                                    |
+| ------------------ | ---------------------------------------- |
+| **Total Distance** | 2,304.21 meters (≈ 2.30 km / 1.43 miles) |
+| **Total Time**     | 223 seconds (3 minutes 43 seconds)       |
+| **Average Speed**  | 37.21 km/h                               |
+
 
 Segment-by-Segment Analysis
 The route consists of 11 individual segments between the 12 track points.
