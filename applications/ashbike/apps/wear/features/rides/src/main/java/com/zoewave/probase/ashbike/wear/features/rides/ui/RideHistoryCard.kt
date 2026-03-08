@@ -74,7 +74,7 @@ fun RideHistoryCard(
             // Hero Metric: Distance
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
-                    text = String.format(Locale.getDefault(), "%.1f", ride.totalDistance),
+                    text = String.format(Locale.getDefault(), "%.1f", ride.totalDistance / 1000f),
                     style = MaterialTheme.typography.display3,
                     color = Color(0xFF64B5F6)
                 )

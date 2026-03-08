@@ -119,7 +119,7 @@ fun RideDetailPage(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    MetricColumn(label = "Dist", value = "${String.format(Locale.getDefault(), "%.1f", ride.totalDistance)} km")
+                    MetricColumn(label = "Dist", value = "${String.format(Locale.getDefault(), "%.1f", ride.totalDistance / 1000f)} km")
                     MetricColumn(label = "Time", value = "${durationMins} m")
                 }
                 Spacer(modifier = Modifier.height(8.dp))
