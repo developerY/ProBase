@@ -4,13 +4,12 @@ import android.content.Context
 import android.util.Log
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.zoewave.ashbike.data.services.RideSyncEngine
 import com.zoewave.probase.ashbike.database.BikeRideEntity
 import com.zoewave.probase.ashbike.database.RideLocationEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
-
 import javax.inject.Inject
 
 class WearRideSyncEngine @Inject constructor(
@@ -18,7 +17,9 @@ class WearRideSyncEngine @Inject constructor(
 ) : RideSyncEngine {
 
     private val dataClient = Wearable.getDataClient(context)
-    private val gson = Gson()
+    private val gson = GsonBuilder()
+        .serializeSpecialFloatingPointValues()
+        .create()
 
     override suspend fun syncCompletedRide(ride: BikeRideEntity, locations: List<RideLocationEntity>) {
         try {

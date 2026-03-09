@@ -8,7 +8,7 @@ import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.zoewave.probase.ashbike.database.BikeRideEntity
 import com.zoewave.probase.ashbike.database.BikeRideRepo
@@ -28,7 +28,9 @@ class RideSyncListenerService : WearableListenerService() {
     // Hilt perfectly injects your Room DB repository!
     @Inject lateinit var repo: BikeRideRepo
 
-    private val gson = Gson()
+    private val gson = GsonBuilder()
+        .serializeSpecialFloatingPointValues()
+        .create()
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
