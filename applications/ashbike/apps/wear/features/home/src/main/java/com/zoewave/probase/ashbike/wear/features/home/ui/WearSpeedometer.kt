@@ -239,3 +239,27 @@ fun WearSpeedometerPreview() {
         }
     }
 }
+
+
+@Preview(
+    device = WearDevices.LARGE_ROUND,
+    showSystemUi = true,
+    backgroundColor = 0xFF000000,
+    showBackground = true,
+    name = "Large Watch"
+)
+@Composable
+fun WearSpeedometer24Preview() {
+    MaterialTheme {
+        // Wrapping it in a Box with fillMaxSize to simulate the full watch face
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            WearSpeedometer(
+                currentSpeed = 25f, // Set high to test the Red section!
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
