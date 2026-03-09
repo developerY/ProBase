@@ -24,6 +24,8 @@ class WearExerciseClientEngine @Inject constructor(
     private val exerciseClient: ExerciseClient
 ) : RideTrackingEngine {
 
+    private val TAG = "AshBikeDebug"
+
     private val _currentHeartRate = MutableStateFlow(0)
     override val currentHeartRate: StateFlow<Int> = _currentHeartRate.asStateFlow()
 
@@ -37,6 +39,7 @@ class WearExerciseClientEngine @Inject constructor(
     private val exerciseUpdateCallback = object : ExerciseUpdateCallback {
         override fun onExerciseUpdateReceived(update: ExerciseUpdate) {
             val metrics = update.latestMetrics
+            Log.d(TAG, "🟢 onExerciseUpdateReceived fired! State: ${update.exerciseStateInfo.state}")
 
             // 1. Extract Heart Rate
             val hrData = metrics.getData(DataType.HEART_RATE_BPM)
@@ -44,14 +47,25 @@ class WearExerciseClientEngine @Inject constructor(
                 _currentHeartRate.value = hrData.last().value.toInt()
             }
 
-            // 2. Extract Location
+            // 2. EXTRACT SPEED (This was missing!)
+            // Health Services provides speed in meters per second (m/s)
+            val speedData = metrics.getData(DataType.SPEED)
+            if (speedData.isNotEmpty()) {
+                // Grab the newest speed value and save it to our variable
+                latestWatchSpeedMps = speedData.last().value.toFloat()
+                Log.d(TAG, "⚡ SPEED Received: $latestWatchSpeedMps m/s")
+            } else {
+                Log.d(TAG, "⚡ SPEED Data: Empty in this batch")
+            }
+
+            // 3. Extract Location
             val locationData = metrics.getData(DataType.LOCATION)
             if (locationData.isNotEmpty()) {
                 // Grab the wrapper
                 val latestDataPoint = locationData.last()
-
                 // Grab the spatial coordinates from inside the wrapper
                 val latestLoc = latestDataPoint.value
+                Log.d(TAG, "📍 LOCATION Received: Lat/Lng: ${latestLoc.latitude}, ${latestLoc.longitude}")
 
                 // Convert the watch's boot-relative time to a standard Unix Epoch timestamp
                 val bootTimeOffset = System.currentTimeMillis() - android.os.SystemClock.elapsedRealtime()
@@ -62,11 +76,12 @@ class WearExerciseClientEngine @Inject constructor(
                     longitude = latestLoc.longitude,
                     altitude = latestLoc.altitude?.toFloat(),
                     timestamp = locationTimestamp,
-
-                    // Pipe the watch's native hardware data directly to your engine
+                    // Now, this actually contains the real speed instead of 'null'!
                     speed = latestWatchSpeedMps,
                     bearing = latestLoc.bearing.toFloat()
                 )
+            } else {
+                Log.d(TAG, "📍 LOCATION Data: Empty in this batch")
             }
         }
 
@@ -83,14 +98,26 @@ class WearExerciseClientEngine @Inject constructor(
         }
 
         override fun onAvailabilityChanged(dataType: DataType<*, *>, availability: Availability) {
-            if (dataType == DataType.LOCATION && availability is LocationAvailability) {
-                Log.d("AshBike", "GPS Availability changed: $availability")
+            Log.d(TAG, "📡 AVAILABILITY CHANGED | DataType: ${dataType.name} | Availability: $availability")
+
+            if (dataType == DataType.LOCATION) {
+                // Notice we dropped the 'is' keyword because these are static instances, not subclasses!
+                when (availability) {
+                    LocationAvailability.ACQUIRED_UNTETHERED -> Log.d(TAG, "📡 GPS is ACQUIRED (Using Watch Hardware/Emulator)")
+                    LocationAvailability.ACQUIRED_TETHERED -> Log.d(TAG, "📡 GPS is ACQUIRED (Tethered to Phone - THIS MIGHT BE OUR BUG!)")
+                    LocationAvailability.ACQUIRING -> Log.d(TAG, "📡 GPS is ACQUIRING (Searching for satellites or mock data...)")
+                    LocationAvailability.UNAVAILABLE -> Log.w(TAG, "📡 GPS is UNAVAILABLE (Hardware blocked or missing permissions)")
+                    LocationAvailability.NO_GNSS -> Log.w(TAG, "📡 GPS is NO_GNSS (On-device location toggle is OFF in emulator settings)")
+                    LocationAvailability.UNKNOWN -> Log.w(TAG, "📡 GPS is UNKNOWN")
+                    else -> Log.w(TAG, "📡 GPS Availability Unmapped: $availability")
+                }
             }
         }
     }
 
     // ✅ ADDED THE MISSING INTERVAL PARAMETERS HERE
     override fun startRide(intervalMs: Long, minIntervalMs: Long) {
+        Log.d(TAG, "🚀 startRide() called. Requesting Health Services...")
         // 1. Define what we are doing.
         // Notice we ignore the intervalMs because Health Services handles its
         // own battery optimizations based on ExerciseType.BIKING.
@@ -111,9 +138,11 @@ class WearExerciseClientEngine @Inject constructor(
 
         // 3. Command the hardware to start the tracking session
         exerciseClient.startExerciseAsync(config)
+        Log.d(TAG, "🚀 startRide() complete")
     }
 
     override fun stopRide() {
+        Log.d(TAG, "🛑 stopRide() called")
         // Command the hardware to shut down the GPS and sensors to save battery
         exerciseClient.endExerciseAsync()
 
