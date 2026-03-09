@@ -1,8 +1,11 @@
 package com.zoewave.probase.ashbike.wear.data.health.sensor
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.health.services.client.ExerciseClient
 import androidx.health.services.client.ExerciseUpdateCallback
 import androidx.health.services.client.data.Availability
@@ -14,6 +17,7 @@ import androidx.health.services.client.data.ExerciseUpdate
 import androidx.health.services.client.data.LocationAvailability
 import com.zoewave.ashbike.data.services.RideTrackingEngine
 import com.zoewave.ashbike.model.bike.LocationPoint
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +25,7 @@ import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 class WearExerciseClientEngine @Inject constructor(
+    @ApplicationContext private val context: Context, // 👈 Added this!
     private val exerciseClient: ExerciseClient
 ) : RideTrackingEngine {
 
@@ -32,6 +37,32 @@ class WearExerciseClientEngine @Inject constructor(
     private val _currentLocation = MutableStateFlow<LocationPoint?>(null)
     override val currentLocation: StateFlow<LocationPoint?> = _currentLocation.asStateFlow()
     private var latestWatchSpeedMps: Float? = null
+
+    private fun logPermissionStatus() {
+        val requiredPermissions = listOf(
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            android.Manifest.permission.BODY_SENSORS,
+            android.Manifest.permission.ACTIVITY_RECOGNITION
+        )
+
+        Log.d(TAG, "🛡️ --- CHECKING HEALTH SERVICES PERMISSIONS ---")
+        var allGranted = true
+        for (permission in requiredPermissions) {
+            val isGranted = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+            if (isGranted) {
+                Log.d(TAG, "✅ GRANTED: $permission")
+            } else {
+                Log.e(TAG, "❌ DENIED: $permission")
+                allGranted = false
+            }
+        }
+
+        if (!allGranted) {
+            Log.e(TAG, "🚨 WARNING: Missing permissions! ExerciseClient will likely fail silently.")
+        }
+        Log.d(TAG, "🛡️ --------------------------------------------")
+    }
 
     /**
      * The callback that receives batched hardware updates from the watch's sensor chip.
@@ -118,6 +149,10 @@ class WearExerciseClientEngine @Inject constructor(
     // ✅ ADDED THE MISSING INTERVAL PARAMETERS HERE
     override fun startRide(intervalMs: Long, minIntervalMs: Long) {
         Log.d(TAG, "🚀 startRide() called. Requesting Health Services...")
+
+        // 🚨 Check the permissions right here!
+        logPermissionStatus()
+
         // 1. Define what we are doing.
         // Notice we ignore the intervalMs because Health Services handles its
         // own battery optimizations based on ExerciseType.BIKING.

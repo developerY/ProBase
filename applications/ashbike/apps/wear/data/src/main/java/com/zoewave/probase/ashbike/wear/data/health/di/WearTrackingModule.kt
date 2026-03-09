@@ -39,6 +39,7 @@ object WearTrackingModule {
     @Singleton
     fun provideRideTrackingEngine(
         exerciseClient: ExerciseClient,
+        @ApplicationContext context: Context, // 👈 1. Ask Hilt for the Context
         // fusedLocationClient: FusedLocationProviderClient
     ): RideTrackingEngine {
 
@@ -47,7 +48,7 @@ object WearTrackingModule {
                 Build.MODEL.contains("Emulator") ||
                 Build.MODEL.contains("sdk_gwear")
 
-        return WearExerciseClientEngine(exerciseClient)
+        return WearExerciseClientEngine(context, exerciseClient)
 
         /*if (isEmulator) {
             // Inject the hacky hybrid engine so your mock routes work
