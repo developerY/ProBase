@@ -3,6 +3,7 @@ package com.zoewave.probase.ashbike.wear.data.health.sensor
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Looper
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.health.services.client.ExerciseClient
 import androidx.health.services.client.ExerciseUpdateCallback
@@ -22,10 +23,10 @@ import com.zoewave.ashbike.model.bike.LocationPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
-class WearEmulatorTrackingEngine @Inject constructor(
+//class WearEmulatorTrackingEngine @Inject constructor(
+class WearEmulatorTrackingEngine constructor( // removeDI
     private val exerciseClient: ExerciseClient,
     private val fusedLocationClient: FusedLocationProviderClient
 ) : RideTrackingEngine {
@@ -54,6 +55,13 @@ class WearEmulatorTrackingEngine @Inject constructor(
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
             result.lastLocation?.let { loc ->
+                // Calculate km/h for the log just so we can read it easily
+                val rawSpeedMs = if (loc.hasSpeed()) loc.speed else -1f
+                val speedKmh = if (loc.hasSpeed()) loc.speed * 3.6f else -1f
+
+                Log.d("AshBikeDebug", "📍 SENSOR TICK | Time: ${loc.time} | Lat/Lng: ${loc.latitude}, ${loc.longitude}")
+                Log.d("AshBikeDebug", "📍 SENSOR SPEED | HasSpeed: ${loc.hasSpeed()} | m/s: $rawSpeedMs | km/h: $speedKmh")
+
                 _currentLocation.value = LocationPoint(
                     latitude = loc.latitude,
                     longitude = loc.longitude,
@@ -68,6 +76,12 @@ class WearEmulatorTrackingEngine @Inject constructor(
 
     @SuppressLint("MissingPermission")
     override fun startRide(intervalMs: Long, minIntervalMs: Long) {
+
+        // 1. Intercept and override the service's request for testing
+        val emulatorIntervalMs = 1000L
+
+        Log.d("AshBikeDebug", "🚀 EMULATOR OVERRIDE | Service asked for $intervalMs but forcing $emulatorIntervalMs")
+
         // Start Health Services (Heart Rate ONLY, GPS disabled)
         val config = ExerciseConfig(
             exerciseType = ExerciseType.BIKING,
@@ -78,9 +92,9 @@ class WearEmulatorTrackingEngine @Inject constructor(
         exerciseClient.setUpdateCallback(exerciseUpdateCallback)
         exerciseClient.startExerciseAsync(config)
 
-        // Start Fused Location (Sees the Emulator Route perfectly)
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, intervalMs)
-            .setMinUpdateIntervalMillis(minIntervalMs)
+        // 2. Pass the forced 1-second interval to FusedLocation
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, emulatorIntervalMs)
+            .setMinUpdateIntervalMillis(emulatorIntervalMs)
             .build()
 
         fusedLocationClient.requestLocationUpdates(

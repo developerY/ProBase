@@ -9,7 +9,6 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.zoewave.ashbike.data.services.RideSyncEngine
 import com.zoewave.ashbike.data.services.RideTrackingEngine
-import com.zoewave.probase.ashbike.wear.data.health.sensor.WearEmulatorTrackingEngine
 import com.zoewave.probase.ashbike.wear.data.health.sensor.WearExerciseClientEngine
 import com.zoewave.probase.ashbike.wear.data.sync.WearRideSyncEngine
 import dagger.Module
@@ -40,7 +39,7 @@ object WearTrackingModule {
     @Singleton
     fun provideRideTrackingEngine(
         exerciseClient: ExerciseClient,
-        fusedLocationClient: FusedLocationProviderClient
+        // fusedLocationClient: FusedLocationProviderClient
     ): RideTrackingEngine {
 
         // Check if we are running on an Android Studio Emulator
@@ -48,13 +47,15 @@ object WearTrackingModule {
                 Build.MODEL.contains("Emulator") ||
                 Build.MODEL.contains("sdk_gwear")
 
-        return if (isEmulator) {
+        return WearExerciseClientEngine(exerciseClient)
+
+        /*if (isEmulator) {
             // Inject the hacky hybrid engine so your mock routes work
             WearEmulatorTrackingEngine(exerciseClient, fusedLocationClient)
         } else {
             // Inject the pure, battery-optimized production engine
             WearExerciseClientEngine(exerciseClient)
-        }
+        }*/
     }
 
     @Provides
