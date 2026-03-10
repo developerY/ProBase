@@ -13,7 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.ashbike.mobile.home.R
 
 @Composable
 fun HomeRoute(
@@ -31,20 +33,20 @@ fun HomeRoute(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Hello World!",
+                text = stringResource(R.string.applications_ashbike_apps_mobile_features_home_test_hello_world),
                 style = MaterialTheme.typography.displayMedium,
                 color = MaterialTheme.colorScheme.primary
             )
 
             Text(
-                text = "AshBike Home Feature",
+                text = stringResource(R.string.applications_ashbike_apps_mobile_features_home_test_feature_title),
                 style = MaterialTheme.typography.bodyLarge
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(onClick = onNavigateToSettings) {
-                Text("Test Navigation to Settings")
+                Text(stringResource(R.string.applications_ashbike_apps_mobile_features_home_test_navigation_button))
             }
         }
     }

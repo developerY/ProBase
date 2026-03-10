@@ -46,25 +46,25 @@ fun QrExpandableEx(
             ) {
                 Icon(
                     imageVector = Icons.Default.QrCodeScanner,
-                    contentDescription = stringResource(R.string.settings_qr_scanner_cd),
+                    contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_qr_scanner_cd),
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = stringResource(R.string.settings_qr_scanner_title),
+                    text = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_qr_scanner_title),
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = stringResource(if (expanded) R.string.settings_action_collapse else R.string.settings_action_expand)
+                    contentDescription = stringResource(if (expanded) R.string.applications_ashbike_apps_mobile_features_settings_settings_action_collapse else R.string.applications_ashbike_apps_mobile_features_settings_settings_action_expand)
                 )
             }
 
             if (expanded) {
                 HorizontalDivider()
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = stringResource(R.string.settings_qr_scanner_placeholder_text))
+                    Text(text = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_qr_scanner_placeholder_text))
                     Spacer(modifier = Modifier.height(8.dp))
                     QRCodeScannerScreen()
                 }

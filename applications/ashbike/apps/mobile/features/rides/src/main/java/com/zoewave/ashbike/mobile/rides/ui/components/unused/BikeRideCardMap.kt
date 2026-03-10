@@ -83,7 +83,7 @@ fun BikeRideCardMap(
         Column(Modifier.padding(16.dp)) {
             // Header
             Text(
-                stringResource(R.string.feature_trips_card_header_format, startFmt, endFmt),
+                stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_card_header_format, startFmt, endFmt),
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -91,22 +91,22 @@ fun BikeRideCardMap(
 
             // Metrics
             Text(
-                stringResource(R.string.feature_trips_card_label_distance) + stringResource(
-                    R.string.feature_trips_card_value_km_format,
+                stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_card_label_distance) + stringResource(
+                    R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_card_value_km_format,
                     ride.totalDistance / 1000
                 ),
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                stringResource(R.string.feature_trips_card_label_avg_speed) + stringResource(
-                    R.string.feature_trips_card_value_kmh_format,
+                stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_card_label_avg_speed) + stringResource(
+                    R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_card_value_kmh_format,
                     ride.averageSpeed
                 ),
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                stringResource(R.string.feature_trips_card_label_max_speed) + stringResource(
-                    R.string.feature_trips_card_value_kmh_format,
+                stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_card_label_max_speed) + stringResource(
+                    R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_card_value_kmh_format,
                     ride.maxSpeed
                 ),
                 style = MaterialTheme.typography.bodyMedium
@@ -135,12 +135,12 @@ fun BikeRideCardMap(
                         // start marker
                         Marker(
                             state = MarkerState(position = pathPoints.first()),
-                            title = stringResource(R.string.feature_trips_card_map_marker_start)
+                            title = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_card_map_marker_start)
                         )
                         // end marker
                         Marker(
                             state = MarkerState(position = pathPoints.last()),
-                            title = stringResource(R.string.feature_trips_card_map_marker_end)
+                            title = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_card_map_marker_end)
                         )
                     }
                 }

@@ -50,7 +50,7 @@ fun BikeTripsCompose(
             item {
                 TripSectionHeader(
                     onEvent = bikeEvent,
-                    title = stringResource(R.string.feature_trips_bike_rides_section_title),
+                    title = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_bike_rides_section_title),
                     bgColor = MaterialTheme.colorScheme.surfaceVariant,
                     healthConnected = connected,
                     onHealthToggle = {
@@ -64,7 +64,7 @@ fun BikeTripsCompose(
             if (bikeRides.isEmpty()) {
                 item {
                     Text(
-                        text = stringResource(R.string.feature_trips_you_havent_recorded_any_rides),
+                        text = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_you_havent_recorded_any_rides),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(16.dp)
                     )

@@ -47,7 +47,7 @@ fun RideStatsFullList(
             // 1. Distance
             StatRow(
                 icon = Icons.Default.Straighten,
-                label = stringResource(R.string.dist),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_dist),
                 value = "$distance km",
                 color = GlassColors.NeonCyan
             )
@@ -55,7 +55,7 @@ fun RideStatsFullList(
             // 2. Duration
             StatRow(
                 icon = Icons.Default.AvTimer,
-                label = stringResource(R.string.time),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_time),
                 value = duration,
                 color = Color.White
             )
@@ -63,7 +63,7 @@ fun RideStatsFullList(
             // 3. Avg Speed
             StatRow(
                 icon = Icons.Default.Speed,
-                label = stringResource(R.string.avg),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_avg),
                 value = "$avgSpeed mph",
                 color = Color.White
             )
@@ -71,7 +71,7 @@ fun RideStatsFullList(
             // 4. Calories
             StatRow(
                 icon = Icons.Default.LocalFireDepartment,
-                label = stringResource(R.string.cal),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_cal),
                 value = calories,
                 color = Color(0xFFFF9800) // Orange
             )

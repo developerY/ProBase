@@ -67,7 +67,7 @@ fun ProfileInfoCardEx(
                 Column {
                     if (isProfileIncomplete) {
                         Text(
-                            text = stringResource(R.string.profile_incomplete_warning),
+                            text = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_profile_incomplete_warning),
                             color = MaterialTheme.colorScheme.error, // Using theme error color
                             modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
                         )
@@ -78,7 +78,7 @@ fun ProfileInfoCardEx(
                     ) {
                         Icon(
                             Icons.Default.Person,
-                            contentDescription = stringResource(R.string.profile_person_icon_cd),
+                            contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_profile_person_icon_cd),
                             Modifier.size(48.dp)
                         )
                         Spacer(Modifier.width(16.dp))
@@ -89,7 +89,7 @@ fun ProfileInfoCardEx(
                             )
                             Text(
                                 stringResource(
-                                    R.string.profile_details_format,
+                                    R.string.applications_ashbike_apps_mobile_features_settings_profile_details_format,
                                     profile.heightCm,
                                     profile.weightKg
                                 ),
@@ -100,7 +100,7 @@ fun ProfileInfoCardEx(
                         IconButton(onClick = onToggleEdit) {
                             Icon(
                                 Icons.Default.Edit,
-                                contentDescription = stringResource(R.string.profile_edit_icon_cd)
+                                contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_profile_edit_icon_cd)
                             )
                         }
                     }
@@ -115,7 +115,7 @@ fun ProfileInfoCardEx(
                     OutlinedTextField(
                         value = localName,
                         onValueChange = { localName = it },
-                        label = { Text(stringResource(R.string.profile_label_name)) },
+                        label = { Text(stringResource(R.string.applications_ashbike_apps_mobile_features_settings_profile_label_name)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -127,7 +127,7 @@ fun ProfileInfoCardEx(
                         OutlinedTextField(
                             value = localHeight,
                             onValueChange = { localHeight = it },
-                            label = { Text(stringResource(R.string.profile_label_height_cm)) },
+                            label = { Text(stringResource(R.string.applications_ashbike_apps_mobile_features_settings_profile_label_height_cm)) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
@@ -135,7 +135,7 @@ fun ProfileInfoCardEx(
                         OutlinedTextField(
                             value = localWeight,
                             onValueChange = { localWeight = it },
-                            label = { Text(stringResource(R.string.profile_label_weight_kg)) },
+                            label = { Text(stringResource(R.string.applications_ashbike_apps_mobile_features_settings_profile_label_weight_kg)) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
@@ -160,7 +160,7 @@ fun ProfileInfoCardEx(
                             )
                             onToggleEdit()
                         }) {
-                            Text(stringResource(R.string.profile_button_save))
+                            Text(stringResource(R.string.applications_ashbike_apps_mobile_features_settings_profile_button_save))
                         }
                     }
                 }

@@ -43,7 +43,7 @@ fun HeaderBar(
         if (isConnected) {
             // MODE: CONTROLS
             Text(
-                text = stringResource(R.string.gear, gear), // $gear
+                text = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_gear, gear), // $gear
                 color = GlimmerTheme.colors.positive,
                 style = GlimmerTheme.typography.titleLarge
             )

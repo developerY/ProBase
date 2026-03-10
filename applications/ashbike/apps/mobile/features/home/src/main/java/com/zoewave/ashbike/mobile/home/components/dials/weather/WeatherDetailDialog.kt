@@ -25,30 +25,30 @@ fun WeatherDetailDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.weather_details_title)) },
+        title = { Text(text = stringResource(R.string.applications_ashbike_apps_mobile_features_home_weather_details_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     stringResource(
-                        R.string.temperature_format,
+                        R.string.applications_ashbike_apps_mobile_features_home_temperature_format,
                         weatherInfo.temperature?.toInt() ?: 0
                     )
                 )
                 Text(
                     stringResource(
-                        R.string.feels_like_format,
+                        R.string.applications_ashbike_apps_mobile_features_home_feels_like_format,
                         weatherInfo.feelsLike?.toInt() ?: 0
                     )
                 )
                 Text(
                     stringResource(
-                        R.string.humidity_format,
+                        R.string.applications_ashbike_apps_mobile_features_home_humidity_format,
                         weatherInfo.humidity ?: 0
                     )
                 )
                 Text(
                     stringResource(
-                        R.string.wind_format,
+                        R.string.applications_ashbike_apps_mobile_features_home_wind_format,
                         (weatherInfo.windSpeed).toInt(),
                         weatherInfo.windDegree.toInt()
                     )

@@ -131,7 +131,7 @@ fun BikeDashboardContent(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = stringResource(R.string.feature_main_ebike_stats_title),
+                            text = stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_ebike_stats_title),
                             style = if (uiState.bikeData.isBikeConnected) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
                             color = if (uiState.bikeData.isBikeConnected) Color(0xFF03645A) else MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
@@ -143,8 +143,8 @@ fun BikeDashboardContent(
                         )
                         Icon(
                             imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                            contentDescription = if (expanded) stringResource(R.string.feature_main_action_collapse) else stringResource(
-                                R.string.feature_main_action_expand
+                            contentDescription = if (expanded) stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_action_collapse) else stringResource(
+                                R.string.applications_ashbike_apps_mobile_features_home_feature_main_action_expand
                             ),
                             tint = MaterialTheme.colorScheme.onSurface
                         )

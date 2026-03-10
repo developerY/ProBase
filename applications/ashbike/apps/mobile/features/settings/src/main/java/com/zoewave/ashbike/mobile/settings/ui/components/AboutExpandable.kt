@@ -46,18 +46,18 @@ fun AboutExpandable(
             ) {
                 Icon(
                     imageVector = Icons.Default.Info,
-                    contentDescription = stringResource(R.string.settings_about_cd),
+                    contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_about_cd),
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = stringResource(R.string.settings_about_title),
+                    text = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_about_title),
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = stringResource(if (expanded) R.string.settings_action_collapse else R.string.settings_action_expand)
+                    contentDescription = stringResource(if (expanded) R.string.applications_ashbike_apps_mobile_features_settings_settings_action_collapse else R.string.applications_ashbike_apps_mobile_features_settings_settings_action_expand)
                 )
             }
 
@@ -66,20 +66,20 @@ fun AboutExpandable(
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         stringResource(
-                            R.string.settings_app_version_label,
-                            stringResource(R.string.settings_app_version_value_text)
+                            R.string.applications_ashbike_apps_mobile_features_settings_settings_app_version_label,
+                            stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_app_version_value_text)
                         )
                     )
                     Text(
                         stringResource(
-                            R.string.settings_build_number_label,
-                            stringResource(R.string.settings_build_number_value_text)
+                            R.string.applications_ashbike_apps_mobile_features_settings_settings_build_number_label,
+                            stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_build_number_value_text)
                         )
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(stringResource(R.string.settings_about_info_visit_text))
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_about_info_visit_text))
                     Text(
-                        text = stringResource(R.string.settings_about_website_url),
+                        text = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_about_website_url),
                         color = MaterialTheme.colorScheme.primary
                     )
                 }

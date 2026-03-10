@@ -62,25 +62,25 @@ fun StatsRow(
     val avgSpeedText = if (avgSpeed < 0) {
         "--" // ✅ The Sentinel Value triggers this
     } else {
-        stringResource(R.string.feature_main_stats_value_kmh_format, avgSpeed) // Normal formatting (e.g., "22.5")
+        stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_stats_value_kmh_format, avgSpeed) // Normal formatting (e.g., "22.5")
     }
 
     val stats = mutableListOf(
         StatItem(
             icon = Icons.Filled.Straight,
-            label = stringResource(R.string.feature_main_stats_label_distance),
-            value = stringResource(R.string.feature_main_stats_value_km_format, distance),
+            label = stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_stats_label_distance),
+            value = stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_stats_value_km_format, distance),
             activeColor = if (isBikeComputerOn) MaterialTheme.colorScheme.iconColorDistance else null
         ),
         StatItem(
             icon = Icons.Filled.Timer,
-            label = stringResource(R.string.feature_main_stats_label_duration),
+            label = stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_stats_label_duration),
             value = duration,
             activeColor = if (isBikeComputerOn) MaterialTheme.colorScheme.iconColorDuration else null
         ),
         StatItem(
             icon = Icons.Filled.Speed,
-            label = stringResource(R.string.feature_main_stats_label_avg_speed),
+            label = stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_stats_label_avg_speed),
             value = avgSpeedText,
             activeColor = if (isBikeComputerOn) MaterialTheme.colorScheme.iconColorAvgSpeed else null
         )
@@ -89,8 +89,8 @@ fun StatsRow(
             add(
                 StatItem(
                     icon = Icons.Filled.Terrain,
-                    label = stringResource(R.string.feature_main_stats_label_elevation),
-                    value = stringResource(R.string.feature_main_stats_value_meters_format, it),
+                    label = stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_stats_label_elevation),
+                    value = stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_stats_value_meters_format, it),
                     activeColor = if (isBikeComputerOn) MaterialTheme.colorScheme.iconColorElevation else null
                 )
             )

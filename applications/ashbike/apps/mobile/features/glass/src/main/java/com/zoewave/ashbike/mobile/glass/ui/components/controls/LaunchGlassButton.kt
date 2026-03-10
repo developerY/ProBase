@@ -49,21 +49,21 @@ fun LaunchGlassButton(
 
     val visuals = when (buttonState) {
         GlassButtonState.NO_GLASSES -> StateVisuals(
-            text = stringResource(R.string.connect_glasses),
+            text = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_connect_glasses),
             icon = Icons.Default.UsbOff,
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
             enabled = false
         )
         GlassButtonState.READY_TO_START -> StateVisuals(
-            text = stringResource(R.string.start_projection),
+            text = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_start_projection),
             icon = Icons.Default.PermDeviceInformation, // Or generic "Glasses" icon
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             enabled = true
         )
         GlassButtonState.PROJECTING -> StateVisuals(
-            text = stringResource(R.string.projecting_active),
+            text = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_projecting_active),
             icon = Icons.Default.CastConnected,
             containerColor = Color(0xFF4CAF50), // Bike Green
             contentColor = Color.White,

@@ -50,18 +50,18 @@ fun NfcExpandableEx(
             ) {
                 Icon(
                     imageVector = Icons.Default.Nfc,
-                    contentDescription = stringResource(R.string.settings_nfc_cd),
+                    contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_nfc_cd),
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = stringResource(R.string.settings_nfc_title),
+                    text = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_nfc_title),
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = stringResource(if (expanded) R.string.settings_action_collapse else R.string.settings_action_expand)
+                    contentDescription = stringResource(if (expanded) R.string.applications_ashbike_apps_mobile_features_settings_settings_action_collapse else R.string.applications_ashbike_apps_mobile_features_settings_settings_action_expand)
                 )
             }
 

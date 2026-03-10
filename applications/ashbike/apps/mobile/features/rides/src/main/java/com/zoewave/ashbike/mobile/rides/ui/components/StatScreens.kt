@@ -15,7 +15,7 @@ import com.zoewave.ashbike.mobile.rides.R
 
 @Composable
 fun LoadingScreen() {
-    Text(text = stringResource(R.string.state_loading), modifier = Modifier.fillMaxSize())
+    Text(text = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_state_loading), modifier = Modifier.fillMaxSize())
 }
 /*
 @Preview
@@ -33,12 +33,12 @@ fun ErrorScreen(errorMessage: String, onRetry: () -> Unit) {
             .padding(16.dp)
     ) {
         Text(
-            text = stringResource(R.string.state_error_generic_with_message, errorMessage),
+            text = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_state_error_generic_with_message, errorMessage),
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         Text(
-            text = stringResource(R.string.action_retry),
+            text = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_action_retry),
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier
                 .clickable { onRetry() }

@@ -118,7 +118,7 @@ fun ElevationProfile(
 
         // e) axis labels
         Text(
-            text = stringResource(R.string.feature_trips_elevation_label_start_distance),
+            text = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_elevation_label_start_distance),
             style = MaterialTheme.typography.bodySmall,
             color = Color.Black,
             modifier = Modifier
@@ -127,7 +127,7 @@ fun ElevationProfile(
         )
         Text(
             text = stringResource(
-                R.string.feature_trips_elevation_label_total_distance_km,
+                R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_elevation_label_total_distance_km,
                 totalDist / 1000f
             ),
             style = MaterialTheme.typography.bodySmall,

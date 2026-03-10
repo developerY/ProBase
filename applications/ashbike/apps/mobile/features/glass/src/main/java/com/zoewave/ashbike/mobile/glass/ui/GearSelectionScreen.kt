@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.xr.glimmer.Card
 import androidx.xr.glimmer.GlimmerTheme
@@ -18,6 +19,7 @@ import androidx.xr.glimmer.ListItem
 import androidx.xr.glimmer.Text
 import androidx.xr.glimmer.list.VerticalList
 import androidx.xr.glimmer.surface
+import com.zoewave.ashbike.mobile.glass.R
 
 @Composable
 fun GearSelectionScreen(
@@ -30,7 +32,7 @@ fun GearSelectionScreen(
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Card(title = { Text("Select Gear") }) {
+        Card(title = { Text(stringResource(R.string.applications_ashbike_apps_mobile_features_glass_select_gear)) }) {
             // Using VerticalList for proper Glimmer focus handling
             VerticalList(
                 modifier = Modifier
@@ -48,17 +50,17 @@ fun GearSelectionScreen(
 
                         // 2. Add a Checkmark icon if selected
                         leadingIcon = if (isSelected) {
-                            { Icon(imageVector = Icons.Default.Check, contentDescription = "Selected") }
+                            { Icon(imageVector = Icons.Default.Check, contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_selected)) }
                         } else null,
 
                         // 3. The main text goes in the trailing lambda 'content'
                         content = {
-                            Text("Gear $gearNum")
+                            Text(stringResource(R.string.applications_ashbike_apps_mobile_features_glass_gear_label, gearNum))
                         },
 
                         // 4. Optional: "Active" label underneath
                         supportingLabel = if (isSelected) {
-                            { Text("Active") }
+                            { Text(stringResource(R.string.applications_ashbike_apps_mobile_features_glass_active)) }
                         } else null
                     )
                 }
