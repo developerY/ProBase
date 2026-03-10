@@ -32,11 +32,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
 import com.zoewave.ashbike.mobile.settings.ui.SettingsViewModel
+import com.zoewave.probase.ashbike.mobile.R
 import com.zoewave.probase.ashbike.mobile.ui.components.AshBikeMainScreen
 import com.zoewave.probase.core.ui.theme.AshBikeTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -180,16 +182,16 @@ class MainActivity : ComponentActivity() {
     ) {
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text("Location Permission Needed") },
-            text = { Text("AshBike needs access to your location to track your rides and find coffee stops. Please grant the permission to continue.") },
+            title = { Text(stringResource(R.string.applications_ashbike_apps_mobile_permission_location_needed_title)) },
+            text = { Text(stringResource(R.string.applications_ashbike_apps_mobile_permission_location_needed_message)) },
             confirmButton = {
                 TextButton(onClick = onConfirm) {
-                    Text("Grant Permission")
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_permission_grant_permissions))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDismiss) {
-                    Text("Later")
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_permission_later))
                 }
             }
         )
@@ -208,21 +210,21 @@ class MainActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    "Location permission is required.",
+                    stringResource(R.string.applications_ashbike_apps_mobile_permission_location_required),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 Text(
-                    "We cannot track your rides without it. Please enable it in Settings.",
+                    stringResource(R.string.applications_ashbike_apps_mobile_permission_location_required_explanation),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
                 Button(onClick = onGoToSettings) {
-                    Text("Open App Settings")
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_permission_open_settings))
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(onClick = onTryAgain) {
-                    Text("Try Again")
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_permission_try_again))
                 }
             }
         }

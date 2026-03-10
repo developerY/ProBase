@@ -11,7 +11,9 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
+import com.zoewave.probase.ashbike.mobile.R
 
 // Keeping the helper pure and stateless
 @Composable
@@ -25,8 +27,8 @@ fun AshBikeBottomBar(
         NavigationBarItem(
             selected = currentDestination is AshBikeDestination.Home,
             onClick = { onNavigate(AshBikeDestination.Home) },
-            icon = { Icon(Icons.Default.Home, "Home") },
-            label = { Text("Home") }
+            icon = { Icon(Icons.Default.Home, stringResource(R.string.applications_ashbike_apps_mobile_bottom_nav_home)) },
+            label = { Text(stringResource(R.string.applications_ashbike_apps_mobile_bottom_nav_home)) }
         )
         NavigationBarItem(
             selected = currentDestination is AshBikeDestination.Trips,
@@ -40,25 +42,25 @@ fun AshBikeBottomBar(
                             }
                         }
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.List, "History")
+                        Icon(Icons.AutoMirrored.Filled.List, stringResource(R.string.applications_ashbike_apps_mobile_bottom_nav_history))
                     }
                 } else {
-                    Icon(Icons.AutoMirrored.Filled.List, "History")
+                    Icon(Icons.AutoMirrored.Filled.List, stringResource(R.string.applications_ashbike_apps_mobile_bottom_nav_history))
                 }
             },
-            label = { Text("History") }
+            label = { Text(stringResource(R.string.applications_ashbike_apps_mobile_bottom_nav_history)) }
         )
         NavigationBarItem(
             selected = currentDestination is AshBikeDestination.Settings,
             onClick = { onNavigate(AshBikeDestination.Settings()) },
             icon = {
                 if (showSettingsBadge) {
-                    BadgedBox(badge = { Badge() }) { Icon(Icons.Default.Settings, "Settings") }
+                    BadgedBox(badge = { Badge() }) { Icon(Icons.Default.Settings, stringResource(R.string.applications_ashbike_apps_mobile_bottom_nav_settings)) }
                 } else {
-                    Icon(Icons.Default.Settings, "Settings")
+                    Icon(Icons.Default.Settings, stringResource(R.string.applications_ashbike_apps_mobile_bottom_nav_settings))
                 }
             },
-            label = { Text("Settings") }
+            label = { Text(stringResource(R.string.applications_ashbike_apps_mobile_bottom_nav_settings)) }
         )
     }
 }

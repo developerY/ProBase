@@ -45,7 +45,7 @@
     <application
         android:name=".AshBikeApp"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="@string/applications_ashbike_apps_mobile_app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BasePro"
@@ -84,11 +84,10 @@
             </intent-filter>
         </service>
 
-        <!-- must match package name for GlassesMainActivity -->
         <activity
             android:name="com.zoewave.ashbike.mobile.glass.GlassesMainActivity"
             android:exported="true"
-            android:label="AshBike Glass"
+            android:label="@string/applications_ashbike_apps_mobile_glass_app_label"
             android:requiredDisplayCategory="xr_projected">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
