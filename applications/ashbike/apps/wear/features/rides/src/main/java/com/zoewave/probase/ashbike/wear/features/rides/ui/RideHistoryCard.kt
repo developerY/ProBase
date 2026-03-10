@@ -62,6 +62,20 @@ fun RideHistoryCard(
                     color = Color.White
                 )
 
+                /* 🚀 THE DELETE BUTTON
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete Ride",
+                    tint = MaterialTheme.colors.error, // Makes it red!
+                    modifier = Modifier
+                        .size(24.dp)
+                        // padding increases the touch target size slightly
+                        .padding(2.dp)
+                        .clickable {
+                            // onDeleteClick(ride.id)
+                        }
+                )*/
+
                 Text(
                     text = durationStr,
                     style = MaterialTheme.typography.caption1,

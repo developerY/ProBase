@@ -393,6 +393,7 @@ class BikeForegroundService : LifecycleService() {
         // 1. Prepare Data
         val finalDist = continuousDistanceMeters - formalRideSegmentStartOffsetDistanceMeters
         val duration = System.currentTimeMillis() - formalRideSegmentStartTimeMillis
+        // TODO: This might need to checked
         val avgSpeed = if (duration > 0 && finalDist > 0) (finalDist / (duration/1000.0)) * 3.6 else 0.0
 
         val rideEntity = BikeRideEntity(
