@@ -62,7 +62,7 @@ fun PreRideWeatherScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (weather == null) {
-            item { Text(stringResource(RidesR.fetching_weather), color = Color.Gray) }
+            item { Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_fetching_weather), color = Color.Gray) }
             return@ScalingLazyColumn
         }
 
@@ -104,11 +104,11 @@ fun PreRideWeatherScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 // Wind Widget
-                val speedUnit = if (weather.isMetric) stringResource(RidesR.speed_unit_kmh) else stringResource(RidesR.speed_unit_mph)
+                val speedUnit = if (weather.isMetric) stringResource(RidesR.applications_ashbike_apps_wear_features_rides_speed_unit_kmh) else stringResource(RidesR.applications_ashbike_apps_wear_features_rides_speed_unit_mph)
                 WeatherSubMetric(
                     icon = Icons.Default.Air,
                     value = "${weather.windSpeed.toInt()} $speedUnit",
-                    label = stringResource(RidesR.wind_label),
+                    label = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_wind_label),
                     iconTint = Color(0xFF90CAF9) // Light Blue
                 )
 
@@ -116,7 +116,7 @@ fun PreRideWeatherScreen(
                 WeatherSubMetric(
                     icon = Icons.Default.WaterDrop,
                     value = "${weather.humidity}%",
-                    label = stringResource(RidesR.humid_label),
+                    label = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_humid_label),
                     iconTint = Color(0xFF81D4FA) // Cyan
                 )
             }
@@ -130,9 +130,9 @@ fun PreRideWeatherScreen(
                 modifier = Modifier.fillMaxWidth().height(48.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Default.DirectionsBike, contentDescription = stringResource(RidesR.start_icon_description))
+                    Icon(imageVector = Icons.Default.DirectionsBike, contentDescription = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_start_icon_description))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(RidesR.start_ride), fontWeight = FontWeight.Bold)
+                    Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_start_ride), fontWeight = FontWeight.Bold)
                 }
             }
         }

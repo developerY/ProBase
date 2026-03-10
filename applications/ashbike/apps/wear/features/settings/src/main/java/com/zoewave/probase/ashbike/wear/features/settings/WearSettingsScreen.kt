@@ -46,7 +46,7 @@ fun WearSettingsPage(
         // --- Header ---
         item {
             ListHeader {
-                Text(text = stringResource(R.string.settings_title), style = MaterialTheme.typography.titleMedium)//.title3)
+                Text(text = stringResource(R.string.applications_ashbike_apps_wear_features_settings_settings_title), style = MaterialTheme.typography.titleMedium)//.title3)
             }
         }
 
@@ -56,8 +56,8 @@ fun WearSettingsPage(
                 modifier = Modifier.fillMaxWidth(),
                 checked = isAutoPauseEnabled,
                 onCheckedChange = onAutoPauseToggled,
-                label = { Text(stringResource(R.string.auto_pause_label)) },
-                secondaryLabel = { Text(stringResource(R.string.auto_pause_description), color = Color.Gray) },
+                label = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_auto_pause_label)) },
+                secondaryLabel = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_auto_pause_description), color = Color.Gray) },
                 toggleControl = {
                     Switch(
                         checked = isAutoPauseEnabled,
@@ -65,7 +65,7 @@ fun WearSettingsPage(
                     )
                 },
                 appIcon = {
-                    Icon(imageVector = Icons.Default.Timer, contentDescription = stringResource(R.string.timer_icon_description))
+                    Icon(imageVector = Icons.Default.Timer, contentDescription = stringResource(R.string.applications_ashbike_apps_wear_features_settings_timer_icon_description))
                 }
             )
         }
@@ -76,10 +76,10 @@ fun WearSettingsPage(
                 modifier = Modifier.fillMaxWidth(),
                 checked = isMetricUnits,
                 onCheckedChange = onMetricUnitsToggled,
-                label = { Text(stringResource(R.string.use_metric_label)) },
+                label = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_use_metric_label)) },
                 secondaryLabel = {
                     Text(
-                        if (isMetricUnits) stringResource(R.string.metric_units_description) else stringResource(R.string.imperial_units_description),
+                        if (isMetricUnits) stringResource(R.string.applications_ashbike_apps_wear_features_settings_metric_units_description) else stringResource(R.string.applications_ashbike_apps_wear_features_settings_imperial_units_description),
                         color = Color.Gray
                     )
                 },
@@ -87,7 +87,7 @@ fun WearSettingsPage(
                     Switch(checked = isMetricUnits, onCheckedChange = null)
                 },
                 appIcon = {
-                    Icon(imageVector = Icons.Default.Speed, contentDescription = stringResource(R.string.units_icon_description))
+                    Icon(imageVector = Icons.Default.Speed, contentDescription = stringResource(R.string.applications_ashbike_apps_wear_features_settings_units_icon_description))
                 }
             )
         }
@@ -98,15 +98,15 @@ fun WearSettingsPage(
                 modifier = Modifier.fillMaxWidth(),
                 checked = isHealthConnectEnabled,
                 onCheckedChange = onHealthConnectToggled,
-                label = { Text(stringResource(R.string.health_connect_label)) },
-                secondaryLabel = { Text(stringResource(R.string.health_connect_description), color = Color.Gray) },
+                label = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_health_connect_label)) },
+                secondaryLabel = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_health_connect_description), color = Color.Gray) },
                 toggleControl = {
                     Switch(checked = isHealthConnectEnabled, onCheckedChange = null)
                 },
                 appIcon = {
                     Icon(
                         imageVector = Icons.Default.Favorite,
-                        contentDescription = stringResource(R.string.health_icon_description),
+                        contentDescription = stringResource(R.string.applications_ashbike_apps_wear_features_settings_health_icon_description),
                         tint = if (isHealthConnectEnabled) Color.Red else Color.Gray
                     )
                 }
@@ -119,10 +119,10 @@ fun WearSettingsPage(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = onManageEBikeClick,
                 colors = ChipDefaults.secondaryChipColors(),
-                label = { Text(stringResource(R.string.manage_ebike_label)) },
-                secondaryLabel = { Text(stringResource(R.string.manage_ebike_description), color = Color.Gray) },
+                label = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_manage_ebike_label)) },
+                secondaryLabel = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_manage_ebike_description), color = Color.Gray) },
                 icon = {
-                    Icon(imageVector = Icons.Default.ElectricBike, contentDescription = stringResource(R.string.ebike_icon_description))
+                    Icon(imageVector = Icons.Default.ElectricBike, contentDescription = stringResource(R.string.applications_ashbike_apps_wear_features_settings_ebike_icon_description))
                 }
             )
         }
@@ -132,11 +132,11 @@ fun WearSettingsPage(
         item {
             CompactChip(
                 onClick = onNavigateToExperiments, // Triggers Nav3 to push the new screen over the pager
-                label = { Text(stringResource(R.string.ashbike_labs_label), color = Color.Gray) },
+                label = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_ashbike_labs_label), color = Color.Gray) },
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Science,
-                        contentDescription = stringResource(R.string.experiments_icon_description),
+                        contentDescription = stringResource(R.string.applications_ashbike_apps_wear_features_settings_experiments_icon_description),
                         tint = Color.Gray
                     )
                 },

@@ -1,72 +1,72 @@
 <resources>
     <!-- Ride Map Screen -->
-    <string name="north_label">N</string>
-    <string name="distance_100m">100 m</string>
-    <string name="speed_slow">Slow</string>
-    <string name="speed_fast">Fast</string>
-    <string name="north_icon_description">North</string>
-    <string name="coffee_stop_icon_description">Coffee Stop</string>
+    <string name="applications_ashbike_apps_wear_features_rides_north_label">N</string>
+    <string name="applications_ashbike_apps_wear_features_rides_distance_100m">100 m</string>
+    <string name="applications_ashbike_apps_wear_features_rides_speed_slow">Slow</string>
+    <string name="applications_ashbike_apps_wear_features_rides_speed_fast">Fast</string>
+    <string name="applications_ashbike_apps_wear_features_rides_north_icon_description">North</string>
+    <string name="applications_ashbike_apps_wear_features_rides_coffee_stop_icon_description">Coffee Stop</string>
 
     <!-- Ride Detail Screen -->
-    <string name="performance_title">Performance</string>
-    <string name="environment_title">Environment</string>
-    <string name="health_title">Health</string>
-    <string name="synced_to_phone">Synced to Phone</string>
-    <string name="tap_to_sync">Tap to Sync</string>
-    <string name="delete_ride">Delete Ride</string>
-    <string name="synced_icon_description">Synced</string>
-    <string name="sync_icon_description">Sync</string>
-    <string name="delete_icon_description">Delete</string>
+    <string name="applications_ashbike_apps_wear_features_rides_performance_title">Performance</string>
+    <string name="applications_ashbike_apps_wear_features_rides_environment_title">Environment</string>
+    <string name="applications_ashbike_apps_wear_features_rides_health_title">Health</string>
+    <string name="applications_ashbike_apps_wear_features_rides_synced_to_phone">Synced to Phone</string>
+    <string name="applications_ashbike_apps_wear_features_rides_tap_to_sync">Tap to Sync</string>
+    <string name="applications_ashbike_apps_wear_features_rides_delete_ride">Delete Ride</string>
+    <string name="applications_ashbike_apps_wear_features_rides_synced_icon_description">Synced</string>
+    <string name="applications_ashbike_apps_wear_features_rides_sync_icon_description">Sync</string>
+    <string name="applications_ashbike_apps_wear_features_rides_delete_icon_description">Delete</string>
 
     <!-- Feature Hub Screen -->
-    <string name="live_weather_label">Live Weather</string>
-    <string name="pre_ride_conditions">Pre-ride conditions</string>
-    <string name="elevation_profile_label">Elevation Profile</string>
-    <string name="canvas_area_chart">Canvas Area Chart</string>
-    <string name="seven_day_heart_rate_label">7-Day Heart Rate</string>
-    <string name="canvas_bar_chart">Canvas Bar Chart</string>
-    <string name="ride_map_label">Ride Map</string>
-    <string name="poly_line_gps_trace">Polyline GPS Trace</string>
-    <string name="weather_icon_description">Weather</string>
-    <string name="elevation_icon_description">Elevation</string>
-    <string name="heart_rate_icon_description">Heart Rate</string>
-    <string name="map_icon_description">Map</string>
+    <string name="applications_ashbike_apps_wear_features_rides_live_weather_label">Live Weather</string>
+    <string name="applications_ashbike_apps_wear_features_rides_pre_ride_conditions">Pre-ride conditions</string>
+    <string name="applications_ashbike_apps_wear_features_rides_elevation_profile_label">Elevation Profile</string>
+    <string name="applications_ashbike_apps_wear_features_rides_canvas_area_chart">Canvas Area Chart</string>
+    <string name="applications_ashbike_apps_wear_features_rides_seven_day_heart_rate_label">7-Day Heart Rate</string>
+    <string name="applications_ashbike_apps_wear_features_rides_canvas_bar_chart">Canvas Bar Chart</string>
+    <string name="applications_ashbike_apps_wear_features_rides_ride_map_label">Ride Map</string>
+    <string name="applications_ashbike_apps_wear_features_rides_poly_line_gps_trace">Polyline GPS Trace</string>
+    <string name="applications_ashbike_apps_wear_features_rides_weather_icon_description">Weather</string>
+    <string name="applications_ashbike_apps_wear_features_rides_elevation_icon_description">Elevation</string>
+    <string name="applications_ashbike_apps_wear_features_rides_heart_rate_icon_description">Heart Rate</string>
+    <string name="applications_ashbike_apps_wear_features_rides_map_icon_description">Map</string>
 
     <!-- Weather Screen -->
-    <string name="fetching_weather">Fetching weather...</string>
-    <string name="start_ride">Start Ride</string>
-    <string name="start_icon_description">Start</string>
+    <string name="applications_ashbike_apps_wear_features_rides_fetching_weather">Fetching weather…</string>
+    <string name="applications_ashbike_apps_wear_features_rides_start_ride">Start Ride</string>
+    <string name="applications_ashbike_apps_wear_features_rides_start_icon_description">Start</string>
 
     <!-- Elevation Profile Screen -->
-    <string name="not_enough_elevation_data">Not enough elevation data</string>
-    <string name="min_label">Min</string>
-    <string name="max_label">Max</string>
-    <string name="avg_label">Avg</string>
-    <string name="wind_label">Wind</string>
-    <string name="humid_label">Humid</string>
-    <string name="dist_label">Dist</string>
-    <string name="time_label">Time</string>
-    <string name="avg_spd_label">Avg Spd</string>
-    <string name="max_spd_label">Max Spd</string>
-    <string name="gain_label">Gain</string>
-    <string name="loss_label">Loss</string>
-    <string name="avg_hr_label">Avg HR</string>
-    <string name="cals_label">Cals</string>
-    <string name="bpm_unit">bpm</string>
-    <string name="kcal_unit">kcal</string>
-    <string name="speed_unit_kmh">km/h</string>
-    <string name="speed_unit_mph">mph</string>
-    <string name="elevation_meters_format">%1$dm</string>
+    <string name="applications_ashbike_apps_wear_features_rides_not_enough_elevation_data">Not enough elevation data</string>
+    <string name="applications_ashbike_apps_wear_features_rides_min_label">Min</string>
+    <string name="applications_ashbike_apps_wear_features_rides_max_label">Max</string>
+    <string name="applications_ashbike_apps_wear_features_rides_avg_label">Avg</string>
+    <string name="applications_ashbike_apps_wear_features_rides_wind_label">Wind</string>
+    <string name="applications_ashbike_apps_wear_features_rides_humid_label">Humid</string>
+    <string name="applications_ashbike_apps_wear_features_rides_dist_label">Dist</string>
+    <string name="applications_ashbike_apps_wear_features_rides_time_label">Time</string>
+    <string name="applications_ashbike_apps_wear_features_rides_avg_spd_label">Avg Spd</string>
+    <string name="applications_ashbike_apps_wear_features_rides_max_spd_label">Max Spd</string>
+    <string name="applications_ashbike_apps_wear_features_rides_gain_label">Gain</string>
+    <string name="applications_ashbike_apps_wear_features_rides_loss_label">Loss</string>
+    <string name="applications_ashbike_apps_wear_features_rides_avg_hr_label">Avg HR</string>
+    <string name="applications_ashbike_apps_wear_features_rides_cals_label">Cals</string>
+    <string name="applications_ashbike_apps_wear_features_rides_bpm_unit">bpm</string>
+    <string name="applications_ashbike_apps_wear_features_rides_kcal_unit">kcal</string>
+    <string name="applications_ashbike_apps_wear_features_rides_speed_unit_kmh">km/h</string>
+    <string name="applications_ashbike_apps_wear_features_rides_speed_unit_mph">mph</string>
+    <string name="applications_ashbike_apps_wear_features_rides_elevation_meters_format">%1$dm</string>
 
     <!-- Ride History Page -->
-    <string name="no_recent_rides">No recent rides</string>
-    <string name="recent_rides">Recent Rides</string>
+    <string name="applications_ashbike_apps_wear_features_rides_no_recent_rides">No recent rides</string>
+    <string name="applications_ashbike_apps_wear_features_rides_recent_rides">Recent Rides</string>
 
     <!-- Ride History Card -->
-    <string name="delete_ride_description">Delete Ride</string>
-    <string name="distance_unit_km">km</string>
-    <string name="avg_speed_format">Avg: %1$.1f</string>
-    <string name="max_speed_format">Max: %1$.1f</string>
-    <string name="duration_less_than_one_minute">&lt; 1m</string>
-    <string name="duration_minutes_format">%1$dm</string>
+    <string name="applications_ashbike_apps_wear_features_rides_delete_ride_description">Delete Ride</string>
+    <string name="applications_ashbike_apps_wear_features_rides_distance_unit_km">km</string>
+    <string name="applications_ashbike_apps_wear_features_rides_avg_speed_format">Avg: %1$.1f</string>
+    <string name="applications_ashbike_apps_wear_features_rides_max_speed_format">Max: %1$.1f</string>
+    <string name="applications_ashbike_apps_wear_features_rides_duration_less_than_one_minute">&lt; 1m</string>
+    <string name="applications_ashbike_apps_wear_features_rides_duration_minutes_format">%1$dm</string>
 </resources>

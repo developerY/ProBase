@@ -63,7 +63,7 @@ fun TappableSpeedBox(
         // Background Icon
         Icon(
             imageVector = if (isTracking) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-            contentDescription = stringResource(if (isTracking) HomeR.stop_ride_description else HomeR.start_ride_description),
+            contentDescription = stringResource(if (isTracking) HomeR.applications_ashbike_apps_wear_features_home_stop_ride_description else HomeR.applications_ashbike_apps_wear_features_home_start_ride_description),
             tint = iconTintColor,
             modifier = Modifier.size(90.dp)
         )

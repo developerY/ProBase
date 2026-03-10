@@ -117,17 +117,17 @@ fun RideDetailPage(
         item {
             TitleCard(
                 onClick = onMapClick,
-                title = { Text(stringResource(RidesR.performance_title)) },
+                title = { Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_performance_title)) },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    MetricColumn(label = stringResource(RidesR.dist_label), value = "${String.format(Locale.getDefault(), "%.1f", ride.totalDistance / 1000f)} ${stringResource(RidesR.distance_unit_km)}")
-                    MetricColumn(label = stringResource(RidesR.time_label), value = stringResource(RidesR.duration_minutes_format, durationMins))
+                    MetricColumn(label = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_dist_label), value = "${String.format(Locale.getDefault(), "%.1f", ride.totalDistance / 1000f)} ${stringResource(RidesR.applications_ashbike_apps_wear_features_rides_distance_unit_km)}")
+                    MetricColumn(label = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_time_label), value = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_duration_minutes_format, durationMins))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    MetricColumn(label = stringResource(RidesR.avg_spd_label), value = "${String.format(Locale.getDefault(), "%.1f", ride.averageSpeed)} ${stringResource(RidesR.speed_unit_kmh)}")
-                    MetricColumn(label = stringResource(RidesR.max_spd_label), value = "${String.format(Locale.getDefault(), "%.1f", ride.maxSpeed)} ${stringResource(RidesR.speed_unit_kmh)}")
+                    MetricColumn(label = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_avg_spd_label), value = "${String.format(Locale.getDefault(), "%.1f", ride.averageSpeed)} ${stringResource(RidesR.applications_ashbike_apps_wear_features_rides_speed_unit_kmh)}")
+                    MetricColumn(label = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_max_spd_label), value = "${String.format(Locale.getDefault(), "%.1f", ride.maxSpeed)} ${stringResource(RidesR.applications_ashbike_apps_wear_features_rides_speed_unit_kmh)}")
                 }
             }
         }
@@ -136,12 +136,12 @@ fun RideDetailPage(
         item {
             TitleCard(
                 onClick = { /* Future Expansion */ },
-                title = { Text(stringResource(RidesR.environment_title)) },
+                title = { Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_environment_title)) },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    MetricColumn(label = stringResource(RidesR.gain_label), value = "+${stringResource(RidesR.elevation_meters_format, ride.elevationGain.toInt())}")
-                    MetricColumn(label = stringResource(RidesR.loss_label), value = "-${stringResource(RidesR.elevation_meters_format, ride.elevationLoss.toInt())}")
+                    MetricColumn(label = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_gain_label), value = "+${stringResource(RidesR.applications_ashbike_apps_wear_features_rides_elevation_meters_format, ride.elevationGain.toInt())}")
+                    MetricColumn(label = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_loss_label), value = "-${stringResource(RidesR.applications_ashbike_apps_wear_features_rides_elevation_meters_format, ride.elevationLoss.toInt())}")
                 }
             }
         }
@@ -151,12 +151,12 @@ fun RideDetailPage(
             item {
                 TitleCard(
                     onClick = { /* Future Expansion */ },
-                    title = { Text(stringResource(RidesR.health_title)) },
+                    title = { Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_health_title)) },
                     modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
                 ) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        MetricColumn(label = stringResource(RidesR.avg_hr_label), value = "${ride.avgHeartRate ?: "--"} ${stringResource(RidesR.bpm_unit)}")
-                        MetricColumn(label = stringResource(RidesR.cals_label), value = "${ride.caloriesBurned} ${stringResource(RidesR.kcal_unit)}")
+                        MetricColumn(label = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_avg_hr_label), value = "${ride.avgHeartRate ?: "--"} ${stringResource(RidesR.applications_ashbike_apps_wear_features_rides_bpm_unit)}")
+                        MetricColumn(label = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_cals_label), value = "${ride.caloriesBurned} ${stringResource(RidesR.applications_ashbike_apps_wear_features_rides_kcal_unit)}")
                     }
                 }
             }
@@ -171,9 +171,9 @@ fun RideDetailPage(
                     onClick = { /* Disabled visually */ },
                     colors = ChipDefaults.secondaryChipColors(backgroundColor = Color.DarkGray),
                     icon = {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = stringResource(RidesR.synced_icon_description), tint = Color.Green)
+                        Icon(imageVector = Icons.Default.Check, contentDescription = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_synced_icon_description), tint = Color.Green)
                     },
-                    label = { Text(stringResource(RidesR.synced_to_phone), color = Color.White) },
+                    label = { Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_synced_to_phone), color = Color.White) },
                     modifier = Modifier.fillMaxWidth()
                 )
             } else {
@@ -181,9 +181,9 @@ fun RideDetailPage(
                     onClick = { onEvent(RidesEvent.OnForceSyncClick(ride)) }, // Dispatch!
                     colors = ChipDefaults.primaryChipColors(),
                     icon = {
-                        Icon(imageVector = Icons.Default.Sync, contentDescription = stringResource(RidesR.sync_icon_description), tint = Color(0xFF64B5F6))
+                        Icon(imageVector = Icons.Default.Sync, contentDescription = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_sync_icon_description), tint = Color(0xFF64B5F6))
                     },
-                    label = { Text(stringResource(RidesR.tap_to_sync), color = Color.White) },
+                    label = { Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_tap_to_sync), color = Color.White) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -197,9 +197,9 @@ fun RideDetailPage(
                 onClick = { onEvent(RidesEvent.OnDeleteClick(ride.rideId)) }, // Dispatch!
                 colors = ChipDefaults.primaryChipColors(backgroundColor = Color(0xFFB3261E)),
                 icon = {
-                    Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(RidesR.delete_icon_description), tint = Color.White)
+                    Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_delete_icon_description), tint = Color.White)
                 },
-                label = { Text(stringResource(RidesR.delete_ride), color = Color.White) },
+                label = { Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_delete_ride), color = Color.White) },
                 modifier = Modifier.fillMaxWidth()
             )
         }

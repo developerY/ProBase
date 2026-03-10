@@ -92,7 +92,7 @@ fun BurningCalories(
             Icon(
                 // Swap the icon based on the current state
                 imageVector = if (showingFire) Icons.Filled.LocalFireDepartment else Icons.Filled.Bolt,
-                contentDescription = stringResource(if (showingFire) HomeR.calories_icon_description else HomeR.metabolism_icon_description),
+                contentDescription = stringResource(if (showingFire) HomeR.applications_ashbike_apps_wear_features_home_calories_icon_description else HomeR.applications_ashbike_apps_wear_features_home_metabolism_icon_description),
                 tint = flameColor, // Both icons use the same dynamic color
                 modifier = Modifier
                     .size(22.dp) // Precision size

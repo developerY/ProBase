@@ -67,16 +67,16 @@ fun QRCodeScannerScreen() {
                     }
             }
         ) {
-            Text(stringResource(id = R.string.qr_scanner_button_text))
+            Text(stringResource(id = R.string.features_qrscanner_qr_scanner_button_text))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Logic for what text to display (Safe to use stringResource here)
         val displayText = when {
-            errorMessage != null -> stringResource(R.string.qr_scanner_error_prefix, errorMessage!!)
-            scanResult != null -> stringResource(R.string.qr_scanner_result_prefix, scanResult!!)
-            else -> stringResource(R.string.qr_scanner_initial_result)
+            errorMessage != null -> stringResource(R.string.features_qrscanner_qr_scanner_error_prefix, errorMessage!!)
+            scanResult != null -> stringResource(R.string.features_qrscanner_qr_scanner_result_prefix, scanResult!!)
+            else -> stringResource(R.string.features_qrscanner_qr_scanner_initial_result)
         }
 
         Text(text = displayText)

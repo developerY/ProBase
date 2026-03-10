@@ -25,7 +25,7 @@ fun WearMenuScreen(
                 onClick = onNavigateToRides,
                 modifier = Modifier.fillMaxWidth(0.8f)
             ) {
-                Text(stringResource(R.string.past_rides))
+                Text(stringResource(R.string.applications_ashbike_apps_wear_features_home_past_rides))
             }
         }
         item {
@@ -33,7 +33,7 @@ fun WearMenuScreen(
                 onClick = onNavigateToSettings,
                 modifier = Modifier.fillMaxWidth(0.8f)
             ) {
-                Text(stringResource(R.string.settings))
+                Text(stringResource(R.string.applications_ashbike_apps_wear_features_home_settings))
             }
         }
     }
