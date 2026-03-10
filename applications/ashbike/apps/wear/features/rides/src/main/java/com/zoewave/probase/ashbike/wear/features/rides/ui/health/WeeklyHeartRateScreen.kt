@@ -52,12 +52,12 @@ fun WeeklyHeartRateScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Favorite,
-                        contentDescription = stringResource(RidesR.heart_rate_icon_description),
+                        contentDescription = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_heart_rate_icon_description),
                         tint = Color(0xFFE53935), // Material Red
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = stringResource(RidesR.seven_day_heart_rate_label), style = MaterialTheme.typography.title3)
+                    Text(text = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_seven_day_heart_rate_label), style = MaterialTheme.typography.title3)
                 }
             }
         }
@@ -99,13 +99,13 @@ fun HeartRateDayRow(data: DailyHeartRate) {
             Column(horizontalAlignment = Alignment.End) {
                 // Average HR
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Text(text = stringResource(RidesR.avg_label), style = MaterialTheme.typography.caption2, color = Color.Gray)
+                    Text(text = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_avg_label), style = MaterialTheme.typography.caption2, color = Color.Gray)
                     Text(text = "${data.avgHr}", style = MaterialTheme.typography.body1, color = Color.White)
                 }
 
                 // Max HR
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Text(text = stringResource(RidesR.max_label), style = MaterialTheme.typography.caption2, color = Color.Gray)
+                    Text(text = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_max_label), style = MaterialTheme.typography.caption2, color = Color.Gray)
                     // Highlighting the max in red for visual pop
                     Text(text = "${data.maxHr}", style = MaterialTheme.typography.caption1, color = Color(0xFFE53935))
                 }

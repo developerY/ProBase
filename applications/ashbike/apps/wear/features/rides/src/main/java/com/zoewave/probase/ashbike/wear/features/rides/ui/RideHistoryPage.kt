@@ -36,7 +36,7 @@ fun RideHistoryPage(
         if (rides.isEmpty()) {
             item {
                 Text(
-                    text = stringResource(RidesR.no_recent_rides),
+                    text = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_no_recent_rides),
                     modifier = Modifier.padding(bottom = 8.dp),
                     color = Color.Gray
                 )
@@ -44,7 +44,7 @@ fun RideHistoryPage(
         } else {
             item {
                 Text(
-                    text = stringResource(RidesR.recent_rides),
+                    text = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_recent_rides),
                     style = MaterialTheme.typography.title3,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )

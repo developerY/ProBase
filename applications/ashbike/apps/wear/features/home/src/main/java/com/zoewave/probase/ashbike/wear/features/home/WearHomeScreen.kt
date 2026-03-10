@@ -73,7 +73,7 @@ fun WearHomeScreen(
                 .padding(top = 12.dp)
         ) {
             Text(
-                text = stringResource(HomeR.distance_format_km, uiState.distanceMeters / 1000f),
+                text = stringResource(HomeR.applications_ashbike_apps_wear_features_home_distance_format_km, uiState.distanceMeters / 1000f),
                 style = MaterialTheme.typography.titleSmall,
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 2.dp)
@@ -87,7 +87,7 @@ fun WearHomeScreen(
             )
 
             Text(
-                text = stringResource(HomeR.speed_unit_kmh),
+                text = stringResource(HomeR.applications_ashbike_apps_wear_features_home_speed_unit_kmh),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.LightGray
             )

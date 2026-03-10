@@ -48,7 +48,7 @@ fun ElevationProfileScreen(
         contentAlignment = Alignment.Center
     ) {
         if (validPoints.size < 2) {
-            Text(stringResource(RidesR.not_enough_elevation_data), color = Color.Gray)
+            Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_not_enough_elevation_data), color = Color.Gray)
             return@Box
         }
 
@@ -59,7 +59,7 @@ fun ElevationProfileScreen(
             // Header
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = stringResource(RidesR.elevation_profile_label),
+                text = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_elevation_profile_label),
                 style = MaterialTheme.typography.caption1,
                 color = Color(0xFF4CAF50) // Material Green
             )
@@ -85,12 +85,12 @@ fun ElevationProfileScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(horizontalAlignment = Alignment.Start) {
-                    Text(stringResource(RidesR.min_label), style = MaterialTheme.typography.caption3, color = Color.Gray)
-                    Text(stringResource(RidesR.elevation_meters_format, minAlt.toInt()), style = MaterialTheme.typography.caption2, color = Color.White)
+                    Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_min_label), style = MaterialTheme.typography.caption3, color = Color.Gray)
+                    Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_elevation_meters_format, minAlt.toInt()), style = MaterialTheme.typography.caption2, color = Color.White)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(stringResource(RidesR.max_label), style = MaterialTheme.typography.caption3, color = Color.Gray)
-                    Text(stringResource(RidesR.elevation_meters_format, maxAlt.toInt()), style = MaterialTheme.typography.caption2, color = Color.White)
+                    Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_max_label), style = MaterialTheme.typography.caption3, color = Color.Gray)
+                    Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_elevation_meters_format, maxAlt.toInt()), style = MaterialTheme.typography.caption2, color = Color.White)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))

@@ -165,7 +165,7 @@ fun WearRideMapScreen(
         ) {
             Icon(
                 imageVector = Icons.Default.LocalCafe,
-                contentDescription = stringResource(RidesR.coffee_stop_icon_description),
+                contentDescription = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_coffee_stop_icon_description),
                 tint = Color.White,
                 modifier = Modifier.size(20.dp)
             )
@@ -178,10 +178,10 @@ fun WearRideMapScreen(
                 .padding(top = 36.dp, end = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(stringResource(RidesR.north_label), style = MaterialTheme.typography.caption3, color = Color.Black)
+            Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_north_label), style = MaterialTheme.typography.caption3, color = Color.Black)
             Icon(
                 imageVector = Icons.Default.ArrowUpward,
-                contentDescription = stringResource(RidesR.north_icon_description),
+                contentDescription = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_north_icon_description),
                 tint = Color.Black,
                 modifier = Modifier.size(16.dp)
             )
@@ -196,7 +196,7 @@ fun WearRideMapScreen(
         ) {
             Box(modifier = Modifier.width(40.dp).height(2.dp).background(Color.Black))
             Spacer(modifier = Modifier.width(4.dp))
-            Text(stringResource(RidesR.distance_100m), style = MaterialTheme.typography.caption3, color = Color.Black)
+            Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_distance_100m), style = MaterialTheme.typography.caption3, color = Color.Black)
         }
 
         // Speed Legend (Bottom Right)
@@ -206,7 +206,7 @@ fun WearRideMapScreen(
                 .padding(bottom = 32.dp, end = 24.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(stringResource(RidesR.speed_slow), style = MaterialTheme.typography.caption3, color = Color.Black)
+            Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_speed_slow), style = MaterialTheme.typography.caption3, color = Color.Black)
             Spacer(modifier = Modifier.width(4.dp))
             Box(
                 modifier = Modifier
@@ -217,7 +217,7 @@ fun WearRideMapScreen(
                     )
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text(stringResource(RidesR.speed_fast), style = MaterialTheme.typography.caption3, color = Color.Black)
+            Text(stringResource(RidesR.applications_ashbike_apps_wear_features_rides_speed_fast), style = MaterialTheme.typography.caption3, color = Color.Black)
         }
     }
 }

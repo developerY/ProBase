@@ -24,12 +24,12 @@ import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.zoewave.ashbike.model.bike.BikeRide
-import com.zoewave.ashbike.wear.rides.R.string as RidesR
 import com.zoewave.probase.ashbike.wear.features.rides.RidesEvent
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import com.zoewave.ashbike.wear.rides.R.string as RidesR
 
 // 1. The Card only takes the data it needs and a single event dispatcher
 @Composable
@@ -67,7 +67,7 @@ fun RideHistoryCard(
                 /* 🚀 THE DELETE BUTTON
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(RidesR.delete_ride_description),
+                    contentDescription = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_delete_ride_description),
                     tint = MaterialTheme.colors.error, // Makes it red!
                     modifier = Modifier
                         .size(24.dp)
@@ -79,7 +79,7 @@ fun RideHistoryCard(
                 )*/
 
                 Text(
-                    text = if (durationStr <= 0) stringResource(RidesR.duration_less_than_one_minute) else stringResource(RidesR.duration_minutes_format, durationStr),
+                    text = if (durationStr <= 0) stringResource(RidesR.applications_ashbike_apps_wear_features_rides_duration_less_than_one_minute) else stringResource(RidesR.applications_ashbike_apps_wear_features_rides_duration_minutes_format, durationStr),
                     style = MaterialTheme.typography.caption1,
                     color = Color.Gray
                 )
@@ -96,7 +96,7 @@ fun RideHistoryCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = stringResource(RidesR.distance_unit_km),
+                    text = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_distance_unit_km),
                     style = MaterialTheme.typography.body2,
                     color = Color.LightGray,
                     modifier = Modifier.padding(bottom = 2.dp)
@@ -111,12 +111,12 @@ fun RideHistoryCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = stringResource(RidesR.avg_speed_format, ride.averageSpeed),
+                    text = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_avg_speed_format, ride.averageSpeed),
                     style = MaterialTheme.typography.caption1,
                     color = Color.Gray
                 )
                 Text(
-                    text = stringResource(RidesR.max_speed_format, ride.maxSpeed),
+                    text = stringResource(RidesR.applications_ashbike_apps_wear_features_rides_max_speed_format, ride.maxSpeed),
                     style = MaterialTheme.typography.caption1,
                     color = Color.Gray
                 )

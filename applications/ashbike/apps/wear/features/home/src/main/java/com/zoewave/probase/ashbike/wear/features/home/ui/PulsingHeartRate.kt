@@ -61,7 +61,7 @@ fun PulsingHeartRate(
     ) {
         Icon(
             imageVector = Icons.Filled.Favorite,
-            contentDescription = stringResource(HomeR.heart_rate_icon_description),
+            contentDescription = stringResource(HomeR.applications_ashbike_apps_wear_features_home_heart_rate_icon_description),
             tint = zoneColor, // Solid, sharp color
             modifier = Modifier
                 .size(22.dp) // Tiny, precision size

@@ -41,7 +41,7 @@ fun AshBikeWearUI() {
                 contentAlignment = Alignment.Center
             ) {
                 Button(onClick = { permissionState.launchMultiplePermissionRequest() }) {
-                    Text(stringResource(R.string.grant_sensor_access))
+                    Text(stringResource(R.string.applications_ashbike_apps_wear_grant_sensor_access))
                 }
             }
         }
