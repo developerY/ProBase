@@ -113,11 +113,11 @@ dependencies {
 
     // Hilt (Navigation Compose integration)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.navigation3.ui)
 
     // Room (Local Database)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    implementation(libs.navigation3.ui)
     ksp(libs.room.compiler)
 
     // Lifecycle
