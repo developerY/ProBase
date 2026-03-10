@@ -11,12 +11,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.xr.glimmer.Button
 import androidx.xr.glimmer.Card
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Text
 import androidx.xr.glimmer.surface
+import com.zoewave.ashbike.mobile.glass.R
 import com.zoewave.ashbike.mobile.glass.ui.GlassUiEvent
 import com.zoewave.ashbike.mobile.glass.ui.GlassUiState
 
@@ -51,7 +53,7 @@ fun HomeScreen(
             },
             action = {
                 Button(onClick = { onEvent(GlassUiEvent.CloseApp) }) {
-                    Text("EXIT", style = GlimmerTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_features_glass_exit), style = GlimmerTheme.typography.bodyMedium)
                 }
             }
         ) {

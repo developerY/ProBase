@@ -30,9 +30,9 @@ import com.zoewave.probase.core.ui.theme.ThemeIdentifiers
 
 // Sealed class to represent theme options with their string resource IDs
 sealed class ThemeOption(val identifier: String, @StringRes val displayResId: Int) {
-    data object SystemTheme : ThemeOption(ThemeIdentifiers.SYSTEM, R.string.theme_system_display)
-    data object LightTheme : ThemeOption(ThemeIdentifiers.LIGHT, R.string.theme_light_display)
-    data object DarkTheme : ThemeOption(ThemeIdentifiers.DARK, R.string.theme_dark_display)
+    data object SystemTheme : ThemeOption(ThemeIdentifiers.SYSTEM, R.string.applications_ashbike_apps_mobile_features_settings_theme_system_display)
+    data object LightTheme : ThemeOption(ThemeIdentifiers.LIGHT, R.string.applications_ashbike_apps_mobile_features_settings_theme_light_display)
+    data object DarkTheme : ThemeOption(ThemeIdentifiers.DARK, R.string.applications_ashbike_apps_mobile_features_settings_theme_dark_display)
 }
 
 private val themeOptionsList = listOf(
@@ -44,10 +44,10 @@ private val themeOptionsList = listOf(
 @Composable
 fun getCurrentThemeDisplayStringRes(themeIdentifier: String): Int {
     return when (themeIdentifier) {
-        ThemeIdentifiers.LIGHT -> R.string.theme_light_display
-        ThemeIdentifiers.DARK -> R.string.theme_dark_display
-        ThemeIdentifiers.SYSTEM -> R.string.theme_system_display
-        else -> R.string.theme_system_display // Default or throw an error
+        ThemeIdentifiers.LIGHT -> R.string.applications_ashbike_apps_mobile_features_settings_theme_light_display
+        ThemeIdentifiers.DARK -> R.string.applications_ashbike_apps_mobile_features_settings_theme_dark_display
+        ThemeIdentifiers.SYSTEM -> R.string.applications_ashbike_apps_mobile_features_settings_theme_system_display
+        else -> R.string.applications_ashbike_apps_mobile_features_settings_theme_system_display // Default or throw an error
     }
 }
 
@@ -73,7 +73,7 @@ fun ThemeSettingsCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Palette,
-                    contentDescription = stringResource(R.string.theme_icon_cd)
+                    contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_theme_icon_cd)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(text = title, style = MaterialTheme.typography.titleMedium)
@@ -85,7 +85,7 @@ fun ThemeSettingsCard(
                 )
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = stringResource(if (expanded) R.string.settings_action_collapse else R.string.settings_action_expand)
+                    contentDescription = stringResource(if (expanded) R.string.applications_ashbike_apps_mobile_features_settings_settings_action_collapse else R.string.applications_ashbike_apps_mobile_features_settings_settings_action_expand)
                 )
             }
 

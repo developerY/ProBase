@@ -52,7 +52,7 @@ fun StatsBoard(
             item {
                 GlimmerStatItem(
                     icon = Icons.Rounded.Straighten,
-                    label = stringResource(R.string.distance),
+                    label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_distance),
                     value = "$distance km",
                     accent = GlimmerTheme.colors.secondary
                 )
@@ -61,7 +61,7 @@ fun StatsBoard(
             item {
                 GlimmerStatItem(
                     icon = Icons.Rounded.AvTimer,
-                    label = stringResource(R.string.duration),
+                    label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_duration),
                     value = duration,
                     accent = GlimmerTheme.colors.secondary
                 )
@@ -70,7 +70,7 @@ fun StatsBoard(
             item {
                 GlimmerStatItem(
                     icon = Icons.Rounded.Speed,
-                    label = stringResource(R.string.avg_speed),
+                    label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_avg_speed),
                     value = "$avgSpeed mph",
                     accent = GlimmerTheme.colors.secondary
                 )
@@ -79,7 +79,7 @@ fun StatsBoard(
             item {
                 GlimmerStatItem(
                     icon = Icons.Rounded.LocalFireDepartment,
-                    label = stringResource(R.string.calories),
+                    label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_calories),
                     value = calories,
                     accent = GlimmerTheme.colors.negative
                 )

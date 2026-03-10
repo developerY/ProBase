@@ -129,7 +129,7 @@ fun SettingsScreenEx(
                 )
             } ?: run {
                 Text(
-                    stringResource(R.string.settings_profile_data_unavailable),
+                    stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_profile_data_unavailable),
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -138,7 +138,7 @@ fun SettingsScreenEx(
 
         stickyHeader {
             SectionHeader(
-                title = stringResource(R.string.settings_section_title_app),
+                title = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_section_title_app),
                 expanded = expandedSections.contains(SectionKey.App),
                 onToggle = { toggle(expandedSections, SectionKey.App) }
             )
@@ -146,7 +146,7 @@ fun SettingsScreenEx(
         if (expandedSections.contains(SectionKey.App)) {
             item {
                 ThemeSettingsCard(
-                    title = stringResource(R.string.settings_card_title_theme),
+                    title = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_card_title_theme),
                     expanded = expandedCards.contains(CardKey.Theme),
                     onExpandToggle = { toggle(expandedCards, CardKey.Theme) },
                     currentTheme = uiState.selections[AppPreferenceKeys.KEY_THEME]
@@ -179,7 +179,7 @@ fun SettingsScreenEx(
 
         stickyHeader {
             SectionHeader(
-                title = stringResource(R.string.settings_section_title_connectivity),
+                title = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_section_title_connectivity),
                 expanded = expandedSections.contains(SectionKey.Connectivity),
                 onToggle = { toggle(expandedSections, SectionKey.Connectivity) }
             )
@@ -215,7 +215,7 @@ fun SettingsScreenEx(
 
         stickyHeader {
             SectionHeader(
-                title = stringResource(R.string.settings_section_title_bike),
+                title = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_section_title_bike),
                 expanded = expandedSections.contains(SectionKey.Bike),
                 onToggle = { toggle(expandedSections, SectionKey.Bike) }
             )

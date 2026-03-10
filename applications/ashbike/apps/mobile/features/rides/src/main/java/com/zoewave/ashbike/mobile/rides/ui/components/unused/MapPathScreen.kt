@@ -211,7 +211,7 @@ fun MapPathScreenNOUSE(
                     drawGrid(gridColor, 10, 10)
                 }
                 Text(
-                    stringResource(R.string.feature_trips_map_no_ride_data),
+                    stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_map_no_ride_data),
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
@@ -254,12 +254,12 @@ private fun Compass(size: Dp, modifier: Modifier = Modifier) {
         modifier = modifier.padding(8.dp)
     ) {
         Text(
-            stringResource(R.string.feature_trips_map_compass_n),
+            stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_map_compass_n),
             style = MaterialTheme.typography.labelSmall.copy(color = Color.Black.copy(alpha = 0.7f))
         )
         Icon(
             imageVector = Icons.Default.North,
-            contentDescription = stringResource(R.string.feature_trips_map_compass_content_desc_north),
+            contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_map_compass_content_desc_north),
             tint = Color.Black.copy(alpha = 0.7f),
             modifier = Modifier.size(size)
         )
@@ -282,7 +282,7 @@ private fun FindCafesButton(
     ) {
         Icon(
             imageVector = Icons.Default.Coffee,
-            contentDescription = stringResource(R.string.feature_trips_map_cafes_button_content_desc),
+            contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_map_cafes_button_content_desc),
             tint = if (cafesVisible) MaterialTheme.colorScheme.primary else Color.White,
             modifier = Modifier.size(24.dp)
         )
@@ -450,7 +450,7 @@ private fun SpeedLegend(
     ) {
         //Text("${minSpeed.roundToInt()} km/h", style = MaterialTheme.typography.bodySmall, color = Color.Black)
         Text(
-            stringResource(R.string.feature_trips_map_legend_slow),
+            stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_map_legend_slow),
             style = MaterialTheme.typography.bodySmall,
             color = Color.Black
         )
@@ -465,7 +465,7 @@ private fun SpeedLegend(
         )
         Spacer(Modifier.width(4.dp))
         Text(
-            stringResource(R.string.feature_trips_map_legend_fast),
+            stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_map_legend_fast),
             style = MaterialTheme.typography.bodySmall,
             color = Color.Black
         )

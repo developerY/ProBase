@@ -156,12 +156,12 @@ fun WaitingForGpsScreen(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
 
-            Text(stringResource(R.string.waiting_for_GPS_content_desc))
+            Text(stringResource(R.string.applications_ashbike_apps_mobile_features_home_waiting_for_GPS_content_desc))
             // Animated icon
             Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Rounded.LocationSearching,
-                    contentDescription = stringResource(R.string.waiting_for_GPS_content_desc),
+                    contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_home_waiting_for_GPS_content_desc),
                     tint = actualTintIn, // Use lerped color
                     modifier = Modifier
                         .size(90.dp)
@@ -179,24 +179,24 @@ fun WaitingForGpsScreen(
                 )
             }
             Spacer(Modifier.height(8.dp))
-            Text("Acquiring your location…")
+            Text(stringResource(R.string.applications_ashbike_apps_mobile_features_home_acquiring_location))
 
             // 1) Ask for the permission
             if (!hasPermission) {
-                Text("Location permission is required")
+                Text(stringResource(R.string.applications_ashbike_apps_mobile_features_home_permission_required))
                 Spacer(Modifier.height(8.dp))
                 Button(onClick = onRequestPermission) {
-                    Text("Grant permission")
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_features_home_action_grant_permission))
                 }
                 return@Column
             }
 
             // 2) If GPS is off, prompt user to enable it
             if (!gpsEnabled) {
-                Text("GPS is turned off")
+                Text(stringResource(R.string.applications_ashbike_apps_mobile_features_home_gps_off))
                 Spacer(Modifier.height(8.dp))
                 Button(onClick = onEnableGpsSettings) {
-                    Text("Open location settings")
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_features_home_action_open_location_settings))
                 }
                 return@Column
             }

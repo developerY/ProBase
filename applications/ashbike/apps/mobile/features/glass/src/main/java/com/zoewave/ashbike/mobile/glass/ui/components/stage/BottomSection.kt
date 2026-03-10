@@ -50,7 +50,7 @@ fun BottomSection(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            stringResource(R.string.power),
+                            stringResource(R.string.applications_ashbike_apps_mobile_features_glass_power),
                             style = MaterialTheme.typography.labelSmall,
                             color = GlassColors.TextSecondary,
                             fontSize = 8.sp,

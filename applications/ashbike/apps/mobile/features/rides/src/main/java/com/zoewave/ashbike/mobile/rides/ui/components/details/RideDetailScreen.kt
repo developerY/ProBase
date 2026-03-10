@@ -103,25 +103,25 @@ fun RideDetailScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             StatCard(
-                label = stringResource(R.string.feature_trips_detail_label_distance),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_label_distance),
                 value = stringResource(
-                    R.string.feature_trips_distance_km_format,
+                    R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_distance_km_format,
                     ride.totalDistance / 1000f
                 ),
                 modifier = Modifier.weight(1f)
             )
             StatCard(
-                label = stringResource(R.string.feature_trips_detail_label_avg_speed),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_label_avg_speed),
                 value = stringResource(
-                    R.string.feature_trips_detail_value_kmh_format,
+                    R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_value_kmh_format,
                     ride.averageSpeed
                 ),
                 modifier = Modifier.weight(1f)
             )
             StatCard(
-                label = stringResource(R.string.feature_trips_detail_label_max_speed),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_label_max_speed),
                 value = stringResource(
-                    R.string.feature_trips_detail_value_kmh_format,
+                    R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_value_kmh_format,
                     ride.maxSpeed
                 ),
                 modifier = Modifier.weight(1f)
@@ -131,7 +131,7 @@ fun RideDetailScreen(
         // 2) Single-line timestamp + duration
         Text(
             text = stringResource(
-                R.string.feature_trips_detail_full_timespan_format,
+                R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_full_timespan_format,
                 startZoned.format(dateTimeFmt),
                 endZoned.format(timeFmt),
                 minutes.toLong()
@@ -214,27 +214,27 @@ fun RideDetailScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             StatCard(
-                label = stringResource(R.string.feature_trips_detail_label_elevation),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_label_elevation),
                 value = stringResource(
-                    R.string.feature_trips_detail_value_elevation_format,
+                    R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_value_elevation_format,
                     ride.elevationGain.toInt(),
                     ride.elevationLoss.toInt()
                 ),
                 modifier = Modifier.weight(1f)
             )
             StatCard(
-                label = stringResource(R.string.feature_trips_detail_label_duration),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_label_duration),
                 value = stringResource(
-                    R.string.feature_trips_detail_value_duration_format,
+                    R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_value_duration_format,
                     minutes / 60,
                     minutes % 60
                 ),
                 modifier = Modifier.weight(1f)
             )
             StatCard(
-                label = stringResource(R.string.feature_trips_detail_label_calories),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_label_calories),
                 value = stringResource(
-                    R.string.feature_trips_detail_value_calories_format,
+                    R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_value_calories_format,
                     ride.caloriesBurned
                 ),
                 modifier = Modifier.weight(1f)
@@ -248,7 +248,7 @@ fun RideDetailScreen(
                 notesState = it
                 isDirty = it != ride.notes.orEmpty()
             },
-            label = { Text(stringResource(R.string.feature_trips_detail_label_notes)) },
+            label = { Text(stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_label_notes)) },
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 if (isDirty) {
@@ -258,7 +258,7 @@ fun RideDetailScreen(
                     }) {
                         Icon(
                             Icons.Default.Save,
-                            contentDescription = stringResource(R.string.feature_trips_detail_cd_save_notes)
+                            contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_cd_save_notes)
                         )
                     }
                 }
@@ -271,7 +271,7 @@ fun RideDetailScreen(
         // 6) Optional weather
         ride.weatherCondition?.let {
             Text(
-                stringResource(R.string.feature_trips_detail_weather_format, it),
+                stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_detail_weather_format, it),
                 style = MaterialTheme.typography.bodyMedium
             )
         }

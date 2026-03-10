@@ -25,7 +25,7 @@ class GlassesMainActivity : ComponentActivity() {
 
         audioInterface = AudioInterface(
             this,
-            getString(R.string.hello_ai_glasses)
+            getString(R.string.applications_ashbike_apps_mobile_features_glass_hello_ai_glasses)
         )
         lifecycle.addObserver(audioInterface)
 

@@ -69,7 +69,7 @@ fun AshGlassLayout(
             },
             action = {
                 Button(onClick = { onEvent(GlassUiEvent.CloseApp) }) {
-                    Text(stringResource(R.string.exit), style = GlimmerTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_features_glass_exit), style = GlimmerTheme.typography.bodyMedium)
                 }
             }
         ) {

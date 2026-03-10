@@ -67,14 +67,14 @@ fun StatsSection(
             listOf(
                 StatItem(
                     icon = Icons.Filled.Favorite,
-                    label = stringResource(R.string.feature_main_label_heart_rate),
+                    label = stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_label_heart_rate),
                     value = if (hr != null) "$hr bpm" else "-- bpm",
                     // Apply dynamic color here
                     activeColor = heartRateColor
                 ),
                 StatItem(
                     icon = Icons.Filled.LocalFireDepartment,
-                    label = stringResource(R.string.feature_main_label_calories),
+                    label = stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_label_calories),
                     value = bikeData.caloriesBurned.toString(),
                     activeColor = if (isBikeComputerOn) MaterialTheme.colorScheme.iconColorCalories else null
                 )
@@ -84,13 +84,13 @@ fun StatsSection(
         _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.StatsSectionType.EBIKE -> listOf(
             StatItem(
                 icon = Icons.AutoMirrored.Filled.BatteryUnknown,
-                label = stringResource(R.string.feature_main_label_battery),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_label_battery),
                 value = if (bikeData.isBikeConnected && bikeData.batteryLevel != null) "${bikeData.batteryLevel}%" else "--%",
                 activeColor = if (isBikeComputerOn && bikeData.isBikeConnected) MaterialTheme.colorScheme.primary else null
             ),
             StatItem(
                 icon = Icons.Filled.ElectricBike,
-                label = stringResource(R.string.feature_main_label_motor),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_home_feature_main_label_motor),
                 value = if (bikeData.isBikeConnected && bikeData.motorPower != null) "${bikeData.motorPower} W" else "-- W",
                 activeColor = if (isBikeComputerOn && bikeData.isBikeConnected) MaterialTheme.colorScheme.iconColorBikeActive else null
             )

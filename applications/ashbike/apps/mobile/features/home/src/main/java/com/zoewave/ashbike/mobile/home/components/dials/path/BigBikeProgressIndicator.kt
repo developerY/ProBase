@@ -28,9 +28,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.zoewave.ashbike.mobile.home.R
 import com.zoewave.ashbike.mobile.home.components.dials.path.displayKm
 import com.zoewave.ashbike.mobile.home.ui.HomeEvent
 import com.zoewave.ashbike.mobile.home.ui.HomeUiState
@@ -79,7 +81,7 @@ fun BigBikeProgressIndicator(
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.DirectionsBike,
-                contentDescription = "Set total distance",
+                contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_home_bike_cd_set_total_distance),
                 tint = iconTint,
                 modifier = Modifier
                     .size(iconSize)
@@ -138,7 +140,7 @@ fun BigBikeProgressIndicator(
                 .offset(y = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("0 km", style = MaterialTheme.typography.bodySmall)
+            Text(stringResource(R.string.applications_ashbike_apps_mobile_features_home_bike_label_0km), style = MaterialTheme.typography.bodySmall)
             Text((totalDistance / 2).displayKm(), style = MaterialTheme.typography.bodySmall)
             Text(totalDistance.displayKm(), style = MaterialTheme.typography.bodySmall)
         }
@@ -146,7 +148,7 @@ fun BigBikeProgressIndicator(
         // The bike icon, positioned along (and clickable)
         Icon(
             imageVector = Icons.AutoMirrored.Filled.DirectionsBike,
-            contentDescription = "Trip Progress",
+            contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_home_bike_cd_trip_progress),
             tint = iconTint,
             modifier = Modifier
                 .align(Alignment.TopStart)

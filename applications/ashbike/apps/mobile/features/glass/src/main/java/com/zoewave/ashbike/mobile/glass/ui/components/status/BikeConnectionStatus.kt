@@ -25,7 +25,7 @@ fun BikeConnectionStatus(
 ) {
     val color = if (isConnected) GlassColors.NeonGreen else GlassColors.WarningRed
     val icon = if (isConnected) Icons.AutoMirrored.Filled.DirectionsBike else Icons.Default.LinkOff
-    val text = if (isConnected) stringResource(R.string.ble_cnx) else stringResource(R.string.no_ble_cnx)
+    val text = if (isConnected) stringResource(R.string.applications_ashbike_apps_mobile_features_glass_ble_cnx) else stringResource(R.string.applications_ashbike_apps_mobile_features_glass_no_ble_cnx)
 
     Row(
         modifier = modifier,
@@ -34,7 +34,7 @@ fun BikeConnectionStatus(
         // Cool Bike Icon
         Icon(
             imageVector = icon,
-            contentDescription = stringResource(R.string.bike_connection),
+            contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_bike_connection),
             tint = color,
             modifier = Modifier.width(18.dp) // Slightly larger than text
         )

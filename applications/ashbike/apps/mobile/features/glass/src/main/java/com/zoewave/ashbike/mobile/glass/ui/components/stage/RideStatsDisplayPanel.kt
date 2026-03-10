@@ -31,7 +31,7 @@ fun RideStatsDisplayPanel(
     Card(modifier = modifier) {
         // We now use MetricDisplay to reuse the exact same layout style as Speed/Heading
         MetricDisplay(
-            label = stringResource(R.string.distance_km),
+            label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_distance_km),
             value = distance,
             // We can keep it Cyan to match Speed, or use a different color like White
             highlightColor = GlassColors.NeonCyan,
@@ -43,13 +43,13 @@ fun RideStatsDisplayPanel(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.LocalFireDepartment, // Fire icon
-                        contentDescription = stringResource(R.string.distance_km),
+                        contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_distance_km),
                         tint = Color(0xFFFF9800), // Keep Orange tint for the icon
                         modifier = Modifier.width(16.dp) // Similar size to compass icon
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = stringResource(R.string.kcal, calories), // "$calories kcal",
+                        text = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_kcal, calories), // "$calories kcal",
                         color = Color.White, // White text, just like Heading
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium

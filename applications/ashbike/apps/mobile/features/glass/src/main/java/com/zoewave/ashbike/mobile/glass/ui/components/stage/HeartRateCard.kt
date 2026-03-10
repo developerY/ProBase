@@ -45,7 +45,7 @@ fun HeartRateCard(
             modifier = Modifier.padding(8.dp)
         ) {
             Text(
-                text = stringResource(R.string.heart_rate),
+                text = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_heart_rate),
                 style = MaterialTheme.typography.labelSmall,
                 color = GlassColors.TextSecondary,
                 fontSize = 8.sp,

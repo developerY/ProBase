@@ -49,8 +49,8 @@ fun SectionHeader(
             Spacer(Modifier.weight(1f))
             Icon(
                 imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                contentDescription = if (expanded) stringResource(R.string.settings_action_collapse) else stringResource(
-                    R.string.settings_action_expand
+                contentDescription = if (expanded) stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_action_collapse) else stringResource(
+                    R.string.applications_ashbike_apps_mobile_features_settings_settings_action_expand
                 ),
             )
         }

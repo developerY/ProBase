@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -51,6 +52,7 @@ import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
 import com.zoewave.ashbike.mobile.settings.ui.SettingsUiState
 import com.zoewave.ashbike.mobile.settings.ui.SettingsViewModel
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
+import com.zoewave.probase.ashbike.mobile.R
 import com.zoewave.probase.ashbike.mobile.ui.MainUiEvent
 import com.zoewave.probase.ashbike.mobile.ui.MainViewModel
 import com.zoewave.probase.ashbike.mobile.ui.navigation.ashBikeNavEntryProvider
@@ -158,11 +160,11 @@ fun AshBikeMainScreen(
                 TopAppBar(
                     title = {
                         val title = when (currentDestination) {
-                            AshBikeDestination.Home -> "AshBike Dashboard"
-                            AshBikeDestination.Trips -> "Ride History"
-                            is AshBikeDestination.Settings -> "Settings"
-                            is AshBikeDestination.RideDetail -> "Detailed Ride"
-                            is AshBikeDestination.AdvancedBikeSettings -> "Advanced Bike Settings"
+                            AshBikeDestination.Home -> stringResource(R.string.applications_ashbike_apps_mobile_top_bar_title_dashboard)
+                            AshBikeDestination.Trips -> stringResource(R.string.applications_ashbike_apps_mobile_top_bar_title_ride_history)
+                            is AshBikeDestination.Settings -> stringResource(R.string.applications_ashbike_apps_mobile_top_bar_title_settings)
+                            is AshBikeDestination.RideDetail -> stringResource(R.string.applications_ashbike_apps_mobile_top_bar_title_detailed_ride)
+                            is AshBikeDestination.AdvancedBikeSettings -> stringResource(R.string.applications_ashbike_apps_mobile_top_bar_title_advanced_bike_settings)
                         }
                         Text(title)
                     },
@@ -178,7 +180,7 @@ fun AshBikeMainScreen(
                             }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back"
+                                    contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_top_bar_back_button_cd)
                                 )
                             }
                        }
@@ -233,13 +235,13 @@ fun AshBikeMainScreen(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.error
                 )
-                Text("Location Permission Required", modifier = Modifier.padding(16.dp))
+                Text(stringResource(R.string.applications_ashbike_apps_mobile_permission_location_required), modifier = Modifier.padding(16.dp))
                 Button(onClick = {
                     permissionLauncher.launch(
                         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
                     )
                 }) {
-                    Text("Grant Permissions")
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_permission_grant_permissions))
                 }
             }
         }

@@ -43,7 +43,7 @@ fun BatteryStatusDisplay(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = stringResource(R.string.battery),
+            contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_battery),
             tint = color,
             modifier = Modifier.width(16.dp)
         )

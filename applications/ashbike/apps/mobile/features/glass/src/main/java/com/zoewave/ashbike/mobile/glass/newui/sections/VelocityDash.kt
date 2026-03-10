@@ -39,7 +39,7 @@ fun VelocityDash(
         ) {
             // 1. SPEED (Primary Data)
             DataWidget(
-                label = stringResource(R.string.speed),
+                label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_speed),
                 value = speed,
                 isHero = true // Flag for "Extra Big"
             )

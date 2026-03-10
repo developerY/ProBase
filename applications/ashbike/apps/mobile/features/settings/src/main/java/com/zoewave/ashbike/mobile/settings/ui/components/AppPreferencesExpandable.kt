@@ -51,15 +51,15 @@ fun AppPreferencesExpandable(
     val energyLevelMap = mapOf(
         LocationEnergyLevel.POWER_SAVER to Pair(
             0f,
-            stringResource(R.string.settings_energy_level_power_saver)
+            stringResource(R.string.applications_ashbike_apps_mobile_features_settings_energy_level_power_saver)
         ),
         LocationEnergyLevel.BALANCED to Pair(
             1f,
-            stringResource(R.string.settings_energy_level_balanced)
+            stringResource(R.string.applications_ashbike_apps_mobile_features_settings_energy_level_balanced)
         ),
         LocationEnergyLevel.HIGH_ACCURACY to Pair(
             2f,
-            stringResource(R.string.settings_energy_level_high_accuracy)
+            stringResource(R.string.applications_ashbike_apps_mobile_features_settings_energy_level_high_accuracy)
         ),
         //LocationEnergyLevel.AUTO to Pair(3f, stringResource(R.string.settings_energy_level_auto)) // Added Auto
     )
@@ -80,18 +80,18 @@ fun AppPreferencesExpandable(
             ) {
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = stringResource(R.string.settings_app_preferences_cd_icon),
+                    contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_app_preferences_cd_icon),
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = stringResource(id = R.string.settings_app_preferences_title),
+                    text = stringResource(id = R.string.applications_ashbike_apps_mobile_features_settings_settings_app_preferences_title),
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = stringResource(if (expanded) R.string.settings_action_collapse else R.string.settings_action_expand)
+                    contentDescription = stringResource(if (expanded) R.string.applications_ashbike_apps_mobile_features_settings_settings_action_collapse else R.string.applications_ashbike_apps_mobile_features_settings_settings_action_expand)
                 )
             }
             // var checked by remember { mutableStateOf(true) } // Removed local state for 'checked'
@@ -113,7 +113,7 @@ fun AppPreferencesExpandable(
                         ?: currentPair.second
 
                     Text(
-                        text = stringResource(R.string.settings_location_energy_level_label),
+                        text = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_location_energy_level_label),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -125,7 +125,7 @@ fun AppPreferencesExpandable(
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         Text(
-                            text = stringResource(R.string.settings_location_long_ride_label),
+                            text = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_location_long_ride_label),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -182,7 +182,7 @@ fun AppPreferencesExpandable(
                         mutableStateOf(uiState.selections[AppPreferenceKeys.KEY_NOTIFICATIONS] == AppPreferenceKeys.VALUE_NOTIFICATIONS_ENABLED)
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(id = R.string.settings_notifications_label))
+                        Text(stringResource(id = R.string.applications_ashbike_apps_mobile_features_settings_settings_notifications_label))
                         Spacer(modifier = Modifier.weight(1f))
                         Switch(
                             checked = notificationsEnabled,
@@ -204,12 +204,12 @@ fun AppPreferencesExpandable(
                     val isMetric =
                         uiState.selections[AppPreferenceKeys.KEY_UNITS] == AppPreferenceKeys.VALUE_UNITS_METRIC
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(id = R.string.settings_units_label) + ":   ")
+                        Text(stringResource(id = R.string.applications_ashbike_apps_mobile_features_settings_settings_units_label) + ":   ")
                         Text(
                             text = if (isMetric) {
-                                stringResource(id = R.string.settings_units_metric)
+                                stringResource(id = R.string.applications_ashbike_apps_mobile_features_settings_settings_units_metric)
                             } else {
-                                stringResource(id = R.string.settings_units_imperial)
+                                stringResource(id = R.string.applications_ashbike_apps_mobile_features_settings_settings_units_imperial)
                             },
                             style = MaterialTheme.typography.titleSmall
                         )

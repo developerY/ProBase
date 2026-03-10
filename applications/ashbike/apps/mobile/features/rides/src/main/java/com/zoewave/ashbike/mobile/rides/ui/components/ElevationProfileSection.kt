@@ -57,14 +57,14 @@ fun ElevationProfileSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(R.string.feature_trips_elevation_profile_title),
+                    text = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_elevation_profile_title),
                     style = MaterialTheme.typography.titleSmall
                 )
                 Spacer(Modifier.weight(1f))
                 Icon(
                     imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = if (expanded) stringResource(R.string.action_hide) else stringResource(
-                        R.string.action_show
+                    contentDescription = if (expanded) stringResource(R.string.applications_ashbike_apps_mobile_features_rides_action_hide) else stringResource(
+                        R.string.applications_ashbike_apps_mobile_features_rides_action_show
                     )
                 )
             }
