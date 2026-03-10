@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.material3.Button
 import androidx.wear.compose.material3.Text
+import com.zoewave.ashbike.wear.home.R
 
 @Composable
 fun WearMenuScreen(
@@ -23,7 +25,7 @@ fun WearMenuScreen(
                 onClick = onNavigateToRides,
                 modifier = Modifier.fillMaxWidth(0.8f)
             ) {
-                Text("Past Rides")
+                Text(stringResource(R.string.past_rides))
             }
         }
         item {
@@ -31,7 +33,7 @@ fun WearMenuScreen(
                 onClick = onNavigateToSettings,
                 modifier = Modifier.fillMaxWidth(0.8f)
             ) {
-                Text("Settings")
+                Text(stringResource(R.string.settings))
             }
         }
     }

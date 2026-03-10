@@ -5,7 +5,7 @@ package com.zoewave.probase.ashbike.wear.features.home
 data class WearBikeUiState(
     val currentSpeed: Float = 0f,
     val maxSpeed: Float = 40f,
-    val distance: String = "0.00 km",
+    val distanceMeters: Float = 0f,
     val heartRate: Int = 0,
     val calories: Int = 0,
     val elevation: Double = 0.0,      // ✅ NEW: Current Altitude

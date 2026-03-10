@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
+import androidx.compose.ui.res.stringResource
+import com.zoewave.ashbike.wear.home.R.string as HomeR
 
 @Composable
 fun PulsingHeartRate(
@@ -59,7 +61,7 @@ fun PulsingHeartRate(
     ) {
         Icon(
             imageVector = Icons.Filled.Favorite,
-            contentDescription = "Heart Rate",
+            contentDescription = stringResource(HomeR.heart_rate_icon_description),
             tint = zoneColor, // Solid, sharp color
             modifier = Modifier
                 .size(22.dp) // Tiny, precision size

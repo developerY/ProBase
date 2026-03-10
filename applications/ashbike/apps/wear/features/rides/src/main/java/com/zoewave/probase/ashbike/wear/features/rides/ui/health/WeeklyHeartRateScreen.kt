@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,6 +29,7 @@ import androidx.wear.compose.material.ListHeader
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.tooling.preview.devices.WearDevices
+import com.zoewave.ashbike.wear.rides.R.string as RidesR
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
@@ -50,12 +52,12 @@ fun WeeklyHeartRateScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Favorite,
-                        contentDescription = "Heart Rate",
+                        contentDescription = stringResource(RidesR.heart_rate_icon_description),
                         tint = Color(0xFFE53935), // Material Red
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = "7-Day Heart Rate", style = MaterialTheme.typography.title3)
+                    Text(text = stringResource(RidesR.seven_day_heart_rate_label), style = MaterialTheme.typography.title3)
                 }
             }
         }
@@ -97,13 +99,13 @@ fun HeartRateDayRow(data: DailyHeartRate) {
             Column(horizontalAlignment = Alignment.End) {
                 // Average HR
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Text(text = "Avg: ", style = MaterialTheme.typography.caption2, color = Color.Gray)
+                    Text(text = stringResource(RidesR.avg_label), style = MaterialTheme.typography.caption2, color = Color.Gray)
                     Text(text = "${data.avgHr}", style = MaterialTheme.typography.body1, color = Color.White)
                 }
 
                 // Max HR
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Text(text = "Max: ", style = MaterialTheme.typography.caption2, color = Color.Gray)
+                    Text(text = stringResource(RidesR.max_label), style = MaterialTheme.typography.caption2, color = Color.Gray)
                     // Highlighting the max in red for visual pop
                     Text(text = "${data.maxHr}", style = MaterialTheme.typography.caption1, color = Color(0xFFE53935))
                 }

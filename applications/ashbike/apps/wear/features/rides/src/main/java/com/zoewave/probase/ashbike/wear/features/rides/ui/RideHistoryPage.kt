@@ -7,11 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.zoewave.ashbike.model.bike.BikeRide
+import com.zoewave.ashbike.wear.rides.R.string as RidesR
 import com.zoewave.probase.ashbike.wear.features.rides.RidesEvent
 
 @Composable
@@ -34,7 +36,7 @@ fun RideHistoryPage(
         if (rides.isEmpty()) {
             item {
                 Text(
-                    text = "No recent rides",
+                    text = stringResource(RidesR.no_recent_rides),
                     modifier = Modifier.padding(bottom = 8.dp),
                     color = Color.Gray
                 )
@@ -42,7 +44,7 @@ fun RideHistoryPage(
         } else {
             item {
                 Text(
-                    text = "Recent Rides",
+                    text = stringResource(RidesR.recent_rides),
                     style = MaterialTheme.typography.title3,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )

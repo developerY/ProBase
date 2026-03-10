@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,6 +24,7 @@ import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.zoewave.ashbike.model.bike.BikeRide
+import com.zoewave.ashbike.wear.rides.R.string as RidesR
 import com.zoewave.probase.ashbike.wear.features.rides.RidesEvent
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -41,7 +43,7 @@ fun RideHistoryCard(
 
     val durationStr = remember(ride.startTime, ride.endTime) {
         val mins = ((ride.endTime - ride.startTime) / 60000)
-        if (mins <= 0) "< 1m" else "${mins}m"
+        mins
     }
 
     Card(
@@ -65,7 +67,7 @@ fun RideHistoryCard(
                 /* 🚀 THE DELETE BUTTON
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete Ride",
+                    contentDescription = stringResource(RidesR.delete_ride_description),
                     tint = MaterialTheme.colors.error, // Makes it red!
                     modifier = Modifier
                         .size(24.dp)
@@ -77,7 +79,7 @@ fun RideHistoryCard(
                 )*/
 
                 Text(
-                    text = durationStr,
+                    text = if (durationStr <= 0) stringResource(RidesR.duration_less_than_one_minute) else stringResource(RidesR.duration_minutes_format, durationStr),
                     style = MaterialTheme.typography.caption1,
                     color = Color.Gray
                 )
@@ -94,7 +96,7 @@ fun RideHistoryCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "km",
+                    text = stringResource(RidesR.distance_unit_km),
                     style = MaterialTheme.typography.body2,
                     color = Color.LightGray,
                     modifier = Modifier.padding(bottom = 2.dp)
@@ -109,12 +111,12 @@ fun RideHistoryCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Avg: ${String.format(Locale.getDefault(), "%.1f", ride.averageSpeed)}",
+                    text = stringResource(RidesR.avg_speed_format, ride.averageSpeed),
                     style = MaterialTheme.typography.caption1,
                     color = Color.Gray
                 )
                 Text(
-                    text = "Max: ${String.format(Locale.getDefault(), "%.1f", ride.maxSpeed)}",
+                    text = stringResource(RidesR.max_speed_format, ride.maxSpeed),
                     style = MaterialTheme.typography.caption1,
                     color = Color.Gray
                 )

@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
+import com.zoewave.ashbike.wear.home.R.string as HomeR
 import kotlinx.coroutines.delay
 
 @Composable
@@ -90,7 +92,7 @@ fun BurningCalories(
             Icon(
                 // Swap the icon based on the current state
                 imageVector = if (showingFire) Icons.Filled.LocalFireDepartment else Icons.Filled.Bolt,
-                contentDescription = if (showingFire) "Fire" else "Metabolism",
+                contentDescription = stringResource(if (showingFire) HomeR.calories_icon_description else HomeR.metabolism_icon_description),
                 tint = flameColor, // Both icons use the same dynamic color
                 modifier = Modifier
                     .size(22.dp) // Precision size
