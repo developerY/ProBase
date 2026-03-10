@@ -22,7 +22,7 @@ class WearBikeViewModel @Inject constructor(
             WearBikeUiState(
                 currentSpeed = rideInfo.currentSpeed?.toFloat() ?: 0f,
                 // Format distance safely
-                distance = String.format("%.2f km", rideInfo.currentTripDistance ?: 0f),
+                distance = String.format("%.2f km", rideInfo.currentTripDistance),
                 heartRate = rideInfo.heartbeat ?: 0,
                 calories = rideInfo.caloriesBurned,
                 elevation = rideInfo.elevation,           // ✅ Mapping from Service
