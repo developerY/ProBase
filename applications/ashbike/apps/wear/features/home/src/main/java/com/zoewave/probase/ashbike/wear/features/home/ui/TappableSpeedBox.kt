@@ -22,6 +22,8 @@ import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.compose.ui.graphics.lerp // ✅ Needed for the color math!
+import androidx.compose.ui.res.stringResource
+import com.zoewave.ashbike.wear.home.R.string as HomeR
 
 @Composable
 fun TappableSpeedBox(
@@ -61,7 +63,7 @@ fun TappableSpeedBox(
         // Background Icon
         Icon(
             imageVector = if (isTracking) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-            contentDescription = if (isTracking) "Stop Ride" else "Start Ride",
+            contentDescription = stringResource(if (isTracking) HomeR.stop_ride_description else HomeR.start_ride_description),
             tint = iconTintColor,
             modifier = Modifier.size(90.dp)
         )

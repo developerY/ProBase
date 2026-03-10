@@ -21,12 +21,14 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.zoewave.ashbike.model.bike.LocationPoint
+import com.zoewave.ashbike.wear.rides.R.string as RidesR
 
 @Composable
 fun ElevationProfileScreen(
@@ -46,7 +48,7 @@ fun ElevationProfileScreen(
         contentAlignment = Alignment.Center
     ) {
         if (validPoints.size < 2) {
-            Text("Not enough elevation data", color = Color.Gray)
+            Text(stringResource(RidesR.not_enough_elevation_data), color = Color.Gray)
             return@Box
         }
 
@@ -57,7 +59,7 @@ fun ElevationProfileScreen(
             // Header
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Elevation Profile",
+                text = stringResource(RidesR.elevation_profile_label),
                 style = MaterialTheme.typography.caption1,
                 color = Color(0xFF4CAF50) // Material Green
             )
@@ -83,12 +85,12 @@ fun ElevationProfileScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(horizontalAlignment = Alignment.Start) {
-                    Text("Min", style = MaterialTheme.typography.caption3, color = Color.Gray)
-                    Text("${minAlt.toInt()}m", style = MaterialTheme.typography.caption2, color = Color.White)
+                    Text(stringResource(RidesR.min_label), style = MaterialTheme.typography.caption3, color = Color.Gray)
+                    Text(stringResource(RidesR.elevation_meters_format, minAlt.toInt()), style = MaterialTheme.typography.caption2, color = Color.White)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text("Max", style = MaterialTheme.typography.caption3, color = Color.Gray)
-                    Text("${maxAlt.toInt()}m", style = MaterialTheme.typography.caption2, color = Color.White)
+                    Text(stringResource(RidesR.max_label), style = MaterialTheme.typography.caption3, color = Color.Gray)
+                    Text(stringResource(RidesR.elevation_meters_format, maxAlt.toInt()), style = MaterialTheme.typography.caption2, color = Color.White)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))

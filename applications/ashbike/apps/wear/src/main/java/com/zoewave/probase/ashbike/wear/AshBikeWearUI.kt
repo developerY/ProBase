@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation3.ui.NavDisplay
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.Button
@@ -40,7 +41,7 @@ fun AshBikeWearUI() {
                 contentAlignment = Alignment.Center
             ) {
                 Button(onClick = { permissionState.launchMultiplePermissionRequest() }) {
-                    Text("Grant Sensor Access")
+                    Text(stringResource(R.string.grant_sensor_access))
                 }
             }
         }

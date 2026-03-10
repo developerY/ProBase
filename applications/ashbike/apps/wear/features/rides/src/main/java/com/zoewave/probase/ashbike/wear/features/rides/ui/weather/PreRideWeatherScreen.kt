@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,7 @@ import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.tooling.preview.devices.WearDevices
+import com.zoewave.ashbike.wear.rides.R.string as RidesR
 
 // ==========================================
 // 1. UI State Model
@@ -60,7 +62,7 @@ fun PreRideWeatherScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (weather == null) {
-            item { Text("Fetching weather...", color = Color.Gray) }
+            item { Text(stringResource(RidesR.fetching_weather), color = Color.Gray) }
             return@ScalingLazyColumn
         }
 
@@ -69,7 +71,7 @@ fun PreRideWeatherScreen(
             val (icon, tint) = getWeatherIconAndColor(weather.condition)
             Icon(
                 imageVector = icon,
-                contentDescription = weather.condition,
+                contentDescription = null, // Set to null if the text below describes it
                 tint = tint,
                 modifier = Modifier.size(48.dp).padding(bottom = 8.dp)
             )
@@ -102,11 +104,11 @@ fun PreRideWeatherScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 // Wind Widget
-                val speedUnit = if (weather.isMetric) "km/h" else "mph"
+                val speedUnit = if (weather.isMetric) stringResource(RidesR.speed_unit_kmh) else stringResource(RidesR.speed_unit_mph)
                 WeatherSubMetric(
                     icon = Icons.Default.Air,
                     value = "${weather.windSpeed.toInt()} $speedUnit",
-                    label = "Wind",
+                    label = stringResource(RidesR.wind_label),
                     iconTint = Color(0xFF90CAF9) // Light Blue
                 )
 
@@ -114,7 +116,7 @@ fun PreRideWeatherScreen(
                 WeatherSubMetric(
                     icon = Icons.Default.WaterDrop,
                     value = "${weather.humidity}%",
-                    label = "Humid",
+                    label = stringResource(RidesR.humid_label),
                     iconTint = Color(0xFF81D4FA) // Cyan
                 )
             }
@@ -128,9 +130,9 @@ fun PreRideWeatherScreen(
                 modifier = Modifier.fillMaxWidth().height(48.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Default.DirectionsBike, contentDescription = "Start")
+                    Icon(imageVector = Icons.Default.DirectionsBike, contentDescription = stringResource(RidesR.start_icon_description))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Start Ride", fontWeight = FontWeight.Bold)
+                    Text(stringResource(RidesR.start_ride), fontWeight = FontWeight.Bold)
                 }
             }
         }

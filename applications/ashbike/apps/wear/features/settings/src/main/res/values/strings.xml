@@ -1,0 +1,18 @@
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="auto_pause_label">Auto-Pause</string>
+    <string name="auto_pause_description">Stop timer at 0 km/h</string>
+    <string name="timer_icon_description">Timer</string>
+    <string name="use_metric_label">Use Metric</string>
+    <string name="metric_units_description">km, km/h</string>
+    <string name="imperial_units_description">mi, mph</string>
+    <string name="units_icon_description">Units</string>
+    <string name="health_connect_label">Health Connect</string>
+    <string name="health_connect_description">Sync HR &amp; Calories</string>
+    <string name="health_icon_description">Health</string>
+    <string name="manage_ebike_label">Manage E-Bike</string>
+    <string name="manage_ebike_description">Pair &amp; Battery</string>
+    <string name="ebike_icon_description">E-Bike</string>
+    <string name="ashbike_labs_label">AshBike Labs</string>
+    <string name="experiments_icon_description">Experiments</string>
+</resources>

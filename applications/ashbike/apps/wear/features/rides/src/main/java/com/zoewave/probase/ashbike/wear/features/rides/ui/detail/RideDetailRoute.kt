@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,7 @@ import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.TitleCard
 import com.zoewave.ashbike.model.bike.BikeRide
+import com.zoewave.ashbike.wear.rides.R.string as RidesR
 import com.zoewave.probase.ashbike.wear.features.rides.RidesEvent
 import com.zoewave.probase.ashbike.wear.features.rides.RidesViewModel
 import java.text.SimpleDateFormat
@@ -115,17 +117,17 @@ fun RideDetailPage(
         item {
             TitleCard(
                 onClick = onMapClick,
-                title = { Text("Performance") },
+                title = { Text(stringResource(RidesR.performance_title)) },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    MetricColumn(label = "Dist", value = "${String.format(Locale.getDefault(), "%.1f", ride.totalDistance / 1000f)} km")
-                    MetricColumn(label = "Time", value = "${durationMins} m")
+                    MetricColumn(label = stringResource(RidesR.dist_label), value = "${String.format(Locale.getDefault(), "%.1f", ride.totalDistance / 1000f)} ${stringResource(RidesR.distance_unit_km)}")
+                    MetricColumn(label = stringResource(RidesR.time_label), value = stringResource(RidesR.duration_minutes_format, durationMins))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    MetricColumn(label = "Avg Spd", value = "${String.format(Locale.getDefault(), "%.1f", ride.averageSpeed)} km/h")
-                    MetricColumn(label = "Max Spd", value = "${String.format(Locale.getDefault(), "%.1f", ride.maxSpeed)} km/h")
+                    MetricColumn(label = stringResource(RidesR.avg_spd_label), value = "${String.format(Locale.getDefault(), "%.1f", ride.averageSpeed)} ${stringResource(RidesR.speed_unit_kmh)}")
+                    MetricColumn(label = stringResource(RidesR.max_spd_label), value = "${String.format(Locale.getDefault(), "%.1f", ride.maxSpeed)} ${stringResource(RidesR.speed_unit_kmh)}")
                 }
             }
         }
@@ -134,12 +136,12 @@ fun RideDetailPage(
         item {
             TitleCard(
                 onClick = { /* Future Expansion */ },
-                title = { Text("Environment") },
+                title = { Text(stringResource(RidesR.environment_title)) },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    MetricColumn(label = "Gain", value = "+${ride.elevationGain} m")
-                    MetricColumn(label = "Loss", value = "-${ride.elevationLoss} m")
+                    MetricColumn(label = stringResource(RidesR.gain_label), value = "+${stringResource(RidesR.elevation_meters_format, ride.elevationGain.toInt())}")
+                    MetricColumn(label = stringResource(RidesR.loss_label), value = "-${stringResource(RidesR.elevation_meters_format, ride.elevationLoss.toInt())}")
                 }
             }
         }
@@ -149,12 +151,12 @@ fun RideDetailPage(
             item {
                 TitleCard(
                     onClick = { /* Future Expansion */ },
-                    title = { Text("Health") },
+                    title = { Text(stringResource(RidesR.health_title)) },
                     modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
                 ) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        MetricColumn(label = "Avg HR", value = "${ride.avgHeartRate ?: "--"} bpm")
-                        MetricColumn(label = "Cals", value = "${ride.caloriesBurned} kcal")
+                        MetricColumn(label = stringResource(RidesR.avg_hr_label), value = "${ride.avgHeartRate ?: "--"} ${stringResource(RidesR.bpm_unit)}")
+                        MetricColumn(label = stringResource(RidesR.cals_label), value = "${ride.caloriesBurned} ${stringResource(RidesR.kcal_unit)}")
                     }
                 }
             }
@@ -169,9 +171,9 @@ fun RideDetailPage(
                     onClick = { /* Disabled visually */ },
                     colors = ChipDefaults.secondaryChipColors(backgroundColor = Color.DarkGray),
                     icon = {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = "Synced", tint = Color.Green)
+                        Icon(imageVector = Icons.Default.Check, contentDescription = stringResource(RidesR.synced_icon_description), tint = Color.Green)
                     },
-                    label = { Text("Synced to Phone", color = Color.White) },
+                    label = { Text(stringResource(RidesR.synced_to_phone), color = Color.White) },
                     modifier = Modifier.fillMaxWidth()
                 )
             } else {
@@ -179,9 +181,9 @@ fun RideDetailPage(
                     onClick = { onEvent(RidesEvent.OnForceSyncClick(ride)) }, // Dispatch!
                     colors = ChipDefaults.primaryChipColors(),
                     icon = {
-                        Icon(imageVector = Icons.Default.Sync, contentDescription = "Sync", tint = Color(0xFF64B5F6))
+                        Icon(imageVector = Icons.Default.Sync, contentDescription = stringResource(RidesR.sync_icon_description), tint = Color(0xFF64B5F6))
                     },
-                    label = { Text("Tap to Sync", color = Color.White) },
+                    label = { Text(stringResource(RidesR.tap_to_sync), color = Color.White) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -195,9 +197,9 @@ fun RideDetailPage(
                 onClick = { onEvent(RidesEvent.OnDeleteClick(ride.rideId)) }, // Dispatch!
                 colors = ChipDefaults.primaryChipColors(backgroundColor = Color(0xFFB3261E)),
                 icon = {
-                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                    Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(RidesR.delete_icon_description), tint = Color.White)
                 },
-                label = { Text("Delete Ride", color = Color.White) },
+                label = { Text(stringResource(RidesR.delete_ride), color = Color.White) },
                 modifier = Modifier.fillMaxWidth()
             )
         }

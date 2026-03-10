@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Icon
@@ -32,6 +33,7 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.zoewave.ashbike.model.bike.LocationPoint
+import com.zoewave.ashbike.wear.rides.R.string as RidesR
 import kotlin.math.max
 
 @Composable
@@ -163,7 +165,7 @@ fun WearRideMapScreen(
         ) {
             Icon(
                 imageVector = Icons.Default.LocalCafe,
-                contentDescription = "Coffee Stop",
+                contentDescription = stringResource(RidesR.coffee_stop_icon_description),
                 tint = Color.White,
                 modifier = Modifier.size(20.dp)
             )
@@ -176,10 +178,10 @@ fun WearRideMapScreen(
                 .padding(top = 36.dp, end = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("N", style = MaterialTheme.typography.caption3, color = Color.Black)
+            Text(stringResource(RidesR.north_label), style = MaterialTheme.typography.caption3, color = Color.Black)
             Icon(
                 imageVector = Icons.Default.ArrowUpward,
-                contentDescription = "North",
+                contentDescription = stringResource(RidesR.north_icon_description),
                 tint = Color.Black,
                 modifier = Modifier.size(16.dp)
             )
@@ -194,7 +196,7 @@ fun WearRideMapScreen(
         ) {
             Box(modifier = Modifier.width(40.dp).height(2.dp).background(Color.Black))
             Spacer(modifier = Modifier.width(4.dp))
-            Text("100 m", style = MaterialTheme.typography.caption3, color = Color.Black)
+            Text(stringResource(RidesR.distance_100m), style = MaterialTheme.typography.caption3, color = Color.Black)
         }
 
         // Speed Legend (Bottom Right)
@@ -204,7 +206,7 @@ fun WearRideMapScreen(
                 .padding(bottom = 32.dp, end = 24.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Slow", style = MaterialTheme.typography.caption3, color = Color.Black)
+            Text(stringResource(RidesR.speed_slow), style = MaterialTheme.typography.caption3, color = Color.Black)
             Spacer(modifier = Modifier.width(4.dp))
             Box(
                 modifier = Modifier
@@ -215,7 +217,7 @@ fun WearRideMapScreen(
                     )
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Fast", style = MaterialTheme.typography.caption3, color = Color.Black)
+            Text(stringResource(RidesR.speed_fast), style = MaterialTheme.typography.caption3, color = Color.Black)
         }
     }
 }

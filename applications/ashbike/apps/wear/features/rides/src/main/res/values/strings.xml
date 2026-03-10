@@ -1,35 +1,4 @@
 <resources>
-    <string name="app_name">Wear</string>
-    <!--
-    This string is used for square devices and overridden by hello_world in
-    values-round/strings.xml for round devices.
-    -->
-    <string name="hello_world">From the Square world,\nHello, %1$s!</string>
-    <string name="tile_label">AshBike</string>
-    <string name="complication_label">Example complication</string>
-
-    <!-- Settings Screen -->
-    <string name="settings_title">Settings</string>
-    <string name="auto_pause_label">Auto-Pause</string>
-    <string name="auto_pause_description">Stop timer at 0 km/h</string>
-    <string name="timer_icon_description">Timer</string>
-    <string name="use_metric_label">Use Metric</string>
-    <string name="metric_units_description">km, km/h</string>
-    <string name="imperial_units_description">mi, mph</string>
-    <string name="units_icon_description">Units</string>
-    <string name="health_connect_label">Health Connect</string>
-    <string name="health_connect_description">Sync HR &amp; Calories</string>
-    <string name="health_icon_description">Health</string>
-    <string name="manage_ebike_label">Manage E-Bike</string>
-    <string name="manage_ebike_description">Pair &amp; Battery</string>
-    <string name="ebike_icon_description">E-Bike</string>
-    <string name="ashbike_labs_label">AshBike Labs</string>
-    <string name="experiments_icon_description">Experiments</string>
-
-    <!-- Menu Screen -->
-    <string name="past_rides">Past Rides</string>
-    <string name="settings">Settings</string>
-
     <!-- Ride Map Screen -->
     <string name="north_label">N</string>
     <string name="distance_100m">100 m</string>
@@ -72,13 +41,32 @@
     <string name="not_enough_elevation_data">Not enough elevation data</string>
     <string name="min_label">Min</string>
     <string name="max_label">Max</string>
+    <string name="avg_label">Avg</string>
+    <string name="wind_label">Wind</string>
+    <string name="humid_label">Humid</string>
+    <string name="dist_label">Dist</string>
+    <string name="time_label">Time</string>
+    <string name="avg_spd_label">Avg Spd</string>
+    <string name="max_spd_label">Max Spd</string>
+    <string name="gain_label">Gain</string>
+    <string name="loss_label">Loss</string>
+    <string name="avg_hr_label">Avg HR</string>
+    <string name="cals_label">Cals</string>
+    <string name="bpm_unit">bpm</string>
+    <string name="kcal_unit">kcal</string>
+    <string name="speed_unit_kmh">km/h</string>
+    <string name="speed_unit_mph">mph</string>
     <string name="elevation_meters_format">%1$dm</string>
 
-    <!-- Home Screen / Bike VM -->
-    <string name="distance_km_format">%.2f km</string>
-    <string name="initial_distance">0.00 km</string>
+    <!-- Ride History Page -->
+    <string name="no_recent_rides">No recent rides</string>
+    <string name="recent_rides">Recent Rides</string>
 
-    <!-- Permissions -->
-    <string name="grant_sensor_access">Grant Sensor Access</string>
-
+    <!-- Ride History Card -->
+    <string name="delete_ride_description">Delete Ride</string>
+    <string name="distance_unit_km">km</string>
+    <string name="avg_speed_format">Avg: %1$.1f</string>
+    <string name="max_speed_format">Max: %1$.1f</string>
+    <string name="duration_less_than_one_minute">&lt; 1m</string>
+    <string name="duration_minutes_format">%1$dm</string>
 </resources>
