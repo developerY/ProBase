@@ -1,6 +1,5 @@
 package com.zoewave.probase.ashbike.mobile.data.sync
 
-
 import android.util.Log
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
@@ -44,41 +43,50 @@ class RideSyncListenerService : WearableListenerService() {
                 val path = event.dataItem.uri.path
                 Log.d(TAG, "🔍 PHONE inspecting incoming path: $path")
 
-
                 // Check if this matches the exact path the watch used to pitch the data
                 if (path != null && path.startsWith("/completed_ride/")) {
                     Log.d(TAG, "📥 PHONE caught a ride payload! Extracting DataMap...")
-                    Log.d(TAG, "Incoming ride detected from Watch! Path: $path")
 
                     val dataMapItem = DataMapItem.fromDataItem(event.dataItem)
                     val dataMap = dataMapItem.dataMap
 
-                    // 1. Extract the JSON payloads we packed on the watch
+                    // 1. Extract the String (Ride Info) and the Asset (Massive Location Array)
                     val rideJson = dataMap.getString("ride_data")
-                    val locationsJson = dataMap.getString("location_data")
+                    val locationAsset = dataMap.getAsset("location_data") // 🚀 NOW FETCHED AS AN ASSET
 
-                    if (rideJson != null && locationsJson != null) {
-                        try {
-                            // 2. Deserialize the data back into your Room Entities
-                            val rideEntity = gson.fromJson(rideJson, BikeRideEntity::class.java)
+                    if (rideJson != null && locationAsset != null) {
 
-                            val listType = object : TypeToken<List<RideLocationEntity>>() {}.type
-                            val locationEntities: List<RideLocationEntity> = gson.fromJson(locationsJson, listType)
+                        // 2. Move into the Coroutine to download and parse the Asset safely
+                        serviceScope.launch {
+                            try {
+                                Log.d(TAG, "📦 PHONE downloading Asset bytes from Play Services...")
 
-                            Log.d(TAG, "💾 PHONE successfully deserialized Ride ID: ${rideEntity.rideId}. Saving to Room DB...")
+                                // Request the raw file stream from Play Services
+                                val assetInputStream = Wearable.getDataClient(this@RideSyncListenerService)
+                                    .getFdForAsset(locationAsset)
+                                    .await()
+                                    .inputStream
 
-                            Log.i(TAG, "✅ PHONE Room DB save complete for Ride ID: ${rideEntity.rideId}")
+                                // Convert the byte stream back into our massive JSON String
+                                val locationsJson = assetInputStream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }
 
-                            // 3. Save it straight to the phone's database!
-                            serviceScope.launch {
-                                repo.insertRideWithLocations(rideEntity, locationEntities)
-                                Log.i(TAG, "Successfully synced watch ride ${rideEntity.rideId} to phone database!")
+                                if (locationsJson != null) {
+                                    // 3. Deserialize the data back into your Room Entities
+                                    val rideEntity = gson.fromJson(rideJson, BikeRideEntity::class.java)
 
-                                // ---------------------------------------------------------
-                                // THE NEW ACKNOWLEDGEMENT PITCH
-                                // ---------------------------------------------------------
-                                Log.d(TAG, "📤 PHONE pitching ACK back to watch for Ride ID: ${rideEntity.rideId}")
-                                try {
+                                    val listType = object : TypeToken<List<RideLocationEntity>>() {}.type
+                                    val locationEntities: List<RideLocationEntity> = gson.fromJson(locationsJson, listType)
+
+                                    Log.d(TAG, "💾 PHONE successfully deserialized Ride ID: ${rideEntity.rideId}. Saving to Room DB...")
+
+                                    // 4. Save it straight to the phone's database!
+                                    repo.insertRideWithLocations(rideEntity, locationEntities)
+                                    Log.i(TAG, "✅ PHONE Room DB save complete for Ride ID: ${rideEntity.rideId}")
+
+                                    // ---------------------------------------------------------
+                                    // THE NEW ACKNOWLEDGEMENT PITCH
+                                    // ---------------------------------------------------------
+                                    Log.d(TAG, "📤 PHONE pitching ACK back to watch for Ride ID: ${rideEntity.rideId}")
                                     val dataClient = Wearable.getDataClient(this@RideSyncListenerService)
                                     val ackRequest = PutDataMapRequest.create("/sync_ack/${rideEntity.rideId}")
                                     ackRequest.dataMap.putLong("timestamp", System.currentTimeMillis())
@@ -86,17 +94,16 @@ class RideSyncListenerService : WearableListenerService() {
                                     val putDataReq = ackRequest.asPutDataRequest().setUrgent()
                                     dataClient.putDataItem(putDataReq).await()
                                     Log.i(TAG, "🚀 PHONE successfully fired ACK over Bluetooth!")
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "❌ PHONE failed to send ACK to watch", e)
+
+                                } else {
+                                    Log.e(TAG, "❌ PHONE failed to read bytes from the location Asset!")
                                 }
-
-
+                            } catch (e: Exception) {
+                                Log.e(TAG, "❌ PHONE failed to parse, save, or ACK incoming ride data", e)
                             }
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Failed to parse and save incoming ride data", e)
                         }
                     } else {
-                        Log.e(TAG, "❌ PHONE received empty JSON strings from watch!")
+                        Log.e(TAG, "❌ PHONE received missing ride JSON or location Asset from watch!")
                     }
                 }
             }

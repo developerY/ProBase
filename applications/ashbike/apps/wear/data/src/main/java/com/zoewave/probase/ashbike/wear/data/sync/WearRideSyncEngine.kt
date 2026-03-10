@@ -2,6 +2,7 @@ package com.zoewave.probase.ashbike.wear.data.sync
 
 import android.content.Context
 import android.util.Log
+import com.google.android.gms.wearable.Asset
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import com.google.gson.GsonBuilder
@@ -32,9 +33,13 @@ class WearRideSyncEngine @Inject constructor(
             val rideJson = gson.toJson(ride)
             val locationsJson = gson.toJson(locations)
 
+            // 🚀 THE FIX: Convert the massive locations JSON into a byte array and wrap it in an Asset
+            val locationBytes = locationsJson.toByteArray(Charsets.UTF_8)
+            val locationAsset = Asset.createFromBytes(locationBytes)
+
             // 3. Pack the DataMap
-            request.dataMap.putString("ride_data", rideJson)
-            request.dataMap.putString("location_data", locationsJson)
+            request.dataMap.putString("ride_data", rideJson) // Ride summary is small, String is fine
+            request.dataMap.putAsset("location_data", locationAsset) // Locations list is massive, MUST be an Asset
 
             // Adding a timestamp forces the DataClient to treat this as a "new"
             // event, even if the payload looks identical to a previous one.
@@ -44,7 +49,7 @@ class WearRideSyncEngine @Inject constructor(
             val putDataReq = request.asPutDataRequest().setUrgent()
             dataClient.putDataItem(putDataReq).await()
 
-            Log.d("AshBikeSync", "Ride successfully beamed to Phone!")
+            Log.d("AshBikeSync", "Ride successfully beamed to Phone as an Asset!")
 
         } catch (e: Exception) {
             Log.e("AshBikeSync", "Failed to sync ride to phone", e)
