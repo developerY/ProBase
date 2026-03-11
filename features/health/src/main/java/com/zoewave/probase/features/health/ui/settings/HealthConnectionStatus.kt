@@ -20,7 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.health.R
 import com.zoewave.probase.features.health.ui.HealthEvent
 
 @Composable
@@ -48,7 +50,7 @@ fun HealthConnectionStatus(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Access Granted",
+                text = stringResource(R.string.features_health_access_granted),
                 style = MaterialTheme.typography.labelLarge,
                 color = Color(0xFF1B5E20)
             )
@@ -60,7 +62,7 @@ fun HealthConnectionStatus(
             onClick = { onEvent(HealthEvent.ManagePermissions) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Manage Permissions")
+            Text(stringResource(R.string.features_health_health_route_action_manage_permissions))
         }
     }
 }

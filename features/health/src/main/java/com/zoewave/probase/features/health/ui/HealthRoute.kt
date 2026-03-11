@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.HealthConnectClient
@@ -34,6 +35,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import com.zoewave.probase.features.health.R
 import com.zoewave.probase.features.health.ui.components.HealthDashboard
 import com.zoewave.probase.features.health.ui.components.common.ErrorScreen
 import com.zoewave.probase.features.health.ui.settings.HealthConnectionStatus
@@ -148,18 +150,18 @@ private fun PermissionsNotGrantedScreen(onEnableClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Health Connect Permissions Required",
+            text = stringResource(R.string.features_health_health_route_permissions_required_title),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Please grant access to show your weekly activity.",
+            text = stringResource(R.string.features_health_health_route_permissions_required_message),
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onEnableClick) {
-            Text("Grant Permissions")
+            Text(stringResource(R.string.features_health_health_route_action_grant_permissions))
         }
     }
 }

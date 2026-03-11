@@ -14,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.health.R
 import com.zoewave.probase.features.health.ui.HealthEvent
 
 @Composable
@@ -27,7 +29,7 @@ fun SettingsTab(
         modifier = modifier.fillMaxSize()
     ) {
         Text(
-            text = "Health Connect Settings",
+            text = stringResource(R.string.features_health_settings_title),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 24.dp)
         )
@@ -38,13 +40,13 @@ fun SettingsTab(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Debug Tools",
+            text = stringResource(R.string.features_health_debug_tools_title),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Use these tools to simulate data if you don't have a real device connected.",
+            text = stringResource(R.string.features_health_debug_tools_description),
             style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray,
             modifier = Modifier.padding(bottom = 16.dp)
@@ -57,7 +59,7 @@ fun SettingsTab(
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Add Test City Ride (4.5km)")
+            Text(stringResource(R.string.features_health_action_add_test_ride))
         }
     }
 }

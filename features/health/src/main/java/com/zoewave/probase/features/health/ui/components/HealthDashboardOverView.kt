@@ -28,8 +28,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import com.zoewave.probase.features.health.R
 import com.zoewave.probase.features.health.ui.HealthEvent
 import com.zoewave.probase.features.health.ui.HealthUiState
 import com.zoewave.probase.features.health.ui.components.charts.GenericWeeklyChart
@@ -37,10 +39,10 @@ import com.zoewave.probase.features.health.ui.sessions.SessionCard
 import com.zoewave.probase.features.health.ui.sessions.SessionDetailDialog
 import com.zoewave.probase.features.health.ui.settings.HealthConnectionStatus
 
-private enum class HealthTabOverView(val label: String, val icon: ImageVector) {
-    Settings("Settings", Icons.Default.Settings),
-    Data("Overview", Icons.Default.DateRange),
-    Sessions("Sessions", Icons.Default.List)
+private enum class HealthTabOverView(val labelRes: Int, val icon: ImageVector) {
+    Settings(R.string.features_health_health_route_enable_health_connect_title, Icons.Default.Settings),
+    Data(R.string.features_health_overview_label, Icons.Default.DateRange),
+    Sessions(R.string.features_health_sessions_label, Icons.Default.List)
 }
 
 @Composable
@@ -63,7 +65,7 @@ fun HealthDashboardOverView(
                         selected = currentTab == tab,
                         onClick = { currentTab = tab },
                         icon = { Icon(tab.icon, contentDescription = null) },
-                        label = { Text(tab.label) }
+                        label = { Text(stringResource(tab.labelRes)) }
                     )
                 }
             }
@@ -85,17 +87,17 @@ fun HealthDashboardOverView(
                 HealthTabOverView.Data -> { /* ... same as before ... */
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                         GenericWeeklyChart(
-                            "Steps",
+                            stringResource(R.string.features_health_steps_label),
                             state.weeklySteps.mapValues { it.value.toDouble() },
                             MaterialTheme.colorScheme.primary
                         ) { "${it.toInt()}" }
                         GenericWeeklyChart(
-                            "Calories",
+                            stringResource(R.string.features_health_calories_label),
                             state.weeklyCalories,
                             Color(0xFFFF9800)
                         ) { "${it.toInt()}" }
                         GenericWeeklyChart(
-                            "Distance",
+                            stringResource(R.string.features_health_distance_label),
                             state.weeklyDistance,
                             Color(0xFF03A9F4)
                         ) { String.format("%.1f", it / 1000) }
@@ -105,14 +107,14 @@ fun HealthDashboardOverView(
                 HealthTabOverView.Sessions -> {
                     Column(modifier = Modifier.fillMaxSize()) {
                         Text(
-                            text = "Recent Sessions",
+                            text = stringResource(R.string.features_health_recent_sessions_title),
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
                         if (state.sessions.isEmpty()) {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("No recent activities found.", color = Color.Gray)
+                                Text(stringResource(R.string.features_health_no_recent_activities), color = Color.Gray)
                             }
                         } else {
                             LazyColumn(
