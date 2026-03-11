@@ -31,7 +31,7 @@ fun PermissionsDenied(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(id = R.string.ble_message_permissions_denied), // Replaced hardcoded string
+            text = stringResource(id = R.string.features_ble_ble_message_permissions_denied), // Replaced hardcoded string
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )

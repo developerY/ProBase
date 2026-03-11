@@ -40,7 +40,7 @@ fun GattServices(
         Button(
             onClick = readBat
         ) {
-            Text(stringResource(id = R.string.ble_action_read_battery_level)) // Updated
+            Text(stringResource(id = R.string.features_ble_ble_action_read_battery_level)) // Updated
         }
 
         LazyColumn(
@@ -50,7 +50,7 @@ fun GattServices(
         ) {
             item {
                 Text(
-                    text = stringResource(id = R.string.ble_title_gatt_services), // Updated
+                    text = stringResource(id = R.string.features_ble_ble_title_gatt_services), // Updated
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
@@ -72,7 +72,7 @@ fun GattServices(
                                 Text(
                                     // Updated with new string R.string.ble_text_characteristic_name
                                     text = stringResource(
-                                        id = R.string.ble_text_characteristic_name,
+                                        id = R.string.features_ble_ble_text_characteristic_name,
                                         characteristic.name
                                     ),
                                     style = MaterialTheme.typography.bodySmall,
@@ -81,7 +81,7 @@ fun GattServices(
                                 IconButton(onClick = { /*onCharacteristicClick(entry, characteristic)*/ }) {
                                     Icon(
                                         Icons.Default.Info,
-                                        contentDescription = stringResource(id = R.string.ble_cd_read_characteristic) // Updated
+                                        contentDescription = stringResource(id = R.string.features_ble_ble_cd_read_characteristic) // Updated
                                     )
                                 }
                             }
@@ -107,7 +107,7 @@ fun Gattab(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = stringResource(id = R.string.ble_title_sensor_tag_details), // Updated
+                text = stringResource(id = R.string.features_ble_ble_title_sensor_tag_details), // Updated
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -116,7 +116,7 @@ fun Gattab(
             Text(
                 // Updated
                 text = stringResource(
-                    id = R.string.ble_label_battery_level_formatted,
+                    id = R.string.features_ble_ble_label_battery_level_formatted,
                     batteryLevel()
                 ),
                 style = MaterialTheme.typography.bodyMedium,
@@ -125,19 +125,19 @@ fun Gattab(
             Text(
                 // Updated - Assuming "22°C" is a placeholder for a dynamic value.
                 // For now, we format it with the existing placeholder.
-                text = stringResource(id = R.string.ble_label_temperature_formatted, "22°C"),
+                text = stringResource(id = R.string.features_ble_ble_label_temperature_formatted, "22°C"),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Text(
                 // Updated - Assuming "45%" is a placeholder.
-                text = stringResource(id = R.string.ble_label_humidity_formatted, "45%"),
+                text = stringResource(id = R.string.features_ble_ble_label_humidity_formatted, "45%"),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Text(
                 // Updated - Assuming "0" is a placeholder.
-                text = stringResource(id = R.string.ble_label_last_synced_formatted, "0"),
+                text = stringResource(id = R.string.features_ble_ble_label_last_synced_formatted, "0"),
                 style = MaterialTheme.typography.bodyMedium
             )
         }

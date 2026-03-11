@@ -43,26 +43,26 @@ fun ScanControls(
                 onClick = startScan,
                 enabled = isStartScanningEnabled && scanState != ScanState.SCANNING
             ) {
-                Text(stringResource(id = R.string.ble_scan_controls_start_scan_button))
+                Text(stringResource(id = R.string.features_ble_ble_scan_controls_start_scan_button))
             }
             Spacer(Modifier.width(8.dp))
             Button(
                 onClick = stopScan,
                 enabled = scanState == ScanState.SCANNING
             ) {
-                Text(stringResource(id = R.string.ble_scan_controls_stop_scan_button))
+                Text(stringResource(id = R.string.features_ble_ble_scan_controls_stop_scan_button))
             }
         }
 
         Spacer(Modifier.height(8.dp)) // Keep this spacer for visual separation
 
         val statusText = when (scanState) {
-            ScanState.NOT_SCANNING -> stringResource(id = R.string.ble_scan_controls_status_display_not_scanning) // Updated
-            ScanState.SCANNING -> stringResource(id = R.string.ble_scan_controls_status_display_scanning)       // Updated
-            ScanState.STOPPING -> stringResource(id = R.string.ble_scan_controls_status_display_stopping)     // Updated
+            ScanState.NOT_SCANNING -> stringResource(id = R.string.features_ble_ble_scan_controls_status_display_not_scanning) // Updated
+            ScanState.SCANNING -> stringResource(id = R.string.features_ble_ble_scan_controls_status_display_scanning)       // Updated
+            ScanState.STOPPING -> stringResource(id = R.string.features_ble_ble_scan_controls_status_display_stopping)     // Updated
         }
         Text(
-            text = stringResource(id = R.string.ble_scan_controls_status_label) + " " + statusText,
+            text = stringResource(id = R.string.features_ble_ble_scan_controls_status_label) + " " + statusText,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

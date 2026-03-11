@@ -32,7 +32,7 @@ fun PermissionsRationale(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(id = R.string.ble_message_permissions_rationale_scan), // Updated
+            text = stringResource(id = R.string.features_ble_ble_message_permissions_rationale_scan), // Updated
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )

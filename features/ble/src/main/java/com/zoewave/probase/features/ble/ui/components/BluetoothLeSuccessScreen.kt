@@ -99,7 +99,7 @@ fun BluetoothLeSuccessScreen(
                         Text(
                             // Assuming device.name can be null
                             text = device.name
-                                ?: stringResource(id = R.string.ble_text_unnamed_device),
+                                ?: stringResource(id = R.string.features_ble_ble_text_unnamed_device),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -121,13 +121,13 @@ fun BluetoothLeSuccessScreen(
                             }
                             if (gattConnectionState == GattConnectionState.Connected) {
                                 Button(onClick = { readCharacteristics() }) {
-                                    Text(stringResource(id = R.string.ble_action_read_values))
+                                    Text(stringResource(id = R.string.features_ble_ble_action_read_values))
                                 }
                             }
                         }
                         Text(
                             text = stringResource(
-                                id = R.string.ble_text_status_label,
+                                id = R.string.features_ble_ble_text_status_label,
                                 gattConnectionState.toString()
                             ),
                             style = MaterialTheme.typography.bodySmall
@@ -151,7 +151,7 @@ fun BluetoothLeSuccessScreen(
             ) {
                 Text(
                     text = stringResource(
-                        id = R.string.ble_title_discovered_devices,
+                        id = R.string.features_ble_ble_title_discovered_devices,
                         discoveredDevices.size
                     ),
                     style = MaterialTheme.typography.titleMedium,
@@ -188,8 +188,8 @@ fun BluetoothLeSuccessScreen(
             if (discoveredDevices.isEmpty()) {
                 item {
                     Text(
-                        text = if (scanState == ScanState.SCANNING) stringResource(id = R.string.ble_text_scanning_for_devices) else stringResource(
-                            id = R.string.ble_text_no_devices_found
+                        text = if (scanState == ScanState.SCANNING) stringResource(id = R.string.features_ble_ble_text_scanning_for_devices) else stringResource(
+                            id = R.string.features_ble_ble_text_no_devices_found
                         ),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(16.dp)
@@ -199,7 +199,7 @@ fun BluetoothLeSuccessScreen(
                 item {
                     Text(
                         text = stringResource(
-                            id = R.string.ble_text_no_named_devices_found,
+                            id = R.string.features_ble_ble_text_no_named_devices_found,
                             discoveredDevices.size
                         ),
                         style = MaterialTheme.typography.bodyMedium,
@@ -221,7 +221,7 @@ fun BluetoothLeSuccessScreen(
             item { Spacer(modifier = Modifier.height(8.dp)) }
             item {
                 Text(
-                    stringResource(id = R.string.ble_title_gatt_services),
+                    stringResource(id = R.string.features_ble_ble_title_gatt_services),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
@@ -232,7 +232,7 @@ fun BluetoothLeSuccessScreen(
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)) {
                         Text(
-                            stringResource(id = R.string.ble_text_service_uuid, service.uuid),
+                            stringResource(id = R.string.features_ble_ble_text_service_uuid, service.uuid),
                             style = MaterialTheme.typography.bodySmall
                         )
                         service.characteristics.forEach { characteristic ->
@@ -241,7 +241,7 @@ fun BluetoothLeSuccessScreen(
                                 characteristic.value ?: stringResource(id = CoreUiR.string.text_na)
                             Text(
                                 text = stringResource(
-                                    id = R.string.ble_text_characteristic_details,
+                                    id = R.string.features_ble_ble_text_characteristic_details,
                                     characteristic.uuid,
                                     valueDisplay
                                 ),
@@ -254,7 +254,7 @@ fun BluetoothLeSuccessScreen(
             } else if (activeDevice != null) { // Only show "no services" if an active device is connected but no services found
                 item {
                     Text(
-                        stringResource(id = R.string.ble_error_no_services_discovered),
+                        stringResource(id = R.string.features_ble_ble_error_no_services_discovered),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -289,12 +289,12 @@ fun DiscoveredDeviceItem(
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = stringResource(id = R.string.ble_text_device_address, device.address),
+            text = stringResource(id = R.string.features_ble_ble_text_device_address, device.address),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
-            text = stringResource(id = R.string.ble_text_device_rssi, device.rssi),
+            text = stringResource(id = R.string.features_ble_ble_text_device_rssi, device.rssi),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
