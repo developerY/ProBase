@@ -49,6 +49,6 @@ private fun MapPathScreenPreview() {
         fixes = fixes,
         coffeeShops = coffeeShops,
         onFindCafes = { },
-        placeName = stringResource(R.string.feature_trips_preview_ride_around_plaza)
+        placeName = stringResource(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_preview_ride_around_plaza)
     )
 }

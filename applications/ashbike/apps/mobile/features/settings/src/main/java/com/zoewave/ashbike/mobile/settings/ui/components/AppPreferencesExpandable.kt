@@ -51,15 +51,15 @@ fun AppPreferencesExpandable(
     val energyLevelMap = mapOf(
         LocationEnergyLevel.POWER_SAVER to Pair(
             0f,
-            stringResource(R.string.applications_ashbike_apps_mobile_features_settings_energy_level_power_saver)
+            stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_energy_level_power_saver)
         ),
         LocationEnergyLevel.BALANCED to Pair(
             1f,
-            stringResource(R.string.applications_ashbike_apps_mobile_features_settings_energy_level_balanced)
+            stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_energy_level_balanced)
         ),
         LocationEnergyLevel.HIGH_ACCURACY to Pair(
             2f,
-            stringResource(R.string.applications_ashbike_apps_mobile_features_settings_energy_level_high_accuracy)
+            stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_energy_level_high_accuracy)
         ),
         //LocationEnergyLevel.AUTO to Pair(3f, stringResource(R.string.settings_energy_level_auto)) // Added Auto
     )
