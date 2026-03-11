@@ -28,9 +28,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.model.ble.DeviceService
+import com.zoewave.probase.features.ble.R
 
 // Composable for GATT Services Carousel
 @OptIn(ExperimentalAnimationApi::class)
@@ -45,11 +47,11 @@ fun GattServicesCarousel(
             onClick = readBat,
             modifier = Modifier.padding(16.dp)
         ) {
-            Text("Read Battery Level")
+            Text(stringResource(R.string.features_ble_ble_action_read_battery_level))
         }
 
         Text(
-            text = "GATT Services",
+            text = stringResource(R.string.features_ble_ble_title_gatt_services),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(16.dp)
@@ -107,7 +109,7 @@ fun FrontOfCard(service: DeviceService) {
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "UUID: ${service.uuid}",
+            text = stringResource(R.string.features_ble_ble_label_uuid) + " ${service.uuid}",
             style = MaterialTheme.typography.bodySmall,
             color = Color.Gray
         )
@@ -122,7 +124,7 @@ fun BackOfCard(service: DeviceService) {
             .fillMaxWidth()
     ) {
         Text(
-            text = "Characteristics:",
+            text = stringResource(R.string.features_ble_ble_title_characteristics),
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold
         )
@@ -137,7 +139,7 @@ fun BackOfCard(service: DeviceService) {
                     color = Color.Gray
                 )
                 Text(
-                    text = "Value: ${characteristic.value}",
+                    text = stringResource(R.string.features_ble_ble_text_characteristic_value_label, characteristic.value),
                     style = MaterialTheme.typography.bodySmall
                 )
             }

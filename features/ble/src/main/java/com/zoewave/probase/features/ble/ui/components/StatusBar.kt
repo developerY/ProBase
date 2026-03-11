@@ -71,7 +71,7 @@ fun StatusBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(id = R.string.ble_status_bar_title), // Changed
+                    text = stringResource(id = R.string.features_ble_ble_status_bar_title), // Changed
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -86,9 +86,9 @@ fun StatusBar(
                             ScanState.STOPPING -> Icons.Outlined.Clear
                         },
                         contentDescription = when (scanState) {
-                            ScanState.NOT_SCANNING -> stringResource(id = R.string.ble_cd_scan_state_not_scanning)
-                            ScanState.SCANNING -> stringResource(id = R.string.ble_cd_scan_state_scanning)
-                            ScanState.STOPPING -> stringResource(id = R.string.ble_cd_scan_state_stopping)
+                            ScanState.NOT_SCANNING -> stringResource(id = R.string.features_ble_ble_cd_scan_state_not_scanning)
+                            ScanState.SCANNING -> stringResource(id = R.string.features_ble_ble_cd_scan_state_scanning)
+                            ScanState.STOPPING -> stringResource(id = R.string.features_ble_ble_cd_scan_state_stopping)
                         },
                         tint = when (scanState) {
                             ScanState.NOT_SCANNING -> Color.Red //MaterialTheme.colorScheme.error
@@ -100,9 +100,9 @@ fun StatusBar(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = when (scanState) {
-                            ScanState.NOT_SCANNING -> stringResource(id = R.string.ble_text_scan_state_not_scanning)
-                            ScanState.SCANNING -> stringResource(id = R.string.ble_text_scan_state_scanning)
-                            ScanState.STOPPING -> stringResource(id = R.string.ble_text_scan_state_stopping)
+                            ScanState.NOT_SCANNING -> stringResource(id = R.string.features_ble_ble_text_scan_state_not_scanning)
+                            ScanState.SCANNING -> stringResource(id = R.string.features_ble_ble_text_scan_state_scanning)
+                            ScanState.STOPPING -> stringResource(id = R.string.features_ble_ble_text_scan_state_stopping)
                         },
                         color = //MaterialTheme.colorScheme.onPrimary,
                             when (scanState) {
@@ -175,7 +175,7 @@ fun StatusBar(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(id = R.string.ble_status_bar_cd_manage_permissions), // Changed
+                            contentDescription = stringResource(id = R.string.features_ble_ble_status_bar_cd_manage_permissions), // Changed
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -194,7 +194,7 @@ fun Legend() {
 
     Column {
         Text(
-            text = stringResource(id = R.string.ble_status_bar_legend_title), // Changed
+            text = stringResource(id = R.string.features_ble_ble_status_bar_legend_title), // Changed
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(bottom = 4.dp)
@@ -208,7 +208,7 @@ fun Legend() {
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                stringResource(id = R.string.ble_status_bar_legend_granted),
+                stringResource(id = R.string.features_ble_ble_status_bar_legend_granted),
                 style = MaterialTheme.typography.bodySmall
             ) // Changed
         }
@@ -221,7 +221,7 @@ fun Legend() {
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                stringResource(id = R.string.ble_status_bar_legend_denied),
+                stringResource(id = R.string.features_ble_ble_status_bar_legend_denied),
                 style = MaterialTheme.typography.bodySmall
             ) // Changed
         }
@@ -234,7 +234,7 @@ fun Legend() {
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                stringResource(id = R.string.ble_status_bar_legend_not_requested),
+                stringResource(id = R.string.features_ble_ble_status_bar_legend_not_requested),
                 style = MaterialTheme.typography.bodySmall
             ) // Changed
         }
@@ -244,12 +244,12 @@ fun Legend() {
 @Composable
 private fun getFriendlyName(permission: String): String {
     return when (permission) {
-        android.Manifest.permission.BLUETOOTH_SCAN -> stringResource(id = R.string.ble_status_bar_perm_scan_nearby) // Changed
+        android.Manifest.permission.BLUETOOTH_SCAN -> stringResource(id = R.string.features_ble_ble_status_bar_perm_scan_nearby) // Changed
         android.Manifest.permission.BLUETOOTH_CONNECT -> stringResource(id = CoreUiR.string.action_connect)
-        android.Manifest.permission.BLUETOOTH_ADVERTISE -> stringResource(id = R.string.ble_status_bar_perm_advertise) // Changed
-        android.Manifest.permission.ACCESS_COARSE_LOCATION -> stringResource(id = R.string.ble_status_bar_perm_coarse_location) // Changed
-        android.Manifest.permission.ACCESS_FINE_LOCATION -> stringResource(id = R.string.ble_status_bar_perm_fine_location) // Changed
-        else -> stringResource(id = R.string.ble_status_bar_perm_unknown) // Changed
+        android.Manifest.permission.BLUETOOTH_ADVERTISE -> stringResource(id = R.string.features_ble_ble_status_bar_perm_advertise) // Changed
+        android.Manifest.permission.ACCESS_COARSE_LOCATION -> stringResource(id = R.string.features_ble_ble_status_bar_perm_coarse_location) // Changed
+        android.Manifest.permission.ACCESS_FINE_LOCATION -> stringResource(id = R.string.features_ble_ble_status_bar_perm_fine_location) // Changed
+        else -> stringResource(id = R.string.features_ble_ble_status_bar_perm_unknown) // Changed
     }
 }
 

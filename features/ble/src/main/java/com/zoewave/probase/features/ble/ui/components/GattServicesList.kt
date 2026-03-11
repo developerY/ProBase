@@ -84,7 +84,7 @@ fun ExpandableGattServiceCard(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = stringResource(id = R.string.ble_text_service_uuid, service.uuid),
+                        text = stringResource(id = R.string.features_ble_ble_text_service_uuid, service.uuid),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray
                     )
@@ -101,7 +101,7 @@ fun ExpandableGattServiceCard(
             if (isExpanded) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = stringResource(id = R.string.ble_title_characteristics),
+                    text = stringResource(id = R.string.features_ble_ble_title_characteristics),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -125,7 +125,7 @@ fun ExpandableGattServiceCard(
                             )
                             Text(
                                 text = stringResource(
-                                    id = R.string.ble_text_characteristic_value_label,
+                                    id = R.string.features_ble_ble_text_characteristic_value_label,
                                     characteristic.value
                                         ?: stringResource(id = CoreUiR.string.text_na)
                                 ),
@@ -163,7 +163,7 @@ fun ExpandableGattServiceCardOrig(service: DeviceService) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = stringResource(id = R.string.ble_text_service_uuid, service.uuid),
+                text = stringResource(id = R.string.features_ble_ble_text_service_uuid, service.uuid),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
@@ -171,7 +171,7 @@ fun ExpandableGattServiceCardOrig(service: DeviceService) {
             if (isExpanded) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = stringResource(id = R.string.ble_title_characteristics),
+                    text = stringResource(id = R.string.features_ble_ble_title_characteristics),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -189,7 +189,7 @@ fun ExpandableGattServiceCardOrig(service: DeviceService) {
                         )
                         Text(
                             text = stringResource(
-                                id = R.string.ble_text_characteristic_value_label,
+                                id = R.string.features_ble_ble_text_characteristic_value_label,
                                 characteristic.value ?: stringResource(id = CoreUiR.string.text_na)
                             ),
                             style = MaterialTheme.typography.bodySmall
