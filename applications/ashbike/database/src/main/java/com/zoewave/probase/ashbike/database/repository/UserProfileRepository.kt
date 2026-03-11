@@ -24,4 +24,7 @@ interface UserProfileRepository {
     suspend fun setHeight(cm: String)
     suspend fun setWeight(kg: String)
     suspend fun saveProfile(profile: ProfileData)
+
+    val isImperialFlow: Flow<Boolean>
+    suspend fun setImperial(isImperial: Boolean)
 }

@@ -19,6 +19,9 @@ private object UserPrefsDefaults {
     const val WEIGHT_DEFAULT = "72"   // kg
     const val PROFILE_REVIEWED_OR_SAVED_DEFAULT = false // Default for the new flag
 
+    // ADD THIS: Default to Metric (false)
+    const val IS_IMPERIAL_DEFAULT = false
+
     // --- New default for Location Energy Level ---
     val LOCATION_ENERGY_LEVEL_DEFAULT = LocationEnergyLevel.BALANCED.ordinal
     const val SHOW_GPS_COUNTDOWN_DEFAULT = true // Default to show the timer
@@ -32,6 +35,9 @@ private object UserPrefsKeys {
 
     // Add the new boolean key
     val PROFILE_REVIEWED_OR_SAVED = booleanPreferencesKey("profile_reviewed_or_saved_by_user")
+
+    // ADD THIS: The key to save the toggle state
+    val IS_IMPERIAL = booleanPreferencesKey("is_imperial")
 
     // --- New key for Location Energy Level (stores the ordinal as an Int) ---
     val LOCATION_ENERGY_LEVEL = intPreferencesKey("location_energy_level")
@@ -116,6 +122,19 @@ class DataStoreUserProfileRepository @Inject constructor(
             prefs[UserPrefsKeys.WEIGHT] = profile.weightKg
             // Set the reviewed/saved flag to true when profile is saved
             prefs[UserPrefsKeys.PROFILE_REVIEWED_OR_SAVED] = true
+        }
+    }
+
+    // ADD THIS: Read the Imperial setting
+    override val isImperialFlow: Flow<Boolean> = dataStore.data
+        .map { prefs ->
+            prefs[UserPrefsKeys.IS_IMPERIAL] ?: UserPrefsDefaults.IS_IMPERIAL_DEFAULT
+        }
+
+    // ADD THIS: Save the Imperial setting when the user taps the toggle
+    override suspend fun setImperial(isImperial: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[UserPrefsKeys.IS_IMPERIAL] = isImperial
         }
     }
 }

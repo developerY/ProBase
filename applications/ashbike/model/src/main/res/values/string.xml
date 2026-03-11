@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string name="applications_ashbike_model_unit_mph">mph</string>
+    <string name="applications_ashbike_model_unit_kmh">km/h</string>
+
+    <string name="applications_ashbike_model_unit_miles">mi</string>
+    <string name="applications_ashbike_model_unit_kilometers">km</string>
+
+    <string name="applications_ashbike_model_unit_feet">ft</string>
+    <string name="applications_ashbike_model_unit_meters">m</string>
+
+</resources>
