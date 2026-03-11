@@ -42,29 +42,29 @@ fun RideWithLocations.toUiModel(resources: Resources): BikeRideUiModel {
     val seconds = rideDuration.seconds % 60
 
     val durationText = if (seconds > 0) {
-        resources.getString(R.string.feature_trips_model_duration_min_sec_format, minutes, seconds)
+        resources.getString(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_model_duration_min_sec_format, minutes, seconds)
     } else {
-        resources.getString(R.string.feature_trips_model_duration_min_only_format, minutes)
+        resources.getString(R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_model_duration_min_only_format, minutes)
     }
 
     return BikeRideUiModel(
         rideId = ride.rideId,
         dateRange = resources.getString(
-            R.string.feature_trips_model_daterange_format,
+            R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_model_daterange_format,
             dateFormatter.format(startDate),
             endFormatter.format(endDate)
         ),
         duration = durationText,
         distance = resources.getString(
-            R.string.feature_trips_model_distance_format,
+            R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_model_distance_format,
             ride.totalDistance / 1000.0
         ),
         avgSpeed = resources.getString(
-            R.string.feature_trips_model_avg_speed_format,
+            R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_model_avg_speed_format,
             ride.averageSpeed
         ),
         maxSpeed = resources.getString(
-            R.string.feature_trips_model_max_speed_format,
+            R.string.applications_ashbike_apps_mobile_features_rides_feature_trips_model_max_speed_format,
             ride.maxSpeed
         ),
         rideType = ride.rideType,

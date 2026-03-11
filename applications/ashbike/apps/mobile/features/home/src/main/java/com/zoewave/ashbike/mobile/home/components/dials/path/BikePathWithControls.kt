@@ -132,12 +132,12 @@ fun BikePathWithControls(
 
         AlertDialog(
             onDismissRequest = onDismissRequest,
-            title = { Text(stringResource(R.string.bike_dialog_set_distance_title)) },
+            title = { Text(stringResource(R.string.applications_ashbike_apps_mobile_features_home_bike_dialog_set_distance_title)) },
             text = {
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
-                    label = { Text(stringResource(R.string.bike_dialog_set_distance_label)) },
+                    label = { Text(stringResource(R.string.applications_ashbike_apps_mobile_features_home_bike_dialog_set_distance_label)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
