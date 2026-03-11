@@ -19,11 +19,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.tooling.preview.devices.WearDevices
-import com.zoewave.ashbike.wear.home.R.string as HomeR
 import com.zoewave.probase.ashbike.wear.features.home.ui.BurningCalories
 import com.zoewave.probase.ashbike.wear.features.home.ui.PulsingHeartRate
 import com.zoewave.probase.ashbike.wear.features.home.ui.TappableSpeedBox
 import com.zoewave.probase.ashbike.wear.features.home.ui.WearSpeedometer
+import com.zoewave.ashbike.wear.home.R.string as HomeR
 
 
 @Composable
@@ -73,7 +73,10 @@ fun WearHomeScreen(
                 .padding(top = 12.dp)
         ) {
             Text(
-                text = stringResource(HomeR.applications_ashbike_apps_wear_features_home_distance_format_km, uiState.distanceMeters / 1000f),
+                // RIGHT: Unwrapping the pre-formatted string and the unit!
+
+                    text = "${uiState.distance.value} ${stringResource(id = uiState.distance.unitResId)}",
+
                 style = MaterialTheme.typography.titleSmall,
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 2.dp)

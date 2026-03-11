@@ -21,7 +21,7 @@ fun SpeedometerWithCompassOverlay(
 ) {
     Box(modifier = modifier) {
         // 1) The main speedometer
-        _root_ide_package_.com.zoewave.ashbike.mobile.home.components.dials.FancySpeedometer(
+       FancySpeedometer(
             currentSpeed = currentSpeed,
             maxSpeed = maxSpeed,
             modifier = Modifier.fillMaxSize(),

@@ -13,6 +13,9 @@ android {
 
 dependencies {
     implementation(project(":core:model"))
+
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
     // --- 1. Serialization ---
     // Allows BikeRide to be converted to JSON or passed in Navigation 3
     implementation(libs.kotlinx.serialization.json)

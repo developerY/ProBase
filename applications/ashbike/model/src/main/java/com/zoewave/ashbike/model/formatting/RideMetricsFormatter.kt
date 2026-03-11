@@ -1,8 +1,10 @@
 package com.zoewave.ashbike.model.formatting
 
 import com.zoewave.ashbike.model.R
+import javax.inject.Inject
 
-class RideMetricsFormatter {
+// 2. Add @Inject constructor() right here
+class RideMetricsFormatter @Inject constructor() {
 
     fun formatSpeed(speedKmh: Float, isImperial: Boolean): DisplayMetric {
         return if (isImperial) {

@@ -20,7 +20,7 @@ private object UserPrefsDefaults {
     const val PROFILE_REVIEWED_OR_SAVED_DEFAULT = false // Default for the new flag
 
     // ADD THIS: Default to Metric (false)
-    const val IS_IMPERIAL_DEFAULT = false
+    const val IS_IMPERIAL_DEFAULT = true
 
     // --- New default for Location Energy Level ---
     val LOCATION_ENERGY_LEVEL_DEFAULT = LocationEnergyLevel.BALANCED.ordinal
@@ -134,7 +134,7 @@ class DataStoreUserProfileRepository @Inject constructor(
     // ADD THIS: Save the Imperial setting when the user taps the toggle
     override suspend fun setImperial(isImperial: Boolean) {
         dataStore.edit { prefs ->
-            prefs[UserPrefsKeys.IS_IMPERIAL] = isImperial
+            prefs[UserPrefsKeys.IS_IMPERIAL] = true
         }
     }
 }

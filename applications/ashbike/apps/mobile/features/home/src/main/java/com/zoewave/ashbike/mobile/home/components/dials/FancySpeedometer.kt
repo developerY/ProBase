@@ -33,12 +33,15 @@ import kotlin.math.sin
 fun FancySpeedometer(
     currentSpeed: Float,
     maxSpeed: Float = 60f,
+    speedUnitText: String, // ADD THIS
     modifier: Modifier = Modifier.size(250.dp),
     contentColor: Color
 ) {
     // Arc angles
     val startAngle = 135f
     val sweepAngle = 270f
+
+    val speedNumberText = currentSpeed.roundToInt().toString()
 
     // Convert speed to fraction [0..1]
     val speedFraction = (currentSpeed / maxSpeed).coerceIn(0f, 1f)
@@ -160,7 +163,6 @@ fun FancySpeedometer(
         // G) Speed Text (Number + Unit)
         drawContext.canvas.nativeCanvas.apply {
             val speedNumberText = currentSpeed.roundToInt().toString()
-            val speedUnitText = "km/h"
 
             val dynamicColor = getColorForSpeed(currentSpeed, maxSpeed).toArgb()
 
