@@ -26,13 +26,13 @@ fun NfcNotSupportedScreen(onRetry: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(id = R.string.nfc_not_supported_message),
+            text = stringResource(id = R.string.features_nfc_nfc_not_supported_message),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.error
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onRetry) {
-            Text(stringResource(id = R.string.nfc_action_retry))
+            Text(stringResource(id = R.string.features_nfc_nfc_action_retry))
         }
     }
 }
