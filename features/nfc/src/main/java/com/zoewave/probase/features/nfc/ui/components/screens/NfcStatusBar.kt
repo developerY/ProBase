@@ -22,25 +22,25 @@ import com.zoewave.probase.features.nfc.ui.NfcUiState
 @Composable
 fun NfcStatusBar(uiState: NfcUiState) {
     val statusMessage = when (uiState) {
-        is NfcUiState.NfcNotSupported -> stringResource(R.string.nfc_status_not_supported)
-        is NfcUiState.NfcDisabled -> stringResource(R.string.nfc_status_disabled)
-        is NfcUiState.Stopped -> stringResource(R.string.nfc_status_ready_not_scanning)
-        is NfcUiState.WaitingForTag -> stringResource(R.string.nfc_status_waiting_for_tag)
-        is NfcUiState.TagScanned -> stringResource(R.string.nfc_status_tag_scanned)
-        is NfcUiState.Loading -> stringResource(R.string.nfc_status_loading)
-        is NfcUiState.Error -> stringResource(R.string.nfc_status_error, uiState.message)
-        is NfcUiState.WriteError -> stringResource(R.string.nfc_status_write_error, uiState.error)
+        is NfcUiState.NfcNotSupported -> stringResource(R.string.features_nfc_nfc_status_not_supported)
+        is NfcUiState.NfcDisabled -> stringResource(R.string.features_nfc_nfc_status_disabled)
+        is NfcUiState.Stopped -> stringResource(R.string.features_nfc_nfc_status_ready_not_scanning)
+        is NfcUiState.WaitingForTag -> stringResource(R.string.features_nfc_nfc_status_waiting_for_tag)
+        is NfcUiState.TagScanned -> stringResource(R.string.features_nfc_nfc_status_tag_scanned)
+        is NfcUiState.Loading -> stringResource(R.string.features_nfc_nfc_status_loading)
+        is NfcUiState.Error -> stringResource(R.string.features_nfc_nfc_status_error, uiState.message)
+        is NfcUiState.WriteError -> stringResource(R.string.features_nfc_nfc_status_write_error, uiState.error)
         is NfcUiState.WriteSuccess -> stringResource(
-            R.string.nfc_status_write_success,
+            R.string.features_nfc_nfc_status_write_success,
             uiState.message
         )
 
-        NfcUiState.Writing -> stringResource(R.string.nfc_status_writing_to_tag)
+        NfcUiState.Writing -> stringResource(R.string.features_nfc_nfc_status_writing_to_tag)
     }
 
     Row(modifier = Modifier.padding(8.dp)) {
         Text(
-            text = stringResource(R.string.nfc_status_label),
+            text = stringResource(R.string.features_nfc_nfc_status_label),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(end = 4.dp)
         )
