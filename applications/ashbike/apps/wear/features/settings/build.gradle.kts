@@ -65,6 +65,11 @@ dependencies {
     // --- Collections ---
     implementation(libs.kotlinx.collections.immutable)
 
+    // --- Preview Support ---
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.wear.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+
     // --- Hilt Dependency Injection ---
     implementation(libs.hilt.navigation.compose)
     implementation(libs.hilt.android)
