@@ -1,6 +1,7 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
+    <inspection_tool class="8cfdc69b-f6ff-386c-95e8-9c65fc60d75f" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ComposePreviewDimensionRespectsLimit" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="composableFile" value="true" />
       <option name="previewFile" value="true" />
@@ -56,6 +57,13 @@
     <inspection_tool class="PreviewPickerAnnotation" enabled="true" level="ERROR" enabled_by_default="true">
       <option name="composableFile" value="true" />
       <option name="previewFile" value="true" />
+    </inspection_tool>
+    <inspection_tool class="SSBasedInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <searchConfiguration name="HardCodeName" description="Find all hard coded names" problemDescriptor="hard coded strings" text="$func$(&quot;$text$&quot;)" recursive="true" caseInsensitive="false" type="Kotlin" pattern_context="default">
+        <constraint name="__context__" within="" contains="" />
+        <constraint name="func" within="" contains="" />
+        <constraint name="text" within="" contains="" />
+      </searchConfiguration>
     </inspection_tool>
   </profile>
 </component>
