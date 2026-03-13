@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,8 +53,27 @@ fun WearSettingsPage(
             }
         }
 
-        // --- Tracking Settings ---
         item {
+            Chip(
+                label = { Text("About AshBike") },
+                secondaryLabel = { Text("Version 1.0.0") }, // Hardcode for V1, or fetch from BuildConfig
+                onClick = {
+                    // TODO: Trigger navigation to the About Screen
+                    onNavigateToAbout()
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Info,
+                        contentDescription = "About icon"
+                    )
+                },
+                colors = ChipDefaults.secondaryChipColors(),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        // --- Tracking Settings ---
+        /*item {
             ToggleChip(
                 modifier = Modifier.fillMaxWidth(),
                 checked = isAutoPauseEnabled,
@@ -144,7 +164,7 @@ fun WearSettingsPage(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
-        }
+        }*/
 
 
 
