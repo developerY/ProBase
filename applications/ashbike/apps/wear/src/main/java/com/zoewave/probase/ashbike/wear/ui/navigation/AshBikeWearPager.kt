@@ -25,6 +25,7 @@ import com.zoewave.probase.ashbike.wear.features.settings.WearSettingsRoute
 fun AshBikeWearPager(
     onNavigateToRideDetail: (String) -> Unit,
     onNavigateToExperiments: () -> Unit,
+    onNavigateToAbout: () -> Unit // 1. Added the callback here
 ) {
     // 1. The state that controls the actual swipeable pager
     val pagerState = rememberPagerState(pageCount = { 3 })
@@ -53,6 +54,7 @@ fun AshBikeWearPager(
                 0 -> WearHomeScreen()
                 1 -> RideHistoryRoute { rideId -> onNavigateToRideDetail(rideId) }
                 2 -> WearSettingsRoute(
+                    onNavigateToAbout = onNavigateToAbout, // 2. Passed it to the Settings Route
                     onNavigateToEBikeSetup = {/* Handle this later */ },
                     onNavigateToExperiments = onNavigateToExperiments
                 )

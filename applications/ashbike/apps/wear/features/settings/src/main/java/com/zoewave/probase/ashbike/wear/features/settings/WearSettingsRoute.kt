@@ -5,24 +5,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
+
 @Composable
 fun WearSettingsRoute(
     viewModel: SettingsViewModel = hiltViewModel(),
+    onNavigateToAbout: () -> Unit, // Add this so the Route can tell the NavGraph to move
     onNavigateToEBikeSetup: () -> Unit = {},
-    onNavigateToExperiments: () -> Unit
+    onNavigateToExperiments: () -> Unit = {}
 ) {
-    // Collecting state from DataStore via the ViewModel
-    val isAutoPause by viewModel.isAutoPauseEnabled.collectAsState(initial = false)
-    val isMetric by viewModel.isMetricUnits.collectAsState(initial = true)
-    val isHealthSync by viewModel.isHealthConnectEnabled.collectAsState(initial = false)
+    // 1. Collect the single source of truth from the ViewModel
+    val uiState by viewModel.uiState.collectAsState()
 
+    // 2. Pass everything down to the dumb UI
     WearSettingsPage(
-        isAutoPauseEnabled = isAutoPause,
-        onAutoPauseToggled = { viewModel.setAutoPause(it) },
-        isMetricUnits = isMetric,
-        onMetricUnitsToggled = { viewModel.setMetricUnits(it) },
-        isHealthConnectEnabled = isHealthSync,
-        onHealthConnectToggled = { viewModel.setHealthConnect(it) },
+        uiState = uiState,
+        onEvent = viewModel::onEvent, // Neatly passes all toggle events to the ViewModel
+        onNavigateToAbout = onNavigateToAbout,
         onManageEBikeClick = onNavigateToEBikeSetup,
         onNavigateToExperiments = onNavigateToExperiments
     )

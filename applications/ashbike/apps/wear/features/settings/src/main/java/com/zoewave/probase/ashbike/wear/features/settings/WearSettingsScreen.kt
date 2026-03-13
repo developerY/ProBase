@@ -4,24 +4,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ElectricBike
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Science
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.ChipDefaults
-import androidx.wear.compose.material.CompactChip
-import androidx.wear.compose.material.Switch
-import androidx.wear.compose.material.ToggleChip
 import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.MaterialTheme
@@ -29,18 +20,14 @@ import androidx.wear.compose.material3.Text
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.zoewave.ashbike.wear.settings.R
 
-
 @Composable
 fun WearSettingsPage(
-    modifier: Modifier = Modifier,
-    isHealthConnectEnabled: Boolean,
-    onHealthConnectToggled: (Boolean) -> Unit,
-    isMetricUnits: Boolean,
-    onMetricUnitsToggled: (Boolean) -> Unit,
-    isAutoPauseEnabled: Boolean,
-    onAutoPauseToggled: (Boolean) -> Unit,
+    uiState: SettingsUiState,
+    onEvent: (SettingsEvent) -> Unit,
+    onNavigateToAbout: () -> Unit,
     onManageEBikeClick: () -> Unit,
-    onNavigateToExperiments:  () -> Unit
+    onNavigateToExperiments: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     ScalingLazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -49,18 +36,19 @@ fun WearSettingsPage(
         // --- Header ---
         item {
             ListHeader {
-                Text(text = stringResource(R.string.applications_ashbike_apps_wear_features_settings_settings_title), style = MaterialTheme.typography.titleMedium)//.title3)
+                Text(
+                    text = stringResource(R.string.applications_ashbike_apps_wear_features_settings_settings_title),
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
 
+        // --- V1 Active Settings ---
         item {
             Chip(
                 label = { Text("About AshBike") },
-                secondaryLabel = { Text("Version 1.0.0") }, // Hardcode for V1, or fetch from BuildConfig
-                onClick = {
-                    // TODO: Trigger navigation to the About Screen
-                    onNavigateToAbout()
-                },
+                secondaryLabel = { Text("Version 1.0.0") },
+                onClick = onNavigateToAbout, // Wired up the navigation!
                 icon = {
                     Icon(
                         imageVector = Icons.Rounded.Info,
@@ -72,19 +60,20 @@ fun WearSettingsPage(
             )
         }
 
+        // ==========================================
+        // --- FUTURE WORK (Stashed for V1.1) ---
+        // ==========================================
+        /*
         // --- Tracking Settings ---
-        /*item {
+        item {
             ToggleChip(
                 modifier = Modifier.fillMaxWidth(),
-                checked = isAutoPauseEnabled,
-                onCheckedChange = onAutoPauseToggled,
+                checked = uiState.isAutoPauseEnabled,
+                onCheckedChange = { onEvent(SettingsEvent.ToggleAutoPause(it)) },
                 label = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_auto_pause_label)) },
                 secondaryLabel = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_auto_pause_description), color = Color.Gray) },
                 toggleControl = {
-                    Switch(
-                        checked = isAutoPauseEnabled,
-                        onCheckedChange = null // Handled by the parent chip
-                    )
+                    Switch(checked = uiState.isAutoPauseEnabled, onCheckedChange = null)
                 },
                 appIcon = {
                     Icon(imageVector = Icons.Default.Timer, contentDescription = stringResource(R.string.applications_ashbike_apps_wear_features_settings_timer_icon_description))
@@ -96,17 +85,18 @@ fun WearSettingsPage(
         item {
             ToggleChip(
                 modifier = Modifier.fillMaxWidth(),
-                checked = isMetricUnits,
-                onCheckedChange = onMetricUnitsToggled,
+                checked = uiState.isMetricUnits,
+                onCheckedChange = { onEvent(SettingsEvent.ToggleMetricUnits(it)) },
                 label = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_use_metric_label)) },
                 secondaryLabel = {
                     Text(
-                        if (isMetricUnits) stringResource(R.string.applications_ashbike_apps_wear_features_settings_metric_units_description) else stringResource(R.string.applications_ashbike_apps_wear_features_settings_imperial_units_description),
+                        if (uiState.isMetricUnits) stringResource(R.string.applications_ashbike_apps_wear_features_settings_metric_units_description)
+                        else stringResource(R.string.applications_ashbike_apps_wear_features_settings_imperial_units_description),
                         color = Color.Gray
                     )
                 },
                 toggleControl = {
-                    Switch(checked = isMetricUnits, onCheckedChange = null)
+                    Switch(checked = uiState.isMetricUnits, onCheckedChange = null)
                 },
                 appIcon = {
                     Icon(imageVector = Icons.Default.Speed, contentDescription = stringResource(R.string.applications_ashbike_apps_wear_features_settings_units_icon_description))
@@ -118,18 +108,18 @@ fun WearSettingsPage(
         item {
             ToggleChip(
                 modifier = Modifier.fillMaxWidth(),
-                checked = isHealthConnectEnabled,
-                onCheckedChange = onHealthConnectToggled,
+                checked = uiState.isHealthConnectEnabled,
+                onCheckedChange = { onEvent(SettingsEvent.ToggleHealthConnect(it)) },
                 label = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_health_connect_label)) },
                 secondaryLabel = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_health_connect_description), color = Color.Gray) },
                 toggleControl = {
-                    Switch(checked = isHealthConnectEnabled, onCheckedChange = null)
+                    Switch(checked = uiState.isHealthConnectEnabled, onCheckedChange = null)
                 },
                 appIcon = {
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         contentDescription = stringResource(R.string.applications_ashbike_apps_wear_features_settings_health_icon_description),
-                        tint = if (isHealthConnectEnabled) Color.Red else Color.Gray
+                        tint = if (uiState.isHealthConnectEnabled) Color.Red else Color.Gray
                     )
                 }
             )
@@ -150,10 +140,9 @@ fun WearSettingsPage(
         }
 
         // --- The Entry to the Experimental Hub ---
-        // Put this as the absolute last item in the list
         item {
             CompactChip(
-                onClick = onNavigateToExperiments, // Triggers Nav3 to push the new screen over the pager
+                onClick = onNavigateToExperiments,
                 label = { Text(stringResource(R.string.applications_ashbike_apps_wear_features_settings_ashbike_labs_label), color = Color.Gray) },
                 icon = {
                     Icon(
@@ -164,10 +153,8 @@ fun WearSettingsPage(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
-        }*/
-
-
-
+        }
+        */
     }
 }
 
@@ -189,12 +176,9 @@ fun WearSettingsPage(
 fun WearSettingsPagePreview() {
     MaterialTheme {
         WearSettingsPage(
-            isHealthConnectEnabled = true,
-            onHealthConnectToggled = {},
-            isMetricUnits = true,
-            onMetricUnitsToggled = {},
-            isAutoPauseEnabled = false,
-            onAutoPauseToggled = {},
+            uiState = SettingsUiState(), // Pass the default dummy state
+            onEvent = {},
+            onNavigateToAbout = {},
             onManageEBikeClick = {},
             onNavigateToExperiments = {}
         )
