@@ -12,7 +12,7 @@ android {
     namespace = "com.zoewave.probase.ashbike.wear"
 
     defaultConfig {
-        applicationId = "com.zoewave.probase.ashbike.mobile"
+        applicationId = "com.zoewave.probase.ashbike"
         versionCode = 1
         versionName = "1.0"
 
