@@ -19,5 +19,8 @@ sealed interface AshBikeRoute {
         data object Elevation : Info
         data object HrGraph : Info
         data object RideMap : Info
+
+        // 1. ADDED THIS: The new static About route!
+        data object About : Info
     }
 }

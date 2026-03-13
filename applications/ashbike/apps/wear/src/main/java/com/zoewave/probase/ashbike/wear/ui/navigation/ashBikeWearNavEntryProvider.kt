@@ -1,12 +1,13 @@
 package com.zoewave.probase.ashbike.wear.ui.navigation
 
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.probase.ashbike.wear.features.rides.ui.detail.RideDetailRoute
 import com.zoewave.probase.ashbike.wear.features.rides.ui.dash.FeatureHubScreen
+import com.zoewave.probase.ashbike.wear.features.rides.ui.detail.RideDetailRoute
 import com.zoewave.probase.ashbike.wear.features.rides.ui.graphs.ElevationProfileScreen
 import com.zoewave.probase.ashbike.wear.features.rides.ui.health.WeeklyHeartRateGraphScreen
 import com.zoewave.probase.ashbike.wear.features.rides.ui.maps.WearRideMapRoute
 import com.zoewave.probase.ashbike.wear.features.rides.ui.weather.PreRideWeatherScreen
+import com.zoewave.probase.ashbike.wear.features.settings.ui.AboutScreen
 import com.zoewave.probase.ashbike.wear.ui.navigation.AshBikeRoute.Core.RideDetail
 import com.zoewave.probase.ashbike.wear.ui.navigation.AshBikeRoute.Core.RideMap
 
@@ -23,7 +24,9 @@ fun ashBikeWearNavEntryProvider(
                 AshBikeWearPager(
                     onNavigateToRideDetail = { rideId -> navigateTo(RideDetail(rideId)) },
                     // Add a button somewhere in the pager to open the hub
-                    onNavigateToExperiments = { navigateTo(AshBikeRoute.Info.FeatureHub) }
+                    onNavigateToExperiments = { navigateTo(AshBikeRoute.Info.FeatureHub) },
+                    // Add a button somewhere in the pager to open the hub
+                    onNavigateToAbout = { navigateTo(AshBikeRoute.Info.About) }
                 )
             }
             is RideDetail -> {
@@ -58,6 +61,7 @@ fun ashBikeWearNavEntryProvider(
             is AshBikeRoute.Info.Elevation -> ElevationProfileScreen(locations = emptyList())
             is AshBikeRoute.Info.HrGraph -> WeeklyHeartRateGraphScreen(weeklyData = emptyList())
             AshBikeRoute.Info.RideMap -> TODO()
+            AshBikeRoute.Info.About -> AboutScreen()
         }
     }
 }
