@@ -2,7 +2,7 @@
     <string name="applications_ashbike_apps_wear_features_home_past_rides">Past Rides</string>
     <string name="applications_ashbike_apps_wear_features_home_settings">Settings</string>
     <string name="applications_ashbike_apps_wear_features_home_speed_unit_kmh">km/h</string>
-    <string name="applications_ashbike_apps_wear_features_home_distance_format_km">%1$.2f km</string>
+    <string name="applications_ashbike_apps_wear_features_home_distance_format_km">%1$.1f km</string>
     <string name="applications_ashbike_apps_wear_features_home_heart_rate_icon_description">Heart Rate</string>
     <string name="applications_ashbike_apps_wear_features_home_calories_icon_description">Calories</string>
     <string name="applications_ashbike_apps_wear_features_home_metabolism_icon_description">Metabolism</string>
