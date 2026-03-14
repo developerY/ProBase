@@ -74,3 +74,4 @@ include(":applications:photodo:model")
 include(":applications:photodo:apps:mobile")
 include(":applications:photodo:db")
 
+include(":applications:photodo:apps:mobile:features:tasks")

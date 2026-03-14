@@ -49,6 +49,7 @@
             <option value="$PROJECT_DIR$/applications/photodo/apps/mobile" />
             <option value="$PROJECT_DIR$/applications/photodo/apps/mobile/features" />
             <option value="$PROJECT_DIR$/applications/photodo/apps/mobile/features/home" />
+            <option value="$PROJECT_DIR$/applications/photodo/apps/mobile/features/tasks" />
             <option value="$PROJECT_DIR$/applications/photodo/db" />
             <option value="$PROJECT_DIR$/applications/photodo/model" />
             <option value="$PROJECT_DIR$/build-logic" />
