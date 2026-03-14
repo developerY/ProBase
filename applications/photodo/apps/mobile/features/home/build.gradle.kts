@@ -15,10 +15,10 @@ android {
 
 dependencies {
     // --- Shared Core Projects ---
-    implementation(project(":core:model"))
-    implementation(project(":core:ui"))
-    implementation(project(":core:network"))
-    implementation(project(":core:data"))
+    // implementation(project(":core:model"))
+    // implementation(project(":core:ui"))
+    // implementation(project(":core:network"))
+    // implementation(project(":core:data"))
     implementation(project(":applications:photodo:model"))
 
     // --- Serialization (The backbone of Nav3) ---
