@@ -89,7 +89,7 @@ dependencies {
     // implementation(project(":core:database")) // Uncomment if needed
 
     // --- PhotoTodo Specific Features ---
-    // implementation(project(":applications:photodo:features:home"))
+    implementation(project(":applications:photodo:apps:mobile:features:home"))
     // implementation(project(":applications:photodo:features:tasks"))
     // implementation(project(":applications:photodo:features:settings"))
 
