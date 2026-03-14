@@ -74,16 +74,6 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name="com.zoewave.probase.ashbike.mobile.data.sync.RideSyncListenerService"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
-
-                <data android:scheme="wear" android:host="*" android:pathPrefix="/completed_ride/" />
-            </intent-filter>
-        </service>
-
         <activity
             android:name="com.zoewave.ashbike.mobile.glass.GlassesMainActivity"
             android:exported="true"

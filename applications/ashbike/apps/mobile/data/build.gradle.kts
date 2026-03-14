@@ -6,7 +6,7 @@ plugins {
 
 android {
     // Unique namespace for the mobile hardware/data layer
-    namespace = "com.zoewave.ashbike.mobile.data.sensor"
+    namespace = "com.zoewave.probase.ashbike.mobile.data"
 }
 
 dependencies {
@@ -31,7 +31,7 @@ dependencies {
 
     // --- Coroutines ---
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.google.play.services.wearable)
+    api(libs.google.play.services.wearable)
 
     implementation(libs.squareup.retrofit.converter.gson)
     implementation((libs.kotlinx.coroutines.play.services))
