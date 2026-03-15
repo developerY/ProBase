@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiRoute
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksListUiRoute
 
 //import com.zoewave.probase.photodo.features.home.ui.HomeScreen
 //import com.zoewave.probase.photodo.features.settings.ui.SettingsScreen
@@ -31,10 +32,7 @@ fun photoTodoNavEntryProvider(
 
             is PhotoTodoRoute.TasksList -> {
                 // val viewModel: TasksViewModel = hiltViewModel()
-                Text("Lists")
-                /*TasksListScreen(
-                    modifier = Modifier.fillMaxSize()
-                )*/
+                TasksListUiRoute()
             }
 
             is PhotoTodoRoute.Settings -> {

@@ -11,7 +11,7 @@ plugins {
 
 android {
     // Unique namespace for the PhotoTodo Tasks Feature
-    namespace = "com.zoewave.probase.photodo.features.tasks"
+    namespace = "com.zoewave.probase.photodo.mobile.features.tasks"
 }
 
 dependencies {

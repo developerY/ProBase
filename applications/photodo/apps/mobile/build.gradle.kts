@@ -90,6 +90,7 @@ dependencies {
 
     // --- PhotoTodo Specific Features ---
     implementation(project(":applications:photodo:apps:mobile:features:home"))
+    implementation(project(":applications:photodo:apps:mobile:features:tasks"))
     // implementation(project(":applications:photodo:features:tasks"))
     // implementation(project(":applications:photodo:features:settings"))
 
