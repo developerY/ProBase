@@ -14,7 +14,7 @@ interface PhotoDoRepo {
 
     // --- Category Operations ---
 
-    suspend fun insertCategory(category: CategoryEntity)
+    suspend fun insertCategory(category: CategoryEntity): Long
 
     suspend fun deleteCategory(category: CategoryEntity)
 
@@ -27,7 +27,7 @@ interface PhotoDoRepo {
 
     // --- TaskList Operations ---
 
-    suspend fun insertTaskList(taskList: TaskListEntity)
+    suspend fun insertTaskList(taskList: TaskListEntity): Long
 
     suspend fun deleteTaskList(taskList: TaskListEntity)
 
