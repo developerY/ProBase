@@ -17,6 +17,20 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PhotoDoDao {
 
+    // -- Delete A!!
+
+    @Query("DELETE FROM photos")
+    suspend fun clearPhotos()
+
+    @Query("DELETE FROM task_items")
+    suspend fun clearTaskItems()
+
+    @Query("DELETE FROM task_lists")
+    suspend fun clearTaskLists()
+
+    @Query("DELETE FROM categories")
+    suspend fun clearCategories()
+
     // --- Category Operations ---
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

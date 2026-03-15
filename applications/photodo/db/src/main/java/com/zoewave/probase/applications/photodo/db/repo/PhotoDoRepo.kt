@@ -59,4 +59,7 @@ interface PhotoDoRepo {
 
     fun getTaskListWithPhotos(listId: Long): Flow<TaskListWithPhotos?>
 
+    // ✅ Promoted to production contract
+    suspend fun clearAllData()
+
 }
