@@ -1,5 +1,6 @@
 package com.zoewave.probase.applications.photodo.db.repo
 
+import android.util.Log
 import com.zoewave.probase.applications.photodo.db.PhotoDoDao
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
@@ -88,5 +89,14 @@ class PhotoDoRepoImpl @Inject constructor(
 
     override fun getTaskListWithPhotos(listId: Long): Flow<TaskListWithPhotos?> {
         return photoDoDao.getTaskListWithPhotos(listId)
+    }
+
+    override suspend fun clearAllData() {
+        // Delete from the bottom of the tree up to the root
+        Log.d("PhotoDoRepoImpl", "Cleared all data")
+        photoDoDao.clearPhotos()
+        photoDoDao.clearTaskItems()
+        photoDoDao.clearTaskLists()
+        photoDoDao.clearCategories()
     }
 }
