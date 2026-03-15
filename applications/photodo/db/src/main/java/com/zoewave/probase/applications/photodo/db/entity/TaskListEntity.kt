@@ -2,6 +2,7 @@ package com.zoewave.probase.applications.photodo.db.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -13,7 +14,9 @@ import androidx.room.PrimaryKey
             childColumns = ["categoryId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    // ✅ ADD THIS: Prevents full table scans during cascade deletes/updates
+    indices = [Index(value = ["categoryId"])]
 )
 data class TaskListEntity(
     @PrimaryKey(autoGenerate = true)
