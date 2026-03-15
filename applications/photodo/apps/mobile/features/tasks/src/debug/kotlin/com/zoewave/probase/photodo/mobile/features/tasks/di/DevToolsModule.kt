@@ -1,0 +1,15 @@
+package com.zoewave.probase.photodo.mobile.features.tasks.di
+
+import com.zoewave.probase.photodo.mobile.features.tasks.domain.DebugTaskDevTools
+import com.zoewave.probase.photodo.mobile.features.tasks.domain.TaskDevTools
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
+
+@Module
+@InstallIn(ViewModelComponent::class)
+abstract class DevToolsModule {
+    @Binds
+    abstract fun bindDevTools(impl: DebugTaskDevTools): TaskDevTools
+}

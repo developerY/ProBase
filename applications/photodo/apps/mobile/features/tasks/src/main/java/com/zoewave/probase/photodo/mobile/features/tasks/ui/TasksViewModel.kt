@@ -2,6 +2,7 @@ package com.zoewave.probase.photodo.mobile.features.tasks.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.photodo.mobile.features.tasks.domain.TaskDevTools
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TasksViewModel @Inject constructor(
     // private val repo: PhotoDoRepo
+    private val devTools: TaskDevTools // Inject the interface
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TasksUiState())
@@ -32,6 +34,11 @@ class TasksViewModel @Inject constructor(
         when (event) {
             is TasksEvent.OnAddRandomTaskClicked -> insertRandomTask()
             is TasksEvent.OnTaskToggled -> updateTask(event.taskId, event.isCompleted)
+            is TasksEvent.OnGenerateFullMockDataClicked -> {
+                viewModelScope.launch {
+                    devTools.seedDatabase() // Delegate entirely
+                }
+            }
         }
     }
 
