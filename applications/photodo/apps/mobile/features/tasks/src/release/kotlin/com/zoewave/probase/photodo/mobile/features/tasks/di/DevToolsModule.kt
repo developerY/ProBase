@@ -9,7 +9,7 @@ import dagger.hilt.android.components.ViewModelComponent
 
 @Module
 @InstallIn(ViewModelComponent::class)
-abstract class DevToolsModuleRel {
+abstract class DevToolsModule {
     @Binds
     abstract fun bindDevTools(impl: ReleaseTaskDevTools): TaskDevTools
 }
