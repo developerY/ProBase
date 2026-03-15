@@ -34,7 +34,7 @@ interface PhotoDoDao {
     // --- Category Operations ---
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCategory(category: CategoryEntity)
+    suspend fun insertCategory(category: CategoryEntity) : Long // <-- Returns the ID
 
     @Delete
     suspend fun deleteCategory(category: CategoryEntity)
@@ -48,7 +48,7 @@ interface PhotoDoDao {
     // --- TaskList Operations ---
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTaskList(taskList: TaskListEntity)
+    suspend fun insertTaskList(taskList: TaskListEntity) : Long // <-- Returns the ID
 
     @Delete
     suspend fun deleteTaskList(taskList: TaskListEntity)

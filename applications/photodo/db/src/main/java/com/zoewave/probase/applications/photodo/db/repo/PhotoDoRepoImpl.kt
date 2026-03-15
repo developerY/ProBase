@@ -16,8 +16,8 @@ class PhotoDoRepoImpl @Inject constructor(
 
     // --- Category Operations ---
 
-    override suspend fun insertCategory(category: CategoryEntity) {
-        photoDoDao.insertCategory(category)
+    override suspend fun insertCategory(category: CategoryEntity): Long {
+        return photoDoDao.insertCategory(category)
     }
 
     override suspend fun deleteCategory(category: CategoryEntity) {
@@ -38,8 +38,8 @@ class PhotoDoRepoImpl @Inject constructor(
 
     // --- TaskList Operations ---
 
-    override suspend fun insertTaskList(taskList: TaskListEntity) {
-        photoDoDao.insertTaskList(taskList)
+    override suspend fun insertTaskList(taskList: TaskListEntity) : Long {
+        return photoDoDao.insertTaskList(taskList)
     }
 
     override suspend fun deleteTaskList(taskList: TaskListEntity) {
