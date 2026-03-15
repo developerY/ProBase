@@ -5,7 +5,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.ylabz.basepro.core.model.bike.LocationEnergyLevel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -28,7 +27,6 @@ interface AppSettingsRepository {
     val languageFlow: Flow<String>
     val notificationsFlow: Flow<String>
     val unitsFlow: Flow<String> // Added Units Flow
-    val gpsAccuracyFlow: Flow<LocationEnergyLevel>
     val longRideEnabledFlow: Flow<Boolean> // Added Long Ride Flow
 
     suspend fun setTheme(theme: String)
@@ -57,18 +55,6 @@ class DataStoreAppSettingsRepository @Inject constructor(
     override val unitsFlow: Flow<String> = dataStore.data // Added Units Flow implementation
         .map { it[SettingsPrefsKeys.UNITS] ?: "Metric (SI)" } // Defaulting to Metric
 
-    override val gpsAccuracyFlow: Flow<LocationEnergyLevel> = dataStore.data
-        .map { preferences ->
-            val accuracyString =
-                preferences[SettingsPrefsKeys.GPS_ACCURACY] ?: LocationEnergyLevel.BALANCED.name
-            try {
-                LocationEnergyLevel.valueOf(accuracyString)
-            } catch (e: IllegalArgumentException) {
-                // If the stored string is not a valid enum member, default to BALANCED.
-                // This handles potential data corruption or older invalid values.
-                LocationEnergyLevel.BALANCED
-            }
-        }
 
     override val longRideEnabledFlow: Flow<Boolean> =
         dataStore.data // Added Long Ride Flow implementation
