@@ -34,8 +34,6 @@ fun PhotoDoMainScreen() {
             )
         }
     ) { innerPadding ->
-
-
         NavDisplay(
             backStack = backStack,
             modifier = Modifier.padding(innerPadding),
@@ -44,6 +42,7 @@ fun PhotoDoMainScreen() {
                 // ✅ DELEGATE: Call the provider function
                 photoTodoNavEntryProvider(
                     key = key,
+                    navigateBack = { backStack.removeLastOrNull() },
                     navigateTo = { dest ->
                         if (dest != backStack.lastOrNull()) {
                             backStack.add(dest)
