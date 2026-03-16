@@ -75,11 +75,40 @@ class TasksViewModel @Inject constructor(
                 }
             }
             is TasksEvent.OnSaveDraftClicked -> saveDraftToDatabase()
-            TasksEvent.OnAddCategoryClicked -> TODO()
-            TasksEvent.OnAddListClicked -> TODO()
-            TasksEvent.OnAddPhotoClicked -> TODO()
-            TasksEvent.OnAddTaskItemClicked -> TODO()
-            TasksEvent.OnDismissBottomSheet -> TODO()
+
+
+
+            // 🟢 OPEN SHEETS (Triggered by the new FAB Menu)
+            is TasksEvent.OnAddCategoryClicked -> {
+                _uiState.update { it.copy(isAddCategorySheetOpen = true) }
+            }
+            is TasksEvent.OnAddListClicked -> {
+                _uiState.update { it.copy(isAddListSheetOpen = true) }
+            }
+            is TasksEvent.OnAddTaskItemClicked -> {
+                _uiState.update { it.copy(isAddTaskItemSheetOpen = true) }
+            }
+            is TasksEvent.OnAddPhotoClicked -> {
+                _uiState.update { it.copy(isAddPhotoSheetOpen = true) }
+            }
+
+            // 🔴 CLOSE SHEETS (Triggered by swipe-to-dismiss or tapping outside)
+            is TasksEvent.OnDismissBottomSheet -> {
+                _uiState.update {
+                    it.copy(
+                        isAddCategorySheetOpen = false,
+                        isAddListSheetOpen = false,
+                        isAddTaskItemSheetOpen = false,
+                        isAddPhotoSheetOpen = false
+                    )
+                }
+            }
+
+            // 💾 Save Execution
+            is TasksEvent.OnSaveDraftClicked -> {
+                saveDraftToDatabase()
+                onEvent(TasksEvent.OnDismissBottomSheet) // Close sheets automatically after saving!
+            }
         }
     }
 
