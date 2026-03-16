@@ -1,20 +1,15 @@
 package com.zoewave.probase.photodo.mobile.features.tasks.ui.components
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.FormatListBulleted
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButtonMenu
@@ -37,33 +32,39 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun TasksListScreen(
-    uiState: TasksUiState,
+fun TaskDetailScreen(
+    listTitle: String, // Passed down from the selected TaskList
+    // uiState: TaskDetailUiState, <-- You'll likely want a specific state for this screen!
     onEvent: (TasksEvent) -> Unit,
+    onNavigateBack: () -> Unit, // Triggers the NavController to pop the backstack
     modifier: Modifier = Modifier
 ) {
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
-    BackHandler(fabMenuExpanded) { fabMenuExpanded = false }
+    // Close the FAB menu if open, otherwise trigger standard back navigation
+    BackHandler {
+        if (fabMenuExpanded) {
+            fabMenuExpanded = false
+        } else {
+            onNavigateBack()
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("My Projects") },
-                actions = {
-                    // 🐞 Debug Buttons
-                    IconButton(onClick = { onEvent(TasksEvent.OnGenerateFullMockDataClicked) }) {
-                        Icon(Icons.Default.BugReport, contentDescription = "Populate DB")
-                    }
-                    IconButton(onClick = { onEvent(TasksEvent.OnClearDatabaseClicked) }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Clear DB")
+                title = { Text(listTitle) },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate Back"
+                        )
                     }
                 }
             )
@@ -83,58 +84,55 @@ fun TasksListScreen(
                         }
                         Icon(
                             painter = rememberVectorPainter(imageVector),
-                            contentDescription = "Toggle Add Menu",
+                            contentDescription = "Toggle Add Content Menu",
                             modifier = Modifier.animateIcon({ checkedProgress })
                         )
                     }
                 }
             ) {
-                // 1. Add Task List (The "Bucket")
+                // 1. Add Photo (Contextual to this list!)
                 FloatingActionButtonMenuItem(
                     onClick = {
                         fabMenuExpanded = false
-                        onEvent(TasksEvent.OnAddListClicked)
+                        onEvent(TasksEvent.OnAddPhotoClicked)
                     },
-                    icon = { Icon(Icons.Default.FormatListBulleted, contentDescription = null) },
-                    text = { Text("New List") }
+                    icon = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
+                    text = { Text("Take Photo") }
                 )
-                // 2. Add Category (The "Super Bucket")
+                // 2. Add Task Item (Contextual to this list!)
                 FloatingActionButtonMenuItem(
                     onClick = {
                         fabMenuExpanded = false
-                        onEvent(TasksEvent.OnAddCategoryClicked)
+                        onEvent(TasksEvent.OnAddTaskItemClicked)
                     },
-                    icon = { Icon(Icons.Default.Folder, contentDescription = null) },
-                    text = { Text("New Category") }
+                    icon = { Icon(Icons.Default.CheckBox, contentDescription = null) },
+                    text = { Text("Add Task Item") }
                 )
             }
         }
     ) { localPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(localPadding)) {
-            if (uiState.tasks.isEmpty()) {
-                Text(
-                    text = "No projects yet. Tap + to create a list or category!",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // We will update this to show Categories containing Task Lists
-                    items(uiState.tasks, key = { it.id }) { taskList ->
-                        // Tapping this row will trigger navigation to the Detail Screen!
-                        TaskRow(
-                            task = taskList,
-                            onToggle = { isCompleted ->
-                                onEvent(TasksEvent.OnTaskToggled(taskList.id, isCompleted))
-                            }
-                        )
-                    }
-                }
+            // Placeholder for the actual content (Tasks & Photos)
+            // If the list is empty:
+            Text(
+                text = "This list is empty. Add a task or a photo!",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.align(Alignment.Center)
+            )
+
+            /*
+            // When populated, it will look something like this:
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // 1. Render the Photos Row/Grid here
+
+                // 2. Render the Checklist Items here
+                items(uiState.taskItems) { item -> ... }
             }
+            */
         }
     }
 }
