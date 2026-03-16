@@ -17,4 +17,15 @@ sealed interface TasksEvent {
     data class OnDraftPhotoAttached(val uri: String) : TasksEvent
 
     data object OnSaveDraftClicked : TasksEvent
+
+
+    // FAB Menu Actions
+    data object OnAddCategoryClicked : TasksEvent
+    data object OnAddListClicked : TasksEvent
+    data object OnAddTaskItemClicked : TasksEvent
+    data object OnAddPhotoClicked : TasksEvent
+
+
+    // ✅ Sheet Dismissal
+    data object OnDismissBottomSheet : TasksEvent
 }

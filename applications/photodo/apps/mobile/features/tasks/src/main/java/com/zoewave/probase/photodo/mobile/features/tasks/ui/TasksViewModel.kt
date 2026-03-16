@@ -9,6 +9,7 @@ import com.zoewave.probase.applications.photodo.db.entity.TaskListEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
 import com.zoewave.probase.photodo.mobile.features.tasks.domain.TaskDevTools
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -74,6 +75,11 @@ class TasksViewModel @Inject constructor(
                 }
             }
             is TasksEvent.OnSaveDraftClicked -> saveDraftToDatabase()
+            TasksEvent.OnAddCategoryClicked -> TODO()
+            TasksEvent.OnAddListClicked -> TODO()
+            TasksEvent.OnAddPhotoClicked -> TODO()
+            TasksEvent.OnAddTaskItemClicked -> TODO()
+            TasksEvent.OnDismissBottomSheet -> TODO()
         }
     }
 
