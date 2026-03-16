@@ -14,7 +14,8 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
 @Composable
 fun TasksListUiRoute(
     modifier: Modifier = Modifier,
-    viewModel: TasksViewModel = hiltViewModel()
+    viewModel: TasksViewModel = hiltViewModel(),
+    onNavigateToDetail: (Long, String) -> Unit, // ✅ Accept the Nav3 callback
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     // Grab the draft state too!
