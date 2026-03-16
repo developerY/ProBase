@@ -3,6 +3,7 @@ package com.zoewave.probase.applications.photodo.db.repo
 import android.util.Log
 import com.zoewave.probase.applications.photodo.db.PhotoDoDao
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
+import com.zoewave.probase.applications.photodo.db.entity.CategoryWithTaskLists
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskItemEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskListEntity
@@ -33,7 +34,11 @@ class PhotoDoRepoImpl @Inject constructor(
     }
 
     override suspend fun updateCategory(category: CategoryEntity) {
-        TODO("Not yet implemented")
+        // photoDoDao.updateCategory(category)
+    }
+
+    override suspend fun getCategoriesWithTaskLists(): Flow<List<CategoryWithTaskLists>> {
+        return photoDoDao.getCategoriesWithTaskLists()
     }
 
     // --- TaskList Operations ---
