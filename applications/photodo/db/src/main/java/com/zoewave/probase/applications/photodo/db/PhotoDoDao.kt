@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
+import com.zoewave.probase.applications.photodo.db.entity.CategoryWithTaskLists
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskItemEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskListEntity
@@ -44,6 +45,10 @@ interface PhotoDoDao {
 
     @Query("SELECT * FROM categories WHERE categoryId = :categoryId")
     fun getCategoryById(categoryId: Long): Flow<CategoryEntity?>
+
+    @Transaction
+    @Query("SELECT * FROM categories")
+    fun getCategoriesWithTaskLists(): Flow<List<CategoryWithTaskLists>>
 
     // --- TaskList Operations ---
 
