@@ -23,7 +23,7 @@ constraintLayout = "2.2.1"
 # -- Jetpack Compose --
 composeBom = "2026.01.01"
 composeMaterial = "1.7.8"  # Jetpack Compose Material (used for icons, wear material)
-composeMaterial3Expressive = "1.5.0-alpha13"
+composeMaterial3Expressive = "1.5.0-alpha15"
 
 # -- Nav3 --
 nav3Core = "1.0.1"
