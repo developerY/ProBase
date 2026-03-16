@@ -8,6 +8,7 @@ import com.zoewave.probase.applications.photodo.db.entity.TaskItemEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskListEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
 import com.zoewave.probase.photodo.mobile.features.tasks.domain.TaskDevTools
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,6 +40,34 @@ class TasksViewModel @Inject constructor(
         // repo.getAllTasks().map { entities -> mapToUiModels(entities) }
         //     .onEach { uiState.update { state -> state.copy(tasks = it) } }
         //     .launchIn(viewModelScope)
+    }
+
+    init {
+        viewModelScope.launch {
+            // Just collect the single, pre-joined stream from Room!
+            repo.getCategoriesWithTaskLists().collect { categoriesWithLists ->
+
+                val mappedProjects = mutableListOf<ProjectListUiModel>()
+
+                // Map them into our flat UI model list
+                categoriesWithLists.forEach { groupedData ->
+                    groupedData.taskLists.forEach { listEntity ->
+                        mappedProjects.add(
+                            ProjectListUiModel(
+                                id = listEntity.listId,
+                                title = listEntity.name,
+                                categoryName = groupedData.category.name // Safely extracted from parent!
+                            )
+                        )
+                    }
+                }
+
+                // Push to UI
+                _uiState.update { currentState ->
+                    currentState.copy(projectLists = mappedProjects)
+                }
+            }
+        }
     }
 
     fun onEvent(event: TasksEvent) {

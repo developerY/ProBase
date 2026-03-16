@@ -1,6 +1,7 @@
 package com.zoewave.probase.applications.photodo.db.repo
 
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
+import com.zoewave.probase.applications.photodo.db.entity.CategoryWithTaskLists
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskItemEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskListEntity
@@ -23,6 +24,8 @@ interface PhotoDoRepo {
     fun getCategoryById(categoryId: Long): Flow<CategoryEntity?>
 
     suspend fun updateCategory(category: CategoryEntity) // <--- Add this
+
+    suspend fun getCategoriesWithTaskLists(): Flow<List<CategoryWithTaskLists>>
 
 
     // --- TaskList Operations ---
