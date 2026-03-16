@@ -13,5 +13,7 @@ data class TasksUiState(
     val isAddCategorySheetOpen: Boolean = false,
     val isAddListSheetOpen: Boolean = false,
     val isAddTaskItemSheetOpen: Boolean = false,
-    val isAddPhotoSheetOpen: Boolean = false
+    val isAddPhotoSheetOpen: Boolean = false,
+
+    val projectLists: List<ProjectListUiModel> = emptyList()
 )

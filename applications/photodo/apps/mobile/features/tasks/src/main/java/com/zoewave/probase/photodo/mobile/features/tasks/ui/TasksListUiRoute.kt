@@ -24,7 +24,8 @@ fun TasksListUiRoute(
     TasksListScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
-        modifier = modifier
+        modifier = modifier,
+        onNavigateToDetail = onNavigateToDetail
     )
 
     // Render the isolated Bottom Sheets based on the state flags
@@ -55,6 +56,7 @@ fun TasksListScreenPreview() {
                 TaskItemUiModel(2, "Preview DB Task 2", true)
             )
         ),
-        onEvent = {}
-    )
+        onEvent = {},
+        onNavigateToDetail = {} as (Long, String) -> Unit,
+    ) 
 }
