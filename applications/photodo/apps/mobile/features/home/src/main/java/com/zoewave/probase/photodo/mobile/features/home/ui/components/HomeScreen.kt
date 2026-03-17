@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.photodo.model.PhotoTask
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeEvent
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiState
 
@@ -29,35 +27,38 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        if (uiState.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else if (uiState.errorMessage != null) {
-            Text(
-                text = uiState.errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                item {
-                    Text(
-                        text = "Recent Tasks",
-                        style = MaterialTheme.typography.headlineMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
+        when (uiState) {
+            is HomeUiState.Loading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+            is HomeUiState.Empty -> {
+                Text(
+                    text = "No categories found. Start by adding one!",
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+            is HomeUiState.Success -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    item {
+                        Text(
+                            text = "Dashboard",
+                            style = MaterialTheme.typography.headlineMedium,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
 
-                items(uiState.recentPhotoTasks, key = { it.id }) { task ->
-                    TaskCard(
-                        task = task,
-                        onToggle = { isChecked ->
-                            onEvent(HomeEvent.OnTaskToggled(task.id, isChecked))
-                        }
-                    )
+                    items(uiState.categories, key = { it.id }) { category ->
+                        CategoryCard(
+                            category = category,
+                            onClick = {
+                                onEvent(HomeEvent.OnCategoryClicked(category.id, category.name))
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -65,12 +66,15 @@ fun HomeScreen(
 }
 
 @Composable
-private fun TaskCard(
-    task: PhotoTask,
-    onToggle: (Boolean) -> Unit,
+private fun CategoryCard(
+    category: com.zoewave.probase.photodo.mobile.features.home.ui.CategoryOverviewUiModel,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(modifier = modifier.fillMaxWidth()) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        onClick = onClick
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -78,14 +82,20 @@ private fun TaskCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            androidx.compose.foundation.layout.Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = category.name,
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    text = "${category.completedTasks} / ${category.totalTasks} tasks completed",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
             Text(
-                text = task.title,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f)
-            )
-            Checkbox(
-                checked = task.isCompleted,
-                onCheckedChange = onToggle
+                text = category.progressText,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -95,7 +105,7 @@ private fun TaskCard(
 @Composable
 fun HomeScreenPreview_Loading() {
     HomeScreen(
-        uiState = HomeUiState(isLoading = true),
+        uiState = HomeUiState.Loading,
         onEvent = {}
     )
 }
@@ -104,11 +114,14 @@ fun HomeScreenPreview_Loading() {
 @Composable
 fun HomeScreenPreview_Success() {
     HomeScreen(
-        uiState = HomeUiState(
-            isLoading = false,
-            recentPhotoTasks = listOf(
-                PhotoTask("1", "Preview Task 1", false),
-                PhotoTask("2", "Preview Completed Task", true)
+        uiState = HomeUiState.Success(
+            categories = listOf(
+                com.zoewave.probase.photodo.mobile.features.home.ui.CategoryOverviewUiModel(
+                    1, "Work", 10, 5, 0.5f
+                ),
+                com.zoewave.probase.photodo.mobile.features.home.ui.CategoryOverviewUiModel(
+                    2, "Personal", 5, 5, 1.0f
+                )
             )
         ),
         onEvent = {}

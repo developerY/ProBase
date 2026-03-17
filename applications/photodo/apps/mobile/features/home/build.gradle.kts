@@ -19,6 +19,7 @@ dependencies {
     // implementation(project(":core:ui"))
     // implementation(project(":core:network"))
     // implementation(project(":core:data"))
+    implementation(project(":applications:photodo:db"))
     implementation(project(":applications:photodo:model"))
 
     // --- Serialization (The backbone of Nav3) ---
