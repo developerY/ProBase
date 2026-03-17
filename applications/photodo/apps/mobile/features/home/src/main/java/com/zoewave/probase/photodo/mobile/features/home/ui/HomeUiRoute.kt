@@ -11,6 +11,7 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.HomeOvervi
 fun HomeUiRoute(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
+    onNavigateToCategory: (Long, String) -> Unit, // ✅ Add the Nav3 callback
     // navTo: (PhotoTodoRoute) -> Unit = {} // Add this when you need to navigate away from Home
 ) {
 
@@ -21,8 +22,24 @@ fun HomeUiRoute(
     // Pass the state and events down to our new dashboard screen
     HomeOverviewScreen(
         uiState = uiState,
-        onEvent = viewModel::onEvent,
-        modifier = modifier
+        modifier = modifier,
+        onEvent = { event ->
+            // Intercept events coming up from the UI
+            when (event) {
+                is HomeEvent.OnCategoryClicked -> {
+                    // 1. Let the ViewModel know the click happened (Optional: for logging)
+                    viewModel.onEvent(event)
+
+                    // 2. Trigger the Nav3 state change to push the new screen!
+                    onNavigateToCategory(event.categoryId, event.categoryName)
+                }
+                // If you add other events to HomeEvent later, pass them to the ViewModel:
+                // else -> viewModel.onEvent(event)
+                HomeEvent.OnRefresh -> TODO()
+                is HomeEvent.OnTaskClicked -> TODO()
+                is HomeEvent.OnTaskToggled -> TODO()
+            }
+        }
     )
 
     /* collectAsStateWithLifecycle is MAD-recommended over collectAsState

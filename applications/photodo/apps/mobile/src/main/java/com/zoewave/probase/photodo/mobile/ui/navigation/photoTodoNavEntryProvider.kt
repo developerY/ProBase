@@ -17,7 +17,13 @@ fun photoTodoNavEntryProvider(
     return NavEntry(key) {
         when (key) {
             is PhotoTodoRoute.Home -> {
-                HomeUiRoute(modifier = Modifier.fillMaxSize())
+                HomeUiRoute(
+                    modifier = Modifier.fillMaxSize(),
+                    onNavigateToCategory = { categoryId, categoryName ->
+                        // When a category card is tapped, open its Detail screen!
+                        navigateTo(PhotoTodoRoute.TaskDetail(listId = categoryId, listTitle = categoryName))
+                    }
+                )
             }
 
             is PhotoTodoRoute.TasksList -> {
