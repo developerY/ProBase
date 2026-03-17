@@ -37,7 +37,7 @@ class PhotoDoRepoImpl @Inject constructor(
         // photoDoDao.updateCategory(category)
     }
 
-    override suspend fun getCategoriesWithTaskLists(): Flow<List<CategoryWithTaskLists>> {
+    override fun getCategoriesWithTaskLists(): Flow<List<CategoryWithTaskLists>> {
         return photoDoDao.getCategoriesWithTaskLists()
     }
 

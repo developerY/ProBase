@@ -25,7 +25,7 @@ interface PhotoDoRepo {
 
     suspend fun updateCategory(category: CategoryEntity) // <--- Add this
 
-    suspend fun getCategoriesWithTaskLists(): Flow<List<CategoryWithTaskLists>>
+    fun getCategoriesWithTaskLists(): Flow<List<CategoryWithTaskLists>>
 
 
     // --- TaskList Operations ---
