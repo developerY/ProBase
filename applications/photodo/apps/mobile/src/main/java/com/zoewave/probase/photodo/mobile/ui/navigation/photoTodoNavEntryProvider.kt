@@ -5,7 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiRoute
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.TaskDetailUiRoute
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailUiRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksListUiRoute
 
 fun photoTodoNavEntryProvider(
@@ -17,7 +17,13 @@ fun photoTodoNavEntryProvider(
     return NavEntry(key) {
         when (key) {
             is PhotoTodoRoute.Home -> {
-                HomeUiRoute(modifier = Modifier.fillMaxSize())
+                HomeUiRoute(
+                    modifier = Modifier.fillMaxSize(),
+                    onNavigateToCategory = { categoryId, categoryName ->
+                        // When a category card is tapped, open its Detail screen!
+                        navigateTo(PhotoTodoRoute.TaskDetail(listId = categoryId, listTitle = categoryName))
+                    }
+                )
             }
 
             is PhotoTodoRoute.TasksList -> {

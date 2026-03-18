@@ -35,5 +35,13 @@ data class TaskListWithPhotos(
         parentColumn = "listId",
         entityColumn = "listId"
     )
-    val items: List<TaskItemEntity> = emptyList()
+    val items: List<TaskItemEntity> = emptyList(),
+
+
+    // 👇 Make sure you have this relation so the UI gets the checklist items!
+    @Relation(parentColumn = "listId", entityColumn = "listId")
+    val taskItems: List<TaskItemEntity>
+
+
+
 )

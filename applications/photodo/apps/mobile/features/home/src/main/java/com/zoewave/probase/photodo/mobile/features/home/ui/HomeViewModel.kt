@@ -27,11 +27,7 @@ class HomeViewModel @Inject constructor(
     // 1. Directly map the relational database stream into our UI State
     val uiState: StateFlow<HomeUiState> = photoDoRepo.getCategoriesWithTaskLists()
         .map { categoriesWithLists ->
-
-            // 2. Handle the completely empty state (new user)
-            if (categoriesWithLists.isEmpty()) {
-                return@map HomeUiState.Empty
-            }
+            if (categoriesWithLists.isEmpty()) return@map HomeUiState.Empty
 
             // 3. Map the DB entities to our UI models and calculate the math
             val overviewModels = categoriesWithLists.map { groupedData ->
@@ -75,9 +71,9 @@ class HomeViewModel @Inject constructor(
             initialValue = HomeUiState.Loading
         )
 
-    init {
+    /*init {
         loadDashboardData()
-    }
+    }*/
 
     fun onEvent(event: HomeEvent) {
         when (event) {
@@ -86,7 +82,11 @@ class HomeViewModel @Inject constructor(
                 // Handle navigation or detail expansion logic here
             }
             is HomeEvent.OnTaskToggled -> toggleTask(event.taskId, event.isCompleted)
-            is HomeEvent.OnCategoryClicked -> TODO()
+            is HomeEvent.OnCategoryClicked -> {
+                // With Nav3, navigation is usually intercepted directly in the HomeUiRoute.
+                // We just log it here for debugging purposes!
+                Log.d(TAG, "Category clicked: ${event.categoryName} (ID: ${event.categoryId})")
+            }
         }
     }
 
