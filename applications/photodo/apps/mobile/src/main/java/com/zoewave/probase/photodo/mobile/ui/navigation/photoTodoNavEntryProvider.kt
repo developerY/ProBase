@@ -5,7 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiRoute
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.TaskDetailUiRoute
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailUiRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksListUiRoute
 
 fun photoTodoNavEntryProvider(
