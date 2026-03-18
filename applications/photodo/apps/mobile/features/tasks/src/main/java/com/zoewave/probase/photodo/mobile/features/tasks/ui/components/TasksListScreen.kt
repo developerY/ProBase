@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Close
@@ -47,10 +48,12 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TasksListScreen(
+    modifier: Modifier = Modifier,
     uiState: TasksUiState,
     onEvent: (TasksEvent) -> Unit,
-    modifier: Modifier = Modifier,
-    onNavigateToDetail: (Long, String) -> Unit
+    onNavigateToDetail: (Long, String) -> Unit,
+    screenTitle: String = "My Projects", // Default for the Global tab
+    onNavigateBack: (() -> Unit)? = null // Null means we are on the Global tab (no back button)
 ) {
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -61,6 +64,13 @@ fun TasksListScreen(
         topBar = {
             TopAppBar(
                 title = { Text("My Projects") },
+                navigationIcon = {
+                    if (onNavigateBack != null) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    }
+                },
                 actions = {
                     // 🐞 Debug Buttons
                     IconButton(onClick = { onEvent(TasksEvent.OnGenerateFullMockDataClicked) }) {
