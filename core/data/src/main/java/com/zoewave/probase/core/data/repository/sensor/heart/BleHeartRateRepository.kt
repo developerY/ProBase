@@ -1,7 +1,6 @@
 package com.zoewave.probase.core.data.repository.sensor.heart
 
 import android.util.Log
-import com.zoewave.probase.core.data.repository.sensor.heart.HeartRateRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -34,6 +33,7 @@ import kotlin.random.Random
  */
 @Singleton
 class BleHeartRateRepository @Inject constructor() : HeartRateRepository {
+    val simulate = false
 
     override val heartRate: Flow<Int> = flow {
         Log.d("BleHeartRateRepo", "Starting Heart Rate Simulation (Phone Mode)")
@@ -43,7 +43,7 @@ class BleHeartRateRepository @Inject constructor() : HeartRateRepository {
         // Trend determines if HR is generally rising (exercise) or falling (rest)
         var trend = 1
 
-        while (true) {
+        while (simulate) {
             emit(currentBpm)
 
             // Standard BLE sensors update roughly once per second
