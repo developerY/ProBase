@@ -19,64 +19,70 @@ import javax.inject.Inject
 
 class CalculateCaloriesUseCase @Inject constructor() {
 
-    // Internal state to accumulate calories tick-by-tick
+    // Internal state kept alive by your Foreground Service
     private data class CalorieState(
-        val lastTickMs: Long = 0L,
+        val lastDistanceKm: Float = 0f,
         val totalCalories: Float = 0f
     )
 
     operator fun invoke(
-        distanceKmFlow: Flow<Float>, // Kept in signature so you don't have to change your Service
-        speedKmhFlow: Flow<Float>,
+        distanceKmFlow: Flow<Float>,
+        currentSpeedKmhFlow: Flow<Float>, // Make sure to pass CURRENT speed here
         userStatsFlow: Flow<UserStats>
     ): Flow<Float> = combine(
         distanceKmFlow,
-        speedKmhFlow,
+        currentSpeedKmhFlow,
         userStatsFlow
-    ) { _, speedKmh, userStats ->
-        // Pass instantaneous speed and stats into the accumulator
-        Pair(speedKmh, userStats)
-    }.scan(CalorieState()) { state, (speedKmh, userStats) ->
-        val nowMs = System.currentTimeMillis()
+    ) { distanceKm, currentSpeedKmh, userStats ->
+        Triple(distanceKm, currentSpeedKmh, userStats)
+    }.scan(CalorieState()) { state, (distanceKm, currentSpeedKmh, userStats) ->
 
-        // 1. Initialize on the very first flow tick
-        if (state.lastTickMs == 0L) {
-            return@scan CalorieState(lastTickMs = nowMs, totalCalories = 0f)
+        // 1. How far did the bike move since the exact last GPS tick?
+        val deltaDistanceKm = distanceKm - state.lastDistanceKm
+
+        // 2. Stoplight Guard: If we haven't moved forward, add 0 calories and hold state.
+        if (deltaDistanceKm <= 0f) {
+            return@scan state.copy(
+                // Protect against weird negative GPS jumps
+                lastDistanceKm = maxOf(distanceKm, state.lastDistanceKm)
+            )
         }
 
-        val deltaMs = nowMs - state.lastTickMs
+        // 3. Safe Speed Guard (Prevents Divide-by-Zero)
+        val safeSpeed = if (currentSpeedKmh > 1f) currentSpeedKmh else 1f
 
-        // 2. Time-Leap Guard (Prevents massive spikes if the app is paused/dozing in the background)
-        if (deltaMs > 10_000L) {
-            return@scan state.copy(lastTickMs = nowMs)
+        // 4. Exact moving time for this tiny slice of distance
+        val deltaHours = deltaDistanceKm / safeSpeed
+
+        // 5. Human-Powered MET rules (Caps at 12 for E-Bike physics)
+        /* val met = when {
+            safeSpeed < 16f -> 4f
+            safeSpeed < 19f -> 6f
+            safeSpeed < 22f -> 8f
+            safeSpeed < 25f -> 10f
+            else -> 12f
+        }*/
+
+        val met = when {
+            safeSpeed < 16f -> 4f   // Leisurely / Eco mode
+            safeSpeed < 19f -> 6f   // Moderate
+            safeSpeed < 22f -> 8f   // Brisk
+            safeSpeed < 26f -> 10f  // Fast 
+            safeSpeed < 32f -> 12f  // Class 1/2 E-Bike Max Assist
+            safeSpeed < 45f -> 14f  // Class 3 E-Bike Max Assist
+            else -> 16f               // Extreme Downhill / Sprinting
         }
 
-        // 3. Convert ms to hours for this specific tiny slice of time
-        val deltaHours = deltaMs / 3600000f
+        // 6. Calculate calories burned JUST for this tiny segment
+        val tickCalories = met * userStats.weightKg * deltaHours
 
-        // 4. Calculate MET based on current effort
-        val tickCalories = if (speedKmh >= 1f) {
-            val met = when {
-                speedKmh < 16f -> 4f
-                speedKmh < 19f -> 6f
-                speedKmh < 22f -> 8f
-                speedKmh < 25f -> 10f
-                else -> 12f
-            }
-            // Burn active calories
-            met * userStats.weightKg * deltaHours
-        } else {
-            // Speed is 0: Do not add active calories (Prevents standing-still accumulation)
-            0f
-        }
-
-        // 5. Add to the grand total
+        // 7. Accumulate and save to RAM for the next tick
         CalorieState(
-            lastTickMs = nowMs,
+            lastDistanceKm = distanceKm,
             totalCalories = state.totalCalories + tickCalories
         )
     }.map { state ->
-        // Expose only the Float value to your Service
+        // Expose only the accumulated Float to the UI
         state.totalCalories
     }
 }
