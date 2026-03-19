@@ -11,6 +11,8 @@ package com.zoewave.probase.ashbike.features.main.usecase
 /**
  * Simple MET-based calories calculator.
  */
+
+import android.os.SystemClock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -21,13 +23,13 @@ class CalculateCaloriesUseCase @Inject constructor() {
 
     // Internal state kept alive by your Foreground Service
     private data class CalorieState(
-        val lastDistanceKm: Float = 0f,
+        val lastTickMs: Long = 0L,
         val totalCalories: Float = 0f
     )
 
     operator fun invoke(
-        distanceKmFlow: Flow<Float>,
-        currentSpeedKmhFlow: Flow<Float>, // Make sure to pass CURRENT speed here
+        distanceKmFlow: Flow<Float>,      // 1. Used strictly as a Gatekeeper
+        currentSpeedKmhFlow: Flow<Float>, // 2. Used for the Physics (MET)
         userStatsFlow: Flow<UserStats>
     ): Flow<Float> = combine(
         distanceKmFlow,
@@ -37,48 +39,52 @@ class CalculateCaloriesUseCase @Inject constructor() {
         Triple(distanceKm, currentSpeedKmh, userStats)
     }.scan(CalorieState()) { state, (distanceKm, currentSpeedKmh, userStats) ->
 
-        // 1. How far did the bike move since the exact last GPS tick?
-        val deltaDistanceKm = distanceKm - state.lastDistanceKm
+        // Use elapsedRealtime to prevent timezone/network sync bugs!
+        val nowMs = SystemClock.elapsedRealtime()
 
-        // 2. Stoplight Guard: If we haven't moved forward, add 0 calories and hold state.
-        if (deltaDistanceKm <= 0f) {
-            return@scan state.copy(
-                // Protect against weird negative GPS jumps
-                lastDistanceKm = maxOf(distanceKm, state.lastDistanceKm)
-            )
+        // 1. First tick initialization
+        if (state.lastTickMs == 0L) {
+            return@scan CalorieState(lastTickMs = nowMs, totalCalories = 0f)
         }
 
-        // 3. Safe Speed Guard (Prevents Divide-by-Zero)
-        val safeSpeed = if (currentSpeedKmh > 1f) currentSpeedKmh else 1f
+        val deltaMs = nowMs - state.lastTickMs
 
-        // 4. Exact moving time for this tiny slice of distance
-        val deltaHours = deltaDistanceKm / safeSpeed
+        // 2. Pause Guard (If Flow is paused for > 10 seconds, ignore the gap)
+        if (deltaMs > 10_000L) {
+            return@scan state.copy(lastTickMs = nowMs)
+        }
 
-        // 5. Human-Powered MET rules (Caps at 12 for E-Bike physics)
-        /* val met = when {
-            safeSpeed < 16f -> 4f
-            safeSpeed < 19f -> 6f
-            safeSpeed < 22f -> 8f
-            safeSpeed < 25f -> 10f
-            else -> 12f
+        // 3. THE GATEKEEPER: Ignore all math until they ride 10 meters.
+        // This filters out GPS bounce while they are putting on their helmet.
+        /* if (distanceKm < 0.01f) {
+            return@scan state.copy(lastTickMs = nowMs)
         }*/
 
+        // 4. Stoplight Guard (If stopped, hold state)
+        if (currentSpeedKmh <= 0f) {
+            return@scan state.copy(lastTickMs = nowMs)
+        }
+
+        // 5. Convert MS to Hours
+        val deltaHours = deltaMs / 3600000f
+
+        // 6. E-Bike Physics Cap (Maxes at 12 MET for human effort)
         val met = when {
-            safeSpeed < 16f -> 4f   // Leisurely / Eco mode
-            safeSpeed < 19f -> 6f   // Moderate
-            safeSpeed < 22f -> 8f   // Brisk
-            safeSpeed < 26f -> 10f  // Fast 
-            safeSpeed < 32f -> 12f  // Class 1/2 E-Bike Max Assist
-            safeSpeed < 45f -> 14f  // Class 3 E-Bike Max Assist
+            currentSpeedKmh < 16f -> 4f   // Leisurely / Eco mode
+            currentSpeedKmh < 19f -> 6f   // Moderate
+            currentSpeedKmh < 22f -> 8f   // Brisk
+            currentSpeedKmh < 26f -> 10f  // Fast
+            currentSpeedKmh < 32f -> 12f  // Class 1/2 E-Bike Max Assist
+            currentSpeedKmh < 45f -> 14f  // Class 3 E-Bike Max Assist
             else -> 16f               // Extreme Downhill / Sprinting
         }
 
-        // 6. Calculate calories burned JUST for this tiny segment
+        // 7. Calculate calories burned JUST during this tick
         val tickCalories = met * userStats.weightKg * deltaHours
 
-        // 7. Accumulate and save to RAM for the next tick
+        // 8. Accumulate
         CalorieState(
-            lastDistanceKm = distanceKm,
+            lastTickMs = nowMs,
             totalCalories = state.totalCalories + tickCalories
         )
     }.map { state ->
