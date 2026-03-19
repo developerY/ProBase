@@ -11,6 +11,8 @@ package com.zoewave.probase.ashbike.features.main.usecase
 /**
  * Simple MET-based calories calculator.
  */
+
+import android.os.SystemClock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -19,64 +21,96 @@ import javax.inject.Inject
 
 class CalculateCaloriesUseCase @Inject constructor() {
 
-    // Internal state to accumulate calories tick-by-tick
+    // Added lastDistanceKm to track micro-movements tick-by-tick
     private data class CalorieState(
         val lastTickMs: Long = 0L,
+        val lastDistanceKm: Float = 0f,
         val totalCalories: Float = 0f
     )
 
     operator fun invoke(
-        distanceKmFlow: Flow<Float>, // Kept in signature so you don't have to change your Service
-        speedKmhFlow: Flow<Float>,
+        distanceKmFlow: Flow<Float>,
+        currentSpeedKmhFlow: Flow<Float>,
         userStatsFlow: Flow<UserStats>
     ): Flow<Float> = combine(
         distanceKmFlow,
-        speedKmhFlow,
+        currentSpeedKmhFlow,
         userStatsFlow
-    ) { _, speedKmh, userStats ->
-        // Pass instantaneous speed and stats into the accumulator
-        Pair(speedKmh, userStats)
-    }.scan(CalorieState()) { state, (speedKmh, userStats) ->
-        val nowMs = System.currentTimeMillis()
+    ) { distanceKm, currentSpeedKmh, userStats ->
+        Triple(distanceKm, currentSpeedKmh, userStats)
+    }.scan(CalorieState()) { state, (distanceKm, currentSpeedKmh, userStats) ->
 
-        // 1. Initialize on the very first flow tick
+        // Use elapsedRealtime to prevent timezone/network sync bugs!
+        val nowMs = SystemClock.elapsedRealtime()
+
+        // 1. First tick initialization
         if (state.lastTickMs == 0L) {
-            return@scan CalorieState(lastTickMs = nowMs, totalCalories = 0f)
+            return@scan CalorieState(
+                lastTickMs = nowMs,
+                lastDistanceKm = distanceKm,
+                totalCalories = 0f
+            )
         }
 
         val deltaMs = nowMs - state.lastTickMs
+        val deltaDistance = distanceKm - state.lastDistanceKm
 
-        // 2. Time-Leap Guard (Prevents massive spikes if the app is paused/dozing in the background)
+        // 2. Pause Guard (If Flow is paused for > 10 seconds, ignore the gap)
         if (deltaMs > 10_000L) {
-            return@scan state.copy(lastTickMs = nowMs)
+            return@scan state.copy(lastTickMs = nowMs, lastDistanceKm = distanceKm)
         }
 
-        // 3. Convert ms to hours for this specific tiny slice of time
+        // 3. THE GATEKEEPER: Ignore all math until they ride 10 meters.
+        // This filters out GPS bounce while they are putting on their helmet.
+        /* if (distanceKm < 0.01f) {
+            return@scan state.copy(lastTickMs = nowMs)
+        }*/
+
+        // 4. Phantom Speed Guard (YOUR NEW CHECK):
+        // If the distance hasn't increased, do not add calories, even if speed > 0.
+        // We use maxOf to protect against weird negative GPS jumps.
+        if (deltaDistance <= 0f) {
+            return@scan state.copy(
+                lastTickMs = nowMs,
+                lastDistanceKm = maxOf(distanceKm, state.lastDistanceKm)
+            )
+        }
+
+        // 5. Stoplight Guard (If speed is 0, hold state)
+        if (currentSpeedKmh <= 0f) {
+            return@scan state.copy(lastTickMs = nowMs, lastDistanceKm = distanceKm)
+        }
+
+        // 6. Convert elapsed MS to Hours for this specific tick
         val deltaHours = deltaMs / 3600000f
 
-        // 4. Calculate MET based on current effort
-        val tickCalories = if (speedKmh >= 1f) {
-            val met = when {
-                speedKmh < 16f -> 4f
-                speedKmh < 19f -> 6f
-                speedKmh < 22f -> 8f
-                speedKmh < 25f -> 10f
-                else -> 12f
-            }
-            // Burn active calories
-            met * userStats.weightKg * deltaHours
-        } else {
-            // Speed is 0: Do not add active calories (Prevents standing-still accumulation)
-            0f
+        // 7. Expanded Aerodynamic MET Curve (Caps at 80 km/h)
+        val met = when {
+            currentSpeedKmh < 16f -> 4.0f   // Leisurely / Warmup (~10 mph)
+            currentSpeedKmh < 19f -> 6.0f   // Light effort (~12 mph)
+            currentSpeedKmh < 22f -> 8.0f   // Moderate (~14 mph)
+            currentSpeedKmh < 26f -> 10.0f  // Vigorous (~16 mph)
+            currentSpeedKmh < 32f -> 12.0f  // Very fast / Fast Club Ride (~20 mph)
+            currentSpeedKmh < 38f -> 15.8f  // Racing pace / Cat 3/4 (~24 mph)
+            currentSpeedKmh < 45f -> 19.0f  // Elite Time Trial / Breakaway (~28 mph)
+            currentSpeedKmh < 55f -> 24.0f  // Pro Lead-out / Fast Descent (~34 mph)
+            currentSpeedKmh < 65f -> 30.0f  // Pro Sprint (~40 mph)
+            currentSpeedKmh < 75f -> 38.0f  // Motor-paced / Steep Descent (~46 mph)
+            currentSpeedKmh < 80f -> 45.0f  // Extreme Mountain Descent (~50 mph)
+            else -> 55.0f                   // 80+ km/h (Absolute free-fall)
         }
 
-        // 5. Add to the grand total
+        // 8. Calculate calories burned JUST during this tick
+        val tickCalories = met * userStats.weightKg * deltaHours
+
+        // 9. Accumulate
         CalorieState(
             lastTickMs = nowMs,
+            lastDistanceKm = distanceKm,
             totalCalories = state.totalCalories + tickCalories
         )
     }.map { state ->
-        // Expose only the Float value to your Service
+        // Expose only the accumulated Float to the UI
         state.totalCalories
     }
 }
