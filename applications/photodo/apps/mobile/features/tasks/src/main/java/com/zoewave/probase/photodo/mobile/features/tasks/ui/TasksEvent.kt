@@ -8,6 +8,9 @@ sealed interface TasksEvent {
     data object OnAddRandomTaskClicked : TasksEvent
     data class OnTaskToggled(val taskId: Long, val isCompleted: Boolean) : TasksEvent
 
+    data object OnAddList : TasksEvent
+    data object OnDeleteListClicked : TasksEvent
+
 
 
     // Draft Updates

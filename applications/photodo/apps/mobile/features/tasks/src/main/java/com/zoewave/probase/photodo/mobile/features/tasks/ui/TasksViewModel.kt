@@ -138,6 +138,9 @@ class TasksViewModel @Inject constructor(
                 saveDraftToDatabase()
                 onEvent(TasksEvent.OnDismissBottomSheet) // Close sheets automatically after saving!
             }
+
+            TasksEvent.OnAddList -> TODO()
+            TasksEvent.OnDeleteListClicked -> TODO()
         }
     }
 
