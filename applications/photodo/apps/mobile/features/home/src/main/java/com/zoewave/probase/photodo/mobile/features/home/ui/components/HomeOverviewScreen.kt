@@ -18,12 +18,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
@@ -32,15 +36,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleFloatingActionButton
+import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,7 +58,7 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.CategoryOverviewUiMod
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeEvent
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeOverviewScreen(
     uiState: HomeUiState,
@@ -59,6 +69,7 @@ fun HomeOverviewScreen(
     // Add these state variables at the top of your composable
     var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
     var newCategoryName by rememberSaveable { mutableStateOf("") }
+    var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -75,19 +86,57 @@ fun HomeOverviewScreen(
                         Icon(Icons.Default.Analytics, contentDescription = "Analytics")
                     }
                 },
-                colors = TopAppBarDefaults.largeTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    navigationIconContentColor = Color.Unspecified,
+                    titleContentColor = Color.Unspecified,
+                    actionIconContentColor = Color.Unspecified
                 )
             )
         } ,// ✅ 1. ADD THE FAB HERE
+        // 2. Replace the Scaffold's floatingActionButton block with this:
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showAddCategoryDialog = true },
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            FloatingActionButtonMenu(
+                expanded = fabMenuExpanded,
+                button = {
+                    ToggleFloatingActionButton(
+                        checked = fabMenuExpanded,
+                        onCheckedChange = { fabMenuExpanded = it }, // Safely toggles state
+                        //containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        //contentColor = MaterialTheme.colorScheme.secondary
+                    ) {
+                        // Animates smoothly from a '+' to an 'x' when opened!
+                        val imageVector by remember {
+                            derivedStateOf { if (checkedProgress > 0.5f) Icons.Default.Close else Icons.Default.Add }
+                        }
+                        Icon(
+                            painter = rememberVectorPainter(imageVector),
+                            contentDescription = "Menu",
+                            modifier = Modifier.animateIcon({ checkedProgress })
+                        )
+                    }
+                }
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Category")
+                // Item 1: Add Category
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        fabMenuExpanded = false
+                        showAddCategoryDialog = true
+                    },
+                    icon = { Icon(Icons.Default.FolderSpecial, contentDescription = null) },
+                    text = { Text("New Category") }
+                )
+
+                // Item 2: Quick Project (Placeholder for later!)
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        fabMenuExpanded = false
+                        // TODO: Wire up a cross-tab Quick Project action later
+                    },
+                    icon = { Icon(Icons.Default.Checklist, contentDescription = null) },
+                    text = { Text("Quick Project") }
+                )
             }
         }
     ) { innerPadding ->
