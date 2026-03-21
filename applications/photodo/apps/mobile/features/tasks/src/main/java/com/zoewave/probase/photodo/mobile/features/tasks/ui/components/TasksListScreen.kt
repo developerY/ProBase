@@ -10,35 +10,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.FormatListBulleted
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingActionButtonMenu
-import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.ToggleFloatingActionButton
-import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
@@ -63,7 +52,8 @@ fun TasksListScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("My Projects") },
+                // ✅ FIX 1: Use the dynamic screenTitle so it says "Mock Category 451"
+                title = { Text(screenTitle) },
                 navigationIcon = {
                     if (onNavigateBack != null) {
                         IconButton(onClick = onNavigateBack) {
@@ -83,58 +73,34 @@ fun TasksListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButtonMenu(
-                expanded = fabMenuExpanded,
-                button = {
-                    ToggleFloatingActionButton(
-                        checked = fabMenuExpanded,
-                        onCheckedChange = { fabMenuExpanded = !fabMenuExpanded }
-                    ) {
-                        val imageVector by remember {
-                            derivedStateOf {
-                                if (checkedProgress > 0.5f) Icons.Default.Close else Icons.Default.Add
-                            }
-                        }
-                        Icon(
-                            painter = rememberVectorPainter(imageVector),
-                            contentDescription = "Toggle Add Menu",
-                            modifier = Modifier.animateIcon({ checkedProgress })
-                        )
-                    }
-                }
-            ) {
-                // 1. Add Task List (The "Bucket")
-                FloatingActionButtonMenuItem(
-                    onClick = {
-                        fabMenuExpanded = false
-                        onEvent(TasksEvent.OnAddListClicked)
-                    },
-                    icon = { Icon(Icons.Default.FormatListBulleted, contentDescription = null) },
-                    text = { Text("New List") }
-                )
-                // 2. Add Category (The "Super Bucket")
-                FloatingActionButtonMenuItem(
-                    onClick = {
-                        fabMenuExpanded = false
-                        onEvent(TasksEvent.OnAddCategoryClicked)
-                    },
-                    icon = { Icon(Icons.Default.Folder, contentDescription = null) },
-                    text = { Text("New Category") }
-                )
-            }
+            // ... (Keep your existing FAB Menu code exactly as it is here!) ...
         }
     ) { localPadding ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(localPadding)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(localPadding)
+        ) {
+            // ✅ FIX 2: A strict if/else chain so UI elements NEVER overlap!
 
-            if (uiState.projectLists.isEmpty()) {
+            if (uiState.isNoCategoriesYet) {
+                // Scenario A: Database is completely empty
                 Text(
-                    text = "No projects yet. Tap + to create a list or category!",
+                    text = "No categories yet.\nTap + to create a Category first!",
                     style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else if (uiState.projectLists.isEmpty()) {
+                // Scenario B: This specific category is empty
+                Text(
+                    text = "No projects in ${uiState.categoryName}.\nTap + to create one!",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
+                // Scenario C: We have data! Render the list cleanly.
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
@@ -146,32 +112,6 @@ fun TasksListScreen(
                             project = project,
                             // ✅ TRIGGER THE NAVIGATION EVENT HERE!
                             onClick = { onNavigateToDetail(project.id, project.title) }
-                        )
-                    }
-                }
-            }
-
-
-            if (uiState.tasks.isEmpty()) {
-                Text(
-                    text = "No projects yet. Tap + to create a list or category!",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // We will update this to show Categories containing Task Lists
-                    items(uiState.tasks, key = { it.id }) { taskList ->
-                        // Tapping this row will trigger navigation to the Detail Screen!
-                        TaskRow(
-                            task = taskList,
-                            onToggle = { isCompleted ->
-                                onEvent(TasksEvent.OnTaskToggled(taskList.id, isCompleted))
-                            }
                         )
                     }
                 }
