@@ -37,6 +37,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
 
+    // androidx-compose-material3-expressive
+    implementation(libs.androidx.compose.material3.expressive)
+
     // --- Hilt ---
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
