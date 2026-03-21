@@ -5,5 +5,7 @@ sealed interface HomeEvent {
     data class OnTaskClicked(val taskId: String) : HomeEvent
     data class OnTaskToggled(val taskId: String, val isCompleted: Boolean) : HomeEvent
 
-    data class OnCategoryClicked(val categoryId: Long, val categoryName: String) : HomeEvent
+    data class OnCategoryClicked(val categoryId: Long, val categoryName: String) :HomeEvent
+    // ✅ ADD THE NEW EVENT
+    data class OnAddCategory(val name: String, val description: String? = null) : HomeEvent
 }

@@ -3,6 +3,7 @@ package com.zoewave.probase.photodo.mobile.features.home.ui
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -86,6 +87,21 @@ class HomeViewModel @Inject constructor(
                 // With Nav3, navigation is usually intercepted directly in the HomeUiRoute.
                 // We just log it here for debugging purposes!
                 Log.d(TAG, "Category clicked: ${event.categoryName} (ID: ${event.categoryId})")
+            }
+
+            is HomeEvent.OnAddCategory -> {
+                viewModelScope.launch {
+                    try {
+                        val newCategory = CategoryEntity(
+                            name = event.name,
+                            description = event.description ?: "Created from Dashboard"
+                        )
+                        // Assuming you have an insertCategory function in your Repo!
+                        photoDoRepo.insertCategory(newCategory)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error saving new category", e)
+                    }
+                }
             }
         }
     }
