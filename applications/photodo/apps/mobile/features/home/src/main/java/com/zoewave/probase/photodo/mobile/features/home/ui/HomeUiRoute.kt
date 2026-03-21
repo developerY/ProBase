@@ -1,55 +1,54 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.HomeOverviewScreen
+import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeUiRoute(
-    modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel(),
-    onNavigateToCategory: (Long, String) -> Unit, // ✅ Add the Nav3 callback
-    // navTo: (PhotoTodoRoute) -> Unit = {} // Add this when you need to navigate away from Home
+fun HomeUiRoute( // ✅ The true Home Screen!
+    onNavigateToCategoryGrid: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-
-    // collectAsStateWithLifecycle is MAD-recommended over collectAsState
-    // as it safely pauses collection when the app is in the background, saving battery!
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    // Pass the state and events down to our new dashboard screen
-    HomeOverviewScreen(
-        uiState = uiState,
-        modifier = modifier,
-        onEvent = { event ->
-            // Intercept events coming up from the UI
-            when (event) {
-                is HomeEvent.OnCategoryClicked -> {
-                    // 1. Let the ViewModel know the click happened (Optional: for logging)
-                    viewModel.onEvent(event)
-
-                    // 2. Trigger the Nav3 state change to push the new screen!
-                    onNavigateToCategory(event.categoryId, event.categoryName)
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = { TopAppBar(title = { Text("Overview") }) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // 📈 Placeholder for your future Chart & AI Agent!
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "📈 Graphic & AI Agent Placeholder",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 }
-                // If you add other events to HomeEvent later, pass them to the ViewModel:
-                // else -> viewModel.onEvent(event)
-                HomeEvent.OnRefresh -> TODO()
-                is HomeEvent.OnTaskClicked -> TODO()
-                is HomeEvent.OnTaskToggled -> TODO()
-                is HomeEvent.OnAddCategory -> TODO()
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Button(
+                onClick = onNavigateToCategoryGrid,
+                modifier = Modifier.fillMaxWidth(0.8f)
+            ) {
+                Text("View All Categories")
             }
         }
-    )
-
-    /* collectAsStateWithLifecycle is MAD-recommended over collectAsState
-    // as it safely pauses collection when the app is in the background
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    HomeScreen(
-        uiState = uiState,
-        onEvent = viewModel::onEvent,
-        modifier = modifier
-    )*/
-
+    }
 }

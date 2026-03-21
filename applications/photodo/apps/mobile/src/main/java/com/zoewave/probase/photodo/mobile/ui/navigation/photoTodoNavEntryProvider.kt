@@ -4,10 +4,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
+import com.zoewave.probase.photodo.mobile.features.home.ui.CategoryGridUiRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksListUiRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailUiRoute
-import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.Home
 import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.Settings
 import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.TaskDetail
 import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.TasksList
@@ -24,16 +24,23 @@ fun photoTodoNavEntryProvider(
         when (key) {
 
             // --- TAB 1: DASHBOARD ---
-            is Home -> {
+            is PhotoTodoRoute.Home -> {
+                // 1. The New Root (Chart & AI Placeholder)
                 HomeUiRoute(
                     modifier = Modifier.fillMaxSize(),
-                    onNavigateToCategory = { categoryId, categoryName ->
-                        // THE CROSS-TAB JUMP! 🪄
-                        // 1. (Optional) Tell the Bottom Bar to highlight the Tasks Tab
-                        // onTabSelected(TasksList())
+                    onNavigateToCategoryGrid = {
+                        navigateTo(PhotoTodoRoute.CategoryGrid)
+                    }
+                )
+            }
 
-                        // 2. Tell Nav3 to push the filtered Tasks list onto the stack!
-                        navigateTo(TasksList(categoryId = categoryId, categoryName = categoryName))
+            is PhotoTodoRoute.CategoryGrid -> {
+                // 2. The Drill-Down (The Grid of Cards)
+                CategoryGridUiRoute(
+                    modifier = Modifier.fillMaxSize(),
+                    onNavigateToCategory = { categoryId, categoryName ->
+                        // 3. THE CROSS-TAB JUMP 🪄
+                        navigateTo(PhotoTodoRoute.TasksList(categoryId = categoryId, categoryName = categoryName))
                     }
                 )
             }
