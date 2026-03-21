@@ -18,7 +18,9 @@ fun PhotoTodoBottomBar(
     NavigationBar {
         topLevelRoutes.forEach { route ->
             NavigationBarItem(
-                selected = currentRoute == route,
+                // ✅ THE FIX: Compare the class types, not the data payload!
+                // This tells the bar: "If I am looking at ANY TasksList, highlight the Tasks tab!"
+                selected = currentRoute::class == route::class,
                 onClick = { onNavigateTo(route) },
                 icon = { Icon(imageVector = route.icon, contentDescription = route.title) },
                 label = { Text(route.title) }

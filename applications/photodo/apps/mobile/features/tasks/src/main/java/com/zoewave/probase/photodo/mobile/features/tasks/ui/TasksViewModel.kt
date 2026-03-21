@@ -88,9 +88,13 @@ class TasksViewModel @Inject constructor(
 
     // ✅ NEW: Nav3 calls this to pass the ID
     fun setCategoryId(id: Long?) {
-        _requestedCategoryId.value = id
+        // ✅ The Memory Fix: Only update if the router passed a REAL ID.
+        // If it passes null (because you tapped the bottom tab), we do nothing,
+        // which preserves the last category you were looking at!
+        if (id != null) {
+            _requestedCategoryId.value = id
+        }
     }
-
     fun onEvent(event: TasksEvent) {
         // --- YOUR EXISTING EVENTS STAY EXACTLY THE SAME! ---
         when (event) {
