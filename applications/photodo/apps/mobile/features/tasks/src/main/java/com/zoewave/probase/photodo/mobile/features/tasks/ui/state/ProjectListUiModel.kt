@@ -4,5 +4,5 @@ package com.zoewave.probase.photodo.mobile.features.tasks.ui.state
 data class ProjectListUiModel(
     val id: Long,
     val title: String,
-    val categoryName: String? = null
+    val categoryName: String
 )

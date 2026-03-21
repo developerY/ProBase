@@ -98,7 +98,7 @@ private fun ProjectRowWithoutCategoryPreview() {
                 project = ProjectListUiModel(
                     id = 1002L,
                     title = "AshBike App Architecture",
-                    categoryName = null // Simulating an uncategorized list
+                    categoryName = "Arch" // Simulating an uncategorized list
                 ),
                 onClick = {}
             )
