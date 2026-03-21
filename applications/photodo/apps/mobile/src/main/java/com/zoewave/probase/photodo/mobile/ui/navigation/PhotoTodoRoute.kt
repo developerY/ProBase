@@ -2,6 +2,7 @@ package com.zoewave.probase.photodo.mobile.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
@@ -12,7 +13,13 @@ sealed class PhotoTodoRoute(val title: String, val icon: ImageVector) {
     data object TasksList : PhotoTodoRoute("Tasks", Icons.Default.CheckCircle)
     data object Settings : PhotoTodoRoute("Settings", Icons.Default.Settings)
 
-    // ✅ NEW: The Detail Route holds your specific TaskList data
+    // The Category drill-down route!
+    data class CategoryTasks(
+        val categoryId: Long,
+        val categoryName: String
+    ) : PhotoTodoRoute(categoryName, Icons.Default.Folder)
+
+    // The Detail Route holds your specific TaskList data
     data class TaskDetail(
         val listId: Long,
         val listTitle: String

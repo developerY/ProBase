@@ -38,6 +38,7 @@ fun HomeUiRoute(
                 HomeEvent.OnRefresh -> TODO()
                 is HomeEvent.OnTaskClicked -> TODO()
                 is HomeEvent.OnTaskToggled -> TODO()
+                is HomeEvent.OnAddCategory -> TODO()
             }
         }
     )
