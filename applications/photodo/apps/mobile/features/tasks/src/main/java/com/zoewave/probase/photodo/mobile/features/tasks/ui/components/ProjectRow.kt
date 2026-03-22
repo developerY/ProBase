@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 
@@ -28,13 +29,14 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiM
 fun ProjectRow(
     project: ProjectListUiModel, // ✅ The strict UiState for this component
     onEvent: (TasksEvent) -> Unit, // ✅ The single event channel
+    navTo: (PhotoTodoRoute?) -> Unit, // ✅ The single navigation channel
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            // Send the click directly through the event channel!
-            .clickable { onEvent(TasksEvent.OnProjectClicked(project.id, project.title)) },
+            // Send the click directly through the navigation channel!
+            .clickable { navTo(PhotoTodoRoute.TaskDetail(project.id, project.title)) },
         colors = CardDefaults.cardColors(
             containerColor = if (project.isUrgent)
                 MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)

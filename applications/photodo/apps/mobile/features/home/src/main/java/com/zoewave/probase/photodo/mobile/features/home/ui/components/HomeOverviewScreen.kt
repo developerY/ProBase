@@ -54,6 +54,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.CategoryOverviewUiModel
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeEvent
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiState
@@ -63,6 +64,7 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiState
 fun HomeOverviewScreen(
     uiState: HomeUiState,
     onEvent: (HomeEvent) -> Unit,
+    navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
     modifier: Modifier = Modifier
 ) {
 
@@ -168,7 +170,8 @@ fun HomeOverviewScreen(
                                 category = category,
                                 index = index,
                                 onClick = {
-                                    onEvent(HomeEvent.OnCategoryClicked(category.id, category.name))
+                                    // ✅ Use the standardized navTo channel
+                                    navTo(PhotoTodoRoute.TasksList(categoryId = category.id, categoryName = category.name))
                                 }
                             )
                         }
@@ -335,7 +338,8 @@ private fun HomeOverviewScreenPopulatedPreview() {
                     categories = mockData,
                     urgentProjects = emptyList()
                 ),
-                onEvent = {}
+                onEvent = {},
+                navTo = {}
             )
         }
     }
@@ -348,7 +352,8 @@ private fun HomeOverviewScreenEmptyPreview() {
         Surface {
             HomeOverviewScreen(
                 uiState = HomeUiState.Empty,
-                onEvent = {}
+                onEvent = {},
+                navTo = {}
             )
         }
     }

@@ -19,6 +19,7 @@ sealed interface TasksEvent {
 
     // Draft Updates
     data class OnDraftCategorySelected(val categoryId: Long) : TasksEvent
+    data class OnDraftCategoryNameChanged(val name: String) : TasksEvent
     data class OnDraftTitleChanged(val title: String) : TasksEvent
     data class OnDraftChecklistItemAdded(val itemText: String) : TasksEvent
     data class OnDraftPhotoAttached(val uri: String) : TasksEvent

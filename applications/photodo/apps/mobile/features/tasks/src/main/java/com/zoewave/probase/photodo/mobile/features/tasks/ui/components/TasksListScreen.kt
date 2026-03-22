@@ -40,18 +40,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TasksListScreen(
-    modifier: Modifier = Modifier,
     uiState: TasksUiState,
     onEvent: (TasksEvent) -> Unit,
-    onNavigateToDetail: (Long, String) -> Unit,
-    screenTitle: String = "My Projects",
-    onNavigateBack: (() -> Unit)? = null
+    navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
+    modifier: Modifier = Modifier
 ) {
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -61,12 +60,13 @@ fun TasksListScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(screenTitle) },
+                title = { Text(uiState.categoryName) },
                 navigationIcon = {
-                    if (onNavigateBack != null) {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
+                    // Assume we can always go back if we are in this specific screen? 
+                    // Actually, for top-level it might not show. 
+                    // But in standard Nav3, we just call back.
+                    IconButton(onClick = { navTo(null) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -155,7 +155,8 @@ fun TasksListScreen(
                     items(uiState.projectLists, key = { it.id }) { project ->
                         ProjectRow(
                             project = project,
-                            onEvent = onEvent // Pass the channel straight down!
+                            onEvent = onEvent, // Pass the channel straight down!
+                            navTo = navTo
                         )
                     }
                 }
@@ -168,29 +169,18 @@ fun TasksListScreen(
     // They sit outside the Scaffold so they can float over the entire screen.
 
     if (uiState.isAddListSheetOpen) {
-        // This is the component we built earlier!
-        /*AddListSheet(
-            onDismiss = { onEvent(TasksEvent.OnDismissBottomSheet) },
-            onSave = { projectName ->
-                // Make sure your TasksEvent has something like OnAddList(val title: String)
-                // or just hook it up to your draft saving logic!
-                // onEvent(TasksEvent.OnDraftTitleChanged(projectName))
-                // onEvent(TasksEvent.OnSaveDraftClicked)
-
-                // Assuming you use the direct insert event we built:
-                onEvent(TasksEvent.OnAddList(projectName))
-            },
-            modifier = TODO(),
-            draftState = TODO(),
-            onEvent = TODO()
-        )*/
+        AddListSheet(
+            uiState = uiState.draftState,
+            onEvent = onEvent,
+            navTo = navTo
+        )
     }
 
     if (uiState.isAddCategorySheetOpen) {
-        // Assuming you made a similar sheet/dialog for Categories
-        // AddCategoryDialog(
-        //     onDismiss = { onEvent(TasksEvent.OnDismissBottomSheet) },
-        //     onSave = { categoryName -> onEvent(TasksEvent.OnAddCategory(categoryName)) }
-        // )
+        AddCategorySheet(
+            uiState = uiState.draftState,
+            onEvent = onEvent,
+            navTo = navTo
+        )
     }
 }

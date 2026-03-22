@@ -42,6 +42,12 @@ class TasksViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            _draftState.collect { draft ->
+                _uiState.update { it.copy(draftState = draft) }
+            }
+        }
+
+        viewModelScope.launch {
             // The "Smart Default" Database collector
             _requestedCategoryId.flatMapLatest { requestedId ->
                 if (requestedId != null) {
@@ -102,6 +108,7 @@ class TasksViewModel @Inject constructor(
             is TasksEvent.OnClearDatabaseClicked -> viewModelScope.launch { repo.clearAllData() }
 
             is TasksEvent.OnDraftTitleChanged -> _draftState.update { it.copy(listTitle = event.title) }
+            is TasksEvent.OnDraftCategoryNameChanged -> _draftState.update { it.copy(newCategoryName = event.name) }
             is TasksEvent.OnDraftChecklistItemAdded -> _draftState.update { it.copy(pendingTaskItems = it.pendingTaskItems + event.itemText) }
             is TasksEvent.OnDraftCategorySelected -> _draftState.update { it.copy(selectedCategoryId = event.categoryId) }
             is TasksEvent.OnDraftPhotoAttached -> _draftState.update { it.copy(pendingPhotoUris = it.pendingPhotoUris + event.uri) }

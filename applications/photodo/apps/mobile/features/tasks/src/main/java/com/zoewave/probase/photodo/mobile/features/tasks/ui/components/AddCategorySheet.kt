@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
 
@@ -15,15 +16,17 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddCategorySheet(
-    draftState: TaskDraftState,
+    uiState: TaskDraftState,
     onEvent: (TasksEvent) -> Unit,
-    onDismiss: () -> Unit
+    navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
+    modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState
+        onDismissRequest = { navTo(null) },
+        sheetState = sheetState,
+        modifier = modifier
     ) {
         Column(
             modifier = Modifier
@@ -37,14 +40,15 @@ fun AddCategorySheet(
             // Because this modifies the draftState in the ViewModel,
             // typing here survives rotation!
             OutlinedTextField(
-                value = draftState.newCategoryName,
-                onValueChange = { /* You'll need to add OnDraftCategoryNameChanged to your events! */ },
+                value = uiState.newCategoryName,
+                onValueChange = { onEvent(TasksEvent.OnDraftCategoryNameChanged(it)) },
                 label = { Text("Category Name") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Button(
                 onClick = { onEvent(TasksEvent.OnSaveDraftClicked) },
+                enabled = uiState.newCategoryName.isNotBlank(),
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text("Create Category")

@@ -1,5 +1,7 @@
 package com.zoewave.probase.photodo.mobile.features.tasks.ui.detail
 
+// import coil.compose.AsyncImage // Uncomment when Coil is added
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,16 +46,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
-
-// import coil.compose.AsyncImage // Uncomment when Coil is added
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TaskDetailScreen(
-    listTitle: String,
     uiState: TaskDetailUiState,
     onEvent: (TaskDetailEvent) -> Unit,
-    onNavigateBack: () -> Unit,
+    navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
     modifier: Modifier = Modifier
 ) {
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
@@ -62,16 +62,22 @@ fun TaskDetailScreen(
 
     // Handle back presses appropriately
     BackHandler {
-        if (fabMenuExpanded) fabMenuExpanded = false else onNavigateBack()
+        if (fabMenuExpanded) fabMenuExpanded = false else navTo(null)
     }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(listTitle) },
+                title = {
+                    val title = when (val state = uiState.loadState) {
+                        is DetailLoadState.Success -> state.taskListWithPhotos.taskList.name
+                        else -> "Loading..."
+                    }
+                    Text(title)
+                },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = { navTo(null) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
