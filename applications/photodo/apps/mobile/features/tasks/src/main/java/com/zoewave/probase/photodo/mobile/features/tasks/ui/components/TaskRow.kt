@@ -20,7 +20,7 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 fun TaskRow(
     uiState: TaskItemUiModel,
     onEvent: (TasksEvent) -> Unit,
-    onNav: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
+    navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
     modifier: Modifier = Modifier
 ) {
     Card(modifier = modifier.fillMaxWidth()) {

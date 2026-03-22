@@ -169,8 +169,9 @@ fun TaskDetailScreen(
                                     ) {
                                         items(data.photos, key = { it.photoId }) { photo ->
                                             PhotoThumbnailCard(
-                                                uri = photo.photoUri,
-                                                onDelete = { onEvent(TaskDetailEvent.OnDeletePhoto(photo.photoId)) }
+                                                photo = photo,
+                                                onEvent = onEvent,
+                                                navTo = navTo
                                             )
                                         }
                                     }
@@ -188,12 +189,9 @@ fun TaskDetailScreen(
                                 }
                                 items(data.taskItems, key = { it.itemId }) { item ->
                                     TaskItemRow(
-                                        text = item.text,
-                                        isChecked = item.isChecked,
-                                        onCheckedChange = { isChecked ->
-                                            onEvent(TaskDetailEvent.OnItemCheckedChange(item, isChecked))
-                                        },
-                                        onDelete = { onEvent(TaskDetailEvent.OnDeleteItem(item)) }
+                                        item = item,
+                                        onEvent = onEvent,
+                                        navTo = navTo
                                     )
                                 }
                             }

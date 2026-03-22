@@ -24,7 +24,7 @@ fun AddCategorySheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
-        onDismissRequest = { navTo(null) },
+        onDismissRequest = { onEvent(TasksEvent.OnDismissBottomSheet) },
         sheetState = sheetState,
         modifier = modifier
     ) {

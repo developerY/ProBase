@@ -18,11 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.features.home.ui.HomeEvent
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiState
 
 @Composable
 fun HomeScreenCat(
     uiState: HomeUiState,
+    onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
     modifier: Modifier = Modifier
 ) {
@@ -54,10 +56,8 @@ fun HomeScreenCat(
                     items(uiState.categories, key = { it.id }) { category ->
                         CategoryCard(
                             category = category,
-                            onClick = {
-                                // ✅ Standardized to use navTo for screen jumps
-                                navTo(PhotoTodoRoute.TasksList(categoryId = category.id, categoryName = category.name))
-                            }
+                            onEvent = onEvent,
+                            navTo = navTo
                         )
                     }
                 }
@@ -69,12 +69,15 @@ fun HomeScreenCat(
 @Composable
 private fun CategoryCard(
     category: com.zoewave.probase.photodo.mobile.features.home.ui.CategoryOverviewUiModel,
-    onClick: () -> Unit,
+    onEvent: (HomeEvent) -> Unit,
+    navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        onClick = onClick
+        onClick = {
+            navTo(PhotoTodoRoute.TasksList(categoryId = category.id, categoryName = category.name))
+        }
     ) {
         Row(
             modifier = Modifier
@@ -107,6 +110,7 @@ private fun CategoryCard(
 fun HomeScreenCatPreview_Loading() {
     HomeScreenCat(
         uiState = HomeUiState.Loading,
+        onEvent = {},
         navTo = {}
     )
 }
@@ -126,6 +130,7 @@ fun HomeScreenCatPreview_Success() {
             ),
             urgentProjects = emptyList()
         ),
+        onEvent = {},
         navTo = {}
     )
 }
