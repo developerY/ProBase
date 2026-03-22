@@ -10,28 +10,37 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.FormatListBulleted
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleFloatingActionButton
+import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -41,8 +50,8 @@ fun TasksListScreen(
     uiState: TasksUiState,
     onEvent: (TasksEvent) -> Unit,
     onNavigateToDetail: (Long, String) -> Unit,
-    screenTitle: String = "My Projects", // Default for the Global tab
-    onNavigateBack: (() -> Unit)? = null // Null means we are on the Global tab (no back button)
+    screenTitle: String = "My Projects",
+    onNavigateBack: (() -> Unit)? = null
 ) {
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -52,7 +61,6 @@ fun TasksListScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                // ✅ FIX 1: Use the dynamic screenTitle so it says "Mock Category 451"
                 title = { Text(screenTitle) },
                 navigationIcon = {
                     if (onNavigateBack != null) {
@@ -62,7 +70,6 @@ fun TasksListScreen(
                     }
                 },
                 actions = {
-                    // 🐞 Debug Buttons
                     IconButton(onClick = { onEvent(TasksEvent.OnGenerateFullMockDataClicked) }) {
                         Icon(Icons.Default.BugReport, contentDescription = "Populate DB")
                     }
@@ -72,8 +79,45 @@ fun TasksListScreen(
                 }
             )
         },
+        // ✅ 1. THE FAB IS RESTORED
         floatingActionButton = {
-            // ... (Keep your existing FAB Menu code exactly as it is here!) ...
+            FloatingActionButtonMenu(
+                expanded = fabMenuExpanded,
+                button = {
+                    ToggleFloatingActionButton(
+                        checked = fabMenuExpanded,
+                        onCheckedChange = { fabMenuExpanded = it }
+                    ) {
+                        val imageVector by remember {
+                            derivedStateOf {
+                                if (checkedProgress > 0.5f) Icons.Default.Close else Icons.Default.Add
+                            }
+                        }
+                        Icon(
+                            painter = rememberVectorPainter(imageVector),
+                            contentDescription = "Toggle Add Menu",
+                            modifier = Modifier.animateIcon({ checkedProgress })
+                        )
+                    }
+                }
+            ) {
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        fabMenuExpanded = false
+                        onEvent(TasksEvent.OnAddListClicked) // Opens the Project Sheet!
+                    },
+                    icon = { Icon(Icons.Default.FormatListBulleted, contentDescription = null) },
+                    text = { Text("New Project") }
+                )
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        fabMenuExpanded = false
+                        onEvent(TasksEvent.OnAddCategoryClicked) // Opens the Category Sheet!
+                    },
+                    icon = { Icon(Icons.Default.Folder, contentDescription = null) },
+                    text = { Text("New Category") }
+                )
+            }
         }
     ) { localPadding ->
         Box(
@@ -81,14 +125,14 @@ fun TasksListScreen(
                 .fillMaxSize()
                 .padding(localPadding)
         ) {
-            // ✅ FIX 2: A strict if/else chain so UI elements NEVER overlap!
-
+            // Your exact if/else logic for the Empty States vs Data Lists
             if (uiState.isNoCategoriesYet) {
                 // Scenario A: Database is completely empty
                 Text(
                     text = "No categories yet.\nTap + to create a Category first!",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else if (uiState.projectLists.isEmpty()) {
@@ -97,6 +141,7 @@ fun TasksListScreen(
                     text = "No projects in ${uiState.categoryName}.\nTap + to create one!",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
@@ -110,69 +155,42 @@ fun TasksListScreen(
                     items(uiState.projectLists, key = { it.id }) { project ->
                         ProjectRow(
                             project = project,
-                            // ✅ TRIGGER THE NAVIGATION EVENT HERE!
-                            onClick = { onNavigateToDetail(project.id, project.title) }
+                            onEvent = onEvent // Pass the channel straight down!
                         )
                     }
                 }
             }
         }
     }
-}
 
-// ... (Your TasksListScreen composable up here) ...
 
-@Preview(showBackground = true, name = "1. Populated Projects List")
-@Composable
-private fun TasksListScreenPopulatedPreview() {
-    MaterialTheme {
-        // Create a mock state with some realistic relational data
-        val mockState = TasksUiState(
-            projectLists = listOf(
-                ProjectListUiModel(
-                    id = 1001L,
-                    title = "Boxabl PreFab Home Build",
-                    categoryName = "Real Estate"
-                ),
-                ProjectListUiModel(
-                    id = 1002L,
-                    title = "AshBike Mobile App",
-                    categoryName = "Development"
-                ),
-                ProjectListUiModel(
-                    id = 1003L,
-                    title = "KoColor Brand Launch",
-                    categoryName = "Business"
-                )
-            )
-        )
+    // ✅ 2. THE SHEETS ARE ACTUALLY RENDERED HERE!
+    // They sit outside the Scaffold so they can float over the entire screen.
 
-        Surface {
-            TasksListScreen(
-                uiState = TasksUiState(projectLists = emptyList()),
-                onEvent = TODO(),
-                modifier = TODO(),
-                onNavigateToDetail = TODO(),
-            )
-            // Note: If you ended up adding `onNavigateToDetail` directly to this
-            // screen's signature instead of the Route wrapper, just add a dummy
-            // lambda here like: `onNavigateToDetail = { _, _ -> }`
+    if (uiState.isAddListSheetOpen) {
+        // This is the component we built earlier!
+        /*AddListSheet(
+            onDismiss = { onEvent(TasksEvent.OnDismissBottomSheet) },
+            onSave = { projectName ->
+                // Make sure your TasksEvent has something like OnAddList(val title: String)
+                // or just hook it up to your draft saving logic!
+                // onEvent(TasksEvent.OnDraftTitleChanged(projectName))
+                // onEvent(TasksEvent.OnSaveDraftClicked)
 
-        }
+                // Assuming you use the direct insert event we built:
+                onEvent(TasksEvent.OnAddList(projectName))
+            },
+            modifier = TODO(),
+            draftState = TODO(),
+            onEvent = TODO()
+        )*/
     }
-}
 
-@Preview(showBackground = true, name = "2. Empty State")
-@Composable
-private fun TasksListScreenEmptyPreview() {
-    MaterialTheme {
-        Surface {
-            TasksListScreen(
-                uiState = TasksUiState(projectLists = emptyList()),
-                onEvent = TODO(),
-                modifier = TODO(),
-                onNavigateToDetail = TODO(),
-            )
-        }
+    if (uiState.isAddCategorySheetOpen) {
+        // Assuming you made a similar sheet/dialog for Categories
+        // AddCategoryDialog(
+        //     onDismiss = { onEvent(TasksEvent.OnDismissBottomSheet) },
+        //     onSave = { categoryName -> onEvent(TasksEvent.OnAddCategory(categoryName)) }
+        // )
     }
 }

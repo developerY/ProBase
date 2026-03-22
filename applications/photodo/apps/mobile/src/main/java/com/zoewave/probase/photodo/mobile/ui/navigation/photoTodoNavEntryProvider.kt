@@ -24,12 +24,18 @@ fun photoTodoNavEntryProvider(
         when (key) {
 
             // --- TAB 1: DASHBOARD ---
+            // ... inside your when(key) block:
+
             is PhotoTodoRoute.Home -> {
                 // 1. The New Root (Chart & AI Placeholder)
                 HomeUiRoute(
                     modifier = Modifier.fillMaxSize(),
                     onNavigateToCategoryGrid = {
                         navigateTo(PhotoTodoRoute.CategoryGrid)
+                    },
+                    // ✅ CATCH THE CLICK AND WARP TO THE DEEP DETAIL SCREEN
+                    onNavigateToProject = { listId, listTitle ->
+                        navigateTo(PhotoTodoRoute.TaskDetail(listId = listId, listTitle = listTitle))
                     }
                 )
             }

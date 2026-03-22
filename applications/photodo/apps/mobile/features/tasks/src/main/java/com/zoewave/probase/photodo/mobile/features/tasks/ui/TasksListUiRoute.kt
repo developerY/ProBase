@@ -27,9 +27,21 @@ fun TasksListUiRoute(
     // 3. Pass ONLY State, Events, and Navigation to the dumb screen
     TasksListScreen(
         uiState = uiState,
-        onEvent = viewModel::onEvent,
         onNavigateToDetail = onNavigateToDetail,
         screenTitle = uiState.categoryName,
-        modifier = modifier
+        modifier = modifier,
+        // ✅ THE TRAFFIC COP: Intercept navigation, pass everything else through!
+        onEvent = { event ->
+            when (event) {
+                is TasksEvent.OnProjectClicked -> {
+                    // Stop the event here and trigger Nav3!
+                    onNavigateToDetail(event.projectId, event.projectTitle)
+                }
+                else -> {
+                    // Pass all other events (adding, toggling, etc.) to the ViewModel
+                    viewModel.onEvent(event)
+                }
+            }
+        }
     )
 }

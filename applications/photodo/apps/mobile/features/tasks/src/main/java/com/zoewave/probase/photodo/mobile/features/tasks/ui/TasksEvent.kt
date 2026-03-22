@@ -11,7 +11,11 @@ sealed interface TasksEvent {
     data object OnAddList : TasksEvent
     data object OnDeleteListClicked : TasksEvent
 
+    data class OnToggleProjectFavorite(val projectId: Long, val isFavorite: Boolean) : TasksEvent
+    data class OnToggleProjectUrgent(val projectId: Long, val isUrgent: Boolean) : TasksEvent
 
+    // NEW: Handle the row tap as an event!
+    data class OnProjectClicked(val projectId: Long, val projectTitle: String) : TasksEvent
 
     // Draft Updates
     data class OnDraftCategorySelected(val categoryId: Long) : TasksEvent

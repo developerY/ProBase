@@ -37,12 +37,12 @@ class TasksViewModel @Inject constructor(
     private val _draftState = MutableStateFlow(TaskDraftState())
     val draftState: StateFlow<TaskDraftState> = _draftState.asStateFlow()
 
-    // ✅ NEW: Tracks the ID passed in from Tab 1
+    // Tracks the ID passed in from Tab 1
     private val _requestedCategoryId = MutableStateFlow<Long?>(null)
 
     init {
         viewModelScope.launch {
-            // ✅ NEW: The "Smart Default" Database collector
+            // The "Smart Default" Database collector
             _requestedCategoryId.flatMapLatest { requestedId ->
                 if (requestedId != null) {
                     // Scenario A: User clicked a specific category from Tab 1
@@ -50,7 +50,7 @@ class TasksViewModel @Inject constructor(
                         val targetData = allData.find { it.category.categoryId == requestedId }
                         if (targetData != null) {
                             val mappedProjects = targetData.taskLists.map {
-                                ProjectListUiModel(it.listId, it.name, targetData.category.name)
+                                ProjectListUiModel(it.listId, it.name, targetData.category.name, it.isFavorite, it.isUrgent)
                             }
                             SmartDbResult(targetData.category.categoryId, targetData.category.name, mappedProjects, false)
                         } else {
@@ -65,7 +65,7 @@ class TasksViewModel @Inject constructor(
                         } else {
                             val firstData = allData.first()
                             val mappedProjects = firstData.taskLists.map {
-                                ProjectListUiModel(it.listId, it.name, firstData.category.name)
+                                ProjectListUiModel(it.listId, it.name, firstData.category.name, it.isFavorite, it.isUrgent)
                             }
                             SmartDbResult(firstData.category.categoryId, firstData.category.name, mappedProjects, false)
                         }
@@ -86,15 +86,14 @@ class TasksViewModel @Inject constructor(
         }
     }
 
-    // ✅ NEW: Nav3 calls this to pass the ID
+    // Nav3 calls this to pass the ID
     fun setCategoryId(id: Long?) {
-        // ✅ The Memory Fix: Only update if the router passed a REAL ID.
-        // If it passes null (because you tapped the bottom tab), we do nothing,
-        // which preserves the last category you were looking at!
+        // The Memory Fix: Only update if the router passed a REAL ID.
         if (id != null) {
             _requestedCategoryId.value = id
         }
     }
+
     fun onEvent(event: TasksEvent) {
         // --- YOUR EXISTING EVENTS STAY EXACTLY THE SAME! ---
         when (event) {
@@ -124,8 +123,47 @@ class TasksViewModel @Inject constructor(
                     )
                 }
             }
-            TasksEvent.OnAddList -> TODO()
-            TasksEvent.OnDeleteListClicked -> TODO()
+
+            // --- SAFELY IMPLEMENTED NEW EVENTS ---
+
+            is TasksEvent.OnProjectClicked -> {
+                // Intentionally left blank!
+                // We intercept this in TasksListUiRoute to trigger navigation.
+            }
+
+            is TasksEvent.OnToggleProjectFavorite -> {
+                viewModelScope.launch {
+                    // Uncomment once you add this function to PhotoDoRepo:
+                    // repo.updateProjectFavoriteStatus(event.projectId, event.isFavorite)
+                }
+            }
+
+            is TasksEvent.OnToggleProjectUrgent -> {
+                viewModelScope.launch {
+                    // Uncomment once you add this function to PhotoDoRepo:
+                    // repo.updateProjectUrgentStatus(event.projectId, event.isUrgent)
+                }
+            }
+
+            is TasksEvent.OnAddList -> {
+                // If bypassing the draft state entirely and passing a string directly
+                val currentCategoryId = _uiState.value.categoryId ?: return
+                viewModelScope.launch {
+                    val newList = TaskListEntity(
+                        categoryId = currentCategoryId,
+                        name = event.toString() // Assuming your event has a 'title' property
+                    )
+                    repo.insertTaskList(newList)
+                    onEvent(TasksEvent.OnDismissBottomSheet)
+                }
+            }
+
+            is TasksEvent.OnDeleteListClicked -> {
+                viewModelScope.launch {
+                    // Uncomment once you add this function to PhotoDoRepo:
+                    // repo.deleteTaskListById(event.listId)
+                }
+            }
         }
     }
 
@@ -136,7 +174,7 @@ class TasksViewModel @Inject constructor(
         viewModelScope.launch {
             val timestamp = System.currentTimeMillis()
 
-            // ✅ ENHANCEMENT: Use the Smart Default Category ID if they didn't pick one in the draft!
+            // ENHANCEMENT: Use the Smart Default Category ID if they didn't pick one in the draft!
             val categoryId: Long = draft.selectedCategoryId
                 ?: _uiState.value.categoryId
                 ?: run {
@@ -147,17 +185,17 @@ class TasksViewModel @Inject constructor(
             val newList = TaskListEntity(categoryId = categoryId, name = draft.listTitle)
             val generatedListId: Long = repo.insertTaskList(newList)
 
-            // 3. Insert Task Items
+            // Insert Task Items
             draft.pendingTaskItems.forEach { itemText ->
                 repo.insertTaskItem(TaskItemEntity(listId = generatedListId, text = itemText, isChecked = false))
             }
 
-            // 4. Insert Photos
+            // Insert Photos
             draft.pendingPhotoUris.forEach { uri ->
                 repo.insertPhoto(PhotoEntity(listId = generatedListId, photoUri = uri, timestamp = timestamp))
             }
 
-            // 5. Clear the draft so the UI closes the Bottom Sheet cleanly
+            // Clear the draft so the UI closes the Bottom Sheet cleanly
             _draftState.value = TaskDraftState()
             onEvent(TasksEvent.OnDismissBottomSheet) // Close sheets cleanly
         }
