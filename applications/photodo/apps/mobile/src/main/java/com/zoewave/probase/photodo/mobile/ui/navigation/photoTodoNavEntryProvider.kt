@@ -99,7 +99,6 @@ fun photoTodoNavEntryProvider(
                 Text("Settings")
             }
 
-            PhotoTodoRoute.CategoryGrid -> TODO()
             is PhotoTodoRoute.CategoryTasks -> TODO()
         }
     }

@@ -22,7 +22,7 @@ fun PhotoDoMainScreen() {
         bottomBar = {
             PhotoTodoBottomBar(
                 currentRoute = currentRoute,
-                onNavigateTo = { selectedRoute ->
+                navTo = { selectedRoute ->
                     if (currentRoute != selectedRoute) {
                         backStack.clear()
                         backStack.add(PhotoTodoRoute.Home)

@@ -22,22 +22,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
+import com.zoewave.probase.applications.photodo.db.entity.TaskItemEntity
 
 // import coil.compose.AsyncImage // Uncomment when Coil is added
 
 @Composable
 fun PhotoThumbnailCard(
-    uri: String,
-    onDelete: () -> Unit
+    photo: PhotoEntity,
+    onEvent: (TaskDetailEvent) -> Unit,
+    navTo: (PhotoTodoRoute?) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(120.dp)
             .clip(RoundedCornerShape(12.dp))
     ) {
         // Replace this Box with AsyncImage when Coil is added
         // AsyncImage(
-        //     model = uri,
+        //     model = photo.photoUri,
         //     contentDescription = "Task Photo",
         //     contentScale = ContentScale.Crop,
         //     modifier = Modifier.fillMaxSize()
@@ -53,7 +58,7 @@ fun PhotoThumbnailCard(
 
         // Delete Button Overlay
         IconButton(
-            onClick = onDelete,
+            onClick = { onEvent(TaskDetailEvent.OnDeletePhoto(photo.photoId)) },
             modifier = Modifier.align(Alignment.TopEnd)
         ) {
             Surface(
@@ -73,29 +78,31 @@ fun PhotoThumbnailCard(
 
 @Composable
 fun TaskItemRow(
-    text: String,
-    isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    onDelete: () -> Unit
+    item: TaskItemEntity,
+    onEvent: (TaskDetailEvent) -> Unit,
+    navTo: (PhotoTodoRoute?) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
-            checked = isChecked,
-            onCheckedChange = onCheckedChange
+            checked = item.isChecked,
+            onCheckedChange = { isChecked ->
+                onEvent(TaskDetailEvent.OnItemCheckedChange(item, isChecked))
+            }
         )
         Text(
-            text = text,
+            text = item.text,
             style = MaterialTheme.typography.bodyLarge,
-            textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None,
-            color = if (isChecked) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
+            textDecoration = if (item.isChecked) TextDecoration.LineThrough else TextDecoration.None,
+            color = if (item.isChecked) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
         )
-        IconButton(onClick = onDelete) {
+        IconButton(onClick = { onEvent(TaskDetailEvent.OnDeleteItem(item)) }) {
             Icon(
                 Icons.Default.Close,
                 contentDescription = "Delete Task",

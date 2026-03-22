@@ -152,7 +152,11 @@ fun HomeOverviewScreen(
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is HomeUiState.Empty -> {
-                    EmptyHomeState(modifier = Modifier.align(Alignment.Center))
+                    EmptyHomeState(
+                        onEvent = onEvent,
+                        navTo = navTo,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
                 is HomeUiState.Success -> {
                     LazyVerticalGrid(
@@ -169,10 +173,7 @@ fun HomeOverviewScreen(
                             CategoryDashboardCard(
                                 category = category,
                                 index = index,
-                                onClick = {
-                                    // ✅ Use the standardized navTo channel
-                                    navTo(PhotoTodoRoute.TasksList(categoryId = category.id, categoryName = category.name))
-                                }
+                                navTo = navTo
                             )
                         }
                     }
@@ -187,7 +188,7 @@ fun HomeOverviewScreen(
 fun CategoryDashboardCard(
     category: CategoryOverviewUiModel,
     index: Int,
-    onClick: () -> Unit,
+    navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Dynamically cycle through Material 3 expressive container colors!
@@ -199,7 +200,9 @@ fun CategoryDashboardCard(
     }
 
     Card(
-        onClick = onClick,
+        onClick = {
+            navTo(PhotoTodoRoute.TasksList(categoryId = category.id, categoryName = category.name))
+        },
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp), // Expressive, large rounded corners
         colors = CardDefaults.cardColors(
@@ -262,7 +265,11 @@ fun CategoryDashboardCard(
 }
 
 @Composable
-fun EmptyHomeState(modifier: Modifier = Modifier) {
+fun EmptyHomeState(
+    onEvent: (HomeEvent) -> Unit,
+    navTo: (PhotoTodoRoute?) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier.padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

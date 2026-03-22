@@ -13,7 +13,7 @@ import com.zoewave.probase.photodo.mobile.ui.theme.ProBaseTheme
 @Composable
 fun PhotoTodoBottomBar(
     currentRoute: PhotoTodoRoute,
-    onNavigateTo: (PhotoTodoRoute) -> Unit
+    navTo: (PhotoTodoRoute) -> Unit
 ) {
     NavigationBar {
         topLevelRoutes.forEach { route ->
@@ -21,7 +21,7 @@ fun PhotoTodoBottomBar(
                 // ✅ THE FIX: Compare the class types, not the data payload!
                 // This tells the bar: "If I am looking at ANY TasksList, highlight the Tasks tab!"
                 selected = currentRoute::class == route::class,
-                onClick = { onNavigateTo(route) },
+                onClick = { navTo(route) },
                 icon = { Icon(imageVector = route.icon, contentDescription = route.title) },
                 label = { Text(route.title) }
             )
@@ -33,6 +33,6 @@ fun PhotoTodoBottomBar(
 @Composable
 fun PhotoTodoBottomBarPreview() {
     ProBaseTheme {
-        PhotoTodoBottomBar(currentRoute = PhotoTodoRoute.Home, onNavigateTo = {})
+        PhotoTodoBottomBar(currentRoute = PhotoTodoRoute.Home, navTo = {})
     }
 }
