@@ -14,43 +14,70 @@ class DebugTaskDevTools @Inject constructor(
     override suspend fun seedDatabase() {
         val timestamp = System.currentTimeMillis()
 
-        // 1. Create a Root Category
-        // We manually assign the ID here so we know exactly what to pass to the TaskList
-        val mockCategoryId = (1..1000).random().toLong()
-        val newCategory = CategoryEntity(
-            categoryId = mockCategoryId,
-            name = "Mock Category $mockCategoryId",
-            description = "Auto-generated test data",
-            imageUri = "content://media/external/images/media/${(1..50).random()}"
-        )
-        repo.insertCategory(newCategory)
+        // 1. Create Categories with manual IDs so we can link them
+        val realEstateId = (1000..1999).random().toLong()
+        val devId = (2000..2999).random().toLong()
+        val businessId = (3000..3999).random().toLong()
 
-        // 2. Create a Task List attached to the Category
-        // Again, manual ID so we can link the TaskItems and Photos to it
-        val mockListId = (1001..2000).random().toLong()
-        val newList = TaskListEntity(
-            listId = mockListId,
-            categoryId = mockCategoryId, // FK REFERENCE to Category
-            name = "Project: PreFab Home Setup"
-        )
-        repo.insertTaskList(newList)
+        repo.insertCategory(CategoryEntity(categoryId = realEstateId, name = "Real Estate", description = "Property management"))
+        repo.insertCategory(CategoryEntity(categoryId = devId, name = "Development", description = "Software projects"))
+        repo.insertCategory(CategoryEntity(categoryId = businessId, name = "Business", description = "Brands and marketing"))
 
-        // 3. Create Multiple Task Items attached to the List
-        for (i in 1..3) {
+        // 2. Create Task Lists (Projects) with the NEW AI FLAGS
+        val prefabId = (4000..4999).random().toLong()
+        repo.insertTaskList(
+            TaskListEntity(
+                listId = prefabId,
+                categoryId = realEstateId, // FK REFERENCE
+                name = "Boxabl PreFab Home Build",
+                notes = "Foundation and assembly",
+                isUrgent = true,   // ❗ Will show the red exclamation
+                isFavorite = true  // ❤️ Will show the filled heart
+            )
+        )
+
+        repo.insertTaskList(
+            TaskListEntity(
+                listId = (5000..5999).random().toLong(),
+                categoryId = devId, // FK REFERENCE
+                name = "AshBike Mobile App",
+                notes = "WatchOS and Android integration",
+                isUrgent = false,
+                isFavorite = true
+            )
+        )
+
+        repo.insertTaskList(
+            TaskListEntity(
+                listId = (6000..6999).random().toLong(),
+                categoryId = businessId, // FK REFERENCE
+                name = "KoColor Brand Launch",
+                notes = "Marketing and supply chain",
+                isUrgent = true,
+                isFavorite = false
+            )
+        )
+
+        // 3. Create Multiple Task Items attached to the PreFab List
+        val prefabTasks = listOf(
+            "Inspect foundation wiring phase 1",
+            "Inspect foundation wiring phase 2",
+            "Schedule city plumbing sign-off"
+        )
+
+        prefabTasks.forEachIndexed { index, taskText ->
             val newTaskItem = TaskItemEntity(
-                // Notice we DO NOT pass 'itemId'. It defaults to 0, and Room auto-generates it!
-                listId = mockListId, // FK REFERENCE to TaskListEntity
-                text = "Inspect foundation wiring phase $i",
-                isChecked = i % 2 == 0 // Randomly complete alternating tasks
+                listId = prefabId, // FK REFERENCE to the specific TaskList
+                text = taskText,
+                isChecked = index % 2 == 0 // Randomly complete alternating tasks
             )
             repo.insertTaskItem(newTaskItem)
         }
 
-        // 4. Attach Photos to the Task List
+        // 4. Attach Photos to the PreFab List
         for (j in 1..2) {
             val newPhoto = PhotoEntity(
-                // Notice we DO NOT pass 'photoId'. It defaults to 0, and Room auto-generates it!
-                listId = mockListId, // FK REFERENCE to TaskListEntity
+                listId = prefabId, // FK REFERENCE
                 photoUri = "content://media/external/images/media/${(100..999).random()}",
                 caption = "Mock inspection photo $j",
                 timestamp = timestamp

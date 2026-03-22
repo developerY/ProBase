@@ -95,7 +95,6 @@ class TasksViewModel @Inject constructor(
     }
 
     fun onEvent(event: TasksEvent) {
-        // --- YOUR EXISTING EVENTS STAY EXACTLY THE SAME! ---
         when (event) {
             is TasksEvent.OnAddRandomTaskClicked -> insertRandomTask()
             is TasksEvent.OnTaskToggled -> updateTask(event.taskId, event.isCompleted)
