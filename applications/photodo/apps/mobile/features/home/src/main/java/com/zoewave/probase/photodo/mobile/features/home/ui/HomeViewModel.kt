@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,12 +31,14 @@ class HomeViewModel @Inject constructor(
         .map { categoriesWithLists ->
             if (categoriesWithLists.isEmpty()) return@map HomeUiState.Empty
 
-            // 3. Map the DB entities to our UI models and calculate the math
-            val overviewModels = categoriesWithLists.map { groupedData ->
+            val overviewModels = mutableListOf<CategoryOverviewUiModel>()
+            val urgentProjects = mutableListOf<ProjectListUiModel>() // ✅ Temporary list
 
+            categoriesWithLists.forEach { groupedData ->
                 val category = groupedData.category
                 val taskLists = groupedData.taskLists
 
+                // --- YOUR EXISTING MATH LOGIC ---
                 val totalTasks = taskLists.size
 
                 // Based on your schema, we count how many lists are marked "Completed"
@@ -48,17 +51,35 @@ class HomeViewModel @Inject constructor(
                     0f
                 }
 
-                CategoryOverviewUiModel(
-                    id = category.categoryId,
-                    name = category.name,
-                    totalTasks = totalTasks,
-                    completedTasks = completedTasks,
-                    progressPercentage = progressPercentage
+                overviewModels.add(
+                    CategoryOverviewUiModel(
+                        id = category.categoryId,
+                        name = category.name,
+                        totalTasks = totalTasks,
+                        completedTasks = completedTasks,
+                        progressPercentage = progressPercentage
+                    )
                 )
+
+                // --- ✅ NEW: FILTER URGENT PROJECTS AT THE SAME TIME ---
+                taskLists.filter { it.isFavorite || it.isUrgent }.forEach { project ->
+                    urgentProjects.add(
+                        ProjectListUiModel(
+                            id = project.listId,
+                            title = project.name,
+                            categoryName = category.name,
+                            isFavorite = project.isFavorite,
+                            isUrgent = project.isUrgent
+                        )
+                    )
+                }
             }
 
-            // 4. Return the populated success state
-            HomeUiState.Success(overviewModels)
+            // Return the populated success state with BOTH lists!
+            HomeUiState.Success(
+                categories = overviewModels,
+                urgentProjects = urgentProjects
+            )
         }
         .catch { e ->
             Log.e(TAG, "Error calculating home overview stats", e)
@@ -68,7 +89,7 @@ class HomeViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000), // Pauses math when app is in background!
+            started = SharingStarted.WhileSubscribed(5_000),
             initialValue = HomeUiState.Loading
         )
 
@@ -78,11 +99,9 @@ class HomeViewModel @Inject constructor(
 
     fun onEvent(event: HomeEvent) {
         when (event) {
-            is HomeEvent.OnRefresh -> loadDashboardData()
-            is HomeEvent.OnTaskClicked -> {
-                // Handle navigation or detail expansion logic here
-            }
-            is HomeEvent.OnTaskToggled -> toggleTask(event.taskId, event.isCompleted)
+            is HomeEvent.OnRefresh -> {}
+            is HomeEvent.OnTaskClicked -> {}
+            is HomeEvent.OnTaskToggled -> {}
             is HomeEvent.OnCategoryClicked -> {
                 // With Nav3, navigation is usually intercepted directly in the HomeUiRoute.
                 // We just log it here for debugging purposes!
@@ -104,34 +123,5 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun loadDashboardData() {
-        viewModelScope.launch {
-            //_uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            // Simulate network/database delay
-            delay(1000)
-
-            /*_uiState.update { state ->
-                state.copy(
-                    isLoading = false,
-                    recentPhotoTasks = listOf(
-                        PhotoTask("1", "Take photo of the sunset", false),
-                        PhotoTask("2", "Scan receipt for expenses", true),
-                        PhotoTask("3", "Organize holiday album", false)
-                    )
-                )
-            }*/
-        }
-    }
-
-    private fun toggleTask(taskId: String, isCompleted: Boolean) {
-        /*_uiState.update { state ->
-            val updatedTasks = state.recentPhotoTasks.map { task ->
-                if (task.id == taskId) task.copy(isCompleted = isCompleted) else task
-            }
-            state.copy(recentPhotoTasks = updatedTasks)
-        }*/
     }
 }

@@ -1,6 +1,7 @@
 plugins {
     // 1. Conventions
     id("composetemplate.android.library")
+    id("composetemplate.android.library.compose")
 
     // 2. Essential for Data Models
     alias(libs.plugins.jetbrains.kotlin.serialization) // For saving/loading JSON
@@ -26,8 +27,10 @@ dependencies {
     // Critical for "Ride Duration", "Start Time", "End Time"
     // implementation(libs.kotlinx.datetime)
 
-    // --- 3. Immutable Collections ---
-    // Recommended for Compose stability (e.g. List<LocationPoint>)
+    // Immutable Collections
     implementation(libs.kotlinx.collections.immutable)
+
+    // Icons (Required for PhotoTodoRoute)
+    implementation(libs.androidx.compose.material.icons.extended)
 }
 

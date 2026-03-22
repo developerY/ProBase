@@ -331,7 +331,10 @@ private fun HomeOverviewScreenPopulatedPreview() {
 
         Surface {
             HomeOverviewScreen(
-                uiState = HomeUiState.Success(mockData),
+                uiState = HomeUiState.Success(
+                    categories = mockData,
+                    urgentProjects = emptyList()
+                ),
                 onEvent = {}
             )
         }
