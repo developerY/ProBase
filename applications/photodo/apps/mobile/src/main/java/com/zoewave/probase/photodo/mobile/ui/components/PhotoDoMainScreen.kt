@@ -9,7 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation3.ui.NavDisplay
 import com.zoewave.probase.photodo.mobile.ui.components.PhotoTodoBottomBar
-import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.mobile.ui.navigation.photoTodoNavEntryProvider
 
 @Composable

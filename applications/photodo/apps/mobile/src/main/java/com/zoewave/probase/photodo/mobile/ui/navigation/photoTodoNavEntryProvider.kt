@@ -4,13 +4,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute.Settings
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute.TaskDetail
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute.TasksList
 import com.zoewave.probase.photodo.mobile.features.home.ui.CategoryGridUiRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksListUiRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailUiRoute
-import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.Settings
-import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.TaskDetail
-import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.TasksList
 
 fun photoTodoNavEntryProvider(
     key: PhotoTodoRoute,
@@ -30,13 +31,7 @@ fun photoTodoNavEntryProvider(
                 // 1. The New Root (Chart & AI Placeholder)
                 HomeUiRoute(
                     modifier = Modifier.fillMaxSize(),
-                    onNavigateToCategoryGrid = {
-                        navigateTo(PhotoTodoRoute.CategoryGrid)
-                    },
-                    // ✅ CATCH THE CLICK AND WARP TO THE DEEP DETAIL SCREEN
-                    onNavigateToProject = { listId, listTitle ->
-                        navigateTo(PhotoTodoRoute.TaskDetail(listId = listId, listTitle = listTitle))
-                    }
+                    navTo = navigateTo
                 )
             }
 

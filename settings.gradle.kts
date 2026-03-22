@@ -71,7 +71,6 @@ include(":applications:ashbike:apps:mobile:data")
 include(":applications:photodo:apps:mobile:features:home")
 include(":applications:photodo:apps:mobile")
 include(":applications:photodo:model")
-include(":applications:photodo:apps:mobile")
 include(":applications:photodo:db")
 
 include(":applications:photodo:apps:mobile:features:tasks")
