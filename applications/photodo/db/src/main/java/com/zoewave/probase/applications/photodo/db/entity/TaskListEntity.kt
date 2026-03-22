@@ -25,6 +25,8 @@ data class TaskListEntity(
     var name: String,
     var notes: String? = null,
     var status: String = "To-Do", // "To-Do" or "Done"
+    val isFavorite: Boolean = false,
+    val isUrgent: Boolean = false,
     var priority: Int = 0, // 0 for normal, 1 for high
     val creationDate: Long = System.currentTimeMillis(),
     var dueDate: Long? = null

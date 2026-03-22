@@ -1,62 +1,47 @@
 package com.zoewave.probase.photodo.mobile.features.tasks.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.AddCategorySheet
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.AddListSheet
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.TasksListScreen
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
 
 @Composable
 fun TasksListUiRoute(
+    categoryId: Long?,
+    categoryName: String?,
+    onNavigateToDetail: (Long, String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: TasksViewModel = hiltViewModel(),
-    onNavigateToDetail: (Long, String) -> Unit, // ✅ Accept the Nav3 callback
+    viewModel: TasksViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    // Grab the draft state too!
-    val draftState by viewModel.draftState.collectAsStateWithLifecycle()
+    // 1. Tell the ViewModel which category to load
+    LaunchedEffect(categoryId) {
+        viewModel.setCategoryId(categoryId)
+    }
 
+    // 2. Collect ONLY the main UI state
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // 3. Pass ONLY State, Events, and Navigation to the dumb screen
     TasksListScreen(
         uiState = uiState,
-        onEvent = viewModel::onEvent,
+        onNavigateToDetail = onNavigateToDetail,
+        screenTitle = uiState.categoryName,
         modifier = modifier,
-        onNavigateToDetail = onNavigateToDetail
+        // ✅ THE TRAFFIC COP: Intercept navigation, pass everything else through!
+        onEvent = { event ->
+            when (event) {
+                is TasksEvent.OnProjectClicked -> {
+                    // Stop the event here and trigger Nav3!
+                    onNavigateToDetail(event.projectId, event.projectTitle)
+                }
+                else -> {
+                    // Pass all other events (adding, toggling, etc.) to the ViewModel
+                    viewModel.onEvent(event)
+                }
+            }
+        }
     )
-
-    // Render the isolated Bottom Sheets based on the state flags
-    if (uiState.isAddCategorySheetOpen) {
-        AddCategorySheet(
-            draftState = draftState,
-            onEvent = viewModel::onEvent,
-            onDismiss = { viewModel.onEvent(TasksEvent.OnDismissBottomSheet) }
-        )
-    }
-
-    if (uiState.isAddListSheetOpen) {
-        AddListSheet(
-            draftState = draftState,
-            onEvent = viewModel::onEvent,
-            onDismiss = { viewModel.onEvent(TasksEvent.OnDismissBottomSheet) }
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TasksListScreenPreview() {
-    TasksListScreen(
-        uiState = TasksUiState(
-            tasks = listOf(
-                TaskItemUiModel(1, "Preview DB Task 1", false),
-                TaskItemUiModel(2, "Preview DB Task 2", true)
-            )
-        ),
-        onEvent = {},
-        onNavigateToDetail = {} as (Long, String) -> Unit,
-    ) 
 }

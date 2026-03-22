@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
@@ -39,10 +38,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -52,8 +50,8 @@ fun TasksListScreen(
     uiState: TasksUiState,
     onEvent: (TasksEvent) -> Unit,
     onNavigateToDetail: (Long, String) -> Unit,
-    screenTitle: String = "My Projects", // Default for the Global tab
-    onNavigateBack: (() -> Unit)? = null // Null means we are on the Global tab (no back button)
+    screenTitle: String = "My Projects",
+    onNavigateBack: (() -> Unit)? = null
 ) {
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -63,7 +61,7 @@ fun TasksListScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("My Projects") },
+                title = { Text(screenTitle) },
                 navigationIcon = {
                     if (onNavigateBack != null) {
                         IconButton(onClick = onNavigateBack) {
@@ -72,7 +70,6 @@ fun TasksListScreen(
                     }
                 },
                 actions = {
-                    // 🐞 Debug Buttons
                     IconButton(onClick = { onEvent(TasksEvent.OnGenerateFullMockDataClicked) }) {
                         Icon(Icons.Default.BugReport, contentDescription = "Populate DB")
                     }
@@ -82,13 +79,14 @@ fun TasksListScreen(
                 }
             )
         },
+        // ✅ 1. THE FAB IS RESTORED
         floatingActionButton = {
             FloatingActionButtonMenu(
                 expanded = fabMenuExpanded,
                 button = {
                     ToggleFloatingActionButton(
                         checked = fabMenuExpanded,
-                        onCheckedChange = { fabMenuExpanded = !fabMenuExpanded }
+                        onCheckedChange = { fabMenuExpanded = it }
                     ) {
                         val imageVector by remember {
                             derivedStateOf {
@@ -103,20 +101,18 @@ fun TasksListScreen(
                     }
                 }
             ) {
-                // 1. Add Task List (The "Bucket")
                 FloatingActionButtonMenuItem(
                     onClick = {
                         fabMenuExpanded = false
-                        onEvent(TasksEvent.OnAddListClicked)
+                        onEvent(TasksEvent.OnAddListClicked) // Opens the Project Sheet!
                     },
                     icon = { Icon(Icons.Default.FormatListBulleted, contentDescription = null) },
-                    text = { Text("New List") }
+                    text = { Text("New Project") }
                 )
-                // 2. Add Category (The "Super Bucket")
                 FloatingActionButtonMenuItem(
                     onClick = {
                         fabMenuExpanded = false
-                        onEvent(TasksEvent.OnAddCategoryClicked)
+                        onEvent(TasksEvent.OnAddCategoryClicked) // Opens the Category Sheet!
                     },
                     icon = { Icon(Icons.Default.Folder, contentDescription = null) },
                     text = { Text("New Category") }
@@ -124,17 +120,32 @@ fun TasksListScreen(
             }
         }
     ) { localPadding ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(localPadding)) {
-
-            if (uiState.projectLists.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(localPadding)
+        ) {
+            // Your exact if/else logic for the Empty States vs Data Lists
+            if (uiState.isNoCategoriesYet) {
+                // Scenario A: Database is completely empty
                 Text(
-                    text = "No projects yet. Tap + to create a list or category!",
+                    text = "No categories yet.\nTap + to create a Category first!",
                     style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else if (uiState.projectLists.isEmpty()) {
+                // Scenario B: This specific category is empty
+                Text(
+                    text = "No projects in ${uiState.categoryName}.\nTap + to create one!",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
+                // Scenario C: We have data! Render the list cleanly.
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
@@ -144,95 +155,42 @@ fun TasksListScreen(
                     items(uiState.projectLists, key = { it.id }) { project ->
                         ProjectRow(
                             project = project,
-                            // ✅ TRIGGER THE NAVIGATION EVENT HERE!
-                            onClick = { onNavigateToDetail(project.id, project.title) }
-                        )
-                    }
-                }
-            }
-
-
-            if (uiState.tasks.isEmpty()) {
-                Text(
-                    text = "No projects yet. Tap + to create a list or category!",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // We will update this to show Categories containing Task Lists
-                    items(uiState.tasks, key = { it.id }) { taskList ->
-                        // Tapping this row will trigger navigation to the Detail Screen!
-                        TaskRow(
-                            task = taskList,
-                            onToggle = { isCompleted ->
-                                onEvent(TasksEvent.OnTaskToggled(taskList.id, isCompleted))
-                            }
+                            onEvent = onEvent // Pass the channel straight down!
                         )
                     }
                 }
             }
         }
     }
-}
 
-// ... (Your TasksListScreen composable up here) ...
 
-@Preview(showBackground = true, name = "1. Populated Projects List")
-@Composable
-private fun TasksListScreenPopulatedPreview() {
-    MaterialTheme {
-        // Create a mock state with some realistic relational data
-        val mockState = TasksUiState(
-            projectLists = listOf(
-                ProjectListUiModel(
-                    id = 1001L,
-                    title = "Boxabl PreFab Home Build",
-                    categoryName = "Real Estate"
-                ),
-                ProjectListUiModel(
-                    id = 1002L,
-                    title = "AshBike Mobile App",
-                    categoryName = "Development"
-                ),
-                ProjectListUiModel(
-                    id = 1003L,
-                    title = "KoColor Brand Launch",
-                    categoryName = "Business"
-                )
-            )
-        )
+    // ✅ 2. THE SHEETS ARE ACTUALLY RENDERED HERE!
+    // They sit outside the Scaffold so they can float over the entire screen.
 
-        Surface {
-            TasksListScreen(
-                uiState = TasksUiState(projectLists = emptyList()),
-                onEvent = TODO(),
-                modifier = TODO(),
-                onNavigateToDetail = TODO(),
-            )
-            // Note: If you ended up adding `onNavigateToDetail` directly to this
-            // screen's signature instead of the Route wrapper, just add a dummy
-            // lambda here like: `onNavigateToDetail = { _, _ -> }`
+    if (uiState.isAddListSheetOpen) {
+        // This is the component we built earlier!
+        /*AddListSheet(
+            onDismiss = { onEvent(TasksEvent.OnDismissBottomSheet) },
+            onSave = { projectName ->
+                // Make sure your TasksEvent has something like OnAddList(val title: String)
+                // or just hook it up to your draft saving logic!
+                // onEvent(TasksEvent.OnDraftTitleChanged(projectName))
+                // onEvent(TasksEvent.OnSaveDraftClicked)
 
-        }
+                // Assuming you use the direct insert event we built:
+                onEvent(TasksEvent.OnAddList(projectName))
+            },
+            modifier = TODO(),
+            draftState = TODO(),
+            onEvent = TODO()
+        )*/
     }
-}
 
-@Preview(showBackground = true, name = "2. Empty State")
-@Composable
-private fun TasksListScreenEmptyPreview() {
-    MaterialTheme {
-        Surface {
-            TasksListScreen(
-                uiState = TasksUiState(projectLists = emptyList()),
-                onEvent = TODO(),
-                modifier = TODO(),
-                onNavigateToDetail = TODO(),
-            )
-        }
+    if (uiState.isAddCategorySheetOpen) {
+        // Assuming you made a similar sheet/dialog for Categories
+        // AddCategoryDialog(
+        //     onDismiss = { onEvent(TasksEvent.OnDismissBottomSheet) },
+        //     onSave = { categoryName -> onEvent(TasksEvent.OnAddCategory(categoryName)) }
+        // )
     }
 }

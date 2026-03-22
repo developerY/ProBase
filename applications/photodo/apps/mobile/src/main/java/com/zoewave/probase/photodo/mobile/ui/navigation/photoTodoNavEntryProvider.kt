@@ -4,12 +4,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
+import com.zoewave.probase.photodo.mobile.features.home.ui.CategoryGridUiRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiRoute
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.CategoryTasksUiRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksListUiRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailUiRoute
-import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.CategoryTasks
-import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.Home
 import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.Settings
 import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.TaskDetail
 import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.TasksList
@@ -17,33 +15,55 @@ import com.zoewave.probase.photodo.mobile.ui.navigation.PhotoTodoRoute.TasksList
 fun photoTodoNavEntryProvider(
     key: PhotoTodoRoute,
     navigateTo: (PhotoTodoRoute) -> Unit,
-    navigateBack: () -> Unit // ✅ ADDED: To handle popping the Detail Screen
-    // Optional: Pass an onTabSelected callback if you want to do the Cross-Tab Jump!
-    // onTabSelected: (PhotoTodoRoute) -> Unit
+    navigateBack: () -> Unit,
+    // Un-comment this if you need to manually tell your BottomBar to switch tabs!
+    // onTabSelected: (PhotoTodoRoute) -> Unit = {}
 ): NavEntry<PhotoTodoRoute> {
 
     return NavEntry(key) {
         when (key) {
-            is Home -> {
+
+            // --- TAB 1: DASHBOARD ---
+            // ... inside your when(key) block:
+
+            is PhotoTodoRoute.Home -> {
+                // 1. The New Root (Chart & AI Placeholder)
                 HomeUiRoute(
                     modifier = Modifier.fillMaxSize(),
-                    onNavigateToCategory = { categoryId, categoryName ->
-                        // ✅ FIXED: Navigate to the Category drill-down screen, NOT the detail screen!
-                        navigateTo(CategoryTasks(categoryId, categoryName))
+                    onNavigateToCategoryGrid = {
+                        navigateTo(PhotoTodoRoute.CategoryGrid)
+                    },
+                    // ✅ CATCH THE CLICK AND WARP TO THE DEEP DETAIL SCREEN
+                    onNavigateToProject = { listId, listTitle ->
+                        navigateTo(PhotoTodoRoute.TaskDetail(listId = listId, listTitle = listTitle))
                     }
                 )
             }
 
+            is PhotoTodoRoute.CategoryGrid -> {
+                // 2. The Drill-Down (The Grid of Cards)
+                CategoryGridUiRoute(
+                    modifier = Modifier.fillMaxSize(),
+                    onNavigateToCategory = { categoryId, categoryName ->
+                        // 3. THE CROSS-TAB JUMP 🪄
+                        navigateTo(PhotoTodoRoute.TasksList(categoryId = categoryId, categoryName = categoryName))
+                    }
+                )
+            }
+
+            // --- TAB 2: WORKSPACE ---
             is TasksList -> {
                 TasksListUiRoute(
-                    // ✅ Pass the navigation event down to the list
+                    // ✅ Catch the ID and Name from the Nav3 key and pass them to the Route!
+                    categoryId = key.categoryId,
+                    categoryName = key.categoryName,
                     onNavigateToDetail = { id, title ->
                         navigateTo(TaskDetail(listId = id, listTitle = title))
                     }
                 )
             }
 
-            // ✅ NEW: Handle the Detail Route
+            // --- DEEP DETAIL SCREEN ---
             is TaskDetail -> {
                 TaskDetailUiRoute(
                     listId = key.listId,
@@ -52,26 +72,13 @@ fun photoTodoNavEntryProvider(
                 )
             }
 
+            // --- TAB 3: SETTINGS ---
             is Settings -> {
                 Text("Settings")
             }
 
-            is PhotoTodoRoute.CategoryTasks -> {
-                CategoryTasksUiRoute(
-                    categoryId = key.categoryId,
-                    categoryName = key.categoryName,
-                    onNavigateBack = navigateBack,
-                    onNavigateToDetail = { listId, listTitle -> // ✅ Matches your signature
-
-                        // THE CROSS-TAB JUMP!
-                        // 1. If you have a state hoisted for your Bottom Bar, change it to Tasks Tab here!
-                        // onTabSelected(PhotoTodoRoute.TasksList)
-
-                        // 2. Push the deep detail screen onto the Nav3 state stack
-                        navigateTo(PhotoTodoRoute.TaskDetail(listId = listId, listTitle = listTitle))
-                    }
-                )
-            }
+            PhotoTodoRoute.CategoryGrid -> TODO()
+            is PhotoTodoRoute.CategoryTasks -> TODO()
         }
     }
 }
