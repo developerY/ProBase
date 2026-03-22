@@ -18,11 +18,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -31,25 +27,25 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddListSheet(
-    modifier: Modifier = Modifier,
-    draftState: TaskDraftState,
+    uiState: TaskDraftState,
     onEvent: (TasksEvent) -> Unit,
-    onDismiss: () -> Unit
+    navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
+    modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var listName by rememberSaveable { mutableStateOf("") }
 
     // Auto-focus the text field when the sheet opens
     val focusRequester = remember { FocusRequester() }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { onEvent(TasksEvent.OnDismissBottomSheet) },
         sheetState = sheetState,
         modifier = modifier
     ) {
@@ -67,8 +63,8 @@ fun AddListSheet(
             )
 
             OutlinedTextField(
-                value = listName,
-                onValueChange = { listName = it },
+                value = uiState.listTitle,
+                onValueChange = { onEvent(TasksEvent.OnDraftTitleChanged(it)) },
                 label = { Text("Project Name") },
                 placeholder = { Text("e.g., Kitchen Remodel") },
                 singleLine = true,
@@ -78,8 +74,8 @@ fun AddListSheet(
                 ),
                 keyboardActions = KeyboardActions(
                     onDone = {
-                        if (listName.isNotBlank()) {
-                            // onSave(listName.trim())
+                        if (uiState.listTitle.isNotBlank()) {
+                            onEvent(TasksEvent.OnSaveDraftClicked)
                         }
                     }
                 ),
@@ -93,13 +89,13 @@ fun AddListSheet(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onDismiss) {
+                TextButton(onClick = { onEvent(TasksEvent.OnDismissBottomSheet) }) {
                     Text("Cancel")
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
-                    onClick = {},// onSave(listName.trim()) },
-                    enabled = listName.isNotBlank()
+                    onClick = { onEvent(TasksEvent.OnSaveDraftClicked) },
+                    enabled = uiState.listTitle.isNotBlank()
                 ) {
                     Text("Create")
                 }
@@ -120,10 +116,9 @@ private fun AddListSheetPreview() {
         // Note: ModalBottomSheet won't render perfectly in a standard Preview
         // without a parent, but this gives you a quick look at the layout!
         AddListSheet(
-            onDismiss = {},
-            modifier = TODO(),
-            draftState = TODO(),
-            onEvent = TODO()
+            uiState = TaskDraftState(),
+            onEvent = {},
+            navTo = {}
         )
     }
 }

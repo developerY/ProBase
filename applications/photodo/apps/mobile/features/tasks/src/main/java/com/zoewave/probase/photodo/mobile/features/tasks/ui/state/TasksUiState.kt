@@ -15,6 +15,7 @@ data class TasksUiState(
     val isAddPhotoSheetOpen: Boolean = false,
 
     val projectLists: List<ProjectListUiModel> = emptyList(),
+    val draftState: TaskDraftState = TaskDraftState(),
 
     // --- NEW: SMART DEFAULT FIELDS ---
     val categoryId: Long? = null,

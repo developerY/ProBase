@@ -17,13 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.photodo.mobile.features.home.ui.HomeEvent
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiState
 
 @Composable
 fun HomeScreenCat(
     uiState: HomeUiState,
-    onEvent: (HomeEvent) -> Unit,
+    navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -55,7 +55,8 @@ fun HomeScreenCat(
                         CategoryCard(
                             category = category,
                             onClick = {
-                                onEvent(HomeEvent.OnCategoryClicked(category.id, category.name))
+                                // ✅ Standardized to use navTo for screen jumps
+                                navTo(PhotoTodoRoute.TasksList(categoryId = category.id, categoryName = category.name))
                             }
                         )
                     }
@@ -106,7 +107,7 @@ private fun CategoryCard(
 fun HomeScreenCatPreview_Loading() {
     HomeScreenCat(
         uiState = HomeUiState.Loading,
-        onEvent = {}
+        navTo = {}
     )
 }
 
@@ -125,6 +126,6 @@ fun HomeScreenCatPreview_Success() {
             ),
             urgentProjects = emptyList()
         ),
-        onEvent = {}
+        navTo = {}
     )
 }
