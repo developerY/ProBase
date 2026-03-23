@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,13 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskItemEntity
-
-// import coil.compose.AsyncImage // Uncomment when Coil is added
+import coil.compose.AsyncImage // ✅ Now actively used!
 
 @Composable
 fun PhotoThumbnailCard(
@@ -40,23 +39,15 @@ fun PhotoThumbnailCard(
             .size(120.dp)
             .clip(RoundedCornerShape(12.dp))
     ) {
-        // Replace this Box with AsyncImage when Coil is added
-        // AsyncImage(
-        //     model = photo.photoUri,
-        //     contentDescription = "Task Photo",
-        //     contentScale = ContentScale.Crop,
-        //     modifier = Modifier.fillMaxSize()
-        // )
-
-        // Placeholder background until Coil is added
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant,
+        // 🚀 1. The Real Image (Layer 1 - Bottom)
+        AsyncImage(
+            model = photo.photoUri,
+            contentDescription = "Context Photo for Task",
+            contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
-        ) {
-            Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.padding(32.dp))
-        }
+        )
 
-        // Delete Button Overlay
+        // 🛑 2. Delete Button Overlay (Layer 2 - Top Right)
         IconButton(
             onClick = { onEvent(TaskDetailEvent.OnDeletePhoto(photo.photoId)) },
             modifier = Modifier.align(Alignment.TopEnd)

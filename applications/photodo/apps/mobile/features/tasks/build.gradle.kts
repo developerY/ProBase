@@ -35,6 +35,8 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
+    implementation(libs.coil.compose)
+
     // --- Standard UI & Compose ---
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.material3)
