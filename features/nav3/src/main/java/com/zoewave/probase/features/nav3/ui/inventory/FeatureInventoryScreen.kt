@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Nfc
@@ -39,7 +40,8 @@ fun FeatureInventoryScreen(
     onNavigateToWeather: () -> Unit,
     onNavigateToBle: () -> Unit,
     onNavigateToNfc: () -> Unit,
-    onNavigateToQrScanner: () -> Unit
+    onNavigateToQrScanner: () -> Unit,
+    onNavigateToCamera: () -> Unit // ✅ Added Camera Callback
 ) {
     Scaffold(
         topBar = {
@@ -94,6 +96,14 @@ fun FeatureInventoryScreen(
                     description = "Scan QR codes and barcodes.",
                     icon = Icons.Default.QrCodeScanner, // Uses the built-in Bluetooth icon
                     onClick = onNavigateToQrScanner
+                )
+            }
+            item {
+                FeatureCard(
+                    title = "Camera",
+                    description = "Capture photos and record videos.",
+                    icon = Icons.Default.CameraAlt,
+                    onClick = onNavigateToCamera
                 )
             }
 
