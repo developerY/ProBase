@@ -18,17 +18,22 @@ fun CameraUIRoute(
     // 1. Collect State
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // 🚀 Auto-pop and pass data purely through the navTo channel!
+    // 🚀 Fixed Auto-pop logic using one-time events
     LaunchedEffect(uiState) {
         if (uiState is CamUIState.Active) {
-            val capturedUri = (uiState as CamUIState.Active).lastCapturedUri
-            if (capturedUri != null) {
-                // Encode the success state and payload into the navigation string
-                navTo("result_ok:$capturedUri")
+            // 1. Check the temporary, stateless event channel
+            val oneTimeUri = (uiState as CamUIState.Active).photoSavedUri
+
+            if (oneTimeUri != null) {
+                // 🛑 2. INSTANTLY CONSUME THE EVENT.
+                // This guarantees the screen rotation can't refire this action!
+                viewModel.onEvent(CamEvent.ConsumePhotoSavedEvent)
+
+                // 3. Encode the data and return purely through the navTo channel!
+                navTo("result_ok:$oneTimeUri")
             }
         }
     }
-
     CameraScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,

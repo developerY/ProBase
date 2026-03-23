@@ -17,4 +17,5 @@ sealed interface CamEvent {
      * Triggered if the user wants to clear the last captured image preview.
      */
     data object ClearLastCapture : CamEvent
+    data object ConsumePhotoSavedEvent : CamEvent
 }

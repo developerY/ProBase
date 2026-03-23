@@ -31,6 +31,9 @@ class CamViewModel @Inject constructor(
             is CamEvent.ClearLastCapture -> {
                 clearLastCapture()
             }
+            is CamEvent.ConsumePhotoSavedEvent -> {
+                consumeSavedEvent()
+            }
         }
     }
 
@@ -57,6 +60,16 @@ class CamViewModel @Inject constructor(
                 Log.e(TAG, "Failed to process captured image", e)
                 // Safely transition to the Error state so the UI can show a Snackbar or warning
                 _uiState.value = CamUIState.Error("Failed to save image: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    private fun consumeSavedEvent() {
+        _uiState.update { currentState ->
+            if (currentState is CamUIState.Active) {
+                currentState.copy(photoSavedUri = null)
+            } else {
+                currentState
             }
         }
     }
