@@ -2,6 +2,7 @@ package com.zoewave.photodo.model.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.GridView
@@ -40,6 +41,8 @@ sealed class PhotoTodoRoute(val title: String, val icon: ImageVector) {
 
     // --- TAB 3 ---
     data object Settings : PhotoTodoRoute("Settings", Icons.Default.Settings)
+
+    data class Camera(val listId: Long) : PhotoTodoRoute("Camera", Icons.Default.CameraAlt)
 }
 
 // Your Bottom Bar uses this, so it naturally ignores TaskDetail. Perfect!
