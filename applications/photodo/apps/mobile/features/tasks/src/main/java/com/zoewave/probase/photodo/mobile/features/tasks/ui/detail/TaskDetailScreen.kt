@@ -111,7 +111,12 @@ fun TaskDetailScreen(
                 FloatingActionButtonMenuItem(
                     onClick = {
                         fabMenuExpanded = false
-                        onEvent(TaskDetailEvent.OnCameraClick)
+
+                        // ✅ Safely grab the current listId from the Success state and trigger the warp pipe!
+                        if (uiState.loadState is DetailLoadState.Success) {
+                            val currentListId = uiState.loadState.taskListWithPhotos.taskList.listId
+                            navTo(PhotoTodoRoute.Camera(listId = currentListId))
+                        }
                     },
                     icon = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
                     text = { Text("Take Photo") }
