@@ -86,6 +86,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
     implementation(project(":core:model"))
+    implementation(project(":features:camera"))
     implementation(project(":applications:photodo:model"))
     // implementation(project(":core:database")) // Uncomment if needed
 

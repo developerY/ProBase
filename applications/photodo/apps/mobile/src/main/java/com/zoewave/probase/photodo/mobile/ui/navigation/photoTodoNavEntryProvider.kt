@@ -5,13 +5,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute.Settings
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute.TaskDetail
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute.TasksList
+import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.HomeViewModel
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.HomeOverviewScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.HomeScreen
@@ -89,6 +90,18 @@ fun photoTodoNavEntryProvider(
                     onEvent = viewModel::onEvent,
                     navTo = { route ->
                         if (route == null) navigateBack() else navigateTo(route)
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            is PhotoTodoRoute.Camera -> {
+                // We launch the isolated Camera UI from your feature module
+                CameraUIRoute(
+                    navTo = { routeString ->
+                        // The camera module uses Strings for navigation out of the box,
+                        // so we just trigger navigateBack() when it's done!
+                        navigateBack()
                     },
                     modifier = Modifier.fillMaxSize()
                 )
