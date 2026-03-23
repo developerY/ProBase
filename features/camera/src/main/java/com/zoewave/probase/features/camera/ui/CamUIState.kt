@@ -13,7 +13,7 @@ sealed interface CamUIState {
         // You can hold the last captured image here if you want
         // the ViewModel to drive the UI thumbnail preview!
         val lastCapturedUri: String? = null,
-
+        val photoSavedUri: String? = null,
         // Example: val galleryImages: List<String> = emptyList()
     ) : CamUIState
 
