@@ -96,11 +96,16 @@ fun photoTodoNavEntryProvider(
             }
 
             is PhotoTodoRoute.Camera -> {
+                // Grab our stateless Action Handler
+                val resultHandler: CameraResultHandler = hiltViewModel()
                 // We launch the isolated Camera UI from your feature module
                 CameraUIRoute(
                     navTo = { routeString ->
-                        // The camera module uses Strings for navigation out of the box,
-                        // so we just trigger navigateBack() when it's done!
+                        if (routeString.startsWith("result_ok:")) {
+                            val uriString = routeString.removePrefix("result_ok:")
+                            // ✅ Execute the pure UseCase via the Handler
+                            resultHandler.execute(listId = key.listId, uri = uriString)
+                        }
                         navigateBack()
                     },
                     modifier = Modifier.fillMaxSize()
