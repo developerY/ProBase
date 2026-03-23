@@ -75,3 +75,5 @@ include(":applications:photodo:db")
 
 include(":applications:photodo:apps:mobile:features:tasks")
 include(":applications:photodo:apps:mobile:features:settings")
+include(":applications:photodo:apps:mobile:core")
+include(":features:camera")
