@@ -1,8 +1,6 @@
 package com.zoewave.probase.ui.components
 
 // Feature Routes
-
-
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Text
 import androidx.compose.ui.unit.dp
@@ -15,7 +13,8 @@ import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventory
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventoryScreen
 import com.zoewave.probase.features.nfc.ui.NfcUiRoute
 import com.zoewave.probase.features.qrscanner.ui.QRCodeScannerScreen
-
+// ✅ Add your Camera route import here
+import com.zoewave.probase.features.camera.ui.CameraUIRoute
 
 fun featureInventoryEntryProvider(
     key: NavKey,
@@ -32,7 +31,8 @@ fun featureInventoryEntryProvider(
                     onNavigateToWeather = { navigateTo(FeatureInventory.Weather) },
                     onNavigateToBle = { navigateTo(FeatureInventory.Ble) },
                     onNavigateToNfc = { navigateTo(FeatureInventory.Nfc) },
-                    onNavigateToQrScanner = { navigateTo(FeatureInventory.QrScanner) }
+                    onNavigateToQrScanner = { navigateTo(FeatureInventory.QrScanner) },
+                    onNavigateToCamera = { navigateTo(FeatureInventory.Camera) } // ✅ Added Camera Callback
                 )
             }
 
@@ -68,8 +68,17 @@ fun featureInventoryEntryProvider(
                 }
             }
 
+            // ✅ Added Camera Route Branch
+            is FeatureInventory.Camera -> {
+                FeatureScaffold(title = "Camera", onBack = navigateBack) {
+                    CameraUIRoute(
+                        navTo = { route -> /* Handle internal camera navigation if needed */ }
+                    )
+                }
+            }
+
             else -> {
-               Text("Unknown route: $key")
+                Text("Unknown route: $key")
             }
         }
     }
