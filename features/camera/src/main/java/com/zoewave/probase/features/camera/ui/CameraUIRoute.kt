@@ -2,6 +2,7 @@ package com.zoewave.probase.features.camera.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -10,14 +11,24 @@ import com.zoewave.probase.features.camera.ui.components.CameraScreen
 
 @Composable
 fun CameraUIRoute(
-    navTo: (String) -> Unit,
+    navTo: (String) -> Unit, // ✅ STRICT RULE ENFORCED
     modifier: Modifier = Modifier,
     viewModel: CamViewModel = hiltViewModel()
 ) {
     // 1. Collect State
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // 2. Pass strict unidirectional data flow to the Dumb Screen
+    // 🚀 Auto-pop and pass data purely through the navTo channel!
+    LaunchedEffect(uiState) {
+        if (uiState is CamUIState.Active) {
+            val capturedUri = (uiState as CamUIState.Active).lastCapturedUri
+            if (capturedUri != null) {
+                // Encode the success state and payload into the navigation string
+                navTo("result_ok:$capturedUri")
+            }
+        }
+    }
+
     CameraScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
