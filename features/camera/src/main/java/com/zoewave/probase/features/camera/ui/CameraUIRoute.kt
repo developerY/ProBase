@@ -1,5 +1,6 @@
 package com.zoewave.probase.features.camera.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,27 +12,20 @@ import com.zoewave.probase.features.camera.ui.components.CameraScreen
 
 @Composable
 fun CameraUIRoute(
-    navTo: (String) -> Unit, // ✅ STRICT RULE ENFORCED
+    navTo: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CamViewModel = hiltViewModel()
 ) {
     // 1. Collect State
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // 🚀 Fixed Auto-pop logic using one-time events
-    LaunchedEffect(uiState) {
-        if (uiState is CamUIState.Active) {
-            // 1. Check the temporary, stateless event channel
-            val oneTimeUri = (uiState as CamUIState.Active).photoSavedUri
-
-            if (oneTimeUri != null) {
-                // 🛑 2. INSTANTLY CONSUME THE EVENT.
-                // This guarantees the screen rotation can't refire this action!
-                viewModel.onEvent(CamEvent.ConsumePhotoSavedEvent)
-
-                // 3. Encode the data and return purely through the navTo channel!
-                navTo("result_ok:$oneTimeUri")
-            }
+    // 1. Safely extract JUST the one-time event URI
+// 🚀 Listen to the continuous stream of one-time events
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { capturedUri ->
+            Log.d("CameraDebug", "3. Route received URI from Channel: $capturedUri")
+            Log.d("CameraDebug", "4. Firing navTo warp pipe!")
+            navTo("result_ok:$capturedUri")
         }
     }
     CameraScreen(

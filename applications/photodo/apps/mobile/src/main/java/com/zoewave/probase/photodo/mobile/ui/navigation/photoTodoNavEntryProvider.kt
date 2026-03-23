@@ -1,5 +1,6 @@
 package com.zoewave.probase.photodo.mobile.ui.navigation
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
@@ -95,17 +96,22 @@ fun photoTodoNavEntryProvider(
                 )
             }
 
+
+
             is PhotoTodoRoute.Camera -> {
                 // Grab our stateless Action Handler
                 val resultHandler: CameraResultHandler = hiltViewModel()
                 // We launch the isolated Camera UI from your feature module
                 CameraUIRoute(
                     navTo = { routeString ->
+                        Log.d("CameraDebug", "5. Host App received navTo string: $routeString")
+
                         if (routeString.startsWith("result_ok:")) {
                             val uriString = routeString.removePrefix("result_ok:")
-                            // ✅ Execute the pure UseCase via the Handler
+                            Log.d("CameraDebug", "G. Host App extracted URI, executing save UseCase...")
                             resultHandler.execute(listId = key.listId, uri = uriString)
                         }
+
                         navigateBack()
                     },
                     modifier = Modifier.fillMaxSize()
