@@ -1,127 +1,210 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.photodo.model.navigation.PhotoTodoRoute
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.HomeOverviewSummaryUiModel
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 
 /**
- * 🚀 A large, data-driven "Overview Summary Card".
- * It shows bold numbers, tasks completed, total tasks, and overall progress.
+ * 🚀 High-Density Data Visualization Card.
+ * Replaces the blue metrics card with a compact "Color Wheel of Events" (Donut Chart).
  */
 @Composable
 fun OverviewSummaryCard(
-    model: HomeOverviewSummaryUiModel,
-    onEvent: (HomeEvent) -> Unit,
-    navTo: (PhotoTodoRoute) -> Unit,
+    categories: List<CategoryOverviewUiModel>,
     modifier: Modifier = Modifier
 ) {
+    // Transform the categories into colored slices
+    val slices = mapCategoriesToWheelSlices(categories)
+    val totalCategories = categories.size
+
+    // Expressive, compact card (Height reduced to 160dp)
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(200.dp),
+            .height(160.dp), // Compact height
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            containerColor = MaterialTheme.colorScheme.surfaceVariant, // Using neutral color
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
-        shape = RoundedCornerShape(24.dp) // Large expressive corners
+        shape = RoundedCornerShape(20.dp) // express round corners
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        // Zero internal padding inside the card!
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Start, // Legend pushed to the left
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 1. Prominent Category Count
-                Column {
-                    Text(
-                        text = "Total PhotoDo Categories",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "${model.totalCategories}",
-                        style = MaterialTheme.typography.displaySmall,
-                        fontWeight = FontWeight.Black
-                    )
-                }
 
-                // Icon to balance the Display-sized number
-                Icon(
-                    imageVector = Icons.Default.GridView,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp)
+            // --- 🚀 1. The Compact Legend (Left Side) ---
+            Column(
+                modifier = Modifier
+                    .weight(1f) // Legends get space
+                    .fillMaxHeight()
+                    // Minimum padding to group the text nicely
+                    .padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                // Main Header (Bold, Primary Color)
+                Text(
+                    text = "Total PhotoDo Categories",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
                 )
+
+                // Bold Category Count
+                Text(
+                    text = "$totalCategories",
+                    style = MaterialTheme.typography.displayMedium, // Compact but Display font
+                    fontWeight = FontWeight.Black
+                )
+
+                // Tiny Legend Items (Derivative from slices)
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    // Show top 3 in compact legend
+                    slices.take(3).forEach { slice ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            // Tiny Color Dot
+                            Box(modifier = Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).size(8.dp).background(slice.color))
+                            Spacer(modifier = Modifier.size(6.dp))
+                            Text(
+                                text = "${slice.name} (${slice.value})",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                maxLines = 1
+                            )
+                        }
+                    }
+                }
             }
 
-            // 2. Bold metrics and progress bar
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "${model.completedTasks} / ${model.totalTasks} Tasks",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                // Expressive, thick progress bar
-                LinearProgressIndicator(
-                    progress = { model.overallProgress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)), // Rounded ends
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
-                )
-                Text(
-                    text = "PhotoDo Categories Completed",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                )
+            // --- 🚀 2. The Color Wheel Donut Chart (Right Side) ---
+            Box(
+                modifier = Modifier
+                    .size(140.dp) // Large wheel, packed into compact container
+                    .padding(end = 16.dp), // Standard side padding
+                contentAlignment = Alignment.Center
+            ) {
+
+                // --- Part A: The Drawing Canvas ---
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    var currentStartAngle = -90f // Start from the top
+                    val strokeWidth = 24.dp.toPx() // Expressive, thick stroke
+
+                    if (slices.isEmpty()) {
+                        // Empty state placeholder arc
+                        drawArc(
+                            color = Color.LightGray.copy(alpha = 0.3f),
+                            startAngle = 0f,
+                            sweepAngle = 360f,
+                            useCenter = false,
+                            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                        )
+                    } else {
+                        slices.forEach { slice ->
+                            // Draw the colored segment
+                            drawArc(
+                                color = slice.color,
+                                startAngle = currentStartAngle,
+                                sweepAngle = slice.sweepAngle,
+                                useCenter = false,
+                                style = Stroke(width = strokeWidth, cap = StrokeCap.Round) // Rounded expressive ends
+                            )
+                            currentStartAngle += slice.sweepAngle // Increment the angle
+                        }
+                    }
+                }
+
+                // --- Part B: The Center Label (Derivative State) ---
+                // Shows overall progress percentage
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    val totalTasks = slices.sumOf { it.value }
+                    val totalCompleted = categories.sumOf { it.completedTasks }
+                    val progressPercentage = if (totalTasks > 0) (totalCompleted.toFloat() / totalTasks * 100).toInt() else 0
+
+                    Text(
+                        text = "$progressPercentage%",
+                        style = MaterialTheme.typography.titleLarge, // Big bold center number
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "DONE",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
 }
 
+// --- PREVIEWS ---
+
 @Preview(showBackground = true)
 @Composable
 private fun OverviewSummaryCardPreview() {
+    val mockData = listOf(
+        CategoryOverviewUiModel(
+            id = 1L,
+            name = "Real Estate",
+            totalTasks = 24,
+            completedTasks = 18,
+            progressPercentage = 0.75f
+        ),
+        CategoryOverviewUiModel(
+            id = 2L,
+            name = "Development",
+            totalTasks = 50,
+            completedTasks = 5,
+            progressPercentage = 0.10f
+        ),
+        CategoryOverviewUiModel(
+            id = 3L,
+            name = "Business",
+            totalTasks = 12,
+            completedTasks = 12,
+            progressPercentage = 1.0f
+        ),
+        CategoryOverviewUiModel(
+            id = 4L,
+            name = "Personal",
+            totalTasks = 8,
+            completedTasks = 4,
+            progressPercentage = 0.50f
+        )
+    )
+
     MaterialTheme {
         OverviewSummaryCard(
-            model = HomeOverviewSummaryUiModel(
-                totalCategories = 12,
-                completedTasks = 45,
-                totalTasks = 60,
-                overallProgress = 0.75f
-            ),
-            onEvent = {},
-            navTo = {}
+            categories = mockData,
+            modifier = Modifier.padding(16.dp)
         )
     }
 }
