@@ -1,0 +1,109 @@
+package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FolderSpecial
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.zoewave.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.CategoryQuickJumpUiModel
+
+/**
+ * A compact, expressively rounded card for a single category quick-jump chip.
+ */
+@Composable
+fun CategoryQuickJumpCard(
+    uiState: CategoryQuickJumpUiModel,
+    onEvent: (HomeEvent) -> Unit,
+    navTo: (PhotoTodoRoute) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = { navTo(PhotoTodoRoute.TasksList(categoryId = uiState.id, categoryName = uiState.name)) },
+        modifier = modifier
+            .width(130.dp) // Fixed width for compact row alignment
+            .clip(RoundedCornerShape(20.dp)), // expressive round radius
+        colors = CardDefaults.cardColors(
+            containerColor = uiState.containerColor,
+            // Assuming we calculate contentColor or just let Card handle it
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Icon & Category Name
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(
+                    imageVector = uiState.icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = uiState.name,
+                    style = MaterialTheme.typography.titleSmall, // compact font size
+                    maxLines = 1,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            // Progress details
+            Column {
+                Text(
+                    text = uiState.progressText,
+                    style = MaterialTheme.typography.bodySmall,
+                    // color = contentColor.copy(alpha = 0.8f) 
+                )
+
+                // Tiny progress bar
+                LinearProgressIndicator(
+                    progress = { uiState.progressPercentage },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp)), // Rounded ends
+                    // color = contentColor,
+                    // trackColor = contentColor.copy(alpha = 0.2f),
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CategoryQuickJumpCardPreview() {
+    MaterialTheme {
+        CategoryQuickJumpCard(
+            uiState = CategoryQuickJumpUiModel(
+                id = 1L,
+                name = "Nature",
+                progressText = "5/10 Tasks",
+                progressPercentage = 0.5f,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                icon = Icons.Default.FolderSpecial
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
