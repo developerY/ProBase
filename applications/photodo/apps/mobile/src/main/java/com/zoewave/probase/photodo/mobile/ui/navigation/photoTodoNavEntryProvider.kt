@@ -14,9 +14,9 @@ import com.zoewave.photodo.model.navigation.PhotoTodoRoute.Settings
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute.TaskDetail
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute.TasksList
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
-import com.zoewave.probase.photodo.mobile.features.home.ui.HomeViewModel
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.HomeOverviewScreen
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.HomeScreen
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeScreen
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksViewModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.TasksListScreen
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailScreen

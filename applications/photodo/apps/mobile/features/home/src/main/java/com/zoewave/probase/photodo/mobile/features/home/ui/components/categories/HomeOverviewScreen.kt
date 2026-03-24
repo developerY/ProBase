@@ -1,4 +1,4 @@
-package com.zoewave.probase.photodo.mobile.features.home.ui.components
+package com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FolderSpecial
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,9 +34,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
 import androidx.compose.material3.TopAppBarDefaults
@@ -52,12 +55,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute
-import com.zoewave.probase.photodo.mobile.features.home.ui.CategoryOverviewUiModel
-import com.zoewave.probase.photodo.mobile.features.home.ui.HomeEvent
-import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiState
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeEvent
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeUiState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -186,11 +189,11 @@ fun HomeOverviewScreen(
 
     // --- ADD CATEGORY DIALOG/SHEET ---
     if (showAddCategoryDialog) {
-        androidx.compose.material3.AlertDialog(
+        AlertDialog(
             onDismissRequest = { showAddCategoryDialog = false },
             title = { Text("New Category") },
             text = {
-                androidx.compose.material3.OutlinedTextField(
+                OutlinedTextField(
                     value = newCategoryName,
                     onValueChange = { newCategoryName = it },
                     placeholder = { Text("e.g. Personal, Work, Real Estate") },
@@ -199,7 +202,7 @@ fun HomeOverviewScreen(
                 )
             },
             confirmButton = {
-                androidx.compose.material3.TextButton(
+                TextButton(
                     onClick = {
                         if (newCategoryName.isNotBlank()) {
                             onEvent(HomeEvent.OnAddCategory(newCategoryName.trim()))
@@ -210,7 +213,7 @@ fun HomeOverviewScreen(
                 ) { Text("Create") }
             },
             dismissButton = {
-                androidx.compose.material3.TextButton(
+                TextButton(
                     onClick = {
                         newCategoryName = ""
                         showAddCategoryDialog = false
@@ -329,7 +332,7 @@ fun EmptyHomeState(
             text = "Head over to the Tasks tab to create your first category and start building projects.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            textAlign = TextAlign.Center
         )
     }
 }

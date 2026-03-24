@@ -1,4 +1,4 @@
-package com.zoewave.probase.photodo.mobile.features.home.ui
+package com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 
 data class CategoryOverviewUiModel(
     val id: Long,

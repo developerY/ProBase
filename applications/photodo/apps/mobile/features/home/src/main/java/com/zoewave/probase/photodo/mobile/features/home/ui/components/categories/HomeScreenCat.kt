@@ -1,7 +1,9 @@
-package com.zoewave.probase.photodo.mobile.features.home.ui.components
+package com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,8 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute
-import com.zoewave.probase.photodo.mobile.features.home.ui.HomeEvent
-import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiState
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeEvent
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeUiState
 
 @Composable
 fun HomeScreenCat(
@@ -42,7 +44,7 @@ fun HomeScreenCat(
             is HomeUiState.Success -> {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                    contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     item {
@@ -68,7 +70,7 @@ fun HomeScreenCat(
 
 @Composable
 private fun CategoryCard(
-    category: com.zoewave.probase.photodo.mobile.features.home.ui.CategoryOverviewUiModel,
+    category: CategoryOverviewUiModel,
     onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
@@ -86,7 +88,7 @@ private fun CategoryCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            androidx.compose.foundation.layout.Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = category.name,
                     style = MaterialTheme.typography.titleLarge
@@ -121,10 +123,10 @@ fun HomeScreenCatPreview_Success() {
     HomeScreenCat(
         uiState = HomeUiState.Success(
             categories = listOf(
-                com.zoewave.probase.photodo.mobile.features.home.ui.CategoryOverviewUiModel(
+                CategoryOverviewUiModel(
                     1, "Work", 10, 5, 0.5f
                 ),
-                com.zoewave.probase.photodo.mobile.features.home.ui.CategoryOverviewUiModel(
+                CategoryOverviewUiModel(
                     2, "Personal", 5, 5, 1.0f
                 )
             ),

@@ -1,7 +1,16 @@
-package com.zoewave.probase.photodo.mobile.features.home.ui.components
+package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -9,15 +18,24 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.photodo.mobile.features.home.ui.HomeEvent
-import com.zoewave.probase.photodo.mobile.features.home.ui.HomeUiState
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,5 +132,69 @@ fun HomeScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenPreview() {
+    MaterialTheme {
+        HomeScreen(
+            uiState = HomeUiState.Success(
+                categories = listOf(
+                    CategoryOverviewUiModel(1L, "Nature", 10, 5, 0.5f),
+                    CategoryOverviewUiModel(2L, "Urban", 8, 2, 0.25f)
+                ),
+                urgentProjects = listOf(
+                    ProjectListUiModel(
+                        id = 1L,
+                        title = "Sunset shoot",
+                        categoryName = "Nature",
+                        isFavorite = true,
+                        isUrgent = true
+                    ),
+                    ProjectListUiModel(
+                        id = 2L,
+                        title = "Street photography",
+                        categoryName = "Urban",
+                        isFavorite = false,
+                        isUrgent = true
+                    ),
+                    ProjectListUiModel(
+                        id = 3L,
+                        title = "Night sky",
+                        categoryName = "Nature",
+                        isFavorite = true,
+                        isUrgent = false
+                    )
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenLoadingPreview() {
+    MaterialTheme {
+        HomeScreen(
+            uiState = HomeUiState.Loading,
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenEmptyPreview() {
+    MaterialTheme {
+        HomeScreen(
+            uiState = HomeUiState.Empty,
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
