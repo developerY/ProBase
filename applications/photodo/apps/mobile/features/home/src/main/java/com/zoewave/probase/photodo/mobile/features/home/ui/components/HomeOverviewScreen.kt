@@ -181,7 +181,46 @@ fun HomeOverviewScreen(
             }
         }
     }
-}
+
+    // ... inside HomeOverviewScreen, just below the Scaffold closing brace ...
+
+    // --- ADD CATEGORY DIALOG/SHEET ---
+    if (showAddCategoryDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showAddCategoryDialog = false },
+            title = { Text("New Category") },
+            text = {
+                androidx.compose.material3.OutlinedTextField(
+                    value = newCategoryName,
+                    onValueChange = { newCategoryName = it },
+                    placeholder = { Text("e.g. Personal, Work, Real Estate") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(
+                    onClick = {
+                        if (newCategoryName.isNotBlank()) {
+                            onEvent(HomeEvent.OnAddCategory(newCategoryName.trim()))
+                            newCategoryName = "" // Reset
+                            showAddCategoryDialog = false // Close
+                        }
+                    }
+                ) { Text("Create") }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(
+                    onClick = {
+                        newCategoryName = ""
+                        showAddCategoryDialog = false
+                    }
+                ) { Text("Cancel") }
+            }
+        )
+    }
+} // <-- End of HomeOverviewScreen
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
