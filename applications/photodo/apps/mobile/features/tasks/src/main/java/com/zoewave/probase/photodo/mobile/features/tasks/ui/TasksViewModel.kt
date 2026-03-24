@@ -140,14 +140,14 @@ class TasksViewModel @Inject constructor(
             is TasksEvent.OnToggleProjectFavorite -> {
                 viewModelScope.launch {
                     // Uncomment once you add this function to PhotoDoRepo:
-                    // repo.updateProjectFavoriteStatus(event.projectId, event.isFavorite)
+                    repo.updateProjectFavorite(event.projectId, event.isFavorite)
                 }
             }
 
             is TasksEvent.OnToggleProjectUrgent -> {
                 viewModelScope.launch {
                     // Uncomment once you add this function to PhotoDoRepo:
-                    // repo.updateProjectUrgentStatus(event.projectId, event.isUrgent)
+                    repo.updateProjectUrgency(event.projectId, event.isUrgent)
                 }
             }
 

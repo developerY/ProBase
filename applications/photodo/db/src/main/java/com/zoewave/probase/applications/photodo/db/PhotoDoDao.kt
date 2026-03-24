@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PhotoDoDao {
 
-    // -- Delete A!!
+    // -- Delete All
 
     @Query("DELETE FROM photos")
     suspend fun clearPhotos()
@@ -36,6 +36,9 @@ interface PhotoDoDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategory(category: CategoryEntity) : Long // <-- Returns the ID
+
+    @Update // ✅ Added for the Repo implementation
+    suspend fun updateCategory(category: CategoryEntity)
 
     @Delete
     suspend fun deleteCategory(category: CategoryEntity)
@@ -67,6 +70,13 @@ interface PhotoDoDao {
     @Query("SELECT * FROM task_lists WHERE categoryId = :categoryId ORDER BY creationDate DESC")
     fun getTaskListsForCategory(categoryId: Long): Flow<List<TaskListEntity>>
 
+    // ✅ ADDED: Targeted updates for the UI toggles
+    @Query("UPDATE task_lists SET isUrgent = :isUrgent WHERE listId = :listId")
+    suspend fun updateProjectUrgency(listId: Long, isUrgent: Boolean)
+
+    // ✅ ADDED: Targeted updates for the UI toggles
+    @Query("UPDATE task_lists SET isFavorite = :isFavorite WHERE listId = :listId")
+    suspend fun updateProjectFavorite(listId: Long, isFavorite: Boolean)
 
     // --- Task Item Operations (Checklist) ---
 
