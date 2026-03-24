@@ -1,6 +1,7 @@
-package com.zoewave.probase.photodo.mobile.features.home.ui
+package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
 import androidx.compose.runtime.Immutable
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 
 @Immutable
@@ -12,10 +13,3 @@ sealed interface HomeUiState {
         val urgentProjects: List<ProjectListUiModel> // ✅ ADDED THIS
     ) : HomeUiState
 }
-
-/* data class HomeUiState(
-    val isLoading: Boolean = true,
-    val recentPhotoTasks: List<PhotoTask> = emptyList(),
-    val errorMessage: String? = null
-) */
-
