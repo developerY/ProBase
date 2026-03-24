@@ -70,7 +70,7 @@ fun HomeScreen(
 
                 // 1. The main "graphic & info" summary card
                 OverviewSummaryCard(
-                    uiState = summaryModel,
+                    model = summaryModel,
                     onEvent = onEvent,
                     navTo = navTo
                 )
@@ -104,7 +104,7 @@ fun HomeScreen(
 
                 // 2. The horizontal quick-jump section
                 CategoryQuickJumpRow(
-                    uiState = importantCategories,
+                    categories = importantCategories,
                     onEvent = onEvent,
                     navTo = navTo
                 )
@@ -139,7 +139,7 @@ fun HomeScreen(
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(uiState.urgentProjects, key = { it.id }) { project ->
                                 HomeProjectRow(
-                                    uiState = project,
+                                    project = project,
                                     onEvent = onEvent,
                                     navTo = navTo
                                 )

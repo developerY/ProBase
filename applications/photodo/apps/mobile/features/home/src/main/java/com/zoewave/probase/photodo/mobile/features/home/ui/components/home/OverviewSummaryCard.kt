@@ -33,7 +33,7 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.HomeOvervi
  */
 @Composable
 fun OverviewSummaryCard(
-    uiState: HomeOverviewSummaryUiModel,
+    model: HomeOverviewSummaryUiModel,
     onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute) -> Unit,
     modifier: Modifier = Modifier
@@ -68,7 +68,7 @@ fun OverviewSummaryCard(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "${uiState.totalCategories}",
+                        text = "${model.totalCategories}",
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Black
                     )
@@ -85,13 +85,13 @@ fun OverviewSummaryCard(
             // 2. Bold metrics and progress bar
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "${uiState.completedTasks} / ${uiState.totalTasks} Tasks",
+                    text = "${model.completedTasks} / ${model.totalTasks} Tasks",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
                 // Expressive, thick progress bar
                 LinearProgressIndicator(
-                    progress = { uiState.overallProgress },
+                    progress = { model.overallProgress },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp)
@@ -114,7 +114,7 @@ fun OverviewSummaryCard(
 private fun OverviewSummaryCardPreview() {
     MaterialTheme {
         OverviewSummaryCard(
-            uiState = HomeOverviewSummaryUiModel(
+            model = HomeOverviewSummaryUiModel(
                 totalCategories = 12,
                 completedTasks = 45,
                 totalTasks = 60,

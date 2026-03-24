@@ -24,7 +24,7 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.CategoryQu
  */
 @Composable
 fun CategoryQuickJumpRow(
-    uiState: List<CategoryQuickJumpUiModel>,
+    categories: List<CategoryQuickJumpUiModel>,
     onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute) -> Unit,
     modifier: Modifier = Modifier
@@ -45,11 +45,11 @@ fun CategoryQuickJumpRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(
-                items = uiState,
+                items = categories,
                 key = { category -> category.id }
             ) { category ->
                 CategoryQuickJumpCard(
-                    uiState = category,
+                    model = category,
                     onEvent = onEvent,
                     navTo = navTo
                 )
@@ -63,7 +63,7 @@ fun CategoryQuickJumpRow(
 private fun CategoryQuickJumpRowPreview() {
     MaterialTheme {
         CategoryQuickJumpRow(
-            uiState = listOf(
+            categories = listOf(
                 CategoryQuickJumpUiModel(
                     id = 1L,
                     name = "Nature",
