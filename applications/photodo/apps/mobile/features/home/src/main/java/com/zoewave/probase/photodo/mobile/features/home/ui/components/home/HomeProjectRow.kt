@@ -31,7 +31,7 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiM
  */
 @Composable
 fun HomeProjectRow(
-    uiState: ProjectListUiModel,
+    project: ProjectListUiModel,
     onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute) -> Unit,
     modifier: Modifier = Modifier
@@ -40,10 +40,10 @@ fun HomeProjectRow(
         modifier = modifier
             .fillMaxWidth()
             .clickable {
-                navTo(PhotoTodoRoute.TaskDetail(listId = uiState.id, listTitle = uiState.title))
+                navTo(PhotoTodoRoute.TaskDetail(listId = project.id, listTitle = project.title))
             },
         colors = CardDefaults.cardColors(
-            containerColor = if (uiState.isUrgent) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceVariant
+            containerColor = if (project.isUrgent) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Row(
@@ -55,21 +55,21 @@ fun HomeProjectRow(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val icon = when {
-                    uiState.isUrgent -> Icons.Default.Error
-                    uiState.isFavorite -> Icons.Default.Favorite
+                    project.isUrgent -> Icons.Default.Error
+                    project.isFavorite -> Icons.Default.Favorite
                     else -> Icons.Default.Star
                 }
                 val tint = when {
-                    uiState.isUrgent -> MaterialTheme.colorScheme.error
-                    uiState.isFavorite -> MaterialTheme.colorScheme.tertiary
+                    project.isUrgent -> MaterialTheme.colorScheme.error
+                    project.isFavorite -> MaterialTheme.colorScheme.tertiary
                     else -> MaterialTheme.colorScheme.primary
                 }
                 Icon(imageVector = icon, contentDescription = null, tint = tint)
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
-                    Text(uiState.title, style = MaterialTheme.typography.bodyLarge)
+                    Text(project.title, style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        uiState.categoryName,
+                        project.categoryName,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -85,7 +85,7 @@ fun HomeProjectRow(
 private fun HomeProjectRowPreview() {
     MaterialTheme {
         HomeProjectRow(
-            uiState = ProjectListUiModel(
+            project = ProjectListUiModel(
                 id = 1L,
                 title = "Sunset shoot",
                 categoryName = "Nature",

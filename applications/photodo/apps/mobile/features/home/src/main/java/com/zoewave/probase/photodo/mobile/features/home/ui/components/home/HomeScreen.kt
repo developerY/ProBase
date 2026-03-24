@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,9 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.CategoryQuickJumpUiModel
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.HomeOverviewSummaryUiModel
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
+import components.home.CategoryQuickJumpRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,63 +50,27 @@ fun HomeScreen(
 
             // --- 🚀 NEW: Graphic/AI Overview Section (Derivative State) ---
             if (uiState is HomeUiState.Success) {
-                // Compute the summary metrics on recomposition
-                val summaryModel = remember(uiState.categories) {
-                    val totalCats = uiState.categories.size
-                    val totalCompleted = uiState.categories.sumOf { it.completedTasks }
-                    val totalTasks = uiState.categories.sumOf { it.totalTasks }
-                    val progress = if (totalTasks > 0) totalCompleted.toFloat() / totalTasks else 0f
-
-                    HomeOverviewSummaryUiModel(
-                        totalCategories = totalCats,
-                        completedTasks = totalCompleted,
-                        totalTasks = totalTasks,
-                        overallProgress = progress
-                    )
-                }
-
-                // 1. The main "graphic & info" summary card
-                OverviewSummaryCard(
-                    uiState = summaryModel,
-                    onEvent = onEvent,
-                    navTo = navTo
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // --- 🚀 NEW: Important Categories Quick Jump (Derivative State) ---
-                // We choose a logic, e.g., categories with the most pending tasks
-                val colorScheme = MaterialTheme.colorScheme // Call it here!
-                val importantCategories = remember(uiState.categories, colorScheme) {
+                // Compute the models on recomposition
+                val importantCategories = remember(uiState.categories) {
+                    // Logic: Categories with most pending tasks
                     uiState.categories
                         .sortedByDescending { it.totalTasks - it.completedTasks }
                         .take(5) // Show top 5
-                        .mapIndexed { index, category ->
-                            val containerColor = when (index % 4) {
-                                0 -> colorScheme.primaryContainer
-                                1 -> colorScheme.secondaryContainer
-                                2 -> colorScheme.tertiaryContainer
-                                else -> colorScheme.surfaceVariant
-                            }
-                            CategoryQuickJumpUiModel(
-                                id = category.id,
-                                name = category.name,
-                                progressText = "${category.completedTasks} / ${category.totalTasks} Tasks",
-                                progressPercentage = category.progressPercentage,
-                                containerColor = containerColor,
-                                icon = Icons.Default.FolderSpecial
-                            )
-                        }
                 }
 
-                // 2. The horizontal quick-jump section
+                // 🚀 1. The main "High-Density Wheel" summary card
+                OverviewSummaryCard(categories = uiState.categories) // ✅ Pass list directly
+
+                Spacer(modifier = Modifier.height(24.dp)) // Vertical spacer reduced (Compactness)
+
+                // 2. The horizontal quick-jump section (Preserved)
                 CategoryQuickJumpRow(
-                    uiState = importantCategories,
+                    importantCategories = importantCategories,
                     onEvent = onEvent,
                     navTo = navTo
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp)) // reduced compactness spacer
             }
             // --- End New Sections ---
 
@@ -139,7 +100,7 @@ fun HomeScreen(
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(uiState.urgentProjects, key = { it.id }) { project ->
                                 HomeProjectRow(
-                                    uiState = project,
+                                    project = project,
                                     onEvent = onEvent,
                                     navTo = navTo
                                 )

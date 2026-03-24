@@ -32,18 +32,18 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.CategoryQu
  */
 @Composable
 fun CategoryQuickJumpCard(
-    uiState: CategoryQuickJumpUiModel,
+    model: CategoryQuickJumpUiModel,
     onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
-        onClick = { navTo(PhotoTodoRoute.TasksList(categoryId = uiState.id, categoryName = uiState.name)) },
+        onClick = { navTo(PhotoTodoRoute.TasksList(categoryId = model.id, categoryName = model.name)) },
         modifier = modifier
             .width(130.dp) // Fixed width for compact row alignment
             .clip(RoundedCornerShape(20.dp)), // expressive round radius
         colors = CardDefaults.cardColors(
-            containerColor = uiState.containerColor,
+            containerColor = model.containerColor,
             // Assuming we calculate contentColor or just let Card handle it
         )
     ) {
@@ -54,12 +54,12 @@ fun CategoryQuickJumpCard(
             // Icon & Category Name
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Icon(
-                    imageVector = uiState.icon,
+                    imageVector = model.icon,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
-                    text = uiState.name,
+                    text = model.name,
                     style = MaterialTheme.typography.titleSmall, // compact font size
                     maxLines = 1,
                     fontWeight = FontWeight.Bold
@@ -69,14 +69,14 @@ fun CategoryQuickJumpCard(
             // Progress details
             Column {
                 Text(
-                    text = uiState.progressText,
+                    text = model.progressText,
                     style = MaterialTheme.typography.bodySmall,
                     // color = contentColor.copy(alpha = 0.8f) 
                 )
 
                 // Tiny progress bar
                 LinearProgressIndicator(
-                    progress = { uiState.progressPercentage },
+                    progress = { model.progressPercentage },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(4.dp)
@@ -94,7 +94,7 @@ fun CategoryQuickJumpCard(
 private fun CategoryQuickJumpCardPreview() {
     MaterialTheme {
         CategoryQuickJumpCard(
-            uiState = CategoryQuickJumpUiModel(
+            model = CategoryQuickJumpUiModel(
                 id = 1L,
                 name = "Nature",
                 progressText = "5/10 Tasks",
