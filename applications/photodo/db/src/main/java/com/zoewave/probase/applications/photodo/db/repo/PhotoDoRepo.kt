@@ -8,61 +8,37 @@ import com.zoewave.probase.applications.photodo.db.entity.TaskListEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskListWithPhotos
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Interface for the PhotoDo repository. This is the single source of truth for all app data.
- */
 interface PhotoDoRepo {
 
     // --- Category Operations ---
-
     suspend fun insertCategory(category: CategoryEntity): Long
-
     suspend fun deleteCategory(category: CategoryEntity)
-
     fun getAllCategories(): Flow<List<CategoryEntity>>
-
     fun getCategoryById(categoryId: Long): Flow<CategoryEntity?>
-
-    suspend fun updateCategory(category: CategoryEntity) // <--- Add this
-
+    suspend fun updateCategory(category: CategoryEntity)
     fun getCategoriesWithTaskLists(): Flow<List<CategoryWithTaskLists>>
 
-
     // --- TaskList Operations ---
-
     suspend fun insertTaskList(taskList: TaskListEntity): Long
-
     suspend fun deleteTaskList(taskList: TaskListEntity)
-
-    /**
-     * Deletes a TaskListEntity and associated PhotoEntities by its ID.
-     */
     suspend fun deleteTaskListById(listId: Long)
-
     fun getTaskListById(listId: Long): Flow<TaskListEntity?>
-
     fun getTaskListsForCategory(categoryId: Long): Flow<List<TaskListEntity>>
 
+    suspend fun updateProjectUrgency(listId: Long, isUrgent: Boolean)
+    suspend fun updateProjectFavorite(listId: Long, isFavorite: Boolean)
+
     // --- Task Item Operations (Checklist) ---
-
-    suspend fun insertTaskItem(item: TaskItemEntity) // <--- Added
-
-    suspend fun updateTaskItem(item: TaskItemEntity) // <--- Added
+    suspend fun insertTaskItem(item: TaskItemEntity)
+    suspend fun updateTaskItem(item: TaskItemEntity)
     suspend fun deleteTaskItem(item: TaskItemEntity)
 
     // --- Photo Operations ---
-
     suspend fun insertPhoto(photo: PhotoEntity)
-
     suspend fun deletePhoto(photo: PhotoEntity)
-
     fun getPhotosForTaskList(listId: Long): Flow<List<PhotoEntity>>
 
     // --- Relational Operations ---
-
     fun getTaskListWithPhotos(listId: Long): Flow<TaskListWithPhotos?>
-
-    // ✅ Promoted to production contract
     suspend fun clearAllData()
-
 }

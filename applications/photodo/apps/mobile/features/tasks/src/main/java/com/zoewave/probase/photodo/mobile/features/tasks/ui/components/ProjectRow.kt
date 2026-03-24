@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
@@ -92,5 +93,41 @@ fun ProjectRow(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProjectRowPreview() {
+    MaterialTheme {
+        ProjectRow(
+            project = ProjectListUiModel(
+                id = 1,
+                title = "Sample Project",
+                categoryName = "Work",
+                isFavorite = false,
+                isUrgent = false
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProjectRowUrgentFavoritePreview() {
+    MaterialTheme {
+        ProjectRow(
+            project = ProjectListUiModel(
+                id = 2,
+                title = "Urgent Favorite Project",
+                categoryName = "Personal",
+                isFavorite = true,
+                isUrgent = true
+            ),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
