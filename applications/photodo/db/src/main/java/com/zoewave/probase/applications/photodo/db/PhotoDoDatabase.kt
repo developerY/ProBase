@@ -2,6 +2,8 @@ package com.zoewave.probase.applications.photodo.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import com.zoewave.probase.applications.photodo.db.converter.PhotoDoConverters
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskItemEntity
@@ -17,7 +19,7 @@ import com.zoewave.probase.applications.photodo.db.entity.TaskListEntity
     version = 1,
     exportSchema = false
 )
-
+@TypeConverters(PhotoDoConverters::class)
 abstract class PhotoDoDB : RoomDatabase() {
     abstract fun photoDoDao(): PhotoDoDao
 }

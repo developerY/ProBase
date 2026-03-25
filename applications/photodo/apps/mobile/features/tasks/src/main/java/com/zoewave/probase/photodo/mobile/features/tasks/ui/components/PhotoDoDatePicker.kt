@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -17,7 +18,7 @@ fun PhotoDoDatePicker(
 ) {
     // Initializes the native Material 3 calendar state
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = System.currentTimeMillis()
+        initialSelectedDateMillis = Clock.System.now().toEpochMilliseconds()
     )
 
     DatePickerDialog(

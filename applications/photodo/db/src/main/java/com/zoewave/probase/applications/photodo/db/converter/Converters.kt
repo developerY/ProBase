@@ -5,29 +5,42 @@ import androidx.core.net.toUri
 import androidx.room.TypeConverter
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.model.Category
+import kotlin.time.Instant
 
-//import kotlinx.datetime.LocalDateTime
 
-class Converters {
+class PhotoDoConverters {
 
-    /*@TypeConverter
-    fun fromTimestrap(dateString: String?): LocalDateTime? {
-        return dateString?.let { LocalDateTime.parse(dateString) }
+    // --- Date/Time ---
+    @TypeConverter
+    fun fromTimestamp(value: Long?): Instant? {
+        return value?.let { Instant.fromEpochMilliseconds(it) }
     }
 
     @TypeConverter
-    fun toDateString(date: LocalDateTime?): String? {
-        return date?.toString()
-    }*/
-
-    @TypeConverter
-    fun fromString(value: String?): Uri? {
-        return if (value == null) null else value.toUri()
+    fun dateToTimestamp(date: Instant?): Long? {
+        return date?.toEpochMilliseconds()
     }
 
+    // --- URIs ---
     @TypeConverter
-    fun toString(uri: Uri?): String? {
+    fun fromUri(uri: Uri?): String? {
         return uri?.toString()
+    }
+
+    @TypeConverter
+    fun toUri(uriString: String?): Uri? {
+        return uriString?.toUri()
+    }
+
+    // --- String Lists ---
+    @TypeConverter
+    fun fromStringList(list: List<String>?): String? {
+        return list?.joinToString(separator = ",")
+    }
+
+    @TypeConverter
+    fun toStringList(data: String?): List<String>? {
+        return data?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
     }
 }
 

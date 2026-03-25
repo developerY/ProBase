@@ -39,6 +39,7 @@ hiltWork = "1.3.0"
 # -- Kotlin & Serialization --
 kotlinxSerializationCore = "1.10.0"
 kotlinSerialization = "2.3.0" # Matches Kotlin version for plugin
+kotlinxDatetime = "0.7.1"
 immutableCollections = "0.4.0"
 coroutines = "1.10.2"
 
@@ -238,6 +239,7 @@ gms-play-services-code-scanner = { group = "com.google.android.gms", name = "pla
 # -- Serialization --
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationCore" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "immutableCollections" }
 
 # -- Testing --
