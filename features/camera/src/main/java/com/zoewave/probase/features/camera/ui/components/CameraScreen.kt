@@ -212,18 +212,18 @@ fun CameraScreen(
 }
 
 private fun createFile(context: Context): File {
-    val mediaDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) ?: context.filesDir
-    val outputDir = File(mediaDir, "BaseProImages").apply { mkdirs() }
-    val fileName = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis()) + ".jpg"
-    return File(outputDir, fileName)
-}
-
-private fun createFileInternalOnly(context: Context): File {
     // 1. Force the use of the strictly internal, sandboxed directory
     val internalDir = context.filesDir
     // 2. Create your dedicated app folder inside that sandbox
     val outputDir = File(internalDir, "PhotoDoImages").apply { mkdirs() }
     // 3. Generate the file name
+    val fileName = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis()) + ".jpg"
+    return File(outputDir, fileName)
+}
+
+private fun createFileInternalOptional(context: Context): File {
+    val mediaDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) ?: context.filesDir
+    val outputDir = File(mediaDir, "BaseProImages").apply { mkdirs() }
     val fileName = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis()) + ".jpg"
     return File(outputDir, fileName)
 }
