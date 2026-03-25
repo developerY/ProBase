@@ -27,5 +27,14 @@ data class PhotoEntity(
     val timestamp: Long = System.currentTimeMillis(),
     // Dormant V2 Feature: Map view and location-based sorting
     var latitude: Double? = null,
-    var longitude: Double? = null
+    var longitude: Double? = null,
+
+    // Dormant V2 Feature: Cloud Synchronization & Cross-Platform compatibility
+    var globalSyncId: String = java.util.UUID.randomUUID().toString(),
+    var lastModified: Long = System.currentTimeMillis(), // Crucial for resolving sync conflicts
+
+    // Dormant V2 Feature: AI Agent Image Analysis
+    var aiVisionTags: String? = null, // e.g., "plumbing, leak, under-sink"
+    var aiSummary: String? = null // e.g., "The p-trap pipe appears to have a slow drip."
+
 )

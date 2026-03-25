@@ -24,5 +24,16 @@ data class TaskItemEntity(
     val text: String,
     val isChecked: Boolean = false,
     // Dormant V2 Feature: Drag-and-drop reordering
-    val sortOrder: Int = 0
+    val sortOrder: Int = 0,
+
+    // Dormant V2 Feature: Cloud Synchronization & Cross-Platform compatibility
+    var globalSyncId: String = java.util.UUID.randomUUID().toString(),
+    var lastModified: Long = System.currentTimeMillis(), // Crucial for resolving sync conflicts
+
+    // Dormant V2 Feature: Multi-user delegation
+    var assignedTo: String? = null, // Could be a name or an email
+
+    // Dormant V2 Feature: Project Budgeting
+    var estimatedCost: Double? = null,
+    var actualCost: Double? = null
 )
