@@ -25,6 +25,7 @@ dependencies {
     // Needed so the TasksViewModel can inject PhotoDoRepo
     implementation(project(":applications:photodo:db"))
     implementation(project(":applications:photodo:model"))
+    implementation(libs.kotlinx.datetime)
 
 
     // --- Serialization (The backbone of Nav3) ---

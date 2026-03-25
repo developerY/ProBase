@@ -18,6 +18,7 @@ dependencies {
     // (Kept explicitly since these are specific to this module's storage needs)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.core)
+    implementation(libs.kotlinx.datetime)
 
     // Note: Hilt, Room, KSP, core-ktx, and standard testing dependencies
     // are automatically provided by the 'composetemplate' convention plugins.
