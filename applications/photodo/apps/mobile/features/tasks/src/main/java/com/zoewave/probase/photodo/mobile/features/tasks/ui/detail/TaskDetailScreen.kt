@@ -2,7 +2,12 @@ package com.zoewave.probase.photodo.mobile.features.tasks.ui.detail
 
 // import coil.compose.AsyncImage // Uncomment when Coil is added
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -45,7 +50,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -59,6 +66,33 @@ fun TaskDetailScreen(
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
     var showAddTaskDialog by rememberSaveable { mutableStateOf(false) }
     var newTaskText by rememberSaveable { mutableStateOf("") }
+
+
+    val context = LocalContext.current
+
+    // 1. Check the current permission status on load
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    // 2. The native Compose launcher that handles the system dialog
+    // 1. Just the launcher. No `hasCameraPermission` state variable needed!
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            if (uiState.loadState is DetailLoadState.Success) {
+                navTo(PhotoTodoRoute.Camera(listId = uiState.loadState.taskListWithPhotos.taskList.listId))
+            }
+        } else {
+            Toast.makeText(context, "Camera permission is required.", Toast.LENGTH_LONG).show()
+        }
+    }
 
     // Handle back presses appropriately
     BackHandler {
@@ -112,10 +146,17 @@ fun TaskDetailScreen(
                     onClick = {
                         fabMenuExpanded = false
 
-                        // ✅ Safely grab the current listId from the Success state and trigger the warp pipe!
-                        if (uiState.loadState is DetailLoadState.Success) {
-                            val currentListId = uiState.loadState.taskListWithPhotos.taskList.listId
-                            navTo(PhotoTodoRoute.Camera(listId = currentListId))
+                        // 2. Check the OS directly at the moment of the click
+                        val isGranted = ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.CAMERA
+                        ) == PackageManager.PERMISSION_GRANTED
+
+                        if (isGranted) {
+                            if (uiState.loadState is DetailLoadState.Success) {
+                                navTo(PhotoTodoRoute.Camera(listId = uiState.loadState.taskListWithPhotos.taskList.listId))
+                            }
+                        } else {
+                            permissionLauncher.launch(Manifest.permission.CAMERA)
                         }
                     },
                     icon = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
@@ -210,7 +251,10 @@ fun TaskDetailScreen(
     // --- ADD TASK DIALOG ---
     if (showAddTaskDialog) {
         AlertDialog(
-            onDismissRequest = { showAddTaskDialog = false },
+            onDismissRequest = {
+                newTaskText = ""
+                showAddTaskDialog = false
+            },
             title = { Text("New Task") },
             text = {
                 OutlinedTextField(
@@ -233,7 +277,10 @@ fun TaskDetailScreen(
                 ) { Text("Add") }
             },
             dismissButton = {
-                TextButton(onClick = { showAddTaskDialog = false }) { Text("Cancel") }
+                TextButton(onClick = {
+                    newTaskText = ""
+                    showAddTaskDialog = false
+                }) { Text("Cancel") }
             }
         )
     }
