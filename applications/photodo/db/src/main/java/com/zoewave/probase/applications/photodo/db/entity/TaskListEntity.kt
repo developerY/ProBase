@@ -34,4 +34,8 @@ data class TaskListEntity(
     var isAlarmEnabled: Boolean = false, // <-- The only thing you add later!
     // Dormant V2 Feature: Archiving completed projects instead of deleting them
     val isArchived: Boolean = false,
+
+    // Dormant V2 Feature: Cloud Synchronization & Cross-Platform compatibility
+    var globalSyncId: String = java.util.UUID.randomUUID().toString(),
+    var lastModified: Long = System.currentTimeMillis(), // Crucial for resolving sync conflicts
 )
