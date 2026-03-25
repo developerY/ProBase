@@ -130,15 +130,15 @@ fun HomeScreen(
                         }
                     } else {
                         // Use `items` for the dynamic data! It scrolls seamlessly with the `item` blocks above.
-                        items(items = uiState.urgentProjects, key = { it.id }) { project ->
+                        items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
                                         navTo(
                                             PhotoTodoRoute.TaskDetail(
-                                                listId = project.id,
-                                                listTitle = project.title
+                                                projectId = project.projectId,
+                                                projectTitle = project.title
                                             )
                                         )
                                     },
@@ -208,7 +208,7 @@ private fun HomeScreenPreview() {
                 ),
                 urgentProjects = listOf(
                     com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel(
-                        id = 1L,
+                        projectId = 1L,
                         title = "Sunset shoot",
                         categoryName = "Nature",
                         isFavorite = true,

@@ -8,11 +8,12 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
-import com.zoewave.probase.applications.photodo.db.entity.CategoryWithTaskLists
+import com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjects
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskItemEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskListEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskListWithPhotos
+import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
+import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
+import com.zoewave.probase.applications.photodo.db.entity.ProjectWithPhotos
+import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -23,11 +24,11 @@ interface PhotoDoDao {
     @Query("DELETE FROM photos")
     suspend fun clearPhotos()
 
-    @Query("DELETE FROM task_items")
-    suspend fun clearTaskItems()
+    @Query("DELETE FROM tasks")
+    suspend fun clearTasks()
 
-    @Query("DELETE FROM task_lists")
-    suspend fun clearTaskLists()
+    @Query("DELETE FROM projects")
+    suspend fun clearProjects()
 
     @Query("DELETE FROM categories")
     suspend fun clearCategories()
@@ -35,9 +36,9 @@ interface PhotoDoDao {
     // --- Category Operations ---
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCategory(category: CategoryEntity) : Long // <-- Returns the ID
+    suspend fun insertCategory(category: CategoryEntity) : Long
 
-    @Update // ✅ Added for the Repo implementation
+    @Update
     suspend fun updateCategory(category: CategoryEntity)
 
     @Delete
@@ -51,44 +52,44 @@ interface PhotoDoDao {
 
     @Transaction
     @Query("SELECT * FROM categories")
-    fun getCategoriesWithTaskLists(): Flow<List<CategoryWithTaskLists>>
+    fun getCategoriesWithProjects(): Flow<List<CategoryWithProjects>>
 
-    // --- TaskList Operations ---
+    // --- Project Operations ---
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTaskList(taskList: TaskListEntity) : Long // <-- Returns the ID
+    suspend fun insertProject(project: ProjectEntity) : Long
 
     @Delete
-    suspend fun deleteTaskList(taskList: TaskListEntity)
+    suspend fun deleteProject(project: ProjectEntity)
 
-    @Query("DELETE FROM task_lists WHERE listId = :listId")
-    suspend fun deleteTaskListById(listId: Long)
+    @Query("DELETE FROM projects WHERE projectId = :projectId")
+    suspend fun deleteProjectById(projectId: Long)
 
-    @Query("SELECT * FROM task_lists WHERE listId = :listId")
-    fun getTaskListById(listId: Long): Flow<TaskListEntity?>
+    @Query("SELECT * FROM projects WHERE projectId = :projectId")
+    fun getProjectById(projectId: Long): Flow<ProjectEntity?>
 
-    @Query("SELECT * FROM task_lists WHERE categoryId = :categoryId ORDER BY creationDate DESC")
-    fun getTaskListsForCategory(categoryId: Long): Flow<List<TaskListEntity>>
+    @Query("SELECT * FROM projects WHERE categoryId = :categoryId ORDER BY creationDate DESC")
+    fun getProjectsForCategory(categoryId: Long): Flow<List<ProjectEntity>>
 
-    // ✅ ADDED: Targeted updates for the UI toggles
-    @Query("UPDATE task_lists SET isUrgent = :isUrgent WHERE listId = :listId")
-    suspend fun updateProjectUrgency(listId: Long, isUrgent: Boolean)
+    @Query("UPDATE projects SET isUrgent = :isUrgent WHERE projectId = :projectId")
+    suspend fun updateProjectUrgency(projectId: Long, isUrgent: Boolean)
 
-    // ✅ ADDED: Targeted updates for the UI toggles
-    @Query("UPDATE task_lists SET isFavorite = :isFavorite WHERE listId = :listId")
-    suspend fun updateProjectFavorite(listId: Long, isFavorite: Boolean)
+    @Query("UPDATE projects SET isFavorite = :isFavorite WHERE projectId = :projectId")
+    suspend fun updateProjectFavorite(projectId: Long, isFavorite: Boolean)
 
-    // --- Task Item Operations (Checklist) ---
+    // --- Task Operations (Checklist) ---
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTaskItem(item: TaskItemEntity)
+    suspend fun insertTask(task: TaskEntity)
 
     @Update
-    suspend fun updateTaskItem(item: TaskItemEntity)
+    suspend fun updateTask(task: TaskEntity)
 
     @Delete
-    suspend fun deleteTaskItem(item: TaskItemEntity)
+    suspend fun deleteTask(task: TaskEntity)
 
+    @Query("SELECT * FROM tasks WHERE projectId = :projectId ORDER BY sortOrder ASC")
+    fun getTasksForProject(projectId: Long): Flow<List<TaskEntity>>
 
     // --- Photo Operations ---
 
@@ -98,12 +99,16 @@ interface PhotoDoDao {
     @Delete
     suspend fun deletePhoto(photo: PhotoEntity)
 
-    @Query("SELECT * FROM photos WHERE listId = :listId ORDER BY timestamp DESC")
-    fun getPhotosForTaskList(listId: Long): Flow<List<PhotoEntity>>
+    @Query("SELECT * FROM photos WHERE projectId = :projectId ORDER BY timestamp DESC")
+    fun getPhotosForProject(projectId: Long): Flow<List<PhotoEntity>>
 
     // --- Relational Query ---
 
     @Transaction
-    @Query("SELECT * FROM task_lists WHERE listId = :listId")
-    fun getTaskListWithPhotos(listId: Long): Flow<TaskListWithPhotos?>
+    @Query("SELECT * FROM projects WHERE projectId = :projectId")
+    fun getProjectWithPhotos(projectId: Long): Flow<ProjectWithPhotos?>
+
+    @Transaction
+    @Query("SELECT * FROM projects WHERE projectId = :projectId")
+    fun getProjectDetails(projectId: Long): Flow<ProjectDetails?>
 }

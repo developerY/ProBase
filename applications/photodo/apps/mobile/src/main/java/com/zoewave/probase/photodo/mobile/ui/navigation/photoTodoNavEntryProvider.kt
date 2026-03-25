@@ -82,8 +82,8 @@ fun photoTodoNavEntryProvider(
             // --- DEEP DETAIL SCREEN ---
             is TaskDetail -> {
                 val viewModel: TaskDetailViewModel = hiltViewModel()
-                LaunchedEffect(key.listId) {
-                    viewModel.loadTaskDetails(key.listId)
+                LaunchedEffect(key.projectId) {
+                    viewModel.loadTaskDetails(key.projectId)
                 }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 TaskDetailScreen(
@@ -109,7 +109,7 @@ fun photoTodoNavEntryProvider(
                         if (routeString.startsWith("result_ok:")) {
                             val uriString = routeString.removePrefix("result_ok:")
                             Log.d("CameraDebug", "G. Host App extracted URI, executing save UseCase...")
-                            resultHandler.execute(listId = key.listId, uri = uriString)
+                            resultHandler.execute(projectId = key.projectId, uri = uriString)
                         }
 
                         navigateBack()

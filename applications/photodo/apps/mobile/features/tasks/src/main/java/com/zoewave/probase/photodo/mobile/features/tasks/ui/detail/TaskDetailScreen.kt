@@ -1,7 +1,5 @@
 package com.zoewave.probase.photodo.mobile.features.tasks.ui.detail
 
-// import coil.compose.AsyncImage // Uncomment when Coil is added
-
 import android.Manifest
 import android.content.pm.PackageManager
 import android.widget.Toast
@@ -60,41 +58,28 @@ import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 fun TaskDetailScreen(
     uiState: TaskDetailUiState,
     onEvent: (TaskDetailEvent) -> Unit,
-    navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
+    navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
     var showAddTaskDialog by rememberSaveable { mutableStateOf(false) }
     var newTaskText by rememberSaveable { mutableStateOf("") }
 
-
     val context = LocalContext.current
 
-    // 1. Check the current permission status on load
-    var hasCameraPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-
-    // 2. The native Compose launcher that handles the system dialog
-    // 1. Just the launcher. No `hasCameraPermission` state variable needed!
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            if (uiState.loadState is DetailLoadState.Success) {
-                navTo(PhotoTodoRoute.Camera(listId = uiState.loadState.taskListWithPhotos.taskList.listId))
+            val state = uiState.loadState
+            if (state is DetailLoadState.Success) {
+                navTo(PhotoTodoRoute.Camera(projectId = state.projectDetails.project.projectId))
             }
         } else {
             Toast.makeText(context, "Camera permission is required.", Toast.LENGTH_LONG).show()
         }
     }
 
-    // Handle back presses appropriately
     BackHandler {
         if (fabMenuExpanded) fabMenuExpanded = false else navTo(null)
     }
@@ -105,7 +90,7 @@ fun TaskDetailScreen(
             TopAppBar(
                 title = {
                     val title = when (val state = uiState.loadState) {
-                        is DetailLoadState.Success -> state.taskListWithPhotos.taskList.name
+                        is DetailLoadState.Success -> state.projectDetails.project.name
                         else -> "Loading..."
                     }
                     Text(title)
@@ -123,7 +108,6 @@ fun TaskDetailScreen(
             )
         },
         floatingActionButton = {
-            // Contextual FAB Menu (Only Photo and Task actions)
             FloatingActionButtonMenu(
                 expanded = fabMenuExpanded,
                 button = {
@@ -145,15 +129,14 @@ fun TaskDetailScreen(
                 FloatingActionButtonMenuItem(
                     onClick = {
                         fabMenuExpanded = false
-
-                        // 2. Check the OS directly at the moment of the click
                         val isGranted = ContextCompat.checkSelfPermission(
                             context, Manifest.permission.CAMERA
                         ) == PackageManager.PERMISSION_GRANTED
 
                         if (isGranted) {
-                            if (uiState.loadState is DetailLoadState.Success) {
-                                navTo(PhotoTodoRoute.Camera(listId = uiState.loadState.taskListWithPhotos.taskList.listId))
+                            val state = uiState.loadState
+                            if (state is DetailLoadState.Success) {
+                                navTo(PhotoTodoRoute.Camera(projectId = state.projectDetails.project.projectId))
                             }
                         } else {
                             permissionLauncher.launch(Manifest.permission.CAMERA)
@@ -186,9 +169,9 @@ fun TaskDetailScreen(
                     )
                 }
                 is DetailLoadState.Success -> {
-                    val data = state.taskListWithPhotos
+                    val data = state.projectDetails
 
-                    if (data.photos.isEmpty() && data.taskItems.isEmpty()) {
+                    if (data.photos.isEmpty() && data.tasks.isEmpty()) {
                         Text(
                             text = "This project is empty.\nTap + to add tasks or photos!",
                             style = MaterialTheme.typography.bodyLarge,
@@ -199,9 +182,8 @@ fun TaskDetailScreen(
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(bottom = 88.dp) // Space for FAB
+                            contentPadding = PaddingValues(bottom = 88.dp)
                         ) {
-                            // --- 1. PHOTOS SECTION ---
                             if (data.photos.isNotEmpty()) {
                                 item {
                                     Text(
@@ -224,8 +206,7 @@ fun TaskDetailScreen(
                                 }
                             }
 
-                            // --- 2. CHECKLIST SECTION ---
-                            if (data.taskItems.isNotEmpty()) {
+                            if (data.tasks.isNotEmpty()) {
                                 item {
                                     Text(
                                         text = "Checklist",
@@ -233,9 +214,9 @@ fun TaskDetailScreen(
                                         modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
                                     )
                                 }
-                                items(data.taskItems, key = { it.itemId }) { item ->
+                                items(data.tasks, key = { it.taskId }) { task ->
                                     TaskItemRow(
-                                        item = item,
+                                        task = task,
                                         onEvent = onEvent,
                                         navTo = navTo
                                     )
@@ -248,7 +229,6 @@ fun TaskDetailScreen(
         }
     }
 
-    // --- ADD TASK DIALOG ---
     if (showAddTaskDialog) {
         AlertDialog(
             onDismissRequest = {

@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskItemEntity
+import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,26 +27,21 @@ class TaskDetailViewModel @Inject constructor(
     private val photoDoRepo: PhotoDoRepo
 ) : ViewModel() {
 
-    // We use a StateFlow for the ID so we can trigger the database query reactively
-    private val _listId = MutableStateFlow<Long?>(null)
+    private val _projectId = MutableStateFlow<Long?>(null)
 
-    // 1. The Single Source of Truth!
-    // Whenever _listId gets set, this flow automatically fetches the data and maps it to the UI.
-    val uiState: StateFlow<TaskDetailUiState> = _listId
-        .filterNotNull() // Don't query until we have a real ID
+    val uiState: StateFlow<TaskDetailUiState> = _projectId
+        .filterNotNull()
         .flatMapLatest { id ->
-            photoDoRepo.getTaskListWithPhotos(id)
-                .map { taskListWithPhotos ->
-                    if (taskListWithPhotos != null) {
-                        TaskDetailUiState(loadState = DetailLoadState.Success(taskListWithPhotos))
+            photoDoRepo.getProjectDetails(id)
+                .map { projectDetails ->
+                    if (projectDetails != null) {
+                        TaskDetailUiState(loadState = DetailLoadState.Success(projectDetails))
                     } else {
-                        // If the list is deleted, Room emits null.
-                        // We catch it here so the UI knows to close the screen!
-                        TaskDetailUiState(loadState = DetailLoadState.Error("List has been deleted."))
+                        TaskDetailUiState(loadState = DetailLoadState.Error("Project has been deleted."))
                     }
                 }
                 .catch { e ->
-                    Log.e(TAG, "Error loading task details", e)
+                    Log.e(TAG, "Error loading project details", e)
                     emit(TaskDetailUiState(loadState = DetailLoadState.Error(e.message ?: "Unknown error")))
                 }
         }
@@ -61,14 +56,14 @@ class TaskDetailViewModel @Inject constructor(
      */
     fun loadTaskDetails(id: Long) {
         if (id == 0L) return
-        if (_listId.value == id) return // Prevent duplicate loads
+        if (_projectId.value == id) return
 
-        Log.d(TAG, "Loading details for listId: $id")
-        _listId.value = id
+        Log.d(TAG, "Loading details for projectId: $id")
+        _projectId.value = id
     }
 
     fun onEvent(event: TaskDetailEvent) {
-        val currentId = _listId.value ?: return
+        val currentId = _projectId.value ?: return
 
         when (event) {
             // --- PHOTOS ---
@@ -78,7 +73,7 @@ class TaskDetailViewModel @Inject constructor(
                         photoDoRepo.insertPhoto(
                             PhotoEntity(
                                 photoUri = event.uri.toString(),
-                                listId = currentId
+                                projectId = currentId
                             )
                         )
                         Log.d(TAG, "Photo saved: ${event.uri}")
@@ -89,9 +84,8 @@ class TaskDetailViewModel @Inject constructor(
             }
             is TaskDetailEvent.OnDeletePhoto -> {
                 viewModelScope.launch {
-                    // Because your DAO likely just takes the photo ID or the whole entity:
                     val photoToDelete = (uiState.value.loadState as? DetailLoadState.Success)
-                        ?.taskListWithPhotos?.photos?.find { it.photoId == event.photoId }
+                        ?.projectDetails?.photos?.find { it.photoId == event.photoId }
 
                     if (photoToDelete != null) {
                         photoDoRepo.deletePhoto(photoToDelete)
@@ -102,35 +96,31 @@ class TaskDetailViewModel @Inject constructor(
             // --- TASK ITEMS ---
             is TaskDetailEvent.OnAddItemClicked -> {
                 viewModelScope.launch {
-                    photoDoRepo.insertTaskItem(
-                        TaskItemEntity(listId = currentId, text = event.text, isChecked = false)
+                    photoDoRepo.insertTask(
+                        TaskEntity(projectId = currentId, text = event.text, isChecked = false)
                     )
                 }
             }
             is TaskDetailEvent.OnItemCheckedChange -> {
                 viewModelScope.launch {
-                    photoDoRepo.updateTaskItem(event.item.copy(isChecked = event.isChecked))
+                    photoDoRepo.updateTask(event.item.copy(isChecked = event.isChecked))
                 }
             }
             is TaskDetailEvent.OnDeleteItem -> {
                 viewModelScope.launch {
-                    photoDoRepo.deleteTaskItem(event.item)
+                    photoDoRepo.deleteTask(event.item)
                 }
             }
 
             // --- PROJECT LIST ---
             is TaskDetailEvent.OnDeleteTaskListClicked -> {
                 viewModelScope.launch {
-                    Log.d(TAG, "Deleting task list ID: $currentId")
-                    // Instead of passing the whole object, just delete by ID!
-                    photoDoRepo.deleteTaskListById(currentId)
-
-                    // Note: Room will automatically emit `null` to our flatMapLatest above,
-                    // flipping the UI state to Error("List has been deleted").
+                    Log.d(TAG, "Deleting project ID: $currentId")
+                    photoDoRepo.deleteProjectById(currentId)
                 }
             }
             is TaskDetailEvent.OnEditList -> {
-                // TODO: Update list title/description
+                // TODO: Update project title/description
             }
 
             // --- UI TOGGLES ---
