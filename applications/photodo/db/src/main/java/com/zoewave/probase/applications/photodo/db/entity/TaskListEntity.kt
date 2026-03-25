@@ -29,5 +29,9 @@ data class TaskListEntity(
     val isUrgent: Boolean = false,
     var priority: Int = 0, // 0 for normal, 1 for high
     val creationDate: Long = System.currentTimeMillis(),
-    var dueDate: Long? = null
+    // V1.1 Entity Upgrade
+    var dueDate: Long? = null,
+    var isAlarmEnabled: Boolean = false, // <-- The only thing you add later!
+    // Dormant V2 Feature: Archiving completed projects instead of deleting them
+    val isArchived: Boolean = false,
 )

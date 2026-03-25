@@ -22,5 +22,7 @@ data class TaskItemEntity(
     @PrimaryKey(autoGenerate = true) val itemId: Long = 0,
     val listId: Long, // Foreign Key to the TaskList
     val text: String,
-    val isChecked: Boolean = false
+    val isChecked: Boolean = false,
+    // Dormant V2 Feature: Drag-and-drop reordering
+    val sortOrder: Int = 0
 )
