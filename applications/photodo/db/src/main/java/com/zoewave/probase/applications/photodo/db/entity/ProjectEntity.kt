@@ -27,6 +27,8 @@ data class ProjectEntity(
     var status: String = "To-Do",
     val isFavorite: Boolean = false,
     val isUrgent: Boolean = false,
+    val projectBudget: Double = 0.0, // The total allowed budget
+    val currentSpend: Double = 0.0,   // The running total of expenses
     var priority: Int = 0,
     val creationDate: Long = System.currentTimeMillis(),
     var dueDate: Long? = null,
