@@ -27,7 +27,7 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()*/
 
     // 1. Directly map the relational database stream into our UI State
-    val uiState: StateFlow<HomeUiState> = photoDoRepo.getCategoriesWithTaskLists()
+    val uiState: StateFlow<HomeUiState> = photoDoRepo.getCategoriesWithProjects()
         .map { categoriesWithLists ->
             if (categoriesWithLists.isEmpty()) return@map HomeUiState.Empty
 
@@ -36,13 +36,13 @@ class HomeViewModel @Inject constructor(
 
             categoriesWithLists.forEach { groupedData ->
                 val category = groupedData.category
-                val taskLists = groupedData.taskLists
+                val projects = groupedData.projects
 
                 // --- YOUR EXISTING MATH LOGIC ---
-                val totalTasks = taskLists.size
+                val totalTasks = projects.size
 
                 // Based on your schema, we count how many lists are marked "Completed"
-                val completedTasks = taskLists.count { it.status == "Completed" }
+                val completedTasks = projects.count { it.status == "Completed" }
 
                 // Protect against divide-by-zero!
                 val progressPercentage = if (totalTasks > 0) {
@@ -62,10 +62,10 @@ class HomeViewModel @Inject constructor(
                 )
 
                 // --- ✅ NEW: FILTER URGENT PROJECTS AT THE SAME TIME ---
-                taskLists.filter { it.isFavorite || it.isUrgent }.forEach { project ->
+                projects.filter { it.isFavorite || it.isUrgent }.forEach { project ->
                     urgentProjects.add(
                         ProjectListUiModel(
-                            id = project.listId,
+                            projectId = project.projectId,
                             title = project.name,
                             categoryName = category.name,
                             isFavorite = project.isFavorite,

@@ -37,7 +37,7 @@ fun ProjectRow(
         modifier = modifier
             .fillMaxWidth()
             // Send the click directly through the navigation channel!
-            .clickable { navTo(PhotoTodoRoute.TaskDetail(project.id, project.title)) },
+            .clickable { navTo(PhotoTodoRoute.TaskDetail(project.projectId, project.title)) },
         colors = CardDefaults.cardColors(
             containerColor = if (project.isUrgent)
                 MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
@@ -68,7 +68,7 @@ fun ProjectRow(
                 IconToggleButton(
                     checked = project.isUrgent,
                     onCheckedChange = { isUrgent ->
-                        onEvent(TasksEvent.OnToggleProjectUrgent(project.id, isUrgent))
+                        onEvent(TasksEvent.OnToggleProjectUrgent(project.projectId, isUrgent))
                     }
                 ) {
                     Icon(
@@ -82,7 +82,7 @@ fun ProjectRow(
                 IconToggleButton(
                     checked = project.isFavorite,
                     onCheckedChange = { isFav ->
-                        onEvent(TasksEvent.OnToggleProjectFavorite(project.id, isFav))
+                        onEvent(TasksEvent.OnToggleProjectFavorite(project.projectId, isFav))
                     }
                 ) {
                     Icon(
@@ -102,7 +102,7 @@ fun ProjectRowPreview() {
     MaterialTheme {
         ProjectRow(
             project = ProjectListUiModel(
-                id = 1,
+                projectId = 1,
                 title = "Sample Project",
                 categoryName = "Work",
                 isFavorite = false,
@@ -120,7 +120,7 @@ fun ProjectRowUrgentFavoritePreview() {
     MaterialTheme {
         ProjectRow(
             project = ProjectListUiModel(
-                id = 2,
+                projectId = 2,
                 title = "Urgent Favorite Project",
                 categoryName = "Personal",
                 isFavorite = true,

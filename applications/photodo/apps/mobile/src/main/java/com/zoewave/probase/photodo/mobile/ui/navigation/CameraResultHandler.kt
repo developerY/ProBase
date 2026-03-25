@@ -12,10 +12,10 @@ class CameraResultHandler @Inject constructor(
     private val addPhotoToTask: AddPhotoToTaskUseCase // ✅ Inject the pure UseCase
 ) : ViewModel() {
 
-    fun execute(listId: Long, uri: String) {
+    fun execute(projectId: Long, uri: String) {
         // We just use the ViewModel to get access to this scope!
         viewModelScope.launch {
-            addPhotoToTask(listId, uri)
+            addPhotoToTask(projectId, uri)
         }
     }
 }

@@ -8,9 +8,9 @@ class AddPhotoToTaskUseCase @Inject constructor(
     private val repo: PhotoDoRepo
 ) {
     // The operator fun allows you to call the class like a function!
-    suspend operator fun invoke(listId: Long, uriString: String) {
+    suspend operator fun invoke(projectId: Long, uriString: String) {
         val newPhoto = PhotoEntity(
-            listId = listId,
+            projectId = projectId,
             photoUri = uriString,
             timestamp = System.currentTimeMillis()
         )

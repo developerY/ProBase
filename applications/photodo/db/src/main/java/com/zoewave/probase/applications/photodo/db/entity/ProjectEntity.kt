@@ -4,9 +4,10 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.util.UUID
 
 @Entity(
-    tableName = "task_lists",
+    tableName = "projects",
     foreignKeys = [
         ForeignKey(
             entity = CategoryEntity::class,
@@ -15,27 +16,22 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         )
     ],
-    // ✅ ADD THIS: Prevents full table scans during cascade deletes/updates
     indices = [Index(value = ["categoryId"])]
 )
-data class TaskListEntity(
+data class ProjectEntity(
     @PrimaryKey(autoGenerate = true)
-    val listId: Long = 0,
+    val projectId: Long = 0,
     val categoryId: Long,
     var name: String,
     var notes: String? = null,
-    var status: String = "To-Do", // "To-Do" or "Done"
+    var status: String = "To-Do",
     val isFavorite: Boolean = false,
     val isUrgent: Boolean = false,
-    var priority: Int = 0, // 0 for normal, 1 for high
+    var priority: Int = 0,
     val creationDate: Long = System.currentTimeMillis(),
-    // V1.1 Entity Upgrade
     var dueDate: Long? = null,
-    var isAlarmEnabled: Boolean = false, // <-- The only thing you add later!
-    // Dormant V2 Feature: Archiving completed projects instead of deleting them
+    var isAlarmEnabled: Boolean = false,
     val isArchived: Boolean = false,
-
-    // Dormant V2 Feature: Cloud Synchronization & Cross-Platform compatibility
-    var globalSyncId: String = java.util.UUID.randomUUID().toString(),
-    var lastModified: Long = System.currentTimeMillis(), // Crucial for resolving sync conflicts
+    var globalSyncId: String = UUID.randomUUID().toString(),
+    var lastModified: Long = System.currentTimeMillis()
 )

@@ -22,10 +22,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.zoewave.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskItemEntity
-import coil.compose.AsyncImage // ✅ Now actively used!
+import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 
 @Composable
 fun PhotoThumbnailCard(
@@ -39,10 +39,9 @@ fun PhotoThumbnailCard(
             .size(120.dp)
             .clip(RoundedCornerShape(12.dp))
     ) {
-        // 🚀 1. The Real Image (Layer 1 - Bottom)
         AsyncImage(
             model = photo.photoUri,
-            contentDescription = "Context Photo for Task",
+            contentDescription = "Context Photo for Project",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
@@ -69,7 +68,7 @@ fun PhotoThumbnailCard(
 
 @Composable
 fun TaskItemRow(
-    item: TaskItemEntity,
+    task: TaskEntity,
     onEvent: (TaskDetailEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
@@ -81,19 +80,19 @@ fun TaskItemRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
-            checked = item.isChecked,
+            checked = task.isChecked,
             onCheckedChange = { isChecked ->
-                onEvent(TaskDetailEvent.OnItemCheckedChange(item, isChecked))
+                onEvent(TaskDetailEvent.OnItemCheckedChange(task, isChecked))
             }
         )
         Text(
-            text = item.text,
+            text = task.text,
             style = MaterialTheme.typography.bodyLarge,
-            textDecoration = if (item.isChecked) TextDecoration.LineThrough else TextDecoration.None,
-            color = if (item.isChecked) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
+            textDecoration = if (task.isChecked) TextDecoration.LineThrough else TextDecoration.None,
+            color = if (task.isChecked) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
         )
-        IconButton(onClick = { onEvent(TaskDetailEvent.OnDeleteItem(item)) }) {
+        IconButton(onClick = { onEvent(TaskDetailEvent.OnDeleteItem(task)) }) {
             Icon(
                 Icons.Default.Close,
                 contentDescription = "Delete Task",

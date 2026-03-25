@@ -1,11 +1,12 @@
 package com.zoewave.probase.applications.photodo.db.repo
 
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
-import com.zoewave.probase.applications.photodo.db.entity.CategoryWithTaskLists
+import com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjects
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskItemEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskListEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskListWithPhotos
+import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
+import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
+import com.zoewave.probase.applications.photodo.db.entity.ProjectWithPhotos
+import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
 import kotlinx.coroutines.flow.Flow
 
 interface PhotoDoRepo {
@@ -16,29 +17,31 @@ interface PhotoDoRepo {
     fun getAllCategories(): Flow<List<CategoryEntity>>
     fun getCategoryById(categoryId: Long): Flow<CategoryEntity?>
     suspend fun updateCategory(category: CategoryEntity)
-    fun getCategoriesWithTaskLists(): Flow<List<CategoryWithTaskLists>>
+    fun getCategoriesWithProjects(): Flow<List<CategoryWithProjects>>
 
-    // --- TaskList Operations ---
-    suspend fun insertTaskList(taskList: TaskListEntity): Long
-    suspend fun deleteTaskList(taskList: TaskListEntity)
-    suspend fun deleteTaskListById(listId: Long)
-    fun getTaskListById(listId: Long): Flow<TaskListEntity?>
-    fun getTaskListsForCategory(categoryId: Long): Flow<List<TaskListEntity>>
+    // --- Project Operations ---
+    suspend fun insertProject(project: ProjectEntity): Long
+    suspend fun deleteProject(project: ProjectEntity)
+    suspend fun deleteProjectById(projectId: Long)
+    fun getProjectById(projectId: Long): Flow<ProjectEntity?>
+    fun getProjectsForCategory(categoryId: Long): Flow<List<ProjectEntity>>
 
-    suspend fun updateProjectUrgency(listId: Long, isUrgent: Boolean)
-    suspend fun updateProjectFavorite(listId: Long, isFavorite: Boolean)
+    suspend fun updateProjectUrgency(projectId: Long, isUrgent: Boolean)
+    suspend fun updateProjectFavorite(projectId: Long, isFavorite: Boolean)
 
-    // --- Task Item Operations (Checklist) ---
-    suspend fun insertTaskItem(item: TaskItemEntity)
-    suspend fun updateTaskItem(item: TaskItemEntity)
-    suspend fun deleteTaskItem(item: TaskItemEntity)
+    // --- Task Operations (Checklist) ---
+    suspend fun insertTask(task: TaskEntity)
+    suspend fun updateTask(task: TaskEntity)
+    suspend fun deleteTask(task: TaskEntity)
+    fun getTasksForProject(projectId: Long): Flow<List<TaskEntity>>
 
     // --- Photo Operations ---
     suspend fun insertPhoto(photo: PhotoEntity)
     suspend fun deletePhoto(photo: PhotoEntity)
-    fun getPhotosForTaskList(listId: Long): Flow<List<PhotoEntity>>
+    fun getPhotosForProject(projectId: Long): Flow<List<PhotoEntity>>
 
     // --- Relational Operations ---
-    fun getTaskListWithPhotos(listId: Long): Flow<TaskListWithPhotos?>
+    fun getProjectWithPhotos(projectId: Long): Flow<ProjectWithPhotos?>
+    fun getProjectDetails(projectId: Long): Flow<ProjectDetails?>
     suspend fun clearAllData()
 }
