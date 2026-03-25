@@ -40,7 +40,7 @@ fun HomeProjectRow(
         modifier = modifier
             .fillMaxWidth()
             .clickable {
-                navTo(PhotoTodoRoute.TaskDetail(listId = project.id, listTitle = project.title))
+                navTo(PhotoTodoRoute.TaskDetail(projectId = project.projectId, projectTitle = project.title))
             },
         colors = CardDefaults.cardColors(
             containerColor = if (project.isUrgent) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceVariant
@@ -86,7 +86,7 @@ private fun HomeProjectRowPreview() {
     MaterialTheme {
         HomeProjectRow(
             project = ProjectListUiModel(
-                id = 1L,
+                projectId = 1L,
                 title = "Sunset shoot",
                 categoryName = "Nature",
                 isFavorite = true,

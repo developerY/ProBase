@@ -33,16 +33,16 @@ sealed class PhotoTodoRoute(val title: String, val icon: ImageVector) {
         val categoryName: String
     ) : PhotoTodoRoute(categoryName, Icons.Default.Folder)
 
-    // The Detail Route holds your specific TaskList data
+    // The Detail Route holds your specific Project data
     data class TaskDetail(
-        val listId: Long,
-        val listTitle: String
-    ) : PhotoTodoRoute(listTitle, Icons.AutoMirrored.Filled.List)
+        val projectId: Long,
+        val projectTitle: String
+    ) : PhotoTodoRoute(projectTitle, Icons.AutoMirrored.Filled.List)
 
     // --- TAB 3 ---
     data object Settings : PhotoTodoRoute("Settings", Icons.Default.Settings)
 
-    data class Camera(val listId: Long) : PhotoTodoRoute("Camera", Icons.Default.CameraAlt)
+    data class Camera(val projectId: Long) : PhotoTodoRoute("Camera", Icons.Default.CameraAlt)
 }
 
 // Your Bottom Bar uses this, so it naturally ignores TaskDetail. Perfect!

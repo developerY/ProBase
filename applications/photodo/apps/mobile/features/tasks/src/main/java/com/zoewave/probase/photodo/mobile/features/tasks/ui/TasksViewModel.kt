@@ -4,10 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskItemEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskListEntity
+import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
+import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
-import com.zoewave.probase.photodo.mobile.features.tasks.domain.TaskDevTools
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
@@ -20,24 +19,20 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
 class TasksViewModel @Inject constructor(
     private val repo: PhotoDoRepo,
-    private val devTools: TaskDevTools
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TasksUiState(isLoading = true))
     val uiState: StateFlow<TasksUiState> = _uiState.asStateFlow()
 
-    // Expose the draft to your Bottom Sheets
     private val _draftState = MutableStateFlow(TaskDraftState())
     val draftState: StateFlow<TaskDraftState> = _draftState.asStateFlow()
 
-    // Tracks the ID passed in from Tab 1
     private val _requestedCategoryId = MutableStateFlow<Long?>(null)
 
     init {
@@ -48,15 +43,13 @@ class TasksViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            // The "Smart Default" Database collector
             _requestedCategoryId.flatMapLatest { requestedId ->
                 if (requestedId != null) {
-                    // Scenario A: User clicked a specific category from Tab 1
-                    repo.getCategoriesWithTaskLists().map { allData ->
+                    repo.getCategoriesWithProjects().map { allData ->
                         val targetData = allData.find { it.category.categoryId == requestedId }
                         if (targetData != null) {
-                            val mappedProjects = targetData.taskLists.map {
-                                ProjectListUiModel(it.listId, it.name, targetData.category.name, it.isFavorite, it.isUrgent)
+                            val mappedProjects = targetData.projects.map {
+                                ProjectListUiModel(it.projectId, it.name, targetData.category.name, it.isFavorite, it.isUrgent)
                             }
                             SmartDbResult(targetData.category.categoryId, targetData.category.name, mappedProjects, false)
                         } else {
@@ -64,14 +57,13 @@ class TasksViewModel @Inject constructor(
                         }
                     }
                 } else {
-                    // Scenario B: User tapped the Tasks tab directly. Default to the very first category!
-                    repo.getCategoriesWithTaskLists().map { allData ->
+                    repo.getCategoriesWithProjects().map { allData ->
                         if (allData.isEmpty()) {
                             SmartDbResult(null, "No Categories Yet", emptyList(), true)
                         } else {
                             val firstData = allData.first()
-                            val mappedProjects = firstData.taskLists.map {
-                                ProjectListUiModel(it.listId, it.name, firstData.category.name, it.isFavorite, it.isUrgent)
+                            val mappedProjects = firstData.projects.map {
+                                ProjectListUiModel(it.projectId, it.name, firstData.category.name, it.isFavorite, it.isUrgent)
                             }
                             SmartDbResult(firstData.category.categoryId, firstData.category.name, mappedProjects, false)
                         }
@@ -104,7 +96,6 @@ class TasksViewModel @Inject constructor(
         when (event) {
             is TasksEvent.OnAddRandomTaskClicked -> insertRandomTask()
             is TasksEvent.OnTaskToggled -> updateTask(event.taskId, event.isCompleted)
-            is TasksEvent.OnGenerateFullMockDataClicked -> viewModelScope.launch { devTools.seedDatabase() }
             is TasksEvent.OnClearDatabaseClicked -> viewModelScope.launch { repo.clearAllData() }
 
             is TasksEvent.OnDraftTitleChanged -> _draftState.update { it.copy(listTitle = event.title) }
@@ -130,36 +121,28 @@ class TasksViewModel @Inject constructor(
                 }
             }
 
-            // --- SAFELY IMPLEMENTED NEW EVENTS ---
-
-            is TasksEvent.OnProjectClicked -> {
-                // Intentionally left blank!
-                // We intercept this in TasksListUiRoute to trigger navigation.
-            }
+            is TasksEvent.OnProjectClicked -> {}
 
             is TasksEvent.OnToggleProjectFavorite -> {
                 viewModelScope.launch {
-                    // Uncomment once you add this function to PhotoDoRepo:
                     repo.updateProjectFavorite(event.projectId, event.isFavorite)
                 }
             }
 
             is TasksEvent.OnToggleProjectUrgent -> {
                 viewModelScope.launch {
-                    // Uncomment once you add this function to PhotoDoRepo:
                     repo.updateProjectUrgency(event.projectId, event.isUrgent)
                 }
             }
 
             is TasksEvent.OnAddList -> {
-                // If bypassing the draft state entirely and passing a string directly
                 val currentCategoryId = _uiState.value.categoryId ?: return
                 viewModelScope.launch {
-                    val newList = TaskListEntity(
+                    val newProject = ProjectEntity(
                         categoryId = currentCategoryId,
-                        name = event.toString() // Assuming your event has a 'title' property
+                        name = event.toString()
                     )
-                    repo.insertTaskList(newList)
+                    repo.insertProject(newProject)
                     onEvent(TasksEvent.OnDismissBottomSheet)
                 }
             }
@@ -188,39 +171,34 @@ class TasksViewModel @Inject constructor(
                     repo.insertCategory(newCat)
                 }
 
-            val newList = TaskListEntity(categoryId = categoryId, name = draft.listTitle)
-            val generatedListId: Long = repo.insertTaskList(newList)
+            val newProject = ProjectEntity(categoryId = categoryId, name = draft.listTitle)
+            val generatedProjectId: Long = repo.insertProject(newProject)
 
             // Insert Task Items
             draft.pendingTaskItems.forEach { itemText ->
-                repo.insertTaskItem(TaskItemEntity(listId = generatedListId, text = itemText, isChecked = false))
+                repo.insertTask(TaskEntity(projectId = generatedProjectId, text = itemText, isChecked = false))
             }
 
             // Insert Photos
             draft.pendingPhotoUris.forEach { uri ->
-                repo.insertPhoto(PhotoEntity(listId = generatedListId, photoUri = uri, timestamp = timestamp))
+                repo.insertPhoto(PhotoEntity(projectId = generatedProjectId, photoUri = uri, timestamp = timestamp))
             }
 
             // Clear the draft so the UI closes the Bottom Sheet cleanly
             _draftState.value = TaskDraftState()
-            onEvent(TasksEvent.OnDismissBottomSheet) // Close sheets cleanly
+            onEvent(TasksEvent.OnDismissBottomSheet)
         }
     }
 
     private fun insertRandomTask() {
-        viewModelScope.launch {
-            val randomId = (1..100000).random().toLong()
-            val randomTitle = "Test Task: ${UUID.randomUUID().toString().take(6)}"
-            // Simulation logic preserved
-        }
+        // Implementation omitted for brevity
     }
 
     private fun updateTask(taskId: Long, isCompleted: Boolean) {
-        // Preserved
+        // Implementation omitted for brevity
     }
 }
 
-// Private helper to make the stream cleaner
 private data class SmartDbResult(
     val categoryId: Long?,
     val categoryName: String,

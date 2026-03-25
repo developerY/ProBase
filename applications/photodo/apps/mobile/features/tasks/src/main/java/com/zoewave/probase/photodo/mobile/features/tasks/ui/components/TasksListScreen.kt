@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Folder
@@ -70,9 +69,6 @@ fun TasksListScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onEvent(TasksEvent.OnGenerateFullMockDataClicked) }) {
-                        Icon(Icons.Default.BugReport, contentDescription = "Populate DB")
-                    }
                     IconButton(onClick = { onEvent(TasksEvent.OnClearDatabaseClicked) }) {
                         Icon(Icons.Default.Delete, contentDescription = "Clear DB")
                     }
@@ -152,7 +148,7 @@ fun TasksListScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // Iterate over the new projectLists state!
-                    items(uiState.projectLists, key = { it.id }) { project ->
+                    items(uiState.projectLists, key = { it.projectId }) { project ->
                         ProjectRow(
                             project = project,
                             onEvent = onEvent, // Pass the channel straight down!
