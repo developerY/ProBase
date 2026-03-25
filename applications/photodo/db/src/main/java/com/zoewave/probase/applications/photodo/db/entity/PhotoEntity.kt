@@ -24,5 +24,8 @@ data class PhotoEntity(
     val listId: Long, // Corrected: Renamed from taskId to listId
     val photoUri: String,
     val caption: String? = null,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    // Dormant V2 Feature: Map view and location-based sorting
+    var latitude: Double? = null,
+    var longitude: Double? = null
 )
