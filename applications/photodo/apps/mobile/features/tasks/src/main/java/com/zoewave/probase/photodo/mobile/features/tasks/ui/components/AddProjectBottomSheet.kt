@@ -8,8 +8,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -18,7 +22,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -33,13 +40,16 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddListSheet(
+fun AddProjectBottomSheet(
     uiState: TaskDraftState,
     onEvent: (TasksEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
     modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // Inside your Bottom Sheet or Add Task dialog:
+    var showDatePicker by remember { mutableStateOf(false) }
+    var selectedDueDate by remember { mutableStateOf<Long?>(null) }
 
     // Auto-focus the text field when the sheet opens
     val focusRequester = remember { FocusRequester() }
@@ -56,11 +66,16 @@ fun AddListSheet(
                 .padding(bottom = 32.dp), // Extra padding for the navigation bar
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "New Project",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Row {
+                Text(
+                    text = "New Project",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                IconButton(onClick = { showDatePicker = true }) {
+                    Icon(Icons.Default.CalendarMonth, contentDescription = "Set Due Date")
+                }
+            }
 
             OutlinedTextField(
                 value = uiState.listTitle,
@@ -94,7 +109,11 @@ fun AddListSheet(
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
-                    onClick = { onEvent(TasksEvent.OnSaveDraftClicked) },
+                    onClick = {
+
+                        onEvent(TasksEvent.OnSaveDraftClicked)
+                        //onEvent(TaskDetailEvent.OnAddItemClicked(text, selectedDueDate))
+                              },
                     enabled = uiState.listTitle.isNotBlank()
                 ) {
                     Text("Create")
@@ -106,16 +125,25 @@ fun AddListSheet(
         LaunchedEffect(Unit) {
             focusRequester.requestFocus()
         }
+
+        if (showDatePicker) {
+            PhotoDoDatePicker(
+                onDateSelected = { timestamp ->
+                    selectedDueDate = timestamp
+                },
+                onDismiss = { showDatePicker = false }
+            )
+        }
     }
 }
 
 @Preview
 @Composable
-private fun AddListSheetPreview() {
+private fun AddProjectBottomSheetPreview() {
     MaterialTheme {
         // Note: ModalBottomSheet won't render perfectly in a standard Preview
         // without a parent, but this gives you a quick look at the layout!
-        AddListSheet(
+        AddProjectBottomSheet(
             uiState = TaskDraftState(),
             onEvent = {},
             navTo = {}

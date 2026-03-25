@@ -169,7 +169,7 @@ fun TasksListScreen(
     // They sit outside the Scaffold so they can float over the entire screen.
 
     if (uiState.isAddListSheetOpen) {
-        AddListSheet(
+        AddProjectBottomSheet(
             uiState = uiState.draftState,
             onEvent = onEvent,
             navTo = navTo
