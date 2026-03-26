@@ -11,7 +11,7 @@ plugins {
 
 android {
     // Unique namespace for the PhotoTodo Home Feature
-    namespace = "com.zoewave.probase.mobile.features.settings"
+    namespace = "com.zoewave.probase.photodo.mobile.features.settings"
 }
 
 dependencies {
@@ -22,6 +22,7 @@ dependencies {
     // implementation(project(":core:data"))
     implementation(project(":applications:photodo:db"))
     implementation(project(":applications:photodo:model"))
+    implementation(project(":applications:photodo:apps:mobile:core"))
 
     // --- Serialization (The backbone of Nav3) ---
     implementation(libs.kotlinx.serialization.json)

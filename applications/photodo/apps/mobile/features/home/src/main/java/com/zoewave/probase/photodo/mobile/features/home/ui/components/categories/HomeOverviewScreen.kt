@@ -58,7 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeEvent
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeUiState
 

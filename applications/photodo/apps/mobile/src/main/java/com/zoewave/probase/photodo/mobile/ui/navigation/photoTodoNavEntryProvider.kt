@@ -2,21 +2,21 @@ package com.zoewave.probase.photodo.mobile.ui.navigation
 
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.photodo.model.navigation.PhotoTodoRoute
-import com.zoewave.photodo.model.navigation.PhotoTodoRoute.Settings
-import com.zoewave.photodo.model.navigation.PhotoTodoRoute.TaskDetail
-import com.zoewave.photodo.model.navigation.PhotoTodoRoute.TasksList
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.Settings
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TaskDetail
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TasksList
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeScreen
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
+import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksViewModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.TasksListScreen
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailScreen
@@ -120,10 +120,28 @@ fun photoTodoNavEntryProvider(
 
             // --- TAB 3: SETTINGS ---
             is Settings -> {
-                Text("Settings")
+                SettingsUiRoute(
+                    modifier = Modifier.fillMaxSize(),
+                    initialCardKeyToExpand = key.title,
+                    navTo = { route ->
+                        if (route == null) navigateBack() else navigateTo(route)
+                    },
+                )
             }
 
-            is PhotoTodoRoute.CategoryTasks -> TODO()
+            is PhotoTodoRoute.CategoryTasks -> {
+                val viewModel: TasksViewModel = hiltViewModel()
+                LaunchedEffect(key.categoryId) {
+                    viewModel.setCategoryId(key.categoryId)
+                }
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                TasksListScreen(
+                    uiState = uiState,
+                    onEvent = viewModel::onEvent,
+                    navTo = { if (it == null) navigateBack() else navigateTo(it) },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 }

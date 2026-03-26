@@ -23,7 +23,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.zoewave.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 

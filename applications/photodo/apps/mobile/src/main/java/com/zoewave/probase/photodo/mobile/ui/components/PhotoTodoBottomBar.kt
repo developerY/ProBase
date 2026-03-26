@@ -6,9 +6,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.zoewave.photodo.model.navigation.PhotoTodoRoute
-import com.zoewave.photodo.model.navigation.topLevelRoutes
-import com.zoewave.probase.photodo.mobile.ui.theme.ProBaseTheme
+import com.zoewave.probase.photodo.mobile.core.ui.PhotoDoTheme
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.model.navigation.topLevelRoutes
+
 
 @Composable
 fun PhotoTodoBottomBar(
@@ -32,7 +33,7 @@ fun PhotoTodoBottomBar(
 @Preview(showBackground = true)
 @Composable
 fun PhotoTodoBottomBarPreview() {
-    ProBaseTheme {
-        PhotoTodoBottomBar(currentRoute = PhotoTodoRoute.Home, navTo = {})
+    PhotoDoTheme {
+        PhotoTodoBottomBar(currentRoute = topLevelRoutes.first(), navTo = {})
     }
 }

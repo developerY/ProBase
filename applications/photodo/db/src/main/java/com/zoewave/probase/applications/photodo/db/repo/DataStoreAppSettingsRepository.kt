@@ -1,0 +1,28 @@
+package com.zoewave.probase.applications.photodo.db.repo
+
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class DataStoreAppSettingsRepository @Inject constructor(
+    private val dataStore: DataStore<Preferences>
+) : AppSettingsRepository {
+
+    private val THEME_KEY = stringPreferencesKey("theme_preference")
+
+    override val themePreferenceFlow: Flow<String> = dataStore.data.map { preferences ->
+        preferences[THEME_KEY] ?: "SYSTEM"
+    }
+
+    override suspend fun saveThemePreference(themeIdentifier: String) {
+        dataStore.edit { preferences ->
+            preferences[THEME_KEY] = themeIdentifier
+        }
+    }
+}

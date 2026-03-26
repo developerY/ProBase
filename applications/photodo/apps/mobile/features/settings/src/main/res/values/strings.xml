@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_photodo_apps_mobile_features_settings_theme_title">Theme</string>
+    <string name="applications_photodo_apps_mobile_features_settings_theme_system_display">System Default</string>
+    <string name="applications_photodo_apps_mobile_features_settings_theme_light_display">Light Mode</string>
+    <string name="applications_photodo_apps_mobile_features_settings_theme_dark_display">Dark Mode</string>
+</resources>

@@ -1,4 +1,4 @@
-package com.zoewave.photodo.model.navigation
+package com.zoewave.probase.photodo.model.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
