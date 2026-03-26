@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.zoewave.probase.photodo.mobile.ui.PhotoDoMainScreen
-import com.zoewave.probase.photodo.mobile.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.core.ui.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.ui.components.PhotoDoMainScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

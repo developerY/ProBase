@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.zoewave.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TaskItemUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 

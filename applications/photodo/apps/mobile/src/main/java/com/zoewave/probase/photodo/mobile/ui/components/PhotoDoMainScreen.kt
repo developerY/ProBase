@@ -1,4 +1,4 @@
-package com.zoewave.probase.photodo.mobile.ui
+package com.zoewave.probase.photodo.mobile.ui.components
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -8,8 +8,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation3.ui.NavDisplay
-import com.zoewave.probase.photodo.mobile.ui.components.PhotoTodoBottomBar
-import com.zoewave.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.mobile.ui.navigation.photoTodoNavEntryProvider
 
 @Composable
