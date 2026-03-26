@@ -1,4 +1,4 @@
-package com.zoewave.ashbike.mobile.settings.ui.components
+package com.zoewave.probase.mobile.features.settings.ui.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
@@ -20,23 +20,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.ashbike.mobile.settings.R
-import com.zoewave.probase.core.ui.theme.ThemeIdentifiers
+import com.zoewave.probase.mobile.features.settings.R
 
-// Sealed class to represent theme options with their string resource IDs
+// Replace with your actual R file for the settings module if needed
+
+
+// We keep this localized so the UI component is fully self-contained
+object ThemeIdentifiers {
+    const val SYSTEM = "SYSTEM"
+    const val LIGHT = "LIGHT"
+    const val DARK = "DARK"
+}
+
 sealed class ThemeOption(val identifier: String, @StringRes val displayResId: Int) {
-    data object SystemTheme : ThemeOption(ThemeIdentifiers.SYSTEM, R.string.applications_ashbike_apps_mobile_features_settings_theme_system_display)
-    data object LightTheme : ThemeOption(ThemeIdentifiers.LIGHT, R.string.applications_ashbike_apps_mobile_features_settings_theme_light_display)
-    data object DarkTheme : ThemeOption(ThemeIdentifiers.DARK, R.string.applications_ashbike_apps_mobile_features_settings_theme_dark_display)
+    data object SystemTheme : ThemeOption(ThemeIdentifiers.SYSTEM, R.string.applications_photodo_apps_mobile_features_settings_theme_system_display)
+    data object LightTheme : ThemeOption(ThemeIdentifiers.LIGHT, R.string.applications_photodo_apps_mobile_features_settings_theme_light_display)
+    data object DarkTheme : ThemeOption(ThemeIdentifiers.DARK, R.string.applications_photodo_apps_mobile_features_settings_theme_dark_display)
 }
 
 private val themeOptionsList = listOf(
@@ -48,24 +51,23 @@ private val themeOptionsList = listOf(
 @Composable
 fun getCurrentThemeDisplayStringRes(themeIdentifier: String): Int {
     return when (themeIdentifier) {
-        ThemeIdentifiers.LIGHT -> R.string.applications_ashbike_apps_mobile_features_settings_theme_light_display
-        ThemeIdentifiers.DARK -> R.string.applications_ashbike_apps_mobile_features_settings_theme_dark_display
-        ThemeIdentifiers.SYSTEM -> R.string.applications_ashbike_apps_mobile_features_settings_theme_system_display
-        else -> R.string.applications_ashbike_apps_mobile_features_settings_theme_system_display // Default or throw an error
+        ThemeIdentifiers.LIGHT -> R.string.applications_photodo_apps_mobile_features_settings_theme_light_display
+        ThemeIdentifiers.DARK -> R.string.applications_photodo_apps_mobile_features_settings_theme_dark_display
+        else -> R.string.applications_photodo_apps_mobile_features_settings_theme_system_display
     }
 }
 
 @Composable
 fun ThemeSettingsCard(
-    title: String, // Expecting this to be a resolved string (ideally from stringResource at call site)
+    title: String,
     expanded: Boolean,
     onExpandToggle: () -> Unit,
-    currentTheme: String, // This will be an identifier like ThemeIdentifiers.SYSTEM
-    onThemeSelected: (String) -> Unit // Callback with the identifier
+    currentTheme: String,
+    onThemeSelected: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth()
     ) {
         Column {
@@ -77,19 +79,22 @@ fun ThemeSettingsCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Palette,
-                    contentDescription = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_theme_icon_cd)
+                    contentDescription = "Theme Settings"
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(text = title, style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.weight(1f))
+
+                // Shows current selected theme name (e.g., "Dark") next to the arrow
                 Text(
                     text = stringResource(id = getCurrentThemeDisplayStringRes(currentTheme)),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
+
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = stringResource(if (expanded) R.string.applications_ashbike_apps_mobile_features_settings_settings_action_collapse else R.string.applications_ashbike_apps_mobile_features_settings_settings_action_expand)
+                    contentDescription = if (expanded) "Collapse" else "Expand"
                 )
             }
 
@@ -104,7 +109,7 @@ fun ThemeSettingsCard(
                                     selected = (themeOption.identifier == currentTheme),
                                     onClick = { onThemeSelected(themeOption.identifier) }
                                 )
-                                .padding(vertical = 8.dp),
+                                .padding(vertical = 12.dp), // slightly larger touch target
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
@@ -122,22 +127,4 @@ fun ThemeSettingsCard(
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun ThemeSettingsCardPreview() {
-    var expanded by remember { mutableStateOf(true) }
-    // currentTheme in preview now uses the identifier
-    var currentTheme by remember { mutableStateOf(ThemeIdentifiers.SYSTEM) }
-
-    ThemeSettingsCard(
-        title = stringResource(R.string.applications_ashbike_apps_mobile_features_settings_settings_card_title_theme), // Title from string resource
-        expanded = expanded,
-        onExpandToggle = { expanded = !expanded },
-        currentTheme = currentTheme,
-        onThemeSelected = { themeIdentifier -> // Receives identifier
-            currentTheme = themeIdentifier
-        }
-    )
 }
