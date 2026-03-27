@@ -4,22 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.seaweed.features.main.navigation.SeaweedDestination
+import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.Transaction
 
 @Composable
@@ -45,8 +39,7 @@ fun HomeUiRoute(
     HomeScreen(
         modifier = modifier,
         uiState = uiState,
-        onEvent = viewModel::onEvent,
-        navTo = navTo
+        onEvent = viewModel::onEvent
     )
 }
 
@@ -55,17 +48,11 @@ fun HomeUiRoute(
 fun HomeScreen(
     modifier: Modifier = Modifier,
     uiState: HomeUiState,
-    onEvent: (HomeUiEvent) -> Unit,
-    navTo: (SeaweedDestination) -> Unit
+    onEvent: (HomeUiEvent) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Seaweed Finance") })
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { navTo(SeaweedDestination.Transaction) }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Transaction")
-            }
         },
         modifier = modifier
     ) { padding ->
@@ -84,7 +71,14 @@ fun HomeScreen(
                     item {
                         BalanceCard(balance = uiState.totalBalance)
                     }
-                    items(uiState.transactions, key = { it.id }) { transaction ->
+                    item {
+                        Text(
+                            text = "Recent Transactions",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                    items(uiState.transactions.take(5), key = { it.id }) { transaction ->
                         TransactionItem(
                             transaction = transaction,
                             onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) }
@@ -105,32 +99,6 @@ fun BalanceCard(balance: Double) {
         Column(modifier = Modifier.padding(24.dp)) {
             Text(text = "Total Balance", style = MaterialTheme.typography.labelLarge)
             Text(text = "$${balance}", style = MaterialTheme.typography.headlineLarge)
-        }
-    }
-}
-
-@Composable
-fun TransactionItem(
-    transaction: Transaction,
-    onDelete: () -> Unit
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = transaction.description, style = MaterialTheme.typography.titleMedium)
-                Text(text = transaction.category, style = MaterialTheme.typography.bodySmall)
-            }
-            Text(
-                text = "$${transaction.amount}",
-                style = MaterialTheme.typography.titleLarge,
-                color = if (transaction.amount < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-            )
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete")
-            }
         }
     }
 }
