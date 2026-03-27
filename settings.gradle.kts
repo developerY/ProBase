@@ -77,3 +77,12 @@ include(":applications:photodo:apps:mobile:features:tasks")
 include(":applications:photodo:apps:mobile:features:settings")
 include(":applications:photodo:apps:mobile:core")
 include(":features:camera")
+
+// --- Seaweed Product Line ---
+include(":applications:seaweed:database")
+include(":applications:seaweed:data")
+include(":applications:seaweed:model")
+include(":applications:seaweed:features:main")
+include(":applications:seaweed:apps:mobile")
+include(":applications:seaweed:apps:mobile:features:home")
+include(":applications:seaweed:apps:mobile:features:add_transaction")
