@@ -5,4 +5,6 @@ import kotlinx.coroutines.flow.Flow
 interface AppSettingsRepository {
     val themePreferenceFlow: Flow<String>
     suspend fun saveThemePreference(themeIdentifier: String)
+    val palettePreferenceFlow: Flow<String>
+    suspend fun savePalettePreference(paletteIdentifier: String)
 }

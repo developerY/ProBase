@@ -1,61 +1,69 @@
-package com.zoewave.probase.photodo.mobile.core.ui
+package com.zoewave.probase.photodo.mobile.core.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
+// 1. Existing Default Schemes
+private val DefaultDarkColorScheme = darkColorScheme(
     primary = PhotoDoPrimaryDark,
     secondary = PhotoDoSecondaryDark,
     tertiary = PhotoDoTertiaryDark,
     background = PhotoDoBackgroundDark,
     surface = PhotoDoSurfaceDark,
-    onPrimary = Color.Black,
-    onSecondary = Color.Black,
-    onTertiary = Color.Black,
-    onBackground = Color.White,
-    onSurface = Color.White,
 )
-
-private val LightColorScheme = lightColorScheme(
+private val DefaultLightColorScheme = lightColorScheme(
     primary = PhotoDoPrimary,
     secondary = PhotoDoSecondary,
     tertiary = PhotoDoTertiary,
     background = PhotoDoBackgroundLight,
     surface = PhotoDoSurfaceLight,
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onTertiary = Color.Black,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
 )
 
+// 2. NEW: Coral Reef Schemes
+private val CoralDarkColorScheme = darkColorScheme(
+    primary = CoralPrimaryDark,
+    secondary = CoralSecondaryDark,
+    tertiary = CoralTertiaryDark,
+    background = CoralBackgroundDark,
+    surface = CoralSurfaceDark,
+    onPrimary = Color.Black,
+    onBackground = Color.White,
+    onSurface = Color.White
+)
+
+private val CoralLightColorScheme = lightColorScheme(
+    primary = CoralPrimary,
+    secondary = CoralSecondary,
+    tertiary = CoralTertiary,
+    background = CoralBackgroundLight,
+    surface = CoralSurfaceLight,
+    onPrimary = Color.White,
+    onBackground = Color(0xFF1C1B1F),
+    onSurface = Color(0xFF1C1B1F)
+)
+
+// 3. Updated Theme Composable
 @Composable
 fun PhotoDoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    palette: String = "DEFAULT", // 🚀 NEW: Accept the palette choice!
+    dynamicColor: Boolean = false, // Turn off dynamic color so your branding overrides Android 12+ wallpaper colors
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        palette == "CORAL_REEF" && darkTheme -> CoralDarkColorScheme
+        palette == "CORAL_REEF" && !darkTheme -> CoralLightColorScheme
+        darkTheme -> DefaultDarkColorScheme
+        else -> DefaultLightColorScheme
     }
 
     val view = LocalView.current
@@ -71,7 +79,7 @@ fun PhotoDoTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography, // Maps to your local Type.kt
+        typography = Typography,
         content = content
     )
 }

@@ -6,7 +6,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.zoewave.probase.photodo.mobile.core.ui.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.model.navigation.topLevelRoutes
 
