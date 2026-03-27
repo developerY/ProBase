@@ -63,7 +63,7 @@ fun HomeScreen(
             TopAppBar(title = { Text("Seaweed Finance") })
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { navTo(SeaweedDestination.AddTransaction) }) {
+            FloatingActionButton(onClick = { navTo(SeaweedDestination.Transaction) }) {
                 Icon(Icons.Default.Add, contentDescription = "Add Transaction")
             }
         },

@@ -1,4 +1,4 @@
-package com.zoewave.probase.seaweed.mobile.add_transaction.ui
+package com.zoewave.probase.seaweed.mobile.transaction.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
