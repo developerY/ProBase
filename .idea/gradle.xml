@@ -58,8 +58,9 @@
             <option value="$PROJECT_DIR$/applications/seaweed/apps" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features" />
-            <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/add_transaction" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/home" />
+            <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/settings" />
+            <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/transaction" />
             <option value="$PROJECT_DIR$/applications/seaweed/data" />
             <option value="$PROJECT_DIR$/applications/seaweed/database" />
             <option value="$PROJECT_DIR$/applications/seaweed/features" />

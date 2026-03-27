@@ -34,7 +34,8 @@ dependencies {
     implementation(project(":applications:seaweed:data"))
     implementation(project(":applications:seaweed:features:main"))
     implementation(project(":applications:seaweed:apps:mobile:features:home"))
-    implementation(project(":applications:seaweed:apps:mobile:features:add_transaction"))
+    implementation(project(":applications:seaweed:apps:mobile:features:transaction"))
+    implementation(project(":applications:seaweed:apps:mobile:features:settings"))
 
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)

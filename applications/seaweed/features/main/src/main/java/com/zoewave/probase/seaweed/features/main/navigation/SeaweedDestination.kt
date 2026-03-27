@@ -7,5 +7,7 @@ sealed class SeaweedDestination {
     @Serializable
     data object Home : SeaweedDestination()
     @Serializable
-    data object AddTransaction : SeaweedDestination()
+    data object Transaction : SeaweedDestination()
+    @Serializable
+    data object Settings : SeaweedDestination()
 }
