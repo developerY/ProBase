@@ -88,6 +88,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":features:camera"))
     implementation(project(":applications:photodo:model"))
+    implementation(project(":applications:photodo:db"))
     // implementation(project(":core:database")) // Uncomment if needed
 
     // --- PhotoTodo Specific Features ---
