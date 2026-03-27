@@ -20,8 +20,9 @@ dependencies {
     // implementation(project(":core:network"))
     // implementation(project(":core:data"))
     implementation(project(":applications:photodo:db"))
-    implementation(project(":applications:photodo:model"))
 
+    implementation(project(":applications:photodo:model"))
+    implementation(project(":applications:photodo:apps:mobile:core"))
     implementation(project(":applications:photodo:apps:mobile:features:tasks"))
 
 

@@ -58,9 +58,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.core.ui.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeEvent
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeUiState
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -342,7 +343,7 @@ fun EmptyHomeState(
 @Preview(showBackground = true, name = "1. Dashboard Populated")
 @Composable
 private fun HomeOverviewScreenPopulatedPreview() {
-    MaterialTheme {
+    PhotoDoTheme {
         val mockData = listOf(
             CategoryOverviewUiModel(
                 id = 1L,
