@@ -1,4 +1,4 @@
-package com.zoewave.probase.photodo.mobile.core.ui
+package com.zoewave.probase.photodo.mobile.core.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

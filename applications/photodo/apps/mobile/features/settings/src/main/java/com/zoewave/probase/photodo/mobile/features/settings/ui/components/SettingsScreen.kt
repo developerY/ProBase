@@ -20,7 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.zoewave.probase.photodo.mobile.core.ui.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsEvent
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiState
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
@@ -66,6 +66,13 @@ fun SettingsScreen(
                 currentTheme = uiState.currentTheme,
                 onThemeSelected = { newTheme ->
                     onEvent(SettingsEvent.OnThemeSelected(newTheme))
+                }
+            )
+
+            PaletteSettingsCard(
+                currentPalette = uiState.currentPalette,
+                onPaletteSelected = { newPalette ->
+                    onEvent(SettingsEvent.OnPaletteSelected(newPalette))
                 }
             )
 

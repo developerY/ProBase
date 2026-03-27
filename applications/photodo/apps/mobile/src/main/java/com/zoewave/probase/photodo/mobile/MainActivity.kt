@@ -12,8 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
-import com.zoewave.probase.photodo.mobile.core.ui.PhotoDoTheme
-import com.zoewave.probase.photodo.mobile.ui.components.PhotoDoMainScreen
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -31,6 +30,7 @@ class MainActivity : ComponentActivity() {
 
             // 2. Collect the current theme state
             val themePreference by appSettingsRepository.themePreferenceFlow.collectAsState(initial = "SYSTEM")
+            val palettePreference by appSettingsRepository.palettePreferenceFlow.collectAsState(initial = "DEFAULT") // NEW
 
             // 3. Determine true/false for Dark Mode
             val isDarkTheme = when (themePreference) {
@@ -40,12 +40,15 @@ class MainActivity : ComponentActivity() {
             }
 
             // 4. Pass it to your beautiful custom theme!
-            PhotoDoTheme(darkTheme = isDarkTheme) {
+            PhotoDoTheme(
+                darkTheme = isDarkTheme,
+                palette = palettePreference
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    PhotoDoMainScreen()
+                    PhotoDoApp()
                 }
             }
         }

@@ -14,6 +14,19 @@ class DataStoreAppSettingsRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) : AppSettingsRepository {
 
+    private val PALETTE_KEY = stringPreferencesKey("palette_preference")
+
+    override val palettePreferenceFlow: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PALETTE_KEY] ?: "DEFAULT"
+    }
+
+    // Add the save function
+    override suspend fun savePalettePreference(paletteIdentifier: String) {
+        dataStore.edit { preferences ->
+            preferences[PALETTE_KEY] = paletteIdentifier
+        }
+    }
+
     private val THEME_KEY = stringPreferencesKey("theme_preference")
 
     override val themePreferenceFlow: Flow<String> = dataStore.data.map { preferences ->

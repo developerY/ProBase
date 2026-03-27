@@ -23,10 +23,12 @@ class SettingsViewModel @Inject constructor(
     // Combines the DB theme preference with the navigation argument into a single UI State
     val uiState: StateFlow<SettingsUiState> = combine(
         appSettingsRepository.themePreferenceFlow,
+        appSettingsRepository.palettePreferenceFlow, // NEW
         _initialExpandedKey
-    ) { theme, expandedKey ->
+    ) { theme, palette, expandedKey ->
         SettingsUiState(
             currentTheme = theme,
+            currentPalette = palette, // NEW
             initialCardKeyToExpand = expandedKey
         )
     }.stateIn(
@@ -41,6 +43,9 @@ class SettingsViewModel @Inject constructor(
                 viewModelScope.launch {
                     appSettingsRepository.saveThemePreference(event.themeIdentifier)
                 }
+            }
+            is SettingsEvent.OnPaletteSelected -> { // NEW
+                viewModelScope.launch { appSettingsRepository.savePalettePreference(event.paletteIdentifier) }
             }
         }
     }
