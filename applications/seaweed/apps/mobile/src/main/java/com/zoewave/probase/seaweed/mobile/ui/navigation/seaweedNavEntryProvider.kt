@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.seaweed.features.main.navigation.SeaweedDestination
+import com.zoewave.probase.seaweed.mobile.transaction.ui.TransactionsUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionUiRoute
 import com.zoewave.probase.seaweed.mobile.home.ui.HomeUiRoute
 import com.zoewave.probase.seaweed.mobile.settings.ui.SettingsUiRoute
@@ -21,7 +22,13 @@ fun seaweedNavEntryProvider(
                     navTo = navigateTo
                 )
             }
-            SeaweedDestination.Transaction -> {
+            SeaweedDestination.Transactions -> {
+                TransactionsUiRoute(
+                    modifier = Modifier.fillMaxSize(),
+                    navTo = navigateTo
+                )
+            }
+            SeaweedDestination.AddTransaction -> {
                 AddTransactionUiRoute(
                     modifier = Modifier.fillMaxSize(),
                     navTo = navigateTo,

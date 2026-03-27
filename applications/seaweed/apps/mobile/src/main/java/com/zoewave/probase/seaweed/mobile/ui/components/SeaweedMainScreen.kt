@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -25,7 +26,7 @@ fun SeaweedMainScreen() {
     val currentDestination = backStack.lastOrNull() ?: SeaweedDestination.Home
 
     fun navigateTo(destination: SeaweedDestination) {
-        if (destination == SeaweedDestination.Home || destination == SeaweedDestination.Settings) {
+        if (destination == SeaweedDestination.Home || destination == SeaweedDestination.Transactions || destination == SeaweedDestination.Settings) {
             backStack.clear()
             backStack.add(destination)
         } else {
@@ -77,6 +78,12 @@ fun SeaweedBottomBar(
             onClick = { onNavigate(SeaweedDestination.Home) },
             icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
             label = { Text("Home") }
+        )
+        NavigationBarItem(
+            selected = currentDestination == SeaweedDestination.Transactions,
+            onClick = { onNavigate(SeaweedDestination.Transactions) },
+            icon = { Icon(Icons.Default.List, contentDescription = "Transactions") },
+            label = { Text("Transactions") }
         )
         NavigationBarItem(
             selected = currentDestination == SeaweedDestination.Settings,
