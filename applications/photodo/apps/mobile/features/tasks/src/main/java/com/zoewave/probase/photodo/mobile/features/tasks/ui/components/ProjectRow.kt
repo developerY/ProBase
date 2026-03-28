@@ -22,9 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 @Composable
 fun ProjectRow(
@@ -99,7 +100,7 @@ fun ProjectRow(
 @Preview(showBackground = true)
 @Composable
 fun ProjectRowPreview() {
-    MaterialTheme {
+    PhotoDoTheme {
         ProjectRow(
             project = ProjectListUiModel(
                 projectId = 1,
@@ -117,7 +118,7 @@ fun ProjectRowPreview() {
 @Preview(showBackground = true)
 @Composable
 fun ProjectRowUrgentFavoritePreview() {
-    MaterialTheme {
+    PhotoDoTheme {
         ProjectRow(
             project = ProjectListUiModel(
                 projectId = 2,
