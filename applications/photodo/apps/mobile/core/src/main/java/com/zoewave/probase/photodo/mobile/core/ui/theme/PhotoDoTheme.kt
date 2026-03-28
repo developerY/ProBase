@@ -2,7 +2,9 @@ package com.zoewave.probase.photodo.mobile.core.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
@@ -36,28 +38,60 @@ private val DefaultLightColorScheme = lightColorScheme(
 )
 
 // --- CORAL REEF SCHEMES ---
+// 1. ADD THE SURFACES to your Coral Dark Scheme
 private val CoralDarkColorScheme = darkColorScheme(
     primary = CoralPrimaryDark,
     secondary = CoralSecondaryDark,
     tertiary = CoralTertiaryDark,
     background = CoralBackgroundDark,
     surface = CoralSurfaceDark,
-    surfaceVariant = Color(0xFF1E3538), // 🚀 Heavily tinted teal cards!
+    // 🚀 THIS IS THE MAGIC BULLET FOR CARDS:
+    surfaceVariant = Color(0xFF1E3538), // Heavily tinted ocean teal for cards
     onPrimary = Color.Black,
     onBackground = Color.White,
-    onSurface = Color.White
+    onSurface = Color.White,
+    onSurfaceVariant = Color(0xFFE2E2E2) // Ensure text on the cards is white
 )
 
+// 2. ADD THE SURFACES to your Coral Light Scheme
 private val CoralLightColorScheme = lightColorScheme(
     primary = CoralPrimary,
     secondary = CoralSecondary,
     tertiary = CoralTertiary,
     background = CoralBackgroundLight,
     surface = CoralSurfaceLight,
-    surfaceVariant = Color(0xFFD6EBE9), // 🚀 Heavily tinted teal cards!
+    // 🚀 THIS IS THE MAGIC BULLET FOR CARDS:
+    surfaceVariant = Color(0xFFD6EBE9), // Heavily tinted teal for cards
     onPrimary = Color.White,
     onBackground = Color.Black,
-    onSurface = Color.Black
+    onSurface = Color.Black,
+    onSurfaceVariant = Color(0xFF1C1B1F) // Ensure text on the cards is black
+)
+
+val ForestLightColorScheme = lightColorScheme(
+    primary = ForestPrimary,
+    secondary = ForestSecondary,
+    tertiary = ForestTertiary,
+    background = ForestBackgroundLight,
+    surface = ForestSurfaceLight,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White,
+    onBackground = Color(0xFF1A1C19),
+    onSurface = Color(0xFF1A1C19)
+)
+
+val ForestDarkColorScheme = darkColorScheme(
+    primary = ForestPrimaryDark,
+    secondary = ForestSecondaryDark,
+    tertiary = ForestTertiaryDark,
+    background = ForestBackgroundDark,
+    surface = ForestSurfaceDark,
+    onPrimary = Color(0xFF1B3716),
+    onSecondary = Color(0xFF312C00),
+    onTertiary = Color(0xFF003544),
+    onBackground = Color(0xFFE2E3DD),
+    onSurface = Color(0xFFE2E3DD)
 )
 
 @Composable
@@ -66,7 +100,11 @@ fun PhotoDoTheme(
     palette: String = "DEFAULT",
     content: @Composable () -> Unit
 ) {
+    // 🚀 Completely remove the "dynamicColor" logic from this WHEN block.
+    // If dynamicColor is left in, Android ignores your background/surface colors!
     val colorScheme = when {
+        palette == "FOREST" && darkTheme -> ForestDarkColorScheme
+        palette == "FOREST" && !darkTheme -> ForestLightColorScheme
         palette == "CORAL_REEF" && darkTheme -> CoralDarkColorScheme
         palette == "CORAL_REEF" && !darkTheme -> CoralLightColorScheme
         darkTheme -> DefaultDarkColorScheme
