@@ -1,5 +1,6 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.home.components.icons
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,49 +27,52 @@ fun BudgetTrendIcon(
     project: ProjectListUiModel,
     modifier: Modifier = Modifier
 ) {
-    // 1. Safety check: Don't draw anything if there's no budget.
     if (!project.hasBudget) return
 
-    // 2. The Color Logic (Red > Yellow > Green)
-    val financialStatusColor = when {
-        project.isOverBudget -> MaterialTheme.colorScheme.error // 🔴 Red
-        project.isNearBudgetLimit -> androidx.compose.ui.graphics.Color(0xFFFFD54F) // 🟡 Warning Yellow
-        else -> androidx.compose.ui.graphics.Color(0xFF81C784) // 🟢 Safe Green
+    val statusColor = when {
+        project.isOverBudget -> MaterialTheme.colorScheme.error // Red
+        project.isNearBudgetLimit -> androidx.compose.ui.graphics.Color(0xFFE5B800) // Deep Yellow/Gold
+        else -> androidx.compose.ui.graphics.Color(0xFF4CAF50) // Material Green
     }
 
-    // 3. The Trending Arrow Logic (Up > Flat > Down)
     val trendingIcon = when {
-        project.isOverBudget -> Icons.AutoMirrored.Filled.TrendingUp // Spending High (Bad trend)
-        project.isNearBudgetLimit -> Icons.AutoMirrored.Filled.TrendingFlat // Nearing Limit (Warning)
-        else -> Icons.AutoMirrored.Filled.TrendingDown // Spending Low (Good trend)
+        project.isOverBudget -> Icons.AutoMirrored.Filled.TrendingUp
+        project.isNearBudgetLimit -> Icons.AutoMirrored.Filled.TrendingFlat
+        else -> Icons.AutoMirrored.Filled.TrendingDown
     }
 
-    // 4. The Composition Box
     Box(
-        modifier = modifier.size(32.dp), // Set total area for the combi-icon
-        contentAlignment = androidx.compose.ui.Alignment.Center // Base align everything to center
+        modifier = modifier.size(36.dp),
+        // 🚀 This tells the Box to stack everything dead center
+        contentAlignment = Alignment.Center
     ) {
 
-        // 🚀 LAYER 1 (BACKGROUND): The Dynamic Trending Graph/Arrow
+        // 🚀 LAYER 1: The Trending Graph
         Icon(
             imageVector = trendingIcon,
-            contentDescription = null, // decorative
-            tint = financialStatusColor, // Carries the color coding!
-            modifier = Modifier.size(28.dp) // The larger background element
+            contentDescription = null,
+            tint = statusColor.copy(alpha = 0.6f),
+            // Made slightly larger so the arrow and tail stick out past the dollar sign
+            modifier = Modifier.size(32.dp)
         )
 
-        // 🚀 LAYER 2 (FOREGROUND): The Dollar Sign
-        // Make it smaller and offset it slightly so both icons are readable
-        Icon(
-            imageVector = Icons.Default.AttachMoney,
-            contentDescription = "Budget Status", // Screen reader info
-            // Use a dark color (like onSurfaceVariant) so it pops against the status color
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        // 🚀 LAYER 2: The Dollar Sign with "Cutout" Background
+        androidx.compose.foundation.layout.Box(
             modifier = Modifier
-                .size(16.dp) // Smaller foreground element
-                .align(androidx.compose.ui.Alignment.BottomEnd) // Pin to bottom-right
-                .padding(bottom = 2.dp, end = 2.dp) // Tiny padding for visual separation
-        )
+                .background(
+                    // Acts as an eraser to cut a hole in the trend line
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = androidx.compose.foundation.shape.CircleShape
+                )
+                .padding(2.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.AttachMoney,
+                contentDescription = "Budget Status",
+                tint = statusColor,
+                modifier = Modifier.size(16.dp)
+            )
+        }
     }
 }
 
