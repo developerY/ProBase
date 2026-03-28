@@ -30,9 +30,9 @@ fun BudgetTrendIcon(
     if (!project.hasBudget) return
 
     val statusColor = when {
-        project.isOverBudget -> MaterialTheme.colorScheme.error // Red
-        project.isNearBudgetLimit -> androidx.compose.ui.graphics.Color(0xFFE5B800) // Deep Yellow/Gold
-        else -> androidx.compose.ui.graphics.Color(0xFF4CAF50) // Material Green
+        project.isOverBudget -> MaterialTheme.colorScheme.error
+        project.isNearBudgetLimit -> androidx.compose.ui.graphics.Color(0xFFE5B800)
+        else -> androidx.compose.ui.graphics.Color(0xFF4CAF50)
     }
 
     val trendingIcon = when {
@@ -41,26 +41,24 @@ fun BudgetTrendIcon(
         else -> Icons.AutoMirrored.Filled.TrendingDown
     }
 
+    // 1. Increased the overall container size to 40.dp
     Box(
-        modifier = modifier.size(36.dp),
-        // 🚀 This tells the Box to stack everything dead center
+        modifier = modifier.size(40.dp),
         contentAlignment = Alignment.Center
     ) {
 
-        // 🚀 LAYER 1: The Trending Graph
+        // 2. Expanded the graph to fill the entire 40.dp space
         Icon(
             imageVector = trendingIcon,
             contentDescription = null,
             tint = statusColor.copy(alpha = 0.6f),
-            // Made slightly larger so the arrow and tail stick out past the dollar sign
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(40.dp)
         )
 
-        // 🚀 LAYER 2: The Dollar Sign with "Cutout" Background
+        // 3. Shrunk the dollar sign slightly to 14.dp so the graph dominates
         androidx.compose.foundation.layout.Box(
             modifier = Modifier
                 .background(
-                    // Acts as an eraser to cut a hole in the trend line
                     color = MaterialTheme.colorScheme.surfaceVariant,
                     shape = androidx.compose.foundation.shape.CircleShape
                 )
@@ -70,7 +68,7 @@ fun BudgetTrendIcon(
                 imageVector = Icons.Default.AttachMoney,
                 contentDescription = "Budget Status",
                 tint = statusColor,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(14.dp)
             )
         }
     }
