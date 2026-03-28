@@ -34,9 +34,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -140,7 +141,7 @@ fun AddProjectBottomSheet(
 @Preview
 @Composable
 private fun AddProjectBottomSheetPreview() {
-    MaterialTheme {
+    PhotoDoTheme {
         // Note: ModalBottomSheet won't render perfectly in a standard Preview
         // without a parent, but this gives you a quick look at the layout!
         AddProjectBottomSheet(
