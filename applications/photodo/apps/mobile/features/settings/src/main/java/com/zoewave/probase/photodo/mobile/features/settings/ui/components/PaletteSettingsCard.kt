@@ -54,7 +54,11 @@ fun PaletteSettingsCard(
 
                 // Display the current selection
                 Text(
-                    text = if (currentPalette == "CORAL_REEF") "Coral Reef" else "Default",
+                    text = when(currentPalette) {
+                        "CORAL_REEF" -> "Coral Reef"
+                        "FOREST" -> "Deep Forest"
+                        else -> "Default"
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -103,6 +107,28 @@ fun PaletteSettingsCard(
                         )
                         Text(
                             text = "Coral Reef",
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+
+
+                    // Inside the expanded Column block, right below the Coral Reef row, add the Forest Row:
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = (currentPalette == "FOREST"),
+                                onClick = { onPaletteSelected("FOREST") }
+                            )
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (currentPalette == "FOREST"),
+                            onClick = null
+                        )
+                        Text(
+                            text = "Deep Forest",
                             modifier = Modifier.padding(start = 16.dp)
                         )
                     }

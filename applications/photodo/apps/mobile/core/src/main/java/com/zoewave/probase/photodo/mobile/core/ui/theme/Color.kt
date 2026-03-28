@@ -27,3 +27,17 @@ val CoralBackgroundLight = Color(0xFFE8F1F2) // Light Aquatic
 val CoralSurfaceLight = Color(0xFFF4F9F9)    // Tinted Sand/Teal for Cards
 val CoralBackgroundDark = Color(0xFF0A1314)  // Deep Ocean
 val CoralSurfaceDark = Color(0xFF132224)     // Ocean Trench for Cards
+// --- 3. FOREST BRAND (Deep Green / Earth) ---
+val ForestPrimary = Color(0xFF4A6741)
+val ForestSecondary = Color(0xFF8C7851)
+val ForestTertiary = Color(0xFF5B8291)
+val ForestPrimaryDark = Color(0xFFA7C49D)
+val ForestSecondaryDark = Color(0xFFD4C29F)
+val ForestTertiaryDark = Color(0xFF9DBCC7)
+// TINTED SURFACES
+val ForestBackgroundLight = Color(0xFFF1F4F0) // Pale Moss
+val ForestSurfaceLight = Color(0xFFFBFDFB)    // Clean Leaf
+val ForestBackgroundDark = Color(0xFF121611)  // Deep Woods
+val ForestSurfaceDark = Color(0xFF1B221A)     // Pine Shadow
+
+// --- COLOR SCHEMES ---
