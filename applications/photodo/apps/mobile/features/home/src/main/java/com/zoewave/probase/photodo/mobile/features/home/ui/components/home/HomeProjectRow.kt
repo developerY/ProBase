@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.components.icons.BudgetTrendIcon
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
@@ -76,6 +77,13 @@ fun HomeProjectRow(
                     )
                 }
             }
+
+            // 🚀 DROP YOUR NEW COMBI-ICON HERE!
+            // (The component handles its own visibility check inside)
+            BudgetTrendIcon(
+                project = project,
+                modifier = Modifier.padding(end = 10.dp) // Give it some room
+            )
             Icon(Icons.Default.ChevronRight, contentDescription = "Go")
         }
     }
@@ -83,15 +91,57 @@ fun HomeProjectRow(
 
 @Preview(showBackground = true)
 @Composable
-private fun HomeProjectRowPreview() {
+private fun HomeProjectRowGreenPreview() {
     PhotoDoTheme {
         HomeProjectRow(
             project = ProjectListUiModel(
                 projectId = 1L,
-                title = "Sunset shoot",
-                categoryName = "Nature",
+                title = "Portrait session",
+                categoryName = "Work",
                 isFavorite = true,
-                isUrgent = true
+                isUrgent = false,
+                currentSpend = 120.0,
+                projectBudget = 200.0
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeProjectRowYellowPreview() {
+    PhotoDoTheme {
+        HomeProjectRow(
+            project = ProjectListUiModel(
+                projectId = 1L,
+                title = "Portrait session",
+                categoryName = "Work",
+                isFavorite = true,
+                isUrgent = false,
+                currentSpend = 200.0,
+                projectBudget = 200.0
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeProjectRowRedPreview() {
+    PhotoDoTheme {
+        HomeProjectRow(
+            project = ProjectListUiModel(
+                projectId = 1L,
+                title = "Portrait session",
+                categoryName = "Work",
+                isFavorite = true,
+                isUrgent = false,
+                currentSpend = 270.0,
+                projectBudget = 200.0
             ),
             onEvent = {},
             navTo = {}
