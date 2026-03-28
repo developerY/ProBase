@@ -1,7 +1,5 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
-import kotlin.collections.sortedByDescending
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -9,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 
 /**
@@ -67,7 +66,7 @@ fun MapCategoriesToWheelSlicesPreview() {
         CategoryOverviewUiModel(4, "Health", 2, 0, 0f)
     )
 
-    MaterialTheme {
+    PhotoDoTheme {
         val slices = mapCategoriesToWheelSlices(categories = sampleCategories)
         Surface {
             Column {

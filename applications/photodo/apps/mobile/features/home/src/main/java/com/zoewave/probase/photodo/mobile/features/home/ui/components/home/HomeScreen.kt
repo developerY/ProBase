@@ -33,8 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import components.home.CategoryQuickJumpRow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -199,7 +200,7 @@ fun HomeScreen(
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
-    MaterialTheme {
+    PhotoDoTheme {
         HomeScreen(
             uiState = HomeUiState.Success(
                 categories = listOf(
@@ -225,7 +226,7 @@ private fun HomeScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenLoadingPreview() {
-    MaterialTheme {
+    PhotoDoTheme {
         HomeScreen(
             uiState = HomeUiState.Loading,
             onEvent = {},
@@ -237,7 +238,7 @@ private fun HomeScreenLoadingPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenEmptyPreview() {
-    MaterialTheme {
+    PhotoDoTheme {
         HomeScreen(
             uiState = HomeUiState.Empty,
             onEvent = {},

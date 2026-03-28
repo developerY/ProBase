@@ -34,11 +34,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.CategoryQuickJumpUiModel
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.CategoryQuickJumpCard
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeEvent
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 /**
  * 🚀 A horizontal section for "Important Categories Quick Jump".
@@ -134,7 +135,7 @@ fun CategoryQuickJumpRow(
 @Preview(showBackground = true, name = "Quick Jump Row - Animated", backgroundColor = 0xFFF3F4F9)
 @Composable
 private fun CategoryQuickJumpRowPreview() {
-    MaterialTheme {
+    PhotoDoTheme {
         val mockData = listOf(
             CategoryOverviewUiModel(
                 id = 1L,

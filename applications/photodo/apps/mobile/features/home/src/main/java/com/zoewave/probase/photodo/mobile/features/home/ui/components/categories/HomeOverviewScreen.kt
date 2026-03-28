@@ -398,7 +398,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
 @Preview(showBackground = true, name = "2. Dashboard Empty")
 @Composable
 private fun HomeOverviewScreenEmptyPreview() {
-    MaterialTheme {
+    PhotoDoTheme {
         Surface {
             HomeOverviewScreen(
                 uiState = HomeUiState.Empty,
