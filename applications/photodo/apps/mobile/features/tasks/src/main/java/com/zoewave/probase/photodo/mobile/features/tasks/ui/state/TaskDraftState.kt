@@ -7,5 +7,6 @@ data class TaskDraftState(
     val listTitle: String = "",
     val listDescription: String = "",
     val pendingTaskItems: List<String> = emptyList(), // Just strings until saved
-    val pendingPhotoUris: List<String> = emptyList()
+    val pendingPhotoUris: List<String> = emptyList(),
+    val budgetInput: String = ""
 )

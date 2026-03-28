@@ -21,6 +21,8 @@ sealed interface TasksEvent {
     data class OnDraftChecklistItemAdded(val itemText: String) : TasksEvent
     data class OnDraftPhotoAttached(val uri: String) : TasksEvent
 
+    data class OnDraftBudgetChanged(val budgetInput: String) : TasksEvent
+
     data object OnSaveDraftClicked : TasksEvent
 
 
