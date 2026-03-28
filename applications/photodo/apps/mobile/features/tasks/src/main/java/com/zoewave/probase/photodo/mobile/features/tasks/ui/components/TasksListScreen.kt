@@ -232,3 +232,41 @@ fun TasksListScreenNoCategoriesPreview() {
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun TasksListBudgetScreenPreview() {
+    PhotoDoTheme {
+        TasksListScreen(
+            uiState = TasksUiState(
+                categoryName = "Work",
+                projectLists = listOf(
+                    ProjectListUiModel(
+                        projectId = 1,
+                        title = "Fix leaking roof",
+                        categoryName = "Home",
+                        isUrgent = true,
+                        currentSpend = 1200.0,
+                        projectBudget = 1000.0 // 🔴 Will show up RED (Over budget)
+                    ),
+                    ProjectListUiModel(
+                        projectId = 2,
+                        title = "Buy groceries",
+                        categoryName = "Personal",
+                        isFavorite = true,
+                        currentSpend = 150.0,
+                        projectBudget = 200.0 // 🟢 Will show up GREEN (Under budget)
+                    ),
+                    ProjectListUiModel(
+                        projectId = 3,
+                        title = "Update resume",
+                        categoryName = "Work"
+                        // No budget set! The card will cleanly shrink and hide the progress bar.
+                    )
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
