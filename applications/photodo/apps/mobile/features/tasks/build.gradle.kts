@@ -25,6 +25,8 @@ dependencies {
     // Needed so the TasksViewModel can inject PhotoDoRepo
     implementation(project(":applications:photodo:db"))
     implementation(project(":applications:photodo:model"))
+    implementation(project(":applications:photodo:apps:mobile:core"))
+
     implementation(libs.kotlinx.datetime)
 
 
