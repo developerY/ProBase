@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 
 /**
@@ -201,7 +202,7 @@ private fun OverviewSummaryCardPreview() {
         )
     )
 
-    MaterialTheme {
+    PhotoDoTheme {
         OverviewSummaryCard(
             categories = mockData,
             modifier = Modifier.padding(16.dp)

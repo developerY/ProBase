@@ -23,8 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 /**
  * A specialized project row for the home screen "Jump Back In" section.
@@ -83,7 +84,7 @@ fun HomeProjectRow(
 @Preview(showBackground = true)
 @Composable
 private fun HomeProjectRowPreview() {
-    MaterialTheme {
+    PhotoDoTheme {
         HomeProjectRow(
             project = ProjectListUiModel(
                 projectId = 1L,

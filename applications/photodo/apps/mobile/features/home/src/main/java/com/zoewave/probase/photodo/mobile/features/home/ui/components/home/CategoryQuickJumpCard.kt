@@ -24,8 +24,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.CategoryQuickJumpUiModel
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 /**
  * A compact, expressively rounded card for a single category quick-jump chip.
@@ -92,7 +93,7 @@ fun CategoryQuickJumpCard(
 @Preview(showBackground = true)
 @Composable
 private fun CategoryQuickJumpCardPreview() {
-    MaterialTheme {
+    PhotoDoTheme {
         CategoryQuickJumpCard(
             model = CategoryQuickJumpUiModel(
                 id = 1L,
