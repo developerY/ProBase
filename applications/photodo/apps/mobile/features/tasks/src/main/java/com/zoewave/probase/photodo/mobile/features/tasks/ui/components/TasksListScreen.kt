@@ -38,10 +38,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -149,7 +152,7 @@ fun TasksListScreen(
                 ) {
                     // Iterate over the new projectLists state!
                     items(uiState.projectLists, key = { it.projectId }) { project ->
-                        ProjectRow(
+                        ProjectCard(
                             project = project,
                             onEvent = onEvent, // Pass the channel straight down!
                             navTo = navTo
@@ -177,6 +180,55 @@ fun TasksListScreen(
             uiState = uiState.draftState,
             onEvent = onEvent,
             navTo = navTo
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TasksListScreenPreview() {
+    PhotoDoTheme {
+        TasksListScreen(
+            uiState = TasksUiState(
+                categoryName = "Work",
+                projectLists = listOf(
+                    ProjectListUiModel(1, "Fix leaking roof", "Home", isUrgent = true),
+                    ProjectListUiModel(2, "Buy groceries", "Personal", isFavorite = true),
+                    ProjectListUiModel(3, "Update resume", "Work")
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TasksListScreenEmptyPreview() {
+    PhotoDoTheme {
+        TasksListScreen(
+            uiState = TasksUiState(
+                categoryName = "Vacation",
+                isNoCategoriesYet = false,
+                projectLists = emptyList()
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TasksListScreenNoCategoriesPreview() {
+    PhotoDoTheme {
+        TasksListScreen(
+            uiState = TasksUiState(
+                isNoCategoriesYet = true
+            ),
+            onEvent = {},
+            navTo = {}
         )
     }
 }

@@ -40,22 +40,15 @@ import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 @Composable
 fun ProjectCard(
-    project: ProjectListUiModel,      // ✅ The strict UiState
-    onEvent: (TasksEvent) -> Unit,    // ✅ The single event channel
-    navTo: (PhotoTodoRoute?) -> Unit, // ✅ The single navigation channel
+    project: ProjectListUiModel,
+    onEvent: (TasksEvent) -> Unit,
+    navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // 1. Math Safety
-    val currentSpend = project.currentSpend
-    val budget = project.projectBudget
-    val progress = if (budget > 0) (currentSpend / budget).toFloat() else 0f
-    val safeProgress = progress.coerceIn(0f, 1f)
-    val isOverBudget = progress >= 1f
-
-    // 2. The Color-Coded Dollar Icon Logic (Green < 80%, Yellow 80-99%, Red 100%+)
+    // 1. NO MORE MATH! We just ask the model for its state.
     val financialStatusColor = when {
-        progress >= 1f -> MaterialTheme.colorScheme.error // Red
-        progress >= 0.8f -> androidx.compose.ui.graphics.Color(0xFFFFD54F) // Warning Yellow
+        project.isOverBudget -> MaterialTheme.colorScheme.error // Red
+        project.isNearBudgetLimit -> androidx.compose.ui.graphics.Color(0xFFFFD54F) // Warning Yellow
         else -> androidx.compose.ui.graphics.Color(0xFF81C784) // Safe Green
     }
 
@@ -64,7 +57,6 @@ fun ProjectCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            // ✅ Send the click directly through the navigation channel!
             .clickable { navTo(PhotoTodoRoute.TaskDetail(project.projectId, project.title)) }
             .padding(vertical = 8.dp),
         shape = RoundedCornerShape(16.dp),
@@ -86,9 +78,7 @@ fun ProjectCard(
                     imageVector = Icons.Rounded.Folder,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(end = 16.dp)
-                        .size(28.dp)
+                    modifier = Modifier.padding(end = 16.dp).size(28.dp)
                 )
 
                 Column(modifier = Modifier.weight(1f)) {
@@ -105,12 +95,9 @@ fun ProjectCard(
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // ✅ Urgent Toggle mapped to onEvent
                     IconToggleButton(
                         checked = project.isUrgent,
-                        onCheckedChange = { isUrgent ->
-                            onEvent(TasksEvent.OnToggleProjectUrgent(project.projectId, isUrgent))
-                        }
+                        onCheckedChange = { onEvent(TasksEvent.OnToggleProjectUrgent(project.projectId, it)) }
                     ) {
                         Icon(
                             imageVector = if (project.isUrgent) Icons.Filled.Error else Icons.Outlined.ErrorOutline,
@@ -119,12 +106,9 @@ fun ProjectCard(
                         )
                     }
 
-                    // ✅ Favorite Toggle mapped to onEvent
                     IconToggleButton(
                         checked = project.isFavorite,
-                        onCheckedChange = { isFav ->
-                            onEvent(TasksEvent.OnToggleProjectFavorite(project.projectId, isFav))
-                        }
+                        onCheckedChange = { onEvent(TasksEvent.OnToggleProjectFavorite(project.projectId, it)) }
                     ) {
                         Icon(
                             imageVector = if (project.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
@@ -138,47 +122,49 @@ fun ProjectCard(
             Spacer(modifier = Modifier.height(16.dp))
 
             // --- BOTTOM SECTION: The Financial Progress Bar ---
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // The new color-coded Dollar Icon + Label
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.AttachMoney,
-                        contentDescription = "Financial Status",
-                        tint = financialStatusColor,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
+            // Only show the budget UI if the user actually set a budget for this project!
+            if (project.hasBudget) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.AttachMoney,
+                            contentDescription = "Financial Status",
+                            tint = financialStatusColor,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Budget",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
                     Text(
-                        text = "Budget",
+                        text = "${currencyFormatter.format(project.currentSpend)} / ${currencyFormatter.format(project.projectBudget)}",
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        fontWeight = FontWeight.Bold,
+                        color = if (project.isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                     )
                 }
 
-                Text(
-                    text = "${currencyFormatter.format(currentSpend)} / ${currencyFormatter.format(budget)}",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                Spacer(modifier = Modifier.height(8.dp))
+
+                LinearProgressIndicator(
+                    // Safe coercion directly in the UI layer
+                    progress = { project.budgetUsagePercent.coerceIn(0f, 1f) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    color = if (project.isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
                 )
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LinearProgressIndicator(
-                progress = { safeProgress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                // The bar itself turns red if over budget, otherwise uses primary theme color
-                color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-            )
         }
     }
 }
@@ -190,10 +176,8 @@ fun ProjectCardPreview() {
         ProjectCard(
             project = ProjectListUiModel(
                 projectId = 1,
-                title = "Kitchen Remodel",
-                categoryName = "Interior Design",
-                currentSpend = 4500.0,
-                projectBudget = 6000.0,
+                title = "Standard Project",
+                categoryName = "Work",
                 isFavorite = false,
                 isUrgent = false
             ),
@@ -205,17 +189,17 @@ fun ProjectCardPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun ProjectCardUrgentFavoritePreview() {
+fun ProjectCardBudgetPreview() {
     PhotoDoTheme {
         ProjectCard(
             project = ProjectListUiModel(
                 projectId = 2,
-                title = "Client Website Redesign",
-                categoryName = "Web Development",
-                currentSpend = 1500.0,
-                projectBudget = 2000.0,
+                title = "Project with Budget",
+                categoryName = "Home",
                 isFavorite = true,
-                isUrgent = true
+                isUrgent = false,
+                currentSpend = 750.0,
+                projectBudget = 1000.0
             ),
             onEvent = {},
             navTo = {}
@@ -225,17 +209,17 @@ fun ProjectCardUrgentFavoritePreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun ProjectCardOverBudgetPreview() {
+fun ProjectCardUrgentOverBudgetPreview() {
     PhotoDoTheme {
         ProjectCard(
             project = ProjectListUiModel(
                 projectId = 3,
-                title = "Backyard Landscaping",
-                categoryName = "Exterior Design",
-                currentSpend = 7200.0,
-                projectBudget = 6500.0,
+                title = "Urgent & Over Budget",
+                categoryName = "Critical",
                 isFavorite = false,
-                isUrgent = true
+                isUrgent = true,
+                currentSpend = 1200.0,
+                projectBudget = 1000.0
             ),
             onEvent = {},
             navTo = {}
