@@ -10,9 +10,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -21,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Close
@@ -200,6 +205,7 @@ fun TaskDetailScreen(
                 }
                 is DetailLoadState.Success -> {
                     val data = state.projectDetails
+                    val dueDateMillis = data.project.dueDate // Assuming it's in your ProjectEntity!
 
                     // 🚀 Extract budget data safely from the Project entity
                     val totalBudget = data.project.projectBudget ?: 0.0
@@ -210,6 +216,36 @@ fun TaskDetailScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 88.dp)
                     ) {
+
+                        // 🚀 1. THE DUE DATE DISPLAY
+                        if (dueDateMillis != null) {
+                            item {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                        .padding(top = 16.dp, bottom = 8.dp), // Spacing to separate from top bar and budget
+                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CalendarMonth,
+                                        contentDescription = "Due Date",
+                                        tint = MaterialTheme.colorScheme.primary, // Matches your theme
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    val formatter = remember { java.text.SimpleDateFormat("MMMM dd, yyyy", java.util.Locale.getDefault()) }
+                                    val dateStr = formatter.format(java.util.Date(dueDateMillis))
+
+                                    Text(
+                                        text = "Due: $dateStr",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                        }
 
                         // 1. THE BUDGET PROGRESS BAR (Always at the top if it exists)
                         if (hasBudget) {

@@ -171,6 +171,7 @@ class TasksViewModel @Inject constructor(
             }
 
             is TasksEvent.OnDraftBudgetChanged -> _draftState.update { it.copy(budgetInput = event.budgetInput) }
+            is TasksEvent.OnDraftDueDateChanged -> _draftState.update { it.copy(dueDateMillis = event.timestamp) }
         }
     }
 
@@ -182,18 +183,23 @@ class TasksViewModel @Inject constructor(
             val timestamp = System.currentTimeMillis()
 
             // ENHANCEMENT: Use the Smart Default Category ID if they didn't pick one in the draft!
-            val categoryId: Long = draft.selectedCategoryId
-                ?: _uiState.value.categoryId
-                ?: run {
+            val categoryId: Long = when {
+                draft.selectedCategoryId != null -> draft.selectedCategoryId
+                _uiState.value.categoryId != null -> _uiState.value.categoryId!!
+                else -> {
                     val newCat = CategoryEntity(name = draft.newCategoryName.ifBlank { "Uncategorized" })
-                    repo.insertCategory(newCat)
+                repo.insertCategory(newCat) // This returns the new ID  
                 }
+            }
 
             val newProject = ProjectEntity(
                 categoryId = categoryId,
                 name = draft.listTitle,
-                projectBudget = draft.budgetInput.toDoubleOrNull() ?: 0.0
+                projectBudget = draft.budgetInput.toDoubleOrNull() ?: 0.0,
+                dueDate = draft.dueDateMillis
             )
+
+
             val generatedProjectId: Long = repo.insertProject(newProject)
 
             // Insert Task Items
@@ -207,7 +213,7 @@ class TasksViewModel @Inject constructor(
             }
 
             // Clear the draft so the UI closes the Bottom Sheet cleanly
-            _draftState.value = TaskDraftState()
+            _draftState.update { TaskDraftState() }
             onEvent(TasksEvent.OnDismissBottomSheet)
         }
     }

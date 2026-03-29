@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,6 +28,9 @@ import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.components.icons.BudgetTrendIcon
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * A specialized project row for the home screen "Jump Back In" section.
@@ -70,12 +74,28 @@ fun HomeProjectRow(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(project.title, style = MaterialTheme.typography.bodyLarge)
+
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        // 1. The Dynamic "Smart Subtitle"
+                        val subtitleText = remember(project.categoryName, project.dueDateMillis) {
+                            buildString {
+                                append(project.categoryName)
+                                project.dueDateMillis?.let { dueDate ->
+                                    val formatter = SimpleDateFormat("MMM dd", Locale.getDefault())
+                                    val dateStr = formatter.format(Date(dueDate))
+                                    append(" • $dateStr")
+                                }
+                            }
+                        }
+
+                        // 🚀 2. Display the newly merged string
                         Text(
-                            project.categoryName,
+                            text = subtitleText,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+
+                        // --- BUDGET DISPLAY ---
                         if (project.hasBudget) {
                             Text(
                                 " • ",
@@ -97,13 +117,15 @@ fun HomeProjectRow(
                 }
             }
 
-            // 🚀 DROP YOUR NEW COMBI-ICON HERE!
-            // (The component handles its own visibility check inside)
-            BudgetTrendIcon(
-                project = project,
-                modifier = Modifier.padding(end = 10.dp) // Give it some room
-            )
-            Icon(Icons.Default.ChevronRight, contentDescription = "Go")
+            // --- RIGHT SIDE ICONS ---
+            // Wrapped in a row to ensure they stay pinned together on the far right
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                BudgetTrendIcon(
+                    project = project,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Icon(Icons.Default.ChevronRight, contentDescription = "Go", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
     }
 }
@@ -120,7 +142,9 @@ private fun HomeProjectRowGreenPreview() {
                 isFavorite = true,
                 isUrgent = false,
                 currentSpend = 120.0,
-                projectBudget = 200.0
+                projectBudget = 200.0,
+                // 🚀 ADDED: A mock timestamp (roughly ~3 days from now) just so you can preview it!
+                dueDateMillis = System.currentTimeMillis() + 259200000L
             ),
             onEvent = {},
             navTo = {}
@@ -140,7 +164,8 @@ private fun HomeProjectRowYellowPreview() {
                 isFavorite = true,
                 isUrgent = false,
                 currentSpend = 200.0,
-                projectBudget = 200.0
+                projectBudget = 200.0,
+                dueDateMillis = System.currentTimeMillis() + 259200000L
             ),
             onEvent = {},
             navTo = {}
@@ -161,6 +186,27 @@ private fun HomeProjectRowRedPreview() {
                 isUrgent = false,
                 currentSpend = 270.0,
                 projectBudget = 200.0
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeProjectRowWithDueDatePreview() {
+    PhotoDoTheme {
+        HomeProjectRow(
+            project = ProjectListUiModel(
+                projectId = 4L,
+                title = "Engagement shoot",
+                categoryName = "Events",
+                isFavorite = false,
+                isUrgent = false,
+                currentSpend = 270.0,
+                projectBudget = 200.0,
+                dueDateMillis = System.currentTimeMillis() + 86400000L * 7 // 1 week from now
             ),
             onEvent = {},
             navTo = {}

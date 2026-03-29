@@ -1,9 +1,12 @@
 package com.zoewave.probase.photodo.mobile.features.tasks.ui.components
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
@@ -12,9 +15,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -42,6 +47,10 @@ import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,23 +62,28 @@ fun AddProjectBottomSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showDatePicker by remember { mutableStateOf(false) }
-    var selectedDueDate by remember { mutableStateOf<Long?>(null) }
 
     val focusRequester = remember { FocusRequester() }
-    val focusManager = LocalFocusManager.current // 🚀 Used to jump to the next text field
+    val focusManager = LocalFocusManager.current
 
     ModalBottomSheet(
         onDismissRequest = { onEvent(TasksEvent.OnDismissBottomSheet) },
-        sheetState = sheetState,
-        modifier = modifier
+        modifier = modifier,
+        sheetState = sheetState
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
+                .imePadding()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp),
+                .padding(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
+            // --- HEADER ---
+            val hasDueDate = uiState.dueDateMillis != null
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -80,44 +94,69 @@ fun AddProjectBottomSheet(
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
-                IconButton(onClick = { showDatePicker = true }) {
+
+                IconButton(
+                    onClick = { showDatePicker = true },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        // 🚀 Color changes so they know it is active!
+                        contentColor = if (hasDueDate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                ) {
                     Icon(Icons.Default.CalendarMonth, contentDescription = "Set Due Date")
                 }
             }
 
-            // --- 1. TITLE FIELD ---
+            // 🚀 ACTUAL DATE FORMATTER: Turns 1709234000000 into "Oct 24, 2026"
+            if (hasDueDate) {
+                val formatter = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
+                val dateString = formatter.format(Date(uiState.dueDateMillis!!))
+
+                Text(
+                    text = "Due: $dateString",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            // --- TITLE FIELD ---
             OutlinedTextField(
                 value = uiState.listTitle,
                 onValueChange = { onEvent(TasksEvent.OnDraftTitleChanged(it)) },
                 label = { Text("Project Name") },
-                placeholder = { Text("e.g., Kitchen Remodel") },
+                placeholder = { Text("e.g., Fix leaky pipe") },
                 singleLine = true,
+                shape = MaterialTheme.shapes.medium,
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Words,
-                    imeAction = ImeAction.Next // 🚀 Changed to Next!
+                    imeAction = ImeAction.Next
                 ),
                 keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) } // 🚀 Jumps to Budget
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(focusRequester)
             )
 
-            // --- 2. BUDGET FIELD (NEW) ---
+            // --- BUDGET FIELD ---
             OutlinedTextField(
-                // Assuming you add 'budgetInput' to TaskDraftState
                 value = uiState.budgetInput,
                 onValueChange = { onEvent(TasksEvent.OnDraftBudgetChanged(it)) },
                 label = { Text("Total Budget (Optional)") },
                 placeholder = { Text("0.00") },
                 leadingIcon = {
-                    Icon(Icons.Default.AttachMoney, contentDescription = "Currency")
+                    Icon(
+                        imageVector = Icons.Default.AttachMoney,
+                        contentDescription = "Currency",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 },
                 singleLine = true,
+                shape = MaterialTheme.shapes.medium,
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal, // 🚀 Forces numeric keyboard
-                    imeAction = ImeAction.Done // 🚀 Final field, so action is Done
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(
                     onDone = {
@@ -129,19 +168,24 @@ fun AddProjectBottomSheet(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // --- 3. BUTTONS ---
+            // --- BUTTONS ---
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = { onEvent(TasksEvent.OnDismissBottomSheet) }) {
+                TextButton(
+                    onClick = { onEvent(TasksEvent.OnDismissBottomSheet) }
+                ) {
                     Text("Cancel")
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = { onEvent(TasksEvent.OnSaveDraftClicked) },
-                    enabled = uiState.listTitle.isNotBlank()
+                    enabled = uiState.listTitle.isNotBlank(),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 ) {
                     Text("Create")
                 }
@@ -149,13 +193,15 @@ fun AddProjectBottomSheet(
         }
 
         LaunchedEffect(Unit) {
+            delay(100)
             focusRequester.requestFocus()
         }
 
+        // 🚀 ONLY ONE DATE PICKER REMAINS
         if (showDatePicker) {
             PhotoDoDatePicker(
                 onDateSelected = { timestamp ->
-                    selectedDueDate = timestamp
+                    onEvent(TasksEvent.OnDraftDueDateChanged(timestamp))
                 },
                 onDismiss = { showDatePicker = false }
             )
@@ -167,8 +213,6 @@ fun AddProjectBottomSheet(
 @Composable
 private fun AddProjectBottomSheetPreview() {
     PhotoDoTheme {
-        // Note: ModalBottomSheet won't render perfectly in a standard Preview
-        // without a parent, but this gives you a quick look at the layout!
         AddProjectBottomSheet(
             uiState = TaskDraftState(),
             onEvent = {},

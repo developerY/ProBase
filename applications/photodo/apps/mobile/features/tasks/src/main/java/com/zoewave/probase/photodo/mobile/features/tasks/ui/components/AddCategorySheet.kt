@@ -1,16 +1,25 @@
 package com.zoewave.probase.photodo.mobile.features.tasks.ui.components
 
-
-
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,31 +37,55 @@ fun AddCategorySheet(
         sheetState = sheetState,
         modifier = modifier
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .padding(bottom = 32.dp), // Extra padding for system nav bar
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        AddCategorySheetContent(
+            newCategoryName = uiState.newCategoryName,
+            onDraftCategoryNameChanged = { onEvent(TasksEvent.OnDraftCategoryNameChanged(it)) },
+            onSaveDraftClicked = { onEvent(TasksEvent.OnSaveDraftClicked) }
+        )
+    }
+}
+
+@Composable
+fun AddCategorySheetContent(
+    newCategoryName: String,
+    onDraftCategoryNameChanged: (String) -> Unit,
+    onSaveDraftClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .padding(bottom = 32.dp), // Extra padding for system nav bar
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text("New Category", style = MaterialTheme.typography.titleLarge)
+
+        OutlinedTextField(
+            value = newCategoryName,
+            onValueChange = onDraftCategoryNameChanged,
+            label = { Text("Category Name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Button(
+            onClick = onSaveDraftClicked,
+            enabled = newCategoryName.isNotBlank(),
+            modifier = Modifier.align(Alignment.End)
         ) {
-            Text("New Category", style = MaterialTheme.typography.titleLarge)
-
-            // Because this modifies the draftState in the ViewModel,
-            // typing here survives rotation!
-            OutlinedTextField(
-                value = uiState.newCategoryName,
-                onValueChange = { onEvent(TasksEvent.OnDraftCategoryNameChanged(it)) },
-                label = { Text("Category Name") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Button(
-                onClick = { onEvent(TasksEvent.OnSaveDraftClicked) },
-                enabled = uiState.newCategoryName.isNotBlank(),
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Create Category")
-            }
+            Text("Create Category")
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AddCategorySheetPreview() {
+    PhotoDoTheme {
+        AddCategorySheetContent(
+            newCategoryName = "Work",
+            onDraftCategoryNameChanged = {},
+            onSaveDraftClicked = {}
+        )
     }
 }

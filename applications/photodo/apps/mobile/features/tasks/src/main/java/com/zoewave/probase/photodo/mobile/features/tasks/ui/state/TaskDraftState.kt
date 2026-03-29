@@ -8,5 +8,8 @@ data class TaskDraftState(
     val listDescription: String = "",
     val pendingTaskItems: List<String> = emptyList(), // Just strings until saved
     val pendingPhotoUris: List<String> = emptyList(),
-    val budgetInput: String = ""
-)
+    val budgetInput: String = "",
+    val dueDateMillis: Long? = null // 🚀 NEW: Store the timestamp
+) {
+    val hasDueDate: Boolean get() = dueDateMillis != null
+}

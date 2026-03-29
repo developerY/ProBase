@@ -25,6 +25,8 @@ sealed interface TasksEvent {
 
     data object OnSaveDraftClicked : TasksEvent
 
+    data class OnDraftDueDateChanged(val timestamp: Long?) : TasksEvent // 🚀 NEW Event
+
 
     // FAB Menu Actions
     data object OnAddCategoryClicked : TasksEvent
