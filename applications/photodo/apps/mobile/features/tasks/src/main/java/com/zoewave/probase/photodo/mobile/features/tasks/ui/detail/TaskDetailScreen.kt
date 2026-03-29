@@ -63,6 +63,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
+import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
@@ -255,6 +257,23 @@ fun TaskDetailScreen(
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
                                 )
                             }
+                            item {
+                                QuickExpenseBar(
+                                    onAdjustSpend = { adjustmentAmount ->
+                                        // Automatically generate a generic description based on + or -
+                                        val description = if (adjustmentAmount > 0) "Quick Edit (+)" else "Quick Edit (-)"
+
+                                        // Fire the exact same event the full dialog uses!
+                                        onEvent(
+                                            TaskDetailEvent.OnAddExpenseClicked(
+                                                description = description,
+                                                amount = adjustmentAmount
+                                            )
+                                        )
+                                    },
+                                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 16.dp)
+                                )
+                            }
                         }
 
                         // 2. EMPTY STATE (Moved inside the list so the budget bar doesn't vanish!)
@@ -420,33 +439,35 @@ fun TaskDetailScreen(
 @Composable
 fun TaskDetailScreenPreview() {
     val sampleProject = ProjectEntity(
-        projectId = 1L,
-        categoryId = 1L,
-        name = "Bathroom Remodel",
-        notes = "Remember to buy waterproof grout.",
-        projectBudget = 2500.0,
-        currentSpend = 1200.0,
-        dueDate = System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7 // 7 days from now
+        projectId = 1,
+        categoryId = 1,
+        name = "Kitchen Renovation",
+        projectBudget = 500.0,
+        currentSpend = 150.0
     )
-
     val sampleTasks = listOf(
-        TaskEntity(taskId = 1L, projectId = 1L, text = "Buy new tiles", isChecked = true),
-        TaskEntity(taskId = 2L, projectId = 1L, text = "Install vanity", isChecked = false),
-        TaskEntity(taskId = 3L, projectId = 1L, text = "Paint walls", isChecked = false)
+        TaskEntity(taskId = 1, projectId = 1, text = "Buy white paint", isChecked = false),
+        TaskEntity(taskId = 2, projectId = 1, text = "Measure cabinets", isChecked = true)
     )
-
+    val samplePhotos = listOf(
+        PhotoEntity(photoId = 1, projectId = 1, photoUri = "content://media/external/images/media/1")
+    )
+    val sampleExpenses = listOf(
+        ExpenseEntity(expenseId = 1, projectId = 1, description = "Paint", amount = 50.0)
+    )
     val sampleProjectDetails = ProjectDetails(
         project = sampleProject,
         tasks = sampleTasks,
-        photos = emptyList(),
-        expenses = emptyList()
+        photos = samplePhotos,
+        expenses = sampleExpenses
+    )
+    val sampleUiState = TaskDetailUiState(
+        loadState = DetailLoadState.Success(sampleProjectDetails)
     )
 
     PhotoDoTheme {
         TaskDetailScreen(
-            uiState = TaskDetailUiState(
-                loadState = DetailLoadState.Success(sampleProjectDetails)
-            ),
+            uiState = sampleUiState,
             onEvent = {},
             navTo = {}
         )
