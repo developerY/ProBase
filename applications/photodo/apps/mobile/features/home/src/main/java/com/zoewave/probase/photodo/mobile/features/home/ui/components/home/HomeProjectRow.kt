@@ -70,11 +70,30 @@ fun HomeProjectRow(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(project.title, style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        project.categoryName,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            project.categoryName,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (project.hasBudget) {
+                            Text(
+                                " • ",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            val budgetColor = when {
+                                project.isOverBudget -> MaterialTheme.colorScheme.error
+                                project.isNearBudgetLimit -> androidx.compose.ui.graphics.Color(0xFFE5B800)
+                                else -> MaterialTheme.colorScheme.primary
+                            }
+                            Text(
+                                "$${project.currentSpend.toInt()} / $${project.projectBudget.toInt()}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = budgetColor
+                            )
+                        }
+                    }
                 }
             }
 
