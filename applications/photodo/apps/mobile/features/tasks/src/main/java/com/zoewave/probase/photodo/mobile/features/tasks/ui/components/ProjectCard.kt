@@ -179,7 +179,8 @@ fun ProjectCardPreview() {
                 title = "Standard Project",
                 categoryName = "Work",
                 isFavorite = false,
-                isUrgent = false
+                isUrgent = false,
+                dueDateMillis = System.currentTimeMillis() + 86400000L * 3,
             ),
             onEvent = {},
             navTo = {}

@@ -97,6 +97,7 @@ fun ProjectRow(
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
 fun ProjectRowPreview() {
@@ -107,7 +108,9 @@ fun ProjectRowPreview() {
                 title = "Sample Project",
                 categoryName = "Work",
                 isFavorite = false,
-                isUrgent = false
+                isUrgent = false,
+                dueDateMillis = System.currentTimeMillis() + 86400000L * 3,
+                isCompleted = false
             ),
             onEvent = {},
             navTo = {}
@@ -125,7 +128,12 @@ fun ProjectRowUrgentFavoritePreview() {
                 title = "Urgent Favorite Project",
                 categoryName = "Personal",
                 isFavorite = true,
-                isUrgent = true
+                isUrgent = true,
+                // budget
+                currentSpend = 10.0,
+                projectBudget = 100.0,
+                dueDateMillis = System.currentTimeMillis() + 259200000L,
+                isCompleted = false
             ),
             onEvent = {},
             navTo = {}
