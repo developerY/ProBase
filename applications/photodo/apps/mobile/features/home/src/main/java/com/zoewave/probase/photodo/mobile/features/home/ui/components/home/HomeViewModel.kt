@@ -71,7 +71,8 @@ class HomeViewModel @Inject constructor(
                             isFavorite = project.isFavorite,
                             isUrgent = project.isUrgent,
                             currentSpend = project.currentSpend,
-                            projectBudget = project.projectBudget
+                            projectBudget = project.projectBudget,
+                            dueDateMillis = project.dueDate
                         )
                     )
                 }

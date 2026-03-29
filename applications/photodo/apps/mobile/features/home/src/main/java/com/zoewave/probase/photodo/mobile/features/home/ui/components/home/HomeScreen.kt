@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import components.home.CategoryQuickJumpRow
 
@@ -147,12 +148,23 @@ private fun HomeScreenPreview() {
                     CategoryOverviewUiModel(2L, "Urban", 8, 2, 0.25f)
                 ),
                 urgentProjects = listOf(
-                    com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel(
+                    ProjectListUiModel(
                         projectId = 1L,
                         title = "Sunset shoot",
                         categoryName = "Nature",
                         isFavorite = true,
-                        isUrgent = true
+                        isUrgent = true,
+                        dueDateMillis = System.currentTimeMillis() + 86400000L * 7 // 1 week from now
+                    ),
+                    ProjectListUiModel(
+                        projectId = 2L,
+                        title = "Portrait session",
+                        categoryName = "Work",
+                        isFavorite = false,
+                        isUrgent = false,
+                        currentSpend = 270.0,
+                        projectBudget = 200.0,
+                        dueDateMillis = System.currentTimeMillis() + 86400000L * 3 // 3 days from now
                     )
                 )
             ),
