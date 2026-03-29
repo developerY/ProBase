@@ -3,6 +3,7 @@ package com.zoewave.probase.photodo.mobile.features.tasks.ui.detail
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
@@ -149,23 +150,39 @@ class TaskDetailViewModel @Inject constructor(
                     val currentState = uiState.value.loadState
                     if (currentState is DetailLoadState.Success) {
                         val project = currentState.projectDetails.project
-                        val currentSpent = project.spentAmount ?: 0.0
+                        val currentSpent = project.currentSpend
                         val newTotalSpent = currentSpent + event.amount
 
                         // Tell Room to update the project.
                         // This will instantly trigger your StateFlow to emit, and the UI progress bar will animate!
                         photoDoRepo.updateProject(
-                            project.copy(spentAmount = newTotalSpent)
+                            project.copy(currentSpend = newTotalSpent)
                         )
                     }
                 }
             }
 
-//            is TaskDetailEvent.OnDeleteExpense -> {
-//                viewModelScope.launch {
-//                    //photoDoRepo.deleteExpenseById(event.expenseId)
-//                }
-//            }
+            is TaskDetailEvent.OnDeleteExpense -> {
+                viewModelScope.launch {
+                    val currentState = uiState.value.loadState
+                    if (currentState is DetailLoadState.Success) {
+                        val expenseToDelete = currentState.projectDetails.expenses.find { it.expenseId == event.expenseId }
+                        if (expenseToDelete != null) {
+                            // 1. Delete the expense
+                            photoDoRepo.deleteExpense(expenseToDelete)
+
+                            // 2. Update project spent amount
+                            val project = currentState.projectDetails.project
+                            val currentSpent = project.currentSpend
+                            val newTotalSpent = (currentSpent - expenseToDelete.amount).coerceAtLeast(0.0)
+
+                            photoDoRepo.updateProject(
+                                project.copy(currentSpend = newTotalSpent)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
