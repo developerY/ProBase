@@ -153,6 +153,8 @@ class TasksViewModel @Inject constructor(
                     // repo.deleteTaskListById(event.listId)
                 }
             }
+
+            is TasksEvent.OnDraftBudgetChanged -> _draftState.update { it.copy(budgetInput = event.budgetInput) }
         }
     }
 
@@ -171,7 +173,11 @@ class TasksViewModel @Inject constructor(
                     repo.insertCategory(newCat)
                 }
 
-            val newProject = ProjectEntity(categoryId = categoryId, name = draft.listTitle)
+            val newProject = ProjectEntity(
+                categoryId = categoryId,
+                name = draft.listTitle,
+                projectBudget = draft.budgetInput.toDoubleOrNull() ?: 0.0
+            )
             val generatedProjectId: Long = repo.insertProject(newProject)
 
             // Insert Task Items

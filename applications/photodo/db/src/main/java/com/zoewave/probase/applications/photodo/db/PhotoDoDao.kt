@@ -9,11 +9,12 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjects
+import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
+import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectWithPhotos
-import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
+import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -33,6 +34,9 @@ interface PhotoDoDao {
     @Query("DELETE FROM categories")
     suspend fun clearCategories()
 
+    @Query("DELETE FROM expenses")
+    suspend fun clearExpenses()
+
     // --- Category Operations ---
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -40,6 +44,21 @@ interface PhotoDoDao {
 
     @Update
     suspend fun updateCategory(category: CategoryEntity)
+
+    @Update
+    suspend fun updateProject(project: ProjectEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertExpense(expense: ExpenseEntity)
+
+    @Update
+    suspend fun updateExpense(expense: ExpenseEntity)
+
+    @Delete
+    suspend fun deleteExpense(expense: ExpenseEntity)
+
+    @Query("SELECT * FROM expenses WHERE projectId = :projectId")
+    fun getExpensesForProject(projectId: Long): Flow<List<ExpenseEntity>>
 
     @Delete
     suspend fun deleteCategory(category: CategoryEntity)

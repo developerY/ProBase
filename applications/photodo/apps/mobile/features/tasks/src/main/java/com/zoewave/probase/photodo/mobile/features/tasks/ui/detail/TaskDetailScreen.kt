@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,9 +16,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Close
@@ -49,8 +52,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.zoewave.probase.photodo.mobile.core.ui.components.BudgetProgressBar
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -62,8 +69,15 @@ fun TaskDetailScreen(
     modifier: Modifier = Modifier
 ) {
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
+
+    // Task Dialog State
     var showAddTaskDialog by rememberSaveable { mutableStateOf(false) }
     var newTaskText by rememberSaveable { mutableStateOf("") }
+
+    // 🚀 Expense Dialog State
+    var showAddExpenseDialog by rememberSaveable { mutableStateOf(false) }
+    var newExpenseAmount by rememberSaveable { mutableStateOf("") }
+    var newExpenseDesc by rememberSaveable { mutableStateOf("") }
 
     val context = LocalContext.current
 
@@ -153,6 +167,15 @@ fun TaskDetailScreen(
                     icon = { Icon(Icons.Default.CheckBox, contentDescription = null) },
                     text = { Text("Add Task") }
                 )
+                // 🚀 NEW: Add Expense FAB Item
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        fabMenuExpanded = false
+                        showAddExpenseDialog = true
+                    },
+                    icon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
+                    text = { Text("Add Expense") }
+                )
             }
         }
     ) { innerPadding ->
@@ -171,19 +194,44 @@ fun TaskDetailScreen(
                 is DetailLoadState.Success -> {
                     val data = state.projectDetails
 
-                    if (data.photos.isEmpty() && data.tasks.isEmpty()) {
-                        Text(
-                            text = "This project is empty.\nTap + to add tasks or photos!",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.align(Alignment.Center),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(bottom = 88.dp)
-                        ) {
+                    // 🚀 Extract budget data safely from the Project entity
+                    val totalBudget = data.project.projectBudget ?: 0.0
+                    val currentSpend = data.project.currentSpend ?: 0.0
+                    val hasBudget = totalBudget > 0
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 88.dp)
+                    ) {
+
+                        // 1. THE BUDGET PROGRESS BAR (Always at the top if it exists)
+                        if (hasBudget) {
+                            item {
+                                BudgetProgressBar(
+                                    projectName = "Total Budget",
+                                    currentSpend = currentSpend,
+                                    projectBudget = totalBudget,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+                                )
+                            }
+                        }
+
+                        // 2. EMPTY STATE (Moved inside the list so the budget bar doesn't vanish!)
+                        if (data.photos.isEmpty() && data.tasks.isEmpty()) {
+                            item {
+                                Text(
+                                    text = "This project is empty.\nTap + to add tasks or photos!",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 64.dp), // Push it down a bit
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        } else {
+
+                            // 3. PHOTOS
                             if (data.photos.isNotEmpty()) {
                                 item {
                                     Text(
@@ -206,6 +254,7 @@ fun TaskDetailScreen(
                                 }
                             }
 
+                            // 4. TASKS
                             if (data.tasks.isNotEmpty()) {
                                 item {
                                     Text(
@@ -229,6 +278,9 @@ fun TaskDetailScreen(
         }
     }
 
+    // --- DIALOGS ---
+
+    // 1. Add Task Dialog
     if (showAddTaskDialog) {
         AlertDialog(
             onDismissRequest = {
@@ -242,6 +294,7 @@ fun TaskDetailScreen(
                     onValueChange = { newTaskText = it },
                     placeholder = { Text("What needs to be done?") },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = Modifier.fillMaxWidth()
                 )
             },
@@ -260,6 +313,62 @@ fun TaskDetailScreen(
                 TextButton(onClick = {
                     newTaskText = ""
                     showAddTaskDialog = false
+                }) { Text("Cancel") }
+            }
+        )
+    }
+
+    // 🚀 2. NEW: Add Expense Dialog
+    if (showAddExpenseDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                newExpenseAmount = ""
+                newExpenseDesc = ""
+                showAddExpenseDialog = false
+            },
+            title = { Text("Add Expense") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = newExpenseDesc,
+                        onValueChange = { newExpenseDesc = it },
+                        label = { Text("Description") },
+                        placeholder = { Text("e.g. Paint from Home Depot") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = newExpenseAmount,
+                        onValueChange = { newExpenseAmount = it },
+                        label = { Text("Amount") },
+                        placeholder = { Text("0.00") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val amount = newExpenseAmount.toDoubleOrNull() ?: 0.0
+                        if (amount > 0 && newExpenseDesc.isNotBlank()) {
+                            // 👇 MAKE SURE TO ADD THIS EVENT TO YOUR SEALED CLASS
+                            onEvent(TaskDetailEvent.OnAddExpenseClicked(description = newExpenseDesc.trim(), amount = amount))
+                            newExpenseAmount = ""
+                            newExpenseDesc = ""
+                            showAddExpenseDialog = false
+                        }
+                    }
+                ) { Text("Add") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    newExpenseAmount = ""
+                    newExpenseDesc = ""
+                    showAddExpenseDialog = false
                 }) { Text("Cancel") }
             }
         )

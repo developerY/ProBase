@@ -14,6 +14,9 @@ sealed interface TaskDetailEvent {
     data class OnPhotoSaved(val uri: Uri) : TaskDetailEvent
     data class OnDeletePhoto(val photoId: Long) : TaskDetailEvent
 
+    data class OnAddExpenseClicked(val description: String, val amount: Double) : TaskDetailEvent
+    data class OnDeleteExpense(val expenseId: Long) : TaskDetailEvent
+
     // --- Checklist Actions ---
     data class OnAddItemClicked(val text: String) : TaskDetailEvent
     data class OnItemCheckedChange(val item: TaskEntity, val isChecked: Boolean) : TaskDetailEvent
