@@ -49,7 +49,15 @@ class TasksViewModel @Inject constructor(
                         val targetData = allData.find { it.category.categoryId == requestedId }
                         if (targetData != null) {
                             val mappedProjects = targetData.projects.map {
-                                ProjectListUiModel(it.projectId, it.name, targetData.category.name, it.isFavorite, it.isUrgent)
+                                ProjectListUiModel(
+                                    projectId = it.projectId,
+                                    title = it.name,
+                                    categoryName = targetData.category.name,
+                                    isFavorite = it.isFavorite,
+                                    isUrgent = it.isUrgent,
+                                    currentSpend = it.currentSpend,
+                                    projectBudget = it.projectBudget
+                                )
                             }
                             SmartDbResult(targetData.category.categoryId, targetData.category.name, mappedProjects, false)
                         } else {
@@ -63,7 +71,15 @@ class TasksViewModel @Inject constructor(
                         } else {
                             val firstData = allData.first()
                             val mappedProjects = firstData.projects.map {
-                                ProjectListUiModel(it.projectId, it.name, firstData.category.name, it.isFavorite, it.isUrgent)
+                                ProjectListUiModel(
+                                    projectId = it.projectId,
+                                    title = it.name,
+                                    categoryName = firstData.category.name,
+                                    isFavorite = it.isFavorite,
+                                    isUrgent = it.isUrgent,
+                                    currentSpend = it.currentSpend,
+                                    projectBudget = it.projectBudget
+                                )
                             }
                             SmartDbResult(firstData.category.categoryId, firstData.category.name, mappedProjects, false)
                         }

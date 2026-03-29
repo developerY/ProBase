@@ -69,7 +69,9 @@ class HomeViewModel @Inject constructor(
                             title = project.name,
                             categoryName = category.name,
                             isFavorite = project.isFavorite,
-                            isUrgent = project.isUrgent
+                            isUrgent = project.isUrgent,
+                            currentSpend = project.currentSpend,
+                            projectBudget = project.projectBudget
                         )
                     )
                 }
