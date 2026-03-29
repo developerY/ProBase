@@ -17,5 +17,11 @@ data class ProjectDetails(
         parentColumn = "projectId",
         entityColumn = "projectId"
     )
-    val photos: List<PhotoEntity>
+    val photos: List<PhotoEntity>,
+
+    @Relation(
+        parentColumn = "projectId",
+        entityColumn = "projectId"
+    )
+    val expenses: List<ExpenseEntity>
 )
