@@ -30,7 +30,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
-fun BudgetProgressBar(
+fun BudgetProgressBarSummary(
     currentSpend: Double,
     projectBudget: Double?, // Nullable, because not all projects have a strict budget
     modifier: Modifier = Modifier
@@ -115,9 +115,9 @@ fun BudgetProgressBar(
 
 @Preview(showBackground = true)
 @Composable
-fun BudgetProgressBarUnderBudgetPreview() {
+fun BudgetProgressBarUnderBudgetPreviewSummary() {
     MaterialTheme {
-        BudgetProgressBar(
+        BudgetProgressBarSummary(
             currentSpend = 450.0,
             projectBudget = 1000.0,
             modifier = Modifier.padding(16.dp)
@@ -127,9 +127,9 @@ fun BudgetProgressBarUnderBudgetPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun BudgetProgressBarWarningPreview() {
+fun BudgetProgressBarSummaryWarningPreview() {
     MaterialTheme {
-        BudgetProgressBar(
+        BudgetProgressBarSummary(
             currentSpend = 850.0,
             projectBudget = 1000.0,
             modifier = Modifier.padding(16.dp)
@@ -139,9 +139,9 @@ fun BudgetProgressBarWarningPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun BudgetProgressBarOverBudgetPreview() {
+fun BudgetProgressBarOverBudgetPreviewSummary() {
     MaterialTheme {
-        BudgetProgressBar(
+        BudgetProgressBarSummary(
             currentSpend = 1200.0,
             projectBudget = 1000.0,
             modifier = Modifier.padding(16.dp)
@@ -151,9 +151,9 @@ fun BudgetProgressBarOverBudgetPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun BudgetProgressBarNoBudgetPreview() {
+fun BudgetProgressBarNoBudgetPreviewSummary() {
     MaterialTheme {
-        BudgetProgressBar(
+        BudgetProgressBarSummary(
             currentSpend = 500.0,
             projectBudget = null,
             modifier = Modifier.padding(16.dp)

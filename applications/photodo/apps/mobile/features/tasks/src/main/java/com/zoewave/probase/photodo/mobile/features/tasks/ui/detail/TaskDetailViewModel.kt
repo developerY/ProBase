@@ -132,6 +132,40 @@ class TaskDetailViewModel @Inject constructor(
             TaskDetailEvent.OnBackFromCamera -> {
                 // See note above.
             }
+
+            is TaskDetailEvent.OnAddExpenseClicked -> {
+                viewModelScope.launch {
+                    // 1. Save the receipt/expense record
+                    photoDoRepo.insertExpense(
+                        ExpenseEntity(
+                            projectId = currentId,
+                            description = event.description,
+                            amount = event.amount
+                        )
+                    )
+
+                    // 2. 🚀 CRITICAL: Update the Project's total spent amount so the progress bar moves!
+                    // We can safely grab the current project state since it's already loaded in the UI
+                    val currentState = uiState.value.loadState
+                    if (currentState is DetailLoadState.Success) {
+                        val project = currentState.projectDetails.project
+                        val currentSpent = project.spentAmount ?: 0.0
+                        val newTotalSpent = currentSpent + event.amount
+
+                        // Tell Room to update the project.
+                        // This will instantly trigger your StateFlow to emit, and the UI progress bar will animate!
+                        photoDoRepo.updateProject(
+                            project.copy(spentAmount = newTotalSpent)
+                        )
+                    }
+                }
+            }
+
+//            is TaskDetailEvent.OnDeleteExpense -> {
+//                viewModelScope.launch {
+//                    //photoDoRepo.deleteExpenseById(event.expenseId)
+//                }
+//            }
         }
     }
 }

@@ -2,11 +2,12 @@ package com.zoewave.probase.applications.photodo.db.repo
 
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjects
+import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
+import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectWithPhotos
-import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
+import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
 interface PhotoDoRepo {
@@ -26,6 +27,8 @@ interface PhotoDoRepo {
     fun getProjectById(projectId: Long): Flow<ProjectEntity?>
     fun getProjectsForCategory(categoryId: Long): Flow<List<ProjectEntity>>
 
+    suspend fun updateProject(project: ProjectEntity)
+
     suspend fun updateProjectUrgency(projectId: Long, isUrgent: Boolean)
     suspend fun updateProjectFavorite(projectId: Long, isFavorite: Boolean)
 
@@ -39,6 +42,12 @@ interface PhotoDoRepo {
     suspend fun insertPhoto(photo: PhotoEntity)
     suspend fun deletePhoto(photo: PhotoEntity)
     fun getPhotosForProject(projectId: Long): Flow<List<PhotoEntity>>
+
+    // --- Expense Operations ---
+    suspend fun insertExpense(expense: ExpenseEntity)
+    suspend fun deleteExpense(expense: ExpenseEntity)
+    suspend fun updateExpense(expense: ExpenseEntity)
+    fun getExpensesForProject(projectId: Long): Flow<List<ExpenseEntity>>
 
     // --- Relational Operations ---
     fun getProjectWithPhotos(projectId: Long): Flow<ProjectWithPhotos?>

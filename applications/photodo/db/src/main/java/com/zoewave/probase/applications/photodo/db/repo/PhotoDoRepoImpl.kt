@@ -4,11 +4,12 @@ import android.util.Log
 import com.zoewave.probase.applications.photodo.db.PhotoDoDao
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjects
+import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
-import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
+import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectWithPhotos
-import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
+import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -62,6 +63,10 @@ class PhotoDoRepoImpl @Inject constructor(
         return photoDoDao.getProjectsForCategory(categoryId)
     }
 
+    override suspend fun updateProject(project: ProjectEntity) {
+        photoDoDao.updateProject(project)
+    }
+
     override suspend fun updateProjectUrgency(projectId: Long, isUrgent: Boolean) {
         photoDoDao.updateProjectUrgency(projectId, isUrgent)
     }
@@ -100,6 +105,24 @@ class PhotoDoRepoImpl @Inject constructor(
         return photoDoDao.getPhotosForProject(projectId)
     }
 
+    // --- Expense Operations ---
+    override suspend fun insertExpense(expense: ExpenseEntity) {
+        photoDoDao.insertExpense(expense)
+    }
+
+    override suspend fun deleteExpense(expense: ExpenseEntity) {
+        photoDoDao.deleteExpense(expense)
+    }
+
+    override suspend fun updateExpense(expense: ExpenseEntity) {
+        photoDoDao.updateExpense(expense)
+    }
+
+    override fun getExpensesForProject(projectId: Long): Flow<List<ExpenseEntity>> {
+        return photoDoDao.getExpensesForProject(projectId)
+    }
+
+    
     // --- Relational Operations ---
     override fun getProjectWithPhotos(projectId: Long): Flow<ProjectWithPhotos?> {
         return photoDoDao.getProjectWithPhotos(projectId)
@@ -113,6 +136,7 @@ class PhotoDoRepoImpl @Inject constructor(
         Log.d("PhotoDoRepoImpl", "Cleared all data")
         photoDoDao.clearPhotos()
         photoDoDao.clearTasks()
+        photoDoDao.clearExpenses()
         photoDoDao.clearProjects()
         photoDoDao.clearCategories()
     }
