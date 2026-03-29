@@ -55,9 +55,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
+import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
+import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
+import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
+import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.photodo.mobile.core.ui.components.BudgetProgressBar
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -212,6 +219,23 @@ fun TaskDetailScreen(
                                     currentSpend = currentSpend,
                                     projectBudget = totalBudget,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+                                )
+                            }
+                            item {
+                                QuickExpenseBar(
+                                    onAdjustSpend = { adjustmentAmount ->
+                                        // Automatically generate a generic description based on + or -
+                                        val description = if (adjustmentAmount > 0) "Quick Edit (+)" else "Quick Edit (-)"
+
+                                        // Fire the exact same event the full dialog uses!
+                                        onEvent(
+                                            TaskDetailEvent.OnAddExpenseClicked(
+                                                description = description,
+                                                amount = adjustmentAmount
+                                            )
+                                        )
+                                    },
+                                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 16.dp)
                                 )
                             }
                         }
@@ -371,6 +395,45 @@ fun TaskDetailScreen(
                     showAddExpenseDialog = false
                 }) { Text("Cancel") }
             }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TaskDetailScreenPreview() {
+    val sampleProject = ProjectEntity(
+        projectId = 1,
+        categoryId = 1,
+        name = "Kitchen Renovation",
+        projectBudget = 500.0,
+        currentSpend = 150.0
+    )
+    val sampleTasks = listOf(
+        TaskEntity(taskId = 1, projectId = 1, text = "Buy white paint", isChecked = false),
+        TaskEntity(taskId = 2, projectId = 1, text = "Measure cabinets", isChecked = true)
+    )
+    val samplePhotos = listOf(
+        PhotoEntity(photoId = 1, projectId = 1, photoUri = "content://media/external/images/media/1")
+    )
+    val sampleExpenses = listOf(
+        ExpenseEntity(expenseId = 1, projectId = 1, description = "Paint", amount = 50.0)
+    )
+    val sampleProjectDetails = ProjectDetails(
+        project = sampleProject,
+        tasks = sampleTasks,
+        photos = samplePhotos,
+        expenses = sampleExpenses
+    )
+    val sampleUiState = TaskDetailUiState(
+        loadState = DetailLoadState.Success(sampleProjectDetails)
+    )
+
+    PhotoDoTheme {
+        TaskDetailScreen(
+            uiState = sampleUiState,
+            onEvent = {},
+            navTo = {}
         )
     }
 }
