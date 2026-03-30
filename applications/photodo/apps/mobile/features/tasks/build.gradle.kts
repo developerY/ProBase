@@ -4,9 +4,7 @@ plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.library.compose")
     id("composetemplate.android.hilt")
-
-    // ✅ 2. Required for Type-Safe Navigation & Nav3
-    alias(libs.plugins.jetbrains.kotlin.serialization)
+    id("composetemplate.kotlin.serialization")
 }
 
 android {
@@ -29,9 +27,6 @@ dependencies {
 
     implementation(libs.kotlinx.datetime)
 
-
-    // --- Serialization (The backbone of Nav3) ---
-    implementation(libs.kotlinx.serialization.json)
 
     // --- Navigation 3 (Strict) ---
     implementation(libs.androidx.navigation3.runtime)

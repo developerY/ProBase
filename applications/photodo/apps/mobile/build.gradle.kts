@@ -3,6 +3,7 @@ plugins {
     id("composetemplate.android.application")
     id("composetemplate.android.application.compose")
     id("composetemplate.android.hilt")
+    id("composetemplate.kotlin.serialization")
 
     // ✅ 2. Apply Specific Plugins for this App
     alias(libs.plugins.ksp)
@@ -114,10 +115,6 @@ dependencies {
 
     // Icons
     implementation(libs.androidx.compose.material.icons.extended)
-
-    // Serialization for Keys
-    implementation(libs.kotlinx.serialization.core)
-    implementation(libs.kotlinx.serialization.json)
 
     // Firebase
     implementation(platform(libs.firebase.bom))
