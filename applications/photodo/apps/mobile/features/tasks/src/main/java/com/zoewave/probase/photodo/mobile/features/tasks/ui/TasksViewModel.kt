@@ -179,6 +179,30 @@ class TasksViewModel @Inject constructor(
                 }
             }
 
+            is TasksEvent.OnCreateFromTemplate -> {
+                viewModelScope.launch {
+                    // 1. We need the Category ID to save the project.
+                    // Assuming your Repo has a way to find or create a category by name:
+                    val categoryId = repo.getOrCreateCategoryByName(event.template.categoryName)
+
+                    // 2. Create the Project Entity
+                    val newProject = ProjectEntity(
+                        categoryId = categoryId,
+                        name = event.template.title,
+                        projectBudget = event.template.defaultBudget,
+                        currentSpend = 0.0,
+                        isUrgent = false,
+                        isFavorite = false
+                    )
+
+                    // 3. Insert into Room (this returns the new unique ID!)
+                    val newProjectId = repo.insertProject(newProject)
+
+                    // 4. (Optional but recommended) Trigger a UI Effect to navigate
+                    // straight to the new TaskDetailScreen using this newProjectId!
+                }
+            }
+
             is TasksEvent.OnDraftBudgetChanged -> _draftState.update { it.copy(budgetInput = event.budgetInput) }
             is TasksEvent.OnDraftDueDateChanged -> _draftState.update { it.copy(dueDateMillis = event.timestamp) }
         }

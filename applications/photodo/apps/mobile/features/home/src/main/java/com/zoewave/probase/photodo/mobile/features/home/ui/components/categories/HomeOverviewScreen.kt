@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeEvent
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeUiState
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.components.bottomsheets.QuickTemplateBottomSheet
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -74,6 +75,7 @@ fun HomeOverviewScreen(
 
     // Add these state variables at the top of your composable
     var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
+    var showQuickTemplateBottomSheet by rememberSaveable { mutableStateOf(false) }
     var newCategoryName by rememberSaveable { mutableStateOf("") }
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -138,7 +140,7 @@ fun HomeOverviewScreen(
                 FloatingActionButtonMenuItem(
                     onClick = {
                         fabMenuExpanded = false
-                        // TODO: Wire up a cross-tab Quick Project action later
+                        showQuickTemplateBottomSheet = true
                     },
                     icon = { Icon(Icons.Default.Checklist, contentDescription = null) },
                     text = { Text("Quick Project") }
@@ -220,6 +222,16 @@ fun HomeOverviewScreen(
                         showAddCategoryDialog = false
                     }
                 ) { Text("Cancel") }
+            }
+        )
+    }
+
+    if (showQuickTemplateBottomSheet) {
+        QuickTemplateBottomSheet(
+            onDismiss = { showQuickTemplateBottomSheet = false },
+            onTemplateSelected = { template ->
+                onEvent(HomeEvent.OnCreateFromTemplate(template))
+                showQuickTemplateBottomSheet = false
             }
         )
     }

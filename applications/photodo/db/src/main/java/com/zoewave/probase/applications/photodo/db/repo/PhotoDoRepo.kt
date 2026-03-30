@@ -20,6 +20,9 @@ interface PhotoDoRepo {
     suspend fun updateCategory(category: CategoryEntity)
     fun getCategoriesWithProjects(): Flow<List<CategoryWithProjects>>
 
+    // Add this under your Category Operations
+    suspend fun getOrCreateCategoryByName(name: String): Long
+
     // --- Project Operations ---
     suspend fun insertProject(project: ProjectEntity): Long
     suspend fun deleteProject(project: ProjectEntity)
