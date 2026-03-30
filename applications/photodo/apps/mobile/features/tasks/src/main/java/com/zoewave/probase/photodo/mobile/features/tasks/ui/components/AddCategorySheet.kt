@@ -14,9 +14,11 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.tasks.R
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
@@ -59,12 +61,12 @@ fun AddCategorySheetContent(
             .padding(bottom = 32.dp), // Extra padding for system nav bar
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("New Category", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_category), style = MaterialTheme.typography.titleLarge)
 
         OutlinedTextField(
             value = newCategoryName,
             onValueChange = onDraftCategoryNameChanged,
-            label = { Text("Category Name") },
+            label = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_category_name_label)) },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -73,7 +75,7 @@ fun AddCategorySheetContent(
             enabled = newCategoryName.isNotBlank(),
             modifier = Modifier.align(Alignment.End)
         ) {
-            Text("Create Category")
+            Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_create_category_button))
         }
     }
 }

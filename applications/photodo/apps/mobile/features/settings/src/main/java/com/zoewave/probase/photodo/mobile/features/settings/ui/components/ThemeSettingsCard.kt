@@ -76,7 +76,7 @@ fun ThemeSettingsCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Palette,
-                    contentDescription = "Theme Settings"
+                    contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_settings_theme_settings_content_description)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(text = title, style = MaterialTheme.typography.titleMedium)
@@ -91,7 +91,11 @@ fun ThemeSettingsCard(
 
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = if (expanded) "Collapse" else "Expand"
+                    contentDescription = if (expanded) {
+                        stringResource(R.string.applications_photodo_apps_mobile_features_settings_collapse_content_description)
+                    } else {
+                        stringResource(R.string.applications_photodo_apps_mobile_features_settings_expand_content_description)
+                    }
                 )
             }
 

@@ -25,10 +25,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 
 /**
@@ -73,7 +75,7 @@ fun OverviewSummaryCard(
             ) {
                 // Main Header (Bold, Primary Color)
                 Text(
-                    text = "Total PhotoDo Categories",
+                    text = stringResource(R.string.applications_photodo_apps_mobile_features_home_total_categories),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -95,7 +97,7 @@ fun OverviewSummaryCard(
                             Box(modifier = Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).size(8.dp).background(slice.color))
                             Spacer(modifier = Modifier.size(6.dp))
                             Text(
-                                text = "${slice.name} (${slice.value})",
+                                text = "${slice.name} (${slice.value})", // I'll keep this as is for now as it's a mix of dynamic data and symbols, or I could use a template
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                                 maxLines = 1
@@ -156,7 +158,7 @@ fun OverviewSummaryCard(
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "DONE",
+                        text = stringResource(R.string.applications_photodo_apps_mobile_features_home_done),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold
                     )

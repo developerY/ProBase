@@ -19,12 +19,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.features.home.R
 import components.home.CategoryQuickJumpRow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +40,7 @@ fun HomeScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         // 🚀 Upgrade: Large Top AppBar for an expressive title feel
-        topBar = { TopAppBar(title = { Text("Overview") }) }
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_overview)) }) }
     ) { paddingValues ->
 
         LazyColumn(
@@ -81,7 +83,7 @@ fun HomeScreen(
                     onClick = { navTo(PhotoTodoRoute.CategoryGrid) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("View All Categories")
+                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_view_all_categories))
                 }
             }
 
@@ -89,7 +91,7 @@ fun HomeScreen(
                 // --- 4. Jump Back In Section (Preserved Urgent/Fav List) ---
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                     Text(
-                        "Jump Back In",
+                        stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -104,7 +106,7 @@ fun HomeScreen(
                 is HomeUiState.Empty -> {
                     item {
                         Text(
-                            "No data yet. Seed the DB!",
+                            stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
                             modifier = Modifier.padding(top = 16.dp)
                         )
                     }
@@ -114,7 +116,7 @@ fun HomeScreen(
                     if (uiState.urgentProjects.isEmpty()) {
                         item {
                             Text(
-                                "No urgent or favorite projects yet.",
+                                stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
                                 modifier = Modifier.padding(top = 16.dp)
                             )
                         }

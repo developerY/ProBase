@@ -16,10 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.core.R
 import java.text.NumberFormat
 
 @Composable
@@ -81,7 +83,7 @@ fun BudgetProgressBar(
         // --- Optional Over-Budget Warning ---
         if (progress >= 1f && currentSpend > projectBudget) {
             Text(
-                text = "Over budget by ${currencyFormatter.format(currentSpend - projectBudget)}",
+                text = stringResource(R.string.applications_photodo_apps_mobile_core_over_budget, currencyFormatter.format(currentSpend - projectBudget)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(top = 4.dp)

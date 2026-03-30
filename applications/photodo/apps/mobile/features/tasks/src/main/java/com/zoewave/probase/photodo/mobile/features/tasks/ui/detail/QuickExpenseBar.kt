@@ -25,9 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.tasks.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,7 +57,7 @@ fun QuickExpenseBar(
                 contentColor = MaterialTheme.colorScheme.error
             )
         ) {
-            Icon(Icons.Default.Remove, contentDescription = "Subtract Spend")
+            Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_subtract_spend_content_desc))
         }
 
         // --- 2. SCROLLABLE NUMBER CHIPS ---
@@ -72,7 +74,7 @@ fun QuickExpenseBar(
                     selected = isSelected,
                     onClick = { selectedAmount = amount },
                     // Formats double (10.0) to integer string ("$10") for cleaner UI
-                    label = { Text("$${amount.toInt()}") }
+                    label = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_amount_format, amount.toInt())) }
                 )
             }
             Spacer(modifier = Modifier.width(4.dp))
@@ -86,7 +88,7 @@ fun QuickExpenseBar(
                 contentColor = MaterialTheme.colorScheme.primary
             )
         ) {
-            Icon(Icons.Default.Add, contentDescription = "Add Spend")
+            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_spend_content_desc))
         }
     }
 }

@@ -4,4 +4,18 @@
     <string name="applications_photodo_apps_mobile_features_settings_theme_system_display">System Default</string>
     <string name="applications_photodo_apps_mobile_features_settings_theme_light_display">Light Mode</string>
     <string name="applications_photodo_apps_mobile_features_settings_theme_dark_display">Dark Mode</string>
+    <string name="applications_photodo_apps_mobile_features_settings_title">Settings</string>
+    <string name="applications_photodo_apps_mobile_features_settings_back_content_description">Back</string>
+    <string name="applications_photodo_apps_mobile_features_settings_app_theme_title">App Theme</string>
+    <string name="applications_photodo_apps_mobile_features_settings_palette_title">Color Palette</string>
+    <string name="applications_photodo_apps_mobile_features_settings_palette_coral_reef">Coral Reef</string>
+    <string name="applications_photodo_apps_mobile_features_settings_palette_deep_forest">Deep Forest</string>
+    <string name="applications_photodo_apps_mobile_features_settings_palette_expressive_summary">Your Wallpaper</string>
+    <string name="applications_photodo_apps_mobile_features_settings_palette_default_summary">Default</string>
+    <string name="applications_photodo_apps_mobile_features_settings_palette_default">Default Professional</string>
+    <string name="applications_photodo_apps_mobile_features_settings_palette_expressive">Material 3 Expressive (Wallpaper)</string>
+    <string name="applications_photodo_apps_mobile_features_settings_theme_settings_content_description">Theme Settings</string>
+    <string name="applications_photodo_apps_mobile_features_settings_collapse_content_description">Collapse</string>
+    <string name="applications_photodo_apps_mobile_features_settings_expand_content_description">Expand</string>
+    <string name="applications_photodo_apps_mobile_features_settings_theme_current_format">Current: %1$s</string>
 </resources>

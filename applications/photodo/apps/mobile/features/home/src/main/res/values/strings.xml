@@ -1,0 +1,28 @@
+<resources>
+    <string name="applications_photodo_apps_mobile_features_home_overview">Overview</string>
+    <string name="applications_photodo_apps_mobile_features_home_view_all_categories">View All Categories</string>
+    <string name="applications_photodo_apps_mobile_features_home_jump_back_in">Jump Back In</string>
+    <string name="applications_photodo_apps_mobile_features_home_no_data_seed">No data yet. Seed the DB!</string>
+    <string name="applications_photodo_apps_mobile_features_home_no_urgent_projects">No urgent or favorite projects yet.</string>
+    <string name="applications_photodo_apps_mobile_features_home_analytics_content_desc">Analytics</string>
+    <string name="applications_photodo_apps_mobile_features_home_menu_content_desc">Menu</string>
+    <string name="applications_photodo_apps_mobile_features_home_new_category">New Category</string>
+    <string name="applications_photodo_apps_mobile_features_home_quick_project">Quick Project</string>
+    <string name="applications_photodo_apps_mobile_features_home_category_placeholder">e.g. Personal, Work, Real Estate</string>
+    <string name="applications_photodo_apps_mobile_features_home_create">Create</string>
+    <string name="applications_photodo_apps_mobile_features_home_cancel">Cancel</string>
+    <string name="applications_photodo_apps_mobile_features_home_tasks_count">%1$d/%2$d Tasks</string>
+    <string name="applications_photodo_apps_mobile_features_home_welcome">Welcome to PhotoDo!</string>
+    <string name="applications_photodo_apps_mobile_features_home_empty_state_description">Head over to the Tasks tab to create your first category and start building projects.</string>
+    <string name="applications_photodo_apps_mobile_features_home_quick_start">Quick Start</string>
+    <string name="applications_photodo_apps_mobile_features_home_close_content_desc">Close</string>
+    <string name="applications_photodo_apps_mobile_features_home_template_summary">%1$s • $%2$d Budget</string>
+    <string name="applications_photodo_apps_mobile_features_home_total_categories">Total PhotoDo Categories</string>
+    <string name="applications_photodo_apps_mobile_features_home_done">DONE</string>
+    <string name="applications_photodo_apps_mobile_features_home_financial_status_content_desc">Financial Status</string>
+    <string name="applications_photodo_apps_mobile_features_home_go_content_desc">Go</string>
+    <string name="applications_photodo_apps_mobile_features_home_jump_to_category">Jump to Category</string>
+    <string name="applications_photodo_apps_mobile_features_home_collapse_categories_content_desc">Collapse Categories</string>
+    <string name="applications_photodo_apps_mobile_features_home_expand_categories_content_desc">Expand Categories</string>
+    <string name="applications_photodo_apps_mobile_features_home_budget_status_content_desc">Budget Status</string>
+</resources>

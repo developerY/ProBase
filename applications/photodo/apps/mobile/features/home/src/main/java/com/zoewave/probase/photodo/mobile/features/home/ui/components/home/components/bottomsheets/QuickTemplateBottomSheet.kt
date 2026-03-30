@@ -22,9 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.applications.photodo.db.model.ProjectTemplate
 import com.zoewave.probase.applications.photodo.db.model.quickTemplates
+import com.zoewave.probase.photodo.mobile.features.home.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,14 +57,14 @@ fun QuickTemplateBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Quick Start",
+                    text = stringResource(R.string.applications_photodo_apps_mobile_features_home_quick_start),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close"
+                        contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_close_content_desc)
                     )
                 }
             }
@@ -97,7 +99,7 @@ fun QuickTemplateBottomSheet(
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
-                                text = "${template.categoryName} • $${template.defaultBudget.toInt()} Budget",
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_home_template_summary, template.categoryName, template.defaultBudget.toInt()),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

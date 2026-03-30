@@ -1,6 +1,6 @@
 # Data Deletion Policy for PhoToDo
 
-**Developer:** Siamak "Ash" Ashrafi / KoColor
+**Developer:** Developer@ZoeWave.com
 
 At **PhoToDo**, we take your privacy seriously. Because our app is designed to function locally without external accounts, we do not have a centralized database containing your personal information. However, we provide the following pathways for you to manage and delete your data.
 

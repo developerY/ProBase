@@ -57,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -70,6 +71,7 @@ import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.photodo.mobile.core.ui.components.BudgetProgressBar
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.tasks.R
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -105,7 +107,7 @@ fun TaskDetailScreen(
                 navTo(PhotoTodoRoute.Camera(projectId = state.projectDetails.project.projectId))
             }
         } else {
-            Toast.makeText(context, "Camera permission is required.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.applications_photodo_apps_mobile_features_tasks_detail_camera_permission_required), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -120,18 +122,24 @@ fun TaskDetailScreen(
                 title = {
                     val title = when (val state = uiState.loadState) {
                         is DetailLoadState.Success -> state.projectDetails.project.name
-                        else -> "Loading..."
+                        else -> stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_loading)
                     }
                     Text(title)
                 },
                 navigationIcon = {
                     IconButton(onClick = { navTo(null) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_back_content_desc)
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = { showDeleteProjectConfirmation = true }) {
-                        Icon(Icons.Default.DeleteForever, contentDescription = "Delete Project")
+                        Icon(
+                            Icons.Default.DeleteForever,
+                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_delete_project_content_desc)
+                        )
                     }
                 }
             )
@@ -149,7 +157,7 @@ fun TaskDetailScreen(
                         }
                         Icon(
                             painter = rememberVectorPainter(imageVector),
-                            contentDescription = "Add Menu",
+                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_menu_content_desc),
                             modifier = Modifier.animateIcon({ checkedProgress })
                         )
                     }
@@ -172,7 +180,7 @@ fun TaskDetailScreen(
                         }
                     },
                     icon = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
-                    text = { Text("Take Photo") }
+                    text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_take_photo)) }
                 )
                 FloatingActionButtonMenuItem(
                     onClick = {
@@ -180,7 +188,7 @@ fun TaskDetailScreen(
                         showAddTaskDialog = true
                     },
                     icon = { Icon(Icons.Default.CheckBox, contentDescription = null) },
-                    text = { Text("Add Task") }
+                    text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_task)) }
                 )
                 // 🚀 NEW: Add Expense FAB Item
                 FloatingActionButtonMenuItem(
@@ -189,7 +197,7 @@ fun TaskDetailScreen(
                         showAddExpenseDialog = true
                     },
                     icon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
-                    text = { Text("Add Expense") }
+                    text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_expense)) }
                 )
             }
         }
@@ -232,7 +240,7 @@ fun TaskDetailScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.CalendarMonth,
-                                        contentDescription = "Due Date",
+                                        contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_due_date_content_desc),
                                         tint = MaterialTheme.colorScheme.primary, // Matches your theme
                                         modifier = Modifier.size(20.dp)
                                     )
@@ -242,7 +250,7 @@ fun TaskDetailScreen(
                                     val dateStr = formatter.format(java.util.Date(dueDateMillis))
 
                                     Text(
-                                        text = "Due: $dateStr",
+                                        text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_due_date, dateStr),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.primary
                                     )
@@ -254,7 +262,7 @@ fun TaskDetailScreen(
                         if (hasBudget) {
                             item {
                                 BudgetProgressBar(
-                                    projectName = "Total Budget",
+                                    projectName = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_total_budget),
                                     currentSpend = currentSpend,
                                     projectBudget = totalBudget,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
@@ -264,7 +272,11 @@ fun TaskDetailScreen(
                                 QuickExpenseBar(
                                     onAdjustSpend = { adjustmentAmount ->
                                         // Automatically generate a generic description based on + or -
-                                        val description = if (adjustmentAmount > 0) "Quick Edit (+)" else "Quick Edit (-)"
+                                        val description = if (adjustmentAmount > 0) {
+                                            context.getString(R.string.applications_photodo_apps_mobile_features_tasks_detail_quick_edit_plus)
+                                        } else {
+                                            context.getString(R.string.applications_photodo_apps_mobile_features_tasks_detail_quick_edit_minus)
+                                        }
 
                                         // Fire the exact same event the full dialog uses!
                                         onEvent(
@@ -283,7 +295,7 @@ fun TaskDetailScreen(
                         if (data.photos.isEmpty() && data.tasks.isEmpty()) {
                             item {
                                 Text(
-                                    text = "This project is empty.\nTap + to add tasks or photos!",
+                                    text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_empty_state),
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier
@@ -298,7 +310,7 @@ fun TaskDetailScreen(
                             if (data.photos.isNotEmpty()) {
                                 item {
                                     Text(
-                                        text = "Context Photos",
+                                        text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_context_photos),
                                         style = MaterialTheme.typography.titleMedium,
                                         modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
                                     )
@@ -321,7 +333,7 @@ fun TaskDetailScreen(
                             if (data.tasks.isNotEmpty()) {
                                 item {
                                     Text(
-                                        text = "Checklist",
+                                        text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_checklist),
                                         style = MaterialTheme.typography.titleMedium,
                                         modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
                                     )
@@ -350,12 +362,12 @@ fun TaskDetailScreen(
                 newTaskText = ""
                 showAddTaskDialog = false
             },
-            title = { Text("New Task") },
+            title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_new_task_title)) },
             text = {
                 OutlinedTextField(
                     value = newTaskText,
                     onValueChange = { newTaskText = it },
-                    placeholder = { Text("What needs to be done?") },
+                    placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_new_task_placeholder)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = Modifier.fillMaxWidth()
@@ -370,13 +382,13 @@ fun TaskDetailScreen(
                             showAddTaskDialog = false
                         }
                     }
-                ) { Text("Add") }
+                ) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_button)) }
             },
             dismissButton = {
                 TextButton(onClick = {
                     newTaskText = ""
                     showAddTaskDialog = false
-                }) { Text("Cancel") }
+                }) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_cancel_button)) }
             }
         )
     }
@@ -389,14 +401,14 @@ fun TaskDetailScreen(
                 newExpenseDesc = ""
                 showAddExpenseDialog = false
             },
-            title = { Text("Add Expense") },
+            title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_expense)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = newExpenseDesc,
                         onValueChange = { newExpenseDesc = it },
-                        label = { Text("Description") },
-                        placeholder = { Text("e.g. Paint from Home Depot") },
+                        label = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_expense_description_label)) },
+                        placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_expense_description_placeholder)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                         modifier = Modifier.fillMaxWidth()
@@ -404,8 +416,8 @@ fun TaskDetailScreen(
                     OutlinedTextField(
                         value = newExpenseAmount,
                         onValueChange = { newExpenseAmount = it },
-                        label = { Text("Amount") },
-                        placeholder = { Text("0.00") },
+                        label = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_expense_amount_label)) },
+                        placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_expense_amount_placeholder)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
@@ -425,14 +437,14 @@ fun TaskDetailScreen(
                             showAddExpenseDialog = false
                         }
                     }
-                ) { Text("Add") }
+                ) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_button)) }
             },
             dismissButton = {
                 TextButton(onClick = {
                     newExpenseAmount = ""
                     newExpenseDesc = ""
                     showAddExpenseDialog = false
-                }) { Text("Cancel") }
+                }) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_cancel_button)) }
             }
         )
     }
@@ -440,8 +452,8 @@ fun TaskDetailScreen(
     if (showDeleteProjectConfirmation) {
         AlertDialog(
             onDismissRequest = { showDeleteProjectConfirmation = false },
-            title = { Text("Delete Project?") },
-            text = { Text("Are you sure you want to delete this project and all its tasks, photos, and expenses?") },
+            title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_delete_project_title)) },
+            text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_delete_project_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -449,12 +461,12 @@ fun TaskDetailScreen(
                         onEvent(TaskDetailEvent.OnDeleteTaskListClicked)
                     }
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_button), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteProjectConfirmation = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_cancel_button))
                 }
             }
         )

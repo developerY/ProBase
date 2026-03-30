@@ -38,12 +38,14 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.tasks.R
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
@@ -90,7 +92,7 @@ fun AddProjectBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "New Project",
+                    text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_project),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -102,7 +104,7 @@ fun AddProjectBottomSheet(
                         contentColor = if (hasDueDate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Icon(Icons.Default.CalendarMonth, contentDescription = "Set Due Date")
+                    Icon(Icons.Default.CalendarMonth, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_set_due_date_content_desc))
                 }
             }
 
@@ -112,7 +114,7 @@ fun AddProjectBottomSheet(
                 val dateString = formatter.format(Date(uiState.dueDateMillis!!))
 
                 Text(
-                    text = "Due: $dateString",
+                    text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_due_date, dateString),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -123,8 +125,8 @@ fun AddProjectBottomSheet(
             OutlinedTextField(
                 value = uiState.listTitle,
                 onValueChange = { onEvent(TasksEvent.OnDraftTitleChanged(it)) },
-                label = { Text("Project Name") },
-                placeholder = { Text("e.g., Fix leaky pipe") },
+                label = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_project_name_label)) },
+                placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_project_name_placeholder)) },
                 singleLine = true,
                 shape = MaterialTheme.shapes.medium,
                 keyboardOptions = KeyboardOptions(
@@ -143,12 +145,12 @@ fun AddProjectBottomSheet(
             OutlinedTextField(
                 value = uiState.budgetInput,
                 onValueChange = { onEvent(TasksEvent.OnDraftBudgetChanged(it)) },
-                label = { Text("Total Budget (Optional)") },
-                placeholder = { Text("0.00") },
+                label = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_total_budget_optional_label)) },
+                placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_expense_amount_placeholder)) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.AttachMoney,
-                        contentDescription = "Currency",
+                        contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_currency_content_desc),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
@@ -179,7 +181,7 @@ fun AddProjectBottomSheet(
                 TextButton(
                     onClick = { onEvent(TasksEvent.OnDismissBottomSheet) }
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_cancel_button))
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
@@ -187,7 +189,7 @@ fun AddProjectBottomSheet(
                     enabled = uiState.listTitle.isNotBlank(),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 ) {
-                    Text("Create")
+                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_create_button))
                 }
             }
         }

@@ -8,8 +8,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.tasks.R
 import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,12 +35,12 @@ fun PhotoDoDatePicker(
                     onDismiss()
                 }
             ) {
-                Text("Set Date")
+                Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_set_date_button))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_cancel_button))
             }
         }
     ) {

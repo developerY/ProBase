@@ -19,8 +19,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.settings.R
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsEvent
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiState
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
@@ -42,11 +44,14 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_settings_title)) },
                 navigationIcon = {
                     // navTo(null) acts as our standard "Pop Backstack" action
                     IconButton(onClick = { navTo(null) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_settings_back_content_description)
+                        )
                     }
                 }
             )
@@ -60,7 +65,7 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             ThemeSettingsCard(
-                title = "App Theme",
+                title = stringResource(R.string.applications_photodo_apps_mobile_features_settings_app_theme_title),
                 expanded = isThemeExpanded,
                 onExpandToggle = { isThemeExpanded = !isThemeExpanded },
                 currentTheme = uiState.currentTheme,

@@ -20,12 +20,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
+import com.zoewave.probase.photodo.mobile.features.tasks.R
 
 @Composable
 fun PhotoThumbnailCard(
@@ -41,7 +43,7 @@ fun PhotoThumbnailCard(
     ) {
         AsyncImage(
             model = photo.photoUri,
-            contentDescription = "Context Photo for Project",
+            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_context_photo_content_desc),
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
@@ -58,7 +60,7 @@ fun PhotoThumbnailCard(
             ) {
                 Icon(
                     Icons.Default.Close,
-                    contentDescription = "Delete Photo",
+                    contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_delete_photo_content_desc),
                     modifier = Modifier.padding(4.dp)
                 )
             }
@@ -95,7 +97,7 @@ fun TaskItemRow(
         IconButton(onClick = { onEvent(TaskDetailEvent.OnDeleteItem(task)) }) {
             Icon(
                 Icons.Default.Close,
-                contentDescription = "Delete Task",
+                contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_delete_task_content_desc),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
