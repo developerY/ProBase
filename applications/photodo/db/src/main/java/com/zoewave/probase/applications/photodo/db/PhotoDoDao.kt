@@ -2,11 +2,10 @@ package com.zoewave.probase.applications.photodo.db
 
 import androidx.room.Dao
 import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import androidx.room.Upsert
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjects
 import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
@@ -17,10 +16,27 @@ import com.zoewave.probase.applications.photodo.db.entity.ProjectWithPhotos
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Data Access Object for the PhotoDo application.
+ * Follows Modern Android Development (MAD) best practices:
+ * - Uses [Flow] for observable queries.
+ * - Uses [suspend] for one-shot asynchronous operations.
+ * - Uses [@Upsert] to simplify insert/update logic.
+ * - Includes [@Transaction] for complex multi-query operations.
+ */
 @Dao
 interface PhotoDoDao {
 
-    // -- Delete All
+    // --- Global Operations ---
+
+    @Transaction
+    suspend fun clearAllData() {
+        clearPhotos()
+        clearTasks()
+        clearExpenses()
+        clearProjects()
+        clearCategories()
+    }
 
     @Query("DELETE FROM photos")
     suspend fun clearPhotos()
@@ -39,26 +55,14 @@ interface PhotoDoDao {
 
     // --- Category Operations ---
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCategory(category: CategoryEntity): Long
+    @Upsert
+    suspend fun upsertCategory(category: CategoryEntity): Long
+
+    @Upsert
+    suspend fun upsertCategories(categories: List<CategoryEntity>)
 
     @Update
     suspend fun updateCategory(category: CategoryEntity)
-
-    @Update
-    suspend fun updateProject(project: ProjectEntity)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertExpense(expense: ExpenseEntity)
-
-    @Update
-    suspend fun updateExpense(expense: ExpenseEntity)
-
-    @Delete
-    suspend fun deleteExpense(expense: ExpenseEntity)
-
-    @Query("SELECT * FROM expenses WHERE projectId = :projectId")
-    fun getExpensesForProject(projectId: Long): Flow<List<ExpenseEntity>>
 
     @Delete
     suspend fun deleteCategory(category: CategoryEntity)
@@ -69,20 +73,23 @@ interface PhotoDoDao {
     @Query("SELECT * FROM categories WHERE categoryId = :categoryId")
     fun getCategoryById(categoryId: Long): Flow<CategoryEntity?>
 
+    @Query("SELECT * FROM categories WHERE name = :name LIMIT 1")
+    suspend fun getCategoryByName(name: String): CategoryEntity?
+
     @Transaction
     @Query("SELECT * FROM categories")
     fun getCategoriesWithProjects(): Flow<List<CategoryWithProjects>>
 
-    @Query("SELECT * FROM categories WHERE name = :name LIMIT 1")
-    suspend fun getCategoryByName(name: String): CategoryEntity?
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertCategoryIgnore(category: CategoryEntity): Long
-
     // --- Project Operations ---
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertProject(project: ProjectEntity) : Long
+    @Upsert
+    suspend fun upsertProject(project: ProjectEntity): Long
+
+    @Upsert
+    suspend fun upsertProjects(projects: List<ProjectEntity>)
+
+    @Update
+    suspend fun updateProject(project: ProjectEntity)
 
     @Delete
     suspend fun deleteProject(project: ProjectEntity)
@@ -93,6 +100,9 @@ interface PhotoDoDao {
     @Query("SELECT * FROM projects WHERE projectId = :projectId")
     fun getProjectById(projectId: Long): Flow<ProjectEntity?>
 
+    @Query("SELECT * FROM projects ORDER BY creationDate DESC")
+    fun getAllProjects(): Flow<List<ProjectEntity>>
+
     @Query("SELECT * FROM projects WHERE categoryId = :categoryId ORDER BY creationDate DESC")
     fun getProjectsForCategory(categoryId: Long): Flow<List<ProjectEntity>>
 
@@ -102,10 +112,16 @@ interface PhotoDoDao {
     @Query("UPDATE projects SET isFavorite = :isFavorite WHERE projectId = :projectId")
     suspend fun updateProjectFavorite(projectId: Long, isFavorite: Boolean)
 
+    @Query("SELECT * FROM projects WHERE name LIKE '%' || :searchQuery || '%' OR notes LIKE '%' || :searchQuery || '%'")
+    fun searchProjects(searchQuery: String): Flow<List<ProjectEntity>>
+
     // --- Task Operations (Checklist) ---
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTask(task: TaskEntity)
+    @Upsert
+    suspend fun upsertTask(task: TaskEntity): Long
+
+    @Upsert
+    suspend fun upsertTasks(tasks: List<TaskEntity>)
 
     @Update
     suspend fun updateTask(task: TaskEntity)
@@ -118,14 +134,37 @@ interface PhotoDoDao {
 
     // --- Photo Operations ---
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPhoto(photo: PhotoEntity)
+    @Upsert
+    suspend fun upsertPhoto(photo: PhotoEntity): Long
+
+    @Upsert
+    suspend fun upsertPhotos(photos: List<PhotoEntity>)
 
     @Delete
     suspend fun deletePhoto(photo: PhotoEntity)
 
     @Query("SELECT * FROM photos WHERE projectId = :projectId ORDER BY timestamp DESC")
     fun getPhotosForProject(projectId: Long): Flow<List<PhotoEntity>>
+
+    @Query("SELECT * FROM photos ORDER BY timestamp DESC")
+    fun getAllPhotos(): Flow<List<PhotoEntity>>
+
+    // --- Expense Operations ---
+
+    @Upsert
+    suspend fun upsertExpense(expense: ExpenseEntity): Long
+
+    @Upsert
+    suspend fun upsertExpenses(expenses: List<ExpenseEntity>)
+
+    @Update
+    suspend fun updateExpense(expense: ExpenseEntity)
+
+    @Delete
+    suspend fun deleteExpense(expense: ExpenseEntity)
+
+    @Query("SELECT * FROM expenses WHERE projectId = :projectId")
+    fun getExpensesForProject(projectId: Long): Flow<List<ExpenseEntity>>
 
     // --- Relational Query ---
 
@@ -136,4 +175,8 @@ interface PhotoDoDao {
     @Transaction
     @Query("SELECT * FROM projects WHERE projectId = :projectId")
     fun getProjectDetails(projectId: Long): Flow<ProjectDetails?>
+
+    @Transaction
+    @Query("SELECT * FROM projects")
+    fun getAllProjectDetails(): Flow<List<ProjectDetails>>
 }

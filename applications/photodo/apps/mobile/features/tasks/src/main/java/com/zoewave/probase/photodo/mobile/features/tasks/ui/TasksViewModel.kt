@@ -167,7 +167,7 @@ class TasksViewModel @Inject constructor(
                         categoryId = currentCategoryId,
                         name = event.toString()
                     )
-                    repo.insertProject(newProject)
+                    repo.upsertProject(newProject)
                     onEvent(TasksEvent.OnDismissBottomSheet)
                 }
             }
@@ -196,7 +196,7 @@ class TasksViewModel @Inject constructor(
                     )
 
                     // 3. Insert into Room (this returns the new unique ID!)
-                    val newProjectId = repo.insertProject(newProject)
+                    val newProjectId = repo.upsertProject(newProject)
 
                     // 4. (Optional but recommended) Trigger a UI Effect to navigate
                     // straight to the new TaskDetailScreen using this newProjectId!
@@ -221,7 +221,7 @@ class TasksViewModel @Inject constructor(
                 _uiState.value.categoryId != null -> _uiState.value.categoryId!!
                 else -> {
                     val newCat = CategoryEntity(name = draft.newCategoryName.ifBlank { "Uncategorized" })
-                repo.insertCategory(newCat) // This returns the new ID  
+                repo.upsertCategory(newCat) // This returns the new ID  
                 }
             }
 
@@ -233,16 +233,16 @@ class TasksViewModel @Inject constructor(
             )
 
 
-            val generatedProjectId: Long = repo.insertProject(newProject)
+            val generatedProjectId: Long = repo.upsertProject(newProject)
 
             // Insert Task Items
             draft.pendingTaskItems.forEach { itemText ->
-                repo.insertTask(TaskEntity(projectId = generatedProjectId, text = itemText, isChecked = false))
+                repo.upsertTask(TaskEntity(projectId = generatedProjectId, text = itemText, isChecked = false))
             }
 
             // Insert Photos
             draft.pendingPhotoUris.forEach { uri ->
-                repo.insertPhoto(PhotoEntity(projectId = generatedProjectId, photoUri = uri, timestamp = timestamp))
+                repo.upsertPhoto(PhotoEntity(projectId = generatedProjectId, photoUri = uri, timestamp = timestamp))
             }
 
             // Clear the draft so the UI closes the Bottom Sheet cleanly

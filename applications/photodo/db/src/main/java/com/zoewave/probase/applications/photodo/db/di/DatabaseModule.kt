@@ -78,13 +78,9 @@ class PhotoDoDatabaseCallback @Inject constructor(
         // Safely extract the DAO from the lazily loaded database provider
         val dao = databaseProvider.get().photoDoDao()
 
-        // 1. Insert Categories
-        PhotoDoOnboardingData.defaultCategories.forEach { dao.insertCategory(it) }
-
-        // 2. Insert Projects
-        PhotoDoOnboardingData.defaultProjects.forEach { dao.insertProject(it) }
-
-        // 3. Insert Tasks
-        PhotoDoOnboardingData.defaultTasks.forEach { dao.insertTask(it) }
+        // Bulk upsert the onboarding data for better performance and safety
+        dao.upsertCategories(PhotoDoOnboardingData.defaultCategories)
+        dao.upsertProjects(PhotoDoOnboardingData.defaultProjects)
+        dao.upsertTasks(PhotoDoOnboardingData.defaultTasks)
     }
 }

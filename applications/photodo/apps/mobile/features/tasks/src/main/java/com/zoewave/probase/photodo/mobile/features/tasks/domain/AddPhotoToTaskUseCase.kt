@@ -14,6 +14,6 @@ class AddPhotoToTaskUseCase @Inject constructor(
             photoUri = uriString,
             timestamp = System.currentTimeMillis()
         )
-        repo.insertPhoto(newPhoto)
+        repo.upsertPhoto(newPhoto)
     }
 }

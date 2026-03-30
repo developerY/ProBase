@@ -13,13 +13,16 @@ import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+/**
+ * Implementation of [PhotoDoRepo] using [PhotoDoDao].
+ */
 class PhotoDoRepoImpl @Inject constructor(
     private val photoDoDao: PhotoDoDao
 ) : PhotoDoRepo {
 
     // --- Category Operations ---
-    override suspend fun insertCategory(category: CategoryEntity): Long {
-        return photoDoDao.insertCategory(category)
+    override suspend fun upsertCategory(category: CategoryEntity): Long {
+        return photoDoDao.upsertCategory(category)
     }
 
     override suspend fun deleteCategory(category: CategoryEntity) {
@@ -50,15 +53,14 @@ class PhotoDoRepoImpl @Inject constructor(
             // 2. It exists! Just return its ID.
             existingCategory.categoryId
         } else {
-            // 3. It doesn't exist. Build it!
-            val newCategory = CategoryEntity(name = name) // Assuming ID auto-generates
-            photoDoDao.insertCategory(newCategory) // insert returns the new Row ID
+            val newCategory = CategoryEntity(name = name)
+            photoDoDao.upsertCategory(newCategory)
         }
     }
 
     // --- Project Operations ---
-    override suspend fun insertProject(project: ProjectEntity) : Long {
-        return photoDoDao.insertProject(project)
+    override suspend fun upsertProject(project: ProjectEntity): Long {
+        return photoDoDao.upsertProject(project)
     }
 
     override suspend fun deleteProject(project: ProjectEntity) {
@@ -71,6 +73,10 @@ class PhotoDoRepoImpl @Inject constructor(
 
     override fun getProjectById(projectId: Long): Flow<ProjectEntity?> {
         return photoDoDao.getProjectById(projectId)
+    }
+
+    override fun getAllProjects(): Flow<List<ProjectEntity>> {
+        return photoDoDao.getAllProjects()
     }
 
     override fun getProjectsForCategory(categoryId: Long): Flow<List<ProjectEntity>> {
@@ -89,9 +95,13 @@ class PhotoDoRepoImpl @Inject constructor(
         photoDoDao.updateProjectFavorite(projectId, isFavorite)
     }
 
+    override fun searchProjects(searchQuery: String): Flow<List<ProjectEntity>> {
+        return photoDoDao.searchProjects(searchQuery)
+    }
+
     // --- Task Operations ---
-    override suspend fun insertTask(task: TaskEntity) {
-        photoDoDao.insertTask(task)
+    override suspend fun upsertTask(task: TaskEntity): Long {
+        return photoDoDao.upsertTask(task)
     }
 
     override suspend fun updateTask(task: TaskEntity) {
@@ -107,8 +117,8 @@ class PhotoDoRepoImpl @Inject constructor(
     }
 
     // --- Photo Operations ---
-    override suspend fun insertPhoto(photo: PhotoEntity) {
-        photoDoDao.insertPhoto(photo)
+    override suspend fun upsertPhoto(photo: PhotoEntity): Long {
+        return photoDoDao.upsertPhoto(photo)
     }
 
     override suspend fun deletePhoto(photo: PhotoEntity) {
@@ -119,9 +129,13 @@ class PhotoDoRepoImpl @Inject constructor(
         return photoDoDao.getPhotosForProject(projectId)
     }
 
+    override fun getAllPhotos(): Flow<List<PhotoEntity>> {
+        return photoDoDao.getAllPhotos()
+    }
+
     // --- Expense Operations ---
-    override suspend fun insertExpense(expense: ExpenseEntity) {
-        photoDoDao.insertExpense(expense)
+    override suspend fun upsertExpense(expense: ExpenseEntity): Long {
+        return photoDoDao.upsertExpense(expense)
     }
 
     override suspend fun deleteExpense(expense: ExpenseEntity) {
@@ -136,7 +150,6 @@ class PhotoDoRepoImpl @Inject constructor(
         return photoDoDao.getExpensesForProject(projectId)
     }
 
-    
     // --- Relational Operations ---
     override fun getProjectWithPhotos(projectId: Long): Flow<ProjectWithPhotos?> {
         return photoDoDao.getProjectWithPhotos(projectId)
@@ -146,12 +159,13 @@ class PhotoDoRepoImpl @Inject constructor(
         return photoDoDao.getProjectDetails(projectId)
     }
 
+    override fun getAllProjectDetails(): Flow<List<ProjectDetails>> {
+        return photoDoDao.getAllProjectDetails()
+    }
+
+    // --- Global Operations ---
     override suspend fun clearAllData() {
-        Log.d("PhotoDoRepoImpl", "Cleared all data")
-        photoDoDao.clearPhotos()
-        photoDoDao.clearTasks()
-        photoDoDao.clearExpenses()
-        photoDoDao.clearProjects()
-        photoDoDao.clearCategories()
+        Log.d("PhotoDoRepoImpl", "Clearing all data using DAO @Transaction")
+        photoDoDao.clearAllData()
     }
 }
