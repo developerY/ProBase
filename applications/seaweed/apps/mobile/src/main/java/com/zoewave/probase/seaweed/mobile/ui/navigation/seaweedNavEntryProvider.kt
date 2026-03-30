@@ -34,6 +34,7 @@ fun seaweedNavEntryProvider(
                 TransactionsUiRoute(
                     modifier = Modifier.fillMaxSize(),
                     initialCategory = key.category,
+                    initialTransactionId = key.transactionId,
                     navTo = navigateTo
                 )
             }

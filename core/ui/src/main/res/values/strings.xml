@@ -25,4 +25,10 @@
     <string name="core_ui_total_balance">Total Balance</string>
     <string name="core_ui_monthly_spending">Monthly Spending</string>
     <string name="core_ui_recent_transactions">Recent Transactions</string>
+    <string name="core_ui_transaction_details">Transaction Details</string>
+    <string name="core_ui_all_categories">All Categories</string>
+    <string name="core_ui_view_all">View All</string>
+    <string name="core_ui_quick_jump">Quick Jump</string>
+    <string name="core_ui_spending_summary">Spending Summary</string>
+    <string name="core_ui_transactions_count">%1$d transactions across %2$d categories</string>
 </resources>
