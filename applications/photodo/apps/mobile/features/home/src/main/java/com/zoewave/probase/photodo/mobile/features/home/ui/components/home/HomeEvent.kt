@@ -1,5 +1,7 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
+import com.zoewave.probase.applications.photodo.db.model.ProjectTemplate
+
 sealed interface HomeEvent {
     data object OnRefresh : HomeEvent
     data class OnTaskClicked(val taskId: String) : HomeEvent
@@ -8,4 +10,5 @@ sealed interface HomeEvent {
     data class OnCategoryClicked(val categoryId: Long, val categoryName: String) :HomeEvent
     // ✅ ADD THE NEW EVENT
     data class OnAddCategory(val name: String, val description: String? = null) : HomeEvent
+    data class OnCreateFromTemplate(val template: ProjectTemplate) : HomeEvent
 }

@@ -40,7 +40,7 @@ interface PhotoDoDao {
     // --- Category Operations ---
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCategory(category: CategoryEntity) : Long
+    suspend fun insertCategory(category: CategoryEntity): Long
 
     @Update
     suspend fun updateCategory(category: CategoryEntity)
@@ -72,6 +72,12 @@ interface PhotoDoDao {
     @Transaction
     @Query("SELECT * FROM categories")
     fun getCategoriesWithProjects(): Flow<List<CategoryWithProjects>>
+
+    @Query("SELECT * FROM categories WHERE name = :name LIMIT 1")
+    suspend fun getCategoryByName(name: String): CategoryEntity?
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertCategoryIgnore(category: CategoryEntity): Long
 
     // --- Project Operations ---
 

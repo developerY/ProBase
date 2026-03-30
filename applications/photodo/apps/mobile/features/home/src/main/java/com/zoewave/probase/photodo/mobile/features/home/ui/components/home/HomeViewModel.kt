@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
+import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
@@ -122,6 +123,23 @@ class HomeViewModel @Inject constructor(
                         photoDoRepo.insertCategory(newCategory)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error saving new category", e)
+                    }
+                }
+            }
+
+            is HomeEvent.OnCreateFromTemplate -> {
+                viewModelScope.launch {
+                    try {
+                        val categoryId = photoDoRepo.getOrCreateCategoryByName(event.template.categoryName)
+                        val newProject = ProjectEntity(
+                            categoryId = categoryId,
+                            name = event.template.title,
+                            projectBudget = event.template.defaultBudget,
+                            notes = "Created from ${event.template.title} template"
+                        )
+                        photoDoRepo.insertProject(newProject)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error creating project from template", e)
                     }
                 }
             }

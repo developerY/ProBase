@@ -20,6 +20,8 @@ dependencies {
     implementation(libs.androidx.datastore.core)
     implementation(libs.kotlinx.datetime)
 
+    implementation(libs.androidx.compose.material.icons.extended)
+
     // Note: Hilt, Room, KSP, core-ktx, and standard testing dependencies
     // are automatically provided by the 'composetemplate' convention plugins.
 }

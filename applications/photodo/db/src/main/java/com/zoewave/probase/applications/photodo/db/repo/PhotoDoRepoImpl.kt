@@ -42,6 +42,20 @@ class PhotoDoRepoImpl @Inject constructor(
         return photoDoDao.getCategoriesWithProjects()
     }
 
+    override suspend fun getOrCreateCategoryByName(name: String): Long {
+        // 1. Check if the category already exists
+        val existingCategory = photoDoDao.getCategoryByName(name)
+
+        return if (existingCategory != null) {
+            // 2. It exists! Just return its ID.
+            existingCategory.categoryId
+        } else {
+            // 3. It doesn't exist. Build it!
+            val newCategory = CategoryEntity(name = name) // Assuming ID auto-generates
+            photoDoDao.insertCategory(newCategory) // insert returns the new Row ID
+        }
+    }
+
     // --- Project Operations ---
     override suspend fun insertProject(project: ProjectEntity) : Long {
         return photoDoDao.insertProject(project)
