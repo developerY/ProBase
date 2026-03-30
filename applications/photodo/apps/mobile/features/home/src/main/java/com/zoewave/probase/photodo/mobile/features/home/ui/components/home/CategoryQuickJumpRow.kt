@@ -32,9 +32,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.CategoryQuickJumpUiModel
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.CategoryQuickJumpCard
@@ -74,14 +76,18 @@ fun CategoryQuickJumpRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "Jump to Category",
+                stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_to_category),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary
             )
 
             Icon(
                 imageVector = Icons.Default.ExpandMore,
-                contentDescription = if (isExpanded) "Collapse Categories" else "Expand Categories",
+                contentDescription = if (isExpanded) {
+                    stringResource(R.string.applications_photodo_apps_mobile_features_home_collapse_categories_content_desc)
+                } else {
+                    stringResource(R.string.applications_photodo_apps_mobile_features_home_expand_categories_content_desc)
+                },
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.rotate(arrowRotation)
             )
@@ -115,7 +121,7 @@ fun CategoryQuickJumpRow(
                     val mappedModel = CategoryQuickJumpUiModel(
                         id = category.id,
                         name = category.name,
-                        progressText = "${category.completedTasks} / ${category.totalTasks} Tasks",
+                        progressText = stringResource(R.string.applications_photodo_apps_mobile_features_home_tasks_count, category.completedTasks, category.totalTasks),
                         progressPercentage = category.progressPercentage,
                         containerColor = containerColor,
                         icon = Icons.Default.FolderSpecial // Or map a specific icon if you have one!

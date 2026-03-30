@@ -30,10 +30,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.tasks.R
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
@@ -101,7 +103,7 @@ fun ProjectCard(
                     ) {
                         Icon(
                             imageVector = if (project.isUrgent) Icons.Filled.Error else Icons.Outlined.ErrorOutline,
-                            contentDescription = "Urgent",
+                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_urgent_content_desc),
                             tint = if (project.isUrgent) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -112,7 +114,7 @@ fun ProjectCard(
                     ) {
                         Icon(
                             imageVector = if (project.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = "Favorite",
+                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_favorite_content_desc),
                             tint = if (project.isFavorite) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -132,13 +134,13 @@ fun ProjectCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.AttachMoney,
-                            contentDescription = "Financial Status",
+                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_financial_status_content_desc),
                             tint = financialStatusColor,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "Budget",
+                            text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_budget_label),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

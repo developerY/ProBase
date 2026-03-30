@@ -23,9 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
@@ -107,7 +109,7 @@ fun HomeProjectRow(
                 if (project.hasBudget) {
                     Icon(
                         imageVector = Icons.Default.AttachMoney,
-                        contentDescription = "Financial Status",
+                        contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_financial_status_content_desc),
                         tint = financialStatusColor,
                         modifier = Modifier.padding(end = 8.dp)
                     )
@@ -115,7 +117,7 @@ fun HomeProjectRow(
 
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "Go",
+                    contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_go_content_desc),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

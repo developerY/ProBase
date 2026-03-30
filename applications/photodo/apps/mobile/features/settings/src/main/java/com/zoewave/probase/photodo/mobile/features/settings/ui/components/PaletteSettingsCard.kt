@@ -23,7 +23,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.photodo.mobile.features.settings.R
 
 @Composable
 fun PaletteSettingsCard(
@@ -47,18 +49,18 @@ fun PaletteSettingsCard(
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.Palette, contentDescription = "Color Palette")
+                Icon(Icons.Default.Palette, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_title))
                 Spacer(modifier = Modifier.width(16.dp))
-                Text("Color Palette", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_title), style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.weight(1f))
 
                 // Display the current selection
                 Text(
                     text = when(currentPalette) {
-                        "CORAL_REEF" -> "Coral Reef"
-                        "FOREST" -> "Deep Forest"
-                        "EXPRESSIVE" -> "Your Wallpaper"
-                        else -> "Default"
+                        "CORAL_REEF" -> stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_coral_reef)
+                        "FOREST" -> stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_deep_forest)
+                        "EXPRESSIVE" -> stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_expressive_summary)
+                        else -> stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_default_summary)
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
@@ -86,7 +88,7 @@ fun PaletteSettingsCard(
                             onClick = null // Handled by the parent Row's selectable modifier
                         )
                         Text(
-                            text = "Default Professional",
+                            text = stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_default),
                             modifier = Modifier.padding(start = 16.dp)
                         )
                     }
@@ -107,7 +109,7 @@ fun PaletteSettingsCard(
                             onClick = null
                         )
                         Text(
-                            text = "Coral Reef",
+                            text = stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_coral_reef),
                             modifier = Modifier.padding(start = 16.dp)
                         )
                     }
@@ -129,7 +131,7 @@ fun PaletteSettingsCard(
                             onClick = null
                         )
                         Text(
-                            text = "Deep Forest",
+                            text = stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_deep_forest),
                             modifier = Modifier.padding(start = 16.dp)
                         )
                     }
@@ -150,7 +152,7 @@ fun PaletteSettingsCard(
                             onClick = null
                         )
                         Text(
-                            text = "Material 3 Expressive (Wallpaper)",
+                            text = stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_expressive),
                             modifier = Modifier.padding(start = 16.dp)
                         )
                     }

@@ -12,7 +12,9 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.photodo.mobile.features.settings.R
 
 @Composable
 fun ThemeSettingsCardAI(
@@ -30,7 +32,7 @@ fun ThemeSettingsCardAI(
         Column {
             ListItem(
                 headlineContent = { Text(title) },
-                supportingContent = { Text("Current: $currentTheme") },
+                supportingContent = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_settings_theme_current_format, currentTheme)) },
                 trailingContent = {
                     Icon(
                         imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,

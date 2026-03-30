@@ -54,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,6 +64,7 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeE
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeUiState
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.components.bottomsheets.QuickTemplateBottomSheet
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.mobile.features.home.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -85,13 +87,13 @@ fun HomeOverviewScreen(
             LargeTopAppBar(
                 title = {
                     Text(
-                        text = "Overview",
+                        text = stringResource(R.string.applications_photodo_apps_mobile_features_home_overview),
                         fontWeight = FontWeight.Bold
                     )
                 },
                 actions = {
                     IconButton(onClick = { /* Optional global action like settings or profile */ }) {
-                        Icon(Icons.Default.Analytics, contentDescription = "Analytics")
+                        Icon(Icons.Default.Analytics, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_analytics_content_desc))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -120,7 +122,7 @@ fun HomeOverviewScreen(
                         }
                         Icon(
                             painter = rememberVectorPainter(imageVector),
-                            contentDescription = "Menu",
+                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_menu_content_desc),
                             modifier = Modifier.animateIcon({ checkedProgress })
                         )
                     }
@@ -133,7 +135,7 @@ fun HomeOverviewScreen(
                         showAddCategoryDialog = true
                     },
                     icon = { Icon(Icons.Default.FolderSpecial, contentDescription = null) },
-                    text = { Text("New Category") }
+                    text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_new_category)) }
                 )
 
                 // Item 2: Quick Project (Placeholder for later!)
@@ -143,7 +145,7 @@ fun HomeOverviewScreen(
                         showQuickTemplateBottomSheet = true
                     },
                     icon = { Icon(Icons.Default.Checklist, contentDescription = null) },
-                    text = { Text("Quick Project") }
+                    text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_quick_project)) }
                 )
             }
         }
@@ -194,12 +196,12 @@ fun HomeOverviewScreen(
     if (showAddCategoryDialog) {
         AlertDialog(
             onDismissRequest = { showAddCategoryDialog = false },
-            title = { Text("New Category") },
+            title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_new_category)) },
             text = {
                 OutlinedTextField(
                     value = newCategoryName,
                     onValueChange = { newCategoryName = it },
-                    placeholder = { Text("e.g. Personal, Work, Real Estate") },
+                    placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_category_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -213,7 +215,7 @@ fun HomeOverviewScreen(
                             showAddCategoryDialog = false // Close
                         }
                     }
-                ) { Text("Create") }
+                ) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_create)) }
             },
             dismissButton = {
                 TextButton(
@@ -221,7 +223,7 @@ fun HomeOverviewScreen(
                         newCategoryName = ""
                         showAddCategoryDialog = false
                     }
-                ) { Text("Cancel") }
+                ) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_cancel)) }
             }
         )
     }
@@ -299,7 +301,7 @@ fun CategoryDashboardCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${category.completedTasks}/${category.totalTasks} Tasks",
+                    text = stringResource(R.string.applications_photodo_apps_mobile_features_home_tasks_count, category.completedTasks, category.totalTasks),
                     style = MaterialTheme.typography.bodyMedium,
                     color = contentColor.copy(alpha = 0.8f) // Slightly dim the subtitle
                 )
@@ -337,12 +339,12 @@ fun EmptyHomeState(
             tint = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = "Welcome to PhotoDo!",
+            text = stringResource(R.string.applications_photodo_apps_mobile_features_home_welcome),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Head over to the Tasks tab to create your first category and start building projects.",
+            text = stringResource(R.string.applications_photodo_apps_mobile_features_home_empty_state_description),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center

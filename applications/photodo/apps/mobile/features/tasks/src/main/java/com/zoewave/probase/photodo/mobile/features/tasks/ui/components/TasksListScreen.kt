@@ -39,10 +39,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.tasks.R
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
@@ -73,12 +75,18 @@ fun TasksListScreen(
                     // Actually, for top-level it might not show. 
                     // But in standard Nav3, we just call back.
                     IconButton(onClick = { navTo(null) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_back_content_desc)
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = { showDeleteConfirmation = true }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Clear DB")
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_category_content_desc)
+                        )
                     }
                 }
             )
@@ -99,7 +107,7 @@ fun TasksListScreen(
                         }
                         Icon(
                             painter = rememberVectorPainter(imageVector),
-                            contentDescription = "Toggle Add Menu",
+                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_toggle_add_menu_content_desc),
                             modifier = Modifier.animateIcon({ checkedProgress })
                         )
                     }
@@ -111,7 +119,7 @@ fun TasksListScreen(
                         onEvent(TasksEvent.OnAddListClicked) // Opens the Project Sheet!
                     },
                     icon = { Icon(Icons.Default.FormatListBulleted, contentDescription = null) },
-                    text = { Text("New Project") }
+                    text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_project)) }
                 )
                 FloatingActionButtonMenuItem(
                     onClick = {
@@ -119,7 +127,7 @@ fun TasksListScreen(
                         onEvent(TasksEvent.OnAddCategoryClicked) // Opens the Category Sheet!
                     },
                     icon = { Icon(Icons.Default.Folder, contentDescription = null) },
-                    text = { Text("New Category") }
+                    text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_category)) }
                 )
             }
         }
@@ -133,7 +141,7 @@ fun TasksListScreen(
             if (uiState.isNoCategoriesYet) {
                 // Scenario A: Database is completely empty
                 Text(
-                    text = "No categories yet.\nTap + to create a Category first!",
+                    text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_no_categories),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -142,7 +150,7 @@ fun TasksListScreen(
             } else if (uiState.projectLists.isEmpty()) {
                 // Scenario B: This specific category is empty
                 Text(
-                    text = "No projects in ${uiState.categoryName}.\nTap + to create one!",
+                    text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_no_projects_in_category, uiState.categoryName),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -191,8 +199,8 @@ fun TasksListScreen(
     if (showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text("Delete Category?") },
-            text = { Text("Are you sure you want to delete this category and ALL its projects and tasks? This action cannot be undone.") },
+            title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_category_title)) },
+            text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_category_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -202,12 +210,12 @@ fun TasksListScreen(
                         }
                     }
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_button), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_cancel_button))
                 }
             }
         )
