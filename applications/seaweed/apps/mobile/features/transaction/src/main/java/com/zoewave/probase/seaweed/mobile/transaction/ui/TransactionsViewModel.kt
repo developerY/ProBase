@@ -3,21 +3,26 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.seaweed.data.TransactionRepository
+import com.zoewave.probase.seaweed.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class TransactionsViewModel @Inject constructor(
     private val repository: TransactionRepository
 ) : ViewModel() {
 
     private val _selectedCategory = MutableStateFlow<String?>(null)
+    private val _selectedTransactionId = MutableStateFlow<String?>(null)
     private var isInitialized = false
 
     fun setInitialCategory(category: String?) {
@@ -27,10 +32,16 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
+    private val _selectedTransaction = _selectedTransactionId.flatMapLatest { id ->
+        if (id == null) flowOf(null) else repository.getTransaction(id)
+    }
+
     val uiState: StateFlow<TransactionsUiState> = combine(
         repository.getAllTransactions(),
-        _selectedCategory
-    ) { transactions, selectedCategory ->
+        _selectedCategory,
+        _selectedTransactionId,
+        _selectedTransaction
+    ) { transactions, selectedCategory, selectedTransactionId, selectedTransaction ->
         val categories = transactions.map { it.category }.distinct().sorted()
         val filteredTransactions = if (selectedCategory == null) {
             transactions
@@ -41,7 +52,9 @@ class TransactionsViewModel @Inject constructor(
             transactions = transactions,
             filteredTransactions = filteredTransactions,
             categories = categories,
-            selectedCategory = selectedCategory
+            selectedCategory = selectedCategory,
+            selectedTransactionId = selectedTransactionId,
+            selectedTransaction = selectedTransaction
         )
     }.stateIn(
         scope = viewModelScope,
@@ -58,6 +71,9 @@ class TransactionsViewModel @Inject constructor(
             }
             is TransactionsUiEvent.SelectCategory -> {
                 _selectedCategory.value = event.category
+            }
+            is TransactionsUiEvent.SelectTransaction -> {
+                _selectedTransactionId.value = event.id
             }
         }
     }

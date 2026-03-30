@@ -1,51 +1,21 @@
 package com.zoewave.probase.seaweed.mobile.home.ui
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -53,11 +23,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.core.ui.R as CoreUiR
 import com.zoewave.probase.seaweed.features.main.navigation.SeaweedDestination
+import com.zoewave.probase.seaweed.mobile.home.ui.components.CategoryQuickJumpCard
+import com.zoewave.probase.seaweed.mobile.home.ui.components.DonutChart
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.CategoryOverview
-import com.zoewave.probase.seaweed.model.Transaction
 import java.util.Locale
-import kotlin.math.absoluteValue
 
 @Composable
 fun HomeUiRoute(
@@ -112,9 +82,9 @@ fun HomeScreen(
                             .fillMaxSize()
                             .padding(padding)
                             .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(24.dp)
                     ) {
-                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(24.dp)) {
                             BalanceCard(balance = uiState.totalBalance)
                             OverviewSummaryCard(categories = uiState.categoriesSummary)
                             CategoryQuickJumpRow(
@@ -133,7 +103,7 @@ fun HomeScreen(
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 Text(
-                                    text = "View All",
+                                    text = stringResource(CoreUiR.string.core_ui_view_all),
                                     style = MaterialTheme.typography.labelLarge,
                                     color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.clickable { navTo(SeaweedDestination.Transactions(null)) }
@@ -146,7 +116,8 @@ fun HomeScreen(
                                 items(uiState.transactions.take(10), key = { it.id }) { transaction ->
                                     TransactionItem(
                                         transaction = transaction,
-                                        onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) }
+                                        onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
+                                        onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
                                     )
                                 }
                             }
@@ -177,7 +148,7 @@ fun HomeScreen(
                                 onClick = { navTo(SeaweedDestination.CategoryGrid) },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("View All Categories")
+                                Text(stringResource(CoreUiR.string.core_ui_all_categories))
                             }
                         }
                         item {
@@ -190,7 +161,8 @@ fun HomeScreen(
                         items(uiState.transactions.take(5), key = { it.id }) { transaction ->
                             TransactionItem(
                                 transaction = transaction,
-                                onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) }
+                                onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
+                                onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
                             )
                         }
                     }
@@ -247,7 +219,7 @@ fun OverviewSummaryCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Spending Summary",
+                    text = stringResource(CoreUiR.string.core_ui_spending_summary),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -258,7 +230,7 @@ fun OverviewSummaryCard(
                     fontWeight = FontWeight.Black
                 )
                 Text(
-                    text = "$totalTransactions transactions across ${categories.size} categories",
+                    text = stringResource(CoreUiR.string.core_ui_transactions_count, totalTransactions, categories.size),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
@@ -310,7 +282,7 @@ fun CategoryQuickJumpRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Quick Jump",
+                text = stringResource(CoreUiR.string.core_ui_quick_jump),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -331,107 +303,3 @@ fun CategoryQuickJumpRow(
         }
     }
 }
-
-@Composable
-fun CategoryQuickJumpCard(
-    category: CategoryOverview,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val colorIndex = category.name.hashCode().absoluteValue % categoryColors.size
-    val color = categoryColors[colorIndex]
-
-    Card(
-        onClick = onClick,
-        modifier = modifier
-            .width(130.dp)
-            .clip(RoundedCornerShape(20.dp)),
-        colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.15f),
-            contentColor = color
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(
-                    imageVector = Icons.Default.Category,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Text(
-                    text = category.name,
-                    style = MaterialTheme.typography.labelLarge,
-                    maxLines = 1,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Column {
-                Text(
-                    text = "$${String.format(Locale.getDefault(), "%.0f", category.totalAmount)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold
-                )
-                LinearProgressIndicator(
-                    progress = { 1f }, // Placeholder
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp)),
-                    color = color,
-                    trackColor = color.copy(alpha = 0.2f)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun DonutChart(
-    spendingByCategory: Map<String, Double>,
-    modifier: Modifier = Modifier
-) {
-    val totalSpending = spendingByCategory.values.sum()
-    if (totalSpending == 0.0) return
-
-    val proportions = spendingByCategory.values.map { (it / totalSpending).toFloat() }
-    
-    Canvas(modifier = modifier) {
-        val strokeWidth = 24f
-        
-        // Background ring
-        drawCircle(
-            color = Color.LightGray.copy(alpha = 0.2f),
-            style = Stroke(width = strokeWidth)
-        )
-        
-        var startAngle = -90f
-        spendingByCategory.keys.forEachIndexed { index, category ->
-            val amount = spendingByCategory[category] ?: 0.0
-            val sweepAngle = (amount / totalSpending).toFloat() * 360f
-            
-            if (sweepAngle > 0) {
-                drawArc(
-                    color = categoryColors[index % categoryColors.size],
-                    startAngle = startAngle,
-                    sweepAngle = sweepAngle,
-                    useCenter = false,
-                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                )
-            }
-            startAngle += sweepAngle
-        }
-    }
-}
-
-private val categoryColors = listOf(
-    Color(0xFF6750A4), // Purple
-    Color(0xFF006C4C), // Green
-    Color(0xFFB3261E), // Red
-    Color(0xFF625B71), // Muted Purple
-    Color(0xFF7D5260), // Muted Red
-    Color(0xFF006A6A)  // Teal
-)
