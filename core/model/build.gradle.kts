@@ -4,7 +4,7 @@ plugins {
     id("composetemplate.android.library.compose") // Adds Compose capability
 
     // ✅ 2. Module Specific Plugins
-    alias(libs.plugins.jetbrains.kotlin.serialization)
+    id("composetemplate.kotlin.serialization")
 }
 
 android {

@@ -9,7 +9,7 @@ plugins {
     id("composetemplate.android.hilt")
 
     // 4. Serialization (Useful for Nav3 arguments)
-    alias(libs.plugins.jetbrains.kotlin.serialization)
+    id("composetemplate.kotlin.serialization")
 }
 
 android {

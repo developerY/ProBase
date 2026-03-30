@@ -1,7 +1,7 @@
 plugins {
     id("composetemplate.android.library")
     // ✅ Required for Type-Safe Navigation
-    alias(libs.plugins.jetbrains.kotlin.serialization)
+    id("composetemplate.kotlin.serialization")
 }
 
 android {

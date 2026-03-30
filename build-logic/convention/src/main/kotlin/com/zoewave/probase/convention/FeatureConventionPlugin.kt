@@ -8,8 +8,10 @@ class FeatureConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             dependencies {
-                add("implementation", project(":core"))
-                add("implementation", project(":contract"))
+                // Add common feature dependencies here.
+                // For example:
+                // add("implementation", project(":core:ui"))
+                // add("implementation", project(":core:model"))
             }
         }
     }

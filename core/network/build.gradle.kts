@@ -6,7 +6,7 @@ plugins {
     // ✅ 2. Module-Specific Plugins
     alias(libs.plugins.apollo.graphql)
     alias(libs.plugins.mapsplatform.secrets)
-    alias(libs.plugins.jetbrains.kotlin.serialization)
+    id("composetemplate.kotlin.serialization")
 }
 
 android {
