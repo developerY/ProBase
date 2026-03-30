@@ -19,4 +19,10 @@
     <string name="action_resume">Resume</string>
     <string name="cd_navigate_back">Back</string>
     <string name="navigation_home">Home</string>
+    <string name="core_ui_summary_title">Seaweed Summary</string>
+    <string name="core_ui_transactions_title">Transactions</string>
+    <string name="core_ui_add_random_data">Add Random Data</string>
+    <string name="core_ui_total_balance">Total Balance</string>
+    <string name="core_ui_monthly_spending">Monthly Spending</string>
+    <string name="core_ui_recent_transactions">Recent Transactions</string>
 </resources>

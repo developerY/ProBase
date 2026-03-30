@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">SeaWeed</string>
+    <string name="summary_title">Seaweed Summary</string>
+    <string name="transactions_title">Transactions</string>
+    <string name="add_random_data">Add Random Data</string>
+    <string name="total_balance">Total Balance</string>
+    <string name="monthly_spending">Monthly Spending</string>
+    <string name="recent_transactions">Recent Transactions</string>
 </resources>
