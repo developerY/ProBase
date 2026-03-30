@@ -15,6 +15,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -113,6 +114,14 @@ class TasksViewModel @Inject constructor(
             is TasksEvent.OnAddRandomTaskClicked -> insertRandomTask()
             is TasksEvent.OnTaskToggled -> updateTask(event.taskId, event.isCompleted)
             is TasksEvent.OnClearDatabaseClicked -> viewModelScope.launch { repo.clearAllData() }
+            is TasksEvent.OnDeleteCategoryClicked -> {
+                viewModelScope.launch {
+                    val category = repo.getCategoryById(event.categoryId).first()
+                    if (category != null) {
+                        repo.deleteCategory(category)
+                    }
+                }
+            }
 
             is TasksEvent.OnDraftTitleChanged -> _draftState.update { it.copy(listTitle = event.title) }
             is TasksEvent.OnDraftCategoryNameChanged -> _draftState.update { it.copy(newCategoryName = event.name) }

@@ -8,6 +8,8 @@ sealed interface TasksEvent {
     data object OnAddList : TasksEvent
     data object OnDeleteListClicked : TasksEvent
 
+    data class OnDeleteCategoryClicked(val categoryId: Long) : TasksEvent
+
     data class OnToggleProjectFavorite(val projectId: Long, val isFavorite: Boolean) : TasksEvent
     data class OnToggleProjectUrgent(val projectId: Long, val isUrgent: Boolean) : TasksEvent
 

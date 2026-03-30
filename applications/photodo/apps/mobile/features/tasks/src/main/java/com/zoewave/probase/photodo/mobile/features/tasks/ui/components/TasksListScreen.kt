@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FormatListBulleted
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButtonMenu
@@ -24,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
 import androidx.compose.material3.TopAppBar
@@ -56,6 +58,9 @@ fun TasksListScreen(
 ) {
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
+    // Confirmation Dialog State
+    var showDeleteConfirmation by rememberSaveable { mutableStateOf(false) }
+
     BackHandler(fabMenuExpanded) { fabMenuExpanded = false }
 
     Scaffold(
@@ -72,7 +77,7 @@ fun TasksListScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onEvent(TasksEvent.OnClearDatabaseClicked) }) {
+                    IconButton(onClick = { showDeleteConfirmation = true }) {
                         Icon(Icons.Default.Delete, contentDescription = "Clear DB")
                     }
                 }
@@ -182,6 +187,31 @@ fun TasksListScreen(
             navTo = navTo
         )
     }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text("Delete Category?") },
+            text = { Text("Are you sure you want to delete this category and ALL its projects and tasks? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirmation = false
+                        uiState.categoryId?.let { id ->
+                            onEvent(TasksEvent.OnDeleteCategoryClicked(id))
+                        }
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @Preview(showBackground = true)
@@ -255,7 +285,8 @@ fun TasksListBudgetScreenPreview() {
                         categoryName = "Personal",
                         isFavorite = true,
                         currentSpend = 150.0,
-                        projectBudget = 200.0 // 🟢 Will show up GREEN (Under budget)
+                        projectBudget = 200.0, // 🟢 Will show up GREEN (Under budget),
+                        dueDateMillis = System.currentTimeMillis() + 86400000L * 3,
                     ),
                     ProjectListUiModel(
                         projectId = 3,
