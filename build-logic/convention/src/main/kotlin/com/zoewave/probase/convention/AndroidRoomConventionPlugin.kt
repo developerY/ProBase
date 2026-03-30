@@ -1,38 +1,48 @@
 package com.zoewave.probase.convention
 
 import com.android.build.api.dsl.LibraryExtension
+import com.google.devtools.ksp.gradle.KspExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 
+/**
+ * A convention plugin for Room database integration.
+ * Applies the KSP plugin and configures Room runtime, compiler, and schema exporting.
+ */
 class AndroidRoomConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            // 1. Apply KSP (Required for Room)
+            // Apply KSP (Required for modern Room processing)
             pluginManager.apply("com.google.devtools.ksp")
 
-            // 2. Configure Dependencies
+            // Room dependencies from the Version Catalog
             dependencies {
+                // Room runtime and KTX extensions
                 add("implementation", libs.findLibrary("room.runtime").get())
                 add("implementation", libs.findLibrary("room.ktx").get())
+                // Use KSP for Room's compiler instead of Kapt
                 add("ksp", libs.findLibrary("room.compiler").get())
             }
 
-            // 3. Configure Schema Location (For exporting DB schemas)
-            // This is critical for database migrations
+            // Configure Room schema location for migrations
             extensions.configure<LibraryExtension> {
-                // We assume this plugin is only applied to Libraries (:core:data, :database, etc.)
-                // If you use it in an App module, check for ApplicationExtension too.
-
                 defaultConfig {
-                    // Export schemas to 'schemas' folder in the module
+                    // Export schemas to the 'schemas' folder within the module.
+                    // This allows for database migration tracking via VCS.
                     javaCompileOptions {
                         annotationProcessorOptions {
                             arguments["room.schemaLocation"] = "$projectDir/schemas"
                         }
                     }
                 }
+            }
+
+            // Configure KSP to export Room schemas
+            extensions.configure<KspExtension> {
+                // Ensure KSP also knows where to export schemas
+                arg("room.schemaLocation", projectDir.path + "/schemas")
             }
         }
     }

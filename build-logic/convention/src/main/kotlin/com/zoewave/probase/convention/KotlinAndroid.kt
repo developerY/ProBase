@@ -8,49 +8,47 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
- * 1. Base Android & Kotlin Configuration
- * Applied to BOTH Libraries and Applications.
+ * Shared configuration logic for both Android Library and Application modules.
+ * Sets the compile and min SDKs, Java toolchain versions, and Kotlin compiler options.
  */
 internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension,
 ) {
-    // 1. Compile SDK (Direct Property Access)
+    // Compile and Min SDK versions from the Version Catalog
     commonExtension.compileSdk = libs.findVersion("android-compileSdk").get().toString().toInt()
-
-    // 2. Min SDK (Direct Property Access on defaultConfig)
     commonExtension.defaultConfig.minSdk = libs.findVersion("android-minSdk").get().toString().toInt()
 
-    // 3. Java 21 Toolchain (Direct Property Access on compileOptions)
+    // Align source and target compatibility with Java 21
     commonExtension.compileOptions.sourceCompatibility = JavaVersion.VERSION_21
     commonExtension.compileOptions.targetCompatibility = JavaVersion.VERSION_21
 
-    // 4. Align Kotlin compiler with JVM 21
+    // Align Kotlin compiler tasks with the JVM 21 target
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
     }
 }
 
 /**
- * 2. Build Type Configuration
- * Separated so we can toggle minification based on the module type.
+ * Shared configuration for build types across Android modules.
+ * Toggles minification for release and debug builds.
  */
 internal fun Project.configureBuildTypes(
     commonExtension: CommonExtension,
 ) {
-    // 1. Configure Release (Get object -> Set properties)
     val release = commonExtension.buildTypes.getByName("release")
 
-    // Use providers.gradleProperty for safe caching support
+    // Use a project property to toggle minification for release builds safely
     release.isMinifyEnabled = providers.gradleProperty("isMinifyForRelease")
         .getOrElse("false")
         .toBoolean()
 
+    // ProGuard optimization rules for release builds
     release.proguardFiles(
         commonExtension.getDefaultProguardFile("proguard-android-optimize.txt"),
         "proguard-rules.pro"
     )
 
-    // 2. Configure Debug (Get object -> Set properties)
+    // Ensure minification is disabled for debug builds
     val debug = commonExtension.buildTypes.getByName("debug")
     debug.isMinifyEnabled = false
 }

@@ -7,23 +7,25 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.kotlin
 
+/**
+ * A convention plugin for Android Library modules.
+ * Applies the 'com.android.library' plugin and configures shared logic for SDKs, Kotlin, and Test Runners.
+ */
 class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            with(pluginManager) {
-                apply("com.android.library")
-            }
+            // Apply the base Android Library plugin
+            pluginManager.apply("com.android.library")
 
             extensions.configure<LibraryExtension> {
+                // Shared base logic for SDKs, Java 21, and Kotlin
                 configureKotlinAndroid(this)
 
-                // 1. Test Runner (Standard for Android Libraries)
+                // Standard Android library test runner configuration
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                 testOptions.animationsDisabled = true
 
-                // 2. Resource Prefixing (The Google Trick)
-                // Forces resources to follow a naming convention (e.g. features_feed_ic_icon.xml)
-                // to prevent collisions when modules are merged.
+                // Resource prefixing to prevent collisions when library modules are merged
                 resourcePrefix = path.split("""\W""".toRegex())
                     .drop(1)
                     .distinct()
@@ -32,7 +34,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             }
 
             dependencies {
-                // Standard Testing Dependencies
+                // Standard Kotlin testing dependencies
                 add("testImplementation", kotlin("test"))
                 add("androidTestImplementation", kotlin("test"))
             }
