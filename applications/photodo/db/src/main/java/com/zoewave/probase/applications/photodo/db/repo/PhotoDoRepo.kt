@@ -10,44 +10,47 @@ import com.zoewave.probase.applications.photodo.db.entity.ProjectWithPhotos
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Repository for the PhotoDo application.
+ * Manages data access for categories, projects, photos, tasks, and expenses.
+ */
 interface PhotoDoRepo {
 
     // --- Category Operations ---
-    suspend fun insertCategory(category: CategoryEntity): Long
+    suspend fun upsertCategory(category: CategoryEntity): Long
     suspend fun deleteCategory(category: CategoryEntity)
     fun getAllCategories(): Flow<List<CategoryEntity>>
     fun getCategoryById(categoryId: Long): Flow<CategoryEntity?>
     suspend fun updateCategory(category: CategoryEntity)
     fun getCategoriesWithProjects(): Flow<List<CategoryWithProjects>>
-
-    // Add this under your Category Operations
     suspend fun getOrCreateCategoryByName(name: String): Long
 
     // --- Project Operations ---
-    suspend fun insertProject(project: ProjectEntity): Long
+    suspend fun upsertProject(project: ProjectEntity): Long
     suspend fun deleteProject(project: ProjectEntity)
     suspend fun deleteProjectById(projectId: Long)
     fun getProjectById(projectId: Long): Flow<ProjectEntity?>
+    fun getAllProjects(): Flow<List<ProjectEntity>>
     fun getProjectsForCategory(categoryId: Long): Flow<List<ProjectEntity>>
-
     suspend fun updateProject(project: ProjectEntity)
-
     suspend fun updateProjectUrgency(projectId: Long, isUrgent: Boolean)
     suspend fun updateProjectFavorite(projectId: Long, isFavorite: Boolean)
+    fun searchProjects(searchQuery: String): Flow<List<ProjectEntity>>
 
     // --- Task Operations (Checklist) ---
-    suspend fun insertTask(task: TaskEntity)
+    suspend fun upsertTask(task: TaskEntity): Long
     suspend fun updateTask(task: TaskEntity)
     suspend fun deleteTask(task: TaskEntity)
     fun getTasksForProject(projectId: Long): Flow<List<TaskEntity>>
 
     // --- Photo Operations ---
-    suspend fun insertPhoto(photo: PhotoEntity)
+    suspend fun upsertPhoto(photo: PhotoEntity): Long
     suspend fun deletePhoto(photo: PhotoEntity)
     fun getPhotosForProject(projectId: Long): Flow<List<PhotoEntity>>
+    fun getAllPhotos(): Flow<List<PhotoEntity>>
 
     // --- Expense Operations ---
-    suspend fun insertExpense(expense: ExpenseEntity)
+    suspend fun upsertExpense(expense: ExpenseEntity): Long
     suspend fun deleteExpense(expense: ExpenseEntity)
     suspend fun updateExpense(expense: ExpenseEntity)
     fun getExpensesForProject(projectId: Long): Flow<List<ExpenseEntity>>
@@ -55,5 +58,8 @@ interface PhotoDoRepo {
     // --- Relational Operations ---
     fun getProjectWithPhotos(projectId: Long): Flow<ProjectWithPhotos?>
     fun getProjectDetails(projectId: Long): Flow<ProjectDetails?>
+    fun getAllProjectDetails(): Flow<List<ProjectDetails>>
+
+    // --- Global Operations ---
     suspend fun clearAllData()
 }

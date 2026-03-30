@@ -71,7 +71,7 @@ class TaskDetailViewModel @Inject constructor(
             is TaskDetailEvent.OnPhotoSaved -> {
                 viewModelScope.launch {
                     try {
-                        photoDoRepo.insertPhoto(
+                        photoDoRepo.upsertPhoto(
                             PhotoEntity(
                                 photoUri = event.uri.toString(),
                                 projectId = currentId
@@ -97,7 +97,7 @@ class TaskDetailViewModel @Inject constructor(
             // --- TASK ITEMS ---
             is TaskDetailEvent.OnAddItemClicked -> {
                 viewModelScope.launch {
-                    photoDoRepo.insertTask(
+                    photoDoRepo.upsertTask(
                         TaskEntity(projectId = currentId, text = event.text, isChecked = false)
                     )
                 }
@@ -137,7 +137,7 @@ class TaskDetailViewModel @Inject constructor(
             is TaskDetailEvent.OnAddExpenseClicked -> {
                 viewModelScope.launch {
                     // 1. Save the receipt/expense record
-                    photoDoRepo.insertExpense(
+                    photoDoRepo.upsertExpense(
                         ExpenseEntity(
                             projectId = currentId,
                             description = event.description,

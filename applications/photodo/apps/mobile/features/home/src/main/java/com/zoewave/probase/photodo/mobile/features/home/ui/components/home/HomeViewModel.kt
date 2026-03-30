@@ -119,8 +119,8 @@ class HomeViewModel @Inject constructor(
                             name = event.name,
                             description = event.description ?: "Created from Dashboard"
                         )
-                        // Assuming you have an insertCategory function in your Repo!
-                        photoDoRepo.insertCategory(newCategory)
+                        // Updated to use the modern upsert API from the repository
+                        photoDoRepo.upsertCategory(newCategory)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error saving new category", e)
                     }
@@ -137,7 +137,7 @@ class HomeViewModel @Inject constructor(
                             projectBudget = event.template.defaultBudget,
                             notes = "Created from ${event.template.title} template"
                         )
-                        photoDoRepo.insertProject(newProject)
+                        photoDoRepo.upsertProject(newProject)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error creating project from template", e)
                     }

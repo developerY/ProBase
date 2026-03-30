@@ -1,9 +1,22 @@
 package com.zoewave.probase.applications.photodo.db.entity
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "expenses")
+@Entity(
+    tableName = "expenses",
+    foreignKeys = [
+        ForeignKey(
+            entity = ProjectEntity::class,
+            parentColumns = ["projectId"],
+            childColumns = ["projectId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index(value = ["projectId"])]
+)
 data class ExpenseEntity(
     @PrimaryKey(autoGenerate = true)
     val expenseId: Long = 0,

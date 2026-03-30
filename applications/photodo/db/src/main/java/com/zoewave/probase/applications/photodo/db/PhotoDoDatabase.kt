@@ -19,7 +19,7 @@ import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
         ExpenseEntity::class
     ],
     version = 1,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(PhotoDoConverters::class)
 abstract class PhotoDoDB : RoomDatabase() {
