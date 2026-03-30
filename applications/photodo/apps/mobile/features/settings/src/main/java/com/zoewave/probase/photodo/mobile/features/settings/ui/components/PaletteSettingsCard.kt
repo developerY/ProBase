@@ -57,6 +57,7 @@ fun PaletteSettingsCard(
                     text = when(currentPalette) {
                         "CORAL_REEF" -> "Coral Reef"
                         "FOREST" -> "Deep Forest"
+                        "EXPRESSIVE" -> "Your Wallpaper"
                         else -> "Default"
                     },
                     style = MaterialTheme.typography.bodyMedium,
@@ -112,7 +113,7 @@ fun PaletteSettingsCard(
                     }
 
 
-                    // Inside the expanded Column block, right below the Coral Reef row, add the Forest Row:
+                    // Option 3: Deep Forest
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -129,6 +130,27 @@ fun PaletteSettingsCard(
                         )
                         Text(
                             text = "Deep Forest",
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+
+                    // Option 4: Expressive (Dynamic Wallpaper)
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = (currentPalette == "EXPRESSIVE"),
+                                onClick = { onPaletteSelected("EXPRESSIVE") }
+                            )
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (currentPalette == "EXPRESSIVE"),
+                            onClick = null
+                        )
+                        Text(
+                            text = "Material 3 Expressive (Wallpaper)",
                             modifier = Modifier.padding(start = 16.dp)
                         )
                     }
