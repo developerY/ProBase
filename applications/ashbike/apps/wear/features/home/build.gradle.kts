@@ -3,9 +3,7 @@ plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.library.compose")
     id("composetemplate.android.hilt")
-
-    // ✅ Required for Type-Safe Navigation & Nav3
-    alias(libs.plugins.jetbrains.kotlin.serialization)
+    id("composetemplate.kotlin.serialization")
 }
 
 android {
@@ -29,9 +27,6 @@ dependencies {
     implementation(project(":applications:ashbike:data"))
     implementation(project(":applications:ashbike:features:main"))
     implementation(project(":applications:ashbike:features:places"))
-
-    // --- Serialization ---
-    implementation(libs.kotlinx.serialization.json)
 
     // --- Navigation 3 (Strict) ---
     // ✅ UI is removed since the App module handles the display engine

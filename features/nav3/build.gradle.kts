@@ -2,7 +2,7 @@ plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.library.compose")
     // From your TOML: [plugins] jetbrains-kotlin-serialization
-    alias(libs.plugins.jetbrains.kotlin.serialization)
+    id("composetemplate.kotlin.serialization")
     // ✅ ADD THIS: Enables Hilt & KSP for this module
     id("composetemplate.android.hilt")
 }

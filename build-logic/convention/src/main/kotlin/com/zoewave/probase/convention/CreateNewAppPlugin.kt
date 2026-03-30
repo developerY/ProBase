@@ -51,7 +51,7 @@ class CreateNewAppPlugin : Plugin<Project> {
                 updateContent(targetDir, finalAppId, finalAppName)
 
                 printStep("Restructuring directory hierarchy...")
-                refactorDirectories(targetDir, "com.ytapps.composetemplate", finalAppId)
+                refactorDirectories(targetDir, "com.zoewave.probase", finalAppId)
 
                 printStep("Removing setup logic and fixing formatting...")
                 cleanupNewProject(targetDir)
@@ -68,8 +68,8 @@ class CreateNewAppPlugin : Plugin<Project> {
     }
 
     private fun updateContent(targetDir: File, appId: String, appName: String) {
-        val oldPackage = "com.ytapps.composetemplate"
-        val oldPrefix = "composetemplate"
+        val oldPackage = "com.zoewave.probase"
+        val oldPrefix = "probase"
         val newPrefix = appId.substringAfterLast(".")
 
         targetDir.walkTopDown().forEach { file ->
@@ -77,7 +77,7 @@ class CreateNewAppPlugin : Plugin<Project> {
                 val content = file.readText()
                 val updated = content
                     .replace(oldPackage, appId)
-                    .replace("ComposeTemplate", appName)
+                    .replace("ProBase", appName)
                     .replace("$oldPrefix.", "$newPrefix.")
 
                 if (content != updated) file.writeText(updated)
@@ -99,7 +99,7 @@ class CreateNewAppPlugin : Plugin<Project> {
                 val newFolder = File(root, newPath).apply { mkdirs() }
                 oldFolder.copyRecursively(newFolder, overwrite = true)
                 oldFolder.deleteRecursively()
-                File(root, "com/ytapps".replace("/", File.separator)).deleteRecursively()
+                File(root, "com/zoewave".replace("/", File.separator)).deleteRecursively()
             }
         }
     }

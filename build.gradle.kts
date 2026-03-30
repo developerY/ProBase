@@ -17,6 +17,10 @@ plugins {
     alias(libs.plugins.google.firebase.crashlytics) apply false
     alias(libs.plugins.mapsplatform.secrets) apply false
 
+    // 6. Serialization
+    // ❌ REMOVED: Kotlin Serialization (Causes AGP 9 conflicts when applied at root)
+    // alias(libs.plugins.jetbrains.kotlin.serialization) apply false
+
     // ⚠️ REMOVED: alias(libs.plugins.jetbrains.kotlin.android)
     // AGP 9 will handle the Kotlin interaction in the modules directly.
     // Do NOT apply serialization here either if it causes similar conflicts.

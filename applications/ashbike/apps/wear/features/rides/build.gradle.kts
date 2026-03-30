@@ -5,7 +5,7 @@ plugins {
     id("composetemplate.android.hilt")
 
     // ✅ Required for Type-Safe Navigation & Nav3
-    alias(libs.plugins.jetbrains.kotlin.serialization)
+    id("composetemplate.kotlin.serialization")
 }
 
 android {

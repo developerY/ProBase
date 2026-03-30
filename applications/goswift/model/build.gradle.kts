@@ -1,6 +1,6 @@
 plugins {
     id("composetemplate.android.library")
-    alias(libs.plugins.jetbrains.kotlin.serialization)
+    id("composetemplate.kotlin.serialization")
 }
 
 android {
