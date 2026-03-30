@@ -4,9 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -16,17 +17,37 @@ class TransactionsViewModel @Inject constructor(
     private val repository: TransactionRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<TransactionsUiState> = repository.getAllTransactions()
-        .map { transactions ->
-            TransactionsUiState.Success(
-                transactions = transactions
-            )
+    private val _selectedCategory = MutableStateFlow<String?>(null)
+    private var isInitialized = false
+
+    fun setInitialCategory(category: String?) {
+        if (!isInitialized && category != null) {
+            _selectedCategory.value = category
+            isInitialized = true
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = TransactionsUiState.Loading
+    }
+
+    val uiState: StateFlow<TransactionsUiState> = combine(
+        repository.getAllTransactions(),
+        _selectedCategory
+    ) { transactions, selectedCategory ->
+        val categories = transactions.map { it.category }.distinct().sorted()
+        val filteredTransactions = if (selectedCategory == null) {
+            transactions
+        } else {
+            transactions.filter { it.category == selectedCategory }
+        }
+        TransactionsUiState.Success(
+            transactions = transactions,
+            filteredTransactions = filteredTransactions,
+            categories = categories,
+            selectedCategory = selectedCategory
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = TransactionsUiState.Loading
+    )
 
     fun onEvent(event: TransactionsUiEvent) {
         when (event) {
@@ -34,6 +55,9 @@ class TransactionsViewModel @Inject constructor(
                 viewModelScope.launch {
                     repository.deleteTransaction(event.id)
                 }
+            }
+            is TransactionsUiEvent.SelectCategory -> {
+                _selectedCategory.value = event.category
             }
         }
     }

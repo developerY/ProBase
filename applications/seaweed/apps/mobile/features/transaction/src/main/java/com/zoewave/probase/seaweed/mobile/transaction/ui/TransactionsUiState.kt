@@ -5,10 +5,14 @@ import com.zoewave.probase.seaweed.model.Transaction
 sealed interface TransactionsUiState {
     object Loading : TransactionsUiState
     data class Success(
-        val transactions: List<Transaction> = emptyList()
+        val transactions: List<Transaction> = emptyList(),
+        val filteredTransactions: List<Transaction> = emptyList(),
+        val categories: List<String> = emptyList(),
+        val selectedCategory: String? = null
     ) : TransactionsUiState
 }
 
 sealed interface TransactionsUiEvent {
     data class DeleteTransaction(val id: String) : TransactionsUiEvent
+    data class SelectCategory(val category: String?) : TransactionsUiEvent
 }

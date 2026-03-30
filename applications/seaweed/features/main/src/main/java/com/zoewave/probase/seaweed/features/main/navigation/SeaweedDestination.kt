@@ -7,7 +7,9 @@ sealed class SeaweedDestination {
     @Serializable
     data object Home : SeaweedDestination()
     @Serializable
-    data object Transactions : SeaweedDestination()
+    data object CategoryGrid : SeaweedDestination()
+    @Serializable
+    data class Transactions(val category: String? = null) : SeaweedDestination()
     @Serializable
     data object AddTransaction : SeaweedDestination()
     @Serializable
