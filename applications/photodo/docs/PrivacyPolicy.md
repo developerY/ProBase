@@ -1,13 +1,3 @@
-Getting your app ready for the Google Play Store is a huge milestone!
-
-Google requires every app to have a publicly accessible Privacy Policy URL, especially if your app requests sensitive permissions like the **Camera**.
-
-Because we built PhotoDo with a local Room database, your privacy policy gets to be incredibly simple and user-friendly: **you don't collect or sell any of their data.** Everything lives safely on their own device.
-
-Here is a clean, release-ready Privacy Policy template tailored exactly to the architecture and features we built for PhotoDo.
-
-***
-
 # Privacy Policy for PhotoDo
 
 **Effective Date:** [Insert Date, e.g., March 29, 2026]
@@ -60,12 +50,3 @@ We may update our Privacy Policy from time to time. Thus, you are advised to rev
 
 ### 7. Contact Us
 If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at **[Your Contact Email Address]**.
-
-***
-
-### 🚀 Crucial Next Step for the Play Console:
-
-Google Play Console will not let you just paste this text into a box; **you have to provide a live URL link to this policy.**
-
-Since you need to host this online, what is your preferred method?
-**Would you like a quick guide on how to host this for free in about 5 minutes using Google Sites or GitHub Pages, or are you going to drop it onto an existing website you own?**
