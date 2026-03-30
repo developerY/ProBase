@@ -10,8 +10,6 @@ dependencies {
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.compose.compiler.gradlePlugin)
 
-    // ✅ ADD THESE TWO LINES
-    // This makes the KSP and Hilt plugins available to your convention plugins
     implementation(libs.ksp.gradlePlugin)
     implementation(libs.hilt.gradlePlugin)
 }
@@ -45,6 +43,10 @@ gradlePlugin {
         register("androidHilt") {
             id = "composetemplate.android.hilt"
             implementationClass = "com.zoewave.probase.convention.AndroidHiltConventionPlugin"
+        }
+        register("kotlinSerialization") {
+            id = "composetemplate.kotlin.serialization"
+            implementationClass = "com.zoewave.probase.convention.KotlinSerializationConventionPlugin"
         }
         register("test") {
             id = "composetemplate.test"

@@ -5,32 +5,33 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 
+/**
+ * A convention plugin for Android Application modules.
+ * Applies the 'com.android.application' plugin and configures shared logic for SDKs, Kotlin, and Build Types.
+ */
 class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            // 1. Apply the Base Android Plugin
+            // Apply the base Android Application plugin
             pluginManager.apply("com.android.application")
 
-            // 2. Configure the Application Extension
             extensions.configure<ApplicationExtension> {
-                // Apply Shared Base Logic (SDKs, Java 21, Kotlin)
+                // Shared base logic for SDKs, Java 21, and Kotlin
                 configureKotlinAndroid(this)
 
-                // Apply Shared Build Types (ProGuard, Minification)
+                // Shared build types configuration (ProGuard, Minification)
                 configureBuildTypes(this)
 
-                // 3. Application-Specific Configuration
-                // Target SDK is an App-only property (Libraries don't typically set this)
+                // Target SDK is an application-only property
                 defaultConfig.targetSdk = libs.findVersion("android-targetSdk").get().toString().toInt()
 
-                // 4. App-Specific Build Type Settings
-                // 'isShrinkResources' is NOT in CommonExtension, so we set it here.
+                // Application-specific build type settings
                 val release = buildTypes.getByName("release")
                 release.isShrinkResources = providers.gradleProperty("isShrinkResources")
                     .getOrElse("false")
                     .toBoolean()
 
-                // 5. Packaging Options
+                // Standard packaging exclusions for clean release builds
                 packaging.resources.excludes.add("/META-INF/{AL2.0,LGPL2.1}")
             }
         }
