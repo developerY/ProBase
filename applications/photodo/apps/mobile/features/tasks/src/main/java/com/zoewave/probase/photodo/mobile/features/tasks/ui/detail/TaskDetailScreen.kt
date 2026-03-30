@@ -91,6 +91,9 @@ fun TaskDetailScreen(
     var newExpenseAmount by rememberSaveable { mutableStateOf("") }
     var newExpenseDesc by rememberSaveable { mutableStateOf("") }
 
+    // 🚀 Confirmation Dialog States
+    var showDeleteProjectConfirmation by rememberSaveable { mutableStateOf(false) }
+
     val context = LocalContext.current
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -127,7 +130,7 @@ fun TaskDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onEvent(TaskDetailEvent.OnDeleteTaskListClicked) }) {
+                    IconButton(onClick = { showDeleteProjectConfirmation = true }) {
                         Icon(Icons.Default.DeleteForever, contentDescription = "Delete Project")
                     }
                 }
@@ -430,6 +433,29 @@ fun TaskDetailScreen(
                     newExpenseDesc = ""
                     showAddExpenseDialog = false
                 }) { Text("Cancel") }
+            }
+        )
+    }
+
+    if (showDeleteProjectConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteProjectConfirmation = false },
+            title = { Text("Delete Project?") },
+            text = { Text("Are you sure you want to delete this project and all its tasks, photos, and expenses?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteProjectConfirmation = false
+                        onEvent(TaskDetailEvent.OnDeleteTaskListClicked)
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteProjectConfirmation = false }) {
+                    Text("Cancel")
+                }
             }
         )
     }
