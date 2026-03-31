@@ -1,7 +1,7 @@
 package com.zoewave.probase.goswift.database
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 import com.zoewave.probase.goswift.model.CaffeineShot
 
 @Entity(tableName = "shots")

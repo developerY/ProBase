@@ -1,7 +1,7 @@
 package com.zoewave.probase.ashbike.database
 
-import androidx.room.Embedded
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Relation
 
 data class RideWithLocations(
     @Embedded val bikeRideEnt: BikeRideEntity,

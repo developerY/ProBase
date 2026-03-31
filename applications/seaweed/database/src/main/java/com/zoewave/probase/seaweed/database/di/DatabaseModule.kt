@@ -1,9 +1,10 @@
 package com.zoewave.probase.seaweed.database.di
 
 import android.content.Context
-import androidx.room.Room
+import androidx.room3.Room
 import com.zoewave.probase.seaweed.database.SeaweedDatabase
 import com.zoewave.probase.seaweed.database.TransactionDao
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,6 +20,7 @@ object DatabaseModule {
     @Singleton
     fun provideSeaweedDatabase(@ApplicationContext ctx: Context): SeaweedDatabase =
         Room.databaseBuilder(ctx, SeaweedDatabase::class.java, SeaweedDatabase.DATABASE_NAME)
+            .setDriver(BundledSQLiteDriver())
             .fallbackToDestructiveMigration()
             .build()
 

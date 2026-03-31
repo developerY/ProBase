@@ -19,9 +19,10 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
 
             // Room dependencies from the Version Catalog
             dependencies {
-                // Room runtime and KTX extensions
+                // Room runtime (KTX extensions are now merged into runtime in Room 3)
                 add("implementation", libs.findLibrary("room.runtime").get())
-                add("implementation", libs.findLibrary("room.ktx").get())
+                // Bundled SQLite driver for Room 3
+                add("implementation", libs.findLibrary("sqlite.bundled").get())
                 // Use KSP for Room's compiler instead of Kapt
                 add("ksp", libs.findLibrary("room.compiler").get())
             }

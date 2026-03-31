@@ -2,7 +2,7 @@ package com.zoewave.probase.ashbike.database.converter
 
 import android.net.Uri
 import androidx.core.net.toUri
-import androidx.room.TypeConverter
+import androidx.room3.TypeConverter
 
 //import kotlinx.datetime.LocalDateTime
 

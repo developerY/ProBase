@@ -1,9 +1,10 @@
 package com.zoewave.probase.applications.photodo.db.di
 
 import android.content.Context
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.zoewave.probase.applications.photodo.db.PhotoDoDB
 import com.zoewave.probase.applications.photodo.db.PhotoDoDao
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
@@ -37,6 +38,7 @@ object DatabaseModule {
             PhotoDoDB::class.java,
             "photodo_database"
         )
+            .setDriver(BundledSQLiteDriver())
             // Drops only Room's tables when the schema changes during development.
             .fallbackToDestructiveMigration(false) // Handles schema changes during dev
             .addCallback(callback)
@@ -65,8 +67,8 @@ class PhotoDoDatabaseCallback @Inject constructor(
     // Create a dedicated scope for database prepopulation
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    override fun onCreate(db: SupportSQLiteDatabase) {
-        super.onCreate(db)
+    override suspend fun onCreate(connection: SQLiteConnection) {
+        super.onCreate(connection)
 
         // Fire off a background coroutine so the UI doesn't stutter on first launch
         applicationScope.launch {
