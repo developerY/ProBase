@@ -52,7 +52,9 @@ sealed class PhotoTodoRoute(
     // --- TAB 3 ---
     data object Settings : PhotoTodoRoute(titleRes = R.string.applications_photodo_model_route_settings, icon = Icons.Default.Settings)
 
-    data class Camera(val projectId: Long) : PhotoTodoRoute(titleRes = R.string.applications_photodo_model_route_camera, icon = Icons.Default.CameraAlt)
+    data class Camera(val projectId: Long? = null) : PhotoTodoRoute(titleRes = R.string.applications_photodo_model_route_camera, icon = Icons.Default.CameraAlt)
+
+    data class SavePhoto(val photoUri: String) : PhotoTodoRoute(icon = Icons.Default.CameraAlt)
 }
 
 // Your Bottom Bar uses this, so it naturally ignores TaskDetail. Perfect!

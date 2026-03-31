@@ -8,19 +8,21 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.Settings
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TaskDetail
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TasksList
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiRoute
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.SavePhotoViewModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksViewModel
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.SavePhotoBottomSheet
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.TasksListScreen
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailScreen
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailViewModel
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.Settings
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TaskDetail
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TasksList
 
 fun photoTodoNavEntryProvider(
     key: PhotoTodoRoute,
@@ -109,12 +111,40 @@ fun photoTodoNavEntryProvider(
                         if (routeString.startsWith("result_ok:")) {
                             val uriString = routeString.removePrefix("result_ok:")
                             Log.d("CameraDebug", "G. Host App extracted URI, executing save UseCase...")
-                            resultHandler.execute(projectId = key.projectId, uri = uriString)
+                            val projectId = key.projectId
+                            if (projectId != null) {
+                                resultHandler.execute(projectId = projectId, uri = uriString)
+                                navigateBack()
+                            } else {
+                                navigateTo(PhotoTodoRoute.SavePhoto(uriString))
+                            }
+                        } else {
+                            navigateBack()
                         }
-
-                        navigateBack()
                     },
                     modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            is PhotoTodoRoute.SavePhoto -> {
+                val viewModel: SavePhotoViewModel = hiltViewModel()
+                LaunchedEffect(key.photoUri) {
+                    viewModel.setPhotoUri(key.photoUri)
+                }
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+                if (uiState.isSaved) {
+                    LaunchedEffect(Unit) {
+                        navigateBack()
+                    }
+                }
+
+                SavePhotoBottomSheet(
+                    uiState = uiState,
+                    onCategorySelected = viewModel::selectCategory,
+                    onProjectSelected = viewModel::selectProject,
+                    onSaveClicked = viewModel::savePhoto,
+                    onDismiss = navigateBack
                 )
             }
 
