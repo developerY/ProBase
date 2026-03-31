@@ -36,9 +36,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.analytics
 import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
 import com.zoewave.ashbike.mobile.settings.ui.SettingsViewModel
-import com.zoewave.probase.ashbike.mobile.R
 import com.zoewave.probase.ashbike.mobile.ui.components.AshBikeMainScreen
 import com.zoewave.probase.core.ui.theme.AshBikeTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -74,6 +75,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val firebaseAnalytics = Firebase.analytics
+        // Tags all future events from this user's phone
+        firebaseAnalytics.setUserProperty("device_platform", "mobile")
 
         // Initial permission check trigger
         if (savedInstanceState == null) {

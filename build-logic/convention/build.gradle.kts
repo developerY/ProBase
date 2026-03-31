@@ -12,6 +12,8 @@ dependencies {
 
     implementation(libs.hilt.gradlePlugin)
     implementation(libs.kotlin.serialization.gradlePlugin)
+    implementation(libs.google.services.gradlePlugin)
+    implementation(libs.firebase.crashlytics.gradlePlugin)
 }
 
 gradlePlugin {
@@ -55,6 +57,10 @@ gradlePlugin {
         register("feature") {
             id = "composetemplate.feature"
             implementationClass = "com.zoewave.probase.convention.FeatureConventionPlugin"
+        }
+        register("androidApplicationFirebase") {
+            id = "composetemplate.android.application.firebase"
+            implementationClass = "com.zoewave.probase.convention.AndroidApplicationFirebaseConventionPlugin"
         }
     }
 }
