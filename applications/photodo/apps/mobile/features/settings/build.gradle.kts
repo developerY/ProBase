@@ -12,9 +12,18 @@ plugins {
 android {
     // Unique namespace for the PhotoTodo Home Feature
     namespace = "com.zoewave.probase.photodo.mobile.features.settings"
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
+    // --- Firebase & Google Services ---
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.installations)
+    implementation(libs.kotlinx.coroutines.play.services)
+
     // --- Shared Core Projects ---
     // implementation(project(":core:model"))
     // implementation(project(":core:ui"))

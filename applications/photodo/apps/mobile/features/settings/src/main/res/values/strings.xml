@@ -18,4 +18,15 @@
     <string name="applications_photodo_apps_mobile_features_settings_collapse_content_description">Collapse</string>
     <string name="applications_photodo_apps_mobile_features_settings_expand_content_description">Expand</string>
     <string name="applications_photodo_apps_mobile_features_settings_theme_current_format">Current: %1$s</string>
+
+    <!-- About Section -->
+    <string name="applications_photodo_apps_mobile_features_settings_about_title">About</string>
+    <string name="applications_photodo_apps_mobile_features_settings_about_version_label">Version</string>
+    <string name="applications_photodo_apps_mobile_features_settings_about_firebase_id_label">Firebase Device ID</string>
+    <string name="applications_photodo_apps_mobile_features_settings_about_firebase_id_description">This ID is used to identify your device for analytics data deletion requests.</string>
+    <string name="applications_photodo_apps_mobile_features_settings_about_legal_title">Legal</string>
+    <string name="applications_photodo_apps_mobile_features_settings_about_privacy_policy">Privacy Policy</string>
+    <string name="applications_photodo_apps_mobile_features_settings_about_eula">EULA</string>
+    <string name="applications_photodo_apps_mobile_features_settings_about_copy_id">Copy ID</string>
+    <string name="applications_photodo_apps_mobile_features_settings_about_id_copied">ID copied to clipboard</string>
 </resources>
