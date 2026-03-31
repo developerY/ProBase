@@ -147,16 +147,17 @@ fun SavePhotoBottomSheet(
                 }
 
                 Button(
-                    onClick = onSaveClicked,
-                    enabled = (uiState.selectedProjectId != null || uiState.newProjectName.isNotBlank()) && !uiState.isSaving,
+                    onClick = if (uiState.isSaved) onDismiss else onSaveClicked,
+                    enabled = (uiState.isSaved || uiState.selectedProjectId != null || uiState.newProjectName.isNotBlank()) && !uiState.isSaving,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp)
+                        .padding(top = 16.dp),
+                    colors = if (uiState.isSaved) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary) else ButtonDefaults.buttonColors()
                 ) {
                     if (uiState.isSaving) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
                     } else {
-                        Text("Save Photo")
+                        Text(if (uiState.isSaved) "Saved! Close" else "Save Photo")
                     }
                 }
             }

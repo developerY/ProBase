@@ -63,7 +63,16 @@ class SavePhotoViewModel @Inject constructor(
     )
 
     fun setPhotoUri(uri: String) {
+        if (_photoUri.value == uri) return // No-op if it's already set
+        
         _photoUri.value = uri
+        // Reset all selection and success flags for the new photo
+        _selectedCategoryId.value = null
+        _selectedProjectId.value = null
+        _isSaving.value = false
+        _isSaved.value = false
+        _newCategoryName.value = ""
+        _newProjectName.value = ""
     }
 
     fun selectCategory(categoryId: Long) {
@@ -73,18 +82,22 @@ class SavePhotoViewModel @Inject constructor(
             _selectedCategoryId.value = categoryId
         }
         _selectedProjectId.value = null
+        _isSaved.value = false // Reset saved status if they change destination
     }
 
     fun selectProject(projectId: Long) {
         _selectedProjectId.value = projectId
+        _isSaved.value = false // Reset saved status if they change destination
     }
 
     fun setNewCategoryName(name: String) {
         _newCategoryName.value = name
+        _isSaved.value = false
     }
 
     fun setNewProjectName(name: String) {
         _newProjectName.value = name
+        _isSaved.value = false
     }
 
     fun createAndSelectCategory() {
@@ -133,6 +146,12 @@ class SavePhotoViewModel @Inject constructor(
                 addPhotoToTask(projectId, uri)
                 _isSaving.value = false
                 _isSaved.value = true
+                
+                // Clear selections after save to follow user suggestion and prevent prefilled state
+                _selectedCategoryId.value = null
+                _selectedProjectId.value = null
+                _newCategoryName.value = ""
+                _newProjectName.value = ""
             } else {
                 _isSaving.value = false
             }

@@ -133,12 +133,6 @@ fun photoTodoNavEntryProvider(
                 }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-                if (uiState.isSaved) {
-                    LaunchedEffect(Unit) {
-                        navigateBack()
-                    }
-                }
-
                 SavePhotoBottomSheet(
                     uiState = uiState,
                     onCategorySelected = viewModel::selectCategory,
