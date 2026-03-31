@@ -143,6 +143,10 @@ fun photoTodoNavEntryProvider(
                     uiState = uiState,
                     onCategorySelected = viewModel::selectCategory,
                     onProjectSelected = viewModel::selectProject,
+                    onNewCategoryNameChanged = viewModel::setNewCategoryName,
+                    onNewProjectNameChanged = viewModel::setNewProjectName,
+                    onAddCategoryClicked = viewModel::createAndSelectCategory,
+                    onAddProjectClicked = viewModel::createAndSelectProject,
                     onSaveClicked = viewModel::savePhoto,
                     onDismiss = navigateBack
                 )

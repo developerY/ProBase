@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.List
@@ -21,6 +22,10 @@ fun SavePhotoBottomSheet(
     uiState: SavePhotoUiState,
     onCategorySelected: (Long) -> Unit,
     onProjectSelected: (Long) -> Unit,
+    onNewCategoryNameChanged: (String) -> Unit,
+    onNewProjectNameChanged: (String) -> Unit,
+    onAddCategoryClicked: () -> Unit,
+    onAddProjectClicked: () -> Unit,
     onSaveClicked: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
@@ -44,9 +49,30 @@ fun SavePhotoBottomSheet(
             )
 
             if (uiState.selectedCategoryId == null) {
-                // Show Categories
+                // Show Category Selection
                 Text(text = "Select Category", style = MaterialTheme.typography.titleMedium)
-                LazyColumn {
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = uiState.newCategoryName,
+                        onValueChange = onNewCategoryNameChanged,
+                        label = { Text("Add Category") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                    IconButton(
+                        onClick = onAddCategoryClicked,
+                        enabled = uiState.newCategoryName.isNotBlank()
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Add Category")
+                    }
+                }
+
+                LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
                     items(uiState.categories) { category ->
                         ListItem(
                             headlineContent = { Text(category.name) },
@@ -56,9 +82,9 @@ fun SavePhotoBottomSheet(
                     }
                 }
             } else {
-                // Show Projects
+                // Show Project Selection
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(onClick = { /* Could implement back to categories if needed */ }) {
+                    TextButton(onClick = { onCategorySelected(-1L) /* Use a marker to go back */ }) {
                         Text("Categories")
                     }
                     Text(">")
@@ -73,6 +99,26 @@ fun SavePhotoBottomSheet(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = uiState.newProjectName,
+                        onValueChange = onNewProjectNameChanged,
+                        label = { Text("Add Project") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                    IconButton(
+                        onClick = onAddProjectClicked,
+                        enabled = uiState.newProjectName.isNotBlank()
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Add Project")
+                    }
+                }
 
                 LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
                     items(uiState.projects) { project ->

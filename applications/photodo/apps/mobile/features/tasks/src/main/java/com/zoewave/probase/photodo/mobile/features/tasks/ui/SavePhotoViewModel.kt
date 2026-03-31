@@ -28,6 +28,8 @@ class SavePhotoViewModel @Inject constructor(
     private val _selectedProjectId = MutableStateFlow<Long?>(null)
     private val _isSaving = MutableStateFlow(false)
     private val _isSaved = MutableStateFlow(false)
+    private val _newCategoryName = MutableStateFlow("")
+    private val _newProjectName = MutableStateFlow("")
 
     val uiState: StateFlow<SavePhotoUiState> = combine(
         _photoUri,
@@ -39,7 +41,9 @@ class SavePhotoViewModel @Inject constructor(
         _selectedCategoryId,
         _selectedProjectId,
         _isSaving,
-        _isSaved
+        _isSaved,
+        _newCategoryName,
+        _newProjectName
     ) { args: Array<Any?> ->
         SavePhotoUiState(
             photoUri = args[0] as String,
@@ -48,7 +52,9 @@ class SavePhotoViewModel @Inject constructor(
             selectedCategoryId = args[3] as Long?,
             selectedProjectId = args[4] as Long?,
             isSaving = args[5] as Boolean,
-            isSaved = args[6] as Boolean
+            isSaved = args[6] as Boolean,
+            newCategoryName = args[7] as String,
+            newProjectName = args[8] as String
         )
     }.stateIn(
         scope = viewModelScope,
@@ -61,12 +67,45 @@ class SavePhotoViewModel @Inject constructor(
     }
 
     fun selectCategory(categoryId: Long) {
-        _selectedCategoryId.value = categoryId
+        if (categoryId == -1L) {
+            _selectedCategoryId.value = null
+        } else {
+            _selectedCategoryId.value = categoryId
+        }
         _selectedProjectId.value = null
     }
 
     fun selectProject(projectId: Long) {
         _selectedProjectId.value = projectId
+    }
+
+    fun setNewCategoryName(name: String) {
+        _newCategoryName.value = name
+    }
+
+    fun setNewProjectName(name: String) {
+        _newProjectName.value = name
+    }
+
+    fun createAndSelectCategory() {
+        val name = _newCategoryName.value
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            val id = repo.upsertCategory(com.zoewave.probase.applications.photodo.db.entity.CategoryEntity(name = name))
+            _selectedCategoryId.value = id
+            _newCategoryName.value = ""
+        }
+    }
+
+    fun createAndSelectProject() {
+        val name = _newProjectName.value
+        val categoryId = _selectedCategoryId.value ?: return
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            val id = repo.upsertProject(com.zoewave.probase.applications.photodo.db.entity.ProjectEntity(categoryId = categoryId, name = name))
+            _selectedProjectId.value = id
+            _newProjectName.value = ""
+        }
     }
 
     fun savePhoto() {
