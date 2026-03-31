@@ -109,15 +109,33 @@ class SavePhotoViewModel @Inject constructor(
     }
 
     fun savePhoto() {
-        val projectId = _selectedProjectId.value ?: return
         val uri = _photoUri.value
         if (uri.isBlank()) return
 
         viewModelScope.launch {
             _isSaving.value = true
-            addPhotoToTask(projectId, uri)
-            _isSaving.value = false
-            _isSaved.value = true
+            
+            var projectId = _selectedProjectId.value
+            
+            if (projectId == null && _newProjectName.value.isNotBlank()) {
+                val categoryId = _selectedCategoryId.value
+                if (categoryId != null) {
+                    projectId = repo.upsertProject(
+                        com.zoewave.probase.applications.photodo.db.entity.ProjectEntity(
+                            categoryId = categoryId, 
+                            name = _newProjectName.value
+                        )
+                    )
+                }
+            }
+            
+            if (projectId != null) {
+                addPhotoToTask(projectId, uri)
+                _isSaving.value = false
+                _isSaved.value = true
+            } else {
+                _isSaving.value = false
+            }
         }
     }
 }
