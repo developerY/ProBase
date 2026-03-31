@@ -41,6 +41,10 @@ fun SettingsScreen(
         mutableStateOf(uiState.initialCardKeyToExpand == ThemeIdentifiers.SYSTEM)
     }
 
+    var isAboutExpanded by rememberSaveable(uiState.initialCardKeyToExpand) {
+        mutableStateOf(uiState.initialCardKeyToExpand == "ABOUT")
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -79,6 +83,13 @@ fun SettingsScreen(
                 onPaletteSelected = { newPalette ->
                     onEvent(SettingsEvent.OnPaletteSelected(newPalette))
                 }
+            )
+
+            AboutSettingsCard(
+                expanded = isAboutExpanded,
+                onExpandToggle = { isAboutExpanded = !isAboutExpanded },
+                appVersion = uiState.appVersion,
+                firebaseDeviceId = uiState.firebaseDeviceId
             )
 
             // Additional settings cards can be added here following the same pattern
