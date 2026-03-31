@@ -25,9 +25,21 @@ The flagship application of this repository. AshBike is a multi-device cycling c
 
 ### 📸 PhotoDo
 
-A secondary application focused on photography and task management (implied by the name and structure).
+A photo-centric task management application that blends visual documentation with structured workflows.
 
 * `applications/photodo/apps/mobile`
+
+* **Key Features**:
+    * **Photo-First Workflow**: Capture and attach visual evidence to every task item.
+    * **Project Hierarchy**: Organize tasks into categorized projects (e.g., Shopping, Home Cleaning).
+    * **Granular Checklists**: Manage detailed sub-tasks with real-time state updates.
+    * **Reactive Persistence**: Fully offline-first with Room database and Kotlin Flows.
+    * **Adaptive Navigation**: Built with `Material 3 Adaptive` and `Nav3` for seamless transitions across device types.
+
+### 🧪 Other Applications
+
+* **GoSwift**: (In Development) A performance-oriented mobile utility.
+* **Seaweed**: (In Development) Experimental feature-focused application.
 
 ---
 
@@ -83,6 +95,14 @@ This project follows a strict **Clean Architecture** approach within a **Modular
 
 
 * **Build System**: Gradle with Version Catalogs (`libs.versions.toml`)
+
+---
+
+## 📜 License
+
+This project is licensed under a custom **Source Available License**. Personal and educational use is permitted, but commercial use and redistribution without prior written consent are restricted.
+
+For full terms and conditions, please see [LICENSE.md](file:///Users/developer/AndroidStudioProjects/ProBase/LICENSE.md).
 
 ---
 
