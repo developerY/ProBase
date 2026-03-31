@@ -23,6 +23,7 @@ import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.Settings
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TaskDetail
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TasksList
+import kotlinx.coroutines.delay
 
 fun photoTodoNavEntryProvider(
     key: PhotoTodoRoute,
@@ -116,6 +117,9 @@ fun photoTodoNavEntryProvider(
                                 resultHandler.execute(projectId = projectId, uri = uriString)
                                 navigateBack()
                             } else {
+                                // 🚀 NEW: Pop the Camera screen first, so the SavePhoto stack is [Home, SavePhoto]
+                                // This ensures dismissing SavePhoto returns to Home dashboard.
+                                navigateBack()
                                 navigateTo(PhotoTodoRoute.SavePhoto(uriString))
                             }
                         } else {
@@ -132,6 +136,14 @@ fun photoTodoNavEntryProvider(
                     viewModel.setPhotoUri(key.photoUri)
                 }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+                // 🚀 NEW: Automatic navigation back to Home dashboard after success
+                if (uiState.isSaved) {
+                    LaunchedEffect(Unit) {
+                        delay(1500)
+                        navigateBack()
+                    }
+                }
 
                 SavePhotoBottomSheet(
                     uiState = uiState,
