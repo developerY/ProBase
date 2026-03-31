@@ -1,7 +1,9 @@
 package com.zoewave.probase.photodo.mobile.features.tasks.ui.state
 
+import androidx.compose.runtime.Immutable
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TaskItemUiModel
-// Make sure you have the @Immutable annotation if you are using it!
+
+@Immutable
 data class TasksUiState(
     // --- YOUR EXISTING WORKING CODE ---
     val isLoading: Boolean = false,

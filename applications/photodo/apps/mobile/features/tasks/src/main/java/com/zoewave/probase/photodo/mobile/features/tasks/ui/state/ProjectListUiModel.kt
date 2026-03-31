@@ -1,6 +1,8 @@
 package com.zoewave.probase.photodo.mobile.features.tasks.ui.state
 
-// And define the new model:
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class ProjectListUiModel(
     val projectId: Long,
     val title: String,
