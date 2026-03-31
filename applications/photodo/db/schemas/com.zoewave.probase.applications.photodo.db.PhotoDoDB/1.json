@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "a035958057d0ceeaef1a294962bb5c1c",
+    "identityHash": "178c2813f968271dab9365c834ac4099",
     "entities": [
       {
         "tableName": "categories",
@@ -54,7 +54,18 @@
           "columnNames": [
             "categoryId"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "index_categories_name",
+            "unique": false,
+            "columnNames": [
+              "name"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_categories_name` ON `${TABLE_NAME}` (`name`)"
+          }
+        ]
       },
       {
         "tableName": "projects",
@@ -170,6 +181,15 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_projects_categoryId` ON `${TABLE_NAME}` (`categoryId`)"
+          },
+          {
+            "name": "index_projects_creationDate",
+            "unique": false,
+            "columnNames": [
+              "creationDate"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_projects_creationDate` ON `${TABLE_NAME}` (`creationDate`)"
           }
         ],
         "foreignKeys": [
@@ -439,7 +459,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a035958057d0ceeaef1a294962bb5c1c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '178c2813f968271dab9365c834ac4099')"
     ]
   }
 }

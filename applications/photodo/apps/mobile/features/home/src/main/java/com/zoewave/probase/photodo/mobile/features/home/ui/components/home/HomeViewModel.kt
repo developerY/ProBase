@@ -9,9 +9,11 @@ import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -32,20 +34,16 @@ class HomeViewModel @Inject constructor(
         .map { categoriesWithLists ->
             if (categoriesWithLists.isEmpty()) return@map HomeUiState.Empty
 
-            val overviewModels = mutableListOf<CategoryOverviewUiModel>()
-            val urgentProjects = mutableListOf<ProjectListUiModel>() // ✅ Temporary list
+            val overviewModels = ArrayList<CategoryOverviewUiModel>(categoriesWithLists.size)
+            val urgentProjects = ArrayList<ProjectListUiModel>()
 
-            categoriesWithLists.forEach { groupedData ->
+            for (groupedData in categoriesWithLists) {
                 val category = groupedData.category
                 val projects = groupedData.projects
 
-                // --- YOUR EXISTING MATH LOGIC ---
                 val totalTasks = projects.size
-
-                // Based on your schema, we count how many lists are marked "Completed"
                 val completedTasks = projects.count { it.status == "Completed" }
 
-                // Protect against divide-by-zero!
                 val progressPercentage = if (totalTasks > 0) {
                     completedTasks.toFloat() / totalTasks.toFloat()
                 } else {
@@ -62,29 +60,30 @@ class HomeViewModel @Inject constructor(
                     )
                 )
 
-                // --- ✅ NEW: FILTER URGENT PROJECTS AT THE SAME TIME ---
-                projects.filter { it.isFavorite || it.isUrgent }.forEach { project ->
-                    urgentProjects.add(
-                        ProjectListUiModel(
-                            projectId = project.projectId,
-                            title = project.name,
-                            categoryName = category.name,
-                            isFavorite = project.isFavorite,
-                            isUrgent = project.isUrgent,
-                            currentSpend = project.currentSpend,
-                            projectBudget = project.projectBudget,
-                            dueDateMillis = project.dueDate
+                for (project in projects) {
+                    if (project.isFavorite || project.isUrgent) {
+                        urgentProjects.add(
+                            ProjectListUiModel(
+                                projectId = project.projectId,
+                                title = project.name,
+                                categoryName = category.name,
+                                isFavorite = project.isFavorite,
+                                isUrgent = project.isUrgent,
+                                currentSpend = project.currentSpend,
+                                projectBudget = project.projectBudget,
+                                dueDateMillis = project.dueDate
+                            )
                         )
-                    )
+                    }
                 }
             }
 
-            // Return the populated success state with BOTH lists!
             HomeUiState.Success(
                 categories = overviewModels,
                 urgentProjects = urgentProjects
             )
         }
+        .flowOn(Dispatchers.Default)
         .catch { e ->
             Log.e(TAG, "Error calculating home overview stats", e)
             // If something goes wrong, we could emit an Error state,

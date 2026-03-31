@@ -16,7 +16,10 @@ import java.util.UUID
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["categoryId"])]
+    indices = [
+        Index(value = ["categoryId"]),
+        Index(value = ["creationDate"])
+    ]
 )
 data class ProjectEntity(
     @PrimaryKey(autoGenerate = true)

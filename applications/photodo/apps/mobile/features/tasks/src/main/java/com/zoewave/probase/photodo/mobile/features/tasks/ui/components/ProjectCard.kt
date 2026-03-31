@@ -26,9 +26,11 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +41,7 @@ import com.zoewave.probase.photodo.mobile.features.tasks.R
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import java.text.NumberFormat
 
 @Composable
 fun ProjectCard(
@@ -47,14 +50,19 @@ fun ProjectCard(
     navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // 1. NO MORE MATH! We just ask the model for its state.
-    val financialStatusColor = when {
-        project.isOverBudget -> MaterialTheme.colorScheme.error // Red
-        project.isNearBudgetLimit -> androidx.compose.ui.graphics.Color(0xFFFFD54F) // Warning Yellow
-        else -> androidx.compose.ui.graphics.Color(0xFF81C784) // Safe Green
+    val errorColor = MaterialTheme.colorScheme.error
+    val financialStatusColor = remember(project.isOverBudget, project.isNearBudgetLimit) {
+        when {
+            project.isOverBudget -> errorColor // Red
+            project.isNearBudgetLimit -> Color(0xFFFFD54F) // Warning Yellow
+            else -> Color(0xFF81C784) // Safe Green
+        }
     }
 
-    val currencyFormatter = java.text.NumberFormat.getCurrencyInstance(LocalLocale.current.platformLocale)
+    val locale = LocalLocale.current.platformLocale
+    val currencyFormatter = remember(locale) {
+        NumberFormat.getCurrencyInstance(locale)
+    }
 
     Card(
         modifier = modifier
