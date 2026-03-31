@@ -4,10 +4,10 @@ plugins {
     id("composetemplate.android.application.compose")
     id("composetemplate.android.hilt")
     id("composetemplate.kotlin.serialization")
+    id("composetemplate.android.application.firebase")
 
     // ✅ 2. Apply Specific Plugins for this App
     alias(libs.plugins.ksp)
-    alias(libs.plugins.google.firebase.crashlytics)
     // alias(libs.plugins.androidx.baselineprofile)
 }
 
@@ -115,11 +115,6 @@ dependencies {
 
     // Icons
     implementation(libs.androidx.compose.material.icons.extended)
-
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.analytics)
 
     // Baseline Profile
     implementation(libs.androidx.profileinstaller)

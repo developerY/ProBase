@@ -2,6 +2,7 @@ plugins {
     id("composetemplate.android.application")
     id("composetemplate.android.application.compose")
     id("composetemplate.android.hilt")
+    id("composetemplate.android.application.firebase")
     alias(libs.plugins.ksp)
 }
 

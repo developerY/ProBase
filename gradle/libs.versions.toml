@@ -114,6 +114,8 @@ compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compos
 kotlin-serialization-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-serialization", version.ref = "kotlin" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
 hilt-gradlePlugin = { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "hilt" }
+google-services-gradlePlugin = { group = "com.google.gms", name = "google-services", version.ref = "googleGmsGoogleServices" }
+firebase-crashlytics-gradlePlugin = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "googleFirebaseCrashlytics" }
 
 # -- Android App Libraries --
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

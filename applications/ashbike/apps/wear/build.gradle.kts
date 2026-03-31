@@ -3,6 +3,7 @@ plugins {
     id("composetemplate.android.application")
     id("composetemplate.android.application.compose")
     id("composetemplate.android.hilt")
+    id("composetemplate.android.application.firebase")
 
     // ✅ 2. Specific Plugins for Wear
     alias(libs.plugins.ksp) // Explicitly needed for Room

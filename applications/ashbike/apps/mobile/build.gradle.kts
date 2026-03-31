@@ -3,12 +3,11 @@ plugins {
     id("composetemplate.android.application")
     id("composetemplate.android.application.compose")
     id("composetemplate.android.hilt")
+    id("composetemplate.android.application.firebase")
 
     // ✅ 2. Apply Specific Plugins for this App
     alias(libs.plugins.ksp)
     alias(libs.plugins.mapsplatform.secrets)
-    alias(libs.plugins.google.gms.google.services)
-    alias(libs.plugins.google.firebase.crashlytics)
     // alias(libs.plugins.androidx.baselineprofile)
 }
 
@@ -141,14 +140,6 @@ dependencies {
 
     // The library containing the Adaptive APIs
     implementation(libs.androidx.material3.adaptive.navigation3)
-
-
-    // Optional: ViewModel support (You have this in TOML, good to include)
-
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.analytics)
 
     // Maps
     implementation(libs.google.maps.compose)

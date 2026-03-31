@@ -11,6 +11,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.analytics
 import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.ui.components.PhotoDoMainScreen
@@ -26,6 +28,16 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Tags all future events from this user's phone
+        val firebaseAnalytics = Firebase.analytics
+        firebaseAnalytics.setUserProperty("device_platform", "mobile")
+        firebaseAnalytics.setUserProperty("app_flavor", "photodo")
+        firebaseAnalytics.setUserProperty("app_type", "probase")
+        firebaseAnalytics.setUserProperty("app_id", "com.zoewave.probase.photodo.mobile")
+        firebaseAnalytics.setUserProperty("app_version", BuildConfig.VERSION_NAME)
+        firebaseAnalytics.setUserProperty("build_type", BuildConfig.BUILD_TYPE)
+
         enableEdgeToEdge()
         setContent {
 
