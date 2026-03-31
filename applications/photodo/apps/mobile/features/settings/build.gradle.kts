@@ -4,6 +4,7 @@ plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.library.compose")
     id("composetemplate.android.hilt")
+    id("composetemplate.android.firebase") // Common Firebase dependencies (Library safe)
 
     // ✅ 2. Required for Type-Safe Navigation & Nav3
     id("composetemplate.kotlin.serialization")
@@ -20,9 +21,7 @@ android {
 
 dependencies {
     // --- Firebase & Google Services ---
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.installations)
-    implementation(libs.kotlinx.coroutines.play.services)
+    // Inherited from composetemplate.android.firebase convention plugin
 
     // --- Shared Core Projects ---
     // implementation(project(":core:model"))

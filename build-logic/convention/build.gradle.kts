@@ -62,5 +62,9 @@ gradlePlugin {
             id = "composetemplate.android.application.firebase"
             implementationClass = "com.zoewave.probase.convention.AndroidApplicationFirebaseConventionPlugin"
         }
+        register("androidFirebase") {
+            id = "composetemplate.android.firebase"
+            implementationClass = "com.zoewave.probase.convention.AndroidFirebaseConventionPlugin"
+        }
     }
 }

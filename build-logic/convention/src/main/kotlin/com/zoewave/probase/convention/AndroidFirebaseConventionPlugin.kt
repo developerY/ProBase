@@ -5,18 +5,13 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 
 /**
- * A convention plugin for Google Firebase integration (Analytics and Crashlytics).
- * Applies 'com.google.gms.google-services' and 'com.google.firebase.crashlytics' plugins
- * to APPLICATION modules and adds the necessary dependencies using the Firebase BOM.
+ * A common convention plugin for Google Firebase dependencies.
+ * Adds the necessary dependencies using the Firebase BOM, but DOES NOT apply
+ * the 'google-services' or 'crashlytics' plugins (which are app-module only).
  */
-class AndroidApplicationFirebaseConventionPlugin : Plugin<Project> {
+class AndroidFirebaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            with(pluginManager) {
-                apply("com.google.gms.google-services")
-                apply("com.google.firebase.crashlytics")
-            }
-
             dependencies {
                 val bom = libs.findLibrary("firebase-bom").get()
                 add("implementation", platform(bom))
