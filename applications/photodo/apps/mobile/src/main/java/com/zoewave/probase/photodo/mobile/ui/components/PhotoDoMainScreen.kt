@@ -34,21 +34,6 @@ fun PhotoDoMainScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        floatingActionButton = {
-            // Global FAB: Camera opens instantly
-            FloatingActionButton(
-                onClick = {
-                    if (backStack.lastOrNull() !is PhotoTodoRoute.Camera) {
-                        backStack.add(PhotoTodoRoute.Camera(projectId = null))
-                    }
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = stringResource(R.string.applications_photodo_model_route_camera)
-                )
-            }
-        },
         bottomBar = {
             PhotoTodoBottomBar(
                 currentRoute = currentRoute,

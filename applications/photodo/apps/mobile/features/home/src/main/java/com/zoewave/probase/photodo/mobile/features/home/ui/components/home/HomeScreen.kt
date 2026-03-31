@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -40,7 +44,17 @@ fun HomeScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         // 🚀 Upgrade: Large Top AppBar for an expressive title feel
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_overview)) }) }
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_overview)) }) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navTo(PhotoTodoRoute.Camera(projectId = null)) }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CameraAlt,
+                    contentDescription = stringResource(com.zoewave.photodo.model.R.string.applications_photodo_model_route_camera)
+                )
+            }
+        }
     ) { paddingValues ->
 
         LazyColumn(
