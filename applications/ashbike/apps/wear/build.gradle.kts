@@ -118,7 +118,6 @@ dependencies {
 
     // Room (Local Database)
     implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
     // Lifecycle

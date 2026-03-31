@@ -44,8 +44,9 @@ immutableCollections = "0.4.0"
 coroutines = "1.10.2"
 
 # -- Data Persistence --
-room = "2.8.4"
+room = "3.0.0-alpha02"
 datastore = "1.2.0"
+sqlite = "2.7.0-alpha02"
 
 # -- Background --
 work = "2.11.1"
@@ -168,9 +169,9 @@ hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-com
 hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWork" }
 
 # -- Room --
-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
+sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 
 # -- DataStore --
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }

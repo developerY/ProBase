@@ -2,7 +2,7 @@ package com.zoewave.probase.applications.photodo.db.converter
 
 import android.net.Uri
 import androidx.core.net.toUri
-import androidx.room.TypeConverter
+import androidx.room3.TypeConverter
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.model.Category
 import kotlin.time.Instant

@@ -1,7 +1,7 @@
 package com.zoewave.probase.core.database.converter
 
 import android.net.Uri
-import androidx.room.TypeConverter
+import androidx.room3.TypeConverter
 
 //import kotlinx.datetime.LocalDateTime
 

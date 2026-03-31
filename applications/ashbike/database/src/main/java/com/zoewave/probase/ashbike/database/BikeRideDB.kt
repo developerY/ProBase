@@ -1,10 +1,8 @@
 package com.zoewave.probase.ashbike.database
 
-import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
+import androidx.room3.Database
+import androidx.room3.RoomDatabase
+import androidx.room3.TypeConverters
 import com.zoewave.probase.ashbike.database.converter.Converters
 
 @Database(
@@ -12,31 +10,12 @@ import com.zoewave.probase.ashbike.database.converter.Converters
     version = 1,
     exportSchema = false
 )
-@TypeConverters(Converters::class)  // only if you have custom types
+@TypeConverters(Converters::class)
+@Suppress("ROOM_MISSING_CONSTRUCTED_BY")
 abstract class BikeRideDatabase : RoomDatabase() {
     abstract val bikeRideDao: BikeRideDao
 
     companion object {
-        const val DATABASE_NAME = "bikeride_db"
-
-        // volatile keeps INSTANCE visible across threads
-        @Volatile
-        private var INSTANCE: BikeRideDatabase? = null
-
-        @JvmStatic
-        fun getDatabase(context: Context): BikeRideDatabase =
-            INSTANCE ?: synchronized(this) {
-                INSTANCE ?: buildDatabase(context).also { INSTANCE = it }
-            }
-
-        private fun buildDatabase(context: Context) =
-            Room.databaseBuilder(
-                context.applicationContext,
-                BikeRideDatabase::class.java,
-                DATABASE_NAME
-            )
-                // DEV‑ONLY: drop & re-create when you change your schema
-                .fallbackToDestructiveMigration(false)
-                .build()
+        const val DATABASE_NAME = "ashbike_db"
     }
 }

@@ -1,13 +1,14 @@
 package com.zoewave.probase.core.database.di
 
 import android.content.Context
-import androidx.room.Room
+import androidx.room3.Room
 import com.zoewave.probase.core.database.BaseProDB
 import com.zoewave.probase.core.database.BaseProDao
 import com.zoewave.probase.core.database.BaseProRepo
 import com.zoewave.probase.core.database.BikeDatabase
 import com.zoewave.probase.core.database.OtherDatabase
 import com.zoewave.probase.core.database.repository.BaseProRepoImpl
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,7 +28,9 @@ object DatabaseModule {
             appContext,
             BaseProDB::class.java,
             BaseProDB.DATABASE_NAME
-        ).build()
+        )
+            .setDriver(BundledSQLiteDriver())
+            .build()
     }
 
     @Provides
@@ -51,7 +54,9 @@ object DatabaseModule {
             context,
             BaseProDB::class.java,
             "bike_database.db"
-        ).build()
+        )
+            .setDriver(BundledSQLiteDriver())
+            .build()
     }
 
     @OtherDatabase
@@ -62,7 +67,9 @@ object DatabaseModule {
             context,
             BaseProDB::class.java,
             "list_database.db"
-        ).build()
+        )
+            .setDriver(BundledSQLiteDriver())
+            .build()
     }
 
 }

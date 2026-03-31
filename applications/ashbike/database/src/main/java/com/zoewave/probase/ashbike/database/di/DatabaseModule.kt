@@ -1,11 +1,12 @@
 package com.zoewave.probase.ashbike.database.di
 
 import android.content.Context
-import androidx.room.Room
+import androidx.room3.Room
 import com.zoewave.probase.ashbike.database.BikeRideDao
 import com.zoewave.probase.ashbike.database.BikeRideDatabase
 import com.zoewave.probase.ashbike.database.BikeRideRepo
 import com.zoewave.probase.ashbike.database.repository.BikeRideRepoImpl
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,6 +28,7 @@ object DatabaseModule {
     @Singleton
     fun provideBikeRideDB(@ApplicationContext ctx: Context): BikeRideDatabase =
         Room.databaseBuilder(ctx, BikeRideDatabase::class.java, BikeRideDatabase.DATABASE_NAME)
+            .setDriver(BundledSQLiteDriver())
             .fallbackToDestructiveMigration(false)
             .build()
 

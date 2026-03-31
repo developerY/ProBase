@@ -1,9 +1,10 @@
 package com.zoewave.probase.goswift.database.di
 
 import android.content.Context
-import androidx.room.Room
+import androidx.room3.Room
 import com.zoewave.probase.goswift.database.GoSwiftDatabase
 import com.zoewave.probase.goswift.database.ShotDao
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,7 +24,9 @@ object DatabaseModule {
             context,
             GoSwiftDatabase::class.java,
             "goswift-database"
-        ).build()
+        )
+            .setDriver(BundledSQLiteDriver())
+            .build()
     }
 
     @Provides
