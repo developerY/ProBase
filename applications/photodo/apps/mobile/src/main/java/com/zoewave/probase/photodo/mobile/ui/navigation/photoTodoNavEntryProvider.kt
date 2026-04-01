@@ -2,6 +2,8 @@ package com.zoewave.probase.photodo.mobile.ui.navigation
 
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -19,6 +21,7 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.SavePhoto
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.TasksListScreen
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailScreen
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailViewModel
+import com.zoewave.probase.photodo.mobile.ui.components.AdaptivePhotoDoScreen
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.Settings
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TaskDetail
@@ -26,6 +29,7 @@ import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TasksList
 
 fun photoTodoNavEntryProvider(
     key: PhotoTodoRoute,
+    windowSizeClass: WindowSizeClass,
     navigateTo: (PhotoTodoRoute) -> Unit,
     navigateBack: () -> Unit,
     // Un-comment this if you need to manually tell your BottomBar to switch tabs!
@@ -33,6 +37,8 @@ fun photoTodoNavEntryProvider(
 ): NavEntry<PhotoTodoRoute> {
 
     return NavEntry(key) {
+        val isExpanded = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+
         when (key) {
 
             // --- TAB 1: DASHBOARD ---
@@ -52,50 +58,70 @@ fun photoTodoNavEntryProvider(
             }
 
             is PhotoTodoRoute.CategoryGrid -> {
-                val viewModel: HomeViewModel = hiltViewModel()
-                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                HomeOverviewScreen(
-                    uiState = uiState,
-                    onEvent = viewModel::onEvent,
-                    navTo = { route ->
-                        if (route == null) navigateBack() else navigateTo(route)
-                    },
-                    modifier = Modifier.fillMaxSize()
-                )
+                if (isExpanded) {
+                    AdaptivePhotoDoScreen(windowSizeClass = windowSizeClass, modifier = Modifier.fillMaxSize())
+                } else {
+                    val viewModel: HomeViewModel = hiltViewModel()
+                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                    HomeOverviewScreen(
+                        uiState = uiState,
+                        onEvent = viewModel::onEvent,
+                        navTo = { route ->
+                            if (route == null) navigateBack() else navigateTo(route)
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
 
             // --- TAB 2: WORKSPACE ---
             is TasksList -> {
-                val viewModel: TasksViewModel = hiltViewModel()
-                LaunchedEffect(key.categoryId) {
-                    viewModel.setCategoryId(key.categoryId)
+                if (isExpanded) {
+                    AdaptivePhotoDoScreen(
+                        windowSizeClass = windowSizeClass,
+                        initialCategoryId = key.categoryId,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    val viewModel: TasksViewModel = hiltViewModel()
+                    LaunchedEffect(key.categoryId) {
+                        viewModel.setCategoryId(key.categoryId)
+                    }
+                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                    TasksListScreen(
+                        uiState = uiState,
+                        onEvent = viewModel::onEvent,
+                        navTo = { route ->
+                            if (route == null) navigateBack() else navigateTo(route)
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
-                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                TasksListScreen(
-                    uiState = uiState,
-                    onEvent = viewModel::onEvent,
-                    navTo = { route ->
-                        if (route == null) navigateBack() else navigateTo(route)
-                    },
-                    modifier = Modifier.fillMaxSize()
-                )
             }
 
             // --- DEEP DETAIL SCREEN ---
             is TaskDetail -> {
-                val viewModel: TaskDetailViewModel = hiltViewModel()
-                LaunchedEffect(key.projectId) {
-                    viewModel.loadTaskDetails(key.projectId)
+                if (isExpanded) {
+                    AdaptivePhotoDoScreen(
+                        windowSizeClass = windowSizeClass,
+                        initialProjectId = key.projectId,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    val viewModel: TaskDetailViewModel = hiltViewModel()
+                    LaunchedEffect(key.projectId) {
+                        viewModel.loadTaskDetails(key.projectId)
+                    }
+                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                    TaskDetailScreen(
+                        uiState = uiState,
+                        onEvent = viewModel::onEvent,
+                        navTo = { route ->
+                            if (route == null) navigateBack() else navigateTo(route)
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
-                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                TaskDetailScreen(
-                    uiState = uiState,
-                    onEvent = viewModel::onEvent,
-                    navTo = { route ->
-                        if (route == null) navigateBack() else navigateTo(route)
-                    },
-                    modifier = Modifier.fillMaxSize()
-                )
             }
 
 

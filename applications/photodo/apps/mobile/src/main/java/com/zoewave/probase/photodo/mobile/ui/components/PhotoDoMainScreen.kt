@@ -3,30 +3,31 @@ package com.zoewave.probase.photodo.mobile.ui.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowSizeClass.Companion.calculateFromSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.ui.navigation.photoTodoNavEntryProvider
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
-import com.zoewave.photodo.model.R
 
 @Composable
 fun PhotoDoMainScreen(
-    entryProvider: (PhotoTodoRoute, () -> Unit, (PhotoTodoRoute) -> Unit) -> NavEntry<PhotoTodoRoute> = { key, back, to ->
-        photoTodoNavEntryProvider(key, to, back)
+    windowSizeClass: WindowSizeClass,
+    entryProvider: (PhotoTodoRoute, WindowSizeClass, () -> Unit, (PhotoTodoRoute) -> Unit) -> NavEntry<PhotoTodoRoute> = { key, size, back, to ->
+        photoTodoNavEntryProvider(key, size, to, back)
     }
 ) {
     val backStack = remember { mutableStateListOf<PhotoTodoRoute>(PhotoTodoRoute.Home) }
@@ -57,6 +58,7 @@ fun PhotoDoMainScreen(
                 // ✅ DELEGATE: Call the provider function
                 entryProvider(
                     key,
+                    windowSizeClass,
                     { backStack.removeLastOrNull() },
                     { dest ->
                         if (dest != backStack.lastOrNull()) {
@@ -69,12 +71,16 @@ fun PhotoDoMainScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(showBackground = true)
 @Composable
 fun PhotoDoMainScreenPreview() {
+    val configuration = LocalConfiguration.current
+    val windowSizeClass = calculateFromSize(DpSize(configuration.screenWidthDp.dp, configuration.screenHeightDp.dp))
     PhotoDoTheme {
         PhotoDoMainScreen(
-            entryProvider = { key, _, _ ->
+            windowSizeClass = windowSizeClass,
+            entryProvider = { key, _, _, _ ->
                 NavEntry(key) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("Mock Screen: ${key::class.simpleName}")
