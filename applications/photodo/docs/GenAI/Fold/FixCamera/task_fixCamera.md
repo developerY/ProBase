@@ -1,0 +1,28 @@
+# Task Management
+
+- [x] Researching existing photodo implementation
+- [x] Design the Camera FAB flow
+- [x] Implement Camera FAB and instant camera opening
+- [x] Implement post-photo bottom sheet for category/project selection
+- [x] Verify the implementation
+- [x] Refine FAB visibility: Only on Home page
+- [x] Add quick-add text field to Category/Project selection
+- [x] Improve creation UX: Create button and Keyboard actions
+- [x] Refine Save Photo state and persistence issues
+- [x] Ensure seamless navigation back to Home dashboard
+- [x] Refine post-save navigation to Project Detail screen
+- [x] Remove navigation delay for faster UX
+- [x] Replace Camera FAB with Header Camera Icon (Reverted)
+- [x] Add bottom padding to Home Screen lists for FAB clearance
+- [x] Add quick category deletion
+- [x] Fix missing project date in Category detail list
+- [x] Add quick project deletion
+- [x] Fix Category Card task counts and progress
+- [x] Replace "Overview" Header with Summary Graphic
+- [x] Add Adaptive Foldable Support
+- [x] Implement Adaptive Home and Settings Layouts
+- [x] Implement Two-Pane Contrast (Harmonious Split)
+- [x] Fix Adaptive Camera Navigation
+    - [x] Update `AdaptivePhotoDoScreen` to delegate non-local routes
+    - [x] Pass `navigateTo` callback in `photoTodoNavEntryProvider.kt`
+    - [x] Verify build and functionality
