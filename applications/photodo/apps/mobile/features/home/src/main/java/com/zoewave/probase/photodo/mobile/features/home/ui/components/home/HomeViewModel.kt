@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -139,6 +140,19 @@ class HomeViewModel @Inject constructor(
                         photoDoRepo.upsertProject(newProject)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error creating project from template", e)
+                    }
+                }
+            }
+
+            is HomeEvent.OnDeleteCategory -> {
+                viewModelScope.launch {
+                    try {
+                        val category = photoDoRepo.getCategoryById(event.categoryId).first()
+                        if (category != null) {
+                            photoDoRepo.deleteCategory(category)
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error deleting category", e)
                     }
                 }
             }

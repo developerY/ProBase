@@ -15,14 +15,17 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -79,6 +82,7 @@ fun HomeOverviewScreen(
     // Add these state variables at the top of your composable
     var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
     var showQuickTemplateBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
     var newCategoryName by rememberSaveable { mutableStateOf("") }
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -192,6 +196,8 @@ fun HomeOverviewScreen(
                             CategoryDashboardCard(
                                 category = category,
                                 index = index,
+                                onEvent = onEvent,
+                                onDeleteClicked = { categoryToDelete = it },
                                 navTo = navTo
                             )
                         }
@@ -248,6 +254,27 @@ fun HomeOverviewScreen(
             }
         )
     }
+
+    // --- DELETE CATEGORY CONFIRMATION ---
+    categoryToDelete?.let { category ->
+        AlertDialog(
+            onDismissRequest = { categoryToDelete = null },
+            title = { Text("Delete Category?") },
+            text = { Text("This will permanently delete the '${category.name}' category and all its projects. This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onEvent(HomeEvent.OnDeleteCategory(category.id))
+                        categoryToDelete = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text("Delete") }
+            },
+            dismissButton = {
+                TextButton(onClick = { categoryToDelete = null }) { Text("Cancel") }
+            }
+        )
+    }
 } // <-- End of HomeOverviewScreen
 
 
@@ -256,6 +283,8 @@ fun HomeOverviewScreen(
 fun CategoryDashboardCard(
     category: CategoryOverviewUiModel,
     index: Int,
+    onEvent: (HomeEvent) -> Unit,
+    onDeleteClicked: (CategoryOverviewUiModel) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -290,16 +319,31 @@ fun CategoryDashboardCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.FolderSpecial,
-                    contentDescription = null,
-                    modifier = Modifier.size(28.dp)
-                )
-                Text(
-                    text = category.progressText,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.FolderSpecial,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = category.progressText,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                IconButton(
+                    onClick = { onDeleteClicked(category) },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Category",
+                        tint = contentColor.copy(alpha = 0.7f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
 
             // Middle: Category Name & Task Count
