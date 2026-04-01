@@ -61,7 +61,11 @@ fun photoTodoNavEntryProvider(
 
             is PhotoTodoRoute.CategoryGrid -> {
                 if (isExpanded) {
-                    AdaptivePhotoDoScreen(windowSizeClass = windowSizeClass, modifier = Modifier.fillMaxSize())
+                    AdaptivePhotoDoScreen(
+                        windowSizeClass = windowSizeClass,
+                        navTo = navigateTo,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 } else {
                     val viewModel: HomeViewModel = hiltViewModel()
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -81,6 +85,7 @@ fun photoTodoNavEntryProvider(
                 if (isExpanded) {
                     AdaptivePhotoDoScreen(
                         windowSizeClass = windowSizeClass,
+                        navTo = navigateTo,
                         initialCategoryId = key.categoryId,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -106,6 +111,7 @@ fun photoTodoNavEntryProvider(
                 if (isExpanded) {
                     AdaptivePhotoDoScreen(
                         windowSizeClass = windowSizeClass,
+                        navTo = navigateTo,
                         initialProjectId = key.projectId,
                         modifier = Modifier.fillMaxSize()
                     )

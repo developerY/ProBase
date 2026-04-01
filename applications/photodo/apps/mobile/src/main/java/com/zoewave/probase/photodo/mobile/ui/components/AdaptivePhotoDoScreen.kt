@@ -7,7 +7,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -36,6 +35,7 @@ enum class PhotoDoFoldableState {
 @Composable
 fun AdaptivePhotoDoScreen(
     windowSizeClass: WindowSizeClass,
+    navTo: (PhotoTodoRoute) -> Unit,
     modifier: Modifier = Modifier,
     initialCategoryId: Long? = null,
     initialProjectId: Long? = null
@@ -79,11 +79,12 @@ fun AdaptivePhotoDoScreen(
                     onEvent = homeViewModel::onEvent,
                     navTo = { route ->
                         when (route) {
+                            null -> { /* Handle back if needed, but categories is root here */ }
                             is PhotoTodoRoute.TasksList -> {
                                 selectedCategoryId = route.categoryId
                                 // In dual-pane, clicking category updates the right pane
                             }
-                            else -> { /* Handle other nav if needed */ }
+                            else -> navTo(route) // 🚀 Delegate other routes (like Camera)
                         }
                     },
                     modifier = Modifier.fillMaxSize().background(listBackground)
@@ -102,6 +103,8 @@ fun AdaptivePhotoDoScreen(
                         } else if (route is PhotoTodoRoute.TaskDetail) {
                             selectedProjectId = route.projectId
                             // Stay in current state, but update detail pane
+                        } else {
+                            navTo(route) // 🚀 Delegate other routes
                         }
                     },
                     modifier = Modifier.fillMaxSize().background(listBackground)
@@ -119,9 +122,13 @@ fun AdaptivePhotoDoScreen(
                     uiState = tasksUiState,
                     onEvent = tasksViewModel::onEvent,
                     navTo = { route ->
-                        if (route is PhotoTodoRoute.TaskDetail) {
+                        if (route == null) {
+                            currentState = PhotoDoFoldableState.CATEGORY_AND_PROJECTS
+                        } else if (route is PhotoTodoRoute.TaskDetail) {
                             selectedProjectId = route.projectId
                             currentState = PhotoDoFoldableState.PROJECTS_AND_TASKS
+                        } else {
+                            navTo(route) // 🚀 Delegate other routes
                         }
                     },
                     modifier = Modifier.fillMaxSize().background(detailBackground)
@@ -137,6 +144,8 @@ fun AdaptivePhotoDoScreen(
                     navTo = { route ->
                         if (route == null) {
                             currentState = PhotoDoFoldableState.CATEGORY_AND_PROJECTS
+                        } else {
+                            navTo(route) // 🚀 Delegate other routes (like Camera!)
                         }
                     },
                     modifier = Modifier.fillMaxSize().background(detailBackground)
