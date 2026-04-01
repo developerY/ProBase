@@ -8,12 +8,16 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
 import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
+import com.zoewave.probase.photodo.mobile.core.ui.theme.LocalPaneContrast
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.ui.components.PhotoDoMainScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,6 +30,7 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var appSettingsRepository: AppSettingsRepository
 
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -44,6 +49,7 @@ class MainActivity : ComponentActivity() {
             // 2. Collect the current theme state
             val themePreference by appSettingsRepository.themePreferenceFlow.collectAsState(initial = "SYSTEM")
             val palettePreference by appSettingsRepository.palettePreferenceFlow.collectAsState(initial = "DEFAULT") // NEW
+            val paneContrastPreference by appSettingsRepository.paneContrastFlow.collectAsState(initial = "TINTED")
 
             // 3. Determine true/false for Dark Mode
             val isDarkTheme = when (themePreference) {
@@ -57,11 +63,14 @@ class MainActivity : ComponentActivity() {
                 darkTheme = isDarkTheme,
                 palette = palettePreference
             ) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    PhotoDoMainScreen()
+                val windowSizeClass = calculateWindowSizeClass(this)
+                CompositionLocalProvider(LocalPaneContrast provides paneContrastPreference) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        PhotoDoMainScreen(windowSizeClass = windowSizeClass)
+                    }
                 }
             }
         }

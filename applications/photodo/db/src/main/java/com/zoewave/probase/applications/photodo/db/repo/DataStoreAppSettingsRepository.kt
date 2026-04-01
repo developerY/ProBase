@@ -38,4 +38,16 @@ class DataStoreAppSettingsRepository @Inject constructor(
             preferences[THEME_KEY] = themeIdentifier
         }
     }
+
+    private val PANE_CONTRAST_KEY = stringPreferencesKey("pane_contrast_preference")
+
+    override val paneContrastFlow: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PANE_CONTRAST_KEY] ?: "TINTED"
+    }
+
+    override suspend fun savePaneContrast(paneContrastIdentifier: String) {
+        dataStore.edit { preferences ->
+            preferences[PANE_CONTRAST_KEY] = paneContrastIdentifier
+        }
+    }
 }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -80,118 +81,171 @@ fun HomeOverviewScreen(
     var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
     var showQuickTemplateBottomSheet by rememberSaveable { mutableStateOf(false) }
     var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
-    var newCategoryName by rememberSaveable { mutableStateOf("") }
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         // 2. Replace the Scaffold's floatingActionButton block with this:
         floatingActionButton = {
-            FloatingActionButtonMenu(
-                expanded = fabMenuExpanded,
-                button = {
-                    ToggleFloatingActionButton(
-                        checked = fabMenuExpanded,
-                        onCheckedChange = { fabMenuExpanded = it }, // Safely toggles state
-                        //containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        //contentColor = MaterialTheme.colorScheme.secondary
-                    ) {
-                        // Animates smoothly from a '+' to an 'x' when opened!
-                        val imageVector by remember {
-                            derivedStateOf { if (checkedProgress > 0.5f) Icons.Default.Close else Icons.Default.Add }
-                        }
-                        Icon(
-                            painter = rememberVectorPainter(imageVector),
-                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_menu_content_desc),
-                            modifier = Modifier.animateIcon({ checkedProgress })
-                        )
-                    }
+            HomeOverviewFab(
+                fabMenuExpanded = fabMenuExpanded,
+                onFabToggle = { fabMenuExpanded = it },
+                onAddCategoryClick = {
+                    fabMenuExpanded = false
+                    showAddCategoryDialog = true
+                },
+                onQuickProjectClick = {
+                    fabMenuExpanded = false
+                    showQuickTemplateBottomSheet = true
+                },
+                onCameraClick = {
+                    fabMenuExpanded = false
+                    navTo(PhotoTodoRoute.Camera(projectId = null))
                 }
-            ) {
-                // Item 1: Add Category
-                FloatingActionButtonMenuItem(
-                    onClick = {
-                        fabMenuExpanded = false
-                        showAddCategoryDialog = true
-                    },
-                    icon = { Icon(Icons.Default.FolderSpecial, contentDescription = null) },
-                    text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_new_category)) }
-                )
-
-                // Item 2: Quick Project (Placeholder for later!)
-                FloatingActionButtonMenuItem(
-                    onClick = {
-                        fabMenuExpanded = false
-                        showQuickTemplateBottomSheet = true
-                    },
-                    icon = { Icon(Icons.Default.Checklist, contentDescription = null) },
-                    text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_quick_project)) }
-                )
-
-                // NEW: Camera FAB integrated into the Home Menu!
-                /* FloatingActionButtonMenuItem(
-                    onClick = {
-                        fabMenuExpanded = false
-                        navTo(PhotoTodoRoute.Camera(projectId = null))
-                    },
-                    icon = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
-                    text = { Text(stringResource(com.zoewave.photodo.model.R.string.applications_photodo_model_route_camera)) }
-                ) */
-            }
+            )
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            when (uiState) {
-                is HomeUiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        HomeOverviewContent(
+            uiState = uiState,
+            onEvent = onEvent,
+            navTo = navTo,
+            onDeleteClicked = { categoryToDelete = it },
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+
+    // ... inside HomeOverviewScreen, just below the Scaffold closing brace ...
+
+    HomeOverviewDialogs(
+        showAddCategoryDialog = showAddCategoryDialog,
+        onDismissAddCategory = { showAddCategoryDialog = false },
+        showQuickTemplateBottomSheet = showQuickTemplateBottomSheet,
+        onDismissQuickTemplate = { showQuickTemplateBottomSheet = false },
+        categoryToDelete = categoryToDelete,
+        onDismissDeleteConfirmation = { categoryToDelete = null },
+        onEvent = onEvent
+    )
+} // <-- End of HomeOverviewScreen
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun HomeOverviewFab(
+    fabMenuExpanded: Boolean,
+    onFabToggle: (Boolean) -> Unit,
+    onAddCategoryClick: () -> Unit,
+    onQuickProjectClick: () -> Unit,
+    onCameraClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FloatingActionButtonMenu(
+        expanded = fabMenuExpanded,
+        modifier = modifier,
+        button = {
+            ToggleFloatingActionButton(
+                checked = fabMenuExpanded,
+                onCheckedChange = onFabToggle
+            ) {
+                val imageVector by remember {
+                    derivedStateOf { if (checkedProgress > 0.5f) Icons.Default.Close else Icons.Default.Add }
                 }
-                is HomeUiState.Empty -> {
-                    EmptyHomeState(
-                        onEvent = onEvent,
-                        navTo = navTo,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                is HomeUiState.Success -> {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2), // 2-column dashboard layout
-                        contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 80.dp), // 🚀 Added bottom padding!
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
+                Icon(
+                    painter = rememberVectorPainter(imageVector),
+                    contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_menu_content_desc),
+                    modifier = Modifier.animateIcon({ checkedProgress })
+                )
+            }
+        }
+    ) {
+        FloatingActionButtonMenuItem(
+            onClick = onAddCategoryClick,
+            icon = { Icon(Icons.Default.FolderSpecial, contentDescription = null) },
+            text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_new_category)) }
+        )
+
+        FloatingActionButtonMenuItem(
+            onClick = onQuickProjectClick,
+            icon = { Icon(Icons.Default.Checklist, contentDescription = null) },
+            text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_quick_project)) }
+        )
+
+        FloatingActionButtonMenuItem(
+            onClick = onCameraClick,
+            icon = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
+            text = { Text(stringResource(com.zoewave.photodo.model.R.string.applications_photodo_model_route_camera)) }
+        )
+    }
+}
+
+@Composable
+fun HomeOverviewContent(
+    uiState: HomeUiState,
+    onEvent: (HomeEvent) -> Unit,
+    navTo: (PhotoTodoRoute?) -> Unit,
+    onDeleteClicked: (CategoryOverviewUiModel) -> Unit,
+    modifier: Modifier = Modifier,
+    showSummaryHeader: Boolean = true
+) {
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+        when (uiState) {
+            is HomeUiState.Loading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+            is HomeUiState.Empty -> {
+                EmptyHomeState(
+                    onEvent = onEvent,
+                    navTo = navTo,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+            is HomeUiState.Success -> {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2), // 2-column dashboard layout
+                    contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 80.dp), // 🚀 Added bottom padding!
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    if (showSummaryHeader) {
                         item(span = { GridItemSpan(2) }) {
                             OverviewSummaryCard(categories = uiState.categories)
                         }
+                    }
 
-                        itemsIndexed(
-                            items = uiState.categories,
-                            key = { _, category -> category.id }
-                        ) { index, category ->
-                            CategoryDashboardCard(
-                                category = category,
-                                index = index,
-                                onEvent = onEvent,
-                                onDeleteClicked = { categoryToDelete = it },
-                                navTo = navTo
-                            )
-                        }
+                    itemsIndexed(
+                        items = uiState.categories,
+                        key = { _, category -> category.id }
+                    ) { index, category ->
+                        CategoryDashboardCard(
+                            category = category,
+                            index = index,
+                            onEvent = onEvent,
+                            onDeleteClicked = onDeleteClicked,
+                            navTo = navTo
+                        )
                     }
                 }
             }
         }
     }
+}
 
-    // ... inside HomeOverviewScreen, just below the Scaffold closing brace ...
+@Composable
+fun HomeOverviewDialogs(
+    showAddCategoryDialog: Boolean,
+    onDismissAddCategory: () -> Unit,
+    showQuickTemplateBottomSheet: Boolean,
+    onDismissQuickTemplate: () -> Unit,
+    categoryToDelete: CategoryOverviewUiModel?,
+    onDismissDeleteConfirmation: () -> Unit,
+    onEvent: (HomeEvent) -> Unit
+) {
+    var newCategoryName by rememberSaveable { mutableStateOf("") }
 
-    // --- ADD CATEGORY DIALOG/SHEET ---
     if (showAddCategoryDialog) {
         AlertDialog(
-            onDismissRequest = { showAddCategoryDialog = false },
+            onDismissRequest = onDismissAddCategory,
             title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_new_category)) },
             text = {
                 OutlinedTextField(
@@ -208,7 +262,7 @@ fun HomeOverviewScreen(
                         if (newCategoryName.isNotBlank()) {
                             onEvent(HomeEvent.OnAddCategory(newCategoryName.trim()))
                             newCategoryName = "" // Reset
-                            showAddCategoryDialog = false // Close
+                            onDismissAddCategory()
                         }
                     }
                 ) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_create)) }
@@ -217,7 +271,7 @@ fun HomeOverviewScreen(
                 TextButton(
                     onClick = {
                         newCategoryName = ""
-                        showAddCategoryDialog = false
+                        onDismissAddCategory()
                     }
                 ) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_cancel)) }
             }
@@ -226,35 +280,34 @@ fun HomeOverviewScreen(
 
     if (showQuickTemplateBottomSheet) {
         QuickTemplateBottomSheet(
-            onDismiss = { showQuickTemplateBottomSheet = false },
+            onDismiss = onDismissQuickTemplate,
             onTemplateSelected = { template ->
                 onEvent(HomeEvent.OnCreateFromTemplate(template))
-                showQuickTemplateBottomSheet = false
+                onDismissQuickTemplate()
             }
         )
     }
 
-    // --- DELETE CATEGORY CONFIRMATION ---
     categoryToDelete?.let { category ->
         AlertDialog(
-            onDismissRequest = { categoryToDelete = null },
+            onDismissRequest = onDismissDeleteConfirmation,
             title = { Text("Delete Category?") },
             text = { Text("This will permanently delete the '${category.name}' category and all its projects. This action cannot be undone.") },
             confirmButton = {
                 TextButton(
                     onClick = {
                         onEvent(HomeEvent.OnDeleteCategory(category.id))
-                        categoryToDelete = null
+                        onDismissDeleteConfirmation()
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) { Text("Delete") }
             },
             dismissButton = {
-                TextButton(onClick = { categoryToDelete = null }) { Text("Cancel") }
+                TextButton(onClick = onDismissDeleteConfirmation) { Text("Cancel") }
             }
         )
     }
-} // <-- End of HomeOverviewScreen
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
