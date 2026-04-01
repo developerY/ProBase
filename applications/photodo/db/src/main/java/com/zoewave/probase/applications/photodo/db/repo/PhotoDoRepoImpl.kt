@@ -4,6 +4,7 @@ import android.util.Log
 import com.zoewave.probase.applications.photodo.db.PhotoDoDao
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjects
+import com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjectsAndTasks
 import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
@@ -43,6 +44,10 @@ class PhotoDoRepoImpl @Inject constructor(
 
     override fun getCategoriesWithProjects(): Flow<List<CategoryWithProjects>> {
         return photoDoDao.getCategoriesWithProjects()
+    }
+
+    override fun getCategoriesWithProjectsAndTasks(): Flow<List<CategoryWithProjectsAndTasks>> {
+        return photoDoDao.getCategoriesWithProjectsAndTasks()
     }
 
     override suspend fun getOrCreateCategoryByName(name: String): Long {

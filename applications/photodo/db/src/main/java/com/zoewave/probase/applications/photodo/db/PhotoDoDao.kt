@@ -8,6 +8,7 @@ import androidx.room3.Update
 import androidx.room3.Upsert
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjects
+import com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjectsAndTasks
 import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
@@ -79,6 +80,10 @@ interface PhotoDoDao {
     @Transaction
     @Query("SELECT * FROM categories")
     fun getCategoriesWithProjects(): Flow<List<CategoryWithProjects>>
+
+    @Transaction
+    @Query("SELECT * FROM categories")
+    fun getCategoriesWithProjectsAndTasks(): Flow<List<CategoryWithProjectsAndTasks>>
 
     // --- Project Operations ---
 
