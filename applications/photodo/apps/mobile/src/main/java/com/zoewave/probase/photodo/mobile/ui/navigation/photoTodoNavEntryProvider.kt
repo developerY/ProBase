@@ -12,6 +12,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.AdaptiveHomeScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiRoute
@@ -47,12 +48,13 @@ fun photoTodoNavEntryProvider(
             is PhotoTodoRoute.Home -> {
                 val viewModel: HomeViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                HomeScreen(
+                AdaptiveHomeScreen(
                     uiState = uiState,
                     onEvent = viewModel::onEvent,
                     navTo = { route ->
                         if (route == null) navigateBack() else navigateTo(route)
                     },
+                    windowSizeClass = windowSizeClass,
                     modifier = Modifier.fillMaxSize()
                 )
             }
