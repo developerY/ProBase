@@ -116,6 +116,9 @@ fun photoTodoNavEntryProvider(
                                 resultHandler.execute(projectId = projectId, uri = uriString)
                                 navigateBack()
                             } else {
+                                // 🚀 NEW: Pop the Camera screen first, so the SavePhoto stack is [Home, SavePhoto]
+                                // This ensures dismissing SavePhoto returns to Home dashboard.
+                                navigateBack()
                                 navigateTo(PhotoTodoRoute.SavePhoto(uriString))
                             }
                         } else {
@@ -133,9 +136,18 @@ fun photoTodoNavEntryProvider(
                 }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+                // 🚀 NEW: Automatic navigation back to Home dashboard after success
                 if (uiState.isSaved) {
+                    val savedProjectId = uiState.savedProjectId
+                    val savedProjectTitle = uiState.savedProjectTitle
                     LaunchedEffect(Unit) {
-                        navigateBack()
+                        if (savedProjectId != null && savedProjectTitle != null) {
+                            // First go back to pop SavePhoto, then navigate to TaskDetail
+                            navigateBack()
+                            navigateTo(PhotoTodoRoute.TaskDetail(savedProjectId, savedProjectTitle))
+                        } else {
+                            navigateBack()
+                        }
                     }
                 }
 
@@ -143,6 +155,10 @@ fun photoTodoNavEntryProvider(
                     uiState = uiState,
                     onCategorySelected = viewModel::selectCategory,
                     onProjectSelected = viewModel::selectProject,
+                    onNewCategoryNameChanged = viewModel::setNewCategoryName,
+                    onNewProjectNameChanged = viewModel::setNewProjectName,
+                    onAddCategoryClicked = viewModel::createAndSelectCategory,
+                    onAddProjectClicked = viewModel::createAndSelectProject,
                     onSaveClicked = viewModel::savePhoto,
                     onDismiss = navigateBack
                 )

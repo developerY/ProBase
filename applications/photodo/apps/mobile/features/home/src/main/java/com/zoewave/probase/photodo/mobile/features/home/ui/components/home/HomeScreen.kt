@@ -18,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -27,10 +26,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
-import com.zoewave.probase.photodo.mobile.features.home.R
 import components.home.CategoryQuickJumpRow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,7 +43,7 @@ fun HomeScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         // 🚀 Upgrade: Large Top AppBar for an expressive title feel
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_overview)) }) },
+        // topBar = { TopAppBar(title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_overview)) }) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navTo(PhotoTodoRoute.Camera(projectId = null)) }
@@ -62,7 +61,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp), // Only pad the sides, let the list handle vertical padding
-            contentPadding = PaddingValues(vertical = 16.dp), // Padding at top and bottom of scroll
+            contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp), // 🚀 Extra bottom padding to clear the FAB!
             verticalArrangement = Arrangement.spacedBy(24.dp), // 🚀 MAGIC: Replaces all your Spacers!
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

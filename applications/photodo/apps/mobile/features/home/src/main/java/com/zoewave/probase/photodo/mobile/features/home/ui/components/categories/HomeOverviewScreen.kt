@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FolderSpecial
@@ -60,11 +61,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeEvent
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeUiState
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.components.bottomsheets.QuickTemplateBottomSheet
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
-import com.zoewave.probase.photodo.mobile.features.home.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -147,6 +148,16 @@ fun HomeOverviewScreen(
                     icon = { Icon(Icons.Default.Checklist, contentDescription = null) },
                     text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_quick_project)) }
                 )
+
+                // 🚀 NEW: Camera FAB integrated into the Home Menu!
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        fabMenuExpanded = false
+                        navTo(PhotoTodoRoute.Camera(projectId = null))
+                    },
+                    icon = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
+                    text = { Text(stringResource(com.zoewave.photodo.model.R.string.applications_photodo_model_route_camera)) }
+                )
             }
         }
     ) { innerPadding ->
@@ -169,7 +180,7 @@ fun HomeOverviewScreen(
                 is HomeUiState.Success -> {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2), // 2-column dashboard layout
-                        contentPadding = PaddingValues(16.dp),
+                        contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 80.dp), // 🚀 Added bottom padding!
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize()
