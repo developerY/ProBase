@@ -180,7 +180,7 @@ fun HomeOverviewScreen(
                 is HomeUiState.Success -> {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2), // 2-column dashboard layout
-                        contentPadding = PaddingValues(16.dp),
+                        contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 80.dp), // 🚀 Added bottom padding!
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize()
