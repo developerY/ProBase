@@ -139,9 +139,17 @@ fun photoTodoNavEntryProvider(
 
                 // 🚀 NEW: Automatic navigation back to Home dashboard after success
                 if (uiState.isSaved) {
+                    val savedProjectId = uiState.savedProjectId
+                    val savedProjectTitle = uiState.savedProjectTitle
                     LaunchedEffect(Unit) {
                         delay(1500)
-                        navigateBack()
+                        if (savedProjectId != null && savedProjectTitle != null) {
+                            // First go back to pop SavePhoto, then navigate to TaskDetail
+                            navigateBack()
+                            navigateTo(PhotoTodoRoute.TaskDetail(savedProjectId, savedProjectTitle))
+                        } else {
+                            navigateBack()
+                        }
                     }
                 }
 

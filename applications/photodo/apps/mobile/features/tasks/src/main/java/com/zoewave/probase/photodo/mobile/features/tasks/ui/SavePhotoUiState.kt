@@ -12,5 +12,7 @@ data class SavePhotoUiState(
     val isSaving: Boolean = false,
     val isSaved: Boolean = false,
     val newCategoryName: String = "",
-    val newProjectName: String = ""
+    val newProjectName: String = "",
+    val savedProjectId: Long? = null,
+    val savedProjectTitle: String? = null
 )

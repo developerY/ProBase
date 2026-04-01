@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
@@ -30,6 +31,8 @@ class SavePhotoViewModel @Inject constructor(
     private val _isSaved = MutableStateFlow(false)
     private val _newCategoryName = MutableStateFlow("")
     private val _newProjectName = MutableStateFlow("")
+    private val _savedProjectId = MutableStateFlow<Long?>(null)
+    private val _savedProjectTitle = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<SavePhotoUiState> = combine(
         _photoUri,
@@ -43,7 +46,9 @@ class SavePhotoViewModel @Inject constructor(
         _isSaving,
         _isSaved,
         _newCategoryName,
-        _newProjectName
+        _newProjectName,
+        _savedProjectId,
+        _savedProjectTitle
     ) { args: Array<Any?> ->
         SavePhotoUiState(
             photoUri = args[0] as String,
@@ -54,7 +59,9 @@ class SavePhotoViewModel @Inject constructor(
             isSaving = args[5] as Boolean,
             isSaved = args[6] as Boolean,
             newCategoryName = args[7] as String,
-            newProjectName = args[8] as String
+            newProjectName = args[8] as String,
+            savedProjectId = args[9] as Long?,
+            savedProjectTitle = args[10] as String?
         )
     }.stateIn(
         scope = viewModelScope,
@@ -73,6 +80,8 @@ class SavePhotoViewModel @Inject constructor(
         _isSaved.value = false
         _newCategoryName.value = ""
         _newProjectName.value = ""
+        _savedProjectId.value = null
+        _savedProjectTitle.value = null
     }
 
     fun selectCategory(categoryId: Long) {
@@ -129,21 +138,28 @@ class SavePhotoViewModel @Inject constructor(
             _isSaving.value = true
             
             var projectId = _selectedProjectId.value
+            var projectTitle = ""
             
             if (projectId == null && _newProjectName.value.isNotBlank()) {
                 val categoryId = _selectedCategoryId.value
                 if (categoryId != null) {
+                    projectTitle = _newProjectName.value
                     projectId = repo.upsertProject(
                         com.zoewave.probase.applications.photodo.db.entity.ProjectEntity(
                             categoryId = categoryId, 
-                            name = _newProjectName.value
+                            name = projectTitle
                         )
                     )
                 }
+            } else if (projectId != null) {
+                // Fetch the existing title!
+                projectTitle = repo.getProjectById(projectId).firstOrNull()?.name ?: "Task"
             }
             
             if (projectId != null) {
                 addPhotoToTask(projectId, uri)
+                _savedProjectId.value = projectId
+                _savedProjectTitle.value = projectTitle
                 _isSaving.value = false
                 _isSaved.value = true
                 
