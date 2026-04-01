@@ -1,6 +1,7 @@
 package com.zoewave.probase.photodo.mobile.features.settings.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,6 +33,8 @@ import com.zoewave.probase.photodo.mobile.features.settings.R
 fun PaletteSettingsCard(
     currentPalette: String,
     onPaletteSelected: (String) -> Unit,
+    currentPaneContrast: String,
+    onPaneContrastSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // State is safely encapsulated inside the component
@@ -154,6 +158,35 @@ fun PaletteSettingsCard(
                         Text(
                             text = stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_expressive),
                             modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+                    // --- TWO-PANE CONTRAST TOGGLE (Internal) ---
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Two-Pane Contrast",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "Apply a subtle tint to the dashboard side on large screens",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = currentPaneContrast == "TINTED",
+                            onCheckedChange = { isChecked ->
+                                val newOption = if (isChecked) "TINTED" else "FLAT"
+                                onPaneContrastSelected(newOption)
+                            }
                         )
                     }
                 }
