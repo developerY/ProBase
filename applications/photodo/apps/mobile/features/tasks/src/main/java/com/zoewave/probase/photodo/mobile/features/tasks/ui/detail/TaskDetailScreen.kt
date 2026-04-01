@@ -191,14 +191,14 @@ fun TaskDetailScreen(
                     text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_task)) }
                 )
                 // 🚀 NEW: Add Expense FAB Item
-                FloatingActionButtonMenuItem(
+                /* FloatingActionButtonMenuItem(
                     onClick = {
                         fabMenuExpanded = false
                         showAddExpenseDialog = true
                     },
                     icon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
                     text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_expense)) }
-                )
+                )*/
             }
         }
     ) { innerPadding ->

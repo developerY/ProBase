@@ -18,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,7 +43,7 @@ fun HomeScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         // 🚀 Upgrade: Large Top AppBar for an expressive title feel
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_overview)) }) },
+        // topBar = { TopAppBar(title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_overview)) }) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navTo(PhotoTodoRoute.Camera(projectId = null)) }
