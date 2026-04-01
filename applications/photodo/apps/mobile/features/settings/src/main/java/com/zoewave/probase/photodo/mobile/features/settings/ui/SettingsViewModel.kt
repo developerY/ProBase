@@ -34,12 +34,14 @@ class SettingsViewModel @Inject constructor(
     val uiState: StateFlow<SettingsUiState> = combine(
         appSettingsRepository.themePreferenceFlow,
         appSettingsRepository.palettePreferenceFlow,
+        appSettingsRepository.paneContrastFlow,
         _initialExpandedKey,
         _firebaseDeviceId
-    ) { theme, palette, expandedKey, firebaseId ->
+    ) { theme, palette, contrast, expandedKey, firebaseId ->
         SettingsUiState(
             currentTheme = theme,
             currentPalette = palette,
+            currentPaneContrast = contrast,
             initialCardKeyToExpand = expandedKey,
             appVersion = getAppVersion(),
             firebaseDeviceId = firebaseId
@@ -84,6 +86,9 @@ class SettingsViewModel @Inject constructor(
             }
             is SettingsEvent.OnPaletteSelected -> {
                 viewModelScope.launch { appSettingsRepository.savePalettePreference(event.paletteIdentifier) }
+            }
+            is SettingsEvent.OnPaneContrastSelected -> {
+                viewModelScope.launch { appSettingsRepository.savePaneContrast(event.paneContrastIdentifier) }
             }
         }
     }

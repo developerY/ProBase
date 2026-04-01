@@ -1,7 +1,9 @@
 package com.zoewave.probase.photodo.mobile.ui.components
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
@@ -16,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.photodo.mobile.core.ui.theme.LocalPaneContrast
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksViewModel
@@ -59,10 +62,14 @@ fun AdaptivePhotoDoScreen(
         currentState = PhotoDoFoldableState.CATEGORY_AND_PROJECTS
     }
 
+    val paneContrast = LocalPaneContrast.current
+
     ListDetailPaneScaffold(
         directive = navigator.scaffoldDirective,
         value = navigator.scaffoldValue,
         listPane = {
+            val listBackground = if (paneContrast == "TINTED") MaterialTheme.colorScheme.surfaceContainerLow
+                                 else MaterialTheme.colorScheme.surface
             if (currentState == PhotoDoFoldableState.CATEGORY_AND_PROJECTS) {
                 // Left Pane: Categories
                 val homeViewModel: HomeViewModel = hiltViewModel()
@@ -79,7 +86,7 @@ fun AdaptivePhotoDoScreen(
                             else -> { /* Handle other nav if needed */ }
                         }
                     },
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().background(listBackground)
                 )
             } else {
                 // Left Pane: Projects
@@ -97,11 +104,12 @@ fun AdaptivePhotoDoScreen(
                             // Stay in current state, but update detail pane
                         }
                     },
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().background(listBackground)
                 )
             }
         },
         detailPane = {
+            val detailBackground = MaterialTheme.colorScheme.surface
             if (currentState == PhotoDoFoldableState.CATEGORY_AND_PROJECTS) {
                 // Right Pane: Projects
                 val tasksViewModel: TasksViewModel = hiltViewModel()
@@ -116,7 +124,7 @@ fun AdaptivePhotoDoScreen(
                             currentState = PhotoDoFoldableState.PROJECTS_AND_TASKS
                         }
                     },
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().background(detailBackground)
                 )
             } else {
                 // Right Pane: Tasks (Detail)
@@ -131,7 +139,7 @@ fun AdaptivePhotoDoScreen(
                             currentState = PhotoDoFoldableState.CATEGORY_AND_PROJECTS
                         }
                     },
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().background(detailBackground)
                 )
             }
         },

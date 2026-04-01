@@ -7,4 +7,6 @@ interface AppSettingsRepository {
     suspend fun saveThemePreference(themeIdentifier: String)
     val palettePreferenceFlow: Flow<String>
     suspend fun savePalettePreference(paletteIdentifier: String)
+    val paneContrastFlow: Flow<String>
+    suspend fun savePaneContrast(paneContrastIdentifier: String)
 }

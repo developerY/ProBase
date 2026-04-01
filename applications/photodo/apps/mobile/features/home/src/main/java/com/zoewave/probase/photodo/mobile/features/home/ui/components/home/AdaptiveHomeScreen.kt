@@ -1,5 +1,6 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.photodo.mobile.core.ui.theme.LocalPaneContrast
 import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewContent
@@ -90,6 +92,8 @@ fun AdaptiveHomeScreen(
                 )
             }
         ) { paddingValues ->
+            val paneContrast = LocalPaneContrast.current
+            
             ListDetailPaneScaffold(
                 directive = navigator.scaffoldDirective,
                 value = navigator.scaffoldValue,
@@ -98,6 +102,10 @@ fun AdaptiveHomeScreen(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
+                            .background(
+                                if (paneContrast == "TINTED") MaterialTheme.colorScheme.surfaceContainerLow
+                                else MaterialTheme.colorScheme.surface
+                            )
                             .padding(paddingValues)
                             .padding(horizontal = 16.dp),
                         contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp),
