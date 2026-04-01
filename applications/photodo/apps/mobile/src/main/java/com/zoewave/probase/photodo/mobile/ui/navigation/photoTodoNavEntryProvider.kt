@@ -23,7 +23,6 @@ import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.Settings
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TaskDetail
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TasksList
-import kotlinx.coroutines.delay
 
 fun photoTodoNavEntryProvider(
     key: PhotoTodoRoute,
@@ -142,7 +141,6 @@ fun photoTodoNavEntryProvider(
                     val savedProjectId = uiState.savedProjectId
                     val savedProjectTitle = uiState.savedProjectTitle
                     LaunchedEffect(Unit) {
-                        delay(1500)
                         if (savedProjectId != null && savedProjectTitle != null) {
                             // First go back to pop SavePhoto, then navigate to TaskDetail
                             navigateBack()
