@@ -9,7 +9,7 @@ sealed interface TasksEvent {
     data class OnTaskToggled(val taskId: Long, val isCompleted: Boolean) : TasksEvent
 
     data object OnAddList : TasksEvent
-    data object OnDeleteListClicked : TasksEvent
+    data class OnDeleteProject(val projectId: Long) : TasksEvent
 
     data class OnDeleteCategoryClicked(val categoryId: Long) : TasksEvent
 

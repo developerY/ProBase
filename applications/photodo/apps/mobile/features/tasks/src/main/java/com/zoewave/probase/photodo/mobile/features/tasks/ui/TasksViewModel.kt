@@ -57,7 +57,8 @@ class TasksViewModel @Inject constructor(
                                     isFavorite = it.isFavorite,
                                     isUrgent = it.isUrgent,
                                     currentSpend = it.currentSpend,
-                                    projectBudget = it.projectBudget
+                                    projectBudget = it.projectBudget,
+                                    dueDateMillis = it.dueDate
                                 )
                             }
                             SmartDbResult(targetData.category.categoryId, targetData.category.name, mappedProjects, false)
@@ -79,7 +80,8 @@ class TasksViewModel @Inject constructor(
                                     isFavorite = it.isFavorite,
                                     isUrgent = it.isUrgent,
                                     currentSpend = it.currentSpend,
-                                    projectBudget = it.projectBudget
+                                    projectBudget = it.projectBudget,
+                                    dueDateMillis = it.dueDate
                                 )
                             }
                             SmartDbResult(firstData.category.categoryId, firstData.category.name, mappedProjects, false)
@@ -172,10 +174,9 @@ class TasksViewModel @Inject constructor(
                 }
             }
 
-            is TasksEvent.OnDeleteListClicked -> {
+            is TasksEvent.OnDeleteProject -> {
                 viewModelScope.launch {
-                    // Uncomment once you add this function to PhotoDoRepo:
-                    // repo.deleteTaskListById(event.listId)
+                    repo.deleteProjectById(event.projectId)
                 }
             }
 

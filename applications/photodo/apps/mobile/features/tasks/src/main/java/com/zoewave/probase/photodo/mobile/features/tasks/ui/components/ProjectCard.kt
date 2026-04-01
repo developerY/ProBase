@@ -42,11 +42,15 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun ProjectCard(
     project: ProjectListUiModel,
     onEvent: (TasksEvent) -> Unit,
+    onDeleteClicked: (ProjectListUiModel) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -97,8 +101,19 @@ fun ProjectCard(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
+                    // 🚀 The Dynamic "Smart Subtitle"
+                    val subtitleText = remember(project.categoryName, project.dueDateMillis) {
+                        buildString {
+                            append(project.categoryName)
+                            project.dueDateMillis?.let { dueDate ->
+                                val formatter = SimpleDateFormat("MMM dd", Locale.getDefault())
+                                val dateStr = formatter.format(Date(dueDate))
+                                append(" • $dateStr")
+                            }
+                        }
+                    }
                     Text(
-                        text = project.categoryName,
+                        text = subtitleText,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -126,6 +141,18 @@ fun ProjectCard(
                             tint = if (project.isFavorite) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+
+                    /*IconButton(
+                        onClick = { onDeleteClicked(project) },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Project",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }*/
                 }
             }
 
@@ -193,6 +220,7 @@ fun ProjectCardPreview() {
                 dueDateMillis = System.currentTimeMillis() + 86400000L * 3,
             ),
             onEvent = {},
+            onDeleteClicked = {},
             navTo = {}
         )
     }
@@ -213,6 +241,7 @@ fun ProjectCardBudgetPreview() {
                 projectBudget = 1000.0
             ),
             onEvent = {},
+            onDeleteClicked = {},
             navTo = {}
         )
     }
@@ -233,6 +262,7 @@ fun ProjectCardUrgentOverBudgetPreview() {
                 projectBudget = 1000.0
             ),
             onEvent = {},
+            onDeleteClicked = {},
             navTo = {}
         )
     }

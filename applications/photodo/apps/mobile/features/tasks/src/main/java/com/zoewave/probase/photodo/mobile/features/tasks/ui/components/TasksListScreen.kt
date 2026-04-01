@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FormatListBulleted
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButtonMenu
@@ -62,6 +63,7 @@ fun TasksListScreen(
 
     // Confirmation Dialog State
     var showDeleteConfirmation by rememberSaveable { mutableStateOf(false) }
+    var projectToDelete by remember { mutableStateOf<ProjectListUiModel?>(null) }
 
     BackHandler(fabMenuExpanded) { fabMenuExpanded = false }
 
@@ -168,6 +170,7 @@ fun TasksListScreen(
                         ProjectCard(
                             project = project,
                             onEvent = onEvent, // Pass the channel straight down!
+                            onDeleteClicked = { projectToDelete = it },
                             navTo = navTo
                         )
                     }
@@ -216,6 +219,32 @@ fun TasksListScreen(
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
                     Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_cancel_button))
+                }
+            }
+        )
+    }
+
+    if (projectToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { projectToDelete = null },
+            title = { Text("Delete Project?") },
+            text = { Text("This will permanently delete the '${projectToDelete?.title}' project and all its photos. This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        projectToDelete?.let {
+                            onEvent(TasksEvent.OnDeleteProject(it.projectId))
+                        }
+                        projectToDelete = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { projectToDelete = null }) {
+                    Text("Cancel")
                 }
             }
         )
