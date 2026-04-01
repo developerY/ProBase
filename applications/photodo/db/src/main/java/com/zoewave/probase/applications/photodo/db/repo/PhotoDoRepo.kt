@@ -2,6 +2,7 @@ package com.zoewave.probase.applications.photodo.db.repo
 
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjects
+import com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjectsAndTasks
 import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
@@ -23,6 +24,7 @@ interface PhotoDoRepo {
     fun getCategoryById(categoryId: Long): Flow<CategoryEntity?>
     suspend fun updateCategory(category: CategoryEntity)
     fun getCategoriesWithProjects(): Flow<List<CategoryWithProjects>>
+    fun getCategoriesWithProjectsAndTasks(): Flow<List<CategoryWithProjectsAndTasks>>
     suspend fun getOrCreateCategoryByName(name: String): Long
 
     // --- Project Operations ---

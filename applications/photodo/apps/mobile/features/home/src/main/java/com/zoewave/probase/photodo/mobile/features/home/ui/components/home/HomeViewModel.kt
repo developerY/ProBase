@@ -31,37 +31,27 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()*/
 
     // 1. Directly map the relational database stream into our UI State
-    val uiState: StateFlow<HomeUiState> = photoDoRepo.getCategoriesWithProjects()
-        .map { categoriesWithLists ->
-            if (categoriesWithLists.isEmpty()) return@map HomeUiState.Empty
+    val uiState: StateFlow<HomeUiState> = photoDoRepo.getCategoriesWithProjectsAndTasks()
+        .map { categoriesWithProjectsAndTasks ->
+            if (categoriesWithProjectsAndTasks.isEmpty()) return@map HomeUiState.Empty
 
-            val overviewModels = ArrayList<CategoryOverviewUiModel>(categoriesWithLists.size)
+            val overviewModels = ArrayList<CategoryOverviewUiModel>(categoriesWithProjectsAndTasks.size)
             val urgentProjects = ArrayList<ProjectListUiModel>()
 
-            for (groupedData in categoriesWithLists) {
+            for (groupedData in categoriesWithProjectsAndTasks) {
                 val category = groupedData.category
-                val projects = groupedData.projects
+                val projectsWithTasks = groupedData.projects
 
-                val totalTasks = projects.size
-                val completedTasks = projects.count { it.status == "Completed" }
+                var totalTasksInCategory = 0
+                var completedTasksInCategory = 0
 
-                val progressPercentage = if (totalTasks > 0) {
-                    completedTasks.toFloat() / totalTasks.toFloat()
-                } else {
-                    0f
-                }
+                for (projectWithTasks in projectsWithTasks) {
+                    val project = projectWithTasks.project
+                    val tasks = projectWithTasks.tasks
 
-                overviewModels.add(
-                    CategoryOverviewUiModel(
-                        id = category.categoryId,
-                        name = category.name,
-                        totalTasks = totalTasks,
-                        completedTasks = completedTasks,
-                        progressPercentage = progressPercentage
-                    )
-                )
+                    totalTasksInCategory += tasks.size
+                    completedTasksInCategory += tasks.count { it.isChecked }
 
-                for (project in projects) {
                     if (project.isFavorite || project.isUrgent) {
                         urgentProjects.add(
                             ProjectListUiModel(
@@ -77,6 +67,22 @@ class HomeViewModel @Inject constructor(
                         )
                     }
                 }
+
+                val progressPercentage = if (totalTasksInCategory > 0) {
+                    completedTasksInCategory.toFloat() / totalTasksInCategory.toFloat()
+                } else {
+                    0f
+                }
+
+                overviewModels.add(
+                    CategoryOverviewUiModel(
+                        id = category.categoryId,
+                        name = category.name,
+                        totalTasks = totalTasksInCategory,
+                        completedTasks = completedTasksInCategory,
+                        progressPercentage = progressPercentage
+                    )
+                )
             }
 
             HomeUiState.Success(

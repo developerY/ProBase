@@ -11,15 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -35,7 +34,6 @@ import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -45,7 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -56,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -67,6 +63,7 @@ import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeEvent
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeUiState
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.OverviewSummaryCard
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.components.bottomsheets.QuickTemplateBottomSheet
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
@@ -88,28 +85,6 @@ fun HomeOverviewScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = {
-            LargeTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.applications_photodo_apps_mobile_features_home_overview),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                actions = {
-                    IconButton(onClick = { /* Optional global action like settings or profile */ }) {
-                        Icon(Icons.Default.Analytics, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_analytics_content_desc))
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    navigationIconContentColor = Color.Unspecified,
-                    titleContentColor = Color.Unspecified,
-                    actionIconContentColor = Color.Unspecified
-                )
-            )
-        } ,// ✅ 1. ADD THE FAB HERE
         // 2. Replace the Scaffold's floatingActionButton block with this:
         floatingActionButton = {
             FloatingActionButtonMenu(
@@ -153,15 +128,15 @@ fun HomeOverviewScreen(
                     text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_quick_project)) }
                 )
 
-                // 🚀 NEW: Camera FAB integrated into the Home Menu!
-                FloatingActionButtonMenuItem(
+                // NEW: Camera FAB integrated into the Home Menu!
+                /* FloatingActionButtonMenuItem(
                     onClick = {
                         fabMenuExpanded = false
                         navTo(PhotoTodoRoute.Camera(projectId = null))
                     },
                     icon = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
                     text = { Text(stringResource(com.zoewave.photodo.model.R.string.applications_photodo_model_route_camera)) }
-                )
+                ) */
             }
         }
     ) { innerPadding ->
@@ -189,6 +164,10 @@ fun HomeOverviewScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
+                        item(span = { GridItemSpan(2) }) {
+                            OverviewSummaryCard(categories = uiState.categories)
+                        }
+
                         itemsIndexed(
                             items = uiState.categories,
                             key = { _, category -> category.id }
@@ -326,11 +305,13 @@ fun CategoryDashboardCard(
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = category.progressText,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (category.totalTasks > 0) {
+                        Text(
+                            text = category.progressText,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 IconButton(
@@ -363,15 +344,20 @@ fun CategoryDashboardCard(
             }
 
             // Bottom: Thicker, expressive progress bar
-            LinearProgressIndicator(
-                progress = { category.progressPercentage },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)), // Rounded ends for the track
-                color = contentColor, // Use the high-contrast text color for the bar
-                trackColor = contentColor.copy(alpha = 0.2f),
-            )
+            if (category.totalTasks > 0) {
+                LinearProgressIndicator(
+                    progress = { category.progressPercentage },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp)), // Rounded ends for the track
+                    color = contentColor, // Use the high-contrast text color for the bar
+                    trackColor = contentColor.copy(alpha = 0.2f),
+                )
+            } else {
+                // Placeholder to maintain card height consistency
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 }
