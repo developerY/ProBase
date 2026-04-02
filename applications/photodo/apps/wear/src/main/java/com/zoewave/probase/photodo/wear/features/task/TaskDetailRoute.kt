@@ -4,14 +4,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,8 +21,6 @@ import androidx.wear.compose.material3.CircularProgressIndicator
 import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
-import coil.compose.AsyncImage
-import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 
 @Composable
@@ -42,16 +38,14 @@ fun TaskDetailRoute(
 
     TaskDetailScreen(
         modifier = modifier,
-        uiState = uiState,
-        onToggleTask = viewModel::onToggleTask
+        uiState = uiState
     )
 }
 
 @Composable
 fun TaskDetailScreen(
     modifier: Modifier = Modifier,
-    uiState: TaskDetailUiState,
-    onToggleTask: (TaskEntity, Boolean) -> Unit
+    uiState: TaskDetailUiState
 ) {
     val listState = rememberScalingLazyListState()
 
@@ -78,17 +72,21 @@ fun TaskDetailScreen(
                         }
                     }
 
-                    // --- PHOTOS ---
-                    if (uiState.photos.isNotEmpty()) {
+                    // --- PHOTOS COUNT ---
+                    if (uiState.photoCount > 0) {
                         item {
                             Text(
-                                "Photos",
+                                "Photos (${uiState.photoCount})",
                                 style = MaterialTheme.typography.labelSmall,
                                 modifier = Modifier.padding(bottom = 4.dp)
                             )
                         }
-                        items(uiState.photos) { photo ->
-                            PhotoItem(photo = photo)
+                        item {
+                            Text(
+                                "View photos on phone",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
 
@@ -101,10 +99,7 @@ fun TaskDetailScreen(
                         )
                     }
                     items(uiState.tasks) { task ->
-                        TaskItem(
-                            task = task,
-                            onCheckedChange = { onToggleTask(task, it) }
-                        )
+                        TaskItem(task = task)
                     }
                 }
             }
@@ -113,27 +108,13 @@ fun TaskDetailScreen(
 }
 
 @Composable
-fun TaskItem(
-    task: TaskEntity,
-    onCheckedChange: (Boolean) -> Unit
-) {
+fun TaskItem(task: TaskEntity) {
+    // One-Way Sync: Watch is View-Only. Checkboxes are disabled.
     CheckboxButton(
         checked = task.isChecked,
-        onCheckedChange = onCheckedChange,
+        onCheckedChange = { /* Disabled in View-Only mode */ },
+        enabled = false, // Purely read-only icon
         label = { Text(task.text) },
         modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
-fun PhotoItem(photo: PhotoEntity) {
-    AsyncImage(
-        model = photo.photoUri,
-        contentDescription = "Project Photo",
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .padding(vertical = 4.dp),
-        contentScale = ContentScale.Crop
     )
 }
