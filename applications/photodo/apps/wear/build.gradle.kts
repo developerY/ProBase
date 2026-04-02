@@ -57,6 +57,9 @@ dependencies {
     implementation(project(":applications:photodo:db"))
     implementation(project(":applications:photodo:data"))
 
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.google.play.services.wearable)
+
     // Wear UI & Navigation
     implementation(libs.androidx.wear.compose.material3)
     implementation(libs.androidx.wear.compose.foundation)

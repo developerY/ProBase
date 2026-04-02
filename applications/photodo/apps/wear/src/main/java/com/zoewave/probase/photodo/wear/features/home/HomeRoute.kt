@@ -1,10 +1,17 @@
 package com.zoewave.probase.photodo.wear.features.home
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -16,7 +23,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
+import androidx.wear.compose.material3.Button
+import androidx.wear.compose.material3.ButtonDefaults
 import androidx.wear.compose.material3.CircularProgressIndicator
+import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
@@ -33,7 +43,8 @@ fun HomeRoute(
     HomeScreen(
         modifier = modifier,
         uiState = uiState,
-        onCategoryClick = onCategoryClick
+        onCategoryClick = onCategoryClick,
+        onRequestSync = viewModel::requestSync
     )
 }
 
@@ -41,7 +52,8 @@ fun HomeRoute(
 fun HomeScreen(
     modifier: Modifier = Modifier,
     uiState: HomeUiState,
-    onCategoryClick: (Long, String) -> Unit
+    onCategoryClick: (Long, String) -> Unit,
+    onRequestSync: () -> Unit
 ) {
     val listState = rememberScalingLazyListState()
 
@@ -54,12 +66,35 @@ fun HomeScreen(
                 CircularProgressIndicator()
             }
             HomeUiState.Empty -> {
-                Text(
-                    "Open PhotoDo on phone to sync",
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(16.dp)
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Open PhotoDo on phone to sync",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = onRequestSync,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        ),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Sync"
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Sync Now")
+                    }
+                }
             }
             is HomeUiState.Success -> {
                 ScalingLazyColumn(

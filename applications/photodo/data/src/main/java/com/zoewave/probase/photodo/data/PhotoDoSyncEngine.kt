@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.encodeToString
@@ -47,20 +48,42 @@ class PhotoDoSyncEngine @Inject constructor(
             ) { hierarchy, details ->
                 mapToSyncModels(hierarchy, details)
             }.collectLatest { syncData ->
-                try {
-                    val jsonPayload = Json.encodeToString(syncData)
-
-                    val request = PutDataMapRequest.create("/photodo/sync_state").apply {
-                        dataMap.putString("payload", jsonPayload)
-                        dataMap.putLong("timestamp", System.currentTimeMillis())
-                    }.asPutDataRequest().setUrgent()
-
-                    dataClient.putDataItem(request).await()
-                    Log.d(TAG, "Successfully broadcasted sync state (${syncData.size} categories)")
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to broadcast sync state", e)
-                }
+                broadcast(syncData)
             }
+        }
+    }
+
+    /**
+     * Manually triggers a one-shot sync broadcast of the current state.
+     * Useful for responding to "request sync" pings from the watch.
+     */
+    fun triggerSync() {
+        scope.launch {
+            try {
+                Log.d(TAG, "Manual sync trigger received. Performing one-shot broadcast.")
+                val hierarchy = photoDoRepo.getCategoriesWithProjectsAndTasks().first()
+                val details = photoDoRepo.getAllProjectDetails().first()
+                val syncData = mapToSyncModels(hierarchy, details)
+                broadcast(syncData)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to perform manual sync trigger", e)
+            }
+        }
+    }
+
+    private suspend fun broadcast(syncData: List<SyncCategory>) {
+        try {
+            val jsonPayload = Json.encodeToString(syncData)
+
+            val request = PutDataMapRequest.create("/photodo/sync_state").apply {
+                dataMap.putString("payload", jsonPayload)
+                dataMap.putLong("timestamp", System.currentTimeMillis())
+            }.asPutDataRequest().setUrgent()
+
+            dataClient.putDataItem(request).await()
+            Log.d(TAG, "Successfully broadcasted sync state (${syncData.size} categories)")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to broadcast sync state", e)
         }
     }
 
