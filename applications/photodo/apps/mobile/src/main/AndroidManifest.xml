@@ -21,6 +21,18 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name="com.zoewave.probase.photodo.data.PhotoDoSyncListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data
+                    android:host="*"
+                    android:pathPrefix="/photodo/task_update/"
+                    android:scheme="wear" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

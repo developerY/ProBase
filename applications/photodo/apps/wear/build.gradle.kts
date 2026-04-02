@@ -55,6 +55,7 @@ dependencies {
 
     implementation(project(":applications:photodo:model"))
     implementation(project(":applications:photodo:db"))
+    implementation(project(":applications:photodo:data"))
 
     // Wear UI & Navigation
     implementation(libs.androidx.wear.compose.material3)
