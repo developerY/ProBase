@@ -3,7 +3,7 @@ package com.zoewave.probase.photodo.wear.features.home
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
+import com.zoewave.probase.photodo.data.SyncDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,40 +14,37 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val photoDoRepo: PhotoDoRepo
+    private val syncDataStore: SyncDataStore
 ) : ViewModel() {
 
     private val TAG = "PhotoDoHomeViewModel"
 
-    val uiState: StateFlow<HomeUiState> = photoDoRepo.getCategoriesWithProjectsAndTasks()
-        .map { data ->
-            if (data.isEmpty()) return@map HomeUiState.Empty
+    val uiState: StateFlow<HomeUiState> = syncDataStore.latestSyncDataFlow
+        .map { categories ->
+            if (categories.isEmpty()) return@map HomeUiState.Empty
 
-            val categories = data.map { grouped ->
-                val category = grouped.category
-                val projects = grouped.projects
-
+            val mappedCategories = categories.map { syncCategory ->
                 var totalTasks = 0
                 var completedTasks = 0
 
-                projects.forEach { projectWithTasks ->
-                    totalTasks += projectWithTasks.tasks.size
-                    completedTasks += projectWithTasks.tasks.count { it.isChecked }
+                syncCategory.projects.forEach { project ->
+                    totalTasks += project.tasks.size
+                    completedTasks += project.tasks.count { it.isCompleted }
                 }
 
                 CategoryWearUiModel(
-                    id = category.categoryId,
-                    name = category.name,
+                    id = syncCategory.id,
+                    name = syncCategory.name,
                     totalTasks = totalTasks,
                     completedTasks = completedTasks,
                     progressPercentage = if (totalTasks > 0) completedTasks.toFloat() / totalTasks else 0f
                 )
             }
 
-            HomeUiState.Success(categories = categories)
+            HomeUiState.Success(categories = mappedCategories)
         }
         .catch { e ->
-            Log.e(TAG, "Error loading categories", e)
+            Log.e(TAG, "Error loading categories from DataStore", e)
             emit(HomeUiState.Empty)
         }
         .stateIn(

@@ -44,6 +44,7 @@ Update the sync engine and listener service to handle full state broadcast and r
 #### [SyncDataStore.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/photodo/data/src/main/java/com/zoewave/probase/photodo/data/SyncDataStore.kt) [NEW]
 
 - Provide a wrapper around Jetpack DataStore to store and retrieve the latest sync payload.
+- **Internal JSON decoding**: Expose a `Flow<List<SyncCategory>>` to the ViewModels, handling the `kotlinx.serialization` decoding internally.
 
 ---
 
@@ -69,10 +70,10 @@ Update ViewModels and UI to use the synced state and enforce "view-only" mode.
 
 - Update `intent-filter` for `PhotoDoSyncListenerService` to watch `/photodo/sync_state` instead of `/photodo/task_update/`.
 
-#### [HomeViewModel.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/photodo/apps/wear/src/main/java/com/zoewave/probase/photodo/wear/features/home/HomeViewModel.kt)
+#### [HomeRoute.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/photodo/apps/wear/src/main/java/com/zoewave/probase/photodo/wear/features/home/HomeRoute.kt)
 
-- Replace `PhotoDoRepo` dependency with `SyncDataStore`.
-- Observe `latestPayloadFlow`, decode JSON, and update `uiState`.
+- Update `HomeScreen` to handle the empty state.
+- Display a centered `Text` component saying **"Open PhotoDo on phone to sync"** if the categories list is empty.
 
 #### [ProjectListViewModel.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/photodo/apps/wear/src/main/java/com/zoewave/probase/photodo/wear/features/project/ProjectListViewModel.kt)
 

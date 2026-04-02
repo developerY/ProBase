@@ -32,7 +32,7 @@
                 <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
                 <data
                     android:host="*"
-                    android:pathPrefix="/photodo/task_update/"
+                    android:pathPrefix="/photodo/sync_state"
                     android:scheme="wear" />
             </intent-filter>
         </service>
