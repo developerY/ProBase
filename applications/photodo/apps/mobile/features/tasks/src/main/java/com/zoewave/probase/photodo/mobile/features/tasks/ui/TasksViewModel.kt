@@ -257,7 +257,12 @@ class TasksViewModel @Inject constructor(
     }
 
     private fun updateTask(taskId: Long, isCompleted: Boolean) {
-        // Implementation omitted for brevity
+        viewModelScope.launch {
+            val task = repo.getTaskById(taskId)
+            if (task != null) {
+                repo.updateTask(task.copy(isChecked = isCompleted))
+            }
+        }
     }
 }
 

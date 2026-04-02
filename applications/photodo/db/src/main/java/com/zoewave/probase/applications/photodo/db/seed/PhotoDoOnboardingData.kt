@@ -34,16 +34,16 @@ object PhotoDoOnboardingData {
     // 3. The Visual Prompts (Tasks) to train the user
     val defaultTasks = listOf(
         // Under "Food & Groceries"
-        TaskEntity(taskId = 1, projectId = 2, text = "Tap the Camera to snap a pic of an empty carton"),
-        TaskEntity(taskId = 2, projectId = 2, text = "Take a photo of a recipe you want to try"),
+        TaskEntity(taskId = 1, projectId = 2, text = "Tap the Camera to snap a pic of an empty carton", globalSyncId = "photodo-task-1"),
+        TaskEntity(taskId = 2, projectId = 2, text = "Take a photo of a recipe you want to try", globalSyncId = "photodo-task-2"),
 
         // Under "Repairs & Projects"
-        TaskEntity(taskId = 3, projectId = 3, text = "Snap a photo of the broken pipe under the sink"),
+        TaskEntity(taskId = 3, projectId = 3, text = "Snap a photo of the broken pipe under the sink", globalSyncId = "photodo-task-3"),
 
         // Under "Admin & Expenses"
-        TaskEntity(taskId = 4, projectId = 5, text = "Tap the Camera to scan a cafe receipt"),
+        TaskEntity(taskId = 4, projectId = 5, text = "Tap the Camera to scan a cafe receipt", globalSyncId = "photodo-task-4"),
 
         // Under "Travel & Logistics"
-        TaskEntity(taskId = 5, projectId = 8, text = "Take a picture of your passport")
+        TaskEntity(taskId = 5, projectId = 8, text = "Take a picture of your passport", globalSyncId = "photodo-task-5")
     )
 }

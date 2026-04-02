@@ -11,6 +11,7 @@ import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectWithPhotos
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
+import com.zoewave.probase.applications.photodo.db.sync.TaskSyncEngine
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -18,7 +19,8 @@ import javax.inject.Inject
  * Implementation of [PhotoDoRepo] using [PhotoDoDao].
  */
 class PhotoDoRepoImpl @Inject constructor(
-    private val photoDoDao: PhotoDoDao
+    private val photoDoDao: PhotoDoDao,
+    private val syncEngine: TaskSyncEngine
 ) : PhotoDoRepo {
 
     // --- Category Operations ---
@@ -106,11 +108,15 @@ class PhotoDoRepoImpl @Inject constructor(
 
     // --- Task Operations ---
     override suspend fun upsertTask(task: TaskEntity): Long {
-        return photoDoDao.upsertTask(task)
+        val id = photoDoDao.upsertTask(task)
+        syncEngine.syncTaskUpdate(task)
+        return id
     }
 
     override suspend fun updateTask(task: TaskEntity) {
-        photoDoDao.updateTask(task)
+        val updatedTask = task.copy(lastModified = System.currentTimeMillis())
+        photoDoDao.updateTask(updatedTask)
+        syncEngine.syncTaskUpdate(updatedTask)
     }
 
     override suspend fun deleteTask(task: TaskEntity) {
@@ -119,6 +125,18 @@ class PhotoDoRepoImpl @Inject constructor(
 
     override fun getTasksForProject(projectId: Long): Flow<List<TaskEntity>> {
         return photoDoDao.getTasksForProject(projectId)
+    }
+
+    override suspend fun getTaskById(taskId: Long): TaskEntity? {
+        return photoDoDao.getTaskById(taskId)
+    }
+
+    override suspend fun getTaskBySyncId(globalSyncId: String): TaskEntity? {
+        return photoDoDao.getTaskBySyncId(globalSyncId)
+    }
+
+    override suspend fun updateTaskStatusBySyncId(globalSyncId: String, isChecked: Boolean, lastModified: Long) {
+        photoDoDao.updateTaskStatusBySyncId(globalSyncId, isChecked, lastModified)
     }
 
     // --- Photo Operations ---

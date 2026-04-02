@@ -137,6 +137,15 @@ interface PhotoDoDao {
     @Query("SELECT * FROM tasks WHERE projectId = :projectId ORDER BY sortOrder ASC")
     fun getTasksForProject(projectId: Long): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM tasks WHERE taskId = :taskId LIMIT 1")
+    suspend fun getTaskById(taskId: Long): TaskEntity?
+
+    @Query("SELECT * FROM tasks WHERE globalSyncId = :globalSyncId LIMIT 1")
+    suspend fun getTaskBySyncId(globalSyncId: String): TaskEntity?
+
+    @Query("UPDATE tasks SET isChecked = :isChecked, lastModified = :lastModified WHERE globalSyncId = :globalSyncId")
+    suspend fun updateTaskStatusBySyncId(globalSyncId: String, isChecked: Boolean, lastModified: Long)
+
     // --- Photo Operations ---
 
     @Upsert

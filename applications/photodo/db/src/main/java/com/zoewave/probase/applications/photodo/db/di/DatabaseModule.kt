@@ -10,6 +10,7 @@ import com.zoewave.probase.applications.photodo.db.PhotoDoDao
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepoImpl
 import com.zoewave.probase.applications.photodo.db.seed.PhotoDoOnboardingData
+import com.zoewave.probase.applications.photodo.db.sync.TaskSyncEngine
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -53,8 +54,11 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun providePhotoDoRepository(photoDoDao: PhotoDoDao): PhotoDoRepo {
-        return PhotoDoRepoImpl(photoDoDao)
+    fun providePhotoDoRepository(
+        photoDoDao: PhotoDoDao,
+        syncEngine: TaskSyncEngine
+    ): PhotoDoRepo {
+        return PhotoDoRepoImpl(photoDoDao, syncEngine)
     }
 }
 

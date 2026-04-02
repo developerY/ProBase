@@ -17,7 +17,7 @@ android {
     defaultConfig {
         applicationId = "com.zoewave.probase.photodo"
         versionCode = 1
-        versionName = "0.1"
+        versionName = "0.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -90,6 +90,7 @@ dependencies {
     implementation(project(":features:camera"))
     implementation(project(":applications:photodo:model"))
     implementation(project(":applications:photodo:db"))
+    implementation(project(":applications:photodo:data"))
     // implementation(project(":core:database")) // Uncomment if needed
 
     // --- PhotoTodo Specific Features ---

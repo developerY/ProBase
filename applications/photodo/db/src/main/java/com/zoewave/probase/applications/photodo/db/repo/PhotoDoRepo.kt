@@ -44,6 +44,9 @@ interface PhotoDoRepo {
     suspend fun updateTask(task: TaskEntity)
     suspend fun deleteTask(task: TaskEntity)
     fun getTasksForProject(projectId: Long): Flow<List<TaskEntity>>
+    suspend fun getTaskById(taskId: Long): TaskEntity?
+    suspend fun getTaskBySyncId(globalSyncId: String): TaskEntity?
+    suspend fun updateTaskStatusBySyncId(globalSyncId: String, isChecked: Boolean, lastModified: Long)
 
     // --- Photo Operations ---
     suspend fun upsertPhoto(photo: PhotoEntity): Long
