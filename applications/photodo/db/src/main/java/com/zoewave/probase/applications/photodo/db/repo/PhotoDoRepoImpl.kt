@@ -108,7 +108,9 @@ class PhotoDoRepoImpl @Inject constructor(
 
     // --- Task Operations ---
     override suspend fun upsertTask(task: TaskEntity): Long {
-        return photoDoDao.upsertTask(task)
+        val id = photoDoDao.upsertTask(task)
+        syncEngine.syncTaskUpdate(task)
+        return id
     }
 
     override suspend fun updateTask(task: TaskEntity) {
