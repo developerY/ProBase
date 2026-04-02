@@ -1,0 +1,8 @@
+/build
+/release
+lint-baseline.xml
+*.iml
+.gradle
+local.properties
+.idea
+.DS_Store
