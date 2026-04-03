@@ -3,7 +3,6 @@ package com.zoewave.probase.photodo.wear.features.project
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,10 +17,7 @@ import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material3.CircularProgressIndicator
 import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.Text
-import androidx.wear.compose.material3.TitleCard
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.zoewave.probase.photodo.wear.ui.components.ProjectCard
 
 @Composable
 fun ProjectListRoute(
@@ -74,7 +70,7 @@ fun ProjectListScreen(
                         }
                     }
                     items(uiState.projects) { project ->
-                        ProjectItem(
+                        ProjectCard(
                             project = project,
                             onClick = { onProjectClick(project.id, project.name) }
                         )
@@ -83,36 +79,4 @@ fun ProjectListScreen(
             }
         }
     }
-}
-
-@Composable
-fun ProjectItem(
-    project: ProjectWearUiModel,
-    onClick: () -> Unit
-) {
-    TitleCard(
-        onClick = onClick,
-        title = { Text(project.name) },
-        subtitle = {
-            val budgetText = if (project.budget > 0) {
-                "Budget: $${String.format(Locale.getDefault(), "%.2f", project.budget)}"
-            } else {
-                "No Budget"
-            }
-            Text(budgetText)
-        },
-        time = {
-            project.dueDate?.let {
-                Text(formatDate(it))
-            }
-        },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text("Spent: $${String.format(Locale.getDefault(), "%.2f", project.currentSpend)}")
-    }
-}
-
-private fun formatDate(timeInMillis: Long): String {
-    val formatter = SimpleDateFormat("MMM dd", Locale.getDefault())
-    return formatter.format(Date(timeInMillis))
 }

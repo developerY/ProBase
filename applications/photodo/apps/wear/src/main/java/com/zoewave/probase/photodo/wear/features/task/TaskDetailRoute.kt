@@ -1,16 +1,25 @@
 package com.zoewave.probase.photodo.wear.features.task
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
@@ -21,7 +30,10 @@ import androidx.wear.compose.material3.CircularProgressIndicator
 import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
+import androidx.wear.tooling.preview.devices.WearDevices
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
+import com.zoewave.probase.photodo.data.util.loadAssetAsBitmap
+import com.zoewave.probase.photodo.wear.ui.theme.PhotoDoWearTheme
 
 @Composable
 fun TaskDetailRoute(
@@ -48,6 +60,14 @@ fun TaskDetailScreen(
     uiState: TaskDetailUiState
 ) {
     val listState = rememberScalingLazyListState()
+    val context = LocalContext.current
+    var projectBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
+
+    if (uiState is TaskDetailUiState.Success && uiState.hasPhoto) {
+        LaunchedEffect(uiState.projectId) {
+            projectBitmap = loadAssetAsBitmap(context, "/photodo/sync_state", "photo_${uiState.projectId}")
+        }
+    }
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -72,6 +92,21 @@ fun TaskDetailScreen(
                         }
                     }
 
+                    // --- PRIMARY PHOTO (WEAR VERSION) ---
+                    if (projectBitmap != null) {
+                        item {
+                            Image(
+                                bitmap = projectBitmap!!.asImageBitmap(),
+                                contentDescription = "Project Thumbnail",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .size(100.dp)
+                                    .padding(vertical = 8.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+
                     // --- PHOTOS COUNT ---
                     if (uiState.photoCount > 0) {
                         item {
@@ -81,12 +116,14 @@ fun TaskDetailScreen(
                                 modifier = Modifier.padding(bottom = 4.dp)
                             )
                         }
-                        item {
-                            Text(
-                                "View photos on phone",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        if (projectBitmap == null) {
+                            item {
+                                Text(
+                                    "View photos on phone",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
 
@@ -117,4 +154,25 @@ fun TaskItem(task: TaskEntity) {
         label = { Text(task.text) },
         modifier = Modifier.fillMaxWidth()
     )
+}
+
+@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
+@Composable
+fun TaskDetailScreenPreview() {
+    val sampleTasks = listOf(
+        TaskEntity(taskId = 1, projectId = 1, text = "Buy white paint", isChecked = false),
+        TaskEntity(taskId = 2, projectId = 1, text = "Measure cabinets", isChecked = true),
+        TaskEntity(taskId = 3, projectId = 1, text = "Pick up brushes", isChecked = false)
+    )
+    val uiState = TaskDetailUiState.Success(
+        projectId = 1,
+        projectTitle = "Kitchen Renovation",
+        tasks = sampleTasks,
+        photos = emptyList(),
+        photoCount = 2,
+        hasPhoto = true
+    )
+    PhotoDoWearTheme {
+        TaskDetailScreen(uiState = uiState)
+    }
 }

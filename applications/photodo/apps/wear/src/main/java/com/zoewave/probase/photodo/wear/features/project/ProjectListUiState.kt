@@ -16,5 +16,6 @@ data class ProjectWearUiModel(
     val currentSpend: Double,
     val dueDate: Long?,
     val isUrgent: Boolean,
-    val progress: Float
+    val progress: Float,
+    val hasPhoto: Boolean = false // Added flag for photo sync
 )

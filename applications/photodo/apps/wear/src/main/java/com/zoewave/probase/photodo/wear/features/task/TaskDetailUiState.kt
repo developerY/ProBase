@@ -7,9 +7,11 @@ sealed interface TaskDetailUiState {
     data object Loading : TaskDetailUiState
     data object Empty : TaskDetailUiState
     data class Success(
+        val projectId: Long,
         val projectTitle: String,
         val tasks: List<TaskEntity>,
         val photos: List<PhotoEntity>,
-        val photoCount: Int = 0 // Added photo count for View-Only mode
+        val photoCount: Int = 0,
+        val hasPhoto: Boolean = false
     ) : TaskDetailUiState
 }
