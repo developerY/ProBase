@@ -34,10 +34,9 @@ class TaskDetailViewModel @Inject constructor(
 
         if (foundProject != null) {
             TaskDetailUiState.Success(
+                projectId = id,
                 projectTitle = foundProject.name,
                 tasks = foundProject.tasks.map { syncTask ->
-                    // Map back to TaskEntity for UI compatibility (or update UI to use SyncTask)
-                    // PhotoDo's TaskDetailScreen expects List<TaskEntity>
                     TaskEntity(
                         taskId = syncTask.id,
                         projectId = id,
@@ -46,7 +45,8 @@ class TaskDetailViewModel @Inject constructor(
                     )
                 },
                 photos = emptyList(), // Not syncing photos directly
-                photoCount = foundProject.photoCount
+                photoCount = foundProject.photoCount,
+                hasPhoto = foundProject.hasPhoto
             )
         } else {
             TaskDetailUiState.Empty

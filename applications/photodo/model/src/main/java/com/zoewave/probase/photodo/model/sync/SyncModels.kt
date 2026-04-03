@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 data class SyncCategory(
     val id: Long, // Use the Phone's ID!
     val name: String,
-    val projects: List<SyncProject>
+    val projects: List<SyncProject>,
+    val hasPhoto: Boolean = false // Added for Category thumbnails
 )
 
 @Serializable
@@ -16,7 +17,8 @@ data class SyncProject(
     val totalBudget: Double,
     val spentAmount: Double,
     val tasks: List<SyncTask>,
-    val photoCount: Int // Just the integer! 4 bytes of data.
+    val photoCount: Int, // Just the integer! 4 bytes of data.
+    val hasPhoto: Boolean = false // Added flag for the watch to check before fetching Assets
 )
 
 @Serializable

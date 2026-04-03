@@ -1,11 +1,14 @@
 package com.zoewave.probase.photodo.data
 
 import android.content.Context
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
+import com.zoewave.probase.photodo.data.util.toTinyGrayscaleAsset
 import com.zoewave.probase.photodo.model.sync.SyncCategory
 import com.zoewave.probase.photodo.model.sync.SyncProject
 import com.zoewave.probase.photodo.model.sync.SyncTask
@@ -18,8 +21,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -78,6 +81,51 @@ class PhotoDoSyncEngine @Inject constructor(
             val request = PutDataMapRequest.create("/photodo/sync_state").apply {
                 dataMap.putString("payload", jsonPayload)
                 dataMap.putLong("timestamp", System.currentTimeMillis())
+                
+                // --- ATTACH PHOTO ASSETS ---
+                // We need the project details again to get the actual URIs
+                val allDetails = photoDoRepo.getAllProjectDetails().first()
+                syncData.forEach { category ->
+                    // 1. Attach Category Photo
+                    if (category.hasPhoto) {
+                        try {
+                            val dbCategory = photoDoRepo.getCategoryById(category.id).first()
+                            val categoryPhotoUri = dbCategory?.imageUri
+                            if (categoryPhotoUri != null) {
+                                val bitmap = loadBitmapFromUri(categoryPhotoUri)
+                                if (bitmap != null) {
+                                    val asset = bitmap.toTinyGrayscaleAsset()
+                                    dataMap.putAsset("category_${category.id}", asset)
+                                    Log.d(TAG, "Attached category asset: category_${category.id}")
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Failed to attach category asset ${category.id}", e)
+                        }
+                    }
+
+                    // 2. Attach Project Photos (Sync up to 5 thumbnails per project)
+                    category.projects.forEach { project ->
+                        if (project.hasPhoto) {
+                            val details = allDetails.find { it.project.projectId == project.id }
+                            val projectPhotos = details?.photos?.take(5) ?: emptyList()
+                            
+                            projectPhotos.forEachIndexed { index, photoEntity ->
+                                try {
+                                    val bitmap = loadBitmapFromUri(photoEntity.photoUri)
+                                    if (bitmap != null) {
+                                        val asset = bitmap.toTinyGrayscaleAsset()
+                                        val assetKey = "photo_${project.id}_$index"
+                                        dataMap.putAsset(assetKey, asset)
+                                        Log.d(TAG, "Attached project asset: $assetKey")
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Failed to attach project asset ${project.id} index $index", e)
+                                }
+                            }
+                        }
+                    }
+                }
             }.asPutDataRequest().setUrgent()
 
             dataClient.putDataItem(request).await()
@@ -87,16 +135,29 @@ class PhotoDoSyncEngine @Inject constructor(
         }
     }
 
+    private fun loadBitmapFromUri(uriString: String): android.graphics.Bitmap? {
+        return try {
+            val uri = Uri.parse(uriString)
+            val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+            BitmapFactory.decodeStream(inputStream)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading bitmap from URI: $uriString", e)
+            null
+        }
+    }
+
     private fun mapToSyncModels(
         hierarchy: List<com.zoewave.probase.applications.photodo.db.entity.CategoryWithProjectsAndTasks>,
         allDetails: List<ProjectDetails>
     ): List<SyncCategory> {
         val photoCounts = allDetails.associate { it.project.projectId to it.photos.size }
+        val hasPhotos = allDetails.associate { it.project.projectId to it.photos.isNotEmpty() }
 
         return hierarchy.map { categoryWithProjects ->
             SyncCategory(
                 id = categoryWithProjects.category.categoryId,
                 name = categoryWithProjects.category.name,
+                hasPhoto = categoryWithProjects.category.imageUri != null,
                 projects = categoryWithProjects.projects.map { projectWithTasks ->
                     SyncProject(
                         id = projectWithTasks.project.projectId,
@@ -110,7 +171,8 @@ class PhotoDoSyncEngine @Inject constructor(
                                 isCompleted = task.isChecked
                             )
                         },
-                        photoCount = photoCounts[projectWithTasks.project.projectId] ?: 0
+                        photoCount = photoCounts[projectWithTasks.project.projectId] ?: 0,
+                        hasPhoto = hasPhotos[projectWithTasks.project.projectId] ?: false
                     )
                 }
             )

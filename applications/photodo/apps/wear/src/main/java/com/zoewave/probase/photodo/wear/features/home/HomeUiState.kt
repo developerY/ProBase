@@ -13,5 +13,6 @@ data class CategoryWearUiModel(
     val name: String,
     val totalTasks: Int,
     val completedTasks: Int,
-    val progressPercentage: Float
+    val progressPercentage: Float,
+    val hasPhoto: Boolean = false
 )

@@ -32,6 +32,18 @@ import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.TitleCard
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import com.zoewave.probase.photodo.data.util.loadAssetAsBitmap
+
 @Composable
 fun HomeRoute(
     modifier: Modifier = Modifier,
@@ -124,14 +136,34 @@ fun CategoryItem(
     category: CategoryWearUiModel,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    var categoryBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
+
+    if (category.hasPhoto) {
+        LaunchedEffect(category.id) {
+            categoryBitmap = loadAssetAsBitmap(context, "/photodo/sync_state", "category_${category.id}")
+        }
+    }
+
+    val titleBlock: @Composable RowScope.() -> Unit = {
+        Text(category.name)
+    }
+
     TitleCard(
         onClick = onClick,
-        title = { Text(category.name) },
+        title = titleBlock,
         subtitle = {
             Text("${category.completedTasks}/${category.totalTasks} tasks")
         },
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Progress bar could be added here later
+        if (categoryBitmap != null) {
+            Image(
+                bitmap = categoryBitmap!!.asImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                contentScale = ContentScale.Crop
+            )
+        }
     }
 }
