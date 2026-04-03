@@ -12,7 +12,9 @@ import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectWithPhotos
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.applications.photodo.db.sync.TaskSyncEngine
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -24,11 +26,11 @@ class PhotoDoRepoImpl @Inject constructor(
 ) : PhotoDoRepo {
 
     // --- Category Operations ---
-    override suspend fun upsertCategory(category: CategoryEntity): Long {
-        return photoDoDao.upsertCategory(category)
+    override suspend fun upsertCategory(category: CategoryEntity): Long = withContext(Dispatchers.IO) {
+        photoDoDao.upsertCategory(category)
     }
 
-    override suspend fun deleteCategory(category: CategoryEntity) {
+    override suspend fun deleteCategory(category: CategoryEntity) = withContext(Dispatchers.IO) {
         photoDoDao.deleteCategory(category)
     }
 
@@ -40,7 +42,7 @@ class PhotoDoRepoImpl @Inject constructor(
         return photoDoDao.getCategoryById(categoryId)
     }
 
-    override suspend fun updateCategory(category: CategoryEntity) {
+    override suspend fun updateCategory(category: CategoryEntity) = withContext(Dispatchers.IO) {
         photoDoDao.updateCategory(category)
     }
 
@@ -52,11 +54,11 @@ class PhotoDoRepoImpl @Inject constructor(
         return photoDoDao.getCategoriesWithProjectsAndTasks()
     }
 
-    override suspend fun getOrCreateCategoryByName(name: String): Long {
+    override suspend fun getOrCreateCategoryByName(name: String): Long = withContext(Dispatchers.IO) {
         // 1. Check if the category already exists
         val existingCategory = photoDoDao.getCategoryByName(name)
 
-        return if (existingCategory != null) {
+        if (existingCategory != null) {
             // 2. It exists! Just return its ID.
             existingCategory.categoryId
         } else {
@@ -66,15 +68,15 @@ class PhotoDoRepoImpl @Inject constructor(
     }
 
     // --- Project Operations ---
-    override suspend fun upsertProject(project: ProjectEntity): Long {
-        return photoDoDao.upsertProject(project)
+    override suspend fun upsertProject(project: ProjectEntity): Long = withContext(Dispatchers.IO) {
+        photoDoDao.upsertProject(project)
     }
 
-    override suspend fun deleteProject(project: ProjectEntity) {
+    override suspend fun deleteProject(project: ProjectEntity) = withContext(Dispatchers.IO) {
         photoDoDao.deleteProject(project)
     }
 
-    override suspend fun deleteProjectById(projectId: Long) {
+    override suspend fun deleteProjectById(projectId: Long) = withContext(Dispatchers.IO) {
         photoDoDao.deleteProjectById(projectId)
     }
 
@@ -90,15 +92,15 @@ class PhotoDoRepoImpl @Inject constructor(
         return photoDoDao.getProjectsForCategory(categoryId)
     }
 
-    override suspend fun updateProject(project: ProjectEntity) {
+    override suspend fun updateProject(project: ProjectEntity) = withContext(Dispatchers.IO) {
         photoDoDao.updateProject(project)
     }
 
-    override suspend fun updateProjectUrgency(projectId: Long, isUrgent: Boolean) {
+    override suspend fun updateProjectUrgency(projectId: Long, isUrgent: Boolean) = withContext(Dispatchers.IO) {
         photoDoDao.updateProjectUrgency(projectId, isUrgent)
     }
 
-    override suspend fun updateProjectFavorite(projectId: Long, isFavorite: Boolean) {
+    override suspend fun updateProjectFavorite(projectId: Long, isFavorite: Boolean) = withContext(Dispatchers.IO) {
         photoDoDao.updateProjectFavorite(projectId, isFavorite)
     }
 
@@ -107,19 +109,19 @@ class PhotoDoRepoImpl @Inject constructor(
     }
 
     // --- Task Operations ---
-    override suspend fun upsertTask(task: TaskEntity): Long {
+    override suspend fun upsertTask(task: TaskEntity): Long = withContext(Dispatchers.IO) {
         val id = photoDoDao.upsertTask(task)
         syncEngine.syncTaskUpdate(task)
-        return id
+        id
     }
 
-    override suspend fun updateTask(task: TaskEntity) {
+    override suspend fun updateTask(task: TaskEntity) = withContext(Dispatchers.IO) {
         val updatedTask = task.copy(lastModified = System.currentTimeMillis())
         photoDoDao.updateTask(updatedTask)
         syncEngine.syncTaskUpdate(updatedTask)
     }
 
-    override suspend fun deleteTask(task: TaskEntity) {
+    override suspend fun deleteTask(task: TaskEntity) = withContext(Dispatchers.IO) {
         photoDoDao.deleteTask(task)
     }
 
@@ -127,24 +129,24 @@ class PhotoDoRepoImpl @Inject constructor(
         return photoDoDao.getTasksForProject(projectId)
     }
 
-    override suspend fun getTaskById(taskId: Long): TaskEntity? {
-        return photoDoDao.getTaskById(taskId)
+    override suspend fun getTaskById(taskId: Long): TaskEntity? = withContext(Dispatchers.IO) {
+        photoDoDao.getTaskById(taskId)
     }
 
-    override suspend fun getTaskBySyncId(globalSyncId: String): TaskEntity? {
-        return photoDoDao.getTaskBySyncId(globalSyncId)
+    override suspend fun getTaskBySyncId(globalSyncId: String): TaskEntity? = withContext(Dispatchers.IO) {
+        photoDoDao.getTaskBySyncId(globalSyncId)
     }
 
-    override suspend fun updateTaskStatusBySyncId(globalSyncId: String, isChecked: Boolean, lastModified: Long) {
+    override suspend fun updateTaskStatusBySyncId(globalSyncId: String, isChecked: Boolean, lastModified: Long) = withContext(Dispatchers.IO) {
         photoDoDao.updateTaskStatusBySyncId(globalSyncId, isChecked, lastModified)
     }
 
     // --- Photo Operations ---
-    override suspend fun upsertPhoto(photo: PhotoEntity): Long {
-        return photoDoDao.upsertPhoto(photo)
+    override suspend fun upsertPhoto(photo: PhotoEntity): Long = withContext(Dispatchers.IO) {
+        photoDoDao.upsertPhoto(photo)
     }
 
-    override suspend fun deletePhoto(photo: PhotoEntity) {
+    override suspend fun deletePhoto(photo: PhotoEntity) = withContext(Dispatchers.IO) {
         photoDoDao.deletePhoto(photo)
     }
 
@@ -157,15 +159,15 @@ class PhotoDoRepoImpl @Inject constructor(
     }
 
     // --- Expense Operations ---
-    override suspend fun upsertExpense(expense: ExpenseEntity): Long {
-        return photoDoDao.upsertExpense(expense)
+    override suspend fun upsertExpense(expense: ExpenseEntity): Long = withContext(Dispatchers.IO) {
+        photoDoDao.upsertExpense(expense)
     }
 
-    override suspend fun deleteExpense(expense: ExpenseEntity) {
+    override suspend fun deleteExpense(expense: ExpenseEntity) = withContext(Dispatchers.IO) {
         photoDoDao.deleteExpense(expense)
     }
 
-    override suspend fun updateExpense(expense: ExpenseEntity) {
+    override suspend fun updateExpense(expense: ExpenseEntity) = withContext(Dispatchers.IO) {
         photoDoDao.updateExpense(expense)
     }
 
@@ -187,7 +189,7 @@ class PhotoDoRepoImpl @Inject constructor(
     }
 
     // --- Global Operations ---
-    override suspend fun clearAllData() {
+    override suspend fun clearAllData() = withContext(Dispatchers.IO) {
         Log.d("PhotoDoRepoImpl", "Clearing all data using DAO @Transaction")
         photoDoDao.clearAllData()
     }

@@ -1,5 +1,6 @@
 package com.zoewave.probase.photodo.mobile.features.tasks.ui
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
@@ -13,11 +14,14 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,90 +30,88 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 class TasksViewModel @Inject constructor(
     private val repo: PhotoDoRepo,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(TasksUiState(isLoading = true))
-    val uiState: StateFlow<TasksUiState> = _uiState.asStateFlow()
 
     private val _draftState = MutableStateFlow(TaskDraftState())
     val draftState: StateFlow<TaskDraftState> = _draftState.asStateFlow()
 
-    private val _requestedCategoryId = MutableStateFlow<Long?>(null)
+    private val _requestedCategoryId = savedStateHandle.getStateFlow<Long?>("categoryId", null)
+    private val _uiFlags = MutableStateFlow(UiFlags())
 
-    init {
-        viewModelScope.launch {
-            _draftState.collect { draft ->
-                _uiState.update { it.copy(draftState = draft) }
-            }
-        }
+    private data class UiFlags(
+        val isAddCategorySheetOpen: Boolean = false,
+        val isAddListSheetOpen: Boolean = false,
+        val isAddTaskItemSheetOpen: Boolean = false,
+        val isAddPhotoSheetOpen: Boolean = false
+    )
 
-        viewModelScope.launch {
-            _requestedCategoryId.flatMapLatest { requestedId ->
-                if (requestedId != null) {
-                    repo.getCategoriesWithProjects().map { allData ->
-                        val targetData = allData.find { it.category.categoryId == requestedId }
-                        if (targetData != null) {
-                            val mappedProjects = targetData.projects.map {
-                                ProjectListUiModel(
-                                    projectId = it.projectId,
-                                    title = it.name,
-                                    categoryName = targetData.category.name,
-                                    isFavorite = it.isFavorite,
-                                    isUrgent = it.isUrgent,
-                                    currentSpend = it.currentSpend,
-                                    projectBudget = it.projectBudget,
-                                    dueDateMillis = it.dueDate
-                                )
-                            }
-                            SmartDbResult(targetData.category.categoryId, targetData.category.name, mappedProjects, false)
-                        } else {
-                            SmartDbResult(null, "Category Not Found", emptyList(), true)
+    val uiState: StateFlow<TasksUiState> = combine(
+        _requestedCategoryId.flatMapLatest { requestedId ->
+            if (requestedId != null) {
+                repo.getCategoriesWithProjects().map { allData ->
+                    val targetData = allData.find { it.category.categoryId == requestedId }
+                    if (targetData != null) {
+                        val mappedProjects = targetData.projects.map {
+                            ProjectListUiModel(
+                                projectId = it.projectId,
+                                title = it.name,
+                                categoryName = targetData.category.name,
+                                isFavorite = it.isFavorite,
+                                isUrgent = it.isUrgent,
+                                currentSpend = it.currentSpend,
+                                projectBudget = it.projectBudget,
+                                dueDateMillis = it.dueDate
+                            )
                         }
-                    }
-                } else {
-                    repo.getCategoriesWithProjects().map { allData ->
-                        if (allData.isEmpty()) {
-                            SmartDbResult(null, "No Categories Yet", emptyList(), true)
-                        } else {
-                            val firstData = allData.first()
-                            val mappedProjects = firstData.projects.map {
-                                ProjectListUiModel(
-                                    projectId = it.projectId,
-                                    title = it.name,
-                                    categoryName = firstData.category.name,
-                                    isFavorite = it.isFavorite,
-                                    isUrgent = it.isUrgent,
-                                    currentSpend = it.currentSpend,
-                                    projectBudget = it.projectBudget,
-                                    dueDateMillis = it.dueDate
-                                )
-                            }
-                            SmartDbResult(firstData.category.categoryId, firstData.category.name, mappedProjects, false)
-                        }
+                        SmartDbResult(targetData.category.categoryId, targetData.category.name, mappedProjects, false)
+                    } else {
+                        SmartDbResult(null, "Category Not Found", emptyList(), true)
                     }
                 }
-            }.collect { dbResult ->
-                // Gently update the UI state WITHOUT overwriting your bottom sheet flags!
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        isLoading = false,
-                        categoryId = dbResult.categoryId,
-                        categoryName = dbResult.categoryName,
-                        projectLists = dbResult.projectLists,
-                        isNoCategoriesYet = dbResult.isNoCategoriesYet
-                    )
+            } else {
+                repo.getCategoriesWithProjects().map { allData ->
+                    if (allData.isEmpty()) {
+                        SmartDbResult(null, "No Categories Yet", emptyList(), true)
+                    } else {
+                        val firstData = allData.first()
+                        val mappedProjects = firstData.projects.map {
+                            ProjectListUiModel(
+                                projectId = it.projectId,
+                                title = it.name,
+                                categoryName = firstData.category.name,
+                                isFavorite = it.isFavorite,
+                                isUrgent = it.isUrgent,
+                                currentSpend = it.currentSpend,
+                                projectBudget = it.projectBudget,
+                                dueDateMillis = it.dueDate
+                            )
+                        }
+                        SmartDbResult(firstData.category.categoryId, firstData.category.name, mappedProjects, false)
+                    }
                 }
             }
-        }
-    }
-
-    // Nav3 calls this to pass the ID
-    fun setCategoryId(id: Long?) {
-        // The Memory Fix: Only update if the router passed a REAL ID.
-        if (id != null) {
-            _requestedCategoryId.value = id
-        }
-    }
+        },
+        _draftState,
+        _uiFlags
+    ) { dbResult, draft, flags ->
+        TasksUiState(
+            isLoading = false,
+            categoryId = dbResult.categoryId,
+            categoryName = dbResult.categoryName,
+            projectLists = dbResult.projectLists,
+            isNoCategoriesYet = dbResult.isNoCategoriesYet,
+            draftState = draft,
+            isAddCategorySheetOpen = flags.isAddCategorySheetOpen,
+            isAddListSheetOpen = flags.isAddListSheetOpen,
+            isAddTaskItemSheetOpen = flags.isAddTaskItemSheetOpen,
+            isAddPhotoSheetOpen = flags.isAddPhotoSheetOpen
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = TasksUiState(isLoading = true)
+    )
 
     fun onEvent(event: TasksEvent) {
         when (event) {
@@ -132,13 +134,13 @@ class TasksViewModel @Inject constructor(
             is TasksEvent.OnDraftPhotoAttached -> _draftState.update { it.copy(pendingPhotoUris = it.pendingPhotoUris + event.uri) }
             is TasksEvent.OnSaveDraftClicked -> saveDraftToDatabase()
 
-            is TasksEvent.OnAddCategoryClicked -> _uiState.update { it.copy(isAddCategorySheetOpen = true) }
-            is TasksEvent.OnAddListClicked -> _uiState.update { it.copy(isAddListSheetOpen = true) }
-            is TasksEvent.OnAddTaskItemClicked -> _uiState.update { it.copy(isAddTaskItemSheetOpen = true) }
-            is TasksEvent.OnAddPhotoClicked -> _uiState.update { it.copy(isAddPhotoSheetOpen = true) }
+            is TasksEvent.OnAddCategoryClicked -> _uiFlags.update { it.copy(isAddCategorySheetOpen = true) }
+            is TasksEvent.OnAddListClicked -> _uiFlags.update { it.copy(isAddListSheetOpen = true) }
+            is TasksEvent.OnAddTaskItemClicked -> _uiFlags.update { it.copy(isAddTaskItemSheetOpen = true) }
+            is TasksEvent.OnAddPhotoClicked -> _uiFlags.update { it.copy(isAddPhotoSheetOpen = true) }
 
             is TasksEvent.OnDismissBottomSheet -> {
-                _uiState.update {
+                _uiFlags.update {
                     it.copy(
                         isAddCategorySheetOpen = false,
                         isAddListSheetOpen = false,
@@ -163,7 +165,7 @@ class TasksViewModel @Inject constructor(
             }
 
             is TasksEvent.OnAddList -> {
-                val currentCategoryId = _uiState.value.categoryId ?: return
+                val currentCategoryId = uiState.value.categoryId ?: return
                 viewModelScope.launch {
                     val newProject = ProjectEntity(
                         categoryId = currentCategoryId,
@@ -219,7 +221,7 @@ class TasksViewModel @Inject constructor(
             // ENHANCEMENT: Use the Smart Default Category ID if they didn't pick one in the draft!
             val categoryId: Long = when {
                 draft.selectedCategoryId != null -> draft.selectedCategoryId
-                _uiState.value.categoryId != null -> _uiState.value.categoryId!!
+                uiState.value.categoryId != null -> uiState.value.categoryId!!
                 else -> {
                     val newCat = CategoryEntity(name = draft.newCategoryName.ifBlank { "Uncategorized" })
                 repo.upsertCategory(newCat) // This returns the new ID  

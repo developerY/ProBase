@@ -1,6 +1,7 @@
 package com.zoewave.probase.photodo.mobile.features.tasks.ui.detail
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
@@ -9,7 +10,6 @@ import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -25,10 +25,13 @@ private const val TAG = "PhotoDoDetailViewModel"
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
 class TaskDetailViewModel @Inject constructor(
-    private val photoDoRepo: PhotoDoRepo
+    private val photoDoRepo: PhotoDoRepo,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _projectId = MutableStateFlow<Long?>(null)
+    // ✅ GOLD STANDARD: Get projectId directly from SavedStateHandle.
+    // This makes the ViewModel reactive to navigation arguments and survives process death.
+    private val _projectId = savedStateHandle.getStateFlow<Long?>("projectId", null)
 
     val uiState: StateFlow<TaskDetailUiState> = _projectId
         .filterNotNull()
@@ -51,17 +54,6 @@ class TaskDetailViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = TaskDetailUiState(loadState = DetailLoadState.Loading)
         )
-
-    /**
-     * Called by the UI Route immediately upon creation to kick off the flow.
-     */
-    fun loadTaskDetails(id: Long) {
-        if (id == 0L) return
-        if (_projectId.value == id) return
-
-        Log.d(TAG, "Loading details for projectId: $id")
-        _projectId.value = id
-    }
 
     fun onEvent(event: TaskDetailEvent) {
         val currentId = _projectId.value ?: return

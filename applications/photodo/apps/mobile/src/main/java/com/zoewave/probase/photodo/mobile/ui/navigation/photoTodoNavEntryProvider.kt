@@ -91,9 +91,6 @@ fun photoTodoNavEntryProvider(
                     )
                 } else {
                     val viewModel: TasksViewModel = hiltViewModel()
-                    LaunchedEffect(key.categoryId) {
-                        viewModel.setCategoryId(key.categoryId)
-                    }
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                     TasksListScreen(
                         uiState = uiState,
@@ -117,9 +114,6 @@ fun photoTodoNavEntryProvider(
                     )
                 } else {
                     val viewModel: TaskDetailViewModel = hiltViewModel()
-                    LaunchedEffect(key.projectId) {
-                        viewModel.loadTaskDetails(key.projectId)
-                    }
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                     TaskDetailScreen(
                         uiState = uiState,
@@ -211,9 +205,6 @@ fun photoTodoNavEntryProvider(
 
             is PhotoTodoRoute.CategoryTasks -> {
                 val viewModel: TasksViewModel = hiltViewModel()
-                LaunchedEffect(key.categoryId) {
-                    viewModel.setCategoryId(key.categoryId)
-                }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 TasksListScreen(
                     uiState = uiState,
