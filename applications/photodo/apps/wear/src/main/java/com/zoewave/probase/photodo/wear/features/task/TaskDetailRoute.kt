@@ -1,16 +1,12 @@
 package com.zoewave.probase.photodo.wear.features.task
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,13 +14,14 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
@@ -105,10 +102,25 @@ fun TaskDetailScreen(
                         }
                     }
 
-                    // --- PROJECT PHOTOS (HORIZONTAL GALLERY) ---
+                    // --- PROJECT PHOTOS (VERTICAL LIST) ---
                     if (projectBitmaps.isNotEmpty()) {
-                        item {
-                            HorizontalImageGallery(bitmaps = projectBitmaps)
+                        items(projectBitmaps) { bitmap ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    bitmap = bitmap.asImageBitmap(),
+                                    contentDescription = "Project Thumbnail",
+                                    modifier = Modifier
+                                        .size(140.dp)
+                                        .rotate(90f)
+                                        .clip(MaterialTheme.shapes.large),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
                         }
                     }
 
@@ -136,32 +148,6 @@ fun TaskDetailScreen(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun HorizontalImageGallery(bitmaps: List<android.graphics.Bitmap>) {
-    val rowState = rememberLazyListState()
-
-    // Horizontal List of Small Images (50dp)
-    LazyRow(
-        state = rowState,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-        contentPadding = PaddingValues(horizontal = 16.dp)
-    ) {
-        itemsIndexed(bitmaps) { _, bitmap ->
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = "Project Thumbnail",
-                modifier = Modifier
-                    .size(50.dp)
-                    .rotate(90f), // Rotate 90 degrees to the right
-                contentScale = ContentScale.Crop
-            )
         }
     }
 }
