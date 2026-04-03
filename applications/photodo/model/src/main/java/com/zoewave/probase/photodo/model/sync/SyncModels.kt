@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 data class SyncCategory(
     val id: Long, // Use the Phone's ID!
     val name: String,
-    val projects: List<SyncProject>
+    val projects: List<SyncProject>,
+    val hasPhoto: Boolean = false // Added for Category thumbnails
 )
 
 @Serializable

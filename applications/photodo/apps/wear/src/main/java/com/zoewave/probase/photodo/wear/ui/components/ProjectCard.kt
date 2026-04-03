@@ -34,7 +34,13 @@ fun ProjectCard(
 
     if (project.hasPhoto) {
         LaunchedEffect(project.id) {
+            android.util.Log.d("PhotoDoSync_UI", "ProjectCard: Loading photo for project ${project.id}")
             assetBitmap = loadAssetAsBitmap(context, "/photodo/sync_state", "photo_${project.id}")
+            if (assetBitmap != null) {
+                android.util.Log.d("PhotoDoSync_UI", "ProjectCard: Successfully loaded photo for project ${project.id}")
+            } else {
+                android.util.Log.w("PhotoDoSync_UI", "ProjectCard: Failed to load photo for project ${project.id}")
+            }
         }
     }
 

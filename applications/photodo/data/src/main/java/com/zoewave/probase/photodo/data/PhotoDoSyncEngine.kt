@@ -86,6 +86,25 @@ class PhotoDoSyncEngine @Inject constructor(
                 // We need the project details again to get the actual URIs
                 val allDetails = photoDoRepo.getAllProjectDetails().first()
                 syncData.forEach { category ->
+                    // 1. Attach Category Photo
+                    if (category.hasPhoto) {
+                        try {
+                            val dbCategory = photoDoRepo.getCategoryById(category.id).first()
+                            val categoryPhotoUri = dbCategory?.imageUri
+                            if (categoryPhotoUri != null) {
+                                val bitmap = loadBitmapFromUri(categoryPhotoUri)
+                                if (bitmap != null) {
+                                    val asset = bitmap.toTinyGrayscaleAsset()
+                                    dataMap.putAsset("category_${category.id}", asset)
+                                    Log.d(TAG, "Attached category asset: category_${category.id}")
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Failed to attach category asset ${category.id}", e)
+                        }
+                    }
+
+                    // 2. Attach Project Photos
                     category.projects.forEach { project ->
                         if (project.hasPhoto) {
                             val details = allDetails.find { it.project.projectId == project.id }
@@ -96,6 +115,9 @@ class PhotoDoSyncEngine @Inject constructor(
                                     if (bitmap != null) {
                                         val asset = bitmap.toTinyGrayscaleAsset()
                                         dataMap.putAsset("photo_${project.id}", asset)
+                                        Log.d(TAG, "Attached asset: photo_${project.id} for project ${project.id}")
+                                    } else {
+                                        Log.w(TAG, "Failed to load bitmap from URI: $primaryPhotoUri")
                                     }
                                 } catch (e: Exception) {
                                     Log.e(TAG, "Failed to attach asset for project ${project.id}", e)
@@ -135,6 +157,7 @@ class PhotoDoSyncEngine @Inject constructor(
             SyncCategory(
                 id = categoryWithProjects.category.categoryId,
                 name = categoryWithProjects.category.name,
+                hasPhoto = categoryWithProjects.category.imageUri != null,
                 projects = categoryWithProjects.projects.map { projectWithTasks ->
                     SyncProject(
                         id = projectWithTasks.project.projectId,

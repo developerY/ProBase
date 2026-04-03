@@ -18,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
@@ -65,7 +65,13 @@ fun TaskDetailScreen(
 
     if (uiState is TaskDetailUiState.Success && uiState.hasPhoto) {
         LaunchedEffect(uiState.projectId) {
+            android.util.Log.d("PhotoDoSync_UI", "TaskDetail: Loading photo for project ${uiState.projectId}")
             projectBitmap = loadAssetAsBitmap(context, "/photodo/sync_state", "photo_${uiState.projectId}")
+            if (projectBitmap != null) {
+                android.util.Log.d("PhotoDoSync_UI", "TaskDetail: Successfully loaded photo for project ${uiState.projectId}")
+            } else {
+                android.util.Log.w("PhotoDoSync_UI", "TaskDetail: Failed to load photo for project ${uiState.projectId}")
+            }
         }
     }
 

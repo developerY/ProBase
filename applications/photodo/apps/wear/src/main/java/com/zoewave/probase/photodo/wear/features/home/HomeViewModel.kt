@@ -51,7 +51,8 @@ class HomeViewModel @Inject constructor(
                     name = syncCategory.name,
                     totalTasks = totalTasks,
                     completedTasks = completedTasks,
-                    progressPercentage = if (totalTasks > 0) completedTasks.toFloat() / totalTasks else 0f
+                    progressPercentage = if (totalTasks > 0) completedTasks.toFloat() / totalTasks else 0f,
+                    hasPhoto = syncCategory.hasPhoto
                 )
             }
 
