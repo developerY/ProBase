@@ -22,12 +22,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.tasks.R
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 @Composable
 fun PhotoThumbnailCard(
@@ -103,3 +105,28 @@ fun TaskItemRow(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun PhotoThumbnailCardPreview() {
+    PhotoDoTheme {
+        PhotoThumbnailCard(
+            photo = PhotoEntity(photoId = 1, projectId = 1, photoUri = "content://media/external/images/media/1"),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TaskItemRowPreview() {
+    PhotoDoTheme {
+        TaskItemRow(
+            task = TaskEntity(taskId = 1, projectId = 1, text = "Example Task", isChecked = false),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+

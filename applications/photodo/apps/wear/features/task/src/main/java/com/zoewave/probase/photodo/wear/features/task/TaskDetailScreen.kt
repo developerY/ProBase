@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
@@ -27,6 +28,8 @@ import androidx.wear.compose.material3.CircularProgressIndicator
 import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
+import androidx.wear.tooling.preview.devices.WearDevices
+import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.photodo.data.util.loadAssetAsBitmap
 
@@ -137,5 +140,27 @@ private fun TaskItem(task: TaskEntity) {
         enabled = false, // Purely read-only icon
         label = { Text(task.text) },
         modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Preview(device = WearDevices.SMALL_ROUND, showBackground = true, showSystemUi = true)
+@Composable
+fun TaskDetailScreenPreview() {
+    val sampleTasks = listOf(
+        TaskEntity(taskId = 1, projectId = 1, text = "Buy white paint", isChecked = false),
+        TaskEntity(taskId = 2, projectId = 1, text = "Measure cabinets", isChecked = true),
+        TaskEntity(taskId = 3, projectId = 1, text = "Hire a plumber", isChecked = false)
+    )
+    val sampleUiState = TaskDetailUiState.Success(
+        projectId = 1,
+        projectTitle = "Kitchen Reno",
+        tasks = sampleTasks,
+        photos = emptyList(),
+        photoCount = 2,
+        hasPhoto = true
+    )
+    TaskDetailScreen(
+        uiState = sampleUiState,
+        onEvent = {}
     )
 }
