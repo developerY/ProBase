@@ -1,11 +1,11 @@
 package com.zoewave.probase.photodo.wear.features.project
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.photodo.data.SyncDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -15,11 +15,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProjectListViewModel @Inject constructor(
-    private val syncDataStore: SyncDataStore
+    private val syncDataStore: SyncDataStore,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val TAG = "PhotoDoProjectListViewModel"
-    private val _categoryId = MutableStateFlow<Long?>(null)
+    private val _categoryId = savedStateHandle.getStateFlow<Long?>("categoryId", null)
 
     val uiState: StateFlow<ProjectListUiState> = combine(_categoryId, syncDataStore.latestSyncDataFlow) { id, categories ->
         if (id == null || categories.isEmpty()) return@combine ProjectListUiState.Empty
@@ -58,10 +59,6 @@ class ProjectListViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = ProjectListUiState.Loading
     )
-
-    fun setCategoryId(id: Long?) {
-        _categoryId.value = id
-    }
 
     fun onEvent(event: ProjectListEvent) {
         when (event) {

@@ -1,12 +1,12 @@
 package com.zoewave.probase.photodo.wear.features.task
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.photodo.data.SyncDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -16,11 +16,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TaskDetailViewModel @Inject constructor(
-    private val syncDataStore: SyncDataStore
+    private val syncDataStore: SyncDataStore,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val TAG = "PhotoDoTaskDetailViewModel"
-    private val _projectId = MutableStateFlow<Long?>(null)
+    private val _projectId = savedStateHandle.getStateFlow<Long?>("projectId", null)
 
     val uiState: StateFlow<TaskDetailUiState> = combine(_projectId, syncDataStore.latestSyncDataFlow) { id, categories ->
         if (id == null || categories.isEmpty()) return@combine TaskDetailUiState.Empty
@@ -61,10 +62,6 @@ class TaskDetailViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = TaskDetailUiState.Loading
     )
-
-    fun setProjectId(id: Long?) {
-        _projectId.value = id
-    }
 
     fun onEvent(event: TaskDetailEvent) {
         // Handle events here

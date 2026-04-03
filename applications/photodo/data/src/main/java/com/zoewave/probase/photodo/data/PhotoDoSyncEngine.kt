@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 import javax.inject.Inject
@@ -74,7 +75,7 @@ class PhotoDoSyncEngine @Inject constructor(
         }
     }
 
-    private suspend fun broadcast(syncData: List<SyncCategory>) {
+    private suspend fun broadcast(syncData: List<SyncCategory>) = withContext(Dispatchers.IO) {
         try {
             val jsonPayload = Json.encodeToString(syncData)
 
@@ -92,9 +93,14 @@ class PhotoDoSyncEngine @Inject constructor(
                             val dbCategory = photoDoRepo.getCategoryById(category.id).first()
                             val categoryPhotoUri = dbCategory?.imageUri
                             if (categoryPhotoUri != null) {
-                                val bitmap = loadBitmapFromUri(categoryPhotoUri)
+                                // Decouple decoding and transformation to Default dispatcher
+                                val bitmap = withContext(Dispatchers.Default) {
+                                    loadBitmapFromUri(categoryPhotoUri)
+                                }
                                 if (bitmap != null) {
-                                    val asset = bitmap.toTinyGrayscaleAsset()
+                                    val asset = withContext(Dispatchers.Default) {
+                                        bitmap.toTinyGrayscaleAsset()
+                                    }
                                     dataMap.putAsset("category_${category.id}", asset)
                                     Log.d(TAG, "Attached category asset: category_${category.id}")
                                 }
@@ -112,9 +118,13 @@ class PhotoDoSyncEngine @Inject constructor(
                             
                             projectPhotos.forEachIndexed { index, photoEntity ->
                                 try {
-                                    val bitmap = loadBitmapFromUri(photoEntity.photoUri)
+                                    val bitmap = withContext(Dispatchers.Default) {
+                                        loadBitmapFromUri(photoEntity.photoUri)
+                                    }
                                     if (bitmap != null) {
-                                        val asset = bitmap.toTinyGrayscaleAsset()
+                                        val asset = withContext(Dispatchers.Default) {
+                                            bitmap.toTinyGrayscaleAsset()
+                                        }
                                         val assetKey = "photo_${project.id}_$index"
                                         dataMap.putAsset(assetKey, asset)
                                         Log.d(TAG, "Attached project asset: $assetKey")

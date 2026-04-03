@@ -34,7 +34,6 @@ fun photoDoWearNavEntryProvider(
                 ProjectListRoute(
                     viewModel = viewModel,
                     modifier = Modifier.fillMaxSize(),
-                    categoryId = key.categoryId,
                     onNavigateToProject = { projectId, projectTitle ->
                         navigateTo(PhotoTodoRoute.TaskDetail(projectId = projectId, projectTitle = projectTitle))
                     }
@@ -45,7 +44,6 @@ fun photoDoWearNavEntryProvider(
                 TaskDetailRoute(
                     viewModel = viewModel,
                     modifier = Modifier.fillMaxSize(),
-                    projectId = key.projectId,
                     onBack = onBack
                 )
             }
