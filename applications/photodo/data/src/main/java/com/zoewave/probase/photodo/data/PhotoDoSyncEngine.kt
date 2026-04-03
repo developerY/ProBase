@@ -104,23 +104,23 @@ class PhotoDoSyncEngine @Inject constructor(
                         }
                     }
 
-                    // 2. Attach Project Photos
+                    // 2. Attach Project Photos (Sync up to 5 thumbnails per project)
                     category.projects.forEach { project ->
                         if (project.hasPhoto) {
                             val details = allDetails.find { it.project.projectId == project.id }
-                            val primaryPhotoUri = details?.photos?.firstOrNull()?.photoUri
-                            if (primaryPhotoUri != null) {
+                            val projectPhotos = details?.photos?.take(5) ?: emptyList()
+                            
+                            projectPhotos.forEachIndexed { index, photoEntity ->
                                 try {
-                                    val bitmap = loadBitmapFromUri(primaryPhotoUri)
+                                    val bitmap = loadBitmapFromUri(photoEntity.photoUri)
                                     if (bitmap != null) {
                                         val asset = bitmap.toTinyGrayscaleAsset()
-                                        dataMap.putAsset("photo_${project.id}", asset)
-                                        Log.d(TAG, "Attached asset: photo_${project.id} for project ${project.id}")
-                                    } else {
-                                        Log.w(TAG, "Failed to load bitmap from URI: $primaryPhotoUri")
+                                        val assetKey = "photo_${project.id}_$index"
+                                        dataMap.putAsset(assetKey, asset)
+                                        Log.d(TAG, "Attached project asset: $assetKey")
                                     }
                                 } catch (e: Exception) {
-                                    Log.e(TAG, "Failed to attach asset for project ${project.id}", e)
+                                    Log.e(TAG, "Failed to attach project asset ${project.id} index $index", e)
                                 }
                             }
                         }
