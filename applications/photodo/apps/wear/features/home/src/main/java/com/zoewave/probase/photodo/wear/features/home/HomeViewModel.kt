@@ -68,7 +68,16 @@ class HomeViewModel @Inject constructor(
             initialValue = HomeUiState.Loading
         )
 
-    fun requestSync() {
+    fun onEvent(event: HomeEvent) {
+        when (event) {
+            HomeEvent.OnRequestSync -> requestSync()
+            is HomeEvent.OnCategoryClick -> {
+                // Handled in Route for navigation
+            }
+        }
+    }
+
+    private fun requestSync() {
         viewModelScope.launch {
             try {
                 Log.d(TAG, "Sending request_sync message to phone...")

@@ -62,4 +62,12 @@ class ProjectListViewModel @Inject constructor(
     fun setCategoryId(id: Long?) {
         _categoryId.value = id
     }
+
+    fun onEvent(event: ProjectListEvent) {
+        when (event) {
+            is ProjectListEvent.OnProjectClick -> {
+                // Handled in Route for navigation
+            }
+        }
+    }
 }

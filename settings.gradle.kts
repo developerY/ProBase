@@ -78,6 +78,9 @@ include(":applications:photodo:apps:mobile:features:tasks")
 include(":applications:photodo:apps:mobile:features:settings")
 include(":applications:photodo:apps:mobile:core")
 include(":applications:photodo:apps:wear")
+include(":applications:photodo:apps:wear:features:home")
+include(":applications:photodo:apps:wear:features:project")
+include(":applications:photodo:apps:wear:features:task")
 include(":features:camera")
 
 // --- Seaweed Product Line ---

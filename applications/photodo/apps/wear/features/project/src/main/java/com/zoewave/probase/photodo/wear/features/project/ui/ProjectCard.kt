@@ -1,4 +1,4 @@
-package com.zoewave.probase.photodo.wear.ui.components
+package com.zoewave.probase.photodo.wear.features.project.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.RowScope
@@ -21,7 +21,6 @@ import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.TitleCard
 import com.zoewave.probase.photodo.data.util.loadAssetAsBitmap
 import com.zoewave.probase.photodo.wear.features.project.ProjectWearUiModel
-import com.zoewave.probase.photodo.wear.ui.theme.PhotoDoWearTheme
 import java.util.Locale
 
 @Composable
@@ -84,44 +83,4 @@ fun ProjectCard(
 private fun formatDate(timeInMillis: Long): String {
     val formatter = java.text.SimpleDateFormat("MMM dd", java.util.Locale.getDefault())
     return formatter.format(java.util.Date(timeInMillis))
-}
-
-@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
-@Composable
-fun ProjectCardPreview() {
-    PhotoDoWearTheme {
-        ProjectCard(
-            project = ProjectWearUiModel(
-                id = 1,
-                name = "Project Alpha",
-                budget = 1000.0,
-                currentSpend = 250.0,
-                dueDate = System.currentTimeMillis() + 86400000,
-                isUrgent = false,
-                progress = 0.25f
-            ),
-            onClick = {}
-        )
-    }
-}
-
-@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
-@Composable
-fun ProjectCardNoBudgetPreview() {
-    PhotoDoWearTheme {
-        PhotoDoWearTheme {
-            ProjectCard(
-                project = ProjectWearUiModel(
-                    id = 2,
-                    name = "Quick Tasks",
-                    budget = 0.0,
-                    currentSpend = 0.0,
-                    dueDate = null,
-                    isUrgent = true,
-                    progress = 0.5f
-                ),
-                onClick = {}
-            )
-        }
-    }
 }

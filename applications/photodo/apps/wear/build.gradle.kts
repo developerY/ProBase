@@ -57,6 +57,11 @@ dependencies {
     implementation(project(":applications:photodo:db"))
     implementation(project(":applications:photodo:data"))
 
+    // Wear Feature Modules
+    implementation(project(":applications:photodo:apps:wear:features:home"))
+    implementation(project(":applications:photodo:apps:wear:features:project"))
+    implementation(project(":applications:photodo:apps:wear:features:task"))
+
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.google.play.services.wearable)
 

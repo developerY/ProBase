@@ -66,8 +66,7 @@ class TaskDetailViewModel @Inject constructor(
         _projectId.value = id
     }
 
-    fun onToggleTask(task: TaskEntity, isChecked: Boolean) {
-        // One-Way Sync: Watch is View-Only. Ignore toggles.
-        Log.d(TAG, "onToggleTask ignored on Wear (View-Only mode)")
+    fun onEvent(event: TaskDetailEvent) {
+        // Handle events here
     }
 }

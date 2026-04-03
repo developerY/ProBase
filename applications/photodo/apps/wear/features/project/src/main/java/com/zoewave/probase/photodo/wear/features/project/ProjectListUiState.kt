@@ -1,5 +1,8 @@
 package com.zoewave.probase.photodo.wear.features.project
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 sealed interface ProjectListUiState {
     data object Loading : ProjectListUiState
     data object Empty : ProjectListUiState
@@ -9,6 +12,7 @@ sealed interface ProjectListUiState {
     ) : ProjectListUiState
 }
 
+@Immutable
 data class ProjectWearUiModel(
     val id: Long,
     val name: String,
@@ -17,5 +21,5 @@ data class ProjectWearUiModel(
     val dueDate: Long?,
     val isUrgent: Boolean,
     val progress: Float,
-    val hasPhoto: Boolean = false // Added flag for photo sync
+    val hasPhoto: Boolean = false
 )

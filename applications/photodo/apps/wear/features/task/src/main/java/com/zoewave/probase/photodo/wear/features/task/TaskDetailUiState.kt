@@ -1,8 +1,10 @@
 package com.zoewave.probase.photodo.wear.features.task
 
+import androidx.compose.runtime.Immutable
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 
+@Immutable
 sealed interface TaskDetailUiState {
     data object Loading : TaskDetailUiState
     data object Empty : TaskDetailUiState

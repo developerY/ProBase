@@ -1,5 +1,8 @@
 package com.zoewave.probase.photodo.wear.features.home
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 sealed interface HomeUiState {
     data object Loading : HomeUiState
     data object Empty : HomeUiState
@@ -8,6 +11,7 @@ sealed interface HomeUiState {
     ) : HomeUiState
 }
 
+@Immutable
 data class CategoryWearUiModel(
     val id: Long,
     val name: String,

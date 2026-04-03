@@ -27,6 +27,7 @@ dependencies {
     // implementation(libs.material.legacy)
 
     // --- Compose & UI ---
+    implementation("androidx.compose.runtime:runtime")
     // Note: 'library.compose' plugin handles the Compiler & BOM logic usually,
     // but explicit dependencies are still needed for the libraries themselves.
     implementation(libs.androidx.compose.material3)
