@@ -29,7 +29,6 @@ import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.tooling.preview.devices.WearDevices
-import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.photodo.data.util.loadAssetAsBitmap
 
@@ -44,7 +43,7 @@ fun TaskDetailScreen(
     val projectBitmaps = remember { mutableStateListOf<android.graphics.Bitmap>() }
 
     if (uiState is TaskDetailUiState.Success && uiState.hasPhoto) {
-        LaunchedEffect(uiState.projectId) {
+        LaunchedEffect(uiState.projectId, uiState.photoCount) {
             projectBitmaps.clear()
             // Try to load up to 5 synced photos
             for (i in 0 until 5) {

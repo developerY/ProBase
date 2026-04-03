@@ -33,7 +33,7 @@ fun ProjectCard(
     var assetBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
 
     if (project.hasPhoto) {
-        LaunchedEffect(project.id) {
+        LaunchedEffect(project.id, project.hasPhoto) {
             android.util.Log.d("PhotoDoSync_UI", "ProjectCard: Loading primary photo for project ${project.id}")
             assetBitmap = loadAssetAsBitmap(context, "/photodo/sync_state", "photo_${project.id}_0")
             if (assetBitmap != null) {

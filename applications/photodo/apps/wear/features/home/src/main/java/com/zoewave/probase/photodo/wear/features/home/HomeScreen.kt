@@ -121,7 +121,7 @@ private fun CategoryItem(
     var categoryBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
 
     if (category.hasPhoto) {
-        LaunchedEffect(category.id) {
+        LaunchedEffect(category.id, category.hasPhoto) {
             categoryBitmap = loadAssetAsBitmap(context, "/photodo/sync_state", "category_${category.id}")
         }
     }
