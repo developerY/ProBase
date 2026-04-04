@@ -26,12 +26,16 @@ private const val TAG = "PhotoDoDetailViewModel"
 @OptIn(ExperimentalCoroutinesApi::class)
 class TaskDetailViewModel @Inject constructor(
     private val photoDoRepo: PhotoDoRepo,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     // ✅ GOLD STANDARD: Get projectId directly from SavedStateHandle.
     // This makes the ViewModel reactive to navigation arguments and survives process death.
     private val _projectId = savedStateHandle.getStateFlow<Long?>("projectId", null)
+
+    fun loadTaskDetails(projectId: Long) {
+        savedStateHandle["projectId"] = projectId
+    }
 
     val uiState: StateFlow<TaskDetailUiState> = _projectId
         .filterNotNull()

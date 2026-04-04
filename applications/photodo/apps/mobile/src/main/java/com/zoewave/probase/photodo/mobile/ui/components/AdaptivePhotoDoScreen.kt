@@ -55,7 +55,7 @@ fun AdaptivePhotoDoScreen(
     var selectedCategoryId by remember { mutableStateOf(initialCategoryId) }
     var selectedProjectId by remember { mutableStateOf(initialProjectId) }
 
-    val navigator = rememberListDetailPaneScaffoldNavigator<Nothing>()
+    val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
     // Back button logic: Shift panes back instead of exiting
     BackHandler(enabled = currentState == PhotoDoFoldableState.PROJECTS_AND_TASKS) {
@@ -72,39 +72,41 @@ fun AdaptivePhotoDoScreen(
                                  else MaterialTheme.colorScheme.surface
             if (currentState == PhotoDoFoldableState.CATEGORY_AND_PROJECTS) {
                 // Left Pane: Categories
-                val homeViewModel: HomeViewModel = hiltViewModel()
+                val homeViewModel = hiltViewModel<HomeViewModel>()
                 val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
                 HomeOverviewScreen(
                     uiState = homeUiState,
                     onEvent = homeViewModel::onEvent,
-                    navTo = { route ->
+                    navTo = { route: PhotoTodoRoute? ->
                         when (route) {
                             null -> { /* Handle back if needed, but categories is root here */ }
                             is PhotoTodoRoute.TasksList -> {
                                 selectedCategoryId = route.categoryId
-                                // In dual-pane, clicking category updates the right pane
+                                currentState = PhotoDoFoldableState.PROJECTS_AND_TASKS
                             }
-                            else -> navTo(route) // 🚀 Delegate other routes (like Camera)
+                            else -> route.let(navTo) // 🚀 Delegate other routes (like Camera)
                         }
                     },
                     modifier = Modifier.fillMaxSize().background(listBackground)
                 )
             } else {
                 // Left Pane: Projects
-                val tasksViewModel: TasksViewModel = hiltViewModel()
+                val tasksViewModel = hiltViewModel<TasksViewModel>()
                 selectedCategoryId?.let { tasksViewModel.setCategoryId(it) }
                 val tasksUiState by tasksViewModel.uiState.collectAsStateWithLifecycle()
                 TasksListScreen(
                     uiState = tasksUiState,
                     onEvent = tasksViewModel::onEvent,
-                    navTo = { route ->
-                        if (route == null) {
-                            currentState = PhotoDoFoldableState.CATEGORY_AND_PROJECTS
-                        } else if (route is PhotoTodoRoute.TaskDetail) {
-                            selectedProjectId = route.projectId
-                            // Stay in current state, but update detail pane
-                        } else {
-                            navTo(route) // 🚀 Delegate other routes
+                    navTo = { route: PhotoTodoRoute? ->
+                        when {
+                            route == null -> {
+                                currentState = PhotoDoFoldableState.CATEGORY_AND_PROJECTS
+                            }
+                            route is PhotoTodoRoute.TaskDetail -> {
+                                selectedProjectId = route.projectId
+                                // Stay in current state, but update detail pane
+                            }
+                            else -> route.let(navTo) // 🚀 Delegate other routes
                         }
                     },
                     modifier = Modifier.fillMaxSize().background(listBackground)
@@ -115,37 +117,39 @@ fun AdaptivePhotoDoScreen(
             val detailBackground = MaterialTheme.colorScheme.surface
             if (currentState == PhotoDoFoldableState.CATEGORY_AND_PROJECTS) {
                 // Right Pane: Projects
-                val tasksViewModel: TasksViewModel = hiltViewModel()
+                val tasksViewModel = hiltViewModel<TasksViewModel>()
                 selectedCategoryId?.let { tasksViewModel.setCategoryId(it) }
                 val tasksUiState by tasksViewModel.uiState.collectAsStateWithLifecycle()
                 TasksListScreen(
                     uiState = tasksUiState,
                     onEvent = tasksViewModel::onEvent,
-                    navTo = { route ->
-                        if (route == null) {
-                            currentState = PhotoDoFoldableState.CATEGORY_AND_PROJECTS
-                        } else if (route is PhotoTodoRoute.TaskDetail) {
-                            selectedProjectId = route.projectId
-                            currentState = PhotoDoFoldableState.PROJECTS_AND_TASKS
-                        } else {
-                            navTo(route) // 🚀 Delegate other routes
+                    navTo = { route: PhotoTodoRoute? ->
+                        when {
+                            route == null -> {
+                                currentState = PhotoDoFoldableState.CATEGORY_AND_PROJECTS
+                            }
+                            route is PhotoTodoRoute.TaskDetail -> {
+                                selectedProjectId = route.projectId
+                                currentState = PhotoDoFoldableState.PROJECTS_AND_TASKS
+                            }
+                            else -> route.let(navTo) // 🚀 Delegate other routes
                         }
                     },
                     modifier = Modifier.fillMaxSize().background(detailBackground)
                 )
             } else {
                 // Right Pane: Tasks (Detail)
-                val detailViewModel: TaskDetailViewModel = hiltViewModel()
+                val detailViewModel = hiltViewModel<TaskDetailViewModel>()
                 selectedProjectId?.let { detailViewModel.loadTaskDetails(it) }
                 val detailUiState by detailViewModel.uiState.collectAsStateWithLifecycle()
                 TaskDetailScreen(
                     uiState = detailUiState,
                     onEvent = detailViewModel::onEvent,
-                    navTo = { route ->
+                    navTo = { route: PhotoTodoRoute? ->
                         if (route == null) {
                             currentState = PhotoDoFoldableState.CATEGORY_AND_PROJECTS
                         } else {
-                            navTo(route) // 🚀 Delegate other routes (like Camera!)
+                            route.let(navTo) // 🚀 Delegate other routes (like Camera!)
                         }
                     },
                     modifier = Modifier.fillMaxSize().background(detailBackground)

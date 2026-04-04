@@ -30,7 +30,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 class TasksViewModel @Inject constructor(
     private val repo: PhotoDoRepo,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _draftState = MutableStateFlow(TaskDraftState())
@@ -38,6 +38,10 @@ class TasksViewModel @Inject constructor(
 
     private val _requestedCategoryId = savedStateHandle.getStateFlow<Long?>("categoryId", null)
     private val _uiFlags = MutableStateFlow(UiFlags())
+
+    fun setCategoryId(categoryId: Long) {
+        savedStateHandle["categoryId"] = categoryId
+    }
 
     private data class UiFlags(
         val isAddCategorySheetOpen: Boolean = false,

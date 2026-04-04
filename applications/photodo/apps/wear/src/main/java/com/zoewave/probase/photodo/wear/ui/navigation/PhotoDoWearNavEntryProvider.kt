@@ -2,7 +2,7 @@ package com.zoewave.probase.photodo.wear.ui.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.wear.features.home.HomeRoute
@@ -31,6 +31,7 @@ fun photoDoWearNavEntryProvider(
             }
             is PhotoTodoRoute.TasksList -> {
                 val viewModel: ProjectListViewModel = hiltViewModel()
+                key.categoryId?.let { viewModel.setCategoryId(it) }
                 ProjectListRoute(
                     viewModel = viewModel,
                     modifier = Modifier.fillMaxSize(),
@@ -41,6 +42,7 @@ fun photoDoWearNavEntryProvider(
             }
             is PhotoTodoRoute.TaskDetail -> {
                 val viewModel: TaskDetailViewModel = hiltViewModel()
+                viewModel.setProjectId(key.projectId)
                 TaskDetailRoute(
                     viewModel = viewModel,
                     modifier = Modifier.fillMaxSize(),

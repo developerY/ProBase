@@ -17,11 +17,15 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskDetailViewModel @Inject constructor(
     private val syncDataStore: SyncDataStore,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val TAG = "PhotoDoTaskDetailViewModel"
     private val _projectId = savedStateHandle.getStateFlow<Long?>("projectId", null)
+
+    fun setProjectId(projectId: Long) {
+        savedStateHandle["projectId"] = projectId
+    }
 
     val uiState: StateFlow<TaskDetailUiState> = combine(_projectId, syncDataStore.latestSyncDataFlow) { id, categories ->
         if (id == null || categories.isEmpty()) return@combine TaskDetailUiState.Empty

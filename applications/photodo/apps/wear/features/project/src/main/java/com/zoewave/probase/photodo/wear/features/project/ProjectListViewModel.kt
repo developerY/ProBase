@@ -16,11 +16,15 @@ import javax.inject.Inject
 @HiltViewModel
 class ProjectListViewModel @Inject constructor(
     private val syncDataStore: SyncDataStore,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val TAG = "PhotoDoProjectListViewModel"
     private val _categoryId = savedStateHandle.getStateFlow<Long?>("categoryId", null)
+
+    fun setCategoryId(categoryId: Long) {
+        savedStateHandle["categoryId"] = categoryId
+    }
 
     val uiState: StateFlow<ProjectListUiState> = combine(_categoryId, syncDataStore.latestSyncDataFlow) { id, categories ->
         if (id == null || categories.isEmpty()) return@combine ProjectListUiState.Empty
