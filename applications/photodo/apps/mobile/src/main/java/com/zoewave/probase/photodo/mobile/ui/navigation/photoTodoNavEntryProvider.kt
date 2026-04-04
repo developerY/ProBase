@@ -91,6 +91,12 @@ fun photoTodoNavEntryProvider(
                     )
                 } else {
                     val viewModel: TasksViewModel = hiltViewModel()
+                    
+                    // 🚀 NEW: Ensure ViewModel is updated with categoryId in compact mode
+                    LaunchedEffect(key.categoryId) {
+                        key.categoryId?.let { viewModel.setCategoryId(it) }
+                    }
+
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                     TasksListScreen(
                         uiState = uiState,
@@ -114,6 +120,12 @@ fun photoTodoNavEntryProvider(
                     )
                 } else {
                     val viewModel: TaskDetailViewModel = hiltViewModel()
+                    
+                    // 🚀 NEW: Ensure ViewModel is updated with projectId in compact mode
+                    LaunchedEffect(key.projectId) {
+                        viewModel.loadTaskDetails(key.projectId)
+                    }
+
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                     TaskDetailScreen(
                         uiState = uiState,
