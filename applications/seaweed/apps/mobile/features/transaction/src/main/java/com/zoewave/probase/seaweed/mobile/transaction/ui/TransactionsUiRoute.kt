@@ -24,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.seaweed.features.main.navigation.SeaweedDestination
+import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import kotlinx.coroutines.launch
 import java.util.Locale
