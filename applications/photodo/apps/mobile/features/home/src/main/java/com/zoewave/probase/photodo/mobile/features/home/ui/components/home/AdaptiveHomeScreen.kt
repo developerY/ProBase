@@ -22,25 +22,31 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowSizeClass.Companion.calculateFromSize
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.LocalPaneContrast
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewContent
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewDialogs
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewFab
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import components.home.CategoryQuickJumpRow
 
@@ -170,6 +176,52 @@ fun AdaptiveHomeScreen(
             categoryToDelete = categoryToDelete,
             onDismissDeleteConfirmation = { categoryToDelete = null },
             onEvent = onEvent
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@Preview(showBackground = true, widthDp = 400, heightDp = 800)
+@Composable
+fun AdaptiveHomeScreenPreviewCompact() {
+    PhotoDoTheme {
+        AdaptiveHomeScreen(
+            uiState = HomeUiState.Success(
+                categories = listOf(
+                    CategoryOverviewUiModel(1L, "Work", 10, 5, 0.5f),
+                    CategoryOverviewUiModel(2L, "Personal", 5, 2, 0.4f)
+                ),
+                urgentProjects = listOf(
+                    ProjectListUiModel(1L, "Project A", "Work", isUrgent = true),
+                    ProjectListUiModel(2L, "Project B", "Personal", isUrgent = true)
+                )
+            ),
+            onEvent = {},
+            navTo = {},
+            windowSizeClass = calculateFromSize(DpSize(400.dp, 800.dp))
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@Preview(showBackground = true, widthDp = 1000, heightDp = 800)
+@Composable
+fun AdaptiveHomeScreenPreviewExpanded() {
+    PhotoDoTheme {
+        AdaptiveHomeScreen(
+            uiState = HomeUiState.Success(
+                categories = listOf(
+                    CategoryOverviewUiModel(1L, "Work", 10, 5, 0.5f),
+                    CategoryOverviewUiModel(2L, "Personal", 5, 2, 0.4f)
+                ),
+                urgentProjects = listOf(
+                    ProjectListUiModel(1L, "Project A", "Work", isUrgent = true),
+                    ProjectListUiModel(2L, "Project B", "Personal", isUrgent = true)
+                )
+            ),
+            onEvent = {},
+            navTo = {},
+            windowSizeClass = calculateFromSize(DpSize(1000.dp, 800.dp))
         )
     }
 }
