@@ -53,19 +53,23 @@ class TasksViewModel @Inject constructor(
     val uiState: StateFlow<TasksUiState> = combine(
         _requestedCategoryId.flatMapLatest { requestedId ->
             if (requestedId != null) {
-                repo.getCategoriesWithProjects().map { allData ->
+                repo.getCategoriesWithProjectsAndTasks().map { allData ->
                     val targetData = allData.find { it.category.categoryId == requestedId }
                     if (targetData != null) {
-                        val mappedProjects = targetData.projects.map {
+                        val mappedProjects = targetData.projects.map { projectWithTasks ->
+                            val project = projectWithTasks.project
+                            val tasks = projectWithTasks.tasks
                             ProjectListUiModel(
-                                projectId = it.projectId,
-                                title = it.name,
+                                projectId = project.projectId,
+                                title = project.name,
                                 categoryName = targetData.category.name,
-                                isFavorite = it.isFavorite,
-                                isUrgent = it.isUrgent,
-                                currentSpend = it.currentSpend,
-                                projectBudget = it.projectBudget,
-                                dueDateMillis = it.dueDate
+                                isFavorite = project.isFavorite,
+                                isUrgent = project.isUrgent,
+                                currentSpend = project.currentSpend,
+                                projectBudget = project.projectBudget,
+                                dueDateMillis = project.dueDate,
+                                doneTasksCount = tasks.count { it.isChecked },
+                                totalTasksCount = tasks.size
                             )
                         }
                         SmartDbResult(targetData.category.categoryId, targetData.category.name, mappedProjects, false)
@@ -74,21 +78,25 @@ class TasksViewModel @Inject constructor(
                     }
                 }
             } else {
-                repo.getCategoriesWithProjects().map { allData ->
+                repo.getCategoriesWithProjectsAndTasks().map { allData ->
                     if (allData.isEmpty()) {
                         SmartDbResult(null, "No Categories Yet", emptyList(), true)
                     } else {
                         val firstData = allData.first()
-                        val mappedProjects = firstData.projects.map {
+                        val mappedProjects = firstData.projects.map { projectWithTasks ->
+                            val project = projectWithTasks.project
+                            val tasks = projectWithTasks.tasks
                             ProjectListUiModel(
-                                projectId = it.projectId,
-                                title = it.name,
+                                projectId = project.projectId,
+                                title = project.name,
                                 categoryName = firstData.category.name,
-                                isFavorite = it.isFavorite,
-                                isUrgent = it.isUrgent,
-                                currentSpend = it.currentSpend,
-                                projectBudget = it.projectBudget,
-                                dueDateMillis = it.dueDate
+                                isFavorite = project.isFavorite,
+                                isUrgent = project.isUrgent,
+                                currentSpend = project.currentSpend,
+                                projectBudget = project.projectBudget,
+                                dueDateMillis = project.dueDate,
+                                doneTasksCount = tasks.count { it.isChecked },
+                                totalTasksCount = tasks.size
                             )
                         }
                         SmartDbResult(firstData.category.categoryId, firstData.category.name, mappedProjects, false)
