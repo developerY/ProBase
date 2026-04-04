@@ -73,16 +73,23 @@ fun HomeProjectRow(
                 Icon(imageVector = icon, contentDescription = null, tint = tint)
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
-                    Text(project.title, style = MaterialTheme.typography.bodyLarge)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(project.title, style = MaterialTheme.typography.bodyLarge)
+                        if (project.progressText.isNotEmpty()) {
+                            Text(
+                                text = " • ${project.progressText}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 4.dp)
+                            )
+                        }
+                    }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         // 1. The Dynamic "Smart Subtitle"
-                        val subtitleText = remember(project.categoryName, project.dueDateMillis, project.progressText) {
+                        val subtitleText = remember(project.categoryName, project.dueDateMillis) {
                             buildString {
                                 append(project.categoryName)
-                                if (project.progressText.isNotEmpty()) {
-                                    append(" • ${project.progressText}")
-                                }
                                 project.dueDateMillis?.let { dueDate ->
                                     val formatter = SimpleDateFormat("MMM dd", Locale.getDefault())
                                     val dateStr = formatter.format(Date(dueDate))
