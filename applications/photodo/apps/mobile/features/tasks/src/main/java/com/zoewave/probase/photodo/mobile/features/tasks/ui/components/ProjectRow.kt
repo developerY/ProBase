@@ -63,7 +63,16 @@ fun ProjectRow(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = project.title, style = MaterialTheme.typography.titleMedium)
-                Text(text = project.categoryName, style = MaterialTheme.typography.bodySmall)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = project.categoryName, style = MaterialTheme.typography.bodySmall)
+                    if (project.progressText.isNotEmpty()) {
+                        Text(
+                            text = " • ${project.progressText}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
+                }
             }
 
             Row {
@@ -112,7 +121,9 @@ fun ProjectRowPreview() {
                 isFavorite = false,
                 isUrgent = false,
                 dueDateMillis = System.currentTimeMillis() + 86400000L * 3,
-                isCompleted = false
+                isCompleted = false,
+                doneTasksCount = 1,
+                totalTasksCount = 2
             ),
             onEvent = {},
             navTo = {}
@@ -135,7 +146,9 @@ fun ProjectRowUrgentFavoritePreview() {
                 currentSpend = 10.0,
                 projectBudget = 100.0,
                 dueDateMillis = System.currentTimeMillis() + 259200000L,
-                isCompleted = false
+                isCompleted = false,
+                doneTasksCount = 3,
+                totalTasksCount = 5
             ),
             onEvent = {},
             navTo = {}
