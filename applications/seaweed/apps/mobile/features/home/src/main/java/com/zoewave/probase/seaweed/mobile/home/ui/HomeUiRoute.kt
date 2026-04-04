@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.core.ui.R as CoreUiR
-import com.zoewave.probase.seaweed.features.main.navigation.SeaweedDestination
+import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.mobile.home.ui.components.CategoryQuickJumpCard
 import com.zoewave.probase.seaweed.mobile.home.ui.components.DonutChart
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem

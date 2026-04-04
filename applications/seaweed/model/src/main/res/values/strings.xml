@@ -1,0 +1,7 @@
+<resources>
+    <string name="applications_seaweed_model_route_home">Home</string>
+    <string name="applications_seaweed_model_route_categories">Categories</string>
+    <string name="applications_seaweed_model_route_transactions">Transactions</string>
+    <string name="applications_seaweed_model_route_settings">Settings</string>
+    <string name="applications_seaweed_model_route_add_transaction">Add Transaction</string>
+</resources>

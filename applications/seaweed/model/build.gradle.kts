@@ -1,6 +1,6 @@
 plugins {
     id("composetemplate.android.library")
-    // ✅ Required for Type-Safe Navigation
+    id("composetemplate.android.library.compose")
     id("composetemplate.kotlin.serialization")
 }
 
@@ -14,6 +14,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:model"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.compose.material.icons.extended)
 }

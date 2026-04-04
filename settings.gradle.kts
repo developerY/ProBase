@@ -92,7 +92,10 @@ include(":applications:seaweed:apps:mobile")
 include(":applications:seaweed:apps:mobile:features:home")
 include(":applications:seaweed:apps:mobile:features:transaction")
 include(":applications:seaweed:apps:mobile:features:settings")
+include(":applications:seaweed:apps:mobile:core")
 include(":applications:seaweed:apps:wear")
+include(":applications:seaweed:apps:wear:features:home")
+include(":applications:seaweed:apps:wear:features:transactions")
 
 // --- GoSwift Product Line ---
 include(":applications:goswift:model")

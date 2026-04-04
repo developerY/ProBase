@@ -1,17 +1,20 @@
 package com.zoewave.probase.seaweed.mobile.ui.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.probase.seaweed.features.main.navigation.SeaweedDestination
+import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.mobile.home.ui.CategoryGridRoute
 import com.zoewave.probase.seaweed.mobile.home.ui.HomeUiRoute
 import com.zoewave.probase.seaweed.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.TransactionsUiRoute
+import com.zoewave.probase.seaweed.mobile.ui.components.AdaptiveSeaweedScreen
 
 fun seaweedNavEntryProvider(
     key: SeaweedDestination,
+    windowSizeClass: WindowSizeClass,
     navigateTo: (SeaweedDestination) -> Unit,
     onBack: () -> Unit
 ): NavEntry<SeaweedDestination> {
@@ -31,12 +34,22 @@ fun seaweedNavEntryProvider(
                 )
             }
             is SeaweedDestination.Transactions -> {
-                TransactionsUiRoute(
-                    modifier = Modifier.fillMaxSize(),
-                    initialCategory = key.category,
-                    initialTransactionId = key.transactionId,
-                    navTo = navigateTo
-                )
+                val isExpanded = windowSizeClass.widthSizeClass != androidx.compose.material3.windowsizeclass.WindowWidthSizeClass.Compact
+                if (isExpanded) {
+                    AdaptiveSeaweedScreen(
+                        windowSizeClass = windowSizeClass,
+                        navTo = navigateTo,
+                        initialCategory = key.category,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    TransactionsUiRoute(
+                        modifier = Modifier.fillMaxSize(),
+                        initialCategory = key.category,
+                        initialTransactionId = key.transactionId,
+                        navTo = navigateTo
+                    )
+                }
             }
             SeaweedDestination.AddTransaction -> {
                 AddTransactionUiRoute(

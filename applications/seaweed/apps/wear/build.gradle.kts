@@ -58,6 +58,10 @@ dependencies {
     implementation(project(":applications:seaweed:data"))
     implementation(project(":applications:seaweed:features:main"))
 
+    // Wear Feature Modules
+    implementation(project(":applications:seaweed:apps:wear:features:home"))
+    implementation(project(":applications:seaweed:apps:wear:features:transactions"))
+
     // Wear UI & Navigation
     implementation(libs.androidx.wear.compose.material3)
     implementation(libs.androidx.wear.compose.foundation)

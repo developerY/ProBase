@@ -1,0 +1,59 @@
+package com.zoewave.probase.seaweed.model.navigation
+
+import androidx.annotation.StringRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.zoewave.probase.seaweed.model.R
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+
+@Serializable
+sealed class SeaweedDestination(
+    val title: String? = null,
+    @StringRes val titleRes: Int? = null,
+    @Transient val icon: ImageVector = Icons.Default.Home
+) {
+    @Serializable
+    data object Home : SeaweedDestination(
+        titleRes = R.string.applications_seaweed_model_route_home,
+        icon = Icons.Default.Home
+    )
+
+    @Serializable
+    data object CategoryGrid : SeaweedDestination(
+        titleRes = R.string.applications_seaweed_model_route_categories,
+        icon = Icons.Default.GridView
+    )
+
+    @Serializable
+    data class Transactions(
+        val category: String? = null,
+        val transactionId: String? = null
+    ) : SeaweedDestination(
+        titleRes = R.string.applications_seaweed_model_route_transactions,
+        icon = Icons.AutoMirrored.Filled.List
+    )
+
+    @Serializable
+    data object AddTransaction : SeaweedDestination(
+        titleRes = R.string.applications_seaweed_model_route_add_transaction,
+        icon = Icons.Default.Add
+    )
+
+    @Serializable
+    data object Settings : SeaweedDestination(
+        titleRes = R.string.applications_seaweed_model_route_settings,
+        icon = Icons.Default.Settings
+    )
+}
+
+val topLevelDestinations = listOf(
+    SeaweedDestination.Home,
+    SeaweedDestination.Transactions(),
+    SeaweedDestination.Settings
+)
