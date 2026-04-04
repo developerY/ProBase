@@ -3,9 +3,9 @@ package com.zoewave.probase.seaweed.wear.ui.navigation
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.probase.seaweed.features.main.navigation.SeaweedDestination
+import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.wear.features.home.HomeRoute
-import com.zoewave.probase.seaweed.wear.features.transaction.TransactionListRoute
+import com.zoewave.probase.seaweed.wear.features.transactions.TransactionListRoute
 
 fun seaweedWearNavEntryProvider(
     key: SeaweedDestination,
