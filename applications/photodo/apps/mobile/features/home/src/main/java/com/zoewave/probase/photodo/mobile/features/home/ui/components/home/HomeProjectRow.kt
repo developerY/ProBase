@@ -77,9 +77,12 @@ fun HomeProjectRow(
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         // 1. The Dynamic "Smart Subtitle"
-                        val subtitleText = remember(project.categoryName, project.dueDateMillis) {
+                        val subtitleText = remember(project.categoryName, project.dueDateMillis, project.progressText) {
                             buildString {
                                 append(project.categoryName)
+                                if (project.progressText.isNotEmpty()) {
+                                    append(" • ${project.progressText}")
+                                }
                                 project.dueDateMillis?.let { dueDate ->
                                     val formatter = SimpleDateFormat("MMM dd", Locale.getDefault())
                                     val dateStr = formatter.format(Date(dueDate))
@@ -144,7 +147,9 @@ private fun HomeProjectRowGreenPreview() {
                 currentSpend = 120.0,
                 projectBudget = 200.0,
                 // 🚀 ADDED: A mock timestamp (roughly ~3 days from now) just so you can preview it!
-                dueDateMillis = System.currentTimeMillis() + 259200000L
+                dueDateMillis = System.currentTimeMillis() + 259200000L,
+                doneTasksCount = 2,
+                totalTasksCount = 5
             ),
             onEvent = {},
             navTo = {}
@@ -165,7 +170,9 @@ private fun HomeProjectRowYellowPreview() {
                 isUrgent = false,
                 currentSpend = 200.0,
                 projectBudget = 200.0,
-                dueDateMillis = System.currentTimeMillis() + 259200000L
+                dueDateMillis = System.currentTimeMillis() + 259200000L,
+                doneTasksCount = 4,
+                totalTasksCount = 5
             ),
             onEvent = {},
             navTo = {}
@@ -185,7 +192,9 @@ private fun HomeProjectRowRedPreview() {
                 isFavorite = true,
                 isUrgent = false,
                 currentSpend = 270.0,
-                projectBudget = 200.0
+                projectBudget = 200.0,
+                doneTasksCount = 1,
+                totalTasksCount = 5
             ),
             onEvent = {},
             navTo = {}
@@ -206,7 +215,9 @@ private fun HomeProjectRowWithDueDatePreview() {
                 isUrgent = false,
                 currentSpend = 270.0,
                 projectBudget = 200.0,
-                dueDateMillis = System.currentTimeMillis() + 86400000L * 7 // 1 week from now
+                dueDateMillis = System.currentTimeMillis() + 86400000L * 7, // 1 week from now
+                doneTasksCount = 3,
+                totalTasksCount = 3
             ),
             onEvent = {},
             navTo = {}
