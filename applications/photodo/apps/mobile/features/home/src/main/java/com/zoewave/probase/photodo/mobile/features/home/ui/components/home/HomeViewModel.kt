@@ -62,7 +62,9 @@ class HomeViewModel @Inject constructor(
                                 isUrgent = project.isUrgent,
                                 currentSpend = project.currentSpend,
                                 projectBudget = project.projectBudget,
-                                dueDateMillis = project.dueDate
+                                dueDateMillis = project.dueDate,
+                                doneTasksCount = tasks.count { it.isChecked },
+                                totalTasksCount = tasks.size
                             )
                         )
                     }
