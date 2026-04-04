@@ -96,11 +96,21 @@ fun ProjectCard(
                 )
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = project.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = project.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        if (project.progressText.isNotEmpty()) {
+                            Text(
+                                text = " • ${project.progressText}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 4.dp)
+                            )
+                        }
+                    }
                     // 🚀 The Dynamic "Smart Subtitle"
                     val subtitleText = remember(project.categoryName, project.dueDateMillis) {
                         buildString {
@@ -218,6 +228,8 @@ fun ProjectCardPreview() {
                 isFavorite = false,
                 isUrgent = false,
                 dueDateMillis = System.currentTimeMillis() + 86400000L * 3,
+                doneTasksCount = 2,
+                totalTasksCount = 5
             ),
             onEvent = {},
             onDeleteClicked = {},
@@ -238,7 +250,9 @@ fun ProjectCardBudgetPreview() {
                 isFavorite = true,
                 isUrgent = false,
                 currentSpend = 750.0,
-                projectBudget = 1000.0
+                projectBudget = 1000.0,
+                doneTasksCount = 8,
+                totalTasksCount = 10
             ),
             onEvent = {},
             onDeleteClicked = {},
@@ -259,7 +273,9 @@ fun ProjectCardUrgentOverBudgetPreview() {
                 isFavorite = false,
                 isUrgent = true,
                 currentSpend = 1200.0,
-                projectBudget = 1000.0
+                projectBudget = 1000.0,
+                doneTasksCount = 4,
+                totalTasksCount = 12
             ),
             onEvent = {},
             onDeleteClicked = {},
