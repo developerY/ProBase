@@ -32,8 +32,8 @@ fun ProjectCard(
     val context = LocalContext.current
     var assetBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
 
-    if (project.hasPhoto) {
-        LaunchedEffect(project.id, project.hasPhoto) {
+    LaunchedEffect(project.id, project.hasPhoto) {
+        if (project.hasPhoto) {
             android.util.Log.d("PhotoDoSync_UI", "ProjectCard: Loading primary photo for project ${project.id}")
             assetBitmap = loadAssetAsBitmap(context, "/photodo/sync_state", "photo_${project.id}_0")
             if (assetBitmap != null) {
@@ -41,6 +41,8 @@ fun ProjectCard(
             } else {
                 android.util.Log.w("PhotoDoSync_UI", "ProjectCard: Failed to load primary photo for project ${project.id}")
             }
+        } else {
+            assetBitmap = null
         }
     }
 

@@ -120,9 +120,11 @@ private fun CategoryItem(
     val context = LocalContext.current
     var categoryBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
 
-    if (category.hasPhoto) {
-        LaunchedEffect(category.id, category.hasPhoto) {
+    LaunchedEffect(category.id, category.hasPhoto) {
+        if (category.hasPhoto) {
             categoryBitmap = loadAssetAsBitmap(context, "/photodo/sync_state", "category_${category.id}")
+        } else {
+            categoryBitmap = null
         }
     }
 

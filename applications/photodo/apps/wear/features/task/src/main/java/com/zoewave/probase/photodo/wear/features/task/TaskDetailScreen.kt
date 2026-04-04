@@ -42,16 +42,18 @@ fun TaskDetailScreen(
     val context = LocalContext.current
     val projectBitmaps = remember { mutableStateListOf<android.graphics.Bitmap>() }
 
-    if (uiState is TaskDetailUiState.Success && uiState.hasPhoto) {
-        LaunchedEffect(uiState.projectId, uiState.photoCount) {
+    if (uiState is TaskDetailUiState.Success) {
+        LaunchedEffect(uiState.projectId, uiState.photoCount, uiState.hasPhoto) {
             projectBitmaps.clear()
-            // Try to load up to 5 synced photos
-            for (i in 0 until 5) {
-                val bitmap = loadAssetAsBitmap(context, "/photodo/sync_state", "photo_${uiState.projectId}_$i")
-                if (bitmap != null) {
-                    projectBitmaps.add(bitmap)
-                } else {
-                    if (i > 0) break 
+            if (uiState.hasPhoto) {
+                // Try to load up to 5 synced photos
+                for (i in 0 until 5) {
+                    val bitmap = loadAssetAsBitmap(context, "/photodo/sync_state", "photo_${uiState.projectId}_$i")
+                    if (bitmap != null) {
+                        projectBitmaps.add(bitmap)
+                    } else {
+                        if (i > 0) break 
+                    }
                 }
             }
         }
