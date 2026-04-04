@@ -1,77 +1,58 @@
 package com.zoewave.probase.seaweed.mobile.ui.components
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.navigation3.ui.NavDisplay
-import com.zoewave.probase.seaweed.features.main.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.mobile.ui.navigation.seaweedNavEntryProvider
+import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 
 @Composable
-fun SeaweedMainScreen() {
+fun SeaweedMainScreen(
+    windowSizeClass: WindowSizeClass
+) {
     val backStack = remember {
         mutableStateListOf<SeaweedDestination>(SeaweedDestination.Home)
     }
 
     val currentDestination = backStack.lastOrNull() ?: SeaweedDestination.Home
 
-    fun navigateTo(destination: SeaweedDestination) {
-        if (destination is SeaweedDestination.Home || destination is SeaweedDestination.Transactions || destination is SeaweedDestination.Settings) {
-            backStack.clear()
-            backStack.add(destination)
-        } else {
-            backStack.add(destination)
-        }
-    }
-
-    fun navigateBack() {
-        if (backStack.size > 1) {
-            backStack.removeAt(backStack.lastIndex)
-        }
-    }
-
-    BackHandler(enabled = backStack.size > 1) {
-        navigateBack()
-    }
-
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            item(
-                selected = currentDestination is SeaweedDestination.Home || currentDestination is SeaweedDestination.CategoryGrid,
-                onClick = { navigateTo(SeaweedDestination.Home) },
-                icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                label = { Text("Home") }
-            )
-            item(
-                selected = currentDestination is SeaweedDestination.Transactions,
-                onClick = { navigateTo(SeaweedDestination.Transactions(category = null)) },
-                icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Transactions") },
-                label = { Text("Transactions") }
-            )
-            item(
-                selected = currentDestination is SeaweedDestination.Settings,
-                onClick = { navigateTo(SeaweedDestination.Settings) },
-                icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                label = { Text("Settings") }
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            SeaweedBottomBar(
+                currentDestination = currentDestination,
+                navTo = { selectedDestination ->
+                    if (currentDestination != selectedDestination) {
+                        backStack.clear()
+                        backStack.add(SeaweedDestination.Home)
+                        if (selectedDestination != SeaweedDestination.Home) {
+                            backStack.add(selectedDestination)
+                        }
+                    }
+                }
             )
         }
-    ) {
+    ) { innerPadding ->
         NavDisplay(
             backStack = backStack,
-            onBack = { navigateBack() },
+            modifier = Modifier.padding(innerPadding),
+            onBack = { backStack.removeLastOrNull() },
             entryProvider = { key ->
                 seaweedNavEntryProvider(
                     key = key,
-                    navigateTo = { dest -> navigateTo(dest) },
-                    onBack = { navigateBack() }
+                    windowSizeClass = windowSizeClass,
+                    navigateTo = { dest ->
+                        if (dest != backStack.lastOrNull()) {
+                            backStack.add(dest)
+                        }
+                    },
+                    onBack = { backStack.removeLastOrNull() }
                 )
             }
         )
