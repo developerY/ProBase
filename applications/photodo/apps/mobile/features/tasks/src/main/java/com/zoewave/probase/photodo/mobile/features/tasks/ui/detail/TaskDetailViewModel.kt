@@ -10,8 +10,10 @@ import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -31,13 +33,15 @@ class TaskDetailViewModel @Inject constructor(
 
     // ✅ GOLD STANDARD: Get projectId directly from SavedStateHandle.
     // This makes the ViewModel reactive to navigation arguments and survives process death.
-    private val _projectId = savedStateHandle.getStateFlow<Long?>("projectId", null)
+    private val _projectId = MutableStateFlow<Long?>(savedStateHandle.get<Long?>("projectId"))
 
     fun loadTaskDetails(projectId: Long) {
         savedStateHandle["projectId"] = projectId
+        _projectId.value = projectId
     }
 
     val uiState: StateFlow<TaskDetailUiState> = _projectId
+        .asStateFlow()
         .filterNotNull()
         .flatMapLatest { id ->
             photoDoRepo.getProjectDetails(id)
