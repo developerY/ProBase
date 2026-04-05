@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import com.zoewave.probase.seaweed.mobile.home.ui.CategoryGridRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.TransactionsUiRoute
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
+import com.zoewave.probase.seaweed.model.navigation.TransactionTab
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -20,7 +21,8 @@ fun AdaptiveSeaweedScreen(
     windowSizeClass: WindowSizeClass,
     navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
-    initialCategory: String? = null
+    initialCategory: String? = null,
+    initialTab: TransactionTab = TransactionTab.RECENT
 ) {
     val isExpanded = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
     
@@ -46,6 +48,7 @@ fun AdaptiveSeaweedScreen(
             TransactionsUiRoute(
                 modifier = Modifier.fillMaxSize().background(detailBackground),
                 initialCategory = initialCategory,
+                initialTab = initialTab,
                 navTo = navTo
             )
         },

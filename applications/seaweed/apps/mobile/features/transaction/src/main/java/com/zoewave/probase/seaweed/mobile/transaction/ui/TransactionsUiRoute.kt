@@ -1,7 +1,14 @@
 package com.zoewave.probase.seaweed.mobile.transaction.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -9,7 +16,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
@@ -24,8 +44,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
+import com.zoewave.probase.seaweed.mobile.bills.ui.BillsScreen
+import com.zoewave.probase.seaweed.mobile.bills.ui.BillsViewModel
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
+import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
+import com.zoewave.probase.seaweed.model.navigation.TransactionTab
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -35,15 +58,19 @@ fun TransactionsUiRoute(
     modifier: Modifier = Modifier,
     initialCategory: String? = null,
     initialTransactionId: String? = null,
+    initialTab: TransactionTab = TransactionTab.RECENT,
     viewModel: TransactionsViewModel = hiltViewModel(),
+    billsViewModel: BillsViewModel = hiltViewModel(),
     navTo: (SeaweedDestination) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val billsUiState by billsViewModel.uiState.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<String>()
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(initialCategory, initialTransactionId) {
+    LaunchedEffect(initialCategory, initialTransactionId, initialTab) {
         viewModel.setInitialCategory(initialCategory)
+        viewModel.setInitialTab(initialTab)
         if (initialTransactionId != null) {
             viewModel.onEvent(TransactionsUiEvent.SelectTransaction(initialTransactionId))
             navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, initialTransactionId)
@@ -62,7 +89,9 @@ fun TransactionsUiRoute(
         listPane = {
             TransactionsListPane(
                 uiState = uiState,
+                billsUiState = billsUiState,
                 onEvent = viewModel::onEvent,
+                onBillsEvent = billsViewModel::onEvent,
                 navTo = navTo,
                 onTransactionClick = { id ->
                     viewModel.onEvent(TransactionsUiEvent.SelectTransaction(id))
@@ -93,17 +122,28 @@ fun TransactionsUiRoute(
 @Composable
 fun TransactionsListPane(
     uiState: TransactionsUiState,
+    @Suppress("UnusedParameter") billsUiState: Any, // We need the actual BillsUiState
     onEvent: (TransactionsUiEvent) -> Unit,
+    onBillsEvent: (com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiEvent) -> Unit,
     navTo: (SeaweedDestination) -> Unit,
     onTransactionClick: (String) -> Unit
 ) {
+    // Re-cast for proper usage, though it's better to pass it in directly
+    val billsState = billsUiState as? com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState
+
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Transactions") })
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { navTo(SeaweedDestination.AddTransaction) }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Transaction")
+            if (uiState is TransactionsUiState.Success && uiState.selectedTab == TransactionTab.RECENT) {
+                FloatingActionButton(onClick = { navTo(SeaweedDestination.AddTransaction) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Transaction")
+                }
+            } else if (uiState is TransactionsUiState.Success && uiState.selectedTab == TransactionTab.CYCLIC) {
+                FloatingActionButton(onClick = { /* TODO: Show Add Bill Dialog */ }) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Bill")
+                }
             }
         }
     ) { padding ->
@@ -115,31 +155,76 @@ fun TransactionsListPane(
             }
             is TransactionsUiState.Success -> {
                 Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-                    CategoryFilterRow(
-                        categories = uiState.categories,
-                        selectedCategory = uiState.selectedCategory,
-                        onSelect = { onEvent(TransactionsUiEvent.SelectCategory(it)) }
-                    )
-                    if (uiState.filteredTransactions.isEmpty()) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("No transactions yet")
+                    PrimaryTabRow(
+                        selectedTabIndex = uiState.selectedTab.ordinal,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Tab(
+                            selected = uiState.selectedTab == TransactionTab.RECENT,
+                            onClick = { onEvent(TransactionsUiEvent.SelectTab(TransactionTab.RECENT)) },
+                            text = { Text("Recent") }
+                        )
+                        Tab(
+                            selected = uiState.selectedTab == TransactionTab.CYCLIC,
+                            onClick = { onEvent(TransactionsUiEvent.SelectTab(TransactionTab.CYCLIC)) },
+                            text = { Text("Cyclic") }
+                        )
+                    }
+
+                    when (uiState.selectedTab) {
+                        TransactionTab.RECENT -> {
+                            RecentTransactionsContent(
+                                uiState = uiState,
+                                onEvent = onEvent,
+                                onTransactionClick = onTransactionClick
+                            )
                         }
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(uiState.filteredTransactions, key = { it.id }) { transaction ->
-                                TransactionItem(
-                                    transaction = transaction,
-                                    onDelete = { onEvent(TransactionsUiEvent.DeleteTransaction(transaction.id)) },
-                                    onClick = { onTransactionClick(transaction.id) },
-                                    isSelected = uiState.selectedTransactionId == transaction.id
+                        TransactionTab.CYCLIC -> {
+                            if (billsState != null) {
+                                BillsScreen(
+                                    uiState = billsState,
+                                    onEvent = onBillsEvent,
+                                    navTo = navTo,
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RecentTransactionsContent(
+    uiState: TransactionsUiState.Success,
+    onEvent: (TransactionsUiEvent) -> Unit,
+    onTransactionClick: (String) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        CategoryFilterRow(
+            categories = uiState.categories,
+            selectedCategory = uiState.selectedCategory,
+            onSelect = { onEvent(TransactionsUiEvent.SelectCategory(it)) }
+        )
+        if (uiState.filteredTransactions.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("No transactions yet")
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(uiState.filteredTransactions, key = { it.id }) { transaction ->
+                    TransactionItem(
+                        transaction = transaction,
+                        onDelete = { onEvent(TransactionsUiEvent.DeleteTransaction(transaction.id)) },
+                        onClick = { onTransactionClick(transaction.id) },
+                        isSelected = uiState.selectedTransactionId == transaction.id
+                    )
                 }
             }
         }

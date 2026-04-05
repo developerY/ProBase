@@ -14,6 +14,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Serializable
+enum class TransactionTab {
+    RECENT, CYCLIC
+}
+
+@Serializable
 sealed class SeaweedDestination(
     val title: String? = null,
     @StringRes val titleRes: Int? = null,
@@ -40,7 +45,8 @@ sealed class SeaweedDestination(
     @Serializable
     data class Transactions(
         val category: String? = null,
-        val transactionId: String? = null
+        val transactionId: String? = null,
+        val initialTab: TransactionTab = TransactionTab.RECENT
     ) : SeaweedDestination(
         titleRes = R.string.applications_seaweed_model_route_transactions,
         icon = Icons.AutoMirrored.Filled.List
@@ -61,7 +67,6 @@ sealed class SeaweedDestination(
 
 val topLevelDestinations = listOf(
     SeaweedDestination.Home,
-    SeaweedDestination.Bills,
     SeaweedDestination.Transactions(),
     SeaweedDestination.Settings
 )

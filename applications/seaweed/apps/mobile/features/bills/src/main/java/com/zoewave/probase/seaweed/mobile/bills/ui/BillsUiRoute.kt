@@ -30,12 +30,25 @@ fun BillsUiRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    BillsScreen(
-        modifier = modifier,
-        uiState = uiState,
-        onEvent = viewModel::onEvent,
-        navTo = navTo
-    )
+    Scaffold(
+        topBar = {
+            @OptIn(ExperimentalMaterial3Api::class)
+            TopAppBar(title = { Text("Cyclic Bills") })
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { /* TODO: Show Add Dialog */ }) {
+                Icon(Icons.Default.Add, contentDescription = "Add Bill")
+            }
+        },
+        modifier = modifier
+    ) { padding ->
+        BillsScreen(
+            modifier = Modifier.padding(padding),
+            uiState = uiState,
+            onEvent = viewModel::onEvent,
+            navTo = navTo
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -46,20 +59,10 @@ fun BillsScreen(
     onEvent: (BillsUiEvent) -> Unit,
     navTo: (SeaweedDestination) -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Cyclic Bills") })
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { /* TODO: Show Add Dialog */ }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Bill")
-            }
-        },
-        modifier = modifier
-    ) { padding ->
+    Box(modifier = modifier) {
         when (uiState) {
             BillsUiState.Loading -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
@@ -67,7 +70,7 @@ fun BillsScreen(
                 val groupedExpenses = uiState.expenses.groupBy { it.category }
                 
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(padding),
+                    modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
