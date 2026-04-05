@@ -8,7 +8,7 @@ sealed interface ProjectListUiState {
     data object Empty : ProjectListUiState
     data class Success(
         val categoryName: String,
-        val projects: List<ProjectWearUiModel>
+        val projects: List<ProjectWearUiModel>,
     ) : ProjectListUiState
 }
 
@@ -21,5 +21,10 @@ data class ProjectWearUiModel(
     val dueDate: Long?,
     val isUrgent: Boolean,
     val progress: Float,
-    val hasPhoto: Boolean = false
-)
+    val hasPhoto: Boolean = false,
+    val doneTasksCount: Int = 0,
+    val totalTasksCount: Int = 0
+) {
+    val progressText: String = if (totalTasksCount > 0) "$doneTasksCount/$totalTasksCount tasks" else "No tasks"
+}
+

@@ -43,7 +43,9 @@ class ProjectListViewModel @Inject constructor(
                     dueDate = null, 
                     isUrgent = false, 
                     progress = if (totalTasks > 0) completedTasks.toFloat() / totalTasks else 0f,
-                    hasPhoto = syncProject.hasPhoto
+                    hasPhoto = syncProject.hasPhoto,
+                    doneTasksCount = completedTasks,
+                    totalTasksCount = totalTasks
                 )
             }
             ProjectListUiState.Success(
