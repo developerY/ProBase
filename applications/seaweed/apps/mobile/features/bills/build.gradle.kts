@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.zoewave.probase.seaweed.mobile.settings"
+    namespace = "com.zoewave.probase.seaweed.mobile.bills"
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -18,7 +18,7 @@ dependencies {
     implementation(project(":core:util"))
     implementation(project(":applications:seaweed:model"))
     implementation(project(":applications:seaweed:data"))
-    implementation(project(":applications:seaweed:features:main"))
+    implementation(project(":applications:seaweed:apps:mobile:core"))
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.hilt.navigation.compose)

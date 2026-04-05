@@ -2,13 +2,14 @@ package com.zoewave.probase.seaweed.mobile.home.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import com.zoewave.probase.seaweed.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -17,33 +18,40 @@ import kotlin.math.absoluteValue
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: TransactionRepository
+    private val repository: TransactionRepository,
+    private val financialRepository: FinancialRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<HomeUiState> = repository.getAllTransactions()
-        .map { transactions ->
-            val categoriesSummary = transactions.filter { it.amount < 0 }
-                .groupBy { it.category }
-                .map { (category, categoryTransactions) ->
-                    CategoryOverview(
-                        name = category,
-                        totalAmount = categoryTransactions.sumOf { it.amount }.absoluteValue,
-                        transactionCount = categoryTransactions.size
-                    )
-                }
-                .sortedByDescending { it.totalAmount }
+    val uiState: StateFlow<HomeUiState> = combine(
+        repository.getAllTransactions(),
+        financialRepository.getMonthlyIncome(),
+        financialRepository.getTotalMonthlyFixedCosts(),
+        financialRepository.getFlexibleMoneyRemaining()
+    ) { transactions, income, fixedCosts, flexibleRemaining ->
+        val categoriesSummary = transactions.filter { it.amount < 0 }
+            .groupBy { it.category }
+            .map { (category, categoryTransactions) ->
+                CategoryOverview(
+                    name = category,
+                    totalAmount = categoryTransactions.sumOf { it.amount }.absoluteValue,
+                    transactionCount = categoryTransactions.size
+                )
+            }
+            .sortedByDescending { it.totalAmount }
 
-            HomeUiState.Success(
-                transactions = transactions,
-                categoriesSummary = categoriesSummary,
-                totalBalance = transactions.sumOf { it.amount }
-            )
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = HomeUiState.Loading
+        HomeUiState.Success(
+            transactions = transactions,
+            categoriesSummary = categoriesSummary,
+            monthlyIncome = income,
+            totalFixedCosts = fixedCosts,
+            flexibleMoneyRemaining = flexibleRemaining,
+            monthProgress = financialRepository.getMonthProgress()
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = HomeUiState.Loading
+    )
 
     fun onEvent(event: HomeUiEvent) {
         when (event) {

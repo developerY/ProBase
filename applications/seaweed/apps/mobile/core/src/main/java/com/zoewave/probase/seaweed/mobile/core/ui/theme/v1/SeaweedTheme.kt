@@ -2,37 +2,40 @@ package com.zoewave.probase.seaweed.mobile.core.ui.theme.v1
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.zoewave.probase.seaweed.mobile.core.ui.theme.SeaweedPrimary
-import com.zoewave.probase.seaweed.mobile.core.ui.theme.SeaweedPrimaryDark
-import com.zoewave.probase.seaweed.mobile.core.ui.theme.SeaweedSecondary
-import com.zoewave.probase.seaweed.mobile.core.ui.theme.SeaweedSecondaryDark
-import com.zoewave.probase.seaweed.mobile.core.ui.theme.SeaweedTertiary
-import com.zoewave.probase.seaweed.mobile.core.ui.theme.SeaweedTertiaryDark
-import com.zoewave.probase.seaweed.mobile.core.ui.theme.Typography
+import com.zoewave.probase.seaweed.mobile.core.ui.theme.*
+import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
 
-private val DarkColorScheme = darkColorScheme(
+private val SeaweedDarkColorScheme = darkColorScheme(
     primary = SeaweedPrimaryDark,
     secondary = SeaweedSecondaryDark,
     tertiary = SeaweedTertiaryDark
 )
 
-private val LightColorScheme = lightColorScheme(
+private val SeaweedLightColorScheme = lightColorScheme(
     primary = SeaweedPrimary,
     secondary = SeaweedSecondary,
     tertiary = SeaweedTertiary
 )
 
+private val CoralDarkColorScheme = darkColorScheme(
+    primary = CoralPrimaryDark,
+    secondary = CoralSecondaryDark,
+    tertiary = CoralTertiaryDark
+)
+
+private val CoralLightColorScheme = lightColorScheme(
+    primary = CoralPrimary,
+    secondary = CoralSecondary,
+    tertiary = CoralTertiary
+)
+
 @Composable
 fun SeaweedTheme(
+    themeConfig: SeaweedThemeConfig = SeaweedThemeConfig.DEFAULT,
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
@@ -41,9 +44,8 @@ fun SeaweedTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        themeConfig == SeaweedThemeConfig.CORAL -> if (darkTheme) CoralDarkColorScheme else CoralLightColorScheme
+        else -> if (darkTheme) SeaweedDarkColorScheme else SeaweedLightColorScheme
     }
 
     MaterialTheme(

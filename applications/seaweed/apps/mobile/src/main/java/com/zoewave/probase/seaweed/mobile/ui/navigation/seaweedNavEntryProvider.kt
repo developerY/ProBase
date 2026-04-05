@@ -7,6 +7,7 @@ import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.mobile.home.ui.CategoryGridRoute
 import com.zoewave.probase.seaweed.mobile.home.ui.HomeUiRoute
+import com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiRoute
 import com.zoewave.probase.seaweed.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.TransactionsUiRoute
@@ -31,6 +32,12 @@ fun seaweedNavEntryProvider(
                     modifier = Modifier.fillMaxSize(),
                     navTo = navigateTo,
                     onBack = onBack
+                )
+            }
+            SeaweedDestination.Bills -> {
+                BillsUiRoute(
+                    modifier = Modifier.fillMaxSize(),
+                    navTo = navigateTo
                 )
             }
             is SeaweedDestination.Transactions -> {

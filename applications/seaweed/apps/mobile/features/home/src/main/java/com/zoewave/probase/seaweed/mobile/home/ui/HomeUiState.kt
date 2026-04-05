@@ -8,7 +8,10 @@ sealed interface HomeUiState {
     data class Success(
         val transactions: List<Transaction> = emptyList(),
         val categoriesSummary: List<CategoryOverview> = emptyList(),
-        val totalBalance: Double = 0.0
+        val monthlyIncome: Double = 0.0,
+        val totalFixedCosts: Double = 0.0,
+        val flexibleMoneyRemaining: Double = 0.0,
+        val monthProgress: Float = 0f
     ) : HomeUiState
 }
 
