@@ -14,8 +14,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.wear.tooling.preview.devices.WearDevices
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.TitleCard
@@ -54,12 +52,7 @@ fun ProjectCard(
         onClick = onClick,
         title = titleBlock,
         subtitle = {
-            val budgetText = if (project.budget > 0) {
-                "Budget: $${String.format(Locale.getDefault(), "%.2f", project.budget)}"
-            } else {
-                "No Budget"
-            }
-            Text(budgetText)
+            Text(project.progressText)
         },
         time = {
             project.dueDate?.let {
