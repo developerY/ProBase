@@ -7,7 +7,6 @@ import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.mobile.home.ui.CategoryGridRoute
 import com.zoewave.probase.seaweed.mobile.home.ui.HomeUiRoute
-import com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiRoute
 import com.zoewave.probase.seaweed.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.TransactionsUiRoute
@@ -35,8 +34,10 @@ fun seaweedNavEntryProvider(
                 )
             }
             SeaweedDestination.Bills -> {
-                BillsUiRoute(
+                // Bills are now part of Transactions, but we handle the direct destination for backward compatibility or deep links
+                TransactionsUiRoute(
                     modifier = Modifier.fillMaxSize(),
+                    initialTab = com.zoewave.probase.seaweed.model.navigation.TransactionTab.CYCLIC,
                     navTo = navigateTo
                 )
             }
@@ -47,6 +48,7 @@ fun seaweedNavEntryProvider(
                         windowSizeClass = windowSizeClass,
                         navTo = navigateTo,
                         initialCategory = key.category,
+                        initialTab = key.initialTab,
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
@@ -54,6 +56,7 @@ fun seaweedNavEntryProvider(
                         modifier = Modifier.fillMaxSize(),
                         initialCategory = key.category,
                         initialTransactionId = key.transactionId,
+                        initialTab = key.initialTab,
                         navTo = navigateTo
                     )
                 }

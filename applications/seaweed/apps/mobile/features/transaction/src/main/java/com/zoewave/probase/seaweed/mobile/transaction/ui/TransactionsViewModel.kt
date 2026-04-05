@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.model.Transaction
+import com.zoewave.probase.seaweed.model.navigation.TransactionTab
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,11 +24,19 @@ class TransactionsViewModel @Inject constructor(
 
     private val _selectedCategory = MutableStateFlow<String?>(null)
     private val _selectedTransactionId = MutableStateFlow<String?>(null)
+    private val _selectedTab = MutableStateFlow(TransactionTab.RECENT)
     private var isInitialized = false
 
     fun setInitialCategory(category: String?) {
         if (!isInitialized && category != null) {
             _selectedCategory.value = category
+            isInitialized = true
+        }
+    }
+
+    fun setInitialTab(tab: TransactionTab) {
+        if (!isInitialized) {
+            _selectedTab.value = tab
             isInitialized = true
         }
     }
@@ -40,8 +49,9 @@ class TransactionsViewModel @Inject constructor(
         repository.getAllTransactions(),
         _selectedCategory,
         _selectedTransactionId,
-        _selectedTransaction
-    ) { transactions, selectedCategory, selectedTransactionId, selectedTransaction ->
+        _selectedTransaction,
+        _selectedTab
+    ) { transactions, selectedCategory, selectedTransactionId, selectedTransaction, selectedTab ->
         val categories = transactions.map { it.category }.distinct().sorted()
         val filteredTransactions = if (selectedCategory == null) {
             transactions
@@ -54,7 +64,8 @@ class TransactionsViewModel @Inject constructor(
             categories = categories,
             selectedCategory = selectedCategory,
             selectedTransactionId = selectedTransactionId,
-            selectedTransaction = selectedTransaction
+            selectedTransaction = selectedTransaction,
+            selectedTab = selectedTab
         )
     }.stateIn(
         scope = viewModelScope,
@@ -74,6 +85,9 @@ class TransactionsViewModel @Inject constructor(
             }
             is TransactionsUiEvent.SelectTransaction -> {
                 _selectedTransactionId.value = event.id
+            }
+            is TransactionsUiEvent.SelectTab -> {
+                _selectedTab.value = event.tab
             }
         }
     }
