@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.zoewave.probase.seaweed.mobile.core.ui.theme.*
 import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
+import com.zoewave.probase.seaweed.model.ThemeMode
 
 private val SeaweedDarkColorScheme = darkColorScheme(
     primary = SeaweedPrimaryDark,
@@ -35,10 +36,16 @@ private val CoralLightColorScheme = lightColorScheme(
 @Composable
 fun SeaweedTheme(
     themeConfig: SeaweedThemeConfig = SeaweedThemeConfig.DEFAULT,
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
+    dynamicColor: Boolean = false, // Default to false to respect custom theme selections
     content: @Composable () -> Unit
 ) {
+    val darkTheme = when (themeMode) {
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+    }
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current

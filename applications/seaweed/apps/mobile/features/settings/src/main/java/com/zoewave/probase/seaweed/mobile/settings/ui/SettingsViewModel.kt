@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.seaweed.data.UserSettingsRepository
 import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
+import com.zoewave.probase.seaweed.model.ThemeMode
 import com.zoewave.probase.seaweed.model.UserSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -33,6 +34,9 @@ class SettingsViewModel @Inject constructor(
                 is SettingsUiEvent.UpdateTheme -> {
                     repository.saveUserSettings(currentSettings.copy(themeConfig = event.themeConfig))
                 }
+                is SettingsUiEvent.UpdateThemeMode -> {
+                    repository.saveUserSettings(currentSettings.copy(themeMode = event.themeMode))
+                }
                 is SettingsUiEvent.UpdateIncome -> {
                     repository.saveUserSettings(currentSettings.copy(monthlyIncome = event.income))
                 }
@@ -48,5 +52,6 @@ sealed interface SettingsUiState {
 
 sealed interface SettingsUiEvent {
     data class UpdateTheme(val themeConfig: SeaweedThemeConfig) : SettingsUiEvent
+    data class UpdateThemeMode(val themeMode: ThemeMode) : SettingsUiEvent
     data class UpdateIncome(val income: Double) : SettingsUiEvent
 }
