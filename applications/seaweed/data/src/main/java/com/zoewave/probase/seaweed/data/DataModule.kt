@@ -14,4 +14,16 @@ abstract class DataModule {
     abstract fun bindTransactionRepository(
         impl: TransactionRepositoryImpl
     ): TransactionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRecurringExpenseRepository(
+        impl: RecurringExpenseRepositoryImpl
+    ): RecurringExpenseRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserSettingsRepository(
+        impl: UserSettingsRepositoryImpl
+    ): UserSettingsRepository
 }
