@@ -28,4 +28,12 @@ object DatabaseModule {
     @Singleton
     fun provideTransactionDao(db: SeaweedDatabase): TransactionDao =
         db.transactionDao
+
+    @Provides
+    @Singleton
+    fun provideRecurringExpenseDao(db: SeaweedDatabase) = db.recurringExpenseDao
+
+    @Provides
+    @Singleton
+    fun provideUserSettingsDao(db: SeaweedDatabase) = db.userSettingsDao
 }
