@@ -6,6 +6,7 @@ import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.wear.features.home.HomeRoute
 import com.zoewave.probase.seaweed.wear.features.transactions.TransactionListRoute
+import com.zoewave.probase.seaweed.wear.features.bills.WearBillsRoute
 
 fun seaweedWearNavEntryProvider(
     key: SeaweedDestination,
@@ -17,7 +18,14 @@ fun seaweedWearNavEntryProvider(
             SeaweedDestination.Home -> {
                 HomeRoute(
                     modifier = Modifier.fillMaxSize(),
-                    onTransactionsClick = { navigateTo(SeaweedDestination.Transactions(category = null)) }
+                    onTransactionsClick = { navigateTo(SeaweedDestination.Transactions(category = null)) },
+                    onBillsClick = { navigateTo(SeaweedDestination.Bills) }
+                )
+            }
+            SeaweedDestination.Bills -> {
+                WearBillsRoute(
+                    modifier = Modifier.fillMaxSize(),
+                    onBack = onBack
                 )
             }
             is SeaweedDestination.Transactions -> {
@@ -30,7 +38,8 @@ fun seaweedWearNavEntryProvider(
                 // Not supported on Wear yet
                 HomeRoute(
                     modifier = Modifier.fillMaxSize(),
-                    onTransactionsClick = { navigateTo(SeaweedDestination.Transactions(category = null)) }
+                    onTransactionsClick = { navigateTo(SeaweedDestination.Transactions(category = null)) },
+                    onBillsClick = { navigateTo(SeaweedDestination.Bills) }
                 )
             }
         }
