@@ -3,6 +3,7 @@ package com.zoewave.probase.seaweed.model.navigation
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
@@ -31,6 +32,12 @@ sealed class SeaweedDestination(
     )
 
     @Serializable
+    data object Bills : SeaweedDestination(
+        titleRes = R.string.applications_seaweed_model_route_bills,
+        icon = Icons.AutoMirrored.Filled.ReceiptLong
+    )
+
+    @Serializable
     data class Transactions(
         val category: String? = null,
         val transactionId: String? = null
@@ -54,6 +61,7 @@ sealed class SeaweedDestination(
 
 val topLevelDestinations = listOf(
     SeaweedDestination.Home,
+    SeaweedDestination.Bills,
     SeaweedDestination.Transactions(),
     SeaweedDestination.Settings
 )

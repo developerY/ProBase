@@ -77,11 +77,13 @@
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/core" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features" />
+            <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/bills" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/home" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/settings" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/transaction" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/wear" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/wear/features" />
+            <option value="$PROJECT_DIR$/applications/seaweed/apps/wear/features/bills" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/wear/features/home" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/wear/features/transactions" />
             <option value="$PROJECT_DIR$/applications/seaweed/data" />
