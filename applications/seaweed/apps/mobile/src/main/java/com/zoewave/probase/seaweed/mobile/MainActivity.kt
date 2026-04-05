@@ -18,6 +18,7 @@ import com.zoewave.probase.seaweed.data.UserSettingsRepository
 import com.zoewave.probase.seaweed.mobile.core.ui.theme.v1.SeaweedTheme
 import com.zoewave.probase.seaweed.mobile.ui.components.SeaweedMainScreen
 import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
+import com.zoewave.probase.seaweed.model.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -41,7 +42,8 @@ class MainActivity : ComponentActivity() {
             val userSettings by userSettingsRepository.getUserSettings().collectAsStateWithLifecycle(null)
             
             SeaweedTheme(
-                themeConfig = userSettings?.themeConfig ?: SeaweedThemeConfig.DEFAULT
+                themeConfig = userSettings?.themeConfig ?: SeaweedThemeConfig.DEFAULT,
+                themeMode = userSettings?.themeMode ?: ThemeMode.SYSTEM
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

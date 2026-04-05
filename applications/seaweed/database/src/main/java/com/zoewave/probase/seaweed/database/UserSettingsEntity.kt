@@ -3,6 +3,7 @@ package com.zoewave.probase.seaweed.database
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
+import com.zoewave.probase.seaweed.model.ThemeMode
 import com.zoewave.probase.seaweed.model.UserSettings
 
 @Entity(tableName = "user_settings")
@@ -11,16 +12,19 @@ data class UserSettingsEntity(
     val monthlyIncome: Double,
     val currency: String,
     val themeConfig: SeaweedThemeConfig,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM
 )
 
 fun UserSettingsEntity.toDomain() = UserSettings(
     monthlyIncome = monthlyIncome,
     currency = currency,
-    themeConfig = themeConfig
+    themeConfig = themeConfig,
+    themeMode = themeMode
 )
 
 fun UserSettings.toEntity() = UserSettingsEntity(
     monthlyIncome = monthlyIncome,
     currency = currency,
-    themeConfig = themeConfig
+    themeConfig = themeConfig,
+    themeMode = themeMode
 )
