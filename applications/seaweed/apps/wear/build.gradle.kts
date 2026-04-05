@@ -61,6 +61,7 @@ dependencies {
     // Wear Feature Modules
     implementation(project(":applications:seaweed:apps:wear:features:home"))
     implementation(project(":applications:seaweed:apps:wear:features:transactions"))
+    implementation(project(":applications:seaweed:apps:wear:features:bills"))
 
     // Wear UI & Navigation
     implementation(libs.androidx.wear.compose.material3)

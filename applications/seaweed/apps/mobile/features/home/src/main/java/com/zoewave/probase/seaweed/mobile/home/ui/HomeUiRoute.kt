@@ -3,7 +3,6 @@ package com.zoewave.probase.seaweed.mobile.home.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -25,6 +24,8 @@ import com.zoewave.probase.core.ui.R as CoreUiR
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.mobile.home.ui.components.CategoryQuickJumpCard
 import com.zoewave.probase.seaweed.mobile.home.ui.components.DonutChart
+import com.zoewave.probase.seaweed.mobile.home.ui.components.FixedCostsSummaryCard
+import com.zoewave.probase.seaweed.mobile.home.ui.components.RealMoneyHeroCard
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import java.util.Locale
@@ -85,10 +86,14 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(24.dp)
                     ) {
                         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(24.dp)) {
-                            BalanceCard(balance = uiState.totalBalance)
+                            RealMoneyHeroCard(
+                                flexibleRemaining = uiState.flexibleMoneyRemaining,
+                                monthProgress = uiState.monthProgress
+                            )
                             OverviewSummaryCard(categories = uiState.categoriesSummary)
-                            CategoryQuickJumpRow(
-                                categories = uiState.categoriesSummary,
+                            FixedCostsSummaryCard(
+                                totalFixedCosts = uiState.totalFixedCosts,
+                                income = uiState.monthlyIncome,
                                 navTo = navTo
                             )
                         }
@@ -132,16 +137,20 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp)
                     ) {
                         item {
-                            BalanceCard(balance = uiState.totalBalance)
+                            RealMoneyHeroCard(
+                                flexibleRemaining = uiState.flexibleMoneyRemaining,
+                                monthProgress = uiState.monthProgress
+                            )
+                        }
+                        item {
+                            FixedCostsSummaryCard(
+                                totalFixedCosts = uiState.totalFixedCosts,
+                                income = uiState.monthlyIncome,
+                                navTo = navTo
+                            )
                         }
                         item {
                             OverviewSummaryCard(categories = uiState.categoriesSummary)
-                        }
-                        item {
-                            CategoryQuickJumpRow(
-                                categories = uiState.categoriesSummary,
-                                navTo = navTo
-                            )
                         }
                         item {
                             Button(
@@ -168,23 +177,6 @@ fun HomeScreen(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun BalanceCard(balance: Double) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-    ) {
-        Column(modifier = Modifier.padding(24.dp)) {
-            Text(text = stringResource(CoreUiR.string.core_ui_total_balance), style = MaterialTheme.typography.labelLarge)
-            Text(
-                text = "$${String.format(Locale.getDefault(), "%.2f", balance)}",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Black
-            )
         }
     }
 }
@@ -265,41 +257,3 @@ fun OverviewSummaryCard(
     }
 }
 
-@Composable
-fun CategoryQuickJumpRow(
-    categories: List<CategoryOverview>,
-    navTo: (SeaweedDestination) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val topCategories = remember(categories) {
-        categories.take(5)
-    }
-
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(CoreUiR.string.core_ui_quick_jump),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Icon(Icons.Default.ChevronRight, contentDescription = null, modifier = Modifier.size(16.dp))
-        }
-
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(end = 16.dp)
-        ) {
-            items(topCategories) { category ->
-                CategoryQuickJumpCard(
-                    category = category,
-                    onClick = { navTo(SeaweedDestination.Transactions(category.name)) }
-                )
-            }
-        }
-    }
-}

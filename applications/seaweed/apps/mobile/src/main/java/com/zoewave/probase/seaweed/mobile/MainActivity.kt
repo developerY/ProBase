@@ -8,15 +8,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
+import com.zoewave.probase.seaweed.data.FinancialRepository
+import com.zoewave.probase.seaweed.data.UserSettingsRepository
 import com.zoewave.probase.seaweed.mobile.core.ui.theme.v1.SeaweedTheme
 import com.zoewave.probase.seaweed.mobile.ui.components.SeaweedMainScreen
+import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var userSettingsRepository: UserSettingsRepository
+
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +38,11 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
-            SeaweedTheme {
+            val userSettings by userSettingsRepository.getUserSettings().collectAsStateWithLifecycle(null)
+            
+            SeaweedTheme(
+                themeConfig = userSettings?.themeConfig ?: SeaweedThemeConfig.DEFAULT
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

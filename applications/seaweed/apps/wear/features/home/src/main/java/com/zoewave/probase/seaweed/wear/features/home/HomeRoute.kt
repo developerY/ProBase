@@ -10,15 +10,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.material3.*
-import com.zoewave.probase.seaweed.wear.features.home.HomeUiState
-import com.zoewave.probase.seaweed.wear.features.home.HomeViewModel
 import java.util.Locale
 
 @Composable
 fun HomeRoute(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    onTransactionsClick: () -> Unit
+    onTransactionsClick: () -> Unit,
+    onBillsClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -26,6 +25,7 @@ fun HomeRoute(
         modifier = modifier,
         uiState = uiState,
         onTransactionsClick = onTransactionsClick,
+        onBillsClick = onBillsClick,
         onAddClick = { viewModel.addRandomTransaction() }
     )
 }
@@ -35,6 +35,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     uiState: HomeUiState,
     onTransactionsClick: () -> Unit,
+    onBillsClick: () -> Unit,
     onAddClick: () -> Unit
 ) {
     Box(
@@ -48,26 +49,38 @@ fun HomeScreen(
             is HomeUiState.Success -> {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "Balance",
-                        style = MaterialTheme.typography.labelMedium
+                        text = "Real Money",
+                        style = MaterialTheme.typography.labelSmall
                     )
                     Text(
-                        text = "$${String.format(Locale.getDefault(), "%.2f", uiState.totalBalance)}",
+                        text = "$${String.format(Locale.getDefault(), "%.0f", uiState.totalBalance)}",
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Black
                     )
                     
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     
-                    Button(
-                        onClick = onTransactionsClick,
-                        modifier = Modifier.fillMaxWidth()
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text("Recent")
+                        Button(
+                            onClick = onTransactionsClick,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Spend")
+                        }
+                        Button(
+                            onClick = onBillsClick,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                        ) {
+                            Text("Bills")
+                        }
                     }
                     
                     Button(

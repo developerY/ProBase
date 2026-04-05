@@ -32,7 +32,11 @@ fun SeaweedMainScreen(
                         backStack.clear()
                         backStack.add(SeaweedDestination.Home)
                         if (selectedDestination != SeaweedDestination.Home) {
-                            backStack.add(selectedDestination)
+                            if (selectedDestination is SeaweedDestination.Transactions) {
+                                backStack.add(SeaweedDestination.Transactions())
+                            } else {
+                                backStack.add(selectedDestination)
+                            }
                         }
                     }
                 }

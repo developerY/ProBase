@@ -1,19 +1,32 @@
 package com.zoewave.probase.seaweed.mobile.settings.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 
 @Composable
 fun SettingsUiRoute(
     modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = hiltViewModel(),
     navTo: (SeaweedDestination) -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     SettingsScreen(
         modifier = modifier,
-        navTo = navTo
+        uiState = uiState,
+        onEvent = viewModel::onEvent
     )
 }
 
@@ -21,7 +34,8 @@ fun SettingsUiRoute(
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
-    navTo: (SeaweedDestination) -> Unit
+    uiState: SettingsUiState,
+    onEvent: (SettingsUiEvent) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -34,10 +48,81 @@ fun SettingsScreen(
                 .padding(padding)
                 .fillMaxSize()
         ) {
-            ListItem(
-                headlineContent = { Text("About Seaweed") },
-                supportingContent = { Text("Version 0.0.1") }
-            )
+            when (uiState) {
+                SettingsUiState.Loading -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                is SettingsUiState.Success -> {
+                    Text(
+                        text = "App Theme",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                    
+                    ThemeSelectionGroup(
+                        selectedTheme = uiState.settings.themeConfig,
+                        onThemeSelected = { onEvent(SettingsUiEvent.UpdateTheme(it)) }
+                    )
+                    
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    
+                    ListItem(
+                        headlineContent = { Text("About Seaweed") },
+                        supportingContent = { Text("Version 0.0.1") }
+                    )
+                }
+            }
         }
+    }
+}
+
+@Composable
+fun ThemeSelectionGroup(
+    selectedTheme: SeaweedThemeConfig,
+    onThemeSelected: (SeaweedThemeConfig) -> Unit
+) {
+    Column(Modifier.selectableGroup()) {
+        ThemeOption(
+            text = "Seaweed Teal (Default)",
+            selected = selectedTheme == SeaweedThemeConfig.DEFAULT,
+            onClick = { onThemeSelected(SeaweedThemeConfig.DEFAULT) }
+        )
+        ThemeOption(
+            text = "Seaweed Coral",
+            selected = selectedTheme == SeaweedThemeConfig.CORAL,
+            onClick = { onThemeSelected(SeaweedThemeConfig.CORAL) }
+        )
+    }
+}
+
+@Composable
+fun ThemeOption(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .selectable(
+                selected = selected,
+                onClick = onClick,
+                role = Role.RadioButton
+            )
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = null // null recommended for accessibility with screen readers
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(start = 16.dp)
+        )
     }
 }
