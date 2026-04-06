@@ -5,7 +5,9 @@ sealed interface HomeUiState {
     data class Success(
         val currentCaffeineMg: Int,
         val nextDoseRecommendation: String,
-        val sleepQualityImpact: String
+        val sleepQualityImpact: String,
+        val sleepDuration: String = "Unknown",
+        val exerciseMinutes: Int = 0
     ) : HomeUiState
 }
 

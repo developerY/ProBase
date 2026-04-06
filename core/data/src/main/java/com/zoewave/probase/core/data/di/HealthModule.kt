@@ -1,6 +1,8 @@
 package com.zoewave.probase.core.data.di
 
 import android.content.Context
+import com.zoewave.probase.core.data.repository.health.HealthConnectRepository
+import com.zoewave.probase.core.data.repository.health.HealthConnectRepositoryImpl
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
 import dagger.Module
 import dagger.Provides
@@ -19,5 +21,13 @@ object HealthModule {
         @ApplicationContext context: Context
     ): HealthSessionManager {
         return HealthSessionManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideHealthConnectRepository(
+        @ApplicationContext context: Context
+    ): HealthConnectRepository {
+        return HealthConnectRepositoryImpl(context)
     }
 }

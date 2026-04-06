@@ -29,6 +29,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
     implementation(project(":core:model"))
+    implementation(project(":core:data"))
 
     implementation(project(":applications:goswift:model"))
     implementation(project(":applications:goswift:database"))
@@ -38,6 +39,7 @@ dependencies {
     implementation(project(":applications:goswift:apps:mobile:features:shots"))
     implementation(project(":applications:goswift:apps:mobile:features:settings"))
 
+    implementation(libs.androidx.health.connect.client)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.compose.material.icons.extended)

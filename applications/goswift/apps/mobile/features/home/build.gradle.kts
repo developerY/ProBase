@@ -20,8 +20,15 @@ dependencies {
     implementation(project(":applications:goswift:data"))
     implementation(project(":applications:goswift:features:main"))
     implementation(project(":applications:goswift:apps:mobile:features:shots"))
+    implementation(libs.androidx.health.connect.client)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // --- Testing ---
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.truth)
 }

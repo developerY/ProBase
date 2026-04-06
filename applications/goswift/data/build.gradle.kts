@@ -15,5 +15,7 @@ android {
 dependencies {
     implementation(project(":applications:goswift:model"))
     implementation(project(":applications:goswift:database"))
+    implementation(project(":core:data"))
+    implementation(libs.androidx.health.connect.client)
     implementation(libs.androidx.core.ktx)
 }
