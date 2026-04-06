@@ -1,0 +1,44 @@
+# Refine Journey Test Structure and Content
+
+Fix the malformed `main_flow.journey.xml` by applying the correct runnable structure and incorporating steps that follow the official "Tips for writing journeys".
+
+## Proposed Changes
+
+### Journey Test Script
+
+#### [main_flow.journey.xml](file:///Users/developer/AndroidStudioProjects/ProBase/applications/photodo/apps/mobile/src/journeysTest/resources/com/zoewave/probase/photodo/mobile/main_flow.journey.xml)
+
+- Add the `<?xml version="1.0" encoding="utf-8"?>` declaration.
+- Use the `<journey>`, `<description>`, and `<actions>` structure.
+- Incorporate refined steps following the tips (unambiguous language, success criteria, assuming foreground).
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<journey name="Core Flow">
+    <description>Tests the end-to-end user journey: creating a category, a project, and adding a task.</description>
+    <actions xml:space="preserve">
+        <action>Tap 'View All Categories' on the home screen to navigate to the categories view.</action>
+        <action>Open the creation menu by tapping the '+' button at the bottom right of the screen.</action>
+        <action>Select 'New Category' from the menu.</action>
+        <action>Type 'Work' in the 'Category Name' text field.</action>
+        <action>Tap 'Create Category'. This should close the sheet and show 'Work' as the active category title at the top of the screen.</action>
+        <action>Open the category add menu by tapping the '+' button again.</action>
+        <action>Select 'New Project' from the menu.</action>
+        <action>Type 'Launch Website' in the 'Project Name' field.</action>
+        <action>Tap 'Create'. This should return you to the category list where the 'Launch Website' project card is now visible.</action>
+        <action>Tap on the 'Launch Website' card to open the project details.</action>
+        <action>Open the project action menu by tapping the '+' button.</action>
+        <action>Select 'Add Task' to open the task input dialog.</action>
+        <action>Type 'Buy domain' in the task description field and tap 'Add'.</action>
+        <action>Verify that 'Buy domain' appears in the checklist section of the project.</action>
+    </actions>
+</journey>
+```
+
+## Verification Plan
+
+### Automated Tests
+- Run `./gradlew :applications:photodo:apps:mobile:assembleDebug` to ensure no build regressions.
+
+### Manual Verification
+- Open `main_flow.journey.xml` in Android Studio and verify it is recognized as a valid journey and can be run via the "Run Journey" button.

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<journey name="My first Journey">
+    <description></description>
+    <actions xml:space="preserve">
+        <action><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<journey name="LoginFlowTest">
+    <description>Tests the user's path from the splash screen to a successful login.</description>
+
+    <actions>
+        <!-- Step 1: Initial state check -->
+        <action>Verify that the "Email" text field is empty.</action>
+        <action>Verify that the "Login" button is disabled.</action>
+
+        <!-- Step 2: Interaction -->
+        <action>Type "user@example.com" into the email text input field.</action>
+        <action>Type "password123" into the password text input field.</action>
+
+        <!-- Step 3: State change check -->
+        <action>Check that the "Login" button is now enabled.</action>
+        <action>Click the "Login" button.</action>
+
+        <!-- Step 4: Verification of outcome -->
+        <action>Verify that the "Welcome Home" header is displayed on the next screen.</action>
+    </actions>
+</journey>]]></action>
+    </actions>
+</journey>
