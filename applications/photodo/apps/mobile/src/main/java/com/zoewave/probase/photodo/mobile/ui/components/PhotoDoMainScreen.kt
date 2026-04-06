@@ -76,6 +76,7 @@ fun PhotoDoMainScreen(
 @Composable
 fun PhotoDoMainScreenPreview() {
     val configuration = LocalConfiguration.current
+    @Suppress("ConfigurationScreenWidthHeight")
     val windowSizeClass = calculateFromSize(DpSize(configuration.screenWidthDp.dp, configuration.screenHeightDp.dp))
     PhotoDoTheme {
         PhotoDoMainScreen(

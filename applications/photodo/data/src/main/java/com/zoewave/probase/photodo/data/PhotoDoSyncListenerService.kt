@@ -40,7 +40,7 @@ class PhotoDoSyncListenerService : WearableListenerService() {
                     val dataMapItem = DataMapItem.fromDataItem(event.dataItem)
                     val dataMap = dataMapItem.dataMap
                     
-                    val jsonPayload = dataMap.getString("payload")
+                    val jsonPayload = dataMap.getString(getString(R.string.applications_photodo_data_payload))
                     if (jsonPayload != null) {
                         serviceScope.launch {
                             try {
