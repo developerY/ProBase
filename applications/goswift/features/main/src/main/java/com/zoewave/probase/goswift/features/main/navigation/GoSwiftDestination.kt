@@ -12,4 +12,6 @@ sealed class GoSwiftDestination {
     data object AddShot : GoSwiftDestination()
     @Serializable
     data object Settings : GoSwiftDestination()
+    @Serializable
+    data object Hydration : GoSwiftDestination()
 }

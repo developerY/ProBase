@@ -8,6 +8,7 @@ import com.zoewave.probase.goswift.mobile.home.ui.HomeUiRoute
 import com.zoewave.probase.goswift.mobile.shots.ui.AddShotUiRoute
 import com.zoewave.probase.goswift.mobile.shots.ui.ShotsUiRoute
 import com.zoewave.probase.goswift.mobile.settings.ui.SettingsUiRoute
+import com.zoewave.probase.goswift.mobile.hydration.ui.HydrationUiRoute
 
 fun goSwiftNavEntryProvider(
     key: GoSwiftDestination,
@@ -36,6 +37,12 @@ fun goSwiftNavEntryProvider(
             }
             GoSwiftDestination.Settings -> {
                 SettingsUiRoute(
+                    modifier = Modifier.fillMaxSize(),
+                    navTo = navigateTo
+                )
+            }
+            GoSwiftDestination.Hydration -> {
+                HydrationUiRoute(
                     modifier = Modifier.fillMaxSize(),
                     navTo = navigateTo
                 )
