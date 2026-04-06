@@ -7,7 +7,8 @@ sealed interface HomeUiState {
         val nextDoseRecommendation: String,
         val sleepQualityImpact: String,
         val sleepDuration: String = "Unknown",
-        val exerciseMinutes: Int = 0
+        val exerciseMinutes: Int = 0,
+        val hydrationProgress: Double = 0.0
     ) : HomeUiState
 }
 
