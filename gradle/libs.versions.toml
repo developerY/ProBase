@@ -105,6 +105,9 @@ navigation3Ui = "1.0.1"
 composeMaterialVersion = "1.5.6"
 truth = "1.4.4"
 mockk = "1.13.16"
+junitPlatformLauncher = "1.13.4"
+junitPlatformEngine = "1.13.4"
+journeysJunitEngine = "0.2.2"
 
 
 [libraries]
@@ -265,6 +268,9 @@ androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profi
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junitPlatformLauncher" }
+junit-platform-engine = { group = "org.junit.platform", name = "junit-platform-engine", version.ref = "junitPlatformEngine" }
+journeys-junit-engine = { group = "com.android.tools.journeys", name = "journeys-junit-engine", version.ref = "journeysJunitEngine" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
