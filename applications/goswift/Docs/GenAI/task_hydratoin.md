@@ -1,0 +1,33 @@
+# Task Management
+
+- [x] Research and Setup
+	- [x] Explore GoSwift project structure
+	- [x] Explore core:data HealthConnect implementation
+	- [x] Identify required Health Connect data types for Exercise and Sleep
+	- [x] Research missing `READ_SLEEP` permission security exception
+- [x] Core Data Enhancements
+	- [x] Update `HealthConnectRepository` to support Sleep data
+	- [x] Update `HealthConnectRepositoryImpl` with Sleep data reading
+- [x] GoSwift Data Layer
+	- [x] Add `:core:data` dependency to `goswift:data`
+	- [x] Create `HealthRepository` in `goswift:data`
+- [x] GoSwift Permissions & App Config
+	- [x] Update `AndroidManifest.xml` with Health Connect queries and permissions
+	- [x] Implement runtime permission handling in `MainActivity.kt`
+	- [x] Add `:core:data` and `health-connect-client` dependencies to `goswift:apps:mobile`
+	- [x] Fix `UninitializedPropertyAccessException` in `MainActivity.kt`
+- [x] GoSwift Domain/ViewModel Layer
+	- [x] Update `HomeViewModel` to fetch sleep and exercise data
+	- [x] Implement correlation logic (caffeine vs sleep/exercise)
+	- [x] Add refresh mechanism to `HomeViewModel`
+- [x] UI Updates
+	- [x] Display sleep and exercise data in Home screen
+	- [x] Update recommendations based on health data
+	- [x] Add refresh button to Home screen
+- [x] Hydration Integration
+	- [x] Research Hydration in Health Connect
+	- [x] Update `HealthConnectRepository` to support Hydration data (Read/Write)
+	- [x] Create `HydrationRepository` in `goswift:data`
+	- [x] Implement `HydrationViewModel` and UI components
+	- [x] Integrate Hydration into `HomeViewModel` for intelligent recommendations
+	- [x] Add Hydration destination to navigation
