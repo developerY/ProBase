@@ -24,6 +24,27 @@ android {
         buildConfig = true
     }
 
+    testOptions {
+        suites {
+            create("journeysTest") {
+                assets {
+                }
+                targets {
+                    create("default") {
+                    }
+                }
+                useJunitEngine {
+                    inputs += listOf(com.android.build.api.dsl.AgpTestSuiteInputParameters.TESTED_APKS)
+                    includeEngines += listOf("journeys-test-engine")
+                    enginesDependencies(libs.junit.platform.launcher)
+                    enginesDependencies(libs.junit.platform.engine)
+                    enginesDependencies(libs.journeys.junit.engine)
+                }
+                targetVariants += listOf("debug")
+            }
+        }
+    }
+
     signingConfigs {
         create("release") {
             val storeFileProp = providers.gradleProperty("RELEASE_STORE_FILE").orNull
