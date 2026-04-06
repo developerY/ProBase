@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<journey name="Wear Core Flow">
+    <description>Tests the navigation from Categories to Projects and then to Task details on WearOS.</description>
+    <actions xml:space="preserve">
+        <action>Verify that you are on the 'Categories' screen. This is the main screen showing a list of task categories.</action>
+        <action>Scroll the list if necessary to find a category like 'Work' or 'Personal' and tap on it.</action>
+        <action>Verify that the project list for the selected category is now displayed. You should see project titles like 'Fix leaking roof' or 'Buy groceries'.</action>
+        <action>Tap on one of the projects to open its detailed task list.</action>
+        <action>Verify that the detail screen shows the project title at the top.</action>
+        <action>Check that the individual tasks for that project are listed below the title. Each task should have a checkbox next to it.</action>
+    </actions>
+</journey>
