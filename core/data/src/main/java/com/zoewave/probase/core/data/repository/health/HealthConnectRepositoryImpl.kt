@@ -3,10 +3,13 @@ package com.zoewave.probase.core.data.repository.health
 import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
+import androidx.health.connect.client.units.Volume
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Instant
 import javax.inject.Inject
@@ -45,6 +48,29 @@ class HealthConnectRepositoryImpl @Inject constructor(
             timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
         )
         return client.readRecords(request).records
+    }
+
+    override suspend fun readHydrationRecords(
+        startTime: Instant,
+        endTime: Instant
+    ): List<HydrationRecord> {
+        val request = ReadRecordsRequest(
+            recordType = HydrationRecord::class,
+            timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+        )
+        return client.readRecords(request).records
+    }
+
+    override suspend fun insertHydrationRecord(volume: Double, timestamp: Instant) {
+        val record = HydrationRecord(
+            startTime = timestamp,
+            startZoneOffset = null,
+            endTime = timestamp.plusSeconds(1),
+            endZoneOffset = null,
+            volume = Volume.liters(volume),
+            metadata = Metadata.manualEntry()
+        )
+        client.insertRecords(listOf(record))
     }
 
     override suspend fun deleteAllSessions(before: Instant) {
