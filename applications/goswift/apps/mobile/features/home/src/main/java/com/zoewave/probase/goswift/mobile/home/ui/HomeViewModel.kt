@@ -5,6 +5,7 @@ import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.goswift.data.HealthRepository
+import com.zoewave.probase.goswift.data.HydrationRepository
 import com.zoewave.probase.goswift.data.ShotRepository
 import com.zoewave.probase.goswift.model.CaffeineShot
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +28,8 @@ import kotlin.math.pow
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: ShotRepository,
-    private val healthRepository: HealthRepository
+    private val healthRepository: HealthRepository,
+    private val hydrationRepository: HydrationRepository
 ) : ViewModel() {
 
     private val halfLifeHours = 5.0
@@ -52,7 +54,10 @@ class HomeViewModel @Inject constructor(
                     Duration.between(session.startTime, session.endTime).toMinutes()
                 }.toInt()
                 
-                emit(HealthData(totalSleepMillis, totalExerciseMinutes))
+                val hydrationRecords = hydrationRepository.getHydrationRecords(yesterday, now)
+                val totalHydrationLiters = hydrationRecords.sumOf { it.volume.inLiters }
+                
+                emit(HealthData(totalSleepMillis, totalExerciseMinutes, totalHydrationLiters))
             }
         }
 
@@ -65,10 +70,11 @@ class HomeViewModel @Inject constructor(
         
         HomeUiState.Success(
             currentCaffeineMg = currentLevel.toInt(),
-            nextDoseRecommendation = getRecommendation(currentLevel, healthData.exerciseMinutes),
+            nextDoseRecommendation = getRecommendation(currentLevel, healthData.exerciseMinutes, healthData.hydrationLiters),
             sleepQualityImpact = getSleepImpact(currentLevel, healthData.sleepMillis),
             sleepDuration = formatDuration(healthData.sleepMillis),
-            exerciseMinutes = healthData.exerciseMinutes
+            exerciseMinutes = healthData.exerciseMinutes,
+            hydrationProgress = healthData.hydrationLiters
         )
     }
         .stateIn(
@@ -77,7 +83,7 @@ class HomeViewModel @Inject constructor(
             initialValue = HomeUiState.Loading
         )
 
-    data class HealthData(val sleepMillis: Long, val exerciseMinutes: Int)
+    data class HealthData(val sleepMillis: Long, val exerciseMinutes: Int, val hydrationLiters: Double)
 
     private fun formatDuration(millis: Long): String {
         val hours = millis / 3_600_000
@@ -92,8 +98,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun getRecommendation(currentLevel: Double, exerciseMinutes: Int): String {
+    private fun getRecommendation(currentLevel: Double, exerciseMinutes: Int, hydrationLiters: Double): String {
         return when {
+            hydrationLiters < 1.0 -> "Dehydration risk. Drink 500ml water now!"
             exerciseMinutes > 30 && currentLevel < 100 -> "Post-workout energy dip? A 40mg dose is safe."
             currentLevel < 50 -> "Time for a 20mg micro-dose!"
             else -> "Energy level optimal. Wait 2 hours."

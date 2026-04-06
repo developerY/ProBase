@@ -38,6 +38,7 @@ dependencies {
     implementation(project(":applications:goswift:apps:mobile:features:home"))
     implementation(project(":applications:goswift:apps:mobile:features:shots"))
     implementation(project(":applications:goswift:apps:mobile:features:settings"))
+    implementation(project(":applications:goswift:apps:mobile:features:hydration"))
 
     implementation(libs.androidx.health.connect.client)
     implementation(libs.androidx.navigation3.runtime)

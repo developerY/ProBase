@@ -2,6 +2,8 @@ package com.zoewave.probase.goswift.data.di
 
 import com.zoewave.probase.goswift.data.HealthRepository
 import com.zoewave.probase.goswift.data.HealthRepositoryImpl
+import com.zoewave.probase.goswift.data.HydrationRepository
+import com.zoewave.probase.goswift.data.HydrationRepositoryImpl
 import com.zoewave.probase.goswift.data.ShotRepository
 import com.zoewave.probase.goswift.data.ShotRepositoryImpl
 import dagger.Binds
@@ -21,4 +23,9 @@ interface DataModule {
     fun bindHealthRepository(
         healthRepositoryImpl: HealthRepositoryImpl
     ): HealthRepository
+
+    @Binds
+    fun bindHydrationRepository(
+        hydrationRepositoryImpl: HydrationRepositoryImpl
+    ): HydrationRepository
 }

@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -80,6 +81,12 @@ fun GoSwiftBottomBar(
             onClick = { onNavigate(GoSwiftDestination.Shots) },
             icon = { Icon(Icons.Default.History, contentDescription = "Shots") },
             label = { Text("Shots") }
+        )
+        NavigationBarItem(
+            selected = currentDestination == GoSwiftDestination.Hydration,
+            onClick = { onNavigate(GoSwiftDestination.Hydration) },
+            icon = { Icon(Icons.Default.WaterDrop, contentDescription = "Hydration") },
+            label = { Text("Water") }
         )
         NavigationBarItem(
             selected = currentDestination == GoSwiftDestination.Settings,

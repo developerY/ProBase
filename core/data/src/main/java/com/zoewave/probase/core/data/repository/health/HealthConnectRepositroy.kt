@@ -1,6 +1,7 @@
 package com.zoewave.probase.core.data.repository.health
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.SleepSessionRecord
 import java.time.Instant
@@ -42,6 +43,20 @@ interface HealthConnectRepository {
         startTime: Instant,
         endTime: Instant
     ): List<SleepSessionRecord>
+
+    /**
+     * Reads all [HydrationRecord]s within the specified time range.
+     */
+    suspend fun readHydrationRecords(
+        startTime: Instant,
+        endTime: Instant
+    ): List<HydrationRecord>
+
+    /**
+     * Inserts a [HydrationRecord].
+     * @param volume the volume of water in liters
+     */
+    suspend fun insertHydrationRecord(volume: Double, timestamp: Instant)
 
     /**
      * Deletes all ExerciseSessionRecord (and their associated data) ending before [before].

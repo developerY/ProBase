@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
+import java.util.Locale
 
 @Composable
 fun HomeUiRoute(
@@ -89,6 +90,11 @@ fun HomeScreen(
                             modifier = Modifier.weight(1f)
                         )
                     }
+
+                    InfoSection(
+                        title = "Daily Hydration", 
+                        content = String.format(Locale.getDefault(), "%.2f L logged", uiState.hydrationProgress)
+                    )
 
                     InfoSection(title = "Recommendation", content = uiState.nextDoseRecommendation)
                     InfoSection(title = "Sleep Impact", content = uiState.sleepQualityImpact)
