@@ -96,6 +96,11 @@ fun HomeScreen(
                         content = String.format(Locale.getDefault(), "%.2f L logged", uiState.hydrationProgress)
                     )
 
+                    InfoSection(
+                        title = "Daily Calories", 
+                        content = String.format(Locale.getDefault(), "%.0f kcal logged", uiState.caloriesIntake)
+                    )
+
                     InfoSection(title = "Recommendation", content = uiState.nextDoseRecommendation)
                     InfoSection(title = "Sleep Impact", content = uiState.sleepQualityImpact)
                 }

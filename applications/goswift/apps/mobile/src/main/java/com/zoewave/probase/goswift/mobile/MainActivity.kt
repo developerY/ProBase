@@ -50,7 +50,9 @@ class MainActivity : ComponentActivity() {
         "android.permission.health.READ_SLEEP",
         "android.permission.health.READ_EXERCISE",
         "android.permission.health.READ_HYDRATION",
-        "android.permission.health.WRITE_HYDRATION"
+        "android.permission.health.WRITE_HYDRATION",
+        "android.permission.health.READ_NUTRITION",
+        "android.permission.health.WRITE_NUTRITION"
     )
 
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<Set<String>>
@@ -142,7 +144,7 @@ class MainActivity : ComponentActivity() {
         AlertDialog(
             onDismissRequest = onDismiss,
             title = { Text("Health Data Needed") },
-            text = { Text("GoSwift needs access to your sleep, exercise, and hydration data from Health Connect to provide personalized caffeine and hydration recommendations.") },
+            text = { Text("GoSwift needs access to your sleep, exercise, hydration, and nutrition data from Health Connect to provide personalized caffeine and health recommendations.") },
             confirmButton = {
                 TextButton(onClick = onConfirm) {
                     Text("Grant Permissions")
@@ -174,7 +176,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 Text(
-                    "Without Health Connect permissions, we cannot correlate your caffeine intake with your sleep, exercise, and hydration activity.",
+                    "Without Health Connect permissions, we cannot correlate your caffeine intake with your sleep, exercise, hydration, and nutrition activity.",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )

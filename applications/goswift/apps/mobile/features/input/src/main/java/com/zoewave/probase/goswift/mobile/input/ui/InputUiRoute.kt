@@ -3,6 +3,7 @@ package com.zoewave.probase.goswift.mobile.input.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Coffee
+import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,6 +12,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
 import com.zoewave.probase.goswift.mobile.hydration.ui.HydrationScreen
 import com.zoewave.probase.goswift.mobile.hydration.ui.HydrationViewModel
+import com.zoewave.probase.goswift.mobile.nutrition.ui.NutritionScreen
+import com.zoewave.probase.goswift.mobile.nutrition.ui.NutritionViewModel
 import com.zoewave.probase.goswift.mobile.shots.ui.ShotsScreen
 import com.zoewave.probase.goswift.mobile.shots.ui.ShotsViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,12 +24,14 @@ fun InputUiRoute(
     modifier: Modifier = Modifier,
     shotsViewModel: ShotsViewModel = hiltViewModel(),
     hydrationViewModel: HydrationViewModel = hiltViewModel(),
+    nutritionViewModel: NutritionViewModel = hiltViewModel(),
     navTo: (GoSwiftDestination) -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf(
         InputTabItem("Caffeine", Icons.Default.Coffee),
-        InputTabItem("Water", Icons.Default.WaterDrop)
+        InputTabItem("Water", Icons.Default.WaterDrop),
+        InputTabItem("Calories", Icons.Default.Restaurant)
     )
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -56,6 +61,14 @@ fun InputUiRoute(
                 HydrationScreen(
                     uiState = hydrationUiState,
                     onEvent = hydrationViewModel::onEvent,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            2 -> {
+                val nutritionUiState by nutritionViewModel.uiState.collectAsStateWithLifecycle()
+                NutritionScreen(
+                    uiState = nutritionUiState,
+                    onEvent = nutritionViewModel::onEvent,
                     modifier = Modifier.weight(1f)
                 )
             }
