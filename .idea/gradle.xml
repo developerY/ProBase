@@ -51,6 +51,7 @@
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/home" />
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/hydration" />
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/input" />
+            <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/nutrition" />
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/settings" />
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/shots" />
             <option value="$PROJECT_DIR$/applications/goswift/data" />

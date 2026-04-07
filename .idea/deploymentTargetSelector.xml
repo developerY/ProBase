@@ -37,7 +37,7 @@
       </SelectionState>
       <SelectionState runConfigName="applications.photodo.apps.mobile">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-04-01T20:51:04.025363Z">
+        <DropdownSelection timestamp="2026-04-07T20:46:41.010736Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Pixel_10_Pro_Fold.avd" />
@@ -62,10 +62,10 @@
       </SelectionState>
       <SelectionState runConfigName="applications.goswift.apps.mobile">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-04-06T20:12:16.040155Z">
+        <DropdownSelection timestamp="2026-04-07T21:09:11.958267Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Pixel_10_Pro_Fold.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Pixel_9a.avd" />
             </handle>
           </Target>
         </DropdownSelection>
