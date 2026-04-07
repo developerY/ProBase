@@ -84,10 +84,10 @@
       </SelectionState>
       <SelectionState runConfigName="applications.photodo.apps.wear">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-04-06T19:57:28.004258Z">
+        <DropdownSelection timestamp="2026-04-06T23:33:44.520569Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Pixel_9a.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Wear_OS_XL_Round.avd" />
             </handle>
           </Target>
         </DropdownSelection>
