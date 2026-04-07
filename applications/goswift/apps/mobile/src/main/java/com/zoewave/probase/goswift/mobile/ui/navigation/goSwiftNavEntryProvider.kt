@@ -5,10 +5,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
 import com.zoewave.probase.goswift.mobile.home.ui.HomeUiRoute
+import com.zoewave.probase.goswift.mobile.hydration.ui.HydrationUiRoute
+import com.zoewave.probase.goswift.mobile.input.ui.InputUiRoute
+import com.zoewave.probase.goswift.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.goswift.mobile.shots.ui.AddShotUiRoute
 import com.zoewave.probase.goswift.mobile.shots.ui.ShotsUiRoute
-import com.zoewave.probase.goswift.mobile.settings.ui.SettingsUiRoute
-import com.zoewave.probase.goswift.mobile.hydration.ui.HydrationUiRoute
 
 fun goSwiftNavEntryProvider(
     key: GoSwiftDestination,
@@ -19,6 +20,12 @@ fun goSwiftNavEntryProvider(
         when (key) {
             GoSwiftDestination.Home -> {
                 HomeUiRoute(
+                    modifier = Modifier.fillMaxSize(),
+                    navTo = navigateTo
+                )
+            }
+            GoSwiftDestination.Log -> {
+                InputUiRoute(
                     modifier = Modifier.fillMaxSize(),
                     navTo = navigateTo
                 )

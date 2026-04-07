@@ -3,10 +3,9 @@ package com.zoewave.probase.goswift.mobile.ui.components
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -23,7 +22,7 @@ fun GoSwiftMainScreen() {
     val currentDestination = backStack.lastOrNull() ?: GoSwiftDestination.Home
 
     fun navigateTo(destination: GoSwiftDestination) {
-        if (destination == GoSwiftDestination.Home || destination == GoSwiftDestination.Shots || destination == GoSwiftDestination.Settings) {
+        if (destination == GoSwiftDestination.Home || destination == GoSwiftDestination.Log || destination == GoSwiftDestination.Settings) {
             backStack.clear()
             backStack.add(destination)
         } else {
@@ -77,16 +76,10 @@ fun GoSwiftBottomBar(
             label = { Text("Home") }
         )
         NavigationBarItem(
-            selected = currentDestination == GoSwiftDestination.Shots,
-            onClick = { onNavigate(GoSwiftDestination.Shots) },
-            icon = { Icon(Icons.Default.History, contentDescription = "Shots") },
-            label = { Text("Shots") }
-        )
-        NavigationBarItem(
-            selected = currentDestination == GoSwiftDestination.Hydration,
-            onClick = { onNavigate(GoSwiftDestination.Hydration) },
-            icon = { Icon(Icons.Default.WaterDrop, contentDescription = "Hydration") },
-            label = { Text("Water") }
+            selected = currentDestination == GoSwiftDestination.Log,
+            onClick = { onNavigate(GoSwiftDestination.Log) },
+            icon = { Icon(Icons.Default.Add, contentDescription = "Log") },
+            label = { Text("Log") }
         )
         NavigationBarItem(
             selected = currentDestination == GoSwiftDestination.Settings,

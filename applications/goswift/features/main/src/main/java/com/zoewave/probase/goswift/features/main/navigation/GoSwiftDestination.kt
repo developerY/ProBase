@@ -7,6 +7,8 @@ sealed class GoSwiftDestination {
     @Serializable
     data object Home : GoSwiftDestination()
     @Serializable
+    data object Log : GoSwiftDestination()
+    @Serializable
     data object Shots : GoSwiftDestination()
     @Serializable
     data object AddShot : GoSwiftDestination()
