@@ -8,7 +8,8 @@ sealed interface HomeUiState {
         val sleepQualityImpact: String,
         val sleepDuration: String = "Unknown",
         val exerciseMinutes: Int = 0,
-        val hydrationProgress: Double = 0.0
+        val hydrationProgress: Double = 0.0,
+        val caloriesIntake: Double = 0.0
     ) : HomeUiState
 }
 

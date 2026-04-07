@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HydrationRecord
+import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
+import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Volume
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Instant
@@ -68,6 +70,30 @@ class HealthConnectRepositoryImpl @Inject constructor(
             endTime = timestamp.plusSeconds(1),
             endZoneOffset = null,
             volume = Volume.liters(volume),
+            metadata = Metadata.manualEntry()
+        )
+        client.insertRecords(listOf(record))
+    }
+
+    override suspend fun readNutritionRecords(
+        startTime: Instant,
+        endTime: Instant
+    ): List<NutritionRecord> {
+        val request = ReadRecordsRequest(
+            recordType = NutritionRecord::class,
+            timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+        )
+        return client.readRecords(request).records
+    }
+
+    override suspend fun insertNutritionRecord(foodName: String, calories: Double, timestamp: Instant) {
+        val record = NutritionRecord(
+            startTime = timestamp,
+            startZoneOffset = null,
+            endTime = timestamp.plusSeconds(1),
+            endZoneOffset = null,
+            name = foodName,
+            energy = Energy.kilocalories(calories),
             metadata = Metadata.manualEntry()
         )
         client.insertRecords(listOf(record))

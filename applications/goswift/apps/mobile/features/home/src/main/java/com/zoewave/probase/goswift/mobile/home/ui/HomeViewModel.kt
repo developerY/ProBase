@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.goswift.data.HealthRepository
 import com.zoewave.probase.goswift.data.HydrationRepository
+import com.zoewave.probase.goswift.data.NutritionRepository
 import com.zoewave.probase.goswift.data.ShotRepository
 import com.zoewave.probase.goswift.model.CaffeineShot
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +30,8 @@ import kotlin.math.pow
 class HomeViewModel @Inject constructor(
     private val repository: ShotRepository,
     private val healthRepository: HealthRepository,
-    private val hydrationRepository: HydrationRepository
+    private val hydrationRepository: HydrationRepository,
+    private val nutritionRepository: NutritionRepository
 ) : ViewModel() {
 
     private val halfLifeHours = 5.0
@@ -57,7 +59,10 @@ class HomeViewModel @Inject constructor(
                 val hydrationRecords = hydrationRepository.getHydrationRecords(yesterday, now)
                 val totalHydrationLiters = hydrationRecords.sumOf { it.volume.inLiters }
                 
-                emit(HealthData(totalSleepMillis, totalExerciseMinutes, totalHydrationLiters))
+                val nutritionRecords = nutritionRepository.getNutritionRecords(yesterday, now)
+                val totalCalories = nutritionRecords.sumOf { it.energy?.inKilocalories ?: 0.0 }
+                
+                emit(HealthData(totalSleepMillis, totalExerciseMinutes, totalHydrationLiters, totalCalories))
             }
         }
 
@@ -74,7 +79,8 @@ class HomeViewModel @Inject constructor(
             sleepQualityImpact = getSleepImpact(currentLevel, healthData.sleepMillis),
             sleepDuration = formatDuration(healthData.sleepMillis),
             exerciseMinutes = healthData.exerciseMinutes,
-            hydrationProgress = healthData.hydrationLiters
+            hydrationProgress = healthData.hydrationLiters,
+            caloriesIntake = healthData.calories
         )
     }
         .stateIn(
@@ -83,7 +89,7 @@ class HomeViewModel @Inject constructor(
             initialValue = HomeUiState.Loading
         )
 
-    data class HealthData(val sleepMillis: Long, val exerciseMinutes: Int, val hydrationLiters: Double)
+    data class HealthData(val sleepMillis: Long, val exerciseMinutes: Int, val hydrationLiters: Double, val calories: Double)
 
     private fun formatDuration(millis: Long): String {
         val hours = millis / 3_600_000
