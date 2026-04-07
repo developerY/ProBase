@@ -14,10 +14,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
+import kotlin.math.pow
 
 @HiltViewModel
 class HydrationViewModel @Inject constructor(
@@ -67,24 +69,26 @@ class HydrationViewModel @Inject constructor(
 
     private fun calculateTargetFlow() = flow {
         // Base target 2.0L
-        // + 0.5L for every 100mg caffeine
         // + 0.5L for every 30m exercise
+        // + 0.25L for every 100mg active caffeine
         val now = Instant.now()
         val startOfDay = now.truncatedTo(ChronoUnit.DAYS)
-        
-        val shots = shotRepository.getAllShots() // Note: this is a flow, but we need current snapshot for simple target
-        // For simplicity, we'll fetch once in this flow.
         
         val exerciseSessions = healthRepository.getExerciseSessions(startOfDay, now)
         val exerciseMinutes = exerciseSessions.sumOf { 
             java.time.Duration.between(it.startTime, it.endTime).toMinutes() 
         }
         
-        var target = 2.0
-        target += (exerciseMinutes / 30) * 0.5
+        val shots = shotRepository.getAllShots().first()
+        val currentTime = System.currentTimeMillis()
+        val currentCaffeine = shots.sumOf { shot ->
+            val hoursPassed = (currentTime - shot.timestamp).toDouble() / 3_600_000.0
+            if (hoursPassed < 0) 0.0 else shot.mg * (0.5).pow(hoursPassed / 5.0)
+        }
         
-        // We'll also account for caffeine if we had easy access to current total here.
-        // For now, base + exercise.
+        var target = 2.0
+        target += (exerciseMinutes / 30.0) * 0.5
+        target += (currentCaffeine / 100.0) * 0.25
         
         emit(target)
     }

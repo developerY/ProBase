@@ -99,8 +99,12 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun getRecommendation(currentLevel: Double, exerciseMinutes: Int, hydrationLiters: Double): String {
+        val caffeineHydrationPenalty = (currentLevel / 100.0) * 0.25 // 250ml per 100mg caffeine
+        val totalWaterTarget = 2.0 + (exerciseMinutes / 30.0) * 0.5 + caffeineHydrationPenalty
+        
         return when {
-            hydrationLiters < 1.0 -> "Dehydration risk. Drink 500ml water now!"
+            hydrationLiters < totalWaterTarget * 0.5 -> "Critical: Low hydration! Drink 500ml water."
+            hydrationLiters < totalWaterTarget -> String.format(java.util.Locale.getDefault(), "Don't forget to hydrate! Target: %.1fL", totalWaterTarget)
             exerciseMinutes > 30 && currentLevel < 100 -> "Post-workout energy dip? A 40mg dose is safe."
             currentLevel < 50 -> "Time for a 20mg micro-dose!"
             else -> "Energy level optimal. Wait 2 hours."
