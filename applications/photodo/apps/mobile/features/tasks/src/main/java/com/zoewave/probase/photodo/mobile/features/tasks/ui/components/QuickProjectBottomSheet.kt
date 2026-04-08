@@ -48,7 +48,11 @@ fun QuickProjectContent(
     ) {
         // Dynamic title based on override
         val titleText = if (uiState.quickProjectCategoryOverride != null) "Home Project" else "Quick Project"
-        val subtitlePrefix = uiState.quickProjectCategoryOverride ?: uiState.categoryName
+        val subtitlePrefix = when {
+            uiState.quickProjectCategoryOverride != null -> uiState.quickProjectCategoryOverride
+            uiState.isNoCategoriesYet -> "Default"
+            else -> uiState.categoryName
+        }
 
         // --- HEADER ---
         Row(
@@ -156,6 +160,19 @@ private fun QuickProjectBottomSheetPreview() {
         Surface {
             QuickProjectContent(
                 uiState = TasksUiState(categoryName = "Work"),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun QuickProjectBottomSheetEmptyStatePreview() {
+    PhotoDoTheme {
+        Surface {
+            QuickProjectContent(
+                uiState = TasksUiState(isNoCategoriesYet = true),
                 onEvent = {}
             )
         }

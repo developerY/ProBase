@@ -164,7 +164,7 @@ fun HomeOverviewFab(
         FloatingActionButtonMenuItem(
             onClick = onHomeProjectClick, // Renamed
             icon = { Icon(Icons.Default.Checklist, contentDescription = null) },
-            text = { Text("Home Project") } // Renamed
+            text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_home_category)) }
         )
 
         FloatingActionButtonMenuItem(

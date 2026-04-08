@@ -7,6 +7,7 @@
     <string name="applications_photodo_apps_mobile_features_home_analytics_content_desc">Analytics</string>
     <string name="applications_photodo_apps_mobile_features_home_menu_content_desc">Menu</string>
     <string name="applications_photodo_apps_mobile_features_home_new_category">New Category</string>
+    <string name="applications_photodo_apps_mobile_features_home_home_category">Home Category</string>
     <string name="applications_photodo_apps_mobile_features_home_quick_project">Home Project</string>
     <string name="applications_photodo_apps_mobile_features_home_category_placeholder">e.g. Personal, Work, Real Estate</string>
     <string name="applications_photodo_apps_mobile_features_home_create">Create</string>

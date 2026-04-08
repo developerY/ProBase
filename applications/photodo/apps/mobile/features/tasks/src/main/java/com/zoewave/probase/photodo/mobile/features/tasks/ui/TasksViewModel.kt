@@ -238,7 +238,10 @@ class TasksViewModel @Inject constructor(
             is TasksEvent.OnAddQuickProject -> {
                 viewModelScope.launch {
                     // 1. Get or Create Category (Use override if present, otherwise template default)
-                    val targetCategory = uiState.value.quickProjectCategoryOverride ?: event.categoryName
+                    // If no categories exist, default to "Default" category.
+                    val targetCategory = uiState.value.quickProjectCategoryOverride 
+                        ?: if (uiState.value.isNoCategoriesYet) "Default" else event.categoryName
+
                     val categoryId = repo.getOrCreateCategoryByName(targetCategory)
 
                     // 2. Handle Name Collision (Appending a number)
