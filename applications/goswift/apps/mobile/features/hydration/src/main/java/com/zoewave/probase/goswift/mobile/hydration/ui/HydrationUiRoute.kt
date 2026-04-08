@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
+import com.zoewave.probase.goswift.mobile.hydration.ui.components.WavyWaterLevel
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -100,18 +101,13 @@ fun HydrationProgressCard(current: Double, target: Double) {
             modifier = Modifier.padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(Icons.Default.WaterDrop, contentDescription = null, tint = Color(0xFF2196F3), modifier = Modifier.size(48.dp))
-            Spacer(Modifier.height(8.dp))
+            WavyWaterLevel(
+                progress = (current / target).toFloat(),
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            
             Text("Daily Progress", style = MaterialTheme.typography.labelLarge)
             Text(String.format("%.2fL / %.2fL", current, target), style = MaterialTheme.typography.displayMedium)
-            
-            Spacer(Modifier.height(16.dp))
-            LinearProgressIndicator(
-                progress = { (current / target).toFloat().coerceIn(0f, 1f) },
-                modifier = Modifier.fillMaxWidth().height(12.dp),
-                color = Color(0xFF2196F3),
-                trackColor = Color(0xFFBBDEFB),
-            )
         }
     }
 }
