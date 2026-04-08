@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.goswift.mobile.nutrition.ui.components.CalorieBubbleContainer
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -55,6 +56,11 @@ fun NutritionScreen(
                 }
             }
             is NutritionUiState.Success -> {
+                CalorieBubbleContainer(
+                    meals = uiState.recentMeals,
+                    modifier = Modifier.height(250.dp)
+                )
+
                 DailyCalorieCard(uiState.dailyCalories)
                 
                 Spacer(Modifier.height(24.dp))
