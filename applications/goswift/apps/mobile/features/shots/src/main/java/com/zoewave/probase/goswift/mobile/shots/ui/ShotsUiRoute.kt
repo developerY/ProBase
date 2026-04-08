@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
+import com.zoewave.probase.goswift.mobile.shots.ui.components.CaffeineClock
 import com.zoewave.probase.goswift.mobile.shots.ui.components.ShotItem
 
 @Composable
@@ -58,21 +59,31 @@ fun ShotsScreen(
                 }
             }
             is ShotsUiState.Success -> {
-                if (uiState.shots.isEmpty()) {
-                    Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                        Text("No shots recorded today.")
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize().padding(padding),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(uiState.shots, key = { it.id }) { shot ->
-                            ShotItem(
-                                shot = shot,
-                                onDelete = { onEvent(ShotsUiEvent.DeleteShot(shot.id)) }
-                            )
+                Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+                    CaffeineClock(
+                        shots = uiState.shots,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp)
+                            .height(250.dp)
+                    )
+                    
+                    if (uiState.shots.isEmpty()) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("No shots recorded today.")
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(uiState.shots, key = { it.id }) { shot ->
+                                ShotItem(
+                                    shot = shot,
+                                    onDelete = { onEvent(ShotsUiEvent.DeleteShot(shot.id)) }
+                                )
+                            }
                         }
                     }
                 }
