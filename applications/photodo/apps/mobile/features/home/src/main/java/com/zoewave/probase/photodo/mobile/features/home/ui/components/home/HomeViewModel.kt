@@ -64,7 +64,8 @@ class HomeViewModel @Inject constructor(
                                 projectBudget = project.projectBudget,
                                 dueDateMillis = project.dueDate,
                                 doneTasksCount = tasks.count { it.isChecked },
-                                totalTasksCount = tasks.size
+                                totalTasksCount = tasks.size,
+                                thumbnailUri = projectWithTasks.photos.firstOrNull()?.photoUri
                             )
                         )
                     }
