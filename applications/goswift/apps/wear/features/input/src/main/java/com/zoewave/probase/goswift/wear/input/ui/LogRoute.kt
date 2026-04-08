@@ -11,6 +11,8 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.rememberColumnState
 import com.zoewave.probase.goswift.wear.hydration.ui.HydrationUiEvent
 import com.zoewave.probase.goswift.wear.hydration.ui.HydrationViewModel
+import com.zoewave.probase.goswift.wear.input.ui.NutritionUiEvent
+import com.zoewave.probase.goswift.wear.input.ui.NutritionViewModel
 import com.zoewave.probase.goswift.wear.shots.ui.AddShotUiEvent
 import com.zoewave.probase.goswift.wear.shots.ui.AddShotViewModel
 
@@ -20,6 +22,7 @@ fun LogRoute(
     modifier: Modifier = Modifier,
     shotsViewModel: AddShotViewModel = hiltViewModel(),
     hydrationViewModel: HydrationViewModel = hiltViewModel(),
+    nutritionViewModel: NutritionViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
     val columnState = rememberColumnState()
@@ -62,6 +65,21 @@ fun LogRoute(
                     Text("250")
                 }
                 Button(onClick = { hydrationViewModel.onEvent(HydrationUiEvent.AddWater(0.5)); onBack() }) {
+                    Text("500")
+                }
+            }
+        }
+
+        // Calories Section
+        item {
+            Text("Calories (kcal)", style = MaterialTheme.typography.labelMedium)
+        }
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = { nutritionViewModel.onEvent(NutritionUiEvent.AddMeal("Quick Snack", 200.0)); onBack() }) {
+                    Text("200")
+                }
+                Button(onClick = { nutritionViewModel.onEvent(NutritionUiEvent.AddMeal("Quick Meal", 500.0)); onBack() }) {
                     Text("500")
                 }
             }

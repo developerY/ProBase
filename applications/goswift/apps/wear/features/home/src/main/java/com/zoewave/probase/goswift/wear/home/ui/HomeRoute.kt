@@ -80,6 +80,15 @@ fun HomeDashboard(
                     }
                 }
                 item {
+                    Card(
+                        onClick = {},
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors()
+                    ) {
+                        Text("Calories: ${String.format(java.util.Locale.getDefault(), "%.0f", uiState.caloriesIntake)} kcal")
+                    }
+                }
+                item {
                     Button(
                         onClick = onLogClick,
                         modifier = Modifier.fillMaxWidth()
