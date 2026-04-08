@@ -10,13 +10,15 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,10 +32,19 @@ class HomeViewModel @Inject constructor(
     /*private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()*/
 
+    private data class UiFlags(
+        val isQuickProjectSheetOpen: Boolean = false,
+        val quickProjectCategoryOverride: String? = null
+    )
+
+    private val _uiFlags = MutableStateFlow(UiFlags())
+
     // 1. Directly map the relational database stream into our UI State
-    val uiState: StateFlow<HomeUiState> = photoDoRepo.getCategoriesWithProjectsAndTasks()
-        .map { categoriesWithProjectsAndTasks ->
-            if (categoriesWithProjectsAndTasks.isEmpty()) return@map HomeUiState.Empty
+    val uiState: StateFlow<HomeUiState> = combine(
+        photoDoRepo.getCategoriesWithProjectsAndTasks(),
+        _uiFlags
+    ) { categoriesWithProjectsAndTasks, flags ->
+        if (categoriesWithProjectsAndTasks.isEmpty()) return@combine HomeUiState.Empty
 
             val overviewModels = ArrayList<CategoryOverviewUiModel>(categoriesWithProjectsAndTasks.size)
             val urgentProjects = ArrayList<ProjectListUiModel>()
@@ -90,7 +101,9 @@ class HomeViewModel @Inject constructor(
 
             HomeUiState.Success(
                 categories = overviewModels,
-                urgentProjects = urgentProjects
+                urgentProjects = urgentProjects,
+                isQuickProjectSheetOpen = flags.isQuickProjectSheetOpen,
+                quickProjectCategoryOverride = flags.quickProjectCategoryOverride
             )
         }
         .flowOn(Dispatchers.Default)
@@ -119,6 +132,24 @@ class HomeViewModel @Inject constructor(
                 // With Nav3, navigation is usually intercepted directly in the HomeUiRoute.
                 // We just log it here for debugging purposes!
                 Log.d(TAG, "Category clicked: ${event.categoryName} (ID: ${event.categoryId})")
+            }
+
+            is HomeEvent.OnAddQuickProjectClicked -> {
+                _uiFlags.update { 
+                    it.copy(
+                        isQuickProjectSheetOpen = true,
+                        quickProjectCategoryOverride = event.overrideCategoryName
+                    ) 
+                }
+            }
+
+            is HomeEvent.OnDismissBottomSheet -> {
+                _uiFlags.update { 
+                    it.copy(
+                        isQuickProjectSheetOpen = false,
+                        quickProjectCategoryOverride = null
+                    ) 
+                }
             }
 
             is HomeEvent.OnAddCategory -> {

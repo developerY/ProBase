@@ -10,6 +10,8 @@ sealed interface HomeUiState {
     data object Empty : HomeUiState
     data class Success(
         val categories: List<CategoryOverviewUiModel>,
-        val urgentProjects: List<ProjectListUiModel> // ✅ ADDED THIS
+        val urgentProjects: List<ProjectListUiModel>,
+        val isQuickProjectSheetOpen: Boolean = false,
+        val quickProjectCategoryOverride: String? = null
     ) : HomeUiState
 }

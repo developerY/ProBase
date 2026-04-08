@@ -79,7 +79,6 @@ fun HomeOverviewScreen(
 
     // Add these state variables at the top of your composable
     var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
-    var showQuickTemplateBottomSheet by rememberSaveable { mutableStateOf(false) }
     var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -94,9 +93,10 @@ fun HomeOverviewScreen(
                     fabMenuExpanded = false
                     showAddCategoryDialog = true
                 },
-                onQuickProjectClick = {
+                onHomeProjectClick = { // Updated parameter name
                     fabMenuExpanded = false
-                    showQuickTemplateBottomSheet = true
+                    // Map to the common Quick Project logic with "Home" override!
+                    onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
                 },
                 onCameraClick = {
                     fabMenuExpanded = false
@@ -119,8 +119,7 @@ fun HomeOverviewScreen(
     HomeOverviewDialogs(
         showAddCategoryDialog = showAddCategoryDialog,
         onDismissAddCategory = { showAddCategoryDialog = false },
-        showQuickTemplateBottomSheet = showQuickTemplateBottomSheet,
-        onDismissQuickTemplate = { showQuickTemplateBottomSheet = false },
+        uiState = uiState, // Pass the UI State!
         categoryToDelete = categoryToDelete,
         onDismissDeleteConfirmation = { categoryToDelete = null },
         onEvent = onEvent
@@ -133,7 +132,7 @@ fun HomeOverviewFab(
     fabMenuExpanded: Boolean,
     onFabToggle: (Boolean) -> Unit,
     onAddCategoryClick: () -> Unit,
-    onQuickProjectClick: () -> Unit,
+    onHomeProjectClick: () -> Unit, // Renamed
     onCameraClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -163,9 +162,9 @@ fun HomeOverviewFab(
         )
 
         FloatingActionButtonMenuItem(
-            onClick = onQuickProjectClick,
+            onClick = onHomeProjectClick, // Renamed
             icon = { Icon(Icons.Default.Checklist, contentDescription = null) },
-            text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_quick_project)) }
+            text = { Text("Home Project") } // Renamed
         )
 
         FloatingActionButtonMenuItem(
@@ -235,8 +234,7 @@ fun HomeOverviewContent(
 fun HomeOverviewDialogs(
     showAddCategoryDialog: Boolean,
     onDismissAddCategory: () -> Unit,
-    showQuickTemplateBottomSheet: Boolean,
-    onDismissQuickTemplate: () -> Unit,
+    uiState: HomeUiState,
     categoryToDelete: CategoryOverviewUiModel?,
     onDismissDeleteConfirmation: () -> Unit,
     onEvent: (HomeEvent) -> Unit
@@ -278,12 +276,18 @@ fun HomeOverviewDialogs(
         )
     }
 
-    if (showQuickTemplateBottomSheet) {
+    if (uiState is HomeUiState.Success && uiState.isQuickProjectSheetOpen) {
         QuickTemplateBottomSheet(
-            onDismiss = onDismissQuickTemplate,
+            onDismiss = { onEvent(HomeEvent.OnDismissBottomSheet) },
             onTemplateSelected = { template ->
-                onEvent(HomeEvent.OnCreateFromTemplate(template))
-                onDismissQuickTemplate()
+                // Ensure it uses the override if present!
+                val targetTemplate = if (uiState.quickProjectCategoryOverride != null) {
+                    template.copy(categoryName = uiState.quickProjectCategoryOverride)
+                } else {
+                    template
+                }
+                onEvent(HomeEvent.OnCreateFromTemplate(targetTemplate))
+                onEvent(HomeEvent.OnDismissBottomSheet)
             }
         )
     }

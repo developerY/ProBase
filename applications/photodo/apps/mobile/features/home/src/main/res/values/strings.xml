@@ -7,14 +7,14 @@
     <string name="applications_photodo_apps_mobile_features_home_analytics_content_desc">Analytics</string>
     <string name="applications_photodo_apps_mobile_features_home_menu_content_desc">Menu</string>
     <string name="applications_photodo_apps_mobile_features_home_new_category">New Category</string>
-    <string name="applications_photodo_apps_mobile_features_home_quick_project">Quick Project</string>
+    <string name="applications_photodo_apps_mobile_features_home_quick_project">Home Project</string>
     <string name="applications_photodo_apps_mobile_features_home_category_placeholder">e.g. Personal, Work, Real Estate</string>
     <string name="applications_photodo_apps_mobile_features_home_create">Create</string>
     <string name="applications_photodo_apps_mobile_features_home_cancel">Cancel</string>
     <string name="applications_photodo_apps_mobile_features_home_tasks_count">%1$d/%2$d Tasks</string>
     <string name="applications_photodo_apps_mobile_features_home_welcome">Welcome to PhotoDo!</string>
     <string name="applications_photodo_apps_mobile_features_home_empty_state_description">Head over to the Tasks tab to create your first category and start building projects.</string>
-    <string name="applications_photodo_apps_mobile_features_home_quick_start">Quick Start</string>
+    <string name="applications_photodo_apps_mobile_features_home_quick_start">Home Project</string>
     <string name="applications_photodo_apps_mobile_features_home_close_content_desc">Close</string>
     <string name="applications_photodo_apps_mobile_features_home_template_summary">%1$s • $%2$d Budget</string>
     <string name="applications_photodo_apps_mobile_features_home_total_categories">Total PhotoDo Categories</string>

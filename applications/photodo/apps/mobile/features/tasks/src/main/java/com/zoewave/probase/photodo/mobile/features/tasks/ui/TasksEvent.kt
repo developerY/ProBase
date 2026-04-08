@@ -41,6 +41,9 @@ sealed interface TasksEvent {
     data object OnAddTaskItemClicked : TasksEvent
     data object OnAddPhotoClicked : TasksEvent
 
+    data class OnAddQuickProjectClicked(val overrideCategoryName: String? = null) : TasksEvent
+    data class OnAddQuickProject(val name: String, val categoryName: String, val budget: Double) : TasksEvent
+
 
     // ✅ Sheet Dismissal
     data object OnDismissBottomSheet : TasksEvent

@@ -47,7 +47,9 @@ class TasksViewModel @Inject constructor(
         val isAddCategorySheetOpen: Boolean = false,
         val isAddListSheetOpen: Boolean = false,
         val isAddTaskItemSheetOpen: Boolean = false,
-        val isAddPhotoSheetOpen: Boolean = false
+        val isAddPhotoSheetOpen: Boolean = false,
+        val isQuickProjectSheetOpen: Boolean = false,
+        val quickProjectCategoryOverride: String? = null
     )
 
     val uiState: StateFlow<TasksUiState> = combine(
@@ -119,7 +121,9 @@ class TasksViewModel @Inject constructor(
             isAddCategorySheetOpen = flags.isAddCategorySheetOpen,
             isAddListSheetOpen = flags.isAddListSheetOpen,
             isAddTaskItemSheetOpen = flags.isAddTaskItemSheetOpen,
-            isAddPhotoSheetOpen = flags.isAddPhotoSheetOpen
+            isAddPhotoSheetOpen = flags.isAddPhotoSheetOpen,
+            isQuickProjectSheetOpen = flags.isQuickProjectSheetOpen,
+            quickProjectCategoryOverride = flags.quickProjectCategoryOverride
         )
     }.stateIn(
         scope = viewModelScope,
@@ -152,6 +156,12 @@ class TasksViewModel @Inject constructor(
             is TasksEvent.OnAddListClicked -> _uiFlags.update { it.copy(isAddListSheetOpen = true) }
             is TasksEvent.OnAddTaskItemClicked -> _uiFlags.update { it.copy(isAddTaskItemSheetOpen = true) }
             is TasksEvent.OnAddPhotoClicked -> _uiFlags.update { it.copy(isAddPhotoSheetOpen = true) }
+            is TasksEvent.OnAddQuickProjectClicked -> _uiFlags.update { 
+                it.copy(
+                    isQuickProjectSheetOpen = true,
+                    quickProjectCategoryOverride = event.overrideCategoryName
+                ) 
+            }
 
             is TasksEvent.OnDismissBottomSheet -> {
                 _uiFlags.update {
@@ -159,7 +169,9 @@ class TasksViewModel @Inject constructor(
                         isAddCategorySheetOpen = false,
                         isAddListSheetOpen = false,
                         isAddTaskItemSheetOpen = false,
-                        isAddPhotoSheetOpen = false
+                        isAddPhotoSheetOpen = false,
+                        isQuickProjectSheetOpen = false,
+                        quickProjectCategoryOverride = null
                     )
                 }
             }
@@ -222,6 +234,44 @@ class TasksViewModel @Inject constructor(
 
             is TasksEvent.OnDraftBudgetChanged -> _draftState.update { it.copy(budgetInput = event.budgetInput) }
             is TasksEvent.OnDraftDueDateChanged -> _draftState.update { it.copy(dueDateMillis = event.timestamp) }
+
+            is TasksEvent.OnAddQuickProject -> {
+                viewModelScope.launch {
+                    // 1. Get or Create Category (Use override if present, otherwise template default)
+                    val targetCategory = uiState.value.quickProjectCategoryOverride ?: event.categoryName
+                    val categoryId = repo.getOrCreateCategoryByName(targetCategory)
+
+                    // 2. Handle Name Collision (Appending a number)
+                    // We need to fetch all projects to check for global name collisions or just in this category?
+                    // Let's stick to the current view's list for now as a "quick" check.
+                    val existingProjects = uiState.value.projectLists.map { it.title }
+                    var finalName = event.name
+                    var counter = 1
+                    while (existingProjects.contains(finalName)) {
+                        finalName = "${event.name} $counter"
+                        counter++
+                    }
+
+                    // 3. Create Project
+                    val newProject = ProjectEntity(
+                        categoryId = categoryId,
+                        name = finalName,
+                        projectBudget = event.budget
+                    )
+                    val generatedProjectId = repo.upsertProject(newProject)
+
+                    // 4. Add Default Task
+                    repo.upsertTask(
+                        TaskEntity(
+                            projectId = generatedProjectId,
+                            text = "${event.name} quick task",
+                            isChecked = false
+                        )
+                    )
+
+                    onEvent(TasksEvent.OnDismissBottomSheet)
+                }
+            }
         }
     }
 

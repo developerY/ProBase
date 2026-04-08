@@ -19,7 +19,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -32,6 +36,9 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiM
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import components.home.CategoryQuickJumpRow
 
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewDialogs
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewFab
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -40,19 +47,30 @@ fun HomeScreen(
     navTo: (PhotoTodoRoute) -> Unit, // ✅ Restrictive navigation channel enforced
     modifier: Modifier = Modifier
 ) {
+    var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
+    var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
+    var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        // 🚀 Upgrade: Large Top AppBar for an expressive title feel
-        // topBar = { TopAppBar(title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_overview)) }) },
+        // 🚀 Upgrade: HomeOverviewFab for consistent FAB actions
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navTo(PhotoTodoRoute.Camera(projectId = null)) }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = stringResource(com.zoewave.photodo.model.R.string.applications_photodo_model_route_camera)
-                )
-            }
+            HomeOverviewFab(
+                fabMenuExpanded = fabMenuExpanded,
+                onFabToggle = { fabMenuExpanded = it },
+                onAddCategoryClick = {
+                    fabMenuExpanded = false
+                    showAddCategoryDialog = true
+                },
+                onHomeProjectClick = {
+                    fabMenuExpanded = false
+                    onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
+                },
+                onCameraClick = {
+                    fabMenuExpanded = false
+                    navTo(PhotoTodoRoute.Camera(projectId = null))
+                }
+            )
         }
     ) { paddingValues ->
 
@@ -147,6 +165,15 @@ fun HomeScreen(
             }
         }
     }
+
+    HomeOverviewDialogs(
+        showAddCategoryDialog = showAddCategoryDialog,
+        onDismissAddCategory = { showAddCategoryDialog = false },
+        uiState = uiState,
+        categoryToDelete = categoryToDelete,
+        onDismissDeleteConfirmation = { categoryToDelete = null },
+        onEvent = onEvent
+    )
 }
 
 

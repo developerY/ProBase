@@ -16,6 +16,6 @@ data class ProjectTemplate(
 // The hardcoded list of templates for V1
 val quickTemplates = listOf(
     ProjectTemplate("Grocery Run", "Home", 150.0, Icons.Default.ShoppingCart),
-    ProjectTemplate("Quick Fix", "Repairs & Projects", 50.0, Icons.Default.Build),
-    ProjectTemplate("Car Maintenance", "Cleaning & Maintenance", 100.0, Icons.Default.DirectionsCar)
+    ProjectTemplate("Quick Fix", "Home", 50.0, Icons.Default.Build),
+    ProjectTemplate("Car Maintenance", "Home", 100.0, Icons.Default.DirectionsCar)
 )
