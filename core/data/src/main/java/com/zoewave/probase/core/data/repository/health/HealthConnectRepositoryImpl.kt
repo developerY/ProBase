@@ -22,48 +22,64 @@ class HealthConnectRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : HealthConnectRepository {
 
-    private val client: HealthConnectClient by lazy {
-        HealthConnectClient.getOrCreate(context)
+    private val isSupported: Boolean by lazy {
+        try {
+            HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private val client: HealthConnectClient? by lazy {
+        if (isSupported) {
+            HealthConnectClient.getOrCreate(context)
+        } else {
+            null
+        }
     }
 
     override suspend fun insert(records: List<Record>) {
-        client.insertRecords(records)
+        client?.insertRecords(records)
     }
 
     override suspend fun readExerciseSessions(
         startTime: Instant,
         endTime: Instant
     ): List<ExerciseSessionRecord> {
+        val currentClient = client ?: return emptyList()
         val request = ReadRecordsRequest(
             recordType = ExerciseSessionRecord::class,
             timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
         )
-        return client.readRecords(request).records
+        return currentClient.readRecords(request).records
     }
 
     override suspend fun readSleepSessions(
         startTime: Instant,
         endTime: Instant
     ): List<SleepSessionRecord> {
+        val currentClient = client ?: return emptyList()
         val request = ReadRecordsRequest(
             recordType = SleepSessionRecord::class,
             timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
         )
-        return client.readRecords(request).records
+        return currentClient.readRecords(request).records
     }
 
     override suspend fun readHydrationRecords(
         startTime: Instant,
         endTime: Instant
     ): List<HydrationRecord> {
+        val currentClient = client ?: return emptyList()
         val request = ReadRecordsRequest(
             recordType = HydrationRecord::class,
             timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
         )
-        return client.readRecords(request).records
+        return currentClient.readRecords(request).records
     }
 
     override suspend fun insertHydrationRecord(volume: Double, timestamp: Instant) {
+        val currentClient = client ?: return
         val record = HydrationRecord(
             startTime = timestamp,
             startZoneOffset = null,
@@ -72,21 +88,23 @@ class HealthConnectRepositoryImpl @Inject constructor(
             volume = Volume.liters(volume),
             metadata = Metadata.manualEntry()
         )
-        client.insertRecords(listOf(record))
+        currentClient.insertRecords(listOf(record))
     }
 
     override suspend fun readNutritionRecords(
         startTime: Instant,
         endTime: Instant
     ): List<NutritionRecord> {
+        val currentClient = client ?: return emptyList()
         val request = ReadRecordsRequest(
             recordType = NutritionRecord::class,
             timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
         )
-        return client.readRecords(request).records
+        return currentClient.readRecords(request).records
     }
 
     override suspend fun insertNutritionRecord(foodName: String, calories: Double, timestamp: Instant) {
+        val currentClient = client ?: return
         val record = NutritionRecord(
             startTime = timestamp,
             startZoneOffset = null,
@@ -96,11 +114,12 @@ class HealthConnectRepositoryImpl @Inject constructor(
             energy = Energy.kilocalories(calories),
             metadata = Metadata.manualEntry()
         )
-        client.insertRecords(listOf(record))
+        currentClient.insertRecords(listOf(record))
     }
 
     override suspend fun deleteAllSessions(before: Instant) {
-        client.deleteRecords(
+        val currentClient = client ?: return
+        currentClient.deleteRecords(
             recordType = ExerciseSessionRecord::class,
             timeRangeFilter = TimeRangeFilter.before(before)
         )
