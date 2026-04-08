@@ -1,0 +1,20 @@
+# Task Management
+
+- [x] Research and Setup
+- [x] Core Data Enhancements
+- [x] GoSwift Data Layer
+- [x] GoSwift Permissions & App Config
+- [x] GoSwift Domain/ViewModel Layer
+- [x] UI Updates (Initial)
+- [x] Hydration Integration
+- [x] User Input Consolidation (Reuse)
+- [x] Nutrition (Calories In) Integration
+- [x] Jazzing up the UI (Caffeine & Water)
+- [x] Jazzing up the UI (Nutrition)
+- [x] Wear OS Application Development
+	- [x] Research Wear OS best practices (from Photodo)
+	- [x] Initialize Wear OS app module and configuration
+	- [x] Create Wear-optimized Home dashboard
+	- [x] Create Wear-optimized Input logging screen
+	- [x] Implement Health Connect permission handling for Wear
+	- [x] Integrate into project build and settings

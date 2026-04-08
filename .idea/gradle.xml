@@ -54,6 +54,10 @@
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/nutrition" />
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/settings" />
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/shots" />
+            <option value="$PROJECT_DIR$/applications/goswift/apps/wear" />
+            <option value="$PROJECT_DIR$/applications/goswift/apps/wear/features" />
+            <option value="$PROJECT_DIR$/applications/goswift/apps/wear/features/home" />
+            <option value="$PROJECT_DIR$/applications/goswift/apps/wear/features/input" />
             <option value="$PROJECT_DIR$/applications/goswift/data" />
             <option value="$PROJECT_DIR$/applications/goswift/database" />
             <option value="$PROJECT_DIR$/applications/goswift/features" />
