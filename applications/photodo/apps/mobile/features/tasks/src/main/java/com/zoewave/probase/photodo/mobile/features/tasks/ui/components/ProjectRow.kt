@@ -1,10 +1,14 @@
 package com.zoewave.probase.photodo.mobile.features.tasks.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Favorite
@@ -20,9 +24,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.tasks.R
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
@@ -54,12 +61,28 @@ fun ProjectRow(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.Folder,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                if (project.thumbnailUri != null) {
+                    AsyncImage(
+                        model = project.thumbnailUri,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Folder,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = project.title, style = MaterialTheme.typography.titleMedium)
@@ -123,7 +146,8 @@ fun ProjectRowPreview() {
                 dueDateMillis = System.currentTimeMillis() + 86400000L * 3,
                 isCompleted = false,
                 doneTasksCount = 1,
-                totalTasksCount = 2
+                totalTasksCount = 2,
+                thumbnailUri = "https://picsum.photos/200" // Added for preview
             ),
             onEvent = {},
             navTo = {}
@@ -133,22 +157,20 @@ fun ProjectRowPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun ProjectRowUrgentFavoritePreview() {
+fun ProjectRowNoPhotoPreview() {
     PhotoDoTheme {
         ProjectRow(
             project = ProjectListUiModel(
-                projectId = 2,
-                title = "Urgent Favorite Project",
-                categoryName = "Personal",
-                isFavorite = true,
-                isUrgent = true,
-                // budget
-                currentSpend = 10.0,
-                projectBudget = 100.0,
-                dueDateMillis = System.currentTimeMillis() + 259200000L,
+                projectId = 3,
+                title = "No Photo Project",
+                categoryName = "Work",
+                isFavorite = false,
+                isUrgent = false,
+                dueDateMillis = System.currentTimeMillis() + 86400000L * 3,
                 isCompleted = false,
-                doneTasksCount = 3,
-                totalTasksCount = 5
+                doneTasksCount = 1,
+                totalTasksCount = 2,
+                thumbnailUri = null
             ),
             onEvent = {},
             navTo = {}

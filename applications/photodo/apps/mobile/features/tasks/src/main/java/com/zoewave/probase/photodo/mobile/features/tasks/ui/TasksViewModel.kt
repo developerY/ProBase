@@ -69,7 +69,8 @@ class TasksViewModel @Inject constructor(
                                 projectBudget = project.projectBudget,
                                 dueDateMillis = project.dueDate,
                                 doneTasksCount = tasks.count { it.isChecked },
-                                totalTasksCount = tasks.size
+                                totalTasksCount = tasks.size,
+                                thumbnailUri = projectWithTasks.photos.firstOrNull()?.photoUri
                             )
                         }
                         SmartDbResult(targetData.category.categoryId, targetData.category.name, mappedProjects, false)
@@ -96,7 +97,8 @@ class TasksViewModel @Inject constructor(
                                 projectBudget = project.projectBudget,
                                 dueDateMillis = project.dueDate,
                                 doneTasksCount = tasks.count { it.isChecked },
-                                totalTasksCount = tasks.size
+                                totalTasksCount = tasks.size,
+                                thumbnailUri = projectWithTasks.photos.firstOrNull()?.photoUri
                             )
                         }
                         SmartDbResult(firstData.category.categoryId, firstData.category.name, mappedProjects, false)

@@ -11,5 +11,11 @@ data class ProjectWithTasks(
         parentColumn = "projectId",
         entityColumn = "projectId"
     )
-    val tasks: List<TaskEntity>
+    val tasks: List<TaskEntity>,
+
+    @Relation(
+        parentColumn = "projectId",
+        entityColumn = "projectId"
+    )
+    val photos: List<PhotoEntity> = emptyList()
 )

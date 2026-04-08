@@ -10,11 +10,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.FormatListBulleted
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -120,17 +119,17 @@ fun TasksListScreen(
                         fabMenuExpanded = false
                         onEvent(TasksEvent.OnAddListClicked) // Opens the Project Sheet!
                     },
-                    icon = { Icon(Icons.Default.FormatListBulleted, contentDescription = null) },
+                    icon = { Icon(Icons.AutoMirrored.Filled.FormatListBulleted, contentDescription = null) },
                     text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_project)) }
                 )
-                FloatingActionButtonMenuItem(
+                /*FloatingActionButtonMenuItem(
                     onClick = {
                         fabMenuExpanded = false
                         onEvent(TasksEvent.OnAddCategoryClicked) // Opens the Category Sheet!
                     },
                     icon = { Icon(Icons.Default.Folder, contentDescription = null) },
                     text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_category)) }
-                )
+                )*/
             }
         }
     ) { localPadding ->

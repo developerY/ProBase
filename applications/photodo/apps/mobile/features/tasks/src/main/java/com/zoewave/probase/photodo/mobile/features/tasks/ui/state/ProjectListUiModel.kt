@@ -15,7 +15,8 @@ data class ProjectListUiModel(
     val dueDateMillis: Long? = null,
     val isCompleted: Boolean = false,
     val doneTasksCount: Int = 0,
-    val totalTasksCount: Int = 0
+    val totalTasksCount: Int = 0,
+    val thumbnailUri: String? = null
 ) {
     val progressText: String = if (totalTasksCount > 0) "$doneTasksCount/$totalTasksCount" else ""
     val hasBudget: Boolean = projectBudget > 0
