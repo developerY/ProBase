@@ -108,7 +108,16 @@ fun AdaptiveHomeScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        if (uiState is HomeUiState.Success) {
+                        if (uiState.isLoading) {
+                            item { CircularProgressIndicator() }
+                        } else if (uiState.isEmpty) {
+                            item {
+                                Text(
+                                    stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
+                                    modifier = Modifier.padding(top = 16.dp)
+                                )
+                            }
+                        } else {
                             item {
                                 OverviewSummaryCard(categories = uiState.categories)
                             }
@@ -138,8 +147,6 @@ fun AdaptiveHomeScreen(
                                     )
                                 }
                             }
-                        } else if (uiState is HomeUiState.Loading) {
-                            item { CircularProgressIndicator() }
                         }
                     }
                 },
@@ -175,7 +182,7 @@ fun AdaptiveHomeScreen(
 fun AdaptiveHomeScreenPreviewCompact() {
     PhotoDoTheme {
         AdaptiveHomeScreen(
-            uiState = HomeUiState.Success(
+            uiState = HomeUiState(
                 categories = listOf(
                     CategoryOverviewUiModel(1L, "Work", 10, 5, 0.5f),
                     CategoryOverviewUiModel(2L, "Personal", 5, 2, 0.4f)
@@ -198,7 +205,7 @@ fun AdaptiveHomeScreenPreviewCompact() {
 fun AdaptiveHomeScreenPreviewExpanded() {
     PhotoDoTheme {
         AdaptiveHomeScreen(
-            uiState = HomeUiState.Success(
+            uiState = HomeUiState(
                 categories = listOf(
                     CategoryOverviewUiModel(1L, "Work", 10, 5, 0.5f),
                     CategoryOverviewUiModel(2L, "Personal", 5, 2, 0.4f)

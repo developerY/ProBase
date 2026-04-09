@@ -85,7 +85,7 @@ fun HomeScreen(
         ) {
 
             // --- 🚀 NEW: Graphic/AI Overview Section (Derivative State) ---
-            if (uiState is HomeUiState.Success) {
+            if (!uiState.isLoading && !uiState.isEmpty) {
                 // Compute the models on recomposition
                 item {
                     // 🚀 1. The main "High-Density Wheel" summary card
@@ -129,37 +129,31 @@ fun HomeScreen(
                 }
             }
 
-            when (uiState) {
-                is HomeUiState.Loading -> {
-                    item { CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp)) }
+            if (uiState.isLoading) {
+                item { CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp)) }
+            } else if (uiState.isEmpty) {
+                item {
+                    Text(
+                        stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
                 }
-
-                is HomeUiState.Empty -> {
+            } else {
+                if (uiState.urgentProjects.isEmpty()) {
                     item {
                         Text(
-                            stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
+                            stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
                             modifier = Modifier.padding(top = 16.dp)
                         )
                     }
-                }
-
-                is HomeUiState.Success -> {
-                    if (uiState.urgentProjects.isEmpty()) {
-                        item {
-                            Text(
-                                stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
-                                modifier = Modifier.padding(top = 16.dp)
-                            )
-                        }
-                    } else {
-                        // Use `items` for the dynamic data! It scrolls seamlessly with the `item` blocks above.
-                        items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
-                            HomeProjectRow(
-                                project = project,
-                                onEvent = onEvent, // Pass the channel down
-                                navTo = navTo      // Pass the channel down
-                            )
-                        }
+                } else {
+                    // Use `items` for the dynamic data! It scrolls seamlessly with the `item` blocks above.
+                    items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
+                        HomeProjectRow(
+                            project = project,
+                            onEvent = onEvent, // Pass the channel down
+                            navTo = navTo      // Pass the channel down
+                        )
                     }
                 }
             }
@@ -184,7 +178,7 @@ fun HomeScreen(
 private fun HomeScreenPreview() {
     PhotoDoTheme {
         HomeScreen(
-            uiState = HomeUiState.Success(
+            uiState = HomeUiState(
                 categories = listOf(
                     CategoryOverviewUiModel(1L, "Nature", 10, 5, 0.5f),
                     CategoryOverviewUiModel(2L, "Urban", 8, 2, 0.25f)
@@ -221,7 +215,7 @@ private fun HomeScreenPreview() {
 private fun HomeScreenLoadingPreview() {
     PhotoDoTheme {
         HomeScreen(
-            uiState = HomeUiState.Loading,
+            uiState = HomeUiState(isLoading = true),
             onEvent = {},
             navTo = {}
         )
@@ -233,7 +227,7 @@ private fun HomeScreenLoadingPreview() {
 private fun HomeScreenEmptyPreview() {
     PhotoDoTheme {
         HomeScreen(
-            uiState = HomeUiState.Empty,
+            uiState = HomeUiState(),
             onEvent = {},
             navTo = {}
         )

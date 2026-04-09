@@ -44,10 +44,8 @@ class HomeViewModel @Inject constructor(
         photoDoRepo.getCategoriesWithProjectsAndTasks(),
         _uiFlags
     ) { categoriesWithProjectsAndTasks, flags ->
-        if (categoriesWithProjectsAndTasks.isEmpty()) return@combine HomeUiState.Empty
-
-            val overviewModels = ArrayList<CategoryOverviewUiModel>(categoriesWithProjectsAndTasks.size)
-            val urgentProjects = ArrayList<ProjectListUiModel>()
+        val overviewModels = ArrayList<CategoryOverviewUiModel>(categoriesWithProjectsAndTasks.size)
+        val urgentProjects = ArrayList<ProjectListUiModel>()
 
             for (groupedData in categoriesWithProjectsAndTasks) {
                 val category = groupedData.category
@@ -99,7 +97,7 @@ class HomeViewModel @Inject constructor(
                 )
             }
 
-            HomeUiState.Success(
+            HomeUiState(
                 categories = overviewModels,
                 urgentProjects = urgentProjects,
                 isQuickProjectSheetOpen = flags.isQuickProjectSheetOpen,
@@ -111,12 +109,12 @@ class HomeViewModel @Inject constructor(
             Log.e(TAG, "Error calculating home overview stats", e)
             // If something goes wrong, we could emit an Error state,
             // but falling back to Empty is often safer for dashboards.
-            emit(HomeUiState.Empty)
+            emit(HomeUiState())
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Companion.WhileSubscribed(5_000),
-            initialValue = HomeUiState.Loading
+            initialValue = HomeUiState(isLoading = true)
         )
 
     /*init {

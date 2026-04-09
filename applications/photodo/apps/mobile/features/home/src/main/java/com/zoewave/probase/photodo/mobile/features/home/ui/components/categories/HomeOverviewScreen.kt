@@ -187,43 +187,39 @@ fun HomeOverviewContent(
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        when (uiState) {
-            is HomeUiState.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-            is HomeUiState.Empty -> {
-                EmptyHomeState(
-                    onEvent = onEvent,
-                    navTo = navTo,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            is HomeUiState.Success -> {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2), // 2-column dashboard layout
-                    contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 80.dp), // 🚀 Added bottom padding!
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    if (showSummaryHeader) {
-                        item(span = { GridItemSpan(2) }) {
-                            OverviewSummaryCard(categories = uiState.categories)
-                        }
+        if (uiState.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        } else if (uiState.isEmpty) {
+            EmptyHomeState(
+                onEvent = onEvent,
+                navTo = navTo,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2), // 2-column dashboard layout
+                contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 80.dp), // 🚀 Added bottom padding!
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (showSummaryHeader) {
+                    item(span = { GridItemSpan(2) }) {
+                        OverviewSummaryCard(categories = uiState.categories)
                     }
+                }
 
-                    itemsIndexed(
-                        items = uiState.categories,
-                        key = { _, category -> category.id }
-                    ) { index, category ->
-                        CategoryDashboardCard(
-                            category = category,
-                            index = index,
-                            onEvent = onEvent,
-                            onDeleteClicked = onDeleteClicked,
-                            navTo = navTo
-                        )
-                    }
+                itemsIndexed(
+                    items = uiState.categories,
+                    key = { _, category -> category.id }
+                ) { index, category ->
+                    CategoryDashboardCard(
+                        category = category,
+                        index = index,
+                        onEvent = onEvent,
+                        onDeleteClicked = onDeleteClicked,
+                        navTo = navTo
+                    )
                 }
             }
         }
@@ -276,7 +272,7 @@ fun HomeOverviewDialogs(
         )
     }
 
-    if (uiState is HomeUiState.Success && uiState.isQuickProjectSheetOpen) {
+    if (uiState.isQuickProjectSheetOpen) {
         QuickTemplateBottomSheet(
             onDismiss = { onEvent(HomeEvent.OnDismissBottomSheet) },
             onTemplateSelected = { template ->
@@ -496,7 +492,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
 
         Surface {
             HomeOverviewScreen(
-                uiState = HomeUiState.Success(
+                uiState = HomeUiState(
                     categories = mockData,
                     urgentProjects = emptyList()
                 ),
@@ -513,7 +509,7 @@ private fun HomeOverviewScreenEmptyPreview() {
     PhotoDoTheme {
         Surface {
             HomeOverviewScreen(
-                uiState = HomeUiState.Empty,
+                uiState = HomeUiState(),
                 onEvent = {},
                 navTo = {}
             )
