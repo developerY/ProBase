@@ -62,6 +62,18 @@ fun HomeScreen(
                         fontWeight = FontWeight.Black
                     )
                     
+                    if (uiState.topBudgets.isNotEmpty()) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            uiState.topBudgets.forEach { budget ->
+                                Text(
+                                    text = "${budget.name}: $${String.format(Locale.getDefault(), "%.0f", budget.remainingAmount ?: 0.0)} left",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if ((budget.remainingAmount ?: 0.0) < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                    
                     Spacer(modifier = Modifier.height(4.dp))
                     
                     Row(
