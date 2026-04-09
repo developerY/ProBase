@@ -22,10 +22,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.core.ui.R as CoreUiR
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
+import com.zoewave.probase.seaweed.mobile.home.ui.components.CategoryBudgetProgressBar
 import com.zoewave.probase.seaweed.mobile.home.ui.components.CategoryQuickJumpCard
 import com.zoewave.probase.seaweed.mobile.home.ui.components.DonutChart
 import com.zoewave.probase.seaweed.mobile.home.ui.components.FixedCostsSummaryCard
 import com.zoewave.probase.seaweed.mobile.home.ui.components.RealMoneyHeroCard
+import com.zoewave.probase.seaweed.mobile.home.ui.components.UnallocatedMoneyCard
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import java.util.Locale
@@ -90,7 +92,11 @@ fun HomeScreen(
                                 flexibleRemaining = uiState.flexibleMoneyRemaining,
                                 monthProgress = uiState.monthProgress
                             )
-                            OverviewSummaryCard(categories = uiState.categoriesSummary)
+                            OverviewSummaryCard(
+                                categories = uiState.categoriesSummary,
+                                navTo = navTo
+                            )
+                            UnallocatedMoneyCard(unallocatedAmount = uiState.unallocatedMoney)
                             FixedCostsSummaryCard(
                                 totalFixedCosts = uiState.totalFixedCosts,
                                 income = uiState.monthlyIncome,
@@ -150,7 +156,13 @@ fun HomeScreen(
                             )
                         }
                         item {
-                            OverviewSummaryCard(categories = uiState.categoriesSummary)
+                            OverviewSummaryCard(
+                                categories = uiState.categoriesSummary,
+                                navTo = navTo
+                            )
+                        }
+                        item {
+                            UnallocatedMoneyCard(unallocatedAmount = uiState.unallocatedMoney)
                         }
                         item {
                             Button(
@@ -184,74 +196,75 @@ fun HomeScreen(
 @Composable
 fun OverviewSummaryCard(
     categories: List<CategoryOverview>,
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val totalSpending = categories.sumOf { it.totalAmount }
     val totalTransactions = categories.sumOf { it.transactionCount }
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(160.dp),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
         ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(20.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(start = 16.dp),
-                verticalArrangement = Arrangement.Center
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(CoreUiR.string.core_ui_spending_summary),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = "$${String.format(Locale.getDefault(), "%.0f", totalSpending)}",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Black
-                )
-                Text(
-                    text = stringResource(CoreUiR.string.core_ui_transactions_count, totalTransactions, categories.size),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .size(140.dp)
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                DonutChart(
-                    spendingByCategory = categories.associate { it.name to it.totalAmount },
-                    modifier = Modifier.fillMaxSize()
-                )
-                
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(
-                        text = "${categories.size}",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Black,
+                        text = stringResource(CoreUiR.string.core_ui_spending_summary),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "Categories",
+                        text = "$${String.format(Locale.getDefault(), "%.0f", totalSpending)}",
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        text = stringResource(CoreUiR.string.core_ui_transactions_count, totalTransactions, categories.size),
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                 }
+
+                Box(
+                    modifier = Modifier.size(100.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    DonutChart(
+                        spendingByCategory = categories.associate { it.name to it.totalAmount },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                categories.take(3).forEach { category ->
+                    CategoryBudgetProgressBar(category = category)
+                }
+            }
+            
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+            
+            TextButton(
+                onClick = { navTo(SeaweedDestination.Budget) },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Manage Budgets")
+                Icon(Icons.Default.ChevronRight, contentDescription = null)
             }
         }
     }
