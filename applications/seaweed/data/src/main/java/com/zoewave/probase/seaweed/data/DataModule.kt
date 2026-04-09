@@ -26,4 +26,10 @@ abstract class DataModule {
     abstract fun bindUserSettingsRepository(
         impl: UserSettingsRepositoryImpl
     ): UserSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBudgetTargetRepository(
+        impl: BudgetTargetRepositoryImpl
+    ): BudgetTargetRepository
 }
