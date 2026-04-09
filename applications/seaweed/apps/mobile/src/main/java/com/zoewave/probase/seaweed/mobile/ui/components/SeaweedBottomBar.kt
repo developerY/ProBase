@@ -24,9 +24,9 @@ fun SeaweedBottomBar(
                 else -> ""
             }
             NavigationBarItem(
-                // ✅ Highlight Transactions tab if on CategoryGrid too (they are related)
                 selected = currentDestination::class == destination::class || 
-                           (destination is SeaweedDestination.Transactions && currentDestination is SeaweedDestination.CategoryGrid),
+                           (destination is SeaweedDestination.Transactions && currentDestination is SeaweedDestination.CategoryGrid) ||
+                           (destination is SeaweedDestination.Transactions && currentDestination is SeaweedDestination.Budget),
                 onClick = { navTo(destination) },
                 icon = { Icon(imageVector = destination.icon, contentDescription = label) },
                 label = { Text(label) }

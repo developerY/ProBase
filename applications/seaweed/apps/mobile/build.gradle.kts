@@ -40,6 +40,7 @@ dependencies {
     implementation(project(":applications:seaweed:apps:mobile:features:transaction"))
     implementation(project(":applications:seaweed:apps:mobile:features:settings"))
     implementation(project(":applications:seaweed:apps:mobile:features:bills"))
+    implementation(project(":applications:seaweed:apps:mobile:features:budget"))
 
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)

@@ -7,6 +7,7 @@ import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.zoewave.probase.seaweed.model.R
@@ -40,6 +41,12 @@ sealed class SeaweedDestination(
     data object Bills : SeaweedDestination(
         titleRes = R.string.applications_seaweed_model_route_bills,
         icon = Icons.AutoMirrored.Filled.ReceiptLong
+    )
+
+    @Serializable
+    data object Budget : SeaweedDestination(
+        titleRes = R.string.applications_seaweed_model_route_budget,
+        icon = Icons.Default.PieChart
     )
 
     @Serializable
