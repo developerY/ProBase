@@ -7,5 +7,7 @@ data class CategoryOverview(
     val name: String,
     val totalAmount: Double,
     val transactionCount: Int,
-    val progressPercentage: Float = 0f // Optional: if we want to show budget progress later
+    val limitAmount: Double? = null,
+    val remainingAmount: Double? = null,
+    val progressPercentage: Float = 0f
 )
