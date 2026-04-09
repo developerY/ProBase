@@ -19,9 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeEvent
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeUiState
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 @Composable
 fun HomeScreenCat(
@@ -31,37 +31,33 @@ fun HomeScreenCat(
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        when (uiState) {
-            is HomeUiState.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-            is HomeUiState.Empty -> {
-                Text(
-                    text = "No categories found. Start by adding one!",
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            is HomeUiState.Success -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    item {
-                        Text(
-                            text = "Dashboard",
-                            style = MaterialTheme.typography.headlineMedium,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
+        if (uiState.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        } else if (uiState.isEmpty) {
+            Text(
+                text = "No categories found. Start by adding one!",
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    Text(
+                        text = "Dashboard",
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
 
-                    items(uiState.categories, key = { it.id }) { category ->
-                        CategoryCard(
-                            category = category,
-                            onEvent = onEvent,
-                            navTo = navTo
-                        )
-                    }
+                items(uiState.categories, key = { it.id }) { category ->
+                    CategoryCard(
+                        category = category,
+                        onEvent = onEvent,
+                        navTo = navTo
+                    )
                 }
             }
         }
@@ -111,7 +107,7 @@ private fun CategoryCard(
 @Composable
 fun HomeScreenCatPreview_Loading() {
     HomeScreenCat(
-        uiState = HomeUiState.Loading,
+        uiState = HomeUiState(isLoading = true),
         onEvent = {},
         navTo = {}
     )
@@ -121,7 +117,7 @@ fun HomeScreenCatPreview_Loading() {
 @Composable
 fun HomeScreenCatPreview_Success() {
     HomeScreenCat(
-        uiState = HomeUiState.Success(
+        uiState = HomeUiState(
             categories = listOf(
                 CategoryOverviewUiModel(
                     1, "Work", 10, 5, 0.5f

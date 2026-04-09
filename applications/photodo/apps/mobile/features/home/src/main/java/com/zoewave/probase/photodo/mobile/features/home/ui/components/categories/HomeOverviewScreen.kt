@@ -79,7 +79,6 @@ fun HomeOverviewScreen(
 
     // Add these state variables at the top of your composable
     var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
-    var showQuickTemplateBottomSheet by rememberSaveable { mutableStateOf(false) }
     var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -94,9 +93,10 @@ fun HomeOverviewScreen(
                     fabMenuExpanded = false
                     showAddCategoryDialog = true
                 },
-                onQuickProjectClick = {
+                onHomeProjectClick = { // Updated parameter name
                     fabMenuExpanded = false
-                    showQuickTemplateBottomSheet = true
+                    // Map to the common Quick Project logic with "Home" override!
+                    onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
                 },
                 onCameraClick = {
                     fabMenuExpanded = false
@@ -119,8 +119,7 @@ fun HomeOverviewScreen(
     HomeOverviewDialogs(
         showAddCategoryDialog = showAddCategoryDialog,
         onDismissAddCategory = { showAddCategoryDialog = false },
-        showQuickTemplateBottomSheet = showQuickTemplateBottomSheet,
-        onDismissQuickTemplate = { showQuickTemplateBottomSheet = false },
+        uiState = uiState, // Pass the UI State!
         categoryToDelete = categoryToDelete,
         onDismissDeleteConfirmation = { categoryToDelete = null },
         onEvent = onEvent
@@ -133,7 +132,7 @@ fun HomeOverviewFab(
     fabMenuExpanded: Boolean,
     onFabToggle: (Boolean) -> Unit,
     onAddCategoryClick: () -> Unit,
-    onQuickProjectClick: () -> Unit,
+    onHomeProjectClick: () -> Unit, // Renamed
     onCameraClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -163,9 +162,9 @@ fun HomeOverviewFab(
         )
 
         FloatingActionButtonMenuItem(
-            onClick = onQuickProjectClick,
+            onClick = onHomeProjectClick, // Renamed
             icon = { Icon(Icons.Default.Checklist, contentDescription = null) },
-            text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_quick_project)) }
+            text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_home_category)) }
         )
 
         FloatingActionButtonMenuItem(
@@ -188,43 +187,39 @@ fun HomeOverviewContent(
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        when (uiState) {
-            is HomeUiState.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-            is HomeUiState.Empty -> {
-                EmptyHomeState(
-                    onEvent = onEvent,
-                    navTo = navTo,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            is HomeUiState.Success -> {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2), // 2-column dashboard layout
-                    contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 80.dp), // 🚀 Added bottom padding!
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    if (showSummaryHeader) {
-                        item(span = { GridItemSpan(2) }) {
-                            OverviewSummaryCard(categories = uiState.categories)
-                        }
+        if (uiState.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        } else if (uiState.isEmpty) {
+            EmptyHomeState(
+                onEvent = onEvent,
+                navTo = navTo,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2), // 2-column dashboard layout
+                contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 80.dp), // 🚀 Added bottom padding!
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (showSummaryHeader) {
+                    item(span = { GridItemSpan(2) }) {
+                        OverviewSummaryCard(categories = uiState.categories)
                     }
+                }
 
-                    itemsIndexed(
-                        items = uiState.categories,
-                        key = { _, category -> category.id }
-                    ) { index, category ->
-                        CategoryDashboardCard(
-                            category = category,
-                            index = index,
-                            onEvent = onEvent,
-                            onDeleteClicked = onDeleteClicked,
-                            navTo = navTo
-                        )
-                    }
+                itemsIndexed(
+                    items = uiState.categories,
+                    key = { _, category -> category.id }
+                ) { index, category ->
+                    CategoryDashboardCard(
+                        category = category,
+                        index = index,
+                        onEvent = onEvent,
+                        onDeleteClicked = onDeleteClicked,
+                        navTo = navTo
+                    )
                 }
             }
         }
@@ -235,8 +230,7 @@ fun HomeOverviewContent(
 fun HomeOverviewDialogs(
     showAddCategoryDialog: Boolean,
     onDismissAddCategory: () -> Unit,
-    showQuickTemplateBottomSheet: Boolean,
-    onDismissQuickTemplate: () -> Unit,
+    uiState: HomeUiState,
     categoryToDelete: CategoryOverviewUiModel?,
     onDismissDeleteConfirmation: () -> Unit,
     onEvent: (HomeEvent) -> Unit
@@ -278,12 +272,18 @@ fun HomeOverviewDialogs(
         )
     }
 
-    if (showQuickTemplateBottomSheet) {
+    if (uiState.isQuickProjectSheetOpen) {
         QuickTemplateBottomSheet(
-            onDismiss = onDismissQuickTemplate,
+            onDismiss = { onEvent(HomeEvent.OnDismissBottomSheet) },
             onTemplateSelected = { template ->
-                onEvent(HomeEvent.OnCreateFromTemplate(template))
-                onDismissQuickTemplate()
+                // Ensure it uses the override if present!
+                val targetTemplate = if (uiState.quickProjectCategoryOverride != null) {
+                    template.copy(categoryName = uiState.quickProjectCategoryOverride)
+                } else {
+                    template
+                }
+                onEvent(HomeEvent.OnCreateFromTemplate(targetTemplate))
+                onEvent(HomeEvent.OnDismissBottomSheet)
             }
         )
     }
@@ -492,7 +492,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
 
         Surface {
             HomeOverviewScreen(
-                uiState = HomeUiState.Success(
+                uiState = HomeUiState(
                     categories = mockData,
                     urgentProjects = emptyList()
                 ),
@@ -509,7 +509,7 @@ private fun HomeOverviewScreenEmptyPreview() {
     PhotoDoTheme {
         Surface {
             HomeOverviewScreen(
-                uiState = HomeUiState.Empty,
+                uiState = HomeUiState(),
                 onEvent = {},
                 navTo = {}
             )

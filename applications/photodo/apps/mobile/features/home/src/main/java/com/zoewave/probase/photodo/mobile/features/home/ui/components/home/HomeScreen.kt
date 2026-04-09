@@ -19,7 +19,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -32,6 +36,9 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiM
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import components.home.CategoryQuickJumpRow
 
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewDialogs
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewFab
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -40,19 +47,30 @@ fun HomeScreen(
     navTo: (PhotoTodoRoute) -> Unit, // ✅ Restrictive navigation channel enforced
     modifier: Modifier = Modifier
 ) {
+    var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
+    var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
+    var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        // 🚀 Upgrade: Large Top AppBar for an expressive title feel
-        // topBar = { TopAppBar(title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_overview)) }) },
+        // 🚀 Upgrade: HomeOverviewFab for consistent FAB actions
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navTo(PhotoTodoRoute.Camera(projectId = null)) }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = stringResource(com.zoewave.photodo.model.R.string.applications_photodo_model_route_camera)
-                )
-            }
+            HomeOverviewFab(
+                fabMenuExpanded = fabMenuExpanded,
+                onFabToggle = { fabMenuExpanded = it },
+                onAddCategoryClick = {
+                    fabMenuExpanded = false
+                    showAddCategoryDialog = true
+                },
+                onHomeProjectClick = {
+                    fabMenuExpanded = false
+                    onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
+                },
+                onCameraClick = {
+                    fabMenuExpanded = false
+                    navTo(PhotoTodoRoute.Camera(projectId = null))
+                }
+            )
         }
     ) { paddingValues ->
 
@@ -67,7 +85,7 @@ fun HomeScreen(
         ) {
 
             // --- 🚀 NEW: Graphic/AI Overview Section (Derivative State) ---
-            if (uiState is HomeUiState.Success) {
+            if (!uiState.isLoading && !uiState.isEmpty) {
                 // Compute the models on recomposition
                 item {
                     // 🚀 1. The main "High-Density Wheel" summary card
@@ -111,42 +129,45 @@ fun HomeScreen(
                 }
             }
 
-            when (uiState) {
-                is HomeUiState.Loading -> {
-                    item { CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp)) }
+            if (uiState.isLoading) {
+                item { CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp)) }
+            } else if (uiState.isEmpty) {
+                item {
+                    Text(
+                        stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
                 }
-
-                is HomeUiState.Empty -> {
+            } else {
+                if (uiState.urgentProjects.isEmpty()) {
                     item {
                         Text(
-                            stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
+                            stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
                             modifier = Modifier.padding(top = 16.dp)
                         )
                     }
-                }
-
-                is HomeUiState.Success -> {
-                    if (uiState.urgentProjects.isEmpty()) {
-                        item {
-                            Text(
-                                stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
-                                modifier = Modifier.padding(top = 16.dp)
-                            )
-                        }
-                    } else {
-                        // Use `items` for the dynamic data! It scrolls seamlessly with the `item` blocks above.
-                        items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
-                            HomeProjectRow(
-                                project = project,
-                                onEvent = onEvent, // Pass the channel down
-                                navTo = navTo      // Pass the channel down
-                            )
-                        }
+                } else {
+                    // Use `items` for the dynamic data! It scrolls seamlessly with the `item` blocks above.
+                    items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
+                        HomeProjectRow(
+                            project = project,
+                            onEvent = onEvent, // Pass the channel down
+                            navTo = navTo      // Pass the channel down
+                        )
                     }
                 }
             }
         }
     }
+
+    HomeOverviewDialogs(
+        showAddCategoryDialog = showAddCategoryDialog,
+        onDismissAddCategory = { showAddCategoryDialog = false },
+        uiState = uiState,
+        categoryToDelete = categoryToDelete,
+        onDismissDeleteConfirmation = { categoryToDelete = null },
+        onEvent = onEvent
+    )
 }
 
 
@@ -157,7 +178,7 @@ fun HomeScreen(
 private fun HomeScreenPreview() {
     PhotoDoTheme {
         HomeScreen(
-            uiState = HomeUiState.Success(
+            uiState = HomeUiState(
                 categories = listOf(
                     CategoryOverviewUiModel(1L, "Nature", 10, 5, 0.5f),
                     CategoryOverviewUiModel(2L, "Urban", 8, 2, 0.25f)
@@ -194,7 +215,7 @@ private fun HomeScreenPreview() {
 private fun HomeScreenLoadingPreview() {
     PhotoDoTheme {
         HomeScreen(
-            uiState = HomeUiState.Loading,
+            uiState = HomeUiState(isLoading = true),
             onEvent = {},
             navTo = {}
         )
@@ -206,7 +227,7 @@ private fun HomeScreenLoadingPreview() {
 private fun HomeScreenEmptyPreview() {
     PhotoDoTheme {
         HomeScreen(
-            uiState = HomeUiState.Empty,
+            uiState = HomeUiState(),
             onEvent = {},
             navTo = {}
         )

@@ -12,4 +12,7 @@ sealed interface HomeEvent {
     data class OnAddCategory(val name: String, val description: String? = null) : HomeEvent
     data class OnCreateFromTemplate(val template: ProjectTemplate) : HomeEvent
     data class OnDeleteCategory(val categoryId: Long) : HomeEvent
+
+    data class OnAddQuickProjectClicked(val overrideCategoryName: String? = null) : HomeEvent
+    data object OnDismissBottomSheet : HomeEvent
 }

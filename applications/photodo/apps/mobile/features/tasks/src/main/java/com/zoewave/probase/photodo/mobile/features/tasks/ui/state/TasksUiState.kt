@@ -15,6 +15,8 @@ data class TasksUiState(
     val isAddListSheetOpen: Boolean = false,
     val isAddTaskItemSheetOpen: Boolean = false,
     val isAddPhotoSheetOpen: Boolean = false,
+    val isQuickProjectSheetOpen: Boolean = false,
+    val quickProjectCategoryOverride: String? = null,
 
     val projectLists: List<ProjectListUiModel> = emptyList(),
     val draftState: TaskDraftState = TaskDraftState(),

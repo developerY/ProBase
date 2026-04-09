@@ -117,9 +117,17 @@ fun TasksListScreen(
                 FloatingActionButtonMenuItem(
                     onClick = {
                         fabMenuExpanded = false
-                        onEvent(TasksEvent.OnAddListClicked) // Opens the Project Sheet!
+                        onEvent(TasksEvent.OnAddQuickProjectClicked(overrideCategoryName = null))
                     },
                     icon = { Icon(Icons.AutoMirrored.Filled.FormatListBulleted, contentDescription = null) },
+                    text = { Text("Quick Project") }
+                )
+                FloatingActionButtonMenuItem(
+                    onClick = {
+                        fabMenuExpanded = false
+                        onEvent(TasksEvent.OnAddListClicked) // Opens the Project Sheet!
+                    },
+                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
                     text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_project)) }
                 )
                 /*FloatingActionButtonMenuItem(
@@ -187,6 +195,13 @@ fun TasksListScreen(
             uiState = uiState.draftState,
             onEvent = onEvent,
             navTo = navTo
+        )
+    }
+
+    if (uiState.isQuickProjectSheetOpen) {
+        QuickProjectBottomSheet(
+            uiState = uiState,
+            onEvent = onEvent
         )
     }
 

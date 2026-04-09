@@ -2,20 +2,13 @@ package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,10 +38,8 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewContent
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewDialogs
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewFab
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
-import components.home.CategoryQuickJumpRow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -73,7 +64,6 @@ fun AdaptiveHomeScreen(
 
         // Shared dialog/fab states for the adaptive view
         var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
-        var showQuickTemplateBottomSheet by rememberSaveable { mutableStateOf(false) }
         var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
         var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -87,9 +77,9 @@ fun AdaptiveHomeScreen(
                         fabMenuExpanded = false
                         showAddCategoryDialog = true
                     },
-                    onQuickProjectClick = {
+                    onHomeProjectClick = {
                         fabMenuExpanded = false
-                        showQuickTemplateBottomSheet = true
+                        onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
                     },
                     onCameraClick = {
                         fabMenuExpanded = false
@@ -118,7 +108,16 @@ fun AdaptiveHomeScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        if (uiState is HomeUiState.Success) {
+                        if (uiState.isLoading) {
+                            item { CircularProgressIndicator() }
+                        } else if (uiState.isEmpty) {
+                            item {
+                                Text(
+                                    stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
+                                    modifier = Modifier.padding(top = 16.dp)
+                                )
+                            }
+                        } else {
                             item {
                                 OverviewSummaryCard(categories = uiState.categories)
                             }
@@ -148,8 +147,6 @@ fun AdaptiveHomeScreen(
                                     )
                                 }
                             }
-                        } else if (uiState is HomeUiState.Loading) {
-                            item { CircularProgressIndicator() }
                         }
                     }
                 },
@@ -171,8 +168,7 @@ fun AdaptiveHomeScreen(
         HomeOverviewDialogs(
             showAddCategoryDialog = showAddCategoryDialog,
             onDismissAddCategory = { showAddCategoryDialog = false },
-            showQuickTemplateBottomSheet = showQuickTemplateBottomSheet,
-            onDismissQuickTemplate = { showQuickTemplateBottomSheet = false },
+            uiState = uiState,
             categoryToDelete = categoryToDelete,
             onDismissDeleteConfirmation = { categoryToDelete = null },
             onEvent = onEvent
@@ -186,7 +182,7 @@ fun AdaptiveHomeScreen(
 fun AdaptiveHomeScreenPreviewCompact() {
     PhotoDoTheme {
         AdaptiveHomeScreen(
-            uiState = HomeUiState.Success(
+            uiState = HomeUiState(
                 categories = listOf(
                     CategoryOverviewUiModel(1L, "Work", 10, 5, 0.5f),
                     CategoryOverviewUiModel(2L, "Personal", 5, 2, 0.4f)
@@ -209,7 +205,7 @@ fun AdaptiveHomeScreenPreviewCompact() {
 fun AdaptiveHomeScreenPreviewExpanded() {
     PhotoDoTheme {
         AdaptiveHomeScreen(
-            uiState = HomeUiState.Success(
+            uiState = HomeUiState(
                 categories = listOf(
                     CategoryOverviewUiModel(1L, "Work", 10, 5, 0.5f),
                     CategoryOverviewUiModel(2L, "Personal", 5, 2, 0.4f)
