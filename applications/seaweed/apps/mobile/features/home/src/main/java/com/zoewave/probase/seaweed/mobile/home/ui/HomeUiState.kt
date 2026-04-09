@@ -11,6 +11,7 @@ sealed interface HomeUiState {
         val monthlyIncome: Double = 0.0,
         val totalFixedCosts: Double = 0.0,
         val flexibleMoneyRemaining: Double = 0.0,
+        val unallocatedMoney: Double = 0.0,
         val monthProgress: Float = 0f
     ) : HomeUiState
 }

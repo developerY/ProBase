@@ -36,4 +36,8 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideUserSettingsDao(db: SeaweedDatabase) = db.userSettingsDao
+
+    @Provides
+    @Singleton
+    fun provideBudgetTargetDao(db: SeaweedDatabase) = db.budgetTargetDao
 }

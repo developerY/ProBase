@@ -4,17 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
-import com.zoewave.probase.seaweed.model.CategoryOverview
 import com.zoewave.probase.seaweed.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
-import kotlin.math.absoluteValue
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -22,36 +20,22 @@ class HomeViewModel @Inject constructor(
     private val financialRepository: FinancialRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<HomeUiState> = combine(
-        repository.getAllTransactions(),
-        financialRepository.getMonthlyIncome(),
-        financialRepository.getTotalMonthlyFixedCosts(),
-        financialRepository.getFlexibleMoneyRemaining()
-    ) { transactions, income, fixedCosts, flexibleRemaining ->
-        val categoriesSummary = transactions.filter { it.amount < 0 }
-            .groupBy { it.category }
-            .map { (category, categoryTransactions) ->
-                CategoryOverview(
-                    name = category,
-                    totalAmount = categoryTransactions.sumOf { it.amount }.absoluteValue,
-                    transactionCount = categoryTransactions.size
-                )
-            }
-            .sortedByDescending { it.totalAmount }
-
-        HomeUiState.Success(
-            transactions = transactions,
-            categoriesSummary = categoriesSummary,
-            monthlyIncome = income,
-            totalFixedCosts = fixedCosts,
-            flexibleMoneyRemaining = flexibleRemaining,
-            monthProgress = financialRepository.getMonthProgress()
+    val uiState: StateFlow<HomeUiState> = financialRepository.getFinancialProfile()
+        .map { profile ->
+            HomeUiState.Success(
+                transactions = emptyList(), // We might need recent transactions here
+                categoriesSummary = profile.categoryOverviews,
+                monthlyIncome = profile.monthlyIncome,
+                totalFixedCosts = profile.totalFixedCosts,
+                flexibleMoneyRemaining = profile.flexibleMoneyRemaining,
+                unallocatedMoney = profile.unallocatedMoney,
+                monthProgress = profile.monthProgress
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = HomeUiState.Loading
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = HomeUiState.Loading
-    )
 
     fun onEvent(event: HomeUiEvent) {
         when (event) {

@@ -1,45 +1,33 @@
 package com.zoewave.probase.seaweed.data
 
+import com.zoewave.probase.seaweed.model.CategoryOverview
+import com.zoewave.probase.seaweed.model.FinancialProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.absoluteValue
 
 @Singleton
 class FinancialRepository @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val recurringExpenseRepository: RecurringExpenseRepository,
-    private val userSettingsRepository: UserSettingsRepository
+    private val userSettingsRepository: UserSettingsRepository,
+    private val budgetTargetRepository: BudgetTargetRepository
 ) {
-    /**
-     * The absolute baseline income before any deductions.
-     */
-    fun getMonthlyIncome(): Flow<Double> =
-        userSettingsRepository.getUserSettings().combine(userSettingsRepository.getUserSettings()) { settings, _ ->
-            settings.monthlyIncome
-        }
-
-    /**
-     * Total amortized monthly cost of all recurring bills.
-     */
-    fun getTotalMonthlyFixedCosts(): Flow<Double> =
-        recurringExpenseRepository.getTotalMonthlyImpact()
-
-    /**
-     * Real Starting Balance = Income - Fixed Costs.
-     * This is the "honest" starting point for the month.
-     */
-    fun getRealStartingBalance(): Flow<Double> =
-        combine(getMonthlyIncome(), getTotalMonthlyFixedCosts()) { income, fixedCosts ->
-            income - fixedCosts
-        }
-
-    /**
-     * Total spent on daily transactions so far this month.
-     */
-    fun getMonthlyVariableSpending(): Flow<Double> =
-        transactionRepository.getAllTransactions().combine(transactionRepository.getAllTransactions()) { transactions, _ ->
+    fun getFinancialProfile(): Flow<FinancialProfile> =
+        combine(
+            userSettingsRepository.getUserSettings(),
+            recurringExpenseRepository.getTotalMonthlyImpact(),
+            transactionRepository.getAllTransactions(),
+            budgetTargetRepository.getTotalBudgetedAmount(),
+            getCategoryOverviews()
+        ) { settings, fixedCosts, transactions, budgeted, categories ->
+            val income = settings.monthlyIncome
+            val realStarting = income - fixedCosts
+            
             val now = Calendar.getInstance()
             val startOfMonth = now.apply {
                 set(Calendar.DAY_OF_MONTH, 1)
@@ -49,20 +37,59 @@ class FinancialRepository @Inject constructor(
                 set(Calendar.MILLISECOND, 0)
             }.timeInMillis
 
-            transactions.filter { it.date >= startOfMonth }.sumOf { it.amount }
+            val monthlyVariable = transactions
+                .filter { it.date >= startOfMonth && it.amount < 0 }
+                .sumOf { it.amount }
+                .absoluteValue
+
+            FinancialProfile(
+                monthlyIncome = income,
+                totalFixedCosts = fixedCosts,
+                realStartingBalance = realStarting,
+                monthlyVariableSpending = monthlyVariable,
+                flexibleMoneyRemaining = realStarting - monthlyVariable,
+                totalBudgetedAmount = budgeted,
+                unallocatedMoney = realStarting - budgeted,
+                categoryOverviews = categories,
+                monthProgress = getMonthProgress()
+            )
         }
 
-    /**
-     * Real-time Money Remaining = Real Starting Balance - Variable Spending.
-     */
-    fun getFlexibleMoneyRemaining(): Flow<Double> =
-        combine(getRealStartingBalance(), getMonthlyVariableSpending()) { realStarting, variableSpending ->
-            realStarting - variableSpending
+    fun getCategoryOverviews(): Flow<List<CategoryOverview>> =
+        combine(
+            transactionRepository.getAllTransactions(),
+            budgetTargetRepository.getAllBudgets()
+        ) { transactions, budgets ->
+            val now = Calendar.getInstance()
+            val startOfMonth = now.apply {
+                set(Calendar.DAY_OF_MONTH, 1)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+
+            val monthlyTransactions = transactions.filter { it.date >= startOfMonth && it.amount < 0 }
+            val budgetsMap = budgets.associateBy { it.categoryName }
+            
+            val allCategoryNames = (monthlyTransactions.map { it.category } + budgets.map { it.categoryName }).distinct()
+
+            allCategoryNames.map { categoryName ->
+                val spent = monthlyTransactions.filter { it.category == categoryName }.sumOf { it.amount }.absoluteValue
+                val count = monthlyTransactions.count { it.category == categoryName }
+                val limit = budgetsMap[categoryName]?.limitAmount
+                
+                CategoryOverview(
+                    name = categoryName,
+                    totalAmount = spent,
+                    transactionCount = count,
+                    limitAmount = limit,
+                    remainingAmount = limit?.let { it - spent },
+                    progressPercentage = limit?.let { (spent / it).toFloat() } ?: 0f
+                )
+            }.sortedByDescending { it.totalAmount }
         }
 
-    /**
-     * Progress through the current month (0.0 to 1.0).
-     */
     fun getMonthProgress(): Float {
         val now = Calendar.getInstance()
         val daysInMonth = now.getActualMaximum(Calendar.DAY_OF_MONTH)

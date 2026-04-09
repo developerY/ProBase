@@ -8,7 +8,11 @@ import com.zoewave.probase.seaweed.model.ExpenseCategory
 import com.zoewave.probase.seaweed.model.ExpenseFrequency
 import com.zoewave.probase.seaweed.model.RecurringExpense
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -26,19 +30,27 @@ class BillsViewModel @Inject constructor(
         viewModelScope.launch {
             repository.initializeDefaultExpenses()
             
-            combine(
-                repository.getAllExpenses(),
-                financialRepository.getMonthlyIncome(),
-                financialRepository.getTotalMonthlyFixedCosts()
-            ) { expenses, income, totalCosts ->
-                BillsUiState.Success(
-                    expenses = expenses,
-                    monthlyIncome = income,
-                    totalFixedCosts = totalCosts
-                )
-            }.collect { state ->
-                _uiState.value = state
-            }
+            financialRepository.getFinancialProfile()
+                .onEach { profile ->
+                    _uiState.value = BillsUiState.Success(
+                        expenses = (uiState.value as? BillsUiState.Success)?.expenses ?: emptyList(),
+                        monthlyIncome = profile.monthlyIncome,
+                        totalFixedCosts = profile.totalFixedCosts
+                    )
+                }
+                .launchIn(viewModelScope)
+
+            repository.getAllExpenses()
+                .onEach { expenses ->
+                    val currentState = _uiState.value
+                    if (currentState is BillsUiState.Success) {
+                        _uiState.value = currentState.copy(expenses = expenses)
+                    } else {
+                        // If it's still loading or first time, we'll get another update from financialProfile soon
+                        _uiState.value = BillsUiState.Success(expenses = expenses)
+                    }
+                }
+                .launchIn(viewModelScope)
         }
     }
 
