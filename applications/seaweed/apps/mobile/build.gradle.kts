@@ -20,6 +20,11 @@ android {
         )
     }
 
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+
+    // ✅ 6. Enable Build Config (Disabled by default in AGP 9)
     buildFeatures {
         buildConfig = true
     }
