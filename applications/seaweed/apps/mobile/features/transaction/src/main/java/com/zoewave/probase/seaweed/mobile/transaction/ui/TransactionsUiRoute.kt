@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -133,7 +134,14 @@ fun TransactionsListPane(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Transactions") })
+            TopAppBar(
+                title = { Text("Transactions") },
+                actions = {
+                    IconButton(onClick = { navTo(SeaweedDestination.Budget) }) {
+                        Icon(Icons.Default.PieChart, contentDescription = "Budget")
+                    }
+                }
+            )
         },
         floatingActionButton = {
             if (uiState is TransactionsUiState.Success && uiState.selectedTab == TransactionTab.RECENT) {

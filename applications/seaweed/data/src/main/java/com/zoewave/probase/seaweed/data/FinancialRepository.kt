@@ -96,4 +96,9 @@ class FinancialRepository @Inject constructor(
         val currentDay = now.get(Calendar.DAY_OF_MONTH)
         return currentDay.toFloat() / daysInMonth
     }
+    
+    // Helper methods for individual metrics
+    fun getMonthlyIncome(): Flow<Double> = userSettingsRepository.getUserSettings().map { it.monthlyIncome }
+    fun getTotalMonthlyFixedCosts(): Flow<Double> = recurringExpenseRepository.getTotalMonthlyImpact()
+    fun getFlexibleMoneyRemaining(): Flow<Double> = getFinancialProfile().map { it.flexibleMoneyRemaining }
 }
