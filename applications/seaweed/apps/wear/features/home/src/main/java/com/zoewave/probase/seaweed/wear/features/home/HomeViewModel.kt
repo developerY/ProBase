@@ -20,10 +20,11 @@ class HomeViewModel @Inject constructor(
     private val financialRepository: FinancialRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<HomeUiState> = financialRepository.getFlexibleMoneyRemaining()
-        .map { flexibleRemaining ->
+    val uiState: StateFlow<HomeUiState> = financialRepository.getFinancialProfile()
+        .map { profile ->
             HomeUiState.Success(
-                totalBalance = flexibleRemaining
+                totalBalance = profile.flexibleMoneyRemaining,
+                topBudgets = profile.categoryOverviews.filter { it.limitAmount != null }.take(3)
             )
         }
         .stateIn(
