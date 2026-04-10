@@ -18,4 +18,7 @@ dependencies {
     // --- Third Party ---
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.google.accompanist.permissions)
 }
