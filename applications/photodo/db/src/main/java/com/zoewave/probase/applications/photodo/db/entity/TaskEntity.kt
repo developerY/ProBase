@@ -28,5 +28,6 @@ data class TaskEntity(
     var lastModified: Long = System.currentTimeMillis(),
     var assignedTo: String? = null,
     var estimatedCost: Double? = null,
-    var actualCost: Double? = null
+    var actualCost: Double? = null,
+    val estimatedTimeMillis: Long? = null
 )
