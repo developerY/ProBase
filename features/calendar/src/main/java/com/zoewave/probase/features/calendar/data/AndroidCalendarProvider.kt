@@ -20,7 +20,7 @@ import javax.inject.Inject
 /**
  * Implementation of [CalendarRepository] using the Android Calendar Provider API.
  */
-internal class AndroidCalendarProvider @Inject constructor(
+class AndroidCalendarProvider @Inject constructor(
     @ApplicationContext private val context: Context,
     private val calendarSyncDao: CalendarSyncDao // Isolated DAO injected here
 ) : CalendarRepository {

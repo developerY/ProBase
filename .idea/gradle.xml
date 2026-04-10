@@ -79,6 +79,7 @@
             <option value="$PROJECT_DIR$/applications/photodo/data" />
             <option value="$PROJECT_DIR$/applications/photodo/db" />
             <option value="$PROJECT_DIR$/applications/photodo/features" />
+            <option value="$PROJECT_DIR$/applications/photodo/features/calendar" />
             <option value="$PROJECT_DIR$/applications/photodo/features/timebudgeting" />
             <option value="$PROJECT_DIR$/applications/photodo/model" />
             <option value="$PROJECT_DIR$/applications/seaweed" />
