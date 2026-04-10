@@ -1,0 +1,37 @@
+# Task Management
+
+- [x] Researching ProjectRow and ProjectListUiModel
+    - [x] Explore `ProjectRow.kt` and `ProjectListUiModel`
+    - [x] Identify where the photo data comes from
+- [x] Create Implementation Plan
+- [x] Implement changes in `ProjectRow.kt`
+- [x] Verify changes
+- [x] Fix photo loading issue (nested relation mapping)
+- [x] Implement project photo in `ProjectCard.kt`
+- [x] Implement "Home Project" (Quick Project) Bottom Sheet
+    - [x] Add events and state for Quick Project
+    - [x] Create `QuickProjectBottomSheet.kt`
+    - [x] Implement name collision logic in `TasksViewModel`
+    - [x] Integrate with `TasksListScreen`
+    - [x] Add default task creation logic to Quick Project templates
+    - [x] Rename to "Home Project" and standardize category to "Home"
+    - [x] Handle empty category state (default to "Default")
+    - [x] Fix Home Project menu visibility in empty state (refactor HomeUiState)
+- [x] Differentiate Quick Project vs Home Project category logic
+    - [x] Update `TasksEvent` and `TasksUiState` for category overrides
+    - [x] Modify `TasksViewModel` to handle category overrides
+    - [x] Update `QuickProjectBottomSheet` to show dynamic titles and categories
+    - [x] Update Home screen FAB to use unified `HomeOverviewFab` and "Home" override
+    - [x] Update Project List screen FAB to use "Quick Project" with current category
+- [x] Add "Dark Code" Time Tracking to Database
+    - [x] Create `TimeLogEntity` in `entity/time` (internal)
+    - [x] Create `TimeTrackingDao` (internal)
+    - [x] Create `TimeTrackingRepository` and implementation in `repo/time` (internal)
+    - [x] Update `PhotoDoDatabase` with new entity, DAO, and AutoMigration (v1 -> v2)
+    - [x] Verify schema generation (2.json) and database build
+- [x] Add Time Budgeting Capabilities to Database
+    - [x] Add `estimatedTimeMillis` to `TaskEntity`
+    - [x] Create `TimeBudgetEntity` in `entity/time` (internal)
+    - [x] Update `TimeTrackingDao` with budgeting methods
+    - [x] Update `PhotoDoDatabase` with new entity and AutoMigration (v2 -> v3)
+    - [x] Verify schema generation (3.json) and database build

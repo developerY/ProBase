@@ -7,7 +7,7 @@ import androidx.room3.PrimaryKey
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 
 /**
- * Internal entity for time tracking logs.
+ * Entity for time tracking logs.
  * Linked to a TaskEntity via foreign key.
  */
 @Entity(
@@ -22,7 +22,7 @@ import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
     ],
     indices = [Index(value = ["taskId"])]
 )
-internal data class TimeLogEntity(
+data class TimeLogEntity(
     @PrimaryKey(autoGenerate = true)
     val logId: Long = 0,
     val taskId: Long,
