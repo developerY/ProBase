@@ -4,6 +4,7 @@ import androidx.room3.Dao
 import androidx.room3.Delete
 import androidx.room3.Query
 import androidx.room3.Upsert
+import com.zoewave.probase.applications.photodo.db.entity.time.CalendarSyncEntity
 import com.zoewave.probase.applications.photodo.db.entity.time.TimeBudgetEntity
 import com.zoewave.probase.applications.photodo.db.entity.time.TimeLogEntity
 import kotlinx.coroutines.flow.Flow
@@ -38,4 +39,15 @@ interface TimeTrackingDao {
 
     @Delete
     suspend fun deleteTimeBudget(budget: TimeBudgetEntity)
+
+    // --- Calendar Sync Operations ---
+
+    @Upsert
+    suspend fun upsertCalendarSync(sync: CalendarSyncEntity)
+
+    @Query("SELECT * FROM calendar_sync WHERE taskId = :taskId")
+    suspend fun getCalendarSyncForTask(taskId: Long): CalendarSyncEntity?
+
+    @Delete
+    suspend fun deleteCalendarSync(sync: CalendarSyncEntity)
 }

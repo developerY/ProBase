@@ -40,6 +40,8 @@ include(":features:weather")
 include(":features:places")
 include(":features:health")
 include(":features:ml")
+include(":features:camera")
+include(":features:calendar")
 
 // --- AshBike Product Line ---
 include(":applications:ashbike:database")

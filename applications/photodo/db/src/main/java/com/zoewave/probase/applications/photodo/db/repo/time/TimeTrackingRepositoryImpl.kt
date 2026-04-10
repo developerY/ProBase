@@ -1,6 +1,7 @@
 package com.zoewave.probase.applications.photodo.db.repo.time
 
 import com.zoewave.probase.applications.photodo.db.TimeTrackingDao
+import com.zoewave.probase.applications.photodo.db.entity.time.CalendarSyncEntity
 import com.zoewave.probase.applications.photodo.db.entity.time.TimeBudgetEntity
 import com.zoewave.probase.applications.photodo.db.entity.time.TimeLogEntity
 import kotlinx.coroutines.Dispatchers
@@ -41,5 +42,17 @@ class TimeTrackingRepositoryImpl @Inject constructor(
 
     override suspend fun deleteTimeBudget(budget: TimeBudgetEntity) = withContext(Dispatchers.IO) {
         timeTrackingDao.deleteTimeBudget(budget)
+    }
+
+    override suspend fun saveCalendarSync(sync: CalendarSyncEntity) = withContext(Dispatchers.IO) {
+        timeTrackingDao.upsertCalendarSync(sync)
+    }
+
+    override suspend fun getCalendarSyncForTask(taskId: Long): CalendarSyncEntity? = withContext(Dispatchers.IO) {
+        timeTrackingDao.getCalendarSyncForTask(taskId)
+    }
+
+    override suspend fun deleteCalendarSync(sync: CalendarSyncEntity) = withContext(Dispatchers.IO) {
+        timeTrackingDao.deleteCalendarSync(sync)
     }
 }
