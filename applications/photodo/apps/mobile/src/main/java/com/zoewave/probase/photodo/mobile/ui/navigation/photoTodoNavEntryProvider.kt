@@ -13,7 +13,6 @@ import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.AdaptiveHomeScreen
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.SavePhotoViewModel
@@ -99,6 +98,13 @@ fun photoTodoNavEntryProvider(
                     }
 
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+                    // 🚀 NEW: Auto-navigate Home if no categories exist
+                    LaunchedEffect(uiState.isNoCategoriesYet) {
+                        if (uiState.isNoCategoriesYet) {
+                            navigateBack()
+                        }
+                    }
 
                     LaunchedEffect(viewModel.effects) {
                         viewModel.effects.collect { effect ->
@@ -237,6 +243,14 @@ fun photoTodoNavEntryProvider(
             is PhotoTodoRoute.CategoryTasks -> {
                 val viewModel: TasksViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+                // 🚀 NEW: Auto-navigate Home if no categories exist
+                LaunchedEffect(uiState.isNoCategoriesYet) {
+                    if (uiState.isNoCategoriesYet) {
+                        navigateBack()
+                    }
+                }
+
                 TasksListScreen(
                     uiState = uiState,
                     onEvent = viewModel::onEvent,
