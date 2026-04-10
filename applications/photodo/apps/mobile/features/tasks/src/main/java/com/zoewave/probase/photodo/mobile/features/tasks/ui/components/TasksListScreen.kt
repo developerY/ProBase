@@ -171,7 +171,7 @@ fun TasksListScreen(
                 // Scenario C: We have data! Render the list cleanly.
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 80.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // Iterate over the new projectLists state!
