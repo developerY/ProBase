@@ -2,6 +2,7 @@ plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.hilt")
     id("composetemplate.android.library.compose")
+    id("composetemplate.android.room")
 }
 
 android {

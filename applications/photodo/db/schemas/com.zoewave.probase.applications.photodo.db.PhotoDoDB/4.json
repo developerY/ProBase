@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "86ea5b371b616e48f84d5acdb8be176b",
+    "identityHash": "6653dfa026b6d676374295e59c006ce6",
     "entities": [
       {
         "tableName": "categories",
@@ -530,131 +530,11 @@
             ]
           }
         ]
-      },
-      {
-        "tableName": "time_budgets",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`budgetId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `categoryId` INTEGER NOT NULL, `targetTimeMillis` INTEGER NOT NULL, `period` TEXT NOT NULL, `lastModified` INTEGER NOT NULL, FOREIGN KEY(`categoryId`) REFERENCES `categories`(`categoryId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
-        "fields": [
-          {
-            "fieldPath": "budgetId",
-            "columnName": "budgetId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "categoryId",
-            "columnName": "categoryId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "targetTimeMillis",
-            "columnName": "targetTimeMillis",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "period",
-            "columnName": "period",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "lastModified",
-            "columnName": "lastModified",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": true,
-          "columnNames": [
-            "budgetId"
-          ]
-        },
-        "indices": [
-          {
-            "name": "index_time_budgets_categoryId",
-            "unique": false,
-            "columnNames": [
-              "categoryId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_time_budgets_categoryId` ON `${TABLE_NAME}` (`categoryId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "categories",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "categoryId"
-            ],
-            "referencedColumns": [
-              "categoryId"
-            ]
-          }
-        ]
-      },
-      {
-        "tableName": "calendar_sync",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`taskId` INTEGER NOT NULL, `calendarEventId` INTEGER NOT NULL, `lastSyncTimestamp` INTEGER NOT NULL, PRIMARY KEY(`taskId`), FOREIGN KEY(`taskId`) REFERENCES `tasks`(`taskId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
-        "fields": [
-          {
-            "fieldPath": "taskId",
-            "columnName": "taskId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "calendarEventId",
-            "columnName": "calendarEventId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "lastSyncTimestamp",
-            "columnName": "lastSyncTimestamp",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "taskId"
-          ]
-        },
-        "indices": [
-          {
-            "name": "index_calendar_sync_taskId",
-            "unique": false,
-            "columnNames": [
-              "taskId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_calendar_sync_taskId` ON `${TABLE_NAME}` (`taskId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "tasks",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "taskId"
-            ],
-            "referencedColumns": [
-              "taskId"
-            ]
-          }
-        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '86ea5b371b616e48f84d5acdb8be176b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6653dfa026b6d676374295e59c006ce6')"
     ]
   }
 }

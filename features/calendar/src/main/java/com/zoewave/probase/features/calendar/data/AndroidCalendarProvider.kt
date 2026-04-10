@@ -5,6 +5,7 @@ import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.provider.CalendarContract
+import com.zoewave.probase.features.calendar.data.db.dao.CalendarSyncDao
 import com.zoewave.probase.features.calendar.domain.CalendarEventModel
 import com.zoewave.probase.features.calendar.domain.CalendarRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,7 +21,8 @@ import javax.inject.Inject
  * Implementation of [CalendarRepository] using the Android Calendar Provider API.
  */
 internal class AndroidCalendarProvider @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val calendarSyncDao: CalendarSyncDao // Isolated DAO injected here
 ) : CalendarRepository {
 
     private val contentResolver: ContentResolver get() = context.contentResolver
