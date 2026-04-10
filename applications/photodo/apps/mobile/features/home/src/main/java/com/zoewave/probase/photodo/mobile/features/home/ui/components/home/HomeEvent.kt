@@ -9,7 +9,7 @@ sealed interface HomeEvent {
 
     data class OnCategoryClicked(val categoryId: Long, val categoryName: String) :HomeEvent
     // ✅ ADD THE NEW EVENT
-    data class OnAddCategory(val name: String, val description: String? = null) : HomeEvent
+    data class OnAddCategory(val name: String, val iconUri: String? = null, val colorHex: String? = null, val description: String? = null) : HomeEvent
     data class OnCreateFromTemplate(val template: ProjectTemplate) : HomeEvent
     data class OnDeleteCategory(val categoryId: Long) : HomeEvent
 

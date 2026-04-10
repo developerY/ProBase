@@ -166,7 +166,7 @@ fun AdaptiveHomeScreen(
         }
 
         HomeOverviewDialogs(
-            showAddCategoryDialog = showAddCategoryDialog,
+            showAddCategorySheet = showAddCategoryDialog,
             onDismissAddCategory = { showAddCategoryDialog = false },
             uiState = uiState,
             categoryToDelete = categoryToDelete,
