@@ -9,8 +9,10 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass.Companion.calculateFromSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -30,7 +32,7 @@ fun PhotoDoMainScreen(
         photoTodoNavEntryProvider(key, size, to, back)
     }
 ) {
-    val backStack = remember { mutableStateListOf<PhotoTodoRoute>(PhotoTodoRoute.Home) }
+    var backStack by remember { mutableStateOf(listOf<PhotoTodoRoute>(PhotoTodoRoute.Home)) }
     val currentRoute = backStack.lastOrNull() ?: PhotoTodoRoute.Home
 
     Scaffold(
@@ -40,10 +42,11 @@ fun PhotoDoMainScreen(
                 currentRoute = currentRoute,
                 navTo = { selectedRoute ->
                     if (currentRoute != selectedRoute) {
-                        backStack.clear()
-                        backStack.add(PhotoTodoRoute.Home)
-                        if (selectedRoute != PhotoTodoRoute.Home) {
-                            backStack.add(selectedRoute)
+                        // 🚀 ATOMIC UPDATE: Ensure backstack is never transiently empty
+                        backStack = if (selectedRoute == PhotoTodoRoute.Home) {
+                            listOf(PhotoTodoRoute.Home)
+                        } else {
+                            listOf(PhotoTodoRoute.Home, selectedRoute)
                         }
                     }
                 }
@@ -53,16 +56,24 @@ fun PhotoDoMainScreen(
         NavDisplay(
             backStack = backStack,
             modifier = Modifier.padding(innerPadding),
-            onBack = { backStack.removeLastOrNull() },
+            onBack = { 
+                if (backStack.size > 1) {
+                    backStack = backStack.dropLast(1)
+                }
+            },
             entryProvider = { key ->
                 // ✅ DELEGATE: Call the provider function
                 entryProvider(
                     key,
                     windowSizeClass,
-                    { backStack.removeLastOrNull() },
+                    { 
+                        if (backStack.size > 1) {
+                            backStack = backStack.dropLast(1)
+                        }
+                    },
                     { dest ->
                         if (dest != backStack.lastOrNull()) {
-                            backStack.add(dest)
+                            backStack = backStack + dest
                         }
                     }
                 )
