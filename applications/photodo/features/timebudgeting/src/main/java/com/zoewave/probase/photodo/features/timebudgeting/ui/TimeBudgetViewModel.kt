@@ -3,7 +3,7 @@ package com.zoewave.probase.photodo.features.timebudgeting.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
-import com.zoewave.probase.applications.photodo.db.repo.time.TimeTrackingRepository
+import com.zoewave.probase.photodo.features.timebudgeting.data.repo.TimeBudgetRepository
 import com.zoewave.probase.photodo.features.timebudgeting.ui.state.TimeBudgetUiModel
 import com.zoewave.probase.photodo.features.timebudgeting.ui.state.TimeBudgetUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,12 +16,12 @@ import javax.inject.Inject
 @HiltViewModel
 internal class TimeBudgetViewModel @Inject constructor(
     private val photoDoRepo: PhotoDoRepo,
-    private val timeTrackingRepo: TimeTrackingRepository
+    private val timeBudgetRepo: TimeBudgetRepository
 ) : ViewModel() {
 
     val uiState: StateFlow<TimeBudgetUiState> = combine(
         photoDoRepo.getAllCategories(),
-        timeTrackingRepo.getAllTimeBudgets()
+        timeBudgetRepo.getAllTimeBudgets()
     ) { categories, budgets ->
         val budgetModels = budgets.mapNotNull { budget ->
             val category = categories.find { it.categoryId == budget.categoryId }

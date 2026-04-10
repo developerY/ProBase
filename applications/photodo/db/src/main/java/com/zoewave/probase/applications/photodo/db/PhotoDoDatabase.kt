@@ -10,7 +10,6 @@ import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
-import com.zoewave.probase.applications.photodo.db.entity.time.TimeBudgetEntity
 import com.zoewave.probase.applications.photodo.db.entity.time.TimeLogEntity
 
 @Database(
@@ -20,14 +19,14 @@ import com.zoewave.probase.applications.photodo.db.entity.time.TimeLogEntity
         PhotoEntity::class,
         TaskEntity::class,
         ExpenseEntity::class,
-        TimeLogEntity::class,
-        TimeBudgetEntity::class
+        TimeLogEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
     autoMigrations = [
-        AutoMigration(from = 1, to = 2),
-        AutoMigration(from = 2, to = 3)
+        AutoMigration(from = 1, to = 2)
+        // Versions 3 and 4 were used for features now isolated into their own modules.
+        // We keep the version at 4 to maintain database compatibility.
     ]
 )
 @TypeConverters(PhotoDoConverters::class)
