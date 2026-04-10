@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Favorite
@@ -41,7 +42,8 @@ fun FeatureInventoryScreen(
     onNavigateToBle: () -> Unit,
     onNavigateToNfc: () -> Unit,
     onNavigateToQrScanner: () -> Unit,
-    onNavigateToCamera: () -> Unit // ✅ Added Camera Callback
+    onNavigateToCamera: () -> Unit, // ✅ Added Camera Callback
+    onNavigateToCalendar: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -104,6 +106,14 @@ fun FeatureInventoryScreen(
                     description = "Capture photos and record videos.",
                     icon = Icons.Default.CameraAlt,
                     onClick = onNavigateToCamera
+                )
+            }
+            item {
+                FeatureCard(
+                    title = "Calendar",
+                    description = "Interact with the system calendar.",
+                    icon = Icons.Default.CalendarMonth,
+                    onClick = onNavigateToCalendar
                 )
             }
 

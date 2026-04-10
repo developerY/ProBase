@@ -2,6 +2,7 @@ plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.hilt")
     id("composetemplate.android.room")
+    id("composetemplate.android.library.compose")
 }
 
 android {
@@ -11,8 +12,10 @@ android {
 dependencies {
     // --- Shared Core Projects ---
     implementation(project(":core:model"))
+    implementation(project(":core:ui"))
     implementation(project(":core:util"))
 
     // --- Third Party ---
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.compose.material.icons.extended)
 }

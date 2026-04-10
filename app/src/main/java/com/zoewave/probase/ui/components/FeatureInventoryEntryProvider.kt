@@ -15,6 +15,7 @@ import com.zoewave.probase.features.nfc.ui.NfcUiRoute
 import com.zoewave.probase.features.qrscanner.ui.QRCodeScannerScreen
 // ✅ Add your Camera route import here
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
+import com.zoewave.probase.features.calendar.ui.CalendarUiRoute
 
 fun featureInventoryEntryProvider(
     key: NavKey,
@@ -32,7 +33,8 @@ fun featureInventoryEntryProvider(
                     onNavigateToBle = { navigateTo(FeatureInventory.Ble) },
                     onNavigateToNfc = { navigateTo(FeatureInventory.Nfc) },
                     onNavigateToQrScanner = { navigateTo(FeatureInventory.QrScanner) },
-                    onNavigateToCamera = { navigateTo(FeatureInventory.Camera) } // ✅ Added Camera Callback
+                    onNavigateToCamera = { navigateTo(FeatureInventory.Camera) }, // ✅ Added Camera Callback
+                    onNavigateToCalendar = { navigateTo(FeatureInventory.Calendar) }
                 )
             }
 
@@ -74,6 +76,12 @@ fun featureInventoryEntryProvider(
                     CameraUIRoute(
                         navTo = { route -> /* Handle internal camera navigation if needed */ }
                     )
+                }
+            }
+
+            is FeatureInventory.Calendar -> {
+                FeatureScaffold(title = "Calendar", onBack = navigateBack) {
+                    CalendarUiRoute()
                 }
             }
 
