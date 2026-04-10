@@ -13,6 +13,7 @@ import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,6 +34,9 @@ class TasksViewModel @Inject constructor(
     private val repo: PhotoDoRepo,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    private val _effects = Channel<TasksSideEffect>(Channel.BUFFERED)
+    val effects = _effects.receiveAsFlow()
 
     private val _draftState = MutableStateFlow(TaskDraftState())
     val draftState: StateFlow<TaskDraftState> = _draftState.asStateFlow()
@@ -141,6 +146,7 @@ class TasksViewModel @Inject constructor(
                     val category = repo.getCategoryById(event.categoryId).first()
                     if (category != null) {
                         repo.deleteCategory(category)
+                        _effects.send(TasksSideEffect.NavigateBack)
                     }
                 }
             }

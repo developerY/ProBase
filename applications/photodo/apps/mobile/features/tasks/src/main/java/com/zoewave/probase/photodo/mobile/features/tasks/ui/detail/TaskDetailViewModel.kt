@@ -8,8 +8,10 @@ import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksSideEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,6 +33,9 @@ class TaskDetailViewModel @Inject constructor(
     private val photoDoRepo: PhotoDoRepo,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    private val _effects = Channel<TasksSideEffect>(Channel.BUFFERED)
+    val effects = _effects.receiveAsFlow()
 
     // ✅ GOLD STANDARD: Get projectId directly from SavedStateHandle.
     // This makes the ViewModel reactive to navigation arguments and survives process death.
@@ -118,6 +124,7 @@ class TaskDetailViewModel @Inject constructor(
                 viewModelScope.launch {
                     Log.d(TAG, "Deleting project ID: $currentId")
                     photoDoRepo.deleteProjectById(currentId)
+                    _effects.send(TasksSideEffect.NavigateBack)
                 }
             }
             is TaskDetailEvent.OnEditList -> {
