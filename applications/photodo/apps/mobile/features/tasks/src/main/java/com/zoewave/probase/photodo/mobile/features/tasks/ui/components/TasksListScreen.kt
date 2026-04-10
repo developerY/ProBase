@@ -83,11 +83,13 @@ fun TasksListScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showDeleteConfirmation = true }) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_category_content_desc)
-                        )
+                    if (!uiState.isNoCategoriesYet) {
+                        IconButton(onClick = { showDeleteConfirmation = true }) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_category_content_desc)
+                            )
+                        }
                     }
                 }
             )
