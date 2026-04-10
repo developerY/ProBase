@@ -17,6 +17,7 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeS
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiRoute
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.SavePhotoViewModel
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksSideEffect
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksViewModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.SavePhotoBottomSheet
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.TasksListScreen
@@ -98,6 +99,15 @@ fun photoTodoNavEntryProvider(
                     }
 
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+                    LaunchedEffect(viewModel.effects) {
+                        viewModel.effects.collect { effect ->
+                            when (effect) {
+                                TasksSideEffect.NavigateBack -> navigateBack()
+                            }
+                        }
+                    }
+
                     TasksListScreen(
                         uiState = uiState,
                         onEvent = viewModel::onEvent,
@@ -127,6 +137,15 @@ fun photoTodoNavEntryProvider(
                     }
 
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+                    LaunchedEffect(viewModel.effects) {
+                        viewModel.effects.collect { effect ->
+                            when (effect) {
+                                TasksSideEffect.NavigateBack -> navigateBack()
+                            }
+                        }
+                    }
+
                     TaskDetailScreen(
                         uiState = uiState,
                         onEvent = viewModel::onEvent,
