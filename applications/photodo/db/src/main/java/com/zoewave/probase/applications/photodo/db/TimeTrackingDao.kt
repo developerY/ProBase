@@ -9,10 +9,10 @@ import com.zoewave.probase.applications.photodo.db.entity.time.TimeLogEntity
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Internal DAO for time tracking and budgeting operations.
+ * DAO for time tracking and budgeting operations.
  */
 @Dao
-internal interface TimeTrackingDao {
+interface TimeTrackingDao {
 
     // --- Time Log Operations ---
 

@@ -7,7 +7,7 @@ import androidx.room3.PrimaryKey
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 
 /**
- * Internal entity for time budgeting at the category level.
+ * Entity for time budgeting at the category level.
  */
 @Entity(
     tableName = "time_budgets",
@@ -21,7 +21,7 @@ import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
     ],
     indices = [Index(value = ["categoryId"])]
 )
-internal data class TimeBudgetEntity(
+data class TimeBudgetEntity(
     @PrimaryKey(autoGenerate = true)
     val budgetId: Long = 0,
     val categoryId: Long,
