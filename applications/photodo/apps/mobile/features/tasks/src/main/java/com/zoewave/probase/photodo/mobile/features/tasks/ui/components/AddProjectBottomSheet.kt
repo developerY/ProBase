@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.AssistChip
@@ -57,6 +59,7 @@ import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.tasks.R
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.QuickExpenseBar
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
@@ -250,19 +253,17 @@ fun AddProjectBottomSheetContent(
         )
 
         // --- QUICK BUDGET SECTION ---
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            listOf("10", "50", "100", "500").forEach { amount ->
-                AssistChip(
-                    onClick = { onEvent(TasksEvent.OnDraftBudgetChanged(amount)) },
-                    label = { Text("$$amount") },
-                    colors = AssistChipDefaults.assistChipColors(
-                        labelColor = MaterialTheme.colorScheme.primary
-                    )
-                )
-            }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = "Adjust Budget",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            QuickExpenseBar(
+                onAdjustSpend = { adjustment -> 
+                    onEvent(TasksEvent.OnAdjustDraftBudget(adjustment)) 
+                }
+            )
         }
 
         // --- BUTTONS ---

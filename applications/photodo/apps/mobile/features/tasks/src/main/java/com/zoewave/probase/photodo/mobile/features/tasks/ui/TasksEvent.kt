@@ -27,6 +27,7 @@ sealed interface TasksEvent {
     data class OnDraftPhotoAttached(val uri: String) : TasksEvent
 
     data class OnDraftBudgetChanged(val budgetInput: String) : TasksEvent
+    data class OnAdjustDraftBudget(val adjustment: Double) : TasksEvent
 
     data object OnSaveDraftClicked : TasksEvent
 
