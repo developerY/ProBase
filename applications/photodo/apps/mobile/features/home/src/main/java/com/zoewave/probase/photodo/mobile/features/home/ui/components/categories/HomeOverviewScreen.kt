@@ -1,5 +1,10 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +21,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -23,8 +29,15 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.FolderSpecial
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,6 +50,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -44,6 +58,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -54,6 +69,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -78,9 +94,10 @@ fun HomeOverviewScreen(
 ) {
 
     // Add these state variables at the top of your composable
-    var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
+    var showAddCategorySheet by rememberSaveable { mutableStateOf(false) }
     var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
+    var isSearchMode by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -91,7 +108,7 @@ fun HomeOverviewScreen(
                 onFabToggle = { fabMenuExpanded = it },
                 onAddCategoryClick = {
                     fabMenuExpanded = false
-                    showAddCategoryDialog = true
+                    showAddCategorySheet = true
                 },
                 onHomeProjectClick = { // Updated parameter name
                     fabMenuExpanded = false
@@ -107,6 +124,8 @@ fun HomeOverviewScreen(
     ) { innerPadding ->
         HomeOverviewContent(
             uiState = uiState,
+            isSearchMode = isSearchMode,
+            onSearchModeChange = { isSearchMode = it },
             onEvent = onEvent,
             navTo = navTo,
             onDeleteClicked = { categoryToDelete = it },
@@ -117,8 +136,8 @@ fun HomeOverviewScreen(
     // ... inside HomeOverviewScreen, just below the Scaffold closing brace ...
 
     HomeOverviewDialogs(
-        showAddCategoryDialog = showAddCategoryDialog,
-        onDismissAddCategory = { showAddCategoryDialog = false },
+        showAddCategorySheet = showAddCategorySheet,
+        onDismissAddCategory = { showAddCategorySheet = false },
         uiState = uiState, // Pass the UI State!
         categoryToDelete = categoryToDelete,
         onDismissDeleteConfirmation = { categoryToDelete = null },
@@ -178,12 +197,22 @@ fun HomeOverviewFab(
 @Composable
 fun HomeOverviewContent(
     uiState: HomeUiState,
+    isSearchMode: Boolean,
+    onSearchModeChange: (Boolean) -> Unit,
     onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
     onDeleteClicked: (CategoryOverviewUiModel) -> Unit,
     modifier: Modifier = Modifier,
     showSummaryHeader: Boolean = true
 ) {
+    val filteredCategories = remember(uiState.categories, uiState.searchQuery) {
+        if (uiState.searchQuery.isBlank()) {
+            uiState.categories
+        } else {
+            uiState.categories.filter { it.name.contains(uiState.searchQuery, ignoreCase = true) }
+        }
+    }
+
     Box(
         modifier = modifier.fillMaxSize()
     ) {
@@ -203,14 +232,70 @@ fun HomeOverviewContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                if (showSummaryHeader) {
+                // --- 🚀 NEW: Header Row (Shortcuts) ---
+                item(span = { GridItemSpan(2) }) {
+                    AnimatedVisibility(
+                        visible = isSearchMode,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        OutlinedTextField(
+                            value = uiState.searchQuery,
+                            onValueChange = { onEvent(HomeEvent.OnSearchQueryChanged(it)) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            placeholder = { Text("Search categories...") },
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    onEvent(HomeEvent.OnSearchQueryChanged(""))
+                                    onSearchModeChange(false)
+                                }) {
+                                    Icon(Icons.Default.Close, contentDescription = "Close search")
+                                }
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = !isSearchMode,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "PhotoDo",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            IconButton(
+                                onClick = { onSearchModeChange(true) },
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                            ) {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            }
+                        }
+                    }
+                }
+
+                if (showSummaryHeader && !isSearchMode) {
                     item(span = { GridItemSpan(2) }) {
                         OverviewSummaryCard(categories = uiState.categories)
                     }
                 }
 
                 itemsIndexed(
-                    items = uiState.categories,
+                    items = filteredCategories,
                     key = { _, category -> category.id }
                 ) { index, category ->
                     CategoryDashboardCard(
@@ -228,46 +313,19 @@ fun HomeOverviewContent(
 
 @Composable
 fun HomeOverviewDialogs(
-    showAddCategoryDialog: Boolean,
+    showAddCategorySheet: Boolean,
     onDismissAddCategory: () -> Unit,
     uiState: HomeUiState,
     categoryToDelete: CategoryOverviewUiModel?,
     onDismissDeleteConfirmation: () -> Unit,
     onEvent: (HomeEvent) -> Unit
 ) {
-    var newCategoryName by rememberSaveable { mutableStateOf("") }
-
-    if (showAddCategoryDialog) {
-        AlertDialog(
-            onDismissRequest = onDismissAddCategory,
-            title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_new_category)) },
-            text = {
-                OutlinedTextField(
-                    value = newCategoryName,
-                    onValueChange = { newCategoryName = it },
-                    placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_category_placeholder)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newCategoryName.isNotBlank()) {
-                            onEvent(HomeEvent.OnAddCategory(newCategoryName.trim()))
-                            newCategoryName = "" // Reset
-                            onDismissAddCategory()
-                        }
-                    }
-                ) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_create)) }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        newCategoryName = ""
-                        onDismissAddCategory()
-                    }
-                ) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_cancel)) }
+    if (showAddCategorySheet) {
+        AddCategoryBottomSheet(
+            onDismiss = onDismissAddCategory,
+            onCategoryCreated = { name, iconName ->
+                onEvent(HomeEvent.OnAddCategory(name = name, iconUri = iconName))
+                onDismissAddCategory()
             }
         )
     }
@@ -309,6 +367,106 @@ fun HomeOverviewDialogs(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddCategoryBottomSheet(
+    onDismiss: () -> Unit,
+    onCategoryCreated: (String, String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var newCategoryName by rememberSaveable { mutableStateOf("") }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.applications_photodo_apps_mobile_features_home_new_category),
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            // --- QUICK PICK SECTION ---
+            Text(
+                text = "Quick Pick",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                categoryTemplates.forEach { template ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Surface(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    onCategoryCreated(template.name, template.iconName)
+                                },
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = CircleShape
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = template.icon,
+                                    contentDescription = template.name,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                        Text(
+                            text = template.name,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = newCategoryName,
+                onValueChange = { newCategoryName = it },
+                label = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_category_placeholder)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Button(
+                onClick = { onCategoryCreated(newCategoryName, "FolderSpecial") },
+                enabled = newCategoryName.isNotBlank(),
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_create))
+            }
+        }
+    }
+}
+
+private data class CategoryTemplate(val name: String, val icon: ImageVector, val iconName: String)
+
+private val categoryTemplates = listOf(
+    CategoryTemplate("Work", Icons.Default.Work, "Work"),
+    CategoryTemplate("Personal", Icons.Default.Person, "Person"),
+    CategoryTemplate("Home", Icons.Default.Home, "Home"),
+    CategoryTemplate("Shopping", Icons.Default.ShoppingCart, "ShoppingCart"),
+    CategoryTemplate("Travel", Icons.Default.Flight, "Flight")
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -367,16 +525,30 @@ fun CategoryDashboardCard(
                     }
                 }
 
-                IconButton(
-                    onClick = { onDeleteClicked(category) },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete Category",
-                        tint = contentColor.copy(alpha = 0.7f),
-                        modifier = Modifier.size(20.dp)
-                    )
+                Row {
+                    /*IconButton(
+                        onClick = { onEvent(HomeEvent.OnAddQuickProjectClicked(category.name)) },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Quick Project",
+                            tint = contentColor.copy(alpha = 0.7f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }*/
+
+                    IconButton(
+                        onClick = { onDeleteClicked(category) },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Category",
+                            tint = contentColor.copy(alpha = 0.7f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
 
@@ -390,9 +562,14 @@ fun CategoryDashboardCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
+                    text = "${category.totalProjects} Projects",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = contentColor.copy(alpha = 0.8f)
+                )
+                Text(
                     text = stringResource(R.string.applications_photodo_apps_mobile_features_home_tasks_count, category.completedTasks, category.totalTasks),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = contentColor.copy(alpha = 0.8f) // Slightly dim the subtitle
+                    color = contentColor.copy(alpha = 0.8f)
                 )
             }
 
@@ -456,6 +633,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
             CategoryOverviewUiModel(
                 id = 1L,
                 name = "Real Estate",
+                totalProjects = 3,
                 totalTasks = 24,
                 completedTasks = 18,
                 progressPercentage = 0.75f
@@ -463,6 +641,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
             CategoryOverviewUiModel(
                 id = 2L,
                 name = "Development",
+                totalProjects = 5,
                 totalTasks = 50,
                 completedTasks = 5,
                 progressPercentage = 0.10f
@@ -470,6 +649,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
             CategoryOverviewUiModel(
                 id = 3L,
                 name = "Business",
+                totalProjects = 2,
                 totalTasks = 12,
                 completedTasks = 12,
                 progressPercentage = 1.0f
@@ -477,6 +657,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
             CategoryOverviewUiModel(
                 id = 4L,
                 name = "Personal",
+                totalProjects = 4,
                 totalTasks = 8,
                 completedTasks = 4,
                 progressPercentage = 0.50f
@@ -484,6 +665,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
             CategoryOverviewUiModel(
                 id = 5L,
                 name = "Hobbies",
+                totalProjects = 0,
                 totalTasks = 0,
                 completedTasks = 0,
                 progressPercentage = 0.0f

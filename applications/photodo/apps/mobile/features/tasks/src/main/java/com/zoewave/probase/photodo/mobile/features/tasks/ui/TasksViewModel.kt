@@ -239,6 +239,19 @@ class TasksViewModel @Inject constructor(
             }
 
             is TasksEvent.OnDraftBudgetChanged -> _draftState.update { it.copy(budgetInput = event.budgetInput) }
+            is TasksEvent.OnAdjustDraftBudget -> {
+                _draftState.update { state ->
+                    val currentBudget = state.budgetInput.toDoubleOrNull() ?: 0.0
+                    val newBudget = (currentBudget + event.adjustment).coerceAtLeast(0.0)
+                    // If it's a whole number, drop the .0 for a cleaner string
+                    val formattedBudget = if (newBudget % 1 == 0.0) {
+                        newBudget.toLong().toString()
+                    } else {
+                        newBudget.toString()
+                    }
+                    state.copy(budgetInput = formattedBudget)
+                }
+            }
             is TasksEvent.OnDraftDueDateChanged -> _draftState.update { it.copy(dueDateMillis = event.timestamp) }
 
             is TasksEvent.OnAddQuickProject -> {

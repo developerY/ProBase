@@ -135,11 +135,13 @@ fun TaskDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showDeleteProjectConfirmation = true }) {
-                        Icon(
-                            Icons.Default.DeleteForever,
-                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_delete_project_content_desc)
-                        )
+                    if (uiState.loadState is DetailLoadState.Success) {
+                        IconButton(onClick = { showDeleteProjectConfirmation = true }) {
+                            Icon(
+                                Icons.Default.DeleteForever,
+                                contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_delete_project_content_desc)
+                            )
+                        }
                     }
                 }
             )

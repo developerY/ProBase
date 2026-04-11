@@ -8,13 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,12 +28,11 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewDialogs
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewFab
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import components.home.CategoryQuickJumpRow
-
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewDialogs
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewFab
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -161,7 +156,7 @@ fun HomeScreen(
     }
 
     HomeOverviewDialogs(
-        showAddCategoryDialog = showAddCategoryDialog,
+        showAddCategorySheet = showAddCategoryDialog,
         onDismissAddCategory = { showAddCategoryDialog = false },
         uiState = uiState,
         categoryToDelete = categoryToDelete,
@@ -180,8 +175,8 @@ private fun HomeScreenPreview() {
         HomeScreen(
             uiState = HomeUiState(
                 categories = listOf(
-                    CategoryOverviewUiModel(1L, "Nature", 10, 5, 0.5f),
-                    CategoryOverviewUiModel(2L, "Urban", 8, 2, 0.25f)
+                    CategoryOverviewUiModel(1L, "Nature", 3, 10, 5, 0.5f),
+                    CategoryOverviewUiModel(2L, "Urban", 2, 8, 2, 0.25f)
                 ),
                 urgentProjects = listOf(
                     ProjectListUiModel(

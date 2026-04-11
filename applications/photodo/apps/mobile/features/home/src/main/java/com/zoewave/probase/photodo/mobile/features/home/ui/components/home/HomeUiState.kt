@@ -10,7 +10,8 @@ data class HomeUiState(
     val categories: List<CategoryOverviewUiModel> = emptyList(),
     val urgentProjects: List<ProjectListUiModel> = emptyList(),
     val isQuickProjectSheetOpen: Boolean = false,
-    val quickProjectCategoryOverride: String? = null
+    val quickProjectCategoryOverride: String? = null,
+    val searchQuery: String = ""
 ) {
     val isEmpty: Boolean = !isLoading && categories.isEmpty()
 }

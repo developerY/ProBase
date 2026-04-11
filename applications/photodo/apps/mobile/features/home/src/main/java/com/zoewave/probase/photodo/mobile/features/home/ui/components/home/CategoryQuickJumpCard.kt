@@ -70,9 +70,12 @@ fun CategoryQuickJumpCard(
             // Progress details
             Column {
                 Text(
+                    text = "${model.totalProjects} Projects",
+                    style = MaterialTheme.typography.labelSmall,
+                )
+                Text(
                     text = model.progressText,
-                    style = MaterialTheme.typography.bodySmall,
-                    // color = contentColor.copy(alpha = 0.8f) 
+                    style = MaterialTheme.typography.labelSmall,
                 )
 
                 // Tiny progress bar
@@ -98,6 +101,7 @@ private fun CategoryQuickJumpCardPreview() {
             model = CategoryQuickJumpUiModel(
                 id = 1L,
                 name = "Nature",
+                totalProjects = 12,
                 progressText = "5/10 Tasks",
                 progressPercentage = 0.5f,
                 containerColor = MaterialTheme.colorScheme.primaryContainer,

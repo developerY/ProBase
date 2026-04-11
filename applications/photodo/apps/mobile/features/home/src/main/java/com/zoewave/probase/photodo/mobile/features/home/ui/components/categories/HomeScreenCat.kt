@@ -90,6 +90,10 @@ private fun CategoryCard(
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
+                    text = "${category.totalProjects} Projects",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
                     text = "${category.completedTasks} / ${category.totalTasks} tasks completed",
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -120,10 +124,10 @@ fun HomeScreenCatPreview_Success() {
         uiState = HomeUiState(
             categories = listOf(
                 CategoryOverviewUiModel(
-                    1, "Work", 10, 5, 0.5f
+                    1, "Work", 3, 10, 5, 0.5f
                 ),
                 CategoryOverviewUiModel(
-                    2, "Personal", 5, 5, 1.0f
+                    2, "Personal", 2, 5, 5, 1.0f
                 )
             ),
             urgentProjects = emptyList()
