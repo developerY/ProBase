@@ -163,8 +163,8 @@ fun AddProjectBottomSheetContent(
                             .size(48.dp)
                             .clip(CircleShape)
                             .clickable {
-                                onEvent(TasksEvent.OnCreateFromTemplate(template))
-                                onEvent(TasksEvent.OnDismissBottomSheet)
+                                onEvent(TasksEvent.OnDraftTitleChanged(template.title))
+                                onEvent(TasksEvent.OnDraftBudgetChanged(template.defaultBudget.toInt().toString()))
                             },
                         color = MaterialTheme.colorScheme.primaryContainer,
                         shape = CircleShape
