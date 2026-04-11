@@ -18,7 +18,9 @@ data class AddTransactionUiState(
     val category: String = "",
     val description: String = "",
     val receiptUri: String? = null,
-    val isSuccess: Boolean = false
+    val isSuccess: Boolean = false,
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
 )
 
 sealed interface AddTransactionUiEvent {
@@ -28,6 +30,7 @@ sealed interface AddTransactionUiEvent {
     data class ReceiptAttached(val uri: String) : AddTransactionUiEvent
     object SaveTransaction : AddTransactionUiEvent
     object BackClicked : AddTransactionUiEvent
+    object SuccessConsumed : AddTransactionUiEvent
 }
 
 @HiltViewModel
@@ -40,28 +43,39 @@ class AddTransactionViewModel @Inject constructor(
 
     fun onEvent(event: AddTransactionUiEvent) {
         when (event) {
-            is AddTransactionUiEvent.AmountChanged -> _uiState.update { it.copy(amount = event.value) }
-            is AddTransactionUiEvent.CategoryChanged -> _uiState.update { it.copy(category = event.value) }
-            is AddTransactionUiEvent.DescriptionChanged -> _uiState.update { it.copy(description = event.value) }
-            is AddTransactionUiEvent.ReceiptAttached -> _uiState.update { it.copy(receiptUri = event.uri) }
+            is AddTransactionUiEvent.AmountChanged -> _uiState.update { it.copy(amount = event.value, errorMessage = null) }
+            is AddTransactionUiEvent.CategoryChanged -> _uiState.update { it.copy(category = event.value, errorMessage = null) }
+            is AddTransactionUiEvent.DescriptionChanged -> _uiState.update { it.copy(description = event.value, errorMessage = null) }
+            is AddTransactionUiEvent.ReceiptAttached -> _uiState.update { it.copy(receiptUri = event.uri, errorMessage = null) }
             AddTransactionUiEvent.SaveTransaction -> saveTransaction()
             AddTransactionUiEvent.BackClicked -> { /* Handled in Route */ }
+            AddTransactionUiEvent.SuccessConsumed -> _uiState.update { it.copy(isSuccess = false) }
         }
     }
 
     private fun saveTransaction() {
         val amountValue = _uiState.value.amount.toDoubleOrNull() ?: 0.0
-        val transaction = Transaction(
-            id = UUID.randomUUID().toString(),
-            amount = amountValue,
-            category = _uiState.value.category,
-            description = _uiState.value.description,
-            date = System.currentTimeMillis(),
-            receiptUri = _uiState.value.receiptUri
-        )
+        if (amountValue <= 0.0 || _uiState.value.category.isBlank()) {
+            _uiState.update { it.copy(errorMessage = "Please enter a valid amount and category") }
+            return
+        }
+
         viewModelScope.launch {
-            repository.addTransaction(transaction)
-            _uiState.update { it.copy(isSuccess = true) }
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            val transaction = Transaction(
+                id = UUID.randomUUID().toString(),
+                amount = amountValue,
+                category = _uiState.value.category,
+                description = _uiState.value.description,
+                date = System.currentTimeMillis(),
+                receiptUri = _uiState.value.receiptUri
+            )
+            try {
+                repository.addTransaction(transaction)
+                _uiState.update { it.copy(isSuccess = true, isLoading = false) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message ) }
+            }
         }
     }
 }
