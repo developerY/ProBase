@@ -18,6 +18,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -246,6 +248,22 @@ fun AddProjectBottomSheetContent(
             ),
             modifier = Modifier.fillMaxWidth()
         )
+
+        // --- QUICK BUDGET SECTION ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf("10", "50", "100", "500").forEach { amount ->
+                AssistChip(
+                    onClick = { onEvent(TasksEvent.OnDraftBudgetChanged(amount)) },
+                    label = { Text("$$amount") },
+                    colors = AssistChipDefaults.assistChipColors(
+                        labelColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+        }
 
         // --- BUTTONS ---
         Row(
