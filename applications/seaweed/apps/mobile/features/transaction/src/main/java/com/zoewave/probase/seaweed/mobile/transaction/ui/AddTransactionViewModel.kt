@@ -6,8 +6,11 @@ import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -26,7 +29,9 @@ data class AddTransactionUiState(
     val tipPercentage: Int? = null,
     val customTipAmount: String = "",
     val isSplitWidgetVisible: Boolean = false,
-    val splitCount: Int = 1
+    val splitCount: Int = 1,
+    val recentCategories: List<String> = emptyList(),
+    val isCategorySuggestionsVisible: Boolean = false
 )
 
 sealed interface AddTransactionUiEvent {
@@ -42,6 +47,7 @@ sealed interface AddTransactionUiEvent {
     data class CustomTipAmountChanged(val value: String) : AddTransactionUiEvent
     object ToggleSplitWidget : AddTransactionUiEvent
     data class SplitCountChanged(val count: Int) : AddTransactionUiEvent
+    data class SetCategorySuggestionsVisible(val visible: Boolean) : AddTransactionUiEvent
 }
 
 @HiltViewModel
@@ -50,7 +56,19 @@ class AddTransactionViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddTransactionUiState())
-    val uiState: StateFlow<AddTransactionUiState> = _uiState.asStateFlow()
+    
+    val uiState: StateFlow<AddTransactionUiState> = combine(
+        _uiState,
+        repository.getAllTransactions().map { transactions ->
+            transactions.map { it.category }.distinct().take(10)
+        }
+    ) { state, recent ->
+        state.copy(recentCategories = recent)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = AddTransactionUiState()
+    )
 
     fun onEvent(event: AddTransactionUiEvent) {
         when (event) {
@@ -81,6 +99,7 @@ class AddTransactionViewModel @Inject constructor(
             }
             AddTransactionUiEvent.ToggleSplitWidget -> _uiState.update { it.copy(isSplitWidgetVisible = !it.isSplitWidgetVisible) }
             is AddTransactionUiEvent.SplitCountChanged -> _uiState.update { it.copy(splitCount = event.count.coerceAtLeast(1)) }
+            is AddTransactionUiEvent.SetCategorySuggestionsVisible -> _uiState.update { it.copy(isCategorySuggestionsVisible = event.visible) }
         }
     }
 
