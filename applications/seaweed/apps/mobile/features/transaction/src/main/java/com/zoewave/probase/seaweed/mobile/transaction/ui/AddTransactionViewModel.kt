@@ -30,7 +30,8 @@ data class AddTransactionUiState(
     val customTipAmount: String = "",
     val isSplitWidgetVisible: Boolean = false,
     val splitCount: Int = 1,
-    val recentCategories: List<String> = emptyList()
+    val recentCategories: List<String> = emptyList(),
+    val isCategorySuggestionsVisible: Boolean = false
 )
 
 sealed interface AddTransactionUiEvent {
@@ -46,6 +47,7 @@ sealed interface AddTransactionUiEvent {
     data class CustomTipAmountChanged(val value: String) : AddTransactionUiEvent
     object ToggleSplitWidget : AddTransactionUiEvent
     data class SplitCountChanged(val count: Int) : AddTransactionUiEvent
+    data class SetCategorySuggestionsVisible(val visible: Boolean) : AddTransactionUiEvent
 }
 
 @HiltViewModel
@@ -97,6 +99,7 @@ class AddTransactionViewModel @Inject constructor(
             }
             AddTransactionUiEvent.ToggleSplitWidget -> _uiState.update { it.copy(isSplitWidgetVisible = !it.isSplitWidgetVisible) }
             is AddTransactionUiEvent.SplitCountChanged -> _uiState.update { it.copy(splitCount = event.count.coerceAtLeast(1)) }
+            is AddTransactionUiEvent.SetCategorySuggestionsVisible -> _uiState.update { it.copy(isCategorySuggestionsVisible = event.visible) }
         }
     }
 

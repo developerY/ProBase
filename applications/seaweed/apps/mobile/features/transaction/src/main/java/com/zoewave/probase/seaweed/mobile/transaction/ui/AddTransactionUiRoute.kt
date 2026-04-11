@@ -45,6 +45,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -148,46 +149,61 @@ fun AddTransactionScreen(
                     value = uiState.category,
                     onValueChange = { onEvent(AddTransactionUiEvent.CategoryChanged(it)) },
                     label = { Text("Category") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { focusState ->
+                            onEvent(AddTransactionUiEvent.SetCategorySuggestionsVisible(focusState.isFocused))
+                        },
                     trailingIcon = { Icon(Icons.Default.Category, contentDescription = null) }
                 )
 
-                if (uiState.recentCategories.isNotEmpty()) {
-                    Text("Recent", style = MaterialTheme.typography.labelMedium)
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(bottom = 8.dp)
-                    ) {
-                        items(uiState.recentCategories) { category ->
-                            AssistChip(
-                                onClick = { onEvent(AddTransactionUiEvent.CategoryChanged(category)) },
-                                label = { Text(category) }
-                            )
+                AnimatedVisibility(visible = uiState.isCategorySuggestionsVisible) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (uiState.recentCategories.isNotEmpty()) {
+                            Text("Recent", style = MaterialTheme.typography.labelMedium)
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(bottom = 8.dp)
+                            ) {
+                                items(uiState.recentCategories) { category ->
+                                    AssistChip(
+                                        onClick = { onEvent(AddTransactionUiEvent.CategoryChanged(category)) },
+                                        label = { Text(category) }
+                                    )
+                                }
+                            }
                         }
-                    }
-                }
 
-                Text("Suggestions", style = MaterialTheme.typography.labelMedium)
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val suggestions = listOf(
-                        "Food" to Icons.Default.Fastfood,
-                        "Coffee" to Icons.Default.Coffee,
-                        "Transport" to Icons.Default.DirectionsBus,
-                        "Shopping" to Icons.Default.ShoppingBag,
-                        "Housing" to Icons.Default.Home,
-                        "Health" to Icons.Default.LocalHospital
-                    )
-                    suggestions.forEach { (name, icon) ->
-                        FilterChip(
-                            selected = uiState.category == name,
-                            onClick = { onEvent(AddTransactionUiEvent.CategoryChanged(name)) },
-                            label = { Text(name) },
-                            leadingIcon = { Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp)) }
-                        )
+                        Text("Suggestions", style = MaterialTheme.typography.labelMedium)
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val suggestions = listOf(
+                                "Food" to Icons.Default.Fastfood,
+                                "Coffee" to Icons.Default.Coffee,
+                                "Transport" to Icons.Default.DirectionsBus,
+                                "Shopping" to Icons.Default.ShoppingBag,
+                                "Housing" to Icons.Default.Home,
+                                "Health" to Icons.Default.LocalHospital
+                            )
+                            suggestions.forEach { (name, icon) ->
+                                val isSelected = uiState.category.equals(name, ignoreCase = true)
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { onEvent(AddTransactionUiEvent.CategoryChanged(name)) },
+                                    label = { Text(name) },
+                                    leadingIcon = {
+                                        Icon(
+                                            icon,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }
