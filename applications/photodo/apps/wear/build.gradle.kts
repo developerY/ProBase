@@ -2,6 +2,7 @@ plugins {
     id("composetemplate.android.application")
     id("composetemplate.android.application.compose")
     id("composetemplate.android.hilt")
+    id("composetemplate.android.application.firebase")
     alias(libs.plugins.ksp)
 }
 
@@ -10,8 +11,8 @@ android {
 
     defaultConfig {
         applicationId = "com.zoewave.probase.photodo"
-        versionCode = 3
-        versionName = "0.0.1"
+        versionCode = 7
+        versionName = "0.0.2"
         minSdk = 34
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         proguardFiles(
