@@ -16,7 +16,7 @@ import kotlinx.serialization.Transient
 
 @Serializable
 enum class TransactionTab {
-    RECENT, CYCLIC
+    RECENT, CYCLIC, ANALYTICS
 }
 
 @Serializable

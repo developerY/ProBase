@@ -1,6 +1,8 @@
 package com.zoewave.probase.seaweed.mobile.transaction.ui
 
 import com.zoewave.probase.seaweed.model.Transaction
+import com.zoewave.probase.seaweed.model.TrendPoint
+import com.zoewave.probase.seaweed.model.HabitInsight
 import com.zoewave.probase.seaweed.model.navigation.TransactionTab
 
 sealed interface TransactionsUiState {
@@ -12,7 +14,9 @@ sealed interface TransactionsUiState {
         val selectedCategory: String? = null,
         val selectedTransactionId: String? = null,
         val selectedTransaction: Transaction? = null,
-        val selectedTab: TransactionTab = TransactionTab.RECENT
+        val selectedTab: TransactionTab = TransactionTab.RECENT,
+        val spendingTrends: Map<com.zoewave.probase.seaweed.model.SpendingPeriod, List<TrendPoint>> = emptyMap(),
+        val habitInsights: List<HabitInsight> = emptyList()
     ) : TransactionsUiState
 }
 
