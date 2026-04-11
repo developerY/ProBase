@@ -70,6 +70,12 @@ sealed class SeaweedDestination(
         titleRes = R.string.applications_seaweed_model_route_settings,
         icon = Icons.Default.Settings
     )
+
+    @Serializable
+    data object Camera : SeaweedDestination(
+        title = "Receipt Camera",
+        icon = Icons.Default.Home // Fallback icon
+    )
 }
 
 val topLevelDestinations = listOf(

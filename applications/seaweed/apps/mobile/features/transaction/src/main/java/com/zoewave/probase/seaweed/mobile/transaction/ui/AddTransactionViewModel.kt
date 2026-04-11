@@ -10,13 +10,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 
 data class AddTransactionUiState(
     val amount: String = "",
     val category: String = "",
     val description: String = "",
+    val receiptUri: String? = null,
     val isSuccess: Boolean = false
 )
 
@@ -24,6 +25,7 @@ sealed interface AddTransactionUiEvent {
     data class AmountChanged(val value: String) : AddTransactionUiEvent
     data class CategoryChanged(val value: String) : AddTransactionUiEvent
     data class DescriptionChanged(val value: String) : AddTransactionUiEvent
+    data class ReceiptAttached(val uri: String) : AddTransactionUiEvent
     object SaveTransaction : AddTransactionUiEvent
     object BackClicked : AddTransactionUiEvent
 }
@@ -41,6 +43,7 @@ class AddTransactionViewModel @Inject constructor(
             is AddTransactionUiEvent.AmountChanged -> _uiState.update { it.copy(amount = event.value) }
             is AddTransactionUiEvent.CategoryChanged -> _uiState.update { it.copy(category = event.value) }
             is AddTransactionUiEvent.DescriptionChanged -> _uiState.update { it.copy(description = event.value) }
+            is AddTransactionUiEvent.ReceiptAttached -> _uiState.update { it.copy(receiptUri = event.uri) }
             AddTransactionUiEvent.SaveTransaction -> saveTransaction()
             AddTransactionUiEvent.BackClicked -> { /* Handled in Route */ }
         }
@@ -53,7 +56,8 @@ class AddTransactionViewModel @Inject constructor(
             amount = amountValue,
             category = _uiState.value.category,
             description = _uiState.value.description,
-            date = System.currentTimeMillis()
+            date = System.currentTimeMillis(),
+            receiptUri = _uiState.value.receiptUri
         )
         viewModelScope.launch {
             repository.addTransaction(transaction)

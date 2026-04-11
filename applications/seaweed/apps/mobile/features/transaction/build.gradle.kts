@@ -20,6 +20,8 @@ dependencies {
     implementation(project(":applications:seaweed:data"))
     implementation(project(":applications:seaweed:features:main"))
     implementation(project(":applications:seaweed:apps:mobile:features:bills"))
+
+    implementation(libs.coil.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.material3.adaptive)
