@@ -2,6 +2,8 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.graphics.Bitmap
+import com.zoewave.probase.feature.ml.receipt.SmartReceiptScanner
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,6 +51,7 @@ sealed interface AddTransactionUiEvent {
     data class SplitCountChanged(val count: Int) : AddTransactionUiEvent
     data class SetCategorySuggestionsVisible(val visible: Boolean) : AddTransactionUiEvent
     data class AdjustAmount(val delta: Double) : AddTransactionUiEvent
+    data class ReceiptImageCaptured(val bitmap: Bitmap) : AddTransactionUiEvent
 }
 
 @HiltViewModel
@@ -56,6 +59,7 @@ class AddTransactionViewModel @Inject constructor(
     private val repository: TransactionRepository
 ) : ViewModel() {
 
+    private val scanner = SmartReceiptScanner()
     private val _uiState = MutableStateFlow(AddTransactionUiState())
     
     val uiState: StateFlow<AddTransactionUiState> = combine(
@@ -107,6 +111,26 @@ class AddTransactionViewModel @Inject constructor(
                     val newAmount = (currentAmount + event.delta).coerceAtLeast(0.0)
                     state.copy(amount = if (newAmount > 0) String.format(Locale.getDefault(), "%.2f", newAmount) else "")
                 }
+            }
+            is AddTransactionUiEvent.ReceiptImageCaptured -> processReceiptImage(event.bitmap)
+        }
+    }
+
+    private fun processReceiptImage(bitmap: Bitmap) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val result = scanner.scanReceipt(bitmap)
+                _uiState.update { 
+                    it.copy(
+                        amount = if (result.totalAmount > 0) String.format(Locale.getDefault(), "%.2f", result.totalAmount) else it.amount,
+                        category = result.category ?: it.category,
+                        description = result.merchant ?: it.description,
+                        isLoading = false
+                    )
+                }
+            } catch (_: Exception) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to parse receipt") }
             }
         }
     }

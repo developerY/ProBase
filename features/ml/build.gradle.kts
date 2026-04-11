@@ -39,6 +39,10 @@ dependencies {
 
     // ML
     implementation(libs.mlkit.text.recognition)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.google.ai.edge.aicore)
+    implementation(libs.google.generative.ai)
+    implementation(libs.kotlinx.serialization.json)
 
     // Add Camera
     implementation(libs.androidx.camera.core)

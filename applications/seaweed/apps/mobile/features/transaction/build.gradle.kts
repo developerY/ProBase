@@ -20,8 +20,13 @@ dependencies {
     implementation(project(":applications:seaweed:data"))
     implementation(project(":applications:seaweed:features:main"))
     implementation(project(":applications:seaweed:apps:mobile:features:bills"))
+    implementation(project(":features:ml"))
 
     implementation(libs.coil.compose)
+    implementation(libs.mlkit.text.recognition)
+    implementation(libs.google.ai.edge.aicore)
+    implementation(libs.google.generative.ai)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.material3.adaptive)
