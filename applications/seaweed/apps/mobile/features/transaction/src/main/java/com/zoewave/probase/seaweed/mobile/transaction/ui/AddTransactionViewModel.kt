@@ -48,6 +48,7 @@ sealed interface AddTransactionUiEvent {
     object ToggleSplitWidget : AddTransactionUiEvent
     data class SplitCountChanged(val count: Int) : AddTransactionUiEvent
     data class SetCategorySuggestionsVisible(val visible: Boolean) : AddTransactionUiEvent
+    data class AdjustAmount(val delta: Double) : AddTransactionUiEvent
 }
 
 @HiltViewModel
@@ -100,6 +101,13 @@ class AddTransactionViewModel @Inject constructor(
             AddTransactionUiEvent.ToggleSplitWidget -> _uiState.update { it.copy(isSplitWidgetVisible = !it.isSplitWidgetVisible) }
             is AddTransactionUiEvent.SplitCountChanged -> _uiState.update { it.copy(splitCount = event.count.coerceAtLeast(1)) }
             is AddTransactionUiEvent.SetCategorySuggestionsVisible -> _uiState.update { it.copy(isCategorySuggestionsVisible = event.visible) }
+            is AddTransactionUiEvent.AdjustAmount -> {
+                _uiState.update { state ->
+                    val currentAmount = state.amount.toDoubleOrNull() ?: 0.0
+                    val newAmount = (currentAmount + event.delta).coerceAtLeast(0.0)
+                    state.copy(amount = if (newAmount > 0) String.format(Locale.getDefault(), "%.2f", newAmount) else "")
+                }
+            }
         }
     }
 

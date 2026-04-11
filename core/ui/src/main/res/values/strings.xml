@@ -31,4 +31,7 @@
     <string name="core_ui_quick_jump">Quick Jump</string>
     <string name="core_ui_spending_summary">Spending Summary</string>
     <string name="core_ui_transactions_count">%1$d transactions across %2$d categories</string>
+    <string name="core_ui_quick_expense_add">Add amount</string>
+    <string name="core_ui_quick_expense_subtract">Subtract amount</string>
+    <string name="core_ui_quick_expense_amount_format">$%1$d</string>
 </resources>

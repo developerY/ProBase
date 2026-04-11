@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
 
@@ -142,6 +143,10 @@ fun AddTransactionScreen(
                 label = { Text("Amount") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth()
+            )
+
+            QuickExpenseBar(
+                onAdjustAmount = { delta -> onEvent(AddTransactionUiEvent.AdjustAmount(delta)) }
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
