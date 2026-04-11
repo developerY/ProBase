@@ -4,15 +4,18 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 
 @Composable
@@ -60,6 +63,11 @@ fun AddTransactionScreen(
                     IconButton(onClick = { onEvent(AddTransactionUiEvent.BackClicked) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
+                },
+                actions = {
+                    IconButton(onClick = { navTo(SeaweedDestination.Camera) }) {
+                        Icon(Icons.Default.CameraAlt, contentDescription = "Take Receipt Photo")
+                    }
                 }
             )
         },
@@ -72,6 +80,16 @@ fun AddTransactionScreen(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            uiState.receiptUri?.let { uri ->
+                AsyncImage(
+                    model = uri,
+                    contentDescription = "Receipt",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
+                )
+            }
             OutlinedTextField(
                 value = uiState.description,
                 onValueChange = { onEvent(AddTransactionUiEvent.DescriptionChanged(it)) },

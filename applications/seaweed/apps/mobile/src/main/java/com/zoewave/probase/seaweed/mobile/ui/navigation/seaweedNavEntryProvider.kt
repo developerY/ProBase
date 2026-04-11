@@ -12,6 +12,10 @@ import com.zoewave.probase.seaweed.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.TransactionsUiRoute
 import com.zoewave.probase.seaweed.mobile.ui.components.AdaptiveSeaweedScreen
+import com.zoewave.probase.features.camera.ui.CameraUIRoute
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionViewModel
+import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionUiEvent
 
 fun seaweedNavEntryProvider(
     key: SeaweedDestination,
@@ -79,6 +83,21 @@ fun seaweedNavEntryProvider(
                 SettingsUiRoute(
                     modifier = Modifier.fillMaxSize(),
                     navTo = navigateTo
+                )
+            }
+            SeaweedDestination.Camera -> {
+                val viewModel: AddTransactionViewModel = hiltViewModel()
+                CameraUIRoute(
+                    navTo = { routeString ->
+                        if (routeString.startsWith("result_ok:")) {
+                            val uriString = routeString.removePrefix("result_ok:")
+                            viewModel.onEvent(AddTransactionUiEvent.ReceiptAttached(uriString))
+                            onBack()
+                        } else {
+                            onBack()
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
