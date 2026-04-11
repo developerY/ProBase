@@ -562,9 +562,14 @@ fun CategoryDashboardCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
+                    text = "${category.totalProjects} Projects",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = contentColor.copy(alpha = 0.8f)
+                )
+                Text(
                     text = stringResource(R.string.applications_photodo_apps_mobile_features_home_tasks_count, category.completedTasks, category.totalTasks),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = contentColor.copy(alpha = 0.8f) // Slightly dim the subtitle
+                    color = contentColor.copy(alpha = 0.8f)
                 )
             }
 
@@ -628,6 +633,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
             CategoryOverviewUiModel(
                 id = 1L,
                 name = "Real Estate",
+                totalProjects = 3,
                 totalTasks = 24,
                 completedTasks = 18,
                 progressPercentage = 0.75f
@@ -635,6 +641,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
             CategoryOverviewUiModel(
                 id = 2L,
                 name = "Development",
+                totalProjects = 5,
                 totalTasks = 50,
                 completedTasks = 5,
                 progressPercentage = 0.10f
@@ -642,6 +649,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
             CategoryOverviewUiModel(
                 id = 3L,
                 name = "Business",
+                totalProjects = 2,
                 totalTasks = 12,
                 completedTasks = 12,
                 progressPercentage = 1.0f
@@ -649,6 +657,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
             CategoryOverviewUiModel(
                 id = 4L,
                 name = "Personal",
+                totalProjects = 4,
                 totalTasks = 8,
                 completedTasks = 4,
                 progressPercentage = 0.50f
@@ -656,6 +665,7 @@ private fun HomeOverviewScreenPopulatedPreview() {
             CategoryOverviewUiModel(
                 id = 5L,
                 name = "Hobbies",
+                totalProjects = 0,
                 totalTasks = 0,
                 completedTasks = 0,
                 progressPercentage = 0.0f

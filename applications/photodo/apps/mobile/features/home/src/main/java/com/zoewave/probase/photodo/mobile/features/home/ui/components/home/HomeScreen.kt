@@ -175,8 +175,8 @@ private fun HomeScreenPreview() {
         HomeScreen(
             uiState = HomeUiState(
                 categories = listOf(
-                    CategoryOverviewUiModel(1L, "Nature", 10, 5, 0.5f),
-                    CategoryOverviewUiModel(2L, "Urban", 8, 2, 0.25f)
+                    CategoryOverviewUiModel(1L, "Nature", 3, 10, 5, 0.5f),
+                    CategoryOverviewUiModel(2L, "Urban", 2, 8, 2, 0.25f)
                 ),
                 urgentProjects = listOf(
                     ProjectListUiModel(

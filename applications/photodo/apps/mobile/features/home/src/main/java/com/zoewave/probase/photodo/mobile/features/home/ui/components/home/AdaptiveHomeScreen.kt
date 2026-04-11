@@ -187,8 +187,8 @@ fun AdaptiveHomeScreenPreviewCompact() {
         AdaptiveHomeScreen(
             uiState = HomeUiState(
                 categories = listOf(
-                    CategoryOverviewUiModel(1L, "Work", 10, 5, 0.5f),
-                    CategoryOverviewUiModel(2L, "Personal", 5, 2, 0.4f)
+                    CategoryOverviewUiModel(1L, "Work", 3, 10, 5, 0.5f),
+                    CategoryOverviewUiModel(2L, "Personal", 2, 5, 2, 0.4f)
                 ),
                 urgentProjects = listOf(
                     ProjectListUiModel(1L, "Project A", "Work", isUrgent = true),
@@ -210,8 +210,8 @@ fun AdaptiveHomeScreenPreviewExpanded() {
         AdaptiveHomeScreen(
             uiState = HomeUiState(
                 categories = listOf(
-                    CategoryOverviewUiModel(1L, "Work", 10, 5, 0.5f),
-                    CategoryOverviewUiModel(2L, "Personal", 5, 2, 0.4f)
+                    CategoryOverviewUiModel(1L, "Work", 3, 10, 5, 0.5f),
+                    CategoryOverviewUiModel(2L, "Personal", 2, 5, 2, 0.4f)
                 ),
                 urgentProjects = listOf(
                     ProjectListUiModel(1L, "Project A", "Work", isUrgent = true),

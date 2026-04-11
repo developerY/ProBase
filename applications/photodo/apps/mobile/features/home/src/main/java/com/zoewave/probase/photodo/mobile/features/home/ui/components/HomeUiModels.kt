@@ -19,6 +19,7 @@ data class HomeOverviewSummaryUiModel(
 data class CategoryQuickJumpUiModel(
     val id: Long,
     val name: String,
+    val totalProjects: Int,
     val progressText: String, // e.g., "5/50 Tasks"
     val progressPercentage: Float, // For the tiny progress bar
     val containerColor: Color,

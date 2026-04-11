@@ -60,10 +60,10 @@ fun mapCategoriesToWheelSlices(
 @Composable
 fun MapCategoriesToWheelSlicesPreview() {
     val sampleCategories = listOf(
-        CategoryOverviewUiModel(1, "Work", 10, 5, 0.5f),
-        CategoryOverviewUiModel(2, "Personal", 5, 2, 0.4f),
-        CategoryOverviewUiModel(3, "Shopping", 3, 3, 1.0f),
-        CategoryOverviewUiModel(4, "Health", 2, 0, 0f)
+        CategoryOverviewUiModel(1, "Work", 3, 10, 5, 0.5f),
+        CategoryOverviewUiModel(2, "Personal", 2, 5, 2, 0.4f),
+        CategoryOverviewUiModel(3, "Shopping", 1, 3, 3, 1.0f),
+        CategoryOverviewUiModel(4, "Health", 1, 2, 0, 0f)
     )
 
     PhotoDoTheme {

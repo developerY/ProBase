@@ -91,6 +91,7 @@ class HomeViewModel @Inject constructor(
                     CategoryOverviewUiModel(
                         id = category.categoryId,
                         name = category.name,
+                        totalProjects = projectsWithTasks.size,
                         totalTasks = totalTasksInCategory,
                         completedTasks = completedTasksInCategory,
                         progressPercentage = progressPercentage
