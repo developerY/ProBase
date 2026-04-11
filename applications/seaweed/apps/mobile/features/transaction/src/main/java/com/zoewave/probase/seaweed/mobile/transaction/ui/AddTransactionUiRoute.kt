@@ -3,16 +3,32 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Coffee
+import androidx.compose.material.icons.filled.DirectionsBus
+import androidx.compose.material.icons.filled.Fastfood
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -69,7 +85,7 @@ fun AddTransactionUiRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddTransactionScreen(
     modifier: Modifier = Modifier,
@@ -99,7 +115,8 @@ fun AddTransactionScreen(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             uiState.receiptUri?.let { uri ->
@@ -125,12 +142,56 @@ fun AddTransactionScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth()
             )
-            OutlinedTextField(
-                value = uiState.category,
-                onValueChange = { onEvent(AddTransactionUiEvent.CategoryChanged(it)) },
-                label = { Text("Category") },
-                modifier = Modifier.fillMaxWidth()
-            )
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = uiState.category,
+                    onValueChange = { onEvent(AddTransactionUiEvent.CategoryChanged(it)) },
+                    label = { Text("Category") },
+                    modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = { Icon(Icons.Default.Category, contentDescription = null) }
+                )
+
+                if (uiState.recentCategories.isNotEmpty()) {
+                    Text("Recent", style = MaterialTheme.typography.labelMedium)
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(bottom = 8.dp)
+                    ) {
+                        items(uiState.recentCategories) { category ->
+                            AssistChip(
+                                onClick = { onEvent(AddTransactionUiEvent.CategoryChanged(category)) },
+                                label = { Text(category) }
+                            )
+                        }
+                    }
+                }
+
+                Text("Suggestions", style = MaterialTheme.typography.labelMedium)
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val suggestions = listOf(
+                        "Food" to Icons.Default.Fastfood,
+                        "Coffee" to Icons.Default.Coffee,
+                        "Transport" to Icons.Default.DirectionsBus,
+                        "Shopping" to Icons.Default.ShoppingBag,
+                        "Housing" to Icons.Default.Home,
+                        "Health" to Icons.Default.LocalHospital
+                    )
+                    suggestions.forEach { (name, icon) ->
+                        FilterChip(
+                            selected = uiState.category == name,
+                            onClick = { onEvent(AddTransactionUiEvent.CategoryChanged(name)) },
+                            label = { Text(name) },
+                            leadingIcon = { Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                        )
+                    }
+                }
+            }
+
             Button(
                 onClick = { onEvent(AddTransactionUiEvent.SaveTransaction) },
                 modifier = Modifier.fillMaxWidth()
@@ -246,7 +307,8 @@ private fun AddTransactionScreenPreview() {
                 tipPercentage = 15,
                 customTipAmount = "6.30",
                 isSplitWidgetVisible = true,
-                splitCount = 3
+                splitCount = 3,
+                recentCategories = listOf("Groceries", "Entertainment", "Gifts")
             ),
             onEvent = {},
             navTo = {}
