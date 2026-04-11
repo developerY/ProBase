@@ -89,6 +89,8 @@ projectedXR = "1.0.0-alpha04"
 # -- Google Services & Firebase --
 playServicesCoroutines = "1.10.2"
 mlkitTextRecognition = "16.0.1"
+googleAiEdgeAicore = "0.0.1-exp02"
+googleGenerativeAi = "0.9.0"
 playServicesCodeScanner = "16.1.0"
 firebaseBom = "34.8.0"
 googleGmsGoogleServices = "4.4.4"
@@ -249,6 +251,8 @@ firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashly
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-installations = { group = "com.google.firebase", name = "firebase-installations" }
 mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitTextRecognition" }
+google-ai-edge-aicore = { group = "com.google.ai.edge.aicore", name = "aicore", version.ref = "googleAiEdgeAicore" }
+google-generative-ai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "googleGenerativeAi" }
 gms-play-services-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "playServicesCodeScanner" }
 
 # -- Serialization --
