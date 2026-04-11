@@ -16,8 +16,8 @@ android {
 
     defaultConfig {
         applicationId = "com.zoewave.probase.photodo"
-        versionCode = 2
-        versionName = "0.0.1"
+        versionCode = 8
+        versionName = "0.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
