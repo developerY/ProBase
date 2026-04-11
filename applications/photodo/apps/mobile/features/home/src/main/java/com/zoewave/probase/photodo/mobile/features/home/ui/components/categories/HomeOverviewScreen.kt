@@ -1,5 +1,8 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -94,6 +97,7 @@ fun HomeOverviewScreen(
     var showAddCategorySheet by rememberSaveable { mutableStateOf(false) }
     var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
+    var isSearchMode by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -120,6 +124,8 @@ fun HomeOverviewScreen(
     ) { innerPadding ->
         HomeOverviewContent(
             uiState = uiState,
+            isSearchMode = isSearchMode,
+            onSearchModeChange = { isSearchMode = it },
             onEvent = onEvent,
             navTo = navTo,
             onDeleteClicked = { categoryToDelete = it },
@@ -191,12 +197,22 @@ fun HomeOverviewFab(
 @Composable
 fun HomeOverviewContent(
     uiState: HomeUiState,
+    isSearchMode: Boolean,
+    onSearchModeChange: (Boolean) -> Unit,
     onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
     onDeleteClicked: (CategoryOverviewUiModel) -> Unit,
     modifier: Modifier = Modifier,
     showSummaryHeader: Boolean = true
 ) {
+    val filteredCategories = remember(uiState.categories, uiState.searchQuery) {
+        if (uiState.searchQuery.isBlank()) {
+            uiState.categories
+        } else {
+            uiState.categories.filter { it.name.contains(uiState.searchQuery, ignoreCase = true) }
+        }
+    }
+
     Box(
         modifier = modifier.fillMaxSize()
     ) {
@@ -218,36 +234,68 @@ fun HomeOverviewContent(
             ) {
                 // --- 🚀 NEW: Header Row (Shortcuts) ---
                 item(span = { GridItemSpan(2) }) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    AnimatedVisibility(
+                        visible = isSearchMode,
+                        enter = fadeIn(),
+                        exit = fadeOut()
                     ) {
-                        Text(
-                            text = "PhotoDo",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.primary
+                        OutlinedTextField(
+                            value = uiState.searchQuery,
+                            onValueChange = { onEvent(HomeEvent.OnSearchQueryChanged(it)) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            placeholder = { Text("Search categories...") },
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    onEvent(HomeEvent.OnSearchQueryChanged(""))
+                                    onSearchModeChange(false)
+                                }) {
+                                    Icon(Icons.Default.Close, contentDescription = "Close search")
+                                }
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(16.dp)
                         )
-                        IconButton(
-                            onClick = { /* TODO: Search */ },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                    }
+
+                    AnimatedVisibility(
+                        visible = !isSearchMode,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Default.Search, contentDescription = "Search")
+                            Text(
+                                text = "PhotoDo",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            IconButton(
+                                onClick = { onSearchModeChange(true) },
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                            ) {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            }
                         }
                     }
                 }
 
-                if (showSummaryHeader) {
+                if (showSummaryHeader && !isSearchMode) {
                     item(span = { GridItemSpan(2) }) {
                         OverviewSummaryCard(categories = uiState.categories)
                     }
                 }
 
                 itemsIndexed(
-                    items = uiState.categories,
+                    items = filteredCategories,
                     key = { _, category -> category.id }
                 ) { index, category ->
                     CategoryDashboardCard(

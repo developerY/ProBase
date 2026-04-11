@@ -66,6 +66,7 @@ fun AdaptiveHomeScreen(
         var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
         var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
         var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
+        var isSearchMode by rememberSaveable { mutableStateOf(false) }
 
         Scaffold(
             modifier = modifier.fillMaxSize(),
@@ -154,6 +155,8 @@ fun AdaptiveHomeScreen(
                     // RIGHT PANE: The Directory (Full Category Grid)
                     HomeOverviewContent(
                         uiState = uiState,
+                        isSearchMode = isSearchMode,
+                        onSearchModeChange = { isSearchMode = it },
                         onEvent = onEvent,
                         navTo = { route -> if (route != null) navTo(route) },
                         onDeleteClicked = { categoryToDelete = it },

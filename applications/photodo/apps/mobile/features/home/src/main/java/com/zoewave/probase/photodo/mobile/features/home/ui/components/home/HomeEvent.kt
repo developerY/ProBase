@@ -14,5 +14,6 @@ sealed interface HomeEvent {
     data class OnDeleteCategory(val categoryId: Long) : HomeEvent
 
     data class OnAddQuickProjectClicked(val overrideCategoryName: String? = null) : HomeEvent
+    data class OnSearchQueryChanged(val query: String) : HomeEvent
     data object OnDismissBottomSheet : HomeEvent
 }

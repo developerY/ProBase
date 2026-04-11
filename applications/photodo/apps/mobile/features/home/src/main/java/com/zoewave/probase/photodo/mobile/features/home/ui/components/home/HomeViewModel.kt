@@ -34,7 +34,8 @@ class HomeViewModel @Inject constructor(
 
     private data class UiFlags(
         val isQuickProjectSheetOpen: Boolean = false,
-        val quickProjectCategoryOverride: String? = null
+        val quickProjectCategoryOverride: String? = null,
+        val searchQuery: String = ""
     )
 
     private val _uiFlags = MutableStateFlow(UiFlags())
@@ -101,7 +102,8 @@ class HomeViewModel @Inject constructor(
                 categories = overviewModels,
                 urgentProjects = urgentProjects,
                 isQuickProjectSheetOpen = flags.isQuickProjectSheetOpen,
-                quickProjectCategoryOverride = flags.quickProjectCategoryOverride
+                quickProjectCategoryOverride = flags.quickProjectCategoryOverride,
+                searchQuery = flags.searchQuery
             )
         }
         .flowOn(Dispatchers.Default)
@@ -192,6 +194,12 @@ class HomeViewModel @Inject constructor(
                     } catch (e: Exception) {
                         Log.e(TAG, "Error deleting category", e)
                     }
+                }
+            }
+
+            is HomeEvent.OnSearchQueryChanged -> {
+                _uiFlags.update { 
+                    it.copy(searchQuery = event.query)
                 }
             }
         }
