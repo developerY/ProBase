@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 
@@ -20,7 +21,10 @@ data class AddTransactionUiState(
     val receiptUri: String? = null,
     val isSuccess: Boolean = false,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isTipWidgetVisible: Boolean = false,
+    val tipPercentage: Int? = null,
+    val customTipAmount: String = ""
 )
 
 sealed interface AddTransactionUiEvent {
@@ -31,6 +35,9 @@ sealed interface AddTransactionUiEvent {
     object SaveTransaction : AddTransactionUiEvent
     object BackClicked : AddTransactionUiEvent
     object SuccessConsumed : AddTransactionUiEvent
+    object ToggleTipWidget : AddTransactionUiEvent
+    data class SelectTipPercentage(val percentage: Int?) : AddTransactionUiEvent
+    data class CustomTipAmountChanged(val value: String) : AddTransactionUiEvent
 }
 
 @HiltViewModel
@@ -50,12 +57,33 @@ class AddTransactionViewModel @Inject constructor(
             AddTransactionUiEvent.SaveTransaction -> saveTransaction()
             AddTransactionUiEvent.BackClicked -> { /* Handled in Route */ }
             AddTransactionUiEvent.SuccessConsumed -> _uiState.update { it.copy(isSuccess = false) }
+            AddTransactionUiEvent.ToggleTipWidget -> _uiState.update { it.copy(isTipWidgetVisible = !it.isTipWidgetVisible) }
+            is AddTransactionUiEvent.SelectTipPercentage -> {
+                _uiState.update { state ->
+                    val baseAmount = state.amount.toDoubleOrNull() ?: 0.0
+                    val tipAmount = if (event.percentage != null) {
+                        baseAmount * (event.percentage / 100.0)
+                    } else {
+                        0.0
+                    }
+                    state.copy(
+                        tipPercentage = event.percentage,
+                        customTipAmount = if (event.percentage != null) String.format(Locale.getDefault(), "%.2f", tipAmount) else ""
+                    )
+                }
+            }
+            is AddTransactionUiEvent.CustomTipAmountChanged -> {
+                _uiState.update { it.copy(customTipAmount = event.value, tipPercentage = null) }
+            }
         }
     }
 
     private fun saveTransaction() {
         val amountValue = _uiState.value.amount.toDoubleOrNull() ?: 0.0
-        if (amountValue <= 0.0 || _uiState.value.category.isBlank()) {
+        val tipValue = _uiState.value.customTipAmount.toDoubleOrNull() ?: 0.0
+        val totalAmount = amountValue + tipValue
+
+        if (totalAmount <= 0.0 || _uiState.value.category.isBlank()) {
             _uiState.update { it.copy(errorMessage = "Please enter a valid amount and category") }
             return
         }
@@ -64,7 +92,7 @@ class AddTransactionViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             val transaction = Transaction(
                 id = UUID.randomUUID().toString(),
-                amount = amountValue,
+                amount = totalAmount,
                 category = _uiState.value.category,
                 description = _uiState.value.description,
                 date = System.currentTimeMillis(),
