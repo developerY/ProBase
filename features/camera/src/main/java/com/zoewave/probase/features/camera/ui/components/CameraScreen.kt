@@ -1,8 +1,10 @@
 package com.zoewave.probase.features.camera.ui.components
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Environment
+import android.provider.Settings
 import android.util.Log
 import android.view.OrientationEventListener
 import android.view.Surface
@@ -37,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -46,6 +49,7 @@ import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.zoewave.probase.features.camera.ui.CamEvent
 import com.zoewave.probase.features.camera.ui.CamUIState
 import kotlinx.coroutines.Dispatchers
@@ -197,15 +201,34 @@ fun CameraScreen(
         }
     } else {
         // Permission Denied State
+        val textToShow = if (cameraPermissionState.status.shouldShowRationale) {
+            "The camera is important for this feature. Please grant the permission."
+        } else {
+            "Camera permission is required to take photos. Please enable it in settings."
+        }
+
         Column(
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize().padding(24.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Camera permission is required to take photos.", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = textToShow,
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
+            )
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { cameraPermissionState.launchPermissionRequest() }) {
-                Text("Grant Permission")
+            Button(onClick = {
+                if (cameraPermissionState.status.shouldShowRationale) {
+                    cameraPermissionState.launchPermissionRequest()
+                } else {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                    }
+                    context.startActivity(intent)
+                }
+            }) {
+                Text(if (cameraPermissionState.status.shouldShowRationale) "Grant Permission" else "Open Settings")
             }
         }
     }
@@ -215,7 +238,7 @@ private fun createFile(context: Context): File {
     // 1. Force the use of the strictly internal, sandboxed directory
     val internalDir = context.filesDir
     // 2. Create your dedicated app folder inside that sandbox
-    val outputDir = File(internalDir, "PhotoDoImages").apply { mkdirs() }
+    val outputDir = File(internalDir, "CapturedImages").apply { mkdirs() }
     // 3. Generate the file name
     val fileName = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis()) + ".jpg"
     return File(outputDir, fileName)
