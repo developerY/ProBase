@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -28,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -181,6 +184,51 @@ fun AddTransactionScreen(
                     )
                 }
             }
+
+            TextButton(
+                onClick = { onEvent(AddTransactionUiEvent.ToggleSplitWidget) },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Text(if (uiState.isSplitWidgetVisible) "Hide Split Bill" else "Split Bill")
+            }
+
+            AnimatedVisibility(visible = uiState.isSplitWidgetVisible) {
+                val base = uiState.amount.toDoubleOrNull() ?: 0.0
+                val tip = uiState.customTipAmount.toDoubleOrNull() ?: 0.0
+                val total = base + tip
+                val perPerson = if (uiState.splitCount > 0) total / uiState.splitCount else total
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Split among", style = MaterialTheme.typography.labelMedium)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        IconButton(onClick = { onEvent(AddTransactionUiEvent.SplitCountChanged(uiState.splitCount - 1)) }) {
+                            Icon(Icons.Default.Remove, contentDescription = "Remove person")
+                        }
+                        Text(
+                            text = "${uiState.splitCount} people",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        IconButton(onClick = { onEvent(AddTransactionUiEvent.SplitCountChanged(uiState.splitCount + 1)) }) {
+                            Icon(Icons.Default.Add, contentDescription = "Add person")
+                        }
+                    }
+                    if (uiState.splitCount > 1) {
+                        Text(
+                            text = "Each person pays: $${String.format(Locale.getDefault(), "%.2f", perPerson)}",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -196,7 +244,9 @@ private fun AddTransactionScreenPreview() {
                 description = "Lunch with friends",
                 isTipWidgetVisible = true,
                 tipPercentage = 15,
-                customTipAmount = "6.30"
+                customTipAmount = "6.30",
+                isSplitWidgetVisible = true,
+                splitCount = 3
             ),
             onEvent = {},
             navTo = {}
