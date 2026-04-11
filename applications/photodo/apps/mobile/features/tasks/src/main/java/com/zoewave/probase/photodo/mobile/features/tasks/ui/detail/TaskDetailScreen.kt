@@ -69,6 +69,7 @@ import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
+import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.photodo.mobile.core.ui.components.BudgetProgressBar
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.tasks.R
@@ -272,7 +273,7 @@ fun TaskDetailScreen(
                             }
                             item {
                                 QuickExpenseBar(
-                                    onAdjustSpend = { adjustmentAmount ->
+                                    onAdjustAmount = { adjustmentAmount ->
                                         // Automatically generate a generic description based on + or -
                                         val description = if (adjustmentAmount > 0) {
                                             context.getString(R.string.applications_photodo_apps_mobile_features_tasks_detail_quick_edit_plus)

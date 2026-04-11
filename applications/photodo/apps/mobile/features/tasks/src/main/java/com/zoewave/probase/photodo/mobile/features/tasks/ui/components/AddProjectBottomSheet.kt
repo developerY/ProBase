@@ -55,11 +55,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.applications.photodo.db.model.quickTemplates
+import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.tasks.R
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TaskDraftState
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.QuickExpenseBar
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
@@ -260,7 +260,7 @@ fun AddProjectBottomSheetContent(
                 color = MaterialTheme.colorScheme.primary
             )
             QuickExpenseBar(
-                onAdjustSpend = { adjustment -> 
+                onAdjustAmount = { adjustment ->
                     onEvent(TasksEvent.OnAdjustDraftBudget(adjustment)) 
                 }
             )
