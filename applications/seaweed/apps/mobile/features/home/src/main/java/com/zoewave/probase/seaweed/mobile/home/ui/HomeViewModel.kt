@@ -57,6 +57,7 @@ class HomeViewModel @Inject constructor(
                     repository.addTransaction(randomTransaction)
                 }
             }
+            HomeUiEvent.OnBackClicked -> { /* Handled in Route */ }
         }
     }
 }

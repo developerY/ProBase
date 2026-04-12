@@ -76,6 +76,7 @@ class BillsViewModel @Inject constructor(
                     )
                     repository.saveExpense(newExpense)
                 }
+                BillsUiEvent.OnBackClicked -> { /* Handled in Route */ }
             }
         }
     }
@@ -99,4 +100,5 @@ sealed interface BillsUiEvent {
         val frequency: ExpenseFrequency,
         val category: ExpenseCategory
     ) : BillsUiEvent
+    object OnBackClicked : BillsUiEvent
 }

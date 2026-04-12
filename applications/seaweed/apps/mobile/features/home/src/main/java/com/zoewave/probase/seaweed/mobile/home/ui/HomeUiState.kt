@@ -19,4 +19,5 @@ sealed interface HomeUiState {
 sealed interface HomeUiEvent {
     data class DeleteTransaction(val id: String) : HomeUiEvent
     object AddRandomTransaction : HomeUiEvent
+    object OnBackClicked : HomeUiEvent
 }

@@ -33,7 +33,15 @@ class HomeViewModel @Inject constructor(
             initialValue = HomeUiState.Loading
         )
 
-    fun addRandomTransaction() {
+    fun onEvent(event: HomeUiEvent) {
+        when (event) {
+            HomeUiEvent.AddRandomTransaction -> addRandomTransaction()
+            HomeUiEvent.NavigateToTransactions -> { /* Handled in Route */ }
+            HomeUiEvent.NavigateToBills -> { /* Handled in Route */ }
+        }
+    }
+
+    private fun addRandomTransaction() {
         viewModelScope.launch {
             val categories = listOf("Food", "Transport", "Rent", "Entertainment", "Salary", "Investment")
             val randomTransaction = Transaction(
