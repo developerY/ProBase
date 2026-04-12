@@ -9,3 +9,9 @@ sealed interface HomeUiState {
         val topBudgets: List<CategoryOverview> = emptyList()
     ) : HomeUiState
 }
+
+sealed interface HomeUiEvent {
+    data object AddRandomTransaction : HomeUiEvent
+    data object NavigateToTransactions : HomeUiEvent
+    data object NavigateToBills : HomeUiEvent
+}

@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -14,6 +15,7 @@ import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material3.*
 import com.zoewave.probase.seaweed.model.Transaction
+import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -27,15 +29,23 @@ fun TransactionListRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     TransactionListScreen(
-        modifier = modifier,
-        uiState = uiState
+        uiState = uiState,
+        onEvent = { event ->
+            when (event) {
+                TransactionListUiEvent.NavigateBack -> onBack()
+            }
+        },
+        navTo = {},
+        modifier = modifier
     )
 }
 
 @Composable
 fun TransactionListScreen(
-    modifier: Modifier = Modifier,
-    uiState: TransactionListUiState
+    uiState: TransactionListUiState,
+    onEvent: (TransactionListUiEvent) -> Unit,
+    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val listState = rememberScalingLazyListState()
 
@@ -68,7 +78,7 @@ fun TransactionListScreen(
 }
 
 @Composable
-fun TransactionItem(transaction: Transaction) {
+private fun TransactionItem(transaction: Transaction) {
     TitleCard(
         onClick = { /* Detail not implemented */ },
         title = { Text(transaction.description) },
@@ -88,4 +98,33 @@ fun TransactionItem(transaction: Transaction) {
 private fun formatDate(timeInMillis: Long): String {
     val formatter = SimpleDateFormat("MMM dd", Locale.getDefault())
     return formatter.format(Date(timeInMillis))
+}
+
+@Preview(device = "id:wearos_small_round", showBackground = true)
+@Composable
+private fun TransactionListScreenPreview() {
+    MaterialTheme {
+        TransactionListScreen(
+            uiState = TransactionListUiState.Success(
+                transactions = listOf(
+                    Transaction("1", 42.0, "Food", "Lunch", 1000L),
+                    Transaction("2", -15.0, "Coffee", "Latte", 2000L)
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(device = "id:wearos_small_round", showBackground = true)
+@Composable
+private fun TransactionListScreenLoadingPreview() {
+    MaterialTheme {
+        TransactionListScreen(
+            uiState = TransactionListUiState.Loading,
+            onEvent = {},
+            navTo = {}
+        )
+    }
 }

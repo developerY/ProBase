@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -48,9 +49,9 @@ import com.zoewave.probase.core.ui.components.SimpleBarChart
 import com.zoewave.probase.seaweed.model.HabitInsight
 import com.zoewave.probase.seaweed.model.SpendingPeriod
 import com.zoewave.probase.seaweed.model.TrendPoint
+import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnalyticsUiRoute(
     modifier: Modifier = Modifier,
@@ -59,27 +60,48 @@ fun AnalyticsUiRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    AnalyticsScreen(
+        uiState = uiState,
+        onEvent = { event ->
+            when (event) {
+                AnalyticsUiEvent.OnBackClicked -> onBack()
+            }
+        },
+        navTo = {}, // Placeholder if navigation from here is needed
+        modifier = modifier
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AnalyticsScreen(
+    uiState: AnalyticsUiState,
+    onEvent: (AnalyticsUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Spending Analytics") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { onEvent(AnalyticsUiEvent.OnBackClicked) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
         },
-        modifier = modifier
+        modifier = modifier.fillMaxSize()
     ) { padding ->
         if (uiState.isLoading) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         } else {
-            AnalyticsScreen(
-                spendingTrends = uiState.spendingTrends,
-                habitInsights = uiState.habitInsights,
+            AnalyticsContent(
+                uiState = uiState,
+                onEvent = onEvent,
+                navTo = navTo,
                 modifier = Modifier.padding(padding)
             )
         }
@@ -88,9 +110,10 @@ fun AnalyticsUiRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AnalyticsScreen(
-    spendingTrends: Map<SpendingPeriod, List<TrendPoint>>,
-    habitInsights: List<HabitInsight>,
+private fun AnalyticsContent(
+    uiState: AnalyticsUiState,
+    @Suppress("UnusedParameter") onEvent: (AnalyticsUiEvent) -> Unit,
+    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var selectedPeriod by remember { mutableStateOf(SpendingPeriod.DAILY) }
@@ -120,7 +143,7 @@ fun AnalyticsScreen(
                                     selected = selectedPeriod == period,
                                     onClick = { 
                                         selectedPeriod = period 
-                                        selectedTrendPoint = null // Reset selection on period change
+                                        selectedTrendPoint = null
                                     },
                                     label = { Text(period.name.lowercase().replaceFirstChar { it.uppercase() }) },
                                     modifier = Modifier.padding(start = 4.dp)
@@ -131,7 +154,7 @@ fun AnalyticsScreen(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    val trendData = spendingTrends[selectedPeriod] ?: emptyList()
+                    val trendData = uiState.spendingTrends[selectedPeriod] ?: emptyList()
                     if (trendData.isNotEmpty()) {
                         SimpleBarChart(
                             data = trendData.map { BarData(it.label, it.value) },
@@ -201,12 +224,12 @@ fun AnalyticsScreen(
             }
         }
 
-        if (habitInsights.isNotEmpty()) {
+        if (uiState.habitInsights.isNotEmpty()) {
             item {
                 Text("Spending Habits", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
             
-            items(habitInsights) { insight ->
+            items(uiState.habitInsights) { insight ->
                 HabitInsightCard(insight = insight)
             }
         }
@@ -214,7 +237,7 @@ fun AnalyticsScreen(
 }
 
 @Composable
-fun HabitInsightCard(insight: HabitInsight) {
+private fun HabitInsightCard(insight: HabitInsight) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -253,5 +276,40 @@ fun HabitInsightCard(insight: HabitInsight) {
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AnalyticsScreenPreview() {
+    MaterialTheme {
+        AnalyticsScreen(
+            uiState = AnalyticsUiState(
+                isLoading = false,
+                spendingTrends = mapOf(
+                    SpendingPeriod.DAILY to listOf(
+                        TrendPoint("Oct 01", 42.0, 1000L, 2, "Food"),
+                        TrendPoint("Oct 02", 15.0, 2000L, 1, "Coffee")
+                    )
+                ),
+                habitInsights = listOf(
+                    HabitInsight("Coffee", 20, 80.0, 2.6, "You're doing this almost every day!")
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AnalyticsScreenLoadingPreview() {
+    MaterialTheme {
+        AnalyticsScreen(
+            uiState = AnalyticsUiState(isLoading = true),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }

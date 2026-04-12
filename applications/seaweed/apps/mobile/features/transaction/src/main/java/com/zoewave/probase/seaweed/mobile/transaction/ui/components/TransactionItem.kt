@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.seaweed.model.Transaction
 import java.util.Locale
@@ -51,5 +52,31 @@ fun TransactionItem(
                 Icon(Icons.Default.Delete, contentDescription = "Delete")
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TransactionItemPreview() {
+    MaterialTheme {
+        TransactionItem(
+            transaction = Transaction("1", 42.0, "Food", "Lunch with friends", 1000L),
+            onDelete = {},
+            onClick = {},
+            isSelected = false
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TransactionItemSelectedPreview() {
+    MaterialTheme {
+        TransactionItem(
+            transaction = Transaction("1", -15.0, "Coffee", "Morning Latte", 1000L),
+            onDelete = {},
+            onClick = {},
+            isSelected = true
+        )
     }
 }

@@ -8,6 +8,7 @@ import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.SwipeToDismissBox
 import androidx.wear.compose.navigation3.SwipeDismissableSceneStrategy
+import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.wear.ui.navigation.seaweedWearNavEntryProvider
 import com.zoewave.probase.seaweed.wear.ui.theme.SeaweedWearTheme
@@ -56,4 +57,10 @@ fun SeaweedWearMainScreen() {
             }
         }
     }
+}
+
+@Preview(device = "id:wearos_small_round", showBackground = true)
+@Composable
+private fun SeaweedWearMainScreenPreview() {
+    SeaweedWearMainScreen()
 }

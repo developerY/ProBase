@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
@@ -110,5 +111,21 @@ fun FixedCostsSummaryCard(
                 Text("$${String.format(Locale.getDefault(), "%.2f", startingBalance)}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black)
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RealMoneyHeroCardPreview() {
+    MaterialTheme {
+        RealMoneyHeroCard(flexibleRemaining = 1234.56, monthProgress = 0.65f, modifier = Modifier.padding(16.dp))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FixedCostsSummaryCardPreview() {
+    MaterialTheme {
+        FixedCostsSummaryCard(totalFixedCosts = 1500.0, income = 5000.0, navTo = {}, modifier = Modifier.padding(16.dp))
     }
 }

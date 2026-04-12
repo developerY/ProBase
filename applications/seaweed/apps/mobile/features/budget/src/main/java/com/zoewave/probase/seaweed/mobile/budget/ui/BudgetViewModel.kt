@@ -37,6 +37,7 @@ class BudgetViewModel @Inject constructor(
                 is BudgetUiEvent.DeleteBudget -> {
                     repository.deleteBudget(event.categoryName)
                 }
+                BudgetUiEvent.OnBackClicked -> { /* Handled in Route */ }
             }
         }
     }
@@ -50,4 +51,5 @@ sealed interface BudgetUiState {
 sealed interface BudgetUiEvent {
     data class UpdateBudget(val categoryName: String, val limitAmount: Double) : BudgetUiEvent
     data class DeleteBudget(val categoryName: String) : BudgetUiEvent
+    object OnBackClicked : BudgetUiEvent
 }

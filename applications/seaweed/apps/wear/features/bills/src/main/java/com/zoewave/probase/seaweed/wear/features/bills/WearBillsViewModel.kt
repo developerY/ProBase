@@ -43,6 +43,12 @@ class WearBillsViewModel @Inject constructor(
                 .launchIn(viewModelScope)
         }
     }
+
+    fun onEvent(event: WearBillsUiEvent) {
+        when (event) {
+            WearBillsUiEvent.NavigateBack -> { /* Handled in Route */ }
+        }
+    }
 }
 
 sealed interface WearBillsUiState {
@@ -51,4 +57,8 @@ sealed interface WearBillsUiState {
         val expenses: List<RecurringExpense> = emptyList(),
         val totalMonthlyFixedCosts: Double = 0.0
     ) : WearBillsUiState
+}
+
+sealed interface WearBillsUiEvent {
+    data object NavigateBack : WearBillsUiEvent
 }

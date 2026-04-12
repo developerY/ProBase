@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import java.util.Locale
@@ -123,3 +124,31 @@ val categoryColors = listOf(
 
 private val String.absoluteValue: Int
     get() = if (this.hashCode() == Int.MIN_VALUE) 0 else Math.abs(this.hashCode())
+
+@Preview(showBackground = true)
+@Composable
+private fun CategoryQuickJumpCardPreview() {
+    MaterialTheme {
+        CategoryQuickJumpCard(
+            category = CategoryOverview("Shopping", 250.0, 5, 500.0),
+            onClick = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DonutChartPreview() {
+    MaterialTheme {
+        DonutChart(
+            spendingByCategory = mapOf(
+                "Food" to 400.0,
+                "Coffee" to 150.0,
+                "Rent" to 1200.0,
+                "Entertainment" to 200.0
+            ),
+            modifier = Modifier.size(200.dp).padding(16.dp)
+        )
+    }
+}

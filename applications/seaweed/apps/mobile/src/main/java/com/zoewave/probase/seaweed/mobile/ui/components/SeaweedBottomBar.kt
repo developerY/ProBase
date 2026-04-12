@@ -6,6 +6,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.model.navigation.topLevelDestinations
 
@@ -33,4 +34,13 @@ fun SeaweedBottomBar(
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SeaweedBottomBarPreview() {
+    SeaweedBottomBar(
+        currentDestination = SeaweedDestination.Home,
+        navTo = {}
+    )
 }

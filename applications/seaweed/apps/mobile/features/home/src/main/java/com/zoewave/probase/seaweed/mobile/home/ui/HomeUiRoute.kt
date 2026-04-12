@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,6 +26,7 @@ import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.mobile.home.ui.components.*
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.CategoryOverview
+import com.zoewave.probase.seaweed.model.Transaction
 import java.util.Locale
 
 @Composable
@@ -36,20 +38,20 @@ fun HomeUiRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     HomeScreen(
-        modifier = modifier,
         uiState = uiState,
         onEvent = viewModel::onEvent,
-        navTo = navTo
+        navTo = navTo,
+        modifier = modifier
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
     uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
-    navTo: (SeaweedDestination) -> Unit
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val adaptiveInfo = currentWindowAdaptiveInfo()
     val isExpanded = adaptiveInfo.windowSizeClass.windowWidthSizeClass == androidx.window.core.layout.WindowWidthSizeClass.EXPANDED
@@ -75,115 +77,135 @@ fun HomeScreen(
             }
             is HomeUiState.Success -> {
                 if (isExpanded) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding)
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(24.dp)
-                    ) {
-                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(24.dp)) {
-                            RealMoneyHeroCard(
-                                flexibleRemaining = uiState.flexibleMoneyRemaining,
-                                monthProgress = uiState.monthProgress
-                            )
-                            OverviewSummaryCard(
-                                categories = uiState.categoriesSummary,
-                                navTo = navTo
-                            )
-                            UnallocatedMoneyCard(unallocatedAmount = uiState.unallocatedMoney)
-                            FixedCostsSummaryCard(
-                                totalFixedCosts = uiState.totalFixedCosts,
-                                income = uiState.monthlyIncome,
-                                navTo = navTo
-                            )
-                        }
-                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = stringResource(CoreUiR.string.core_ui_recent_transactions),
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Text(
-                                    text = stringResource(CoreUiR.string.core_ui_view_all),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.clickable { navTo(SeaweedDestination.Transactions(null)) }
-                                )
-                            }
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                items(uiState.transactions.take(10), key = { it.id }) { transaction ->
-                                    TransactionItem(
-                                        transaction = transaction,
-                                        onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
-                                        onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    HomeExpandedContent(uiState, onEvent, navTo, padding)
                 } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(24.dp)
-                    ) {
-                        item {
-                            RealMoneyHeroCard(
-                                flexibleRemaining = uiState.flexibleMoneyRemaining,
-                                monthProgress = uiState.monthProgress
-                            )
-                        }
-                        item {
-                            FixedCostsSummaryCard(
-                                totalFixedCosts = uiState.totalFixedCosts,
-                                income = uiState.monthlyIncome,
-                                navTo = navTo
-                            )
-                        }
-                        item {
-                            OverviewSummaryCard(
-                                categories = uiState.categoriesSummary,
-                                navTo = navTo
-                            )
-                        }
-                        item {
-                            UnallocatedMoneyCard(unallocatedAmount = uiState.unallocatedMoney)
-                        }
-                        item {
-                            Button(
-                                onClick = { navTo(SeaweedDestination.CategoryGrid) },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(stringResource(CoreUiR.string.core_ui_all_categories))
-                            }
-                        }
-                        item {
-                            Text(
-                                text = stringResource(CoreUiR.string.core_ui_recent_transactions),
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                        }
-                        items(uiState.transactions.take(5), key = { it.id }) { transaction ->
-                            TransactionItem(
-                                transaction = transaction,
-                                onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
-                                onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
-                            )
-                        }
-                    }
+                    HomeCompactContent(uiState, onEvent, navTo, padding)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun HomeExpandedContent(
+    uiState: HomeUiState.Success,
+    onEvent: (HomeUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    padding: PaddingValues
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+            RealMoneyHeroCard(
+                flexibleRemaining = uiState.flexibleMoneyRemaining,
+                monthProgress = uiState.monthProgress
+            )
+            OverviewSummaryCard(
+                categories = uiState.categoriesSummary,
+                navTo = navTo
+            )
+            UnallocatedMoneyCard(unallocatedAmount = uiState.unallocatedMoney)
+            FixedCostsSummaryCard(
+                totalFixedCosts = uiState.totalFixedCosts,
+                income = uiState.monthlyIncome,
+                navTo = navTo
+            )
+        }
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(CoreUiR.string.core_ui_recent_transactions),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = stringResource(CoreUiR.string.core_ui_view_all),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { navTo(SeaweedDestination.Transactions(null)) }
+                )
+            }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(uiState.transactions.take(10), key = { it.id }) { transaction ->
+                    TransactionItem(
+                        transaction = transaction,
+                        onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
+                        onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeCompactContent(
+    uiState: HomeUiState.Success,
+    onEvent: (HomeUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    padding: PaddingValues
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        item {
+            RealMoneyHeroCard(
+                flexibleRemaining = uiState.flexibleMoneyRemaining,
+                monthProgress = uiState.monthProgress
+            )
+        }
+        item {
+            FixedCostsSummaryCard(
+                totalFixedCosts = uiState.totalFixedCosts,
+                income = uiState.monthlyIncome,
+                navTo = navTo
+            )
+        }
+        item {
+            OverviewSummaryCard(
+                categories = uiState.categoriesSummary,
+                navTo = navTo
+            )
+        }
+        item {
+            UnallocatedMoneyCard(unallocatedAmount = uiState.unallocatedMoney)
+        }
+        item {
+            Button(
+                onClick = { navTo(SeaweedDestination.CategoryGrid) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(CoreUiR.string.core_ui_all_categories))
+            }
+        }
+        item {
+            Text(
+                text = stringResource(CoreUiR.string.core_ui_recent_transactions),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+        items(uiState.transactions.take(5), key = { it.id }) { transaction ->
+            TransactionItem(
+                transaction = transaction,
+                onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
+                onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
+            )
         }
     }
 }
@@ -262,5 +284,40 @@ fun OverviewSummaryCard(
                 Icon(Icons.Default.ChevronRight, contentDescription = null)
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenPreview() {
+    MaterialTheme {
+        HomeScreen(
+            uiState = HomeUiState.Success(
+                transactions = listOf(
+                    Transaction("1", 42.0, "Food", "Lunch", 1000L),
+                    Transaction("2", 15.0, "Coffee", "Latte", 2000L)
+                ),
+                categoriesSummary = listOf(
+                    CategoryOverview("Food", 42.0, 1, 100.0),
+                    CategoryOverview("Coffee", 15.0, 1, 50.0)
+                ),
+                flexibleMoneyRemaining = 500.0,
+                monthProgress = 0.5f
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenLoadingPreview() {
+    MaterialTheme {
+        HomeScreen(
+            uiState = HomeUiState.Loading,
+            onEvent = {},
+            navTo = {}
+        )
     }
 }

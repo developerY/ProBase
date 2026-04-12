@@ -1,7 +1,6 @@
 package com.zoewave.probase.seaweed.mobile.transaction.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -44,20 +42,18 @@ import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.seaweed.mobile.bills.ui.BillsScreen
 import com.zoewave.probase.seaweed.mobile.bills.ui.BillsViewModel
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
+import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.model.navigation.TransactionTab
 import kotlinx.coroutines.launch
@@ -101,8 +97,13 @@ fun TransactionsUiRoute(
             TransactionsListPane(
                 uiState = uiState,
                 billsUiState = billsUiState,
-                onEvent = viewModel::onEvent,
-                onBillsEvent = billsViewModel::onEvent,
+                onEvent = { event ->
+                    when (event) {
+                        is TransactionsUiEvent.NavigateTo -> navTo(event.destination)
+                        TransactionsUiEvent.OnBack -> { /* Handle back if needed */ }
+                        else -> viewModel.onEvent(event)
+                    }
+                },
                 navTo = navTo,
                 onTransactionClick = { id ->
                     viewModel.onEvent(TransactionsUiEvent.SelectTransaction(id))
@@ -115,14 +116,20 @@ fun TransactionsUiRoute(
         detailPane = {
             TransactionDetailPane(
                 uiState = uiState,
-                onEvent = viewModel::onEvent,
-                onBack = {
-                    if (navigator.canNavigateBack()) {
-                        scope.launch {
-                            navigator.navigateBack()
+                onEvent = { event ->
+                    when (event) {
+                        TransactionsUiEvent.OnBack -> {
+                            if (navigator.canNavigateBack()) {
+                                scope.launch {
+                                    navigator.navigateBack()
+                                }
+                            }
                         }
+                        is TransactionsUiEvent.NavigateTo -> navTo(event.destination)
+                        else -> viewModel.onEvent(event)
                     }
-                }
+                },
+                navTo = navTo
             )
         },
         modifier = modifier
@@ -133,24 +140,20 @@ fun TransactionsUiRoute(
 @Composable
 fun TransactionsListPane(
     uiState: TransactionsUiState,
-    @Suppress("UnusedParameter") billsUiState: Any, // We need the actual BillsUiState
+    billsUiState: com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState,
     onEvent: (TransactionsUiEvent) -> Unit,
-    onBillsEvent: (com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiEvent) -> Unit,
     navTo: (SeaweedDestination) -> Unit,
     onTransactionClick: (String) -> Unit
 ) {
-    // Re-cast for proper usage, though it's better to pass it in directly
-    val billsState = billsUiState as? com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Transactions") },
                 actions = {
-                    IconButton(onClick = { navTo(SeaweedDestination.Analytics) }) {
+                    IconButton(onClick = { onEvent(TransactionsUiEvent.NavigateTo(SeaweedDestination.Analytics)) }) {
                         Icon(Icons.Default.Analytics, contentDescription = "Analytics")
                     }
-                    IconButton(onClick = { navTo(SeaweedDestination.Budget) }) {
+                    IconButton(onClick = { onEvent(TransactionsUiEvent.NavigateTo(SeaweedDestination.Budget)) }) {
                         Icon(Icons.Default.PieChart, contentDescription = "Budget")
                     }
                 }
@@ -201,14 +204,12 @@ fun TransactionsListPane(
                             )
                         }
                         TransactionTab.CYCLIC -> {
-                            if (billsState != null) {
-                                BillsScreen(
-                                    uiState = billsState,
-                                    onEvent = onBillsEvent,
-                                    navTo = navTo,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
+                            BillsScreen(
+                                uiState = billsUiState,
+                                onEvent = { /* Map to bills event if needed */ },
+                                navTo = navTo,
+                                modifier = Modifier.fillMaxSize()
+                            )
                         }
                     }
                 }
@@ -218,7 +219,7 @@ fun TransactionsListPane(
 }
 
 @Composable
-fun RecentTransactionsContent(
+private fun RecentTransactionsContent(
     uiState: TransactionsUiState.Success,
     onEvent: (TransactionsUiEvent) -> Unit,
     onTransactionClick: (String) -> Unit
@@ -257,7 +258,7 @@ fun RecentTransactionsContent(
 fun TransactionDetailPane(
     uiState: TransactionsUiState,
     onEvent: (TransactionsUiEvent) -> Unit,
-    onBack: () -> Unit
+    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit
 ) {
     val transaction = (uiState as? TransactionsUiState.Success)?.selectedTransaction
 
@@ -266,7 +267,7 @@ fun TransactionDetailPane(
             TopAppBar(
                 title = { Text("Transaction Details") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { onEvent(TransactionsUiEvent.OnBack) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -274,7 +275,7 @@ fun TransactionDetailPane(
                     if (transaction != null) {
                         IconButton(onClick = { 
                             onEvent(TransactionsUiEvent.DeleteTransaction(transaction.id))
-                            onBack()
+                            onEvent(TransactionsUiEvent.OnBack)
                         }) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete")
                         }
@@ -369,5 +370,39 @@ fun CategoryFilterRow(
                 label = { Text(category) }
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TransactionsListPanePreview() {
+    MaterialTheme {
+        TransactionsListPane(
+            uiState = TransactionsUiState.Success(
+                transactions = listOf(
+                    Transaction("1", 42.0, "Food", "Lunch", 1000L),
+                    Transaction("2", 15.0, "Coffee", "Latte", 2000L)
+                ),
+                categories = listOf("Food", "Coffee")
+            ),
+            billsUiState = com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState.Success(),
+            onEvent = {},
+            navTo = {},
+            onTransactionClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TransactionDetailPanePreview() {
+    MaterialTheme {
+        TransactionDetailPane(
+            uiState = TransactionsUiState.Success(
+                selectedTransaction = Transaction("1", 42.0, "Food", "Lunch with friends", 1000L)
+            ),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }

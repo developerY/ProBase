@@ -40,6 +40,7 @@ class SettingsViewModel @Inject constructor(
                 is SettingsUiEvent.UpdateIncome -> {
                     repository.saveUserSettings(currentSettings.copy(monthlyIncome = event.income))
                 }
+                is SettingsUiEvent.NavigateTo -> { /* Handled in Route */ }
             }
         }
     }
@@ -54,4 +55,5 @@ sealed interface SettingsUiEvent {
     data class UpdateTheme(val themeConfig: SeaweedThemeConfig) : SettingsUiEvent
     data class UpdateThemeMode(val themeMode: ThemeMode) : SettingsUiEvent
     data class UpdateIncome(val income: Double) : SettingsUiEvent
+    data class NavigateTo(val destination: com.zoewave.probase.seaweed.model.navigation.SeaweedDestination) : SettingsUiEvent
 }

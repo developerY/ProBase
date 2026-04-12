@@ -74,7 +74,6 @@ fun AddTransactionUiRoute(
     }
 
     AddTransactionScreen(
-        modifier = modifier,
         uiState = uiState,
         onEvent = { event ->
             if (event is AddTransactionUiEvent.BackClicked) {
@@ -83,17 +82,18 @@ fun AddTransactionUiRoute(
                 viewModel.onEvent(event)
             }
         },
-        navTo = navTo
+        navTo = navTo,
+        modifier = modifier
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddTransactionScreen(
-    modifier: Modifier = Modifier,
     uiState: AddTransactionUiState,
     onEvent: (AddTransactionUiEvent) -> Unit,
-    navTo: (SeaweedDestination) -> Unit
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {

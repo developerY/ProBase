@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -14,10 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.seaweed.model.ExpenseCategory
+import com.zoewave.probase.seaweed.model.ExpenseFrequency
 import com.zoewave.probase.seaweed.model.RecurringExpense
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
@@ -26,71 +29,84 @@ import java.util.Locale
 fun BillsUiRoute(
     modifier: Modifier = Modifier,
     viewModel: BillsViewModel = hiltViewModel(),
-    navTo: (SeaweedDestination) -> Unit
+    navTo: (SeaweedDestination) -> Unit,
+    onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    BillsScreen(
+        uiState = uiState,
+        onEvent = { event ->
+            if (event is BillsUiEvent.OnBackClicked) {
+                onBack()
+            } else {
+                viewModel.onEvent(event)
+            }
+        },
+        navTo = navTo,
+        modifier = modifier
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@Composable
+fun BillsScreen(
+    uiState: BillsUiState,
+    onEvent: (BillsUiEvent) -> Unit,
+    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         topBar = {
-            @OptIn(ExperimentalMaterial3Api::class)
-            TopAppBar(title = { Text("Cyclic Bills") })
+            TopAppBar(
+                title = { Text("Cyclic Bills") },
+                navigationIcon = {
+                    IconButton(onClick = { onEvent(BillsUiEvent.OnBackClicked) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { /* TODO: Show Add Dialog */ }) {
                 Icon(Icons.Default.Add, contentDescription = "Add Bill")
             }
         },
-        modifier = modifier
+        modifier = modifier.fillMaxSize()
     ) { padding ->
-        BillsScreen(
-            modifier = Modifier.padding(padding),
-            uiState = uiState,
-            onEvent = viewModel::onEvent,
-            navTo = navTo
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
-@Composable
-fun BillsScreen(
-    modifier: Modifier = Modifier,
-    uiState: BillsUiState,
-    onEvent: (BillsUiEvent) -> Unit,
-    navTo: (SeaweedDestination) -> Unit
-) {
-    Box(modifier = modifier) {
-        when (uiState) {
-            BillsUiState.Loading -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-            is BillsUiState.Success -> {
-                val groupedExpenses = uiState.expenses.groupBy { it.category }
-                
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    item {
-                        BillImpactHeader(
-                            income = uiState.monthlyIncome,
-                            totalCosts = uiState.totalFixedCosts
-                        )
+        Box(modifier = Modifier.padding(padding)) {
+            when (uiState) {
+                BillsUiState.Loading -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
+                }
+                is BillsUiState.Success -> {
+                    val groupedExpenses = uiState.expenses.groupBy { it.category }
                     
-                    groupedExpenses.forEach { (category, expenses) ->
-                        stickyHeader {
-                            CategoryHeader(category = category)
-                        }
-                        items(expenses, key = { it.id }) { expense ->
-                            BillItem(
-                                expense = expense,
-                                onAmountChange = { onEvent(BillsUiEvent.UpdateExpenseAmount(expense.id, it)) },
-                                onDelete = { onEvent(BillsUiEvent.DeleteExpense(expense.id)) }
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        item {
+                            BillImpactHeader(
+                                income = uiState.monthlyIncome,
+                                totalCosts = uiState.totalFixedCosts
                             )
+                        }
+                        
+                        groupedExpenses.forEach { (category, expenses) ->
+                            stickyHeader {
+                                CategoryHeader(category = category)
+                            }
+                            items(expenses, key = { it.id }) { expense ->
+                                BillItem(
+                                    expense = expense,
+                                    onAmountChange = { onEvent(BillsUiEvent.UpdateExpenseAmount(expense.id, it)) },
+                                    onDelete = { onEvent(BillsUiEvent.DeleteExpense(expense.id)) }
+                                )
+                            }
                         }
                     }
                 }
@@ -100,7 +116,7 @@ fun BillsScreen(
 }
 
 @Composable
-fun BillImpactHeader(income: Double, totalCosts: Double) {
+private fun BillImpactHeader(income: Double, totalCosts: Double) {
     val remaining = income - totalCosts
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -126,7 +142,7 @@ fun BillImpactHeader(income: Double, totalCosts: Double) {
 }
 
 @Composable
-fun CategoryHeader(category: ExpenseCategory) {
+private fun CategoryHeader(category: ExpenseCategory) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface
@@ -142,7 +158,7 @@ fun CategoryHeader(category: ExpenseCategory) {
 }
 
 @Composable
-fun BillItem(
+private fun BillItem(
     expense: RecurringExpense,
     onAmountChange: (Double) -> Unit,
     onDelete: () -> Unit
@@ -185,5 +201,36 @@ fun BillItem(
                 Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BillsScreenPreview() {
+    MaterialTheme {
+        BillsScreen(
+            uiState = BillsUiState.Success(
+                expenses = listOf(
+                    RecurringExpense("1", "Rent", 1200.0, ExpenseFrequency.MONTHLY, ExpenseCategory.HOUSING),
+                    RecurringExpense("2", "Internet", 60.0, ExpenseFrequency.MONTHLY, ExpenseCategory.UTILITIES)
+                ),
+                monthlyIncome = 5000.0,
+                totalFixedCosts = 1260.0
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BillsScreenLoadingPreview() {
+    MaterialTheme {
+        BillsScreen(
+            uiState = BillsUiState.Loading,
+            onEvent = {},
+            navTo = {}
+        )
     }
 }

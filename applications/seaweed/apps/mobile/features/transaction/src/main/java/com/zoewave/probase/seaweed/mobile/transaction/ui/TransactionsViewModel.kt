@@ -88,6 +88,8 @@ class TransactionsViewModel @Inject constructor(
             is TransactionsUiEvent.SelectTab -> {
                 _selectedTab.value = event.tab
             }
+            is TransactionsUiEvent.NavigateTo -> { /* Handled in Route */ }
+            TransactionsUiEvent.OnBack -> { /* Handled in Route */ }
         }
     }
 }

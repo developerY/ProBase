@@ -27,6 +27,12 @@ class TransactionListViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = TransactionListUiState.Loading
         )
+
+    fun onEvent(event: TransactionListUiEvent) {
+        when (event) {
+            TransactionListUiEvent.NavigateBack -> { /* Handled in Route */ }
+        }
+    }
 }
 
 sealed interface TransactionListUiState {
@@ -34,4 +40,8 @@ sealed interface TransactionListUiState {
     data class Success(
         val transactions: List<Transaction> = emptyList()
     ) : TransactionListUiState
+}
+
+sealed interface TransactionListUiEvent {
+    data object NavigateBack : TransactionListUiEvent
 }
