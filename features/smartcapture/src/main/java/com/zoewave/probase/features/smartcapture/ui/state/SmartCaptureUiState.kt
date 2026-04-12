@@ -7,5 +7,6 @@ import com.zoewave.probase.features.smartcapture.domain.SmartTask
 data class SmartCaptureUiState(
     val isProcessing: Boolean = false,
     val capturedTask: SmartTask? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val showCamera: Boolean = false
 )

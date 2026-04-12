@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,9 +36,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.features.smartcapture.domain.SmartTask
 import com.zoewave.probase.features.smartcapture.ui.state.SmartCaptureUiState
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SmartCaptureUiRoute(
     viewModel: SmartCaptureViewModel = hiltViewModel(),
@@ -45,14 +51,36 @@ fun SmartCaptureUiRoute(
     onDismiss: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
 
-    SmartCaptureScreen(
-        uiState = uiState,
-        onCaptureClick = { /* Launch Camera Logic */ },
-        onConfirmTask = onTaskConfirmed,
-        onReset = viewModel::reset,
-        onDismiss = onDismiss
-    )
+    if (uiState.showCamera) {
+        if (cameraPermissionState.status.isGranted) {
+            CameraUIRoute(
+                navTo = { result ->
+                    if (result.startsWith("result_ok:")) {
+                        viewModel.onImageCaptured(result.removePrefix("result_ok:"))
+                    } else {
+                        viewModel.setCameraVisible(false)
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            LaunchedEffect(Unit) {
+                cameraPermissionState.launchPermissionRequest()
+            }
+            // Temporarily hide camera if permission is being requested or denied
+            viewModel.setCameraVisible(false)
+        }
+    } else {
+        SmartCaptureScreen(
+            uiState = uiState,
+            onCaptureClick = { viewModel.setCameraVisible(true) },
+            onConfirmTask = onTaskConfirmed,
+            onReset = viewModel::reset,
+            onDismiss = onDismiss
+        )
+    }
 }
 
 @Composable

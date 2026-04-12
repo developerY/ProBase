@@ -19,6 +19,9 @@ dependencies {
     implementation(libs.mlkit.text.recognition)
     implementation(libs.google.generative.ai)
 
+    // --- Core Features ---
+    implementation(project(":features:camera"))
+
     // --- Third Party ---
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -26,4 +29,5 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.google.accompanist.permissions)
 }
