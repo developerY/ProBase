@@ -101,16 +101,16 @@ fun TransactionsUiRoute(
                     when (event) {
                         is TransactionsUiEvent.NavigateTo -> navTo(event.destination)
                         TransactionsUiEvent.OnBack -> { /* Handle back if needed */ }
+                        is TransactionsUiEvent.SelectTransaction -> {
+                            viewModel.onEvent(event)
+                            scope.launch {
+                                navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, event.id)
+                            }
+                        }
                         else -> viewModel.onEvent(event)
                     }
                 },
-                navTo = navTo,
-                onTransactionClick = { id ->
-                    viewModel.onEvent(TransactionsUiEvent.SelectTransaction(id))
-                    scope.launch {
-                        navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id)
-                    }
-                }
+                navTo = navTo
             )
         },
         detailPane = {
@@ -142,8 +142,7 @@ fun TransactionsListPane(
     uiState: TransactionsUiState,
     billsUiState: com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState,
     onEvent: (TransactionsUiEvent) -> Unit,
-    navTo: (SeaweedDestination) -> Unit,
-    onTransactionClick: (String) -> Unit
+    navTo: (SeaweedDestination) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -199,8 +198,7 @@ fun TransactionsListPane(
                         TransactionTab.RECENT -> {
                             RecentTransactionsContent(
                                 uiState = uiState,
-                                onEvent = onEvent,
-                                onTransactionClick = onTransactionClick
+                                onEvent = onEvent
                             )
                         }
                         TransactionTab.CYCLIC -> {
@@ -221,8 +219,7 @@ fun TransactionsListPane(
 @Composable
 private fun RecentTransactionsContent(
     uiState: TransactionsUiState.Success,
-    onEvent: (TransactionsUiEvent) -> Unit,
-    onTransactionClick: (String) -> Unit
+    onEvent: (TransactionsUiEvent) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         CategoryFilterRow(
@@ -244,7 +241,7 @@ private fun RecentTransactionsContent(
                     TransactionItem(
                         transaction = transaction,
                         onDelete = { onEvent(TransactionsUiEvent.DeleteTransaction(transaction.id)) },
-                        onClick = { onTransactionClick(transaction.id) },
+                        onClick = { onEvent(TransactionsUiEvent.SelectTransaction(transaction.id)) },
                         isSelected = uiState.selectedTransactionId == transaction.id
                     )
                 }
@@ -387,8 +384,7 @@ private fun TransactionsListPanePreview() {
             ),
             billsUiState = com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState.Success(),
             onEvent = {},
-            navTo = {},
-            onTransactionClick = {}
+            navTo = {}
         )
     }
 }
