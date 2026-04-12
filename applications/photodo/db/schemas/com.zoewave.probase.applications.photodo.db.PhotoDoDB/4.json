@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "6653dfa026b6d676374295e59c006ce6",
+    "identityHash": "cdee837d107c6ea43b6202c6900424d3",
     "entities": [
       {
         "tableName": "categories",
@@ -69,7 +69,7 @@
       },
       {
         "tableName": "projects",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`projectId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `categoryId` INTEGER NOT NULL, `name` TEXT NOT NULL, `notes` TEXT, `status` TEXT NOT NULL, `isFavorite` INTEGER NOT NULL, `isUrgent` INTEGER NOT NULL, `projectBudget` REAL NOT NULL, `currentSpend` REAL NOT NULL, `priority` INTEGER NOT NULL, `creationDate` INTEGER NOT NULL, `dueDate` INTEGER, `isAlarmEnabled` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `globalSyncId` TEXT NOT NULL, `lastModified` INTEGER NOT NULL, FOREIGN KEY(`categoryId`) REFERENCES `categories`(`categoryId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`projectId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `categoryId` INTEGER NOT NULL, `name` TEXT NOT NULL, `notes` TEXT, `status` TEXT NOT NULL, `isFavorite` INTEGER NOT NULL, `isUrgent` INTEGER NOT NULL, `projectBudget` REAL NOT NULL, `currentSpend` REAL NOT NULL, `priority` INTEGER NOT NULL, `creationDate` INTEGER NOT NULL, `dueDate` INTEGER, `isAlarmEnabled` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, `durationMillis` INTEGER, `globalSyncId` TEXT NOT NULL, `lastModified` INTEGER NOT NULL, FOREIGN KEY(`categoryId`) REFERENCES `categories`(`categoryId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "projectId",
@@ -152,6 +152,11 @@
             "columnName": "isArchived",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "durationMillis",
+            "columnName": "durationMillis",
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "globalSyncId",
@@ -534,7 +539,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6653dfa026b6d676374295e59c006ce6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cdee837d107c6ea43b6202c6900424d3')"
     ]
   }
 }
