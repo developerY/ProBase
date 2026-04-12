@@ -1,8 +1,8 @@
 package com.zoewave.probase.core.ui.components
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,10 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,7 +39,10 @@ data class BarData(
 fun SimpleBarChart(
     data: List<BarData>,
     modifier: Modifier = Modifier,
+    onBarClick: ((BarData) -> Unit)? = null,
+    selectedBar: BarData? = null,
     barColor: Color = MaterialTheme.colorScheme.primary,
+    selectedBarColor: Color = MaterialTheme.colorScheme.secondary,
     height: Int = 200
 ) {
     if (data.isEmpty()) return
@@ -50,6 +55,25 @@ fun SimpleBarChart(
                 .fillMaxWidth()
                 .height(height.dp)
                 .padding(horizontal = 8.dp)
+                .pointerInput(data) {
+                    detectTapGestures { offset ->
+                        val canvasWidth = size.width
+                        val barWidthWithSpacing = canvasWidth / data.size
+                        val barWidth = barWidthWithSpacing * 0.7f
+                        val spacing = barWidthWithSpacing * 0.3f
+                        
+                        data.forEachIndexed { index, barData ->
+                            val left = index * barWidthWithSpacing + (spacing / 2)
+                            val barHeight = (barData.value / maxValue).toFloat() * size.height
+                            val top = size.height - barHeight
+                            
+                            val rect = Rect(left, top, left + barWidth, size.height.toFloat())
+                            if (rect.contains(offset)) {
+                                onBarClick?.invoke(barData)
+                            }
+                        }
+                    }
+                }
         ) {
             val canvasWidth = size.width
             val canvasHeight = size.height
@@ -60,9 +84,10 @@ fun SimpleBarChart(
                 val barHeight = (barData.value / maxValue).toFloat() * canvasHeight
                 val left = index * (barWidth + spacing) + (spacing / 2)
                 val top = canvasHeight - barHeight
+                val isSelected = barData == selectedBar
                 
                 drawRoundRect(
-                    color = barData.color ?: barColor,
+                    color = if (isSelected) selectedBarColor else (barData.color ?: barColor),
                     topLeft = Offset(left, top),
                     size = Size(barWidth, barHeight),
                     cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
@@ -72,7 +97,7 @@ fun SimpleBarChart(
                 if (barHeight > 20.dp.toPx()) {
                     drawIntoCanvas { canvas ->
                         val paint = android.graphics.Paint().apply {
-                            color = android.graphics.Color.WHITE
+                            color = if (isSelected) android.graphics.Color.BLACK else android.graphics.Color.WHITE
                             textSize = 10.sp.toPx()
                             textAlign = android.graphics.Paint.Align.CENTER
                             isAntiAlias = true

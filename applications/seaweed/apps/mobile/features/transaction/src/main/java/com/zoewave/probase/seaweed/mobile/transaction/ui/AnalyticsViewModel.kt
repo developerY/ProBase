@@ -55,7 +55,9 @@ class AnalyticsViewModel @Inject constructor(
                 TrendPoint(
                     label = date.format(DateTimeFormatter.ofPattern("MMM dd")),
                     value = dailyTransactions.sumOf { it.first.amount },
-                    timestamp = dailyTransactions.first().first.date
+                    timestamp = dailyTransactions.first().first.date,
+                    transactionCount = dailyTransactions.size,
+                    topCategory = dailyTransactions.groupBy { it.first.category }.maxByOrNull { it.value.size }?.key
                 )
             }.sortedBy { it.timestamp }.takeLast(7)
 
@@ -68,7 +70,9 @@ class AnalyticsViewModel @Inject constructor(
                 TrendPoint(
                     label = "Week $week",
                     value = weeklyTransactions.sumOf { it.first.amount },
-                    timestamp = weeklyTransactions.minOf { it.first.date }
+                    timestamp = weeklyTransactions.minOf { it.first.date },
+                    transactionCount = weeklyTransactions.size,
+                    topCategory = weeklyTransactions.groupBy { it.first.category }.maxByOrNull { it.value.size }?.key
                 )
             }.sortedBy { it.timestamp }.takeLast(4)
 
@@ -80,7 +84,9 @@ class AnalyticsViewModel @Inject constructor(
                 TrendPoint(
                     label = month.name.lowercase(Locale.ROOT).replaceFirstChar { it.uppercase() }.take(3),
                     value = monthlyTransactions.sumOf { it.first.amount },
-                    timestamp = monthlyTransactions.minOf { it.first.date }
+                    timestamp = monthlyTransactions.minOf { it.first.date },
+                    transactionCount = monthlyTransactions.size,
+                    topCategory = monthlyTransactions.groupBy { it.first.category }.maxByOrNull { it.value.size }?.key
                 )
             }.sortedBy { it.timestamp }.takeLast(6)
 

@@ -6,7 +6,9 @@ import kotlinx.serialization.Serializable
 data class TrendPoint(
     val label: String,
     val value: Double,
-    val timestamp: Long
+    val timestamp: Long,
+    val transactionCount: Int = 0,
+    val topCategory: String? = null
 )
 
 @Serializable
