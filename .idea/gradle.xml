@@ -122,6 +122,7 @@
             <option value="$PROJECT_DIR$/features/nfc" />
             <option value="$PROJECT_DIR$/features/places" />
             <option value="$PROJECT_DIR$/features/qrscanner" />
+            <option value="$PROJECT_DIR$/features/smartcapture" />
             <option value="$PROJECT_DIR$/features/weather" />
           </set>
         </option>

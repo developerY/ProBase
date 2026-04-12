@@ -27,4 +27,7 @@ sealed interface FeatureInventory : NavKey {
 
     @Serializable
     data object Calendar : FeatureInventory
+
+    @Serializable
+    data object SmartCapture : FeatureInventory
 }

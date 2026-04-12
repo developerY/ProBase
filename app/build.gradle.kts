@@ -53,6 +53,7 @@ dependencies {
     implementation(project(":features:qrscanner"))
     implementation(project(":features:camera"))
     implementation(project(":features:calendar"))
+    implementation(project(":features:smartcapture"))
     // implementation(project(":core:ui"))
 
     // ✅ CORE DEPENDENCIES

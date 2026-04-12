@@ -61,6 +61,7 @@ include(":applications:ashbike:features:places")
 include(":features:ble")
 include(":features:nfc")
 include(":features:qrscanner")
+include(":features:smartcapture")
 
 
 include(":applications:ashbike:apps:wear:features:home")
