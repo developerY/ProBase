@@ -13,6 +13,7 @@ android {
 dependencies {
     // --- Shared Core Projects ---
     implementation(project(":core:model"))
+    implementation(project(":core:data"))
 
     // --- DataStore ---
     // (Kept explicitly since these are specific to this module's storage needs)

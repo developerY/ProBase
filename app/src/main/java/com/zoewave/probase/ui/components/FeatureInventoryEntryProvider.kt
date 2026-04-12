@@ -17,7 +17,6 @@ import com.zoewave.probase.features.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.features.calendar.ui.CalendarUiRoute
 import com.zoewave.probase.features.smartcapture.ui.SmartCaptureUiRoute
-import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 
 fun featureInventoryEntryProvider(
     key: NavKey,

@@ -10,7 +10,9 @@ interface AppSettingsRepository {
     val paneContrastFlow: Flow<String>
     suspend fun savePaneContrast(paneContrastIdentifier: String)
 
-    val geminiApiKeyFlow: Flow<String?>
+    // Secure Storage for API Key
+    fun getGeminiApiKey(): String?
+    val isGeminiApiKeySetFlow: Flow<Boolean>
     suspend fun saveGeminiApiKey(apiKey: String?)
 
     val isAiEnabledFlow: Flow<Boolean>

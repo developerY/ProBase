@@ -35,7 +35,7 @@ class SettingsViewModel @Inject constructor(
         appSettingsRepository.themePreferenceFlow,
         appSettingsRepository.palettePreferenceFlow,
         appSettingsRepository.paneContrastFlow,
-        appSettingsRepository.geminiApiKeyFlow,
+        appSettingsRepository.isGeminiApiKeySetFlow,
         appSettingsRepository.isAiEnabledFlow,
         _initialExpandedKey,
         _firebaseDeviceId
@@ -44,7 +44,7 @@ class SettingsViewModel @Inject constructor(
             currentTheme = args[0] as String,
             currentPalette = args[1] as String,
             currentPaneContrast = args[2] as String,
-            geminiApiKey = args[3] as String?,
+            isApiKeySet = args[3] as Boolean,
             isAiEnabled = args[4] as Boolean,
             initialCardKeyToExpand = args[5] as String?,
             appVersion = getAppVersion(),

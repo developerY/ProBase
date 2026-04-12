@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.zoewave.probase.core.data.repository.SecureApiKeyRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -12,7 +13,8 @@ import javax.inject.Singleton
 
 @Singleton
 class DataStoreAppSettingsRepository @Inject constructor(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    private val secureApiKeyRepository: SecureApiKeyRepository
 ) : AppSettingsRepository {
 
     private val PALETTE_KEY = stringPreferencesKey("palette_preference")
@@ -52,19 +54,17 @@ class DataStoreAppSettingsRepository @Inject constructor(
         }
     }
 
-    private val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
-
-    override val geminiApiKeyFlow: Flow<String?> = dataStore.data.map { preferences ->
-        preferences[GEMINI_API_KEY]
+    override fun getGeminiApiKey(): String? {
+        return secureApiKeyRepository.getKey()
     }
 
+    override val isGeminiApiKeySetFlow: Flow<Boolean> = secureApiKeyRepository.isKeySetFlow
+
     override suspend fun saveGeminiApiKey(apiKey: String?) {
-        dataStore.edit { preferences ->
-            if (apiKey == null) {
-                preferences.remove(GEMINI_API_KEY)
-            } else {
-                preferences[GEMINI_API_KEY] = apiKey
-            }
+        if (apiKey == null) {
+            secureApiKeyRepository.deleteKey()
+        } else {
+            secureApiKeyRepository.saveKey(apiKey)
         }
     }
 

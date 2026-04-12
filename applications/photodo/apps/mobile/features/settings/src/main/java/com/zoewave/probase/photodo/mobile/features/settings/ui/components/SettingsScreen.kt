@@ -100,7 +100,7 @@ fun SettingsScreen(
                     onExpandToggle = { isAiExpanded = !isAiExpanded },
                     isAiEnabled = uiState.isAiEnabled,
                     onAiEnabledToggled = { onEvent(SettingsEvent.OnAiEnabledToggled(it)) },
-                    geminiApiKey = uiState.geminiApiKey,
+                    isApiKeySet = uiState.isApiKeySet,
                     onGeminiApiKeyChanged = { onEvent(SettingsEvent.OnGeminiApiKeyChanged(it)) }
                 )
 

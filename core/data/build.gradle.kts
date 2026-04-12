@@ -47,6 +47,7 @@ dependencies {
     // optional:
     implementation(libs.androidx.datastore.core)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.security.crypto)
 
     // --- External Utilities (Optional, based on your Repos) ---
     // If your repositories parse dates/times:
