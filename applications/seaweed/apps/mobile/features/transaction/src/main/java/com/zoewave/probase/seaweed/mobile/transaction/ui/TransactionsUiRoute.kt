@@ -57,11 +57,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.seaweed.mobile.bills.ui.BillsScreen
 import com.zoewave.probase.seaweed.mobile.bills.ui.BillsViewModel
-import com.zoewave.probase.core.ui.components.BarData
-import com.zoewave.probase.core.ui.components.SimpleBarChart
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
-import com.zoewave.probase.seaweed.model.HabitInsight
-import com.zoewave.probase.seaweed.model.SpendingPeriod
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.model.navigation.TransactionTab
 import kotlinx.coroutines.launch
@@ -151,6 +147,9 @@ fun TransactionsListPane(
             TopAppBar(
                 title = { Text("Transactions") },
                 actions = {
+                    IconButton(onClick = { navTo(SeaweedDestination.Analytics) }) {
+                        Icon(Icons.Default.Analytics, contentDescription = "Analytics")
+                    }
                     IconButton(onClick = { navTo(SeaweedDestination.Budget) }) {
                         Icon(Icons.Default.PieChart, contentDescription = "Budget")
                     }
@@ -191,11 +190,6 @@ fun TransactionsListPane(
                             onClick = { onEvent(TransactionsUiEvent.SelectTab(TransactionTab.CYCLIC)) },
                             text = { Text("Cyclic") }
                         )
-                        Tab(
-                            selected = uiState.selectedTab == TransactionTab.ANALYTICS,
-                            onClick = { onEvent(TransactionsUiEvent.SelectTab(TransactionTab.ANALYTICS)) },
-                            text = { Text("Analytics") }
-                        )
                     }
 
                     when (uiState.selectedTab) {
@@ -215,13 +209,6 @@ fun TransactionsListPane(
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }
-                        }
-                        TransactionTab.ANALYTICS -> {
-                            AnalyticsPane(
-                                spendingTrends = uiState.spendingTrends,
-                                habitInsights = uiState.habitInsights,
-                                modifier = Modifier.fillMaxSize()
-                            )
                         }
                     }
                 }
@@ -351,116 +338,6 @@ fun TransactionDetailPane(
         } else {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Text("Select a transaction to see details")
-            }
-        }
-    }
-}
-
-@Composable
-fun AnalyticsPane(
-    spendingTrends: Map<SpendingPeriod, List<com.zoewave.probase.seaweed.model.TrendPoint>>,
-    habitInsights: List<HabitInsight>,
-    modifier: Modifier = Modifier
-) {
-    var selectedPeriod by remember { mutableStateOf(SpendingPeriod.DAILY) }
-
-    LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
-    ) {
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Spending Trends", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        
-                        Row {
-                            SpendingPeriod.entries.forEach { period ->
-                                FilterChip(
-                                    selected = selectedPeriod == period,
-                                    onClick = { selectedPeriod = period },
-                                    label = { Text(period.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                                    modifier = Modifier.padding(start = 4.dp)
-                                )
-                            }
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    val trendData = spendingTrends[selectedPeriod] ?: emptyList()
-                    if (trendData.isNotEmpty()) {
-                        SimpleBarChart(
-                            data = trendData.map { BarData(it.label, it.value) },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    } else {
-                        Box(Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                            Text("No data for this period")
-                        }
-                    }
-                }
-            }
-        }
-
-        if (habitInsights.isNotEmpty()) {
-            item {
-                Text("Spending Habits", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            }
-            
-            items(habitInsights) { insight ->
-                HabitInsightCard(insight = insight)
-            }
-        }
-    }
-}
-
-@Composable
-fun HabitInsightCard(insight: HabitInsight) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(androidx.compose.foundation.shape.CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Analytics,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(insight.category, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(
-                    text = insight.trendMessage,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = String.format(Locale.getDefault(), "Total: $%.2f this month", insight.totalAmount),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }

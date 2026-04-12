@@ -16,7 +16,7 @@ import kotlinx.serialization.Transient
 
 @Serializable
 enum class TransactionTab {
-    RECENT, CYCLIC, ANALYTICS
+    RECENT, CYCLIC
 }
 
 @Serializable
@@ -69,6 +69,12 @@ sealed class SeaweedDestination(
     data object Settings : SeaweedDestination(
         titleRes = R.string.applications_seaweed_model_route_settings,
         icon = Icons.Default.Settings
+    )
+
+    @Serializable
+    data object Analytics : SeaweedDestination(
+        title = "Spending Analytics",
+        icon = Icons.Default.PieChart // We can use Analytics or PieChart
     )
 
     @Serializable
