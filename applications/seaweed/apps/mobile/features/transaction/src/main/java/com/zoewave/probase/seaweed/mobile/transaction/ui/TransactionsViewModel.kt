@@ -3,7 +3,6 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.seaweed.data.TransactionRepository
-import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.navigation.TransactionTab
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

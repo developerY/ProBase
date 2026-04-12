@@ -72,6 +72,12 @@ sealed class SeaweedDestination(
     )
 
     @Serializable
+    data object Analytics : SeaweedDestination(
+        title = "Spending Analytics",
+        icon = Icons.Default.PieChart // We can use Analytics or PieChart
+    )
+
+    @Serializable
     data object Camera : SeaweedDestination(
         title = "Receipt Camera",
         icon = Icons.Default.Home // Fallback icon

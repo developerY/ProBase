@@ -11,6 +11,7 @@ import com.zoewave.probase.seaweed.mobile.budget.ui.BudgetUiRoute
 import com.zoewave.probase.seaweed.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.TransactionsUiRoute
+import com.zoewave.probase.seaweed.mobile.transaction.ui.AnalyticsUiRoute
 import com.zoewave.probase.seaweed.mobile.ui.components.AdaptiveSeaweedScreen
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -83,6 +84,12 @@ fun seaweedNavEntryProvider(
                 SettingsUiRoute(
                     modifier = Modifier.fillMaxSize(),
                     navTo = navigateTo
+                )
+            }
+            SeaweedDestination.Analytics -> {
+                AnalyticsUiRoute(
+                    modifier = Modifier.fillMaxSize(),
+                    onBack = onBack
                 )
             }
             SeaweedDestination.Camera -> {
