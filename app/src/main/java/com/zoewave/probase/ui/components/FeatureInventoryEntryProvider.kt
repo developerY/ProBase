@@ -90,6 +90,11 @@ fun featureInventoryEntryProvider(
             is FeatureInventory.SmartCapture -> {
                 FeatureScaffold(title = "Smart Capture", onBack = navigateBack) {
                     SmartCaptureUiRoute(
+                        onCaptureComplete = { draft ->
+                            // For testing in inventory, just go back. 
+                            // In a real app, you'd navigate to the "Add Task" screen with this draft.
+                            navigateBack()
+                        },
                         onDismiss = navigateBack
                     )
                 }

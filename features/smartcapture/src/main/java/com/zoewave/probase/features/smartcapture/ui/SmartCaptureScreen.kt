@@ -1,93 +1,88 @@
 package com.zoewave.probase.features.smartcapture.ui
 
-import android.graphics.Bitmap
-import androidx.compose.animation.AnimatedVisibility
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.zoewave.probase.features.camera.ui.CameraUIRoute
-import com.zoewave.probase.features.smartcapture.domain.SmartTask
+import com.zoewave.probase.features.smartcapture.domain.TaskDraftState
 import com.zoewave.probase.features.smartcapture.ui.state.SmartCaptureUiState
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SmartCaptureUiRoute(
     viewModel: SmartCaptureViewModel = hiltViewModel(),
-    onTaskConfirmed: (SmartTask) -> Unit = {},
-    onDismiss: () -> Unit = {}
+    onCaptureComplete: (TaskDraftState) -> Unit,
+    onDismiss: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+    val context = LocalContext.current
 
-    if (uiState.showCamera) {
-        if (cameraPermissionState.status.isGranted) {
-            CameraUIRoute(
-                navTo = { result ->
-                    if (result.startsWith("result_ok:")) {
-                        viewModel.onImageCaptured(result.removePrefix("result_ok:"))
-                    } else {
-                        viewModel.setCameraVisible(false)
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
-            LaunchedEffect(Unit) {
-                cameraPermissionState.launchPermissionRequest()
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        uri?.let {
+            val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, it))
+            } else {
+                MediaStore.Images.Media.getBitmap(context.contentResolver, it)
             }
-            // Temporarily hide camera if permission is being requested or denied
-            viewModel.setCameraVisible(false)
+            viewModel.analyzePhoto(bitmap)
         }
-    } else {
-        SmartCaptureScreen(
-            uiState = uiState,
-            onCaptureClick = { viewModel.setCameraVisible(true) },
-            onConfirmTask = onTaskConfirmed,
-            onReset = viewModel::reset,
-            onDismiss = onDismiss
-        )
     }
+
+    SmartCaptureScreen(
+        uiState = uiState,
+        onUploadClick = {
+            launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        },
+        onConfirmTask = onCaptureComplete,
+        onReset = viewModel::reset,
+        onDismiss = onDismiss
+    )
 }
 
 @Composable
 internal fun SmartCaptureScreen(
     uiState: SmartCaptureUiState,
-    onCaptureClick: () -> Unit,
-    onConfirmTask: (SmartTask) -> Unit,
+    onUploadClick: () -> Unit,
+    onConfirmTask: (TaskDraftState) -> Unit,
     onReset: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -95,7 +90,9 @@ internal fun SmartCaptureScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -106,40 +103,63 @@ internal fun SmartCaptureScreen(
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (uiState.isProcessing) {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator()
-                    Text("AI is analyzing text...", modifier = Modifier.padding(top = 16.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            when (uiState) {
+                is SmartCaptureUiState.Idle -> {
+                    EmptyState(onUploadClick = onUploadClick)
                 }
-            } else if (uiState.capturedTask != null) {
-                TaskReviewPane(
-                    task = uiState.capturedTask,
-                    onConfirm = { onConfirmTask(uiState.capturedTask) },
-                    onRetake = onReset
-                )
-            } else {
-                EmptyState(onCaptureClick = onCaptureClick)
-            }
 
-            if (uiState.errorMessage != null) {
-                Text(
-                    text = uiState.errorMessage,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(32.dp)
-                )
+                is SmartCaptureUiState.Loading -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("AI is parsing your image...", style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+
+                is SmartCaptureUiState.Success -> {
+                    TaskReviewPane(
+                        draft = uiState.draft,
+                        onConfirm = { onConfirmTask(uiState.draft) },
+                        onRetake = onReset
+                    )
+                }
+
+                is SmartCaptureUiState.Error -> {
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = uiState.message,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center
+                        )
+                        Button(onClick = onReset, modifier = Modifier.padding(top = 16.dp)) {
+                            Text("Try Again")
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun EmptyState(onCaptureClick: () -> Unit) {
+private fun EmptyState(onUploadClick: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -155,23 +175,24 @@ private fun EmptyState(onCaptureClick: () -> Unit) {
             modifier = Modifier.padding(top = 16.dp)
         )
         Text(
-            "Point your camera at a note, screen, or whiteboard to automatically extract a structured task.",
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            modifier = Modifier.padding(vertical = 8.dp)
+            "Upload a photo of a note, whiteboard, or screen to automatically extract a structured task.",
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(vertical = 8.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Button(
-            onClick = onCaptureClick,
+            onClick = onUploadClick,
             modifier = Modifier.padding(top = 24.dp)
         ) {
-            Icon(Icons.Default.CameraAlt, contentDescription = null)
-            Text("Open Camera", modifier = Modifier.padding(start = 8.dp))
+            Icon(Icons.Default.CloudUpload, contentDescription = null)
+            Text("Upload Photo", modifier = Modifier.padding(start = 8.dp))
         }
     }
 }
 
 @Composable
 private fun TaskReviewPane(
-    task: SmartTask,
+    draft: TaskDraftState,
     onConfirm: () -> Unit,
     onRetake: () -> Unit
 ) {
@@ -190,19 +211,22 @@ private fun TaskReviewPane(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    TaskField("Title", task.title)
-                    TaskField("Description", task.description ?: "None")
-                    TaskField("Due Date", task.dueDate ?: "Not set")
-                    TaskField("Budget", task.estimatedBudget?.let { "$$it" } ?: "None")
-                    TaskField("Category", task.suggestedCategory ?: "General")
+                    TaskField("Task Name", draft.taskName ?: "Unknown")
+                    TaskField("Category", draft.category ?: "General")
+                    TaskField("Project", draft.projectName ?: "None")
+                    TaskField("Duration", draft.duration ?: "Not set")
+                    TaskField("Due Date", draft.dueDate ?: "Not set")
+                    TaskField("Budget", draft.budget?.let { "$$it" } ?: "None")
+                    
+                    if (draft.subTasks.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Sub-tasks", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                        draft.subTasks.forEach { subTask ->
+                            Text("• $subTask", style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
                 }
             }
-        }
-
-        item {
-            HorizontalDivider()
-            Text("Raw OCR Text", style = MaterialTheme.typography.labelSmall)
-            Text(task.rawText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
         item {
