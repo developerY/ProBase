@@ -25,9 +25,11 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,13 +44,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.zoewave.probase.features.smartcapture.domain.TaskDraftState
+import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.smartcapture.ui.state.SmartCaptureUiState
 
 @Composable
 fun SmartCaptureUiRoute(
     viewModel: SmartCaptureViewModel = hiltViewModel(),
-    onCaptureComplete: (TaskDraftState) -> Unit,
+    onCaptureComplete: (SmartTaskDraft) -> Unit,
     onDismiss: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -82,7 +84,7 @@ fun SmartCaptureUiRoute(
 internal fun SmartCaptureScreen(
     uiState: SmartCaptureUiState,
     onUploadClick: () -> Unit,
-    onConfirmTask: (TaskDraftState) -> Unit,
+    onConfirmTask: (SmartTaskDraft) -> Unit,
     onReset: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -118,7 +120,7 @@ internal fun SmartCaptureScreen(
                         modifier = Modifier.align(Alignment.Center),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.tertiary)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text("AI is parsing your image...", style = MaterialTheme.typography.bodyMedium)
                     }
@@ -167,7 +169,7 @@ private fun EmptyState(onUploadClick: () -> Unit) {
             imageVector = Icons.Default.AutoAwesome,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.primary
+            tint = MaterialTheme.colorScheme.tertiary
         )
         Text(
             "Extract Tasks with AI",
@@ -182,7 +184,8 @@ private fun EmptyState(onUploadClick: () -> Unit) {
         )
         Button(
             onClick = onUploadClick,
-            modifier = Modifier.padding(top = 24.dp)
+            modifier = Modifier.padding(top = 24.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
         ) {
             Icon(Icons.Default.CloudUpload, contentDescription = null)
             Text("Upload Photo", modifier = Modifier.padding(start = 8.dp))
@@ -192,7 +195,7 @@ private fun EmptyState(onUploadClick: () -> Unit) {
 
 @Composable
 private fun TaskReviewPane(
-    draft: TaskDraftState,
+    draft: SmartTaskDraft,
     onConfirm: () -> Unit,
     onRetake: () -> Unit
 ) {
@@ -208,7 +211,9 @@ private fun TaskReviewPane(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
+                )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     TaskField("Task Name", draft.taskName ?: "Unknown")
@@ -220,7 +225,7 @@ private fun TaskReviewPane(
                     
                     if (draft.subTasks.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Sub-tasks", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                        Text("Sub-tasks", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
                         draft.subTasks.forEach { subTask ->
                             Text("• $subTask", style = MaterialTheme.typography.bodyMedium)
                         }
@@ -237,7 +242,11 @@ private fun TaskReviewPane(
                 Button(onClick = onRetake, modifier = Modifier.weight(1f)) {
                     Text("Retake")
                 }
-                Button(onClick = onConfirm, modifier = Modifier.weight(1f)) {
+                Button(
+                    onClick = onConfirm, 
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                ) {
                     Icon(Icons.Default.Check, contentDescription = null)
                     Text("Confirm", modifier = Modifier.padding(start = 8.dp))
                 }
@@ -249,7 +258,7 @@ private fun TaskReviewPane(
 @Composable
 private fun TaskField(label: String, value: String) {
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
         Text(value, style = MaterialTheme.typography.bodyLarge)
     }
 }

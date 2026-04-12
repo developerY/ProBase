@@ -25,8 +25,4 @@ abstract class SmartCaptureModule {
     @Singleton
     @Named("Local")
     abstract fun bindLocalEngine(impl: LocalCaptureEngineImpl): SmartCaptureEngine
-
-    @Binds
-    @Singleton
-    abstract fun bindSettings(impl: FakeSmartCaptureSettings): SmartCaptureSettings
 }

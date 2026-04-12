@@ -3,6 +3,7 @@ package com.zoewave.probase.photodo.mobile.features.tasks.ui
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
@@ -42,7 +43,30 @@ class TasksViewModel @Inject constructor(
     val draftState: StateFlow<TaskDraftState> = _draftState.asStateFlow()
 
     private val _requestedCategoryId = savedStateHandle.getStateFlow<Long?>("categoryId", null)
+    private val _prefilledAiDraft = savedStateHandle.getStateFlow<SmartTaskDraft?>("prefilledAiDraft", null)
     private val _uiFlags = MutableStateFlow(UiFlags())
+
+    init {
+        // 🚀 AI HOOK: If we came from SmartCapture, open the sheet and prefill!
+        viewModelScope.launch {
+            _prefilledAiDraft.collect { aiDraft ->
+                if (aiDraft != null) {
+                    _uiFlags.update { it.copy(isAddListSheetOpen = true) }
+                    _draftState.update { 
+                        it.copy(
+                            listTitle = aiDraft.taskName ?: "",
+                            budgetInput = if (aiDraft.budget != null && aiDraft.budget!! > 0) aiDraft.budget.toString() else "",
+                            newCategoryName = aiDraft.category ?: "",
+                            pendingTaskItems = aiDraft.subTasks,
+                            isFromAi = true
+                        )
+                    }
+                    // Clear it so it doesn't re-open on config change
+                    savedStateHandle["prefilledAiDraft"] = null
+                }
+            }
+        }
+    }
 
     fun setCategoryId(categoryId: Long) {
         savedStateHandle["categoryId"] = categoryId

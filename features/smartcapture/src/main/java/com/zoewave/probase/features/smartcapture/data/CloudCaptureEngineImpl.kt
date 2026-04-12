@@ -4,8 +4,8 @@ import android.graphics.Bitmap
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
+import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.smartcapture.domain.SmartCaptureEngine
-import com.zoewave.probase.features.smartcapture.domain.TaskDraftState
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -20,7 +20,7 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         coerceInputValues = true
     }
 
-    override suspend fun processImage(bitmap: Bitmap, apiKey: String?): TaskDraftState {
+    override suspend fun processImage(bitmap: Bitmap, apiKey: String?): SmartTaskDraft {
         if (apiKey.isNullOrBlank()) throw IllegalArgumentException("Missing Gemini API Key for Pro Engine")
 
         val generativeModel = GenerativeModel(
@@ -59,13 +59,13 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
 
         return try {
             val response = generativeModel.generateContent(prompt)
-            val jsonText = response.text ?: return TaskDraftState()
+            val jsonText = response.text ?: return SmartTaskDraft()
             
             // Clean JSON string in case of LLM artifacts
             val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
             val finalJson = "{$cleanedJson}"
             
-            json.decodeFromString<TaskDraftState>(finalJson)
+            json.decodeFromString<SmartTaskDraft>(finalJson)
         } catch (e: Exception) {
             // Rethrow so the orchestrator knows to fallback
             throw e

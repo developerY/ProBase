@@ -9,4 +9,10 @@ interface AppSettingsRepository {
     suspend fun savePalettePreference(paletteIdentifier: String)
     val paneContrastFlow: Flow<String>
     suspend fun savePaneContrast(paneContrastIdentifier: String)
+
+    val geminiApiKeyFlow: Flow<String?>
+    suspend fun saveGeminiApiKey(apiKey: String?)
+
+    val isAiEnabledFlow: Flow<Boolean>
+    suspend fun saveAiEnabled(enabled: Boolean)
 }

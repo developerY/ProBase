@@ -15,6 +15,7 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.AdaptiveHomeScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiRoute
+import com.zoewave.probase.features.smartcapture.ui.SmartCaptureUiRoute
 import com.zoewave.probase.photodo.features.camera.ui.CameraResultHandler
 import com.zoewave.probase.photodo.features.camera.ui.SavePhotoViewModel
 import com.zoewave.probase.photodo.features.camera.ui.components.SavePhotoBottomSheet
@@ -32,10 +33,9 @@ import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TasksList
 fun photoTodoNavEntryProvider(
     key: PhotoTodoRoute,
     windowSizeClass: WindowSizeClass,
+    isAiEnabled: Boolean,
     navigateTo: (PhotoTodoRoute) -> Unit,
     navigateBack: () -> Unit,
-    // Un-comment this if you need to manually tell your BottomBar to switch tabs!
-    // onTabSelected: (PhotoTodoRoute) -> Unit = {}
 ): NavEntry<PhotoTodoRoute> {
 
     return NavEntry(key) {
@@ -181,9 +181,12 @@ fun photoTodoNavEntryProvider(
                             if (projectId != null) {
                                 resultHandler.execute(projectId = projectId, uri = uriString)
                                 navigateBack()
+                            } else if (isAiEnabled) {
+                                // 🚀 NEW: Tier 1 (Cloud) enabled, go to SmartCapture review first!
+                                navigateBack() // Pop camera
+                                navigateTo(PhotoTodoRoute.SmartCapture(uriString))
                             } else {
-                                // 🚀 NEW: Pop the Camera screen first, so the SavePhoto stack is [Home, SavePhoto]
-                                // This ensures dismissing SavePhoto returns to Home dashboard.
+                                // standard flow
                                 navigateBack()
                                 navigateTo(PhotoTodoRoute.SavePhoto(uriString))
                             }
@@ -192,6 +195,17 @@ fun photoTodoNavEntryProvider(
                         }
                     },
                     modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            is PhotoTodoRoute.SmartCapture -> {
+                SmartCaptureUiRoute(
+                    onCaptureComplete = { draft ->
+                        // Navigate to Workspace/TasksList and prefill!
+                        navigateBack() // Pop SmartCapture
+                        navigateTo(PhotoTodoRoute.TasksList(prefilledAiDraft = draft))
+                    },
+                    onDismiss = navigateBack
                 )
             }
 

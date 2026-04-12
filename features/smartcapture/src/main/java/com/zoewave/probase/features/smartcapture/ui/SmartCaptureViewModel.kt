@@ -3,6 +3,7 @@ package com.zoewave.probase.features.smartcapture.ui
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.smartcapture.data.SmartCaptureOrchestrator
 import com.zoewave.probase.features.smartcapture.domain.SmartCaptureSettings
 import com.zoewave.probase.features.smartcapture.ui.state.SmartCaptureUiState

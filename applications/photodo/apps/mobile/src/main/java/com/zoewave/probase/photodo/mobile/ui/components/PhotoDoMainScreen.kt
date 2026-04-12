@@ -19,6 +19,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
@@ -28,10 +30,12 @@ import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 @Composable
 fun PhotoDoMainScreen(
     windowSizeClass: WindowSizeClass,
-    entryProvider: (PhotoTodoRoute, WindowSizeClass, () -> Unit, (PhotoTodoRoute) -> Unit) -> NavEntry<PhotoTodoRoute> = { key, size, back, to ->
-        photoTodoNavEntryProvider(key, size, to, back)
+    viewModel: PhotoDoMainViewModel = hiltViewModel(),
+    entryProvider: (PhotoTodoRoute, WindowSizeClass, Boolean, () -> Unit, (PhotoTodoRoute) -> Unit) -> NavEntry<PhotoTodoRoute> = { key, size, ai, back, to ->
+        photoTodoNavEntryProvider(key, size, ai, to, back)
     }
 ) {
+    val isAiEnabled by viewModel.isAiEnabled.collectAsStateWithLifecycle()
     var backStack by remember { mutableStateOf(listOf<PhotoTodoRoute>(PhotoTodoRoute.Home)) }
     val currentRoute = backStack.lastOrNull() ?: PhotoTodoRoute.Home
 
@@ -66,6 +70,7 @@ fun PhotoDoMainScreen(
                 entryProvider(
                     key,
                     windowSizeClass,
+                    isAiEnabled,
                     { 
                         if (backStack.size > 1) {
                             backStack = backStack.dropLast(1)
@@ -92,7 +97,7 @@ fun PhotoDoMainScreenPreview() {
     PhotoDoTheme {
         PhotoDoMainScreen(
             windowSizeClass = windowSizeClass,
-            entryProvider = { key, _, _, _ ->
+            entryProvider = { key, _, _, _, _ ->
                 NavEntry(key) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("Mock Screen: ${key::class.simpleName}")

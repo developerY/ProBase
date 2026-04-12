@@ -2,6 +2,7 @@ package com.zoewave.probase.applications.photodo.db.repo
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
@@ -48,6 +49,34 @@ class DataStoreAppSettingsRepository @Inject constructor(
     override suspend fun savePaneContrast(paneContrastIdentifier: String) {
         dataStore.edit { preferences ->
             preferences[PANE_CONTRAST_KEY] = paneContrastIdentifier
+        }
+    }
+
+    private val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
+
+    override val geminiApiKeyFlow: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[GEMINI_API_KEY]
+    }
+
+    override suspend fun saveGeminiApiKey(apiKey: String?) {
+        dataStore.edit { preferences ->
+            if (apiKey == null) {
+                preferences.remove(GEMINI_API_KEY)
+            } else {
+                preferences[GEMINI_API_KEY] = apiKey
+            }
+        }
+    }
+
+    private val IS_AI_ENABLED_KEY = booleanPreferencesKey("is_ai_enabled")
+
+    override val isAiEnabledFlow: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[IS_AI_ENABLED_KEY] ?: false
+    }
+
+    override suspend fun saveAiEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[IS_AI_ENABLED_KEY] = enabled
         }
     }
 }

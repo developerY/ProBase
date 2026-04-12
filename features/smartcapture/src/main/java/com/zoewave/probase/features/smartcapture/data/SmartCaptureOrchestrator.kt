@@ -2,8 +2,8 @@ package com.zoewave.probase.features.smartcapture.data
 
 import android.graphics.Bitmap
 import android.util.Log
+import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.smartcapture.domain.SmartCaptureEngine
-import com.zoewave.probase.features.smartcapture.domain.TaskDraftState
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -15,7 +15,7 @@ class SmartCaptureOrchestrator @Inject constructor(
 ) {
     private val TAG = "SmartCaptureOrchestrator"
 
-    suspend fun processImage(bitmap: Bitmap, apiKey: String?): TaskDraftState {
+    suspend fun processImage(bitmap: Bitmap, apiKey: String?): SmartTaskDraft {
         return try {
             if (!apiKey.isNullOrBlank()) {
                 Log.d(TAG, "Attempting Tier 1 (Cloud) capture...")

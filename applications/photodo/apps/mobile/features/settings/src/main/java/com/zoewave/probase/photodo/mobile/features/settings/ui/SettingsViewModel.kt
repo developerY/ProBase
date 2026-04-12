@@ -35,16 +35,20 @@ class SettingsViewModel @Inject constructor(
         appSettingsRepository.themePreferenceFlow,
         appSettingsRepository.palettePreferenceFlow,
         appSettingsRepository.paneContrastFlow,
+        appSettingsRepository.geminiApiKeyFlow,
+        appSettingsRepository.isAiEnabledFlow,
         _initialExpandedKey,
         _firebaseDeviceId
-    ) { theme, palette, contrast, expandedKey, firebaseId ->
+    ) { args: Array<Any?> ->
         SettingsUiState(
-            currentTheme = theme,
-            currentPalette = palette,
-            currentPaneContrast = contrast,
-            initialCardKeyToExpand = expandedKey,
+            currentTheme = args[0] as String,
+            currentPalette = args[1] as String,
+            currentPaneContrast = args[2] as String,
+            geminiApiKey = args[3] as String?,
+            isAiEnabled = args[4] as Boolean,
+            initialCardKeyToExpand = args[5] as String?,
             appVersion = getAppVersion(),
-            firebaseDeviceId = firebaseId
+            firebaseDeviceId = args[6] as String
         )
     }.stateIn(
         scope = viewModelScope,
@@ -89,6 +93,12 @@ class SettingsViewModel @Inject constructor(
             }
             is SettingsEvent.OnPaneContrastSelected -> {
                 viewModelScope.launch { appSettingsRepository.savePaneContrast(event.paneContrastIdentifier) }
+            }
+            is SettingsEvent.OnGeminiApiKeyChanged -> {
+                viewModelScope.launch { appSettingsRepository.saveGeminiApiKey(event.apiKey) }
+            }
+            is SettingsEvent.OnAiEnabledToggled -> {
+                viewModelScope.launch { appSettingsRepository.saveAiEnabled(event.enabled) }
             }
         }
     }

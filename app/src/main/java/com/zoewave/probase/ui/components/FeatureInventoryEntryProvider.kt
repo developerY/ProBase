@@ -17,6 +17,7 @@ import com.zoewave.probase.features.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.features.calendar.ui.CalendarUiRoute
 import com.zoewave.probase.features.smartcapture.ui.SmartCaptureUiRoute
+import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 
 fun featureInventoryEntryProvider(
     key: NavKey,
@@ -90,9 +91,8 @@ fun featureInventoryEntryProvider(
             is FeatureInventory.SmartCapture -> {
                 FeatureScaffold(title = "Smart Capture", onBack = navigateBack) {
                     SmartCaptureUiRoute(
-                        onCaptureComplete = { draft ->
+                        onCaptureComplete = { _ ->
                             // For testing in inventory, just go back. 
-                            // In a real app, you'd navigate to the "Add Task" screen with this draft.
                             navigateBack()
                         },
                         onDismiss = navigateBack

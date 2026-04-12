@@ -4,8 +4,8 @@ import android.graphics.Bitmap
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.smartcapture.domain.SmartCaptureEngine
-import com.zoewave.probase.features.smartcapture.domain.TaskDraftState
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -17,7 +17,7 @@ class LocalCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
 
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
-    override suspend fun processImage(bitmap: Bitmap, apiKey: String?): TaskDraftState {
+    override suspend fun processImage(bitmap: Bitmap, apiKey: String?): SmartTaskDraft {
         val image = InputImage.fromBitmap(bitmap, 0)
         val visionText = try {
             recognizer.process(image).await().text
@@ -25,14 +25,14 @@ class LocalCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
             ""
         }
 
-        if (visionText.isBlank()) return TaskDraftState()
+        if (visionText.isBlank()) return SmartTaskDraft()
 
         val lines = visionText.lines().filter { it.isNotBlank() }
         val taskName = lines.firstOrNull()
         val budget = extractBudget(visionText)
         val dueDate = extractDate(visionText)
 
-        return TaskDraftState(
+        return SmartTaskDraft(
             taskName = taskName,
             budget = budget,
             dueDate = dueDate

@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.smartcapture.domain
+package com.zoewave.probase.core.model.tasks
 
 import kotlinx.serialization.Serializable
 
@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * Designed to be passed back to the main app to pre-fill a task entry.
  */
 @Serializable
-data class TaskDraftState(
+data class SmartTaskDraft(
     val category: String? = null,
     val projectName: String? = null,
     val taskName: String? = null,
