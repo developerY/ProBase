@@ -21,4 +21,6 @@ sealed interface TransactionsUiEvent {
     data class SelectCategory(val category: String?) : TransactionsUiEvent
     data class SelectTransaction(val id: String?) : TransactionsUiEvent
     data class SelectTab(val tab: TransactionTab) : TransactionsUiEvent
+    data class NavigateTo(val destination: com.zoewave.probase.seaweed.model.navigation.SeaweedDestination) : TransactionsUiEvent
+    object OnBack : TransactionsUiEvent
 }

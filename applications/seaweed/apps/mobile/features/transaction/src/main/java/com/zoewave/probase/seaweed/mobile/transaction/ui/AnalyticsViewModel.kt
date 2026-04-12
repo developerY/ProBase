@@ -23,8 +23,12 @@ import javax.inject.Inject
 data class AnalyticsUiState(
     val isLoading: Boolean = true,
     val spendingTrends: Map<SpendingPeriod, List<TrendPoint>> = emptyMap(),
-    val habitInsights: List<HabitInsight> = emptyList()
+    val habitInsights: List<HabitInsight> = emptyList(),
 )
+
+sealed interface AnalyticsUiEvent {
+    object OnBackClicked : AnalyticsUiEvent
+}
 
 @HiltViewModel
 class AnalyticsViewModel @Inject constructor(

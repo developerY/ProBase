@@ -2,20 +2,18 @@ package com.zoewave.probase.seaweed.mobile.settings.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
 import com.zoewave.probase.seaweed.model.ThemeMode
+import com.zoewave.probase.seaweed.model.UserSettings
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 
 @Composable
@@ -27,67 +25,67 @@ fun SettingsUiRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     SettingsScreen(
-        modifier = modifier,
         uiState = uiState,
-        onEvent = viewModel::onEvent
+        onEvent = { event ->
+            if (event is SettingsUiEvent.NavigateTo) {
+                navTo(event.destination)
+            } else {
+                viewModel.onEvent(event)
+            }
+        },
+        navTo = navTo,
+        modifier = modifier
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    modifier: Modifier = Modifier,
     uiState: SettingsUiState,
-    onEvent: (SettingsUiEvent) -> Unit
+    onEvent: (SettingsUiEvent) -> Unit,
+    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Settings") })
         },
-        modifier = modifier
+        modifier = modifier.fillMaxSize()
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            when (uiState) {
-                SettingsUiState.Loading -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+        when (uiState) {
+            SettingsUiState.Loading -> {
+                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-                is SettingsUiState.Success -> {
-                    Text(
-                        text = "App Color Theme",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(16.dp)
+            }
+            is SettingsUiState.Success -> {
+                val settings = uiState.settings
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Text("Income", style = MaterialTheme.typography.titleLarge)
+                    OutlinedTextField(
+                        value = settings.monthlyIncome.toString(),
+                        onValueChange = { val income = it.toDoubleOrNull() ?: 0.0; onEvent(SettingsUiEvent.UpdateIncome(income)) },
+                        label = { Text("Monthly Income") },
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    
+
+                    Text("Theme Appearance", style = MaterialTheme.typography.titleLarge)
                     ThemeConfigSelectionGroup(
-                        selectedTheme = uiState.settings.themeConfig,
-                        onThemeSelected = { onEvent(SettingsUiEvent.UpdateTheme(it)) }
+                        currentConfig = settings.themeConfig,
+                        onConfigSelected = { onEvent(SettingsUiEvent.UpdateTheme(it)) }
                     )
 
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-                    Text(
-                        text = "Theme Mode",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(16.dp)
-                    )
-
+                    Text("Theme Mode", style = MaterialTheme.typography.titleLarge)
                     ThemeModeSelectionGroup(
-                        selectedMode = uiState.settings.themeMode,
+                        currentMode = settings.themeMode,
                         onModeSelected = { onEvent(SettingsUiEvent.UpdateThemeMode(it)) }
-                    )
-                    
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                    
-                    ListItem(
-                        headlineContent = { Text("About Seaweed") },
-                        supportingContent = { Text("Version 0.0.1") }
                     )
                 }
             }
@@ -96,74 +94,100 @@ fun SettingsScreen(
 }
 
 @Composable
-fun ThemeConfigSelectionGroup(
-    selectedTheme: SeaweedThemeConfig,
-    onThemeSelected: (SeaweedThemeConfig) -> Unit
+private fun ThemeConfigSelectionGroup(
+    currentConfig: SeaweedThemeConfig,
+    onConfigSelected: (SeaweedThemeConfig) -> Unit
 ) {
-    Column(Modifier.selectableGroup()) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         ThemeOption(
-            text = "Seaweed Teal (Default)",
-            selected = selectedTheme == SeaweedThemeConfig.DEFAULT,
-            onClick = { onThemeSelected(SeaweedThemeConfig.DEFAULT) }
+            label = "Default",
+            isSelected = currentConfig == SeaweedThemeConfig.DEFAULT,
+            onClick = { onConfigSelected(SeaweedThemeConfig.DEFAULT) }
         )
         ThemeOption(
-            text = "Seaweed Coral",
-            selected = selectedTheme == SeaweedThemeConfig.CORAL,
-            onClick = { onThemeSelected(SeaweedThemeConfig.CORAL) }
+            label = "Coral",
+            isSelected = currentConfig == SeaweedThemeConfig.CORAL,
+            onClick = { onConfigSelected(SeaweedThemeConfig.CORAL) }
         )
     }
 }
 
 @Composable
-fun ThemeModeSelectionGroup(
-    selectedMode: ThemeMode,
+private fun ThemeModeSelectionGroup(
+    currentMode: ThemeMode,
     onModeSelected: (ThemeMode) -> Unit
 ) {
-    Column(Modifier.selectableGroup()) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         ThemeOption(
-            text = "System Default",
-            selected = selectedMode == ThemeMode.SYSTEM,
+            label = "System Default",
+            isSelected = currentMode == ThemeMode.SYSTEM,
             onClick = { onModeSelected(ThemeMode.SYSTEM) }
         )
         ThemeOption(
-            text = "Light Mode",
-            selected = selectedMode == ThemeMode.LIGHT,
+            label = "Light",
+            isSelected = currentMode == ThemeMode.LIGHT,
             onClick = { onModeSelected(ThemeMode.LIGHT) }
         )
         ThemeOption(
-            text = "Dark Mode",
-            selected = selectedMode == ThemeMode.DARK,
+            label = "Dark",
+            isSelected = currentMode == ThemeMode.DARK,
             onClick = { onModeSelected(ThemeMode.DARK) }
         )
     }
 }
 
 @Composable
-fun ThemeOption(
-    text: String,
-    selected: Boolean,
+private fun ThemeOption(
+    label: String,
+    isSelected: Boolean,
     onClick: () -> Unit
 ) {
     Row(
-        Modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
-            .selectable(
-                selected = selected,
-                onClick = onClick,
-                role = Role.RadioButton
-            )
-            .padding(horizontal = 16.dp),
+            .height(56.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
-            selected = selected,
-            onClick = null // null recommended for accessibility with screen readers
+            selected = isSelected,
+            onClick = onClick
         )
         Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(start = 16.dp)
+            text = label,
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .weight(1f),
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsScreenPreview() {
+    MaterialTheme {
+        SettingsScreen(
+            uiState = SettingsUiState.Success(
+                settings = UserSettings(
+                    monthlyIncome = 5000.0,
+                    themeConfig = SeaweedThemeConfig.DEFAULT,
+                    themeMode = ThemeMode.SYSTEM
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsScreenLoadingPreview() {
+    MaterialTheme {
+        SettingsScreen(
+            uiState = SettingsUiState.Loading,
+            onEvent = {},
+            navTo = {}
         )
     }
 }
