@@ -1,4 +1,4 @@
-package com.zoewave.probase.photodo.mobile.features.tasks.ui.components
+package com.zoewave.probase.photodo.features.camera.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.SavePhotoUiState
+import com.zoewave.probase.photodo.features.camera.ui.state.SavePhotoUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

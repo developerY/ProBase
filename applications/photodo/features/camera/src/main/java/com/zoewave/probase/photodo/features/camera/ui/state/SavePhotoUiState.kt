@@ -1,4 +1,4 @@
-package com.zoewave.probase.photodo.mobile.features.tasks.ui
+package com.zoewave.probase.photodo.features.camera.ui.state
 
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity

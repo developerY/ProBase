@@ -1,9 +1,10 @@
-package com.zoewave.probase.photodo.mobile.features.tasks.ui
+package com.zoewave.probase.photodo.features.camera.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
-import com.zoewave.probase.photodo.mobile.features.tasks.domain.AddPhotoToTaskUseCase
+import com.zoewave.probase.photodo.features.camera.domain.AddPhotoToTaskUseCase
+import com.zoewave.probase.photodo.features.camera.ui.state.SavePhotoUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow

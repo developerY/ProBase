@@ -15,10 +15,11 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.AdaptiveHomeScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiRoute
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.SavePhotoViewModel
+import com.zoewave.probase.photodo.features.camera.ui.CameraResultHandler
+import com.zoewave.probase.photodo.features.camera.ui.SavePhotoViewModel
+import com.zoewave.probase.photodo.features.camera.ui.components.SavePhotoBottomSheet
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksSideEffect
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksViewModel
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.SavePhotoBottomSheet
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.TasksListScreen
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailScreen
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailViewModel
