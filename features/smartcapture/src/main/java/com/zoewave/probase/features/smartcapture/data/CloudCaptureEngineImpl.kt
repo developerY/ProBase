@@ -5,6 +5,7 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
+import com.zoewave.probase.features.smartcapture.domain.DiagnosticResult
 import com.zoewave.probase.features.smartcapture.domain.SmartCaptureEngine
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -20,8 +21,15 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         coerceInputValues = true
     }
 
-    override suspend fun processImage(bitmap: Bitmap, apiKey: String?): SmartTaskDraft {
-        if (apiKey.isNullOrBlank()) throw IllegalArgumentException("Missing Gemini API Key for Pro Engine")
+    override suspend fun processImage(bitmap: Bitmap, apiKey: String?): DiagnosticResult {
+        val logs = mutableListOf("Cloud Engine initialized")
+        if (apiKey.isNullOrBlank()) {
+            logs.add("Error: API Key is null or blank")
+            throw IllegalArgumentException("Missing Gemini API Key for Pro Engine")
+        }
+
+        logs.add("API Key found (length: ${apiKey.length})")
+        logs.add("Model: gemini-1.5-flash")
 
         val generativeModel = GenerativeModel(
             modelName = "gemini-1.5-flash",
@@ -58,15 +66,24 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         }
 
         return try {
+            logs.add("Sending multimodal request to Gemini...")
             val response = generativeModel.generateContent(prompt)
-            val jsonText = response.text ?: return SmartTaskDraft()
+            val jsonText = response.text ?: run {
+                logs.add("Gemini returned empty response")
+                return DiagnosticResult(SmartTaskDraft(), logs)
+            }
+            
+            logs.add("Response received (${jsonText.length} chars)")
             
             // Clean JSON string in case of LLM artifacts
             val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
             val finalJson = "{$cleanedJson}"
             
-            json.decodeFromString<SmartTaskDraft>(finalJson)
+            val draft = json.decodeFromString<SmartTaskDraft>(finalJson)
+            logs.add("JSON decoding successful")
+            DiagnosticResult(draft, logs)
         } catch (e: Exception) {
+            logs.add("Gemini API call failed: ${e.message}")
             // Rethrow so the orchestrator knows to fallback
             throw e
         }

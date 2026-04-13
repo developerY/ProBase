@@ -2,6 +2,7 @@ plugins {
     // ✅ 1. Apply Convention Plugin
     // Handles AGP 9, Java 21, and standard Android configuration
     id("composetemplate.android.library")
+    id("composetemplate.android.hilt")
 }
 
 android {
@@ -13,14 +14,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-
-    // ✅ 3. Cleanup
-    // Removed 'buildTypes', 'compileOptions', and 'java { toolchain }'
-    // because 'composetemplate.android.library' configures them for you.
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    // Hilt is already added by the plugin
 
     // Kept these as they were in your original file,
     // but if this is a "pure" utility module (no UI), you might not need them.

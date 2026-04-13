@@ -1,0 +1,9 @@
+package com.zoewave.probase.features.smartcapture.domain
+
+import com.zoewave.probase.core.model.tasks.SmartTaskDraft
+
+data class DiagnosticResult(
+    val draft: SmartTaskDraft,
+    val logs: List<String> = emptyList(),
+    val error: String? = null
+)

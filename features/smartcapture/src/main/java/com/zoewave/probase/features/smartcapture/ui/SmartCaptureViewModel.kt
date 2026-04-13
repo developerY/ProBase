@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
+import com.zoewave.probase.core.util.network.NetworkStatsProvider
 import com.zoewave.probase.features.smartcapture.data.ImageLoader
 import com.zoewave.probase.features.smartcapture.data.SmartCaptureOrchestrator
 import com.zoewave.probase.features.smartcapture.domain.SmartCaptureSettings
@@ -21,7 +22,8 @@ import javax.inject.Inject
 class SmartCaptureViewModel @Inject constructor(
     private val orchestrator: SmartCaptureOrchestrator,
     private val settings: SmartCaptureSettings,
-    private val imageLoader: ImageLoader
+    private val imageLoader: ImageLoader,
+    private val networkStatsProvider: NetworkStatsProvider
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SmartCaptureUiState>(SmartCaptureUiState.Idle)
@@ -29,13 +31,31 @@ class SmartCaptureViewModel @Inject constructor(
 
     fun analyzePhoto(uriString: String) {
         viewModelScope.launch(Dispatchers.Default) {
-            _uiState.value = SmartCaptureUiState.Loading
+            val netType = networkStatsProvider.getNetworkType()
+            _uiState.value = SmartCaptureUiState.Loading(
+                logs = listOf("Starting analysis...", "Network: $netType"),
+                networkSpeed = netType
+            )
+            
             val bitmap = imageLoader.loadBitmap(uriString)
             if (bitmap != null) {
                 try {
                     val apiKey = settings.userApiKeyFlow.firstOrNull()
-                    val draft = orchestrator.processImage(bitmap, apiKey)
-                    _uiState.value = SmartCaptureUiState.Success(draft.copy(photoUri = uriString))
+                    val isUsingCloud = !apiKey.isNullOrBlank()
+                    
+                    _uiState.value = SmartCaptureUiState.Loading(
+                        logs = listOf("Image loaded", "Engine: ${if (isUsingCloud) "Cloud (Gemini)" else "Local (ML Kit)"}"),
+                        isUsingCloud = isUsingCloud,
+                        networkSpeed = netType
+                    )
+
+                    val result = orchestrator.processImage(bitmap, apiKey)
+                    
+                    if (result.error != null) {
+                        _uiState.value = SmartCaptureUiState.Error(result.error, result.logs)
+                    } else {
+                        _uiState.value = SmartCaptureUiState.Success(result.draft.copy(photoUri = uriString), result.logs)
+                    }
                 } catch (e: Exception) {
                     _uiState.value = SmartCaptureUiState.Error(e.message ?: "Unknown error occurred")
                 }
@@ -47,12 +67,25 @@ class SmartCaptureViewModel @Inject constructor(
 
     fun analyzePhoto(bitmap: Bitmap) {
         viewModelScope.launch(Dispatchers.Default) {
-            _uiState.value = SmartCaptureUiState.Loading
+            val netType = networkStatsProvider.getNetworkType()
+            _uiState.value = SmartCaptureUiState.Loading(
+                logs = listOf("Direct bitmap provided", "Network: $netType"),
+                isUsingCloud = false,
+                networkSpeed = netType
+            )
             
             try {
                 val apiKey = settings.userApiKeyFlow.firstOrNull()
-                val draft = orchestrator.processImage(bitmap, apiKey)
-                _uiState.value = SmartCaptureUiState.Success(draft)
+                val isUsingCloud = !apiKey.isNullOrBlank()
+                
+                _uiState.value = SmartCaptureUiState.Loading(
+                    logs = listOf("Processing image...", "Engine: ${if (isUsingCloud) "Cloud" else "Local"}"),
+                    isUsingCloud = isUsingCloud,
+                    networkSpeed = netType
+                )
+
+                val result = orchestrator.processImage(bitmap, apiKey)
+                _uiState.value = SmartCaptureUiState.Success(result.draft, result.logs)
             } catch (e: Exception) {
                 _uiState.value = SmartCaptureUiState.Error(e.message ?: "Unknown error occurred")
             }

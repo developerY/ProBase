@@ -23,7 +23,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.SdStorage
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -131,6 +133,42 @@ internal fun SmartCaptureScreen(
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.tertiary)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text("AI is parsing your image...", style = MaterialTheme.typography.bodyMedium)
+                        
+                        // 🚀 NEW: Diagnostics View
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = if (uiState.isUsingCloud) Icons.Default.Cloud else Icons.Default.SdStorage,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.padding(start = 8.dp))
+                                    Text(
+                                        text = if (uiState.isUsingCloud) "Cloud Engine (Gemini)" else "Local Engine (ML Kit)",
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                    if (uiState.networkSpeed != null) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                        Text(text = "Network: ${uiState.networkSpeed}", style = MaterialTheme.typography.labelSmall)
+                                    }
+                                }
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                                uiState.logs.takeLast(3).forEach { log ->
+                                    Text(
+                                        text = "• $log",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 

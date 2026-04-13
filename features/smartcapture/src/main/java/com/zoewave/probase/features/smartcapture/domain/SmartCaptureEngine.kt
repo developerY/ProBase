@@ -12,5 +12,5 @@ interface SmartCaptureEngine {
      * @param bitmap The image to analyze.
      * @param apiKey Optional API key for cloud engines.
      */
-    suspend fun processImage(bitmap: Bitmap, apiKey: String?): SmartTaskDraft
+    suspend fun processImage(bitmap: Bitmap, apiKey: String?): DiagnosticResult
 }

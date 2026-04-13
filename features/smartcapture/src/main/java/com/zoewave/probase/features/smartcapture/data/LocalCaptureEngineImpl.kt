@@ -5,6 +5,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
+import com.zoewave.probase.features.smartcapture.domain.DiagnosticResult
 import com.zoewave.probase.features.smartcapture.domain.SmartCaptureEngine
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -17,25 +18,36 @@ class LocalCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
 
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
-    override suspend fun processImage(bitmap: Bitmap, apiKey: String?): SmartTaskDraft {
+    override suspend fun processImage(bitmap: Bitmap, apiKey: String?): DiagnosticResult {
+        val logs = mutableListOf("Local Engine initialized")
         val image = InputImage.fromBitmap(bitmap, 0)
+        logs.add("Image converted to ML Input")
+        
         val visionText = try {
-            recognizer.process(image).await().text
+            val result = recognizer.process(image).await().text
+            logs.add("ML Kit OCR successful: ${result.length} characters found")
+            result
         } catch (e: Exception) {
+            logs.add("ML Kit OCR failed: ${e.message}")
             ""
         }
 
-        if (visionText.isBlank()) return SmartTaskDraft()
+        if (visionText.isBlank()) return DiagnosticResult(SmartTaskDraft(), logs)
 
         val lines = visionText.lines().filter { it.isNotBlank() }
         val taskName = lines.firstOrNull()
         val budget = extractBudget(visionText)
         val dueDate = extractDate(visionText)
+        
+        logs.add("Regex extraction complete")
 
-        return SmartTaskDraft(
-            taskName = taskName,
-            budget = budget,
-            dueDate = dueDate
+        return DiagnosticResult(
+            draft = SmartTaskDraft(
+                taskName = taskName,
+                budget = budget,
+                dueDate = dueDate
+            ),
+            logs = logs
         )
     }
 
