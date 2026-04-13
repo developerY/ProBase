@@ -21,9 +21,21 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.BeachAccess
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Kitchen
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Yard
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -164,7 +176,7 @@ internal fun SavePhotoForm(
 
         // --- SECTION 1: CATEGORY ---
         FormSection(title = "Category", themeColor = themeColor) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = uiState.categoryName,
                     onValueChange = onCategoryNameChanged,
@@ -175,7 +187,7 @@ internal fun SavePhotoForm(
                 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     quickTemplates.map { it.categoryName }.distinct().take(5).forEach { category ->
                         CategoryChip(
@@ -190,6 +202,15 @@ internal fun SavePhotoForm(
         }
 
         // --- SECTION 2: PROJECT ---
+        val projectTemplates = listOf(
+            "Kitchen" to Icons.Default.Kitchen,
+            "Garden" to Icons.Default.Yard,
+            "Car" to Icons.Default.DirectionsCar,
+            "Office" to Icons.Default.Business,
+            "Home" to Icons.Default.Home,
+            "Holiday" to Icons.Default.BeachAccess
+        )
+
         FormSection(title = "Project Details", themeColor = themeColor) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
@@ -198,6 +219,12 @@ internal fun SavePhotoForm(
                     label = { Text("Project Name") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
+                )
+
+                QuickIconRow(
+                    items = projectTemplates,
+                    onItemSelected = onProjectNameChanged,
+                    themeColor = themeColor
                 )
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -245,14 +272,31 @@ internal fun SavePhotoForm(
         }
 
         // --- SECTION 3: TASK ---
+        val taskTemplates = listOf(
+            "Fix" to Icons.Default.Build,
+            "Buy" to Icons.Default.ShoppingCart,
+            "Clean" to Icons.Default.CleaningServices,
+            "Call" to Icons.Default.Call,
+            "Find" to Icons.Default.Search,
+            "Organize" to Icons.Default.Layers
+        )
+
         FormSection(title = "Task", themeColor = themeColor) {
-            OutlinedTextField(
-                value = uiState.taskName,
-                onValueChange = onTaskNameChanged,
-                label = { Text("Main Task Name") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = uiState.taskName,
+                    onValueChange = onTaskNameChanged,
+                    label = { Text("Main Task Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                QuickIconRow(
+                    items = taskTemplates,
+                    onItemSelected = onTaskNameChanged,
+                    themeColor = themeColor
+                )
+            }
         }
 
         // --- SAVE BUTTON ---
@@ -292,5 +336,37 @@ private fun CategoryChip(name: String, isSelected: Boolean, onClick: () -> Unit,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             style = MaterialTheme.typography.labelSmall
         )
+    }
+}
+
+@Composable
+private fun QuickIconRow(
+    items: List<Pair<String, androidx.compose.ui.graphics.vector.ImageVector>>,
+    onItemSelected: (String) -> Unit,
+    themeColor: Color
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        items.forEach { (name, icon) ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.clickable { onItemSelected(name) }
+            ) {
+                Surface(
+                    modifier = Modifier.size(40.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = themeColor
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(imageVector = icon, contentDescription = name, modifier = Modifier.size(20.dp))
+                    }
+                }
+                Text(text = name, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
     }
 }
