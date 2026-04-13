@@ -95,8 +95,7 @@ fun AiSettingsCard(
                         trailingContent = {
                             Switch(
                                 checked = isAiEnabled,
-                                onCheckedChange = onAiEnabledToggled,
-                                enabled = isApiKeySet || editingKey.isNotBlank()
+                                onCheckedChange = onAiEnabledToggled
                             )
                         }
                     )
