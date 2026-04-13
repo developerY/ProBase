@@ -3,6 +3,7 @@ package com.zoewave.probase.features.smartcapture.data
 import android.graphics.Bitmap
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
+import com.google.ai.client.generativeai.type.generationConfig
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.smartcapture.domain.DiagnosticResult
 import com.zoewave.probase.features.smartcapture.domain.SmartCaptureEngine
@@ -10,7 +11,7 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 /**
- * Tier 1: Pro Engine using Gemini 2.5 Flash Lite Cloud SDK.
+ * Tier 1: Pro Engine using Gemini 3.1 Flash Lite Cloud SDK.
  * Uses multimodal parsing to extract high-fidelity JSON.
  */
 class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
@@ -22,38 +23,39 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
 
     override suspend fun processImage(bitmap: Bitmap, apiKey: String?): DiagnosticResult {
         val logs = mutableListOf("Cloud AI Engine initialized")
-        
-        // 🚀 SANITIZATION: Clean up the API key to prevent header crashes
-        val cleanApiKey = apiKey?.trim()?.replace("\n", "")?.replace("\r", "")
-        
-        if (cleanApiKey.isNullOrBlank()) {
-            logs.add("Error: API Key is null or blank after sanitization")
+        if (apiKey.isNullOrBlank()) {
+            logs.add("Error: API Key is null or blank")
             throw IllegalArgumentException("Missing Gemini API Key for Pro Engine")
         }
 
-        logs.add("API Key validated (length: ${cleanApiKey.length})")
+        logs.add("API Key found (length: ${apiKey.length})")
         logs.add("Model: gemini-3.1-flash-lite-preview")
 
         val generativeModel = GenerativeModel(
             modelName = "gemini-3.1-flash-lite-preview",
-            apiKey = cleanApiKey
+            apiKey = apiKey,
+            generationConfig = generationConfig {
+                responseMimeType = "application/json"
+            }
         )
 
         val prompt = content {
             image(bitmap)
             text("""
-                Extract task information from this image into a structured JSON format.
-                Fields to find: 
-                - category: A broad classification (e.g., Home, Work, Health).
-                - projectName: If the task belongs to a specific project.
-                - taskName: The main action or title.
-                - duration: Estimated time required (e.g., 30m, 2h).
-                - dueDate: Any visible deadlines.
-                - budget: Any estimated costs (return as a number only).
-                - subTasks: A list of smaller steps if visible.
+                You are a smart project management assistant. From this image, deduce what the user is planning to do.
+                If the image is a broken object, a sketch, or a note, guess the average project requirements for this task.
+                Extract the task information into a structured JSON format to autofill a ToDo app.
                 
-                Respond ONLY with valid JSON.
-                Schema:
+                Fields to find: 
+                - category: A broad classification (e.g., "Home", "Work", "Health").
+                - projectName: The overarching project this belongs to, if applicable.
+                - taskName: The main actionable title.
+                - duration: Estimated time required (e.g., "30m", "2h").
+                - dueDate: Any visible deadlines. Format as MM/DD/YYYY if possible.
+                - budget: Any estimated costs. Return strictly as a primitive number without currency symbols (e.g., 15.50). Use null if none.
+                - subTasks: A list of 3 to 5 logical smaller steps to complete the task.
+                
+                Respond ONLY with a valid JSON object matching this exact schema:
                 {
                   "category": string or null,
                   "projectName": string or null,
@@ -83,12 +85,8 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
             val draft = json.decodeFromString<SmartTaskDraft>(finalJson)
             logs.add("JSON decoding successful")
             DiagnosticResult(draft, logs, engineUsed = "Cloud AI")
-        } catch (e: com.google.ai.client.generativeai.type.ServerException) {
-            logs.add("Gemini Server Error (404/Mismatched Model): ${e.message}")
-            logs.add("Tip: Ensure gemini-3.1-flash-lite-preview is enabled for your API key in Google AI Studio.")
-            throw e
         } catch (e: Exception) {
-            logs.add("Gemini API call failed (${e::class.simpleName}): ${e.message}")
+            logs.add("Gemini API call failed: ${e.message}")
             // Rethrow so the orchestrator knows to fallback
             throw e
         }
