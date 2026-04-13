@@ -35,7 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 
 @Composable
 fun AiSettingsCard(
@@ -108,7 +110,7 @@ fun AiSettingsCard(
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "Get your free API key from Google AI Studio to enable high-fidelity multimodal parsing. Keys are stored in hardware-backed encrypted storage.",
+                        text = "Get your free API key from Google AI Studio to enable high-fidelity multimodal parsing. Keys are stored in hardware-backed encrypted storage. Level 3 Cloud features include mandatory reporting tools; flagging an output will redirect you to Google’s external feedback portal.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 4.dp)
@@ -163,5 +165,35 @@ fun AiSettingsCard(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AiSettingsCardCollapsedPreview() {
+    PhotoDoTheme {
+        AiSettingsCard(
+            expanded = false,
+            onExpandToggle = {},
+            isAiEnabled = true,
+            onAiEnabledToggled = {},
+            isApiKeySet = true,
+            onGeminiApiKeyChanged = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AiSettingsCardExpandedPreview() {
+    PhotoDoTheme {
+        AiSettingsCard(
+            expanded = true,
+            onExpandToggle = {},
+            isAiEnabled = true,
+            onAiEnabledToggled = {},
+            isApiKeySet = false,
+            onGeminiApiKeyChanged = {}
+        )
     }
 }

@@ -15,6 +15,7 @@ data class SavePhotoUiState(
     val budgetInput: String = "",
     val dueDateMillis: Long? = null,
     val subTasks: List<String> = emptyList(),
+    val aiGeneratedFields: Set<String> = emptySet(),
 
     // Selections/Data
     val categories: List<CategoryEntity> = emptyList(),

@@ -7,6 +7,7 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
@@ -218,6 +219,8 @@ fun photoTodoNavEntryProvider(
 
             is PhotoTodoRoute.SavePhoto -> {
                 val viewModel: SavePhotoViewModel = hiltViewModel()
+                val context = LocalContext.current
+                
                 LaunchedEffect(key.photoUri, key.prefilledAiDraft) {
                     viewModel.setInitialData(key.photoUri, key.prefilledAiDraft)
                 }
@@ -249,6 +252,11 @@ fun photoTodoNavEntryProvider(
                     onDueDateChanged = viewModel::setDueDate,
                     onAddSubTask = viewModel::addSubTask,
                     onRemoveSubTask = viewModel::removeSubTask,
+                    onReportIssue = {
+                        val intent = viewModel.getReportIntent()
+                        context.startActivity(intent)
+                    },
+                    onClearAiData = viewModel::clearAiData,
                     onSaveClicked = viewModel::saveTask,
                     onDismiss = navigateBack
                 )

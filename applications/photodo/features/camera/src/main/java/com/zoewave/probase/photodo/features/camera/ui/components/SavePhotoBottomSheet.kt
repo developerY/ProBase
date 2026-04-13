@@ -1,6 +1,8 @@
 package com.zoewave.probase.photodo.features.camera.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +29,7 @@ import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.filled.Layers
@@ -37,6 +40,7 @@ import androidx.compose.material.icons.filled.Yard
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -79,6 +83,8 @@ fun SavePhotoBottomSheet(
     onDueDateChanged: (Long?) -> Unit,
     onAddSubTask: (String) -> Unit,
     onRemoveSubTask: (Int) -> Unit,
+    onReportIssue: () -> Unit,
+    onClearAiData: () -> Unit,
     onSaveClicked: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
@@ -102,6 +108,8 @@ fun SavePhotoBottomSheet(
             onShowDatePicker = { showDatePicker = true },
             onAddSubTask = onAddSubTask,
             onRemoveSubTask = onRemoveSubTask,
+            onReportIssue = onReportIssue,
+            onClearAiData = onClearAiData,
             onSaveClicked = onSaveClicked,
             onDismiss = onDismiss
         )
@@ -131,6 +139,8 @@ internal fun SavePhotoForm(
     onShowDatePicker: () -> Unit,
     onAddSubTask: (String) -> Unit,
     onRemoveSubTask: (Int) -> Unit,
+    onReportIssue: () -> Unit,
+    onClearAiData: () -> Unit,
     onSaveClicked: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -191,13 +201,17 @@ internal fun SavePhotoForm(
                     onExpandedChange = { isCategoryDropdownExpanded = it },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    OutlinedTextField(
+                    AiEnhancedTextField(
                         value = uiState.categoryName,
                         onValueChange = onCategoryNameChanged,
-                        label = { Text("Category Name") },
+                        label = "Category Name",
+                        isAiGenerated = uiState.aiGeneratedFields.contains("category"),
+                        onReportClick = onReportIssue,
+                        onClearAiClick = onClearAiData,
                         modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, true),
-                        singleLine = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCategoryDropdownExpanded) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCategoryDropdownExpanded) 
+                        },
                         colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                     )
 
@@ -238,12 +252,14 @@ internal fun SavePhotoForm(
 
         FormSection(title = "Project Details", themeColor = themeColor) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
+                AiEnhancedTextField(
                     value = uiState.projectName,
                     onValueChange = onProjectNameChanged,
-                    label = { Text("Project Name") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    label = "Project Name",
+                    isAiGenerated = uiState.aiGeneratedFields.contains("project"),
+                    onReportClick = onReportIssue,
+                    onClearAiClick = onClearAiData,
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 QuickIconRow(
@@ -253,14 +269,16 @@ internal fun SavePhotoForm(
                 )
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(
+                    AiEnhancedTextField(
                         value = uiState.duration,
                         onValueChange = onDurationChanged,
-                        label = { Text("Duration") },
+                        label = "Duration",
+                        isAiGenerated = uiState.aiGeneratedFields.contains("duration"),
+                        onReportClick = onReportIssue,
+                        onClearAiClick = onClearAiData,
                         modifier = Modifier.weight(1f),
                         leadingIcon = { Icon(Icons.Default.Timer, contentDescription = null) },
-                        placeholder = { Text("e.g. 2h") },
-                        singleLine = true
+                        placeholder = "e.g. 2h"
                     )
 
                     val dateText = uiState.dueDateMillis?.let {
@@ -277,19 +295,21 @@ internal fun SavePhotoForm(
                         shape = MaterialTheme.shapes.extraSmall
                     ) {
                         Icon(Icons.Default.CalendarMonth, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.padding(start = 8.dp))
                         Text(dateText)
                     }
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
+                    AiEnhancedTextField(
                         value = uiState.budgetInput,
                         onValueChange = onBudgetInputChanged,
-                        label = { Text("Total Budget") },
+                        label = "Total Budget",
+                        isAiGenerated = uiState.aiGeneratedFields.contains("budget"),
+                        onReportClick = onReportIssue,
+                        onClearAiClick = onClearAiData,
                         modifier = Modifier.fillMaxWidth(),
-                        prefix = { Text("$") },
-                        singleLine = true
+                        prefix = { Text("$") }
                     )
                     QuickExpenseBar(onAdjustAmount = onAdjustBudget)
                 }
@@ -308,12 +328,14 @@ internal fun SavePhotoForm(
 
         FormSection(title = "Task", themeColor = themeColor) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
+                AiEnhancedTextField(
                     value = uiState.taskName,
                     onValueChange = onTaskNameChanged,
-                    label = { Text("Main Task Name") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    label = "Main Task Name",
+                    isAiGenerated = uiState.aiGeneratedFields.contains("task"),
+                    onReportClick = onReportIssue,
+                    onClearAiClick = onClearAiData,
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 QuickIconRow(
@@ -345,6 +367,78 @@ private fun FormSection(title: String, themeColor: Color, content: @Composable (
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(text = title, style = MaterialTheme.typography.labelLarge, color = themeColor)
         content()
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@Composable
+private fun AiEnhancedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    isAiGenerated: Boolean,
+    onReportClick: () -> Unit,
+    onClearAiClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    placeholder: String? = null,
+    prefix: @Composable (() -> Unit)? = null,
+    colors: androidx.compose.material3.TextFieldColors = androidx.compose.material3.OutlinedTextFieldDefaults.colors()
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier.combinedClickable(
+        onLongClick = { if (isAiGenerated) showMenu = true },
+        onClick = { /* Default focus behavior */ }
+    )) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            placeholder = placeholder?.let { { Text(it) } },
+            leadingIcon = leadingIcon,
+            prefix = prefix,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            colors = if (isAiGenerated) {
+                androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                    unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.1f)
+                )
+            } else colors,
+            trailingIcon = {
+                if (isAiGenerated) {
+                    Icon(
+                        Icons.Default.AutoAwesome, 
+                        "AI Generated", 
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                } else {
+                    trailingIcon?.invoke()
+                }
+            }
+        )
+
+        DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+            DropdownMenuItem(
+                text = { Text("Clear AI Data") },
+                onClick = {
+                    showMenu = false
+                    onClearAiClick()
+                },
+                leadingIcon = { Icon(Icons.Default.Close, null) }
+            )
+            DropdownMenuItem(
+                text = { Text("Report bad AI output") },
+                onClick = {
+                    showMenu = false
+                    onReportClick()
+                },
+                leadingIcon = { Icon(Icons.Default.Flag, null) }
+            )
+        }
     }
 }
 

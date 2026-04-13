@@ -11,7 +11,7 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 /**
- * Tier 1: Pro Engine using Gemini 1.5 Flash Cloud SDK.
+ * Tier 1: Pro Engine using Gemini 2.5 Flash Lite Cloud SDK.
  * Uses multimodal parsing to extract high-fidelity JSON.
  */
 class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
@@ -22,18 +22,22 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
     }
 
     override suspend fun processImage(bitmap: Bitmap, apiKey: String?): DiagnosticResult {
-        val logs = mutableListOf("Cloud Engine initialized")
-        if (apiKey.isNullOrBlank()) {
-            logs.add("Error: API Key is null or blank")
+        val logs = mutableListOf("Cloud AI Engine initialized")
+        
+        // 🚀 SANITIZATION: Clean up the API key to prevent header crashes
+        val cleanApiKey = apiKey?.trim()?.replace("\n", "")?.replace("\r", "")
+        
+        if (cleanApiKey.isNullOrBlank()) {
+            logs.add("Error: API Key is null or blank after sanitization")
             throw IllegalArgumentException("Missing Gemini API Key for Pro Engine")
         }
 
-        logs.add("API Key found (length: ${apiKey.length})")
+        logs.add("API Key validated (length: ${cleanApiKey.length})")
         logs.add("Model: gemini-1.5-flash")
 
         val generativeModel = GenerativeModel(
             modelName = "gemini-1.5-flash",
-            apiKey = apiKey,
+            apiKey = cleanApiKey,
             generationConfig = generationConfig {
                 responseMimeType = "application/json"
             }
@@ -70,7 +74,7 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
             val response = generativeModel.generateContent(prompt)
             val jsonText = response.text ?: run {
                 logs.add("Gemini returned empty response")
-                return DiagnosticResult(SmartTaskDraft(), logs)
+                return DiagnosticResult(SmartTaskDraft(), logs, engineUsed = "Cloud AI")
             }
             
             logs.add("Response received (${jsonText.length} chars)")
@@ -82,8 +86,12 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
             val draft = json.decodeFromString<SmartTaskDraft>(finalJson)
             logs.add("JSON decoding successful")
             DiagnosticResult(draft, logs, engineUsed = "Cloud AI")
+        } catch (e: com.google.ai.client.generativeai.type.ServerException) {
+            logs.add("Gemini Server Error (404/Mismatched Model): ${e.message}")
+            logs.add("Tip: Ensure gemini-1.5-flash is enabled for your API key in Google AI Studio.")
+            throw e
         } catch (e: Exception) {
-            logs.add("Gemini API call failed: ${e.message}")
+            logs.add("Gemini API call failed (${e::class.simpleName}): ${e.message}")
             // Rethrow so the orchestrator knows to fallback
             throw e
         }
