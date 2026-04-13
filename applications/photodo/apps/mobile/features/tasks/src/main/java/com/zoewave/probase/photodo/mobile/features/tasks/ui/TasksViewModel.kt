@@ -3,6 +3,7 @@ package com.zoewave.probase.photodo.mobile.features.tasks.ui
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
@@ -42,7 +43,30 @@ class TasksViewModel @Inject constructor(
     val draftState: StateFlow<TaskDraftState> = _draftState.asStateFlow()
 
     private val _requestedCategoryId = savedStateHandle.getStateFlow<Long?>("categoryId", null)
+    private val _prefilledAiDraft = savedStateHandle.getStateFlow<SmartTaskDraft?>("prefilledAiDraft", null)
     private val _uiFlags = MutableStateFlow(UiFlags())
+
+    init {
+        // 🚀 AI HOOK: If we came from SmartCapture, open the sheet and prefill!
+        viewModelScope.launch {
+            _prefilledAiDraft.collect { aiDraft ->
+                if (aiDraft != null) {
+                    _uiFlags.update { it.copy(isAddListSheetOpen = true) }
+                    _draftState.update { 
+                        it.copy(
+                            listTitle = aiDraft.taskName ?: "",
+                            budgetInput = if (aiDraft.budget != null && aiDraft.budget!! > 0) aiDraft.budget.toString() else "",
+                            newCategoryName = aiDraft.category ?: "",
+                            pendingTaskItems = aiDraft.subTasks,
+                            isFromAi = true
+                        )
+                    }
+                    // Clear it so it doesn't re-open on config change
+                    savedStateHandle["prefilledAiDraft"] = null
+                }
+            }
+        }
+    }
 
     fun setCategoryId(categoryId: Long) {
         savedStateHandle["categoryId"] = categoryId
@@ -292,6 +316,51 @@ class TasksViewModel @Inject constructor(
                     )
 
                     onEvent(TasksEvent.OnDismissBottomSheet)
+                }
+            }
+
+            is TasksEvent.OnSaveSmartDraft -> {
+                viewModelScope.launch {
+                    val draft = event.draft
+                    val timestamp = System.currentTimeMillis()
+
+                    // 1. Get or Create Category
+                    val categoryName = draft.category?.ifBlank { "Smart Capture" } ?: "Smart Capture"
+                    val categoryId = repo.getOrCreateCategoryByName(categoryName)
+
+                    // 2. Create Project
+                    val newProject = ProjectEntity(
+                        categoryId = categoryId,
+                        name = draft.taskName?.ifBlank { "New Smart Project" } ?: "New Smart Project",
+                        projectBudget = draft.budget ?: 0.0,
+                        notes = draft.projectName // Use projectName as notes if present
+                    )
+                    val projectId = repo.upsertProject(newProject)
+
+                    // 3. Add Sub-tasks
+                    draft.subTasks.forEach { subTaskText ->
+                        repo.upsertTask(
+                            TaskEntity(
+                                projectId = projectId,
+                                text = subTaskText,
+                                isChecked = false
+                            )
+                        )
+                    }
+
+                    // 4. Attach Photo
+                    draft.photoUri?.let { uri ->
+                        repo.upsertPhoto(
+                            PhotoEntity(
+                                projectId = projectId,
+                                photoUri = uri,
+                                timestamp = timestamp
+                            )
+                        )
+                    }
+
+                    // 5. Trigger Navigation Side Effect
+                    _effects.send(TasksSideEffect.ProjectCreated(projectId, newProject.name))
                 }
             }
         }

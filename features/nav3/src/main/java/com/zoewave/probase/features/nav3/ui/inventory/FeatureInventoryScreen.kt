@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
@@ -43,7 +44,8 @@ fun FeatureInventoryScreen(
     onNavigateToNfc: () -> Unit,
     onNavigateToQrScanner: () -> Unit,
     onNavigateToCamera: () -> Unit, // ✅ Added Camera Callback
-    onNavigateToCalendar: () -> Unit
+    onNavigateToCalendar: () -> Unit,
+    onNavigateToSmartCapture: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -114,6 +116,14 @@ fun FeatureInventoryScreen(
                     description = "Interact with the system calendar.",
                     icon = Icons.Default.CalendarMonth,
                     onClick = onNavigateToCalendar
+                )
+            }
+            item {
+                FeatureCard(
+                    title = "Smart Capture",
+                    description = "Extract tasks from photos using AI.",
+                    icon = Icons.Default.AutoAwesome,
+                    onClick = onNavigateToSmartCapture
                 )
             }
 

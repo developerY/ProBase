@@ -37,7 +37,7 @@
       </SelectionState>
       <SelectionState runConfigName="applications.photodo.apps.mobile">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-04-10T21:44:08.899768Z">
+        <DropdownSelection timestamp="2026-04-12T20:16:44.019375Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Pixel_10_Pro_Fold.avd" />

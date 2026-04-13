@@ -1,6 +1,7 @@
 package com.zoewave.probase.ui.components
 
 // Feature Routes
+// ✅ Add your Camera route import here
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Text
 import androidx.compose.ui.unit.dp
@@ -8,14 +9,14 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import com.zoewave.probase.feature.weather.ui.WeatherUiRoute
 import com.zoewave.probase.features.ble.ui.BluetoothLeRoute
+import com.zoewave.probase.features.calendar.ui.CalendarUiRoute
+import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.features.health.ui.HealthRoute
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventory
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventoryScreen
 import com.zoewave.probase.features.nfc.ui.NfcUiRoute
 import com.zoewave.probase.features.qrscanner.ui.QRCodeScannerScreen
-// ✅ Add your Camera route import here
-import com.zoewave.probase.features.camera.ui.CameraUIRoute
-import com.zoewave.probase.features.calendar.ui.CalendarUiRoute
+import com.zoewave.probase.features.smartcapture.ui.SmartCaptureUiRoute
 
 fun featureInventoryEntryProvider(
     key: NavKey,
@@ -34,7 +35,8 @@ fun featureInventoryEntryProvider(
                     onNavigateToNfc = { navigateTo(FeatureInventory.Nfc) },
                     onNavigateToQrScanner = { navigateTo(FeatureInventory.QrScanner) },
                     onNavigateToCamera = { navigateTo(FeatureInventory.Camera) }, // ✅ Added Camera Callback
-                    onNavigateToCalendar = { navigateTo(FeatureInventory.Calendar) }
+                    onNavigateToCalendar = { navigateTo(FeatureInventory.Calendar) },
+                    onNavigateToSmartCapture = { navigateTo(FeatureInventory.SmartCapture) }
                 )
             }
 
@@ -82,6 +84,19 @@ fun featureInventoryEntryProvider(
             is FeatureInventory.Calendar -> {
                 FeatureScaffold(title = "Calendar", onBack = navigateBack) {
                     CalendarUiRoute()
+                }
+            }
+
+            is FeatureInventory.SmartCapture -> {
+                FeatureScaffold(title = "Smart Capture", onBack = navigateBack) {
+                    SmartCaptureUiRoute(
+                        initialPhotoUri = null,
+                        onCaptureComplete = { _ ->
+                            // For testing in inventory, just go back. 
+                            navigateBack()
+                        },
+                        onDismiss = navigateBack
+                    )
                 }
             }
 

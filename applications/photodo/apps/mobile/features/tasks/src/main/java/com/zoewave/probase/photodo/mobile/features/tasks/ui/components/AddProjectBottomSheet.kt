@@ -122,6 +122,8 @@ fun AddProjectBottomSheetContent(
 
         // --- HEADER ---
         val hasDueDate = uiState.dueDateMillis != null
+        val themeColor = if (uiState.isFromAi) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
+        val containerColor = if (uiState.isFromAi) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f) else MaterialTheme.colorScheme.surface
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -129,16 +131,16 @@ fun AddProjectBottomSheetContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_project),
+                text = if (uiState.isFromAi) "AI Smart Draft" else stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_project),
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary
+                color = themeColor
             )
 
             IconButton(
                 onClick = onShowDatePicker,
                 colors = IconButtonDefaults.iconButtonColors(
                     // 🚀 Color changes so they know it is active!
-                    contentColor = if (hasDueDate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    contentColor = if (hasDueDate) themeColor else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             ) {
                 Icon(Icons.Default.CalendarMonth, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_set_due_date_content_desc))
@@ -149,7 +151,7 @@ fun AddProjectBottomSheetContent(
         Text(
             text = "Quick Pick",
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = themeColor
         )
 
         Row(
@@ -169,7 +171,7 @@ fun AddProjectBottomSheetContent(
                                 onEvent(TasksEvent.OnDraftTitleChanged(template.title))
                                 onEvent(TasksEvent.OnDraftBudgetChanged(template.defaultBudget.toInt().toString()))
                             },
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = if (uiState.isFromAi) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer,
                         shape = CircleShape
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -257,7 +259,7 @@ fun AddProjectBottomSheetContent(
             Text(
                 text = "Adjust Budget",
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = themeColor
             )
             QuickExpenseBar(
                 onAdjustAmount = { adjustment ->
@@ -283,7 +285,8 @@ fun AddProjectBottomSheetContent(
             Button(
                 onClick = { onEvent(TasksEvent.OnSaveDraftClicked) },
                 enabled = uiState.listTitle.isNotBlank(),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = themeColor)
             ) {
                 Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_create_button))
             }

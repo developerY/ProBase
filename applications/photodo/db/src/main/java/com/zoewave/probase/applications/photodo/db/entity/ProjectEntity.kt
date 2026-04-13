@@ -37,6 +37,7 @@ data class ProjectEntity(
     var dueDate: Long? = null,
     var isAlarmEnabled: Boolean = false,
     val isArchived: Boolean = false,
+    var durationMillis: Long? = null,
     var globalSyncId: String = UUID.randomUUID().toString(),
     var lastModified: Long = System.currentTimeMillis()
 )

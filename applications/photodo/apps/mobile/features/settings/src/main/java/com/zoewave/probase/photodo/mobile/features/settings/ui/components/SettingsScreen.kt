@@ -48,6 +48,10 @@ fun SettingsScreen(
         mutableStateOf(uiState.initialCardKeyToExpand == ThemeIdentifiers.SYSTEM)
     }
 
+    var isAiExpanded by rememberSaveable(uiState.initialCardKeyToExpand) {
+        mutableStateOf(uiState.initialCardKeyToExpand == "AI")
+    }
+
     var isAboutExpanded by rememberSaveable(uiState.initialCardKeyToExpand) {
         mutableStateOf(uiState.initialCardKeyToExpand == "ABOUT")
     }
@@ -89,6 +93,15 @@ fun SettingsScreen(
                     onThemeSelected = { newTheme ->
                         onEvent(SettingsEvent.OnThemeSelected(newTheme))
                     }
+                )
+
+                AiSettingsCard(
+                    expanded = isAiExpanded,
+                    onExpandToggle = { isAiExpanded = !isAiExpanded },
+                    isAiEnabled = uiState.isAiEnabled,
+                    onAiEnabledToggled = { onEvent(SettingsEvent.OnAiEnabledToggled(it)) },
+                    isApiKeySet = uiState.isApiKeySet,
+                    onGeminiApiKeyChanged = { onEvent(SettingsEvent.OnGeminiApiKeyChanged(it)) }
                 )
 
                 PaletteSettingsCard(

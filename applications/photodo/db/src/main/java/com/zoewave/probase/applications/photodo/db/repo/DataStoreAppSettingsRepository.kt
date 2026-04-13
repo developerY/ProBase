@@ -2,8 +2,10 @@ package com.zoewave.probase.applications.photodo.db.repo
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.zoewave.probase.core.data.repository.SecureApiKeyRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -11,7 +13,8 @@ import javax.inject.Singleton
 
 @Singleton
 class DataStoreAppSettingsRepository @Inject constructor(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    private val secureApiKeyRepository: SecureApiKeyRepository
 ) : AppSettingsRepository {
 
     private val PALETTE_KEY = stringPreferencesKey("palette_preference")
@@ -48,6 +51,32 @@ class DataStoreAppSettingsRepository @Inject constructor(
     override suspend fun savePaneContrast(paneContrastIdentifier: String) {
         dataStore.edit { preferences ->
             preferences[PANE_CONTRAST_KEY] = paneContrastIdentifier
+        }
+    }
+
+    override fun getGeminiApiKey(): String? {
+        return secureApiKeyRepository.getKey()
+    }
+
+    override val isGeminiApiKeySetFlow: Flow<Boolean> = secureApiKeyRepository.isKeySetFlow
+
+    override suspend fun saveGeminiApiKey(apiKey: String?) {
+        if (apiKey == null) {
+            secureApiKeyRepository.deleteKey()
+        } else {
+            secureApiKeyRepository.saveKey(apiKey)
+        }
+    }
+
+    private val IS_AI_ENABLED_KEY = booleanPreferencesKey("is_ai_enabled")
+
+    override val isAiEnabledFlow: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[IS_AI_ENABLED_KEY] ?: false
+    }
+
+    override suspend fun saveAiEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[IS_AI_ENABLED_KEY] = enabled
         }
     }
 }

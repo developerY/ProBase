@@ -11,14 +11,16 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
+import com.zoewave.probase.features.smartcapture.ui.SmartCaptureUiRoute
+import com.zoewave.probase.photodo.features.camera.ui.CameraResultHandler
+import com.zoewave.probase.photodo.features.camera.ui.SavePhotoViewModel
+import com.zoewave.probase.photodo.features.camera.ui.components.SavePhotoBottomSheet
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.AdaptiveHomeScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiRoute
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.SavePhotoViewModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksSideEffect
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksViewModel
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.SavePhotoBottomSheet
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.TasksListScreen
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailScreen
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.detail.TaskDetailViewModel
@@ -31,10 +33,9 @@ import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute.TasksList
 fun photoTodoNavEntryProvider(
     key: PhotoTodoRoute,
     windowSizeClass: WindowSizeClass,
+    isAiEnabled: Boolean,
     navigateTo: (PhotoTodoRoute) -> Unit,
     navigateBack: () -> Unit,
-    // Un-comment this if you need to manually tell your BottomBar to switch tabs!
-    // onTabSelected: (PhotoTodoRoute) -> Unit = {}
 ): NavEntry<PhotoTodoRoute> {
 
     return NavEntry(key) {
@@ -110,6 +111,9 @@ fun photoTodoNavEntryProvider(
                         viewModel.effects.collect { effect ->
                             when (effect) {
                                 TasksSideEffect.NavigateBack -> navigateBack()
+                                is TasksSideEffect.ProjectCreated -> {
+                                    navigateTo(PhotoTodoRoute.TaskDetail(effect.projectId, effect.title))
+                                }
                             }
                         }
                     }
@@ -148,6 +152,9 @@ fun photoTodoNavEntryProvider(
                         viewModel.effects.collect { effect ->
                             when (effect) {
                                 TasksSideEffect.NavigateBack -> navigateBack()
+                                is TasksSideEffect.ProjectCreated -> {
+                                    navigateTo(PhotoTodoRoute.TaskDetail(effect.projectId, effect.title))
+                                }
                             }
                         }
                     }
@@ -180,9 +187,12 @@ fun photoTodoNavEntryProvider(
                             if (projectId != null) {
                                 resultHandler.execute(projectId = projectId, uri = uriString)
                                 navigateBack()
+                            } else if (isAiEnabled) {
+                                // 🚀 NEW: Tier 1 (Cloud) enabled, go to SmartCapture review first!
+                                navigateBack() // Pop camera
+                                navigateTo(PhotoTodoRoute.SmartCapture(uriString))
                             } else {
-                                // 🚀 NEW: Pop the Camera screen first, so the SavePhoto stack is [Home, SavePhoto]
-                                // This ensures dismissing SavePhoto returns to Home dashboard.
+                                // standard flow
                                 navigateBack()
                                 navigateTo(PhotoTodoRoute.SavePhoto(uriString))
                             }
@@ -194,10 +204,22 @@ fun photoTodoNavEntryProvider(
                 )
             }
 
+            is PhotoTodoRoute.SmartCapture -> {
+                SmartCaptureUiRoute(
+                    initialPhotoUri = key.photoUri,
+                    onCaptureComplete = { draft ->
+                        // 🚀 NEW: Navigate to the Smart Form (SavePhoto) with the AI details!
+                        navigateBack() // Pop SmartCapture
+                        navigateTo(PhotoTodoRoute.SavePhoto(photoUri = key.photoUri, prefilledAiDraft = draft))
+                    },
+                    onDismiss = navigateBack
+                )
+            }
+
             is PhotoTodoRoute.SavePhoto -> {
                 val viewModel: SavePhotoViewModel = hiltViewModel()
-                LaunchedEffect(key.photoUri) {
-                    viewModel.setPhotoUri(key.photoUri)
+                LaunchedEffect(key.photoUri, key.prefilledAiDraft) {
+                    viewModel.setInitialData(key.photoUri, key.prefilledAiDraft)
                 }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -218,13 +240,16 @@ fun photoTodoNavEntryProvider(
 
                 SavePhotoBottomSheet(
                     uiState = uiState,
-                    onCategorySelected = viewModel::selectCategory,
-                    onProjectSelected = viewModel::selectProject,
-                    onNewCategoryNameChanged = viewModel::setNewCategoryName,
-                    onNewProjectNameChanged = viewModel::setNewProjectName,
-                    onAddCategoryClicked = viewModel::createAndSelectCategory,
-                    onAddProjectClicked = viewModel::createAndSelectProject,
-                    onSaveClicked = viewModel::savePhoto,
+                    onCategoryNameChanged = viewModel::setCategoryName,
+                    onProjectNameChanged = viewModel::setProjectName,
+                    onTaskNameChanged = viewModel::setTaskName,
+                    onDurationChanged = viewModel::setDuration,
+                    onBudgetInputChanged = viewModel::setBudgetInput,
+                    onAdjustBudget = viewModel::adjustBudget,
+                    onDueDateChanged = viewModel::setDueDate,
+                    onAddSubTask = viewModel::addSubTask,
+                    onRemoveSubTask = viewModel::removeSubTask,
+                    onSaveClicked = viewModel::saveTask,
                     onDismiss = navigateBack
                 )
             }

@@ -9,7 +9,8 @@ data class TaskDraftState(
     val pendingTaskItems: List<String> = emptyList(), // Just strings until saved
     val pendingPhotoUris: List<String> = emptyList(),
     val budgetInput: String = "",
-    val dueDateMillis: Long? = null // 🚀 NEW: Store the timestamp
+    val dueDateMillis: Long? = null, // 🚀 NEW: Store the timestamp
+    val isFromAi: Boolean = false // 🚀 NEW: Visual cue for AI-enhanced tasks
 ) {
     val hasDueDate: Boolean get() = dueDateMillis != null
 }
