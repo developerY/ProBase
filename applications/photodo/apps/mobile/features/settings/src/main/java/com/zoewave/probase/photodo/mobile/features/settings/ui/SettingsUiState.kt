@@ -6,6 +6,9 @@ data class SettingsUiState(
     val currentPaneContrast: String = "TINTED", // FLAT/TINTED
     val isApiKeySet: Boolean = false,
     val isAiEnabled: Boolean = false,
+    val currentAiModel: String = "gemini-1.5-flash",
+    val isTestingKey: Boolean = false,
+    val keyTestResult: String? = null,
     val initialCardKeyToExpand: String? = null,
     val appVersion: String = "",
     val firebaseDeviceId: String = ""

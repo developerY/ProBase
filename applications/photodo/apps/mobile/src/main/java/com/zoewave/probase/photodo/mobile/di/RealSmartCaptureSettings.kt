@@ -14,4 +14,5 @@ class RealSmartCaptureSettings @Inject constructor(
     override val userApiKeyFlow: Flow<String?> = flow {
         emit(appSettingsRepository.getGeminiApiKey())
     }
+    override val userAiModelFlow: Flow<String> = appSettingsRepository.aiModelFlow
 }

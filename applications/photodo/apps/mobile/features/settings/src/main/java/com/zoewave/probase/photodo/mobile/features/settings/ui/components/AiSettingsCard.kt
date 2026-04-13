@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -18,6 +20,12 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -33,12 +41,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiSettingsCard(
     expanded: Boolean,
@@ -46,11 +56,25 @@ fun AiSettingsCard(
     isAiEnabled: Boolean,
     onAiEnabledToggled: (Boolean) -> Unit,
     isApiKeySet: Boolean,
+    currentAiModel: String,
+    onAiModelSelected: (String) -> Unit,
+    isTestingKey: Boolean,
+    keyTestResult: String?,
+    onTestKeyClicked: () -> Unit,
     onGeminiApiKeyChanged: (String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var editingKey by remember { mutableStateOf("") }
     var showKey by remember { mutableStateOf(false) }
+    var isModelDropdownExpanded by remember { mutableStateOf(false) }
+
+    val models = listOf(
+        "gemini-1.5-flash",
+        "gemini-1.5-pro",
+        "gemini-3.1-flash-lite-preview",
+        "gemini-3.1-pro-preview",
+        "gemini-3-flash-preview"
+    )
 
     Card(
         modifier = modifier
@@ -117,18 +141,43 @@ fun AiSettingsCard(
                     )
 
                     if (isApiKeySet && editingKey.isBlank()) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "✅ Gemini API Key is configured",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            TextButton(onClick = { onGeminiApiKeyChanged(null) }) {
-                                Text("Remove", color = MaterialTheme.colorScheme.error)
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "✅ Gemini API Key is configured",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                TextButton(onClick = { onGeminiApiKeyChanged(null) }) {
+                                    Text("Remove", color = MaterialTheme.colorScheme.error)
+                                }
+                            }
+                            
+                            // TEST KEY BUTTON
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Button(
+                                    onClick = onTestKeyClicked,
+                                    enabled = !isTestingKey,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                ) {
+                                    if (isTestingKey) {
+                                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
+                                    Text("Test Connection")
+                                }
+                                if (keyTestResult != null) {
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = keyTestResult,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (keyTestResult.startsWith("Valid")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                                    )
+                                }
                             }
                         }
                     }
@@ -162,6 +211,51 @@ fun AiSettingsCard(
                             Text("Save Key")
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // MODEL SELECTION
+                    Text(
+                        text = "Preferred AI Model",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    
+                    ExposedDropdownMenuBox(
+                        expanded = isModelDropdownExpanded,
+                        onExpandedChange = { isModelDropdownExpanded = it },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = currentAiModel,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Gemini Model") },
+                            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true),
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isModelDropdownExpanded) },
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = isModelDropdownExpanded,
+                            onDismissRequest = { isModelDropdownExpanded = false }
+                        ) {
+                            models.forEach { model ->
+                                DropdownMenuItem(
+                                    text = { 
+                                        Text(
+                                            text = model,
+                                            fontWeight = if (model == currentAiModel) FontWeight.Bold else FontWeight.Normal
+                                        ) 
+                                    },
+                                    onClick = {
+                                        onAiModelSelected(model)
+                                        isModelDropdownExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -178,6 +272,11 @@ fun AiSettingsCardCollapsedPreview() {
             isAiEnabled = true,
             onAiEnabledToggled = {},
             isApiKeySet = true,
+            currentAiModel = "gemini-1.5-flash",
+            onAiModelSelected = {},
+            isTestingKey = false,
+            keyTestResult = "Valid! Connection successful.",
+            onTestKeyClicked = {},
             onGeminiApiKeyChanged = {}
         )
     }
@@ -193,6 +292,11 @@ fun AiSettingsCardExpandedPreview() {
             isAiEnabled = true,
             onAiEnabledToggled = {},
             isApiKeySet = false,
+            currentAiModel = "gemini-3.1-flash-lite-preview",
+            onAiModelSelected = {},
+            isTestingKey = false,
+            keyTestResult = null,
+            onTestKeyClicked = {},
             onGeminiApiKeyChanged = {}
         )
     }

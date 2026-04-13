@@ -31,6 +31,7 @@ dependencies {
     implementation(project(":applications:photodo:db"))
     implementation(project(":applications:photodo:model"))
     implementation(project(":applications:photodo:apps:mobile:core"))
+    implementation(project(":features:smartcapture"))
 
     // --- Serialization (The backbone of Nav3) ---
     implementation(libs.kotlinx.serialization.json)

@@ -7,12 +7,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.installations.FirebaseInstallations
 import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
+import com.zoewave.probase.features.smartcapture.data.SmartCaptureOrchestrator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -21,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val appSettingsRepository: AppSettingsRepository,
+    private val orchestrator: SmartCaptureOrchestrator,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -30,6 +33,10 @@ class SettingsViewModel @Inject constructor(
     // NEW: Firebase Device ID state
     private val _firebaseDeviceId = MutableStateFlow<String>("Loading...")
 
+    // Key Testing State
+    private val _isTestingKey = MutableStateFlow(false)
+    private val _keyTestResult = MutableStateFlow<String?>(null)
+
     // Combines the DB theme preference with the navigation argument into a single UI State
     val uiState: StateFlow<SettingsUiState> = combine(
         appSettingsRepository.themePreferenceFlow,
@@ -37,6 +44,9 @@ class SettingsViewModel @Inject constructor(
         appSettingsRepository.paneContrastFlow,
         appSettingsRepository.isGeminiApiKeySetFlow,
         appSettingsRepository.isAiEnabledFlow,
+        appSettingsRepository.aiModelFlow,
+        _isTestingKey,
+        _keyTestResult,
         _initialExpandedKey,
         _firebaseDeviceId
     ) { args: Array<Any?> ->
@@ -46,9 +56,12 @@ class SettingsViewModel @Inject constructor(
             currentPaneContrast = args[2] as String,
             isApiKeySet = args[3] as Boolean,
             isAiEnabled = args[4] as Boolean,
-            initialCardKeyToExpand = args[5] as String?,
+            currentAiModel = args[5] as String,
+            isTestingKey = args[6] as Boolean,
+            keyTestResult = args[7] as String?,
+            initialCardKeyToExpand = args[8] as String?,
             appVersion = getAppVersion(),
-            firebaseDeviceId = args[6] as String
+            firebaseDeviceId = args[9] as String
         )
     }.stateIn(
         scope = viewModelScope,
@@ -100,6 +113,32 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.OnAiEnabledToggled -> {
                 viewModelScope.launch { appSettingsRepository.saveAiEnabled(event.enabled) }
             }
+            is SettingsEvent.OnAiModelSelected -> {
+                viewModelScope.launch { appSettingsRepository.saveAiModel(event.model) }
+            }
+            is SettingsEvent.OnTestApiKeyClicked -> {
+                testApiKey()
+            }
+        }
+    }
+
+    private fun testApiKey() {
+        viewModelScope.launch {
+            _isTestingKey.value = true
+            _keyTestResult.value = "Testing connection..."
+            
+            val key = appSettingsRepository.getGeminiApiKey()
+            val model = appSettingsRepository.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
+            
+            if (key.isNullOrBlank()) {
+                _keyTestResult.value = "Error: No API key saved."
+                _isTestingKey.value = false
+                return@launch
+            }
+
+            val result = orchestrator.validateApiKey(key, model)
+            _keyTestResult.value = result
+            _isTestingKey.value = false
         }
     }
 

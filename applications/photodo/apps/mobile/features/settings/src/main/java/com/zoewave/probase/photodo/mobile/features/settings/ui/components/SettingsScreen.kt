@@ -101,6 +101,11 @@ fun SettingsScreen(
                     isAiEnabled = uiState.isAiEnabled,
                     onAiEnabledToggled = { onEvent(SettingsEvent.OnAiEnabledToggled(it)) },
                     isApiKeySet = uiState.isApiKeySet,
+                    currentAiModel = uiState.currentAiModel,
+                    onAiModelSelected = { onEvent(SettingsEvent.OnAiModelSelected(it)) },
+                    isTestingKey = uiState.isTestingKey,
+                    keyTestResult = uiState.keyTestResult,
+                    onTestKeyClicked = { onEvent(SettingsEvent.OnTestApiKeyClicked) },
                     onGeminiApiKeyChanged = { onEvent(SettingsEvent.OnGeminiApiKeyChanged(it)) }
                 )
 

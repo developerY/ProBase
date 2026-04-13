@@ -21,18 +21,23 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         coerceInputValues = true
     }
 
-    override suspend fun processImage(bitmap: Bitmap, apiKey: String?): DiagnosticResult {
+    override suspend fun processImage(
+        bitmap: Bitmap,
+        apiKey: String?,
+        modelName: String?
+    ): DiagnosticResult {
         val logs = mutableListOf("Cloud AI Engine initialized")
         if (apiKey.isNullOrBlank()) {
             logs.add("Error: API Key is null or blank")
             throw IllegalArgumentException("Missing Gemini API Key for Pro Engine")
         }
 
+        val finalModelName = modelName ?: "gemini-1.5-flash"
         logs.add("API Key found (length: ${apiKey.length})")
-        logs.add("Model: gemini-3.1-flash-lite-preview")
+        logs.add("Model: $finalModelName")
 
         val generativeModel = GenerativeModel(
-            modelName = "gemini-3.1-flash-lite-preview",
+            modelName = finalModelName,
             apiKey = apiKey,
             generationConfig = generationConfig {
                 responseMimeType = "application/json"

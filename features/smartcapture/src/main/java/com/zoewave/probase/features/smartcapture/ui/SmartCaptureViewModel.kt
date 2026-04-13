@@ -41,15 +41,16 @@ class SmartCaptureViewModel @Inject constructor(
             if (bitmap != null) {
                 try {
                     val apiKey = settings.userApiKeyFlow.firstOrNull()
+                    val modelName = settings.userAiModelFlow.firstOrNull()
                     val isUsingCloud = !apiKey.isNullOrBlank()
                     
                     _uiState.value = SmartCaptureUiState.Loading(
-                        logs = listOf("Image loaded", "Engine: ${if (isUsingCloud) "Cloud (Gemini)" else "Local (ML Kit)"}"),
+                        logs = listOf("Image loaded", "Engine: ${if (isUsingCloud) "Cloud ($modelName)" else "Local (ML Kit)"}"),
                         isUsingCloud = isUsingCloud,
                         networkSpeed = netType
                     )
 
-                    val result = orchestrator.processImage(bitmap, apiKey)
+                    val result = orchestrator.processImage(bitmap, apiKey, modelName)
                     
                     if (result.error != null) {
                         _uiState.value = SmartCaptureUiState.Error(result.error, result.logs)

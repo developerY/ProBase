@@ -17,4 +17,7 @@ interface AppSettingsRepository {
 
     val isAiEnabledFlow: Flow<Boolean>
     suspend fun saveAiEnabled(enabled: Boolean)
+
+    val aiModelFlow: Flow<String>
+    suspend fun saveAiModel(model: String)
 }

@@ -8,4 +8,5 @@ import kotlinx.coroutines.flow.Flow
  */
 interface SmartCaptureSettings {
     val userApiKeyFlow: Flow<String?>
+    val userAiModelFlow: Flow<String>
 }

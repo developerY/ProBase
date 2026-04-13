@@ -18,7 +18,11 @@ class LocalCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
 
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
-    override suspend fun processImage(bitmap: Bitmap, apiKey: String?): DiagnosticResult {
+    override suspend fun processImage(
+        bitmap: Bitmap,
+        apiKey: String?,
+        modelName: String?
+    ): DiagnosticResult {
         val logs = mutableListOf("Local AI Engine initialized")
         val image = InputImage.fromBitmap(bitmap, 0)
         logs.add("Vision analysis started (ML Kit)")

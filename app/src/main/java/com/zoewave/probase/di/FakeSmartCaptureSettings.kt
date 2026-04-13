@@ -9,4 +9,5 @@ import javax.inject.Singleton
 @Singleton
 class FakeSmartCaptureSettings @Inject constructor() : SmartCaptureSettings {
     override val userApiKeyFlow: Flow<String?> = flowOf(null)
+    override val userAiModelFlow: Flow<String> = flowOf("gemini-1.5-flash")
 }
