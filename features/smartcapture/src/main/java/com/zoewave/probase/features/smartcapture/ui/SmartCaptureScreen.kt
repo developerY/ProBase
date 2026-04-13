@@ -59,7 +59,7 @@ fun SmartCaptureUiRoute(
 
     // 🚀 NEW: Auto-trigger analysis if we already have a URI
     LaunchedEffect(initialPhotoUri) {
-        if (initialPhotoUri != null && uiState is SmartCaptureUiState.Idle) {
+        if (initialPhotoUri != null) {
             viewModel.analyzePhoto(initialPhotoUri)
         }
     }

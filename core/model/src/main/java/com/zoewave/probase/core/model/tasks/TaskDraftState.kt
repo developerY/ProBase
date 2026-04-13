@@ -14,5 +14,6 @@ data class SmartTaskDraft(
     val duration: String? = null,
     val dueDate: String? = null,
     val budget: Double? = null,
-    val subTasks: List<String> = emptyList()
+    val subTasks: List<String> = emptyList(),
+    val photoUri: String? = null
 )

@@ -32,7 +32,13 @@ class SmartCaptureViewModel @Inject constructor(
             _uiState.value = SmartCaptureUiState.Loading
             val bitmap = imageLoader.loadBitmap(uriString)
             if (bitmap != null) {
-                analyzePhoto(bitmap)
+                try {
+                    val apiKey = settings.userApiKeyFlow.firstOrNull()
+                    val draft = orchestrator.processImage(bitmap, apiKey)
+                    _uiState.value = SmartCaptureUiState.Success(draft.copy(photoUri = uriString))
+                } catch (e: Exception) {
+                    _uiState.value = SmartCaptureUiState.Error(e.message ?: "Unknown error occurred")
+                }
             } else {
                 _uiState.value = SmartCaptureUiState.Error("Failed to load captured image.")
             }

@@ -318,6 +318,51 @@ class TasksViewModel @Inject constructor(
                     onEvent(TasksEvent.OnDismissBottomSheet)
                 }
             }
+
+            is TasksEvent.OnSaveSmartDraft -> {
+                viewModelScope.launch {
+                    val draft = event.draft
+                    val timestamp = System.currentTimeMillis()
+
+                    // 1. Get or Create Category
+                    val categoryName = draft.category?.ifBlank { "Smart Capture" } ?: "Smart Capture"
+                    val categoryId = repo.getOrCreateCategoryByName(categoryName)
+
+                    // 2. Create Project
+                    val newProject = ProjectEntity(
+                        categoryId = categoryId,
+                        name = draft.taskName?.ifBlank { "New Smart Project" } ?: "New Smart Project",
+                        projectBudget = draft.budget ?: 0.0,
+                        notes = draft.projectName // Use projectName as notes if present
+                    )
+                    val projectId = repo.upsertProject(newProject)
+
+                    // 3. Add Sub-tasks
+                    draft.subTasks.forEach { subTaskText ->
+                        repo.upsertTask(
+                            TaskEntity(
+                                projectId = projectId,
+                                text = subTaskText,
+                                isChecked = false
+                            )
+                        )
+                    }
+
+                    // 4. Attach Photo
+                    draft.photoUri?.let { uri ->
+                        repo.upsertPhoto(
+                            PhotoEntity(
+                                projectId = projectId,
+                                photoUri = uri,
+                                timestamp = timestamp
+                            )
+                        )
+                    }
+
+                    // 5. Trigger Navigation Side Effect
+                    _effects.send(TasksSideEffect.ProjectCreated(projectId, newProject.name))
+                }
+            }
         }
     }
 

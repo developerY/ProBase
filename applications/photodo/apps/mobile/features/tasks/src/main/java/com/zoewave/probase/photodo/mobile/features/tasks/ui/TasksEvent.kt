@@ -1,6 +1,7 @@
 package com.zoewave.probase.photodo.mobile.features.tasks.ui
 
 import com.zoewave.probase.applications.photodo.db.model.ProjectTemplate
+import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 
 
 sealed interface TasksEvent {
@@ -45,6 +46,7 @@ sealed interface TasksEvent {
     data class OnAddQuickProjectClicked(val overrideCategoryName: String? = null) : TasksEvent
     data class OnAddQuickProject(val name: String, val categoryName: String, val budget: Double) : TasksEvent
 
+    data class OnSaveSmartDraft(val draft: SmartTaskDraft) : TasksEvent
 
     // ✅ Sheet Dismissal
     data object OnDismissBottomSheet : TasksEvent

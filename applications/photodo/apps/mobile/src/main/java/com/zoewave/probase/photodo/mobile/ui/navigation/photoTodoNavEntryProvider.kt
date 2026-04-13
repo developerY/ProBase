@@ -11,14 +11,15 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.AdaptiveHomeScreen
-import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
-import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiRoute
 import com.zoewave.probase.features.smartcapture.ui.SmartCaptureUiRoute
 import com.zoewave.probase.photodo.features.camera.ui.CameraResultHandler
 import com.zoewave.probase.photodo.features.camera.ui.SavePhotoViewModel
 import com.zoewave.probase.photodo.features.camera.ui.components.SavePhotoBottomSheet
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.AdaptiveHomeScreen
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
+import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiRoute
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksSideEffect
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksViewModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.TasksListScreen
@@ -111,6 +112,9 @@ fun photoTodoNavEntryProvider(
                         viewModel.effects.collect { effect ->
                             when (effect) {
                                 TasksSideEffect.NavigateBack -> navigateBack()
+                                is TasksSideEffect.ProjectCreated -> {
+                                    navigateTo(PhotoTodoRoute.TaskDetail(effect.projectId, effect.title))
+                                }
                             }
                         }
                     }
@@ -149,6 +153,9 @@ fun photoTodoNavEntryProvider(
                         viewModel.effects.collect { effect ->
                             when (effect) {
                                 TasksSideEffect.NavigateBack -> navigateBack()
+                                is TasksSideEffect.ProjectCreated -> {
+                                    navigateTo(PhotoTodoRoute.TaskDetail(effect.projectId, effect.title))
+                                }
                             }
                         }
                     }
@@ -199,12 +206,24 @@ fun photoTodoNavEntryProvider(
             }
 
             is PhotoTodoRoute.SmartCapture -> {
+                val tasksViewModel: TasksViewModel = hiltViewModel()
+
+                LaunchedEffect(tasksViewModel.effects) {
+                    tasksViewModel.effects.collect { effect ->
+                        when (effect) {
+                            is TasksSideEffect.ProjectCreated -> {
+                                navigateBack() // Pop SmartCapture
+                                navigateTo(PhotoTodoRoute.TaskDetail(effect.projectId, effect.title))
+                            }
+                            else -> {}
+                        }
+                    }
+                }
+
                 SmartCaptureUiRoute(
                     initialPhotoUri = key.photoUri,
                     onCaptureComplete = { draft ->
-                        // Navigate to Workspace/TasksList and prefill!
-                        navigateBack() // Pop SmartCapture
-                        navigateTo(PhotoTodoRoute.TasksList(prefilledAiDraft = draft))
+                        tasksViewModel.onEvent(TasksEvent.OnSaveSmartDraft(draft))
                     },
                     onDismiss = navigateBack
                 )
