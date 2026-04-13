@@ -13,13 +13,10 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.Build
@@ -29,6 +26,7 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.filled.Layers
@@ -38,10 +36,12 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Yard
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,10 +57,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.applications.photodo.db.model.quickTemplates
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.photodo.features.camera.ui.state.SavePhotoUiState
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.PhotoDoDatePicker
@@ -120,6 +118,7 @@ fun SavePhotoBottomSheet(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SavePhotoForm(
     uiState: SavePhotoUiState,
@@ -137,6 +136,8 @@ internal fun SavePhotoForm(
 ) {
     val themeColor = if (uiState.isFromAi) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
     val containerColor = if (uiState.isFromAi) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f) else Color.Transparent
+
+    var isCategoryDropdownExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -175,29 +176,53 @@ internal fun SavePhotoForm(
         }
 
         // --- SECTION 1: CATEGORY ---
+        val categorySuggestions = listOf(
+            "Home" to Icons.Default.Home,
+            "Work" to Icons.Default.Business,
+            "Personal" to Icons.Default.BeachAccess,
+            "Shopping" to Icons.Default.ShoppingCart,
+            "Health" to Icons.Default.Favorite
+        )
+
         FormSection(title = "Category", themeColor = themeColor) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = uiState.categoryName,
-                    onValueChange = onCategoryNameChanged,
-                    label = { Text("Category Name") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ExposedDropdownMenuBox(
+                    expanded = isCategoryDropdownExpanded,
+                    onExpandedChange = { isCategoryDropdownExpanded = it },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    quickTemplates.map { it.categoryName }.distinct().take(5).forEach { category ->
-                        CategoryChip(
-                            name = category, 
-                            isSelected = uiState.categoryName == category,
-                            onClick = { onCategoryNameChanged(category) },
-                            themeColor = themeColor
-                        )
+                    OutlinedTextField(
+                        value = uiState.categoryName,
+                        onValueChange = onCategoryNameChanged,
+                        label = { Text("Category Name") },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, true),
+                        singleLine = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCategoryDropdownExpanded) },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = isCategoryDropdownExpanded,
+                        onDismissRequest = { isCategoryDropdownExpanded = false }
+                    ) {
+                        uiState.categories.forEach { category ->
+                            DropdownMenuItem(
+                                text = { Text(category.name) },
+                                onClick = {
+                                    onCategoryNameChanged(category.name)
+                                    isCategoryDropdownExpanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                            )
+                        }
                     }
                 }
+                
+                QuickIconRow(
+                    items = categorySuggestions,
+                    onItemSelected = onCategoryNameChanged,
+                    themeColor = themeColor
+                )
             }
         }
 
@@ -320,22 +345,6 @@ private fun FormSection(title: String, themeColor: Color, content: @Composable (
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(text = title, style = MaterialTheme.typography.labelLarge, color = themeColor)
         content()
-    }
-}
-
-@Composable
-private fun CategoryChip(name: String, isSelected: Boolean, onClick: () -> Unit, themeColor: Color) {
-    Surface(
-        modifier = Modifier.clickable { onClick() },
-        color = if (isSelected) themeColor else MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Text(
-            text = name,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.labelSmall
-        )
     }
 }
 
