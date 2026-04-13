@@ -19,7 +19,6 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.AdaptiveHomeScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiRoute
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksSideEffect
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksViewModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.TasksListScreen
@@ -206,24 +205,12 @@ fun photoTodoNavEntryProvider(
             }
 
             is PhotoTodoRoute.SmartCapture -> {
-                val tasksViewModel: TasksViewModel = hiltViewModel()
-
-                LaunchedEffect(tasksViewModel.effects) {
-                    tasksViewModel.effects.collect { effect ->
-                        when (effect) {
-                            is TasksSideEffect.ProjectCreated -> {
-                                navigateBack() // Pop SmartCapture
-                                navigateTo(PhotoTodoRoute.TaskDetail(effect.projectId, effect.title))
-                            }
-                            else -> {}
-                        }
-                    }
-                }
-
                 SmartCaptureUiRoute(
                     initialPhotoUri = key.photoUri,
                     onCaptureComplete = { draft ->
-                        tasksViewModel.onEvent(TasksEvent.OnSaveSmartDraft(draft))
+                        // 🚀 NEW: Navigate to the Smart Form (SavePhoto) with the AI details!
+                        navigateBack() // Pop SmartCapture
+                        navigateTo(PhotoTodoRoute.SavePhoto(photoUri = key.photoUri, prefilledAiDraft = draft))
                     },
                     onDismiss = navigateBack
                 )
@@ -231,8 +218,8 @@ fun photoTodoNavEntryProvider(
 
             is PhotoTodoRoute.SavePhoto -> {
                 val viewModel: SavePhotoViewModel = hiltViewModel()
-                LaunchedEffect(key.photoUri) {
-                    viewModel.setPhotoUri(key.photoUri)
+                LaunchedEffect(key.photoUri, key.prefilledAiDraft) {
+                    viewModel.setInitialData(key.photoUri, key.prefilledAiDraft)
                 }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -253,13 +240,16 @@ fun photoTodoNavEntryProvider(
 
                 SavePhotoBottomSheet(
                     uiState = uiState,
-                    onCategorySelected = viewModel::selectCategory,
-                    onProjectSelected = viewModel::selectProject,
-                    onNewCategoryNameChanged = viewModel::setNewCategoryName,
-                    onNewProjectNameChanged = viewModel::setNewProjectName,
-                    onAddCategoryClicked = viewModel::createAndSelectCategory,
-                    onAddProjectClicked = viewModel::createAndSelectProject,
-                    onSaveClicked = viewModel::savePhoto,
+                    onCategoryNameChanged = viewModel::setCategoryName,
+                    onProjectNameChanged = viewModel::setProjectName,
+                    onTaskNameChanged = viewModel::setTaskName,
+                    onDurationChanged = viewModel::setDuration,
+                    onBudgetInputChanged = viewModel::setBudgetInput,
+                    onAdjustBudget = viewModel::adjustBudget,
+                    onDueDateChanged = viewModel::setDueDate,
+                    onAddSubTask = viewModel::addSubTask,
+                    onRemoveSubTask = viewModel::removeSubTask,
+                    onSaveClicked = viewModel::saveTask,
                     onDismiss = navigateBack
                 )
             }

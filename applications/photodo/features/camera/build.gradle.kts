@@ -12,12 +12,13 @@ android {
 dependencies {
     // --- Shared Core Projects ---
     implementation(project(":core:ui"))
-    implementation(project(":core:model"))
+    api(project(":core:model"))
 
     // --- PhotoTodo Modules ---
     implementation(project(":applications:photodo:db"))
     implementation(project(":applications:photodo:model"))
     implementation(project(":applications:photodo:apps:mobile:core"))
+    implementation(project(":applications:photodo:apps:mobile:features:tasks"))
 
     // --- Core Features ---
     implementation(project(":features:camera"))

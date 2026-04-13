@@ -2,274 +2,295 @@ package com.zoewave.probase.photodo.features.camera.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
-import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
-import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.applications.photodo.db.model.quickTemplates
+import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.photodo.features.camera.ui.state.SavePhotoUiState
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.PhotoDoDatePicker
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SavePhotoBottomSheet(
     uiState: SavePhotoUiState,
-    onCategorySelected: (Long) -> Unit,
-    onProjectSelected: (Long) -> Unit,
-    onNewCategoryNameChanged: (String) -> Unit,
-    onNewProjectNameChanged: (String) -> Unit,
-    onAddCategoryClicked: () -> Unit,
-    onAddProjectClicked: () -> Unit,
+    onCategoryNameChanged: (String) -> Unit,
+    onProjectNameChanged: (String) -> Unit,
+    onTaskNameChanged: (String) -> Unit,
+    onDurationChanged: (String) -> Unit,
+    onBudgetInputChanged: (String) -> Unit,
+    onAdjustBudget: (Double) -> Unit,
+    onDueDateChanged: (Long?) -> Unit,
+    onAddSubTask: (String) -> Unit,
+    onRemoveSubTask: (Int) -> Unit,
     onSaveClicked: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showDatePicker by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        modifier = modifier
+        modifier = modifier.imePadding()
     ) {
-        SavePhotoBottomSheetContent(
+        SavePhotoForm(
             uiState = uiState,
-            onCategorySelected = onCategorySelected,
-            onProjectSelected = onProjectSelected,
-            onNewCategoryNameChanged = onNewCategoryNameChanged,
-            onNewProjectNameChanged = onNewProjectNameChanged,
-            onAddCategoryClicked = onAddCategoryClicked,
-            onAddProjectClicked = onAddProjectClicked,
+            onCategoryNameChanged = onCategoryNameChanged,
+            onProjectNameChanged = onProjectNameChanged,
+            onTaskNameChanged = onTaskNameChanged,
+            onDurationChanged = onDurationChanged,
+            onBudgetInputChanged = onBudgetInputChanged,
+            onAdjustBudget = onAdjustBudget,
+            onShowDatePicker = { showDatePicker = true },
+            onAddSubTask = onAddSubTask,
+            onRemoveSubTask = onRemoveSubTask,
             onSaveClicked = onSaveClicked,
             onDismiss = onDismiss
         )
+
+        if (showDatePicker) {
+            PhotoDoDatePicker(
+                onDateSelected = { 
+                    onDueDateChanged(it)
+                    showDatePicker = false
+                },
+                onDismiss = { showDatePicker = false }
+            )
+        }
     }
 }
 
 @Composable
-fun SavePhotoBottomSheetContent(
+internal fun SavePhotoForm(
     uiState: SavePhotoUiState,
-    onCategorySelected: (Long) -> Unit,
-    onProjectSelected: (Long) -> Unit,
-    onNewCategoryNameChanged: (String) -> Unit,
-    onNewProjectNameChanged: (String) -> Unit,
-    onAddCategoryClicked: () -> Unit,
-    onAddProjectClicked: () -> Unit,
+    onCategoryNameChanged: (String) -> Unit,
+    onProjectNameChanged: (String) -> Unit,
+    onTaskNameChanged: (String) -> Unit,
+    onDurationChanged: (String) -> Unit,
+    onBudgetInputChanged: (String) -> Unit,
+    onAdjustBudget: (Double) -> Unit,
+    onShowDatePicker: () -> Unit,
+    onAddSubTask: (String) -> Unit,
+    onRemoveSubTask: (Int) -> Unit,
     onSaveClicked: () -> Unit,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    onDismiss: () -> Unit
 ) {
+    val themeColor = if (uiState.isFromAi) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
+    val containerColor = if (uiState.isFromAi) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f) else Color.Transparent
+
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .navigationBarsPadding()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 24.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        // --- HEADER ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (uiState.isFromAi) {
+                    Icon(
+                        Icons.Default.AutoAwesome, 
+                        contentDescription = null, 
+                        tint = themeColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                Text(
+                    text = if (uiState.isFromAi) "AI Smart Task" else "Create Task",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = themeColor
+                )
+            }
+            IconButton(onClick = onDismiss) {
+                Icon(Icons.Default.Close, contentDescription = "Close")
+            }
+        }
+
+        // --- SECTION 1: CATEGORY ---
+        FormSection(title = "Category", themeColor = themeColor) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = uiState.categoryName,
+                    onValueChange = onCategoryNameChanged,
+                    label = { Text("Category Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    quickTemplates.map { it.categoryName }.distinct().take(5).forEach { category ->
+                        CategoryChip(
+                            name = category, 
+                            isSelected = uiState.categoryName == category,
+                            onClick = { onCategoryNameChanged(category) },
+                            themeColor = themeColor
+                        )
+                    }
+                }
+            }
+        }
+
+        // --- SECTION 2: PROJECT ---
+        FormSection(title = "Project Details", themeColor = themeColor) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = uiState.projectName,
+                    onValueChange = onProjectNameChanged,
+                    label = { Text("Project Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = uiState.duration,
+                        onValueChange = onDurationChanged,
+                        label = { Text("Duration") },
+                        modifier = Modifier.weight(1f),
+                        leadingIcon = { Icon(Icons.Default.Timer, contentDescription = null) },
+                        placeholder = { Text("e.g. 2h") },
+                        singleLine = true
+                    )
+
+                    val dateText = uiState.dueDateMillis?.let {
+                        SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(it))
+                    } ?: "Set Date"
+                    
+                    Button(
+                        onClick = onShowDatePicker,
+                        modifier = Modifier.weight(1f).height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        shape = MaterialTheme.shapes.extraSmall
+                    ) {
+                        Icon(Icons.Default.CalendarMonth, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(dateText)
+                    }
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = uiState.budgetInput,
+                        onValueChange = onBudgetInputChanged,
+                        label = { Text("Total Budget") },
+                        modifier = Modifier.fillMaxWidth(),
+                        prefix = { Text("$") },
+                        singleLine = true
+                    )
+                    QuickExpenseBar(onAdjustAmount = onAdjustBudget)
+                }
+            }
+        }
+
+        // --- SECTION 3: TASK ---
+        FormSection(title = "Task", themeColor = themeColor) {
+            OutlinedTextField(
+                value = uiState.taskName,
+                onValueChange = onTaskNameChanged,
+                label = { Text("Main Task Name") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+        }
+
+        // --- SAVE BUTTON ---
+        Button(
+            onClick = onSaveClicked,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            enabled = !uiState.isSaving && uiState.taskName.isNotBlank(),
+            colors = ButtonDefaults.buttonColors(containerColor = themeColor)
+        ) {
+            if (uiState.isSaving) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+            } else {
+                Text("Create & View Project")
+            }
+        }
+    }
+}
+
+@Composable
+private fun FormSection(title: String, themeColor: Color, content: @Composable () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(text = title, style = MaterialTheme.typography.labelLarge, color = themeColor)
+        content()
+    }
+}
+
+@Composable
+private fun CategoryChip(name: String, isSelected: Boolean, onClick: () -> Unit, themeColor: Color) {
+    Surface(
+        modifier = Modifier.clickable { onClick() },
+        color = if (isSelected) themeColor else MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+        shape = MaterialTheme.shapes.medium
     ) {
         Text(
-            text = "Save to which project?",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 16.dp)
+            text = name,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.labelSmall
         )
-
-        if (uiState.selectedCategoryId == null) {
-            // Show Category Selection
-            Text(text = "Select Category", style = MaterialTheme.typography.titleMedium)
-            
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = uiState.newCategoryName,
-                    onValueChange = onNewCategoryNameChanged,
-                    label = { Text("New Category Name") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = {
-                        if (uiState.newCategoryName.isNotBlank()) onAddCategoryClicked()
-                    })
-                )
-                Button(
-                    onClick = onAddCategoryClicked,
-                    enabled = uiState.newCategoryName.isNotBlank()
-                ) {
-                    Text("Create")
-                }
-            }
-
-            LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
-                items(uiState.categories) { category ->
-                    ListItem(
-                        headlineContent = { Text(category.name) },
-                        leadingContent = { Icon(Icons.Default.Folder, contentDescription = null) },
-                        modifier = Modifier.clickable { onCategorySelected(category.categoryId) }
-                    )
-                }
-            }
-        } else {
-            // Show Project Selection
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = { onCategorySelected(-1L) /* Use a marker to go back */ }) {
-                    Text("Categories")
-                }
-                Text(">")
-                Text(
-                    uiState.categories.find { it.categoryId == uiState.selectedCategoryId }?.name ?: "",
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-
-            Text(
-                text = "Select Project",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = uiState.newProjectName,
-                    onValueChange = onNewProjectNameChanged,
-                    label = { Text("New Project Name") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = {
-                        if (uiState.newProjectName.isNotBlank()) onAddProjectClicked()
-                    })
-                )
-                Button(
-                    onClick = onAddProjectClicked,
-                    enabled = uiState.newProjectName.isNotBlank()
-                ) {
-                    Text("Create")
-                }
-            }
-
-            LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
-                items(uiState.projects) { project ->
-                    ListItem(
-                        headlineContent = { Text(project.name) },
-                        leadingContent = { Icon(Icons.Default.List, contentDescription = null) },
-                        trailingContent = {
-                            if (uiState.selectedProjectId == project.projectId) {
-                                Icon(Icons.Default.Check, contentDescription = null)
-                            }
-                        },
-                        modifier = Modifier.clickable { onProjectSelected(project.projectId) }
-                    )
-                }
-            }
-
-            Button(
-                onClick = if (uiState.isSaved) onDismiss else onSaveClicked,
-                enabled = (uiState.isSaved || uiState.selectedProjectId != null || uiState.newProjectName.isNotBlank()) && !uiState.isSaving,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                colors = if (uiState.isSaved) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary) else ButtonDefaults.buttonColors()
-            ) {
-                if (uiState.isSaving) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
-                } else {
-                    Text(if (uiState.isSaved) "Saved! Close" else "Save Photo")
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(32.dp))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SavePhotoBottomSheetCategoryPreview() {
-    PhotoDoTheme {
-        Surface {
-            SavePhotoBottomSheetContent(
-                uiState = SavePhotoUiState(
-                    photoUri = "",
-                    categories = listOf(
-                        CategoryEntity(categoryId = 1, name = "Home"),
-                        CategoryEntity(categoryId = 2, name = "Work"),
-                        CategoryEntity(categoryId = 3, name = "Personal")
-                    )
-                ),
-                onCategorySelected = {},
-                onProjectSelected = {},
-                onNewCategoryNameChanged = {},
-                onNewProjectNameChanged = {},
-                onAddCategoryClicked = {},
-                onAddProjectClicked = {},
-                onSaveClicked = {},
-                onDismiss = {}
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SavePhotoBottomSheetProjectPreview() {
-    PhotoDoTheme {
-        Surface {
-            SavePhotoBottomSheetContent(
-                uiState = SavePhotoUiState(
-                    photoUri = "",
-                    categories = listOf(
-                        CategoryEntity(categoryId = 1, name = "Home"),
-                        CategoryEntity(categoryId = 2, name = "Work"),
-                        CategoryEntity(categoryId = 3, name = "Personal")
-                    ),
-                    selectedCategoryId = 1,
-                    projects = listOf(
-                        ProjectEntity(projectId = 1, categoryId = 1, name = "Kitchen Remodel"),
-                        ProjectEntity(projectId = 2, categoryId = 1, name = "Garden Maintenance")
-                    ),
-                    selectedProjectId = 1
-                ),
-                onCategorySelected = {},
-                onProjectSelected = {},
-                onNewCategoryNameChanged = {},
-                onNewProjectNameChanged = {},
-                onAddCategoryClicked = {},
-                onAddProjectClicked = {},
-                onSaveClicked = {},
-                onDismiss = {}
-            )
-        }
     }
 }
