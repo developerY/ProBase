@@ -3,7 +3,6 @@ package com.zoewave.probase.features.smartcapture.data
 import android.graphics.Bitmap
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
-import com.google.ai.client.generativeai.type.generationConfig
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.smartcapture.domain.DiagnosticResult
 import com.zoewave.probase.features.smartcapture.domain.SmartCaptureEngine
@@ -33,14 +32,11 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         }
 
         logs.add("API Key validated (length: ${cleanApiKey.length})")
-        logs.add("Model: gemini-1.5-flash")
+        logs.add("Model: gemini-3.1-flash-lite-preview")
 
         val generativeModel = GenerativeModel(
-            modelName = "gemini-1.5-flash",
-            apiKey = cleanApiKey,
-            generationConfig = generationConfig {
-                responseMimeType = "application/json"
-            }
+            modelName = "gemini-3.1-flash-lite-preview",
+            apiKey = cleanApiKey
         )
 
         val prompt = content {
@@ -56,7 +52,8 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
                 - budget: Any estimated costs (return as a number only).
                 - subTasks: A list of smaller steps if visible.
                 
-                Ensure the JSON matches this schema exactly:
+                Respond ONLY with valid JSON.
+                Schema:
                 {
                   "category": string or null,
                   "projectName": string or null,
@@ -88,7 +85,7 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
             DiagnosticResult(draft, logs, engineUsed = "Cloud AI")
         } catch (e: com.google.ai.client.generativeai.type.ServerException) {
             logs.add("Gemini Server Error (404/Mismatched Model): ${e.message}")
-            logs.add("Tip: Ensure gemini-1.5-flash is enabled for your API key in Google AI Studio.")
+            logs.add("Tip: Ensure gemini-3.1-flash-lite-preview is enabled for your API key in Google AI Studio.")
             throw e
         } catch (e: Exception) {
             logs.add("Gemini API call failed (${e::class.simpleName}): ${e.message}")
