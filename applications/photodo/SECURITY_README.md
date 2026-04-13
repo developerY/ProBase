@@ -49,3 +49,20 @@ When building the Settings screen where the user pastes their API key, the Jetpa
 
 ### Rule 3: Do Not Log
 **NEVER** print the API key or the raw `GenerativeModel` configuration block to Logcat or Crashlytics. Ensure all network logging interceptors redact any headers containing the key.
+
+
+
+---
+###### Titan M2 Security Chip:
+This key is generated and permanently stored inside the Android device's physical Trusted Execution Environment (TEE) or StrongBox hardware chip (such as Google's 
+[Titan M2 security chip](https://security.googleblog.com/2021/10/pixel-6-setting-new-standard-for-mobile.html))
+
+| Tier                         | Hardware Type                                      | Common In...                                      | Security Level                                                                 |
+|------------------------------|----------------------------------------------------|---------------------------------------------------|--------------------------------------------------------------------------------|
+| Discrete SE (StrongBox)      | Standalone chip (Titan M2, Knox Vault)            | Pixels, Galaxy S-series                           | Highest: Physically isolated from the main CPU.                               |
+| TEE (TrustZone)              | Virtual "Secure World" inside the main CPU        | Most mid-range & budget phones (Mediatek/Snapdragon) | High: Logic-based isolation; harder to crack but shares the same silicon.     |
+| Software-backed              | Encrypted within the OS software                  | Very old (pre-2015) or extremely ultra-budget devices | Basic: Vulnerable if the phone is rooted or the OS is compromised.            |
+
+
+
+EOD

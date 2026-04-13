@@ -200,6 +200,7 @@ fun photoTodoNavEntryProvider(
 
             is PhotoTodoRoute.SmartCapture -> {
                 SmartCaptureUiRoute(
+                    initialPhotoUri = key.photoUri,
                     onCaptureComplete = { draft ->
                         // Navigate to Workspace/TasksList and prefill!
                         navigateBack() // Pop SmartCapture
