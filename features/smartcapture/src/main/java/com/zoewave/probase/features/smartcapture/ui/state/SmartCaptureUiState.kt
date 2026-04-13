@@ -15,7 +15,9 @@ sealed interface SmartCaptureUiState {
     
     data class Success(
         val draft: SmartTaskDraft,
-        val diagnostics: List<String> = emptyList()
+        val engineUsed: String,
+        val diagnostics: List<String> = emptyList(),
+        val warnings: List<String> = emptyList()
     ) : SmartCaptureUiState
     
     data class Error(

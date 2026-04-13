@@ -150,19 +150,19 @@ internal fun SmartCaptureScreen(
                                     )
                                     Spacer(modifier = Modifier.padding(start = 8.dp))
                                     Text(
-                                        text = if (uiState.isUsingCloud) "Cloud Engine (Gemini)" else "Local Engine (ML Kit)",
+                                        text = if (uiState.isUsingCloud) "Attempting Cloud AI..." else "Local AI (Vision)",
                                         style = MaterialTheme.typography.labelSmall
                                     )
                                     if (uiState.networkSpeed != null) {
                                         Spacer(modifier = Modifier.weight(1f))
-                                        Text(text = "Network: ${uiState.networkSpeed}", style = MaterialTheme.typography.labelSmall)
+                                        Text(text = uiState.networkSpeed, style = MaterialTheme.typography.labelSmall)
                                     }
                                 }
                                 
                                 Spacer(modifier = Modifier.height(8.dp))
                                 uiState.logs.takeLast(3).forEach { log ->
                                     Text(
-                                        text = "• $log",
+                                        text = "> $log",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -173,11 +173,26 @@ internal fun SmartCaptureScreen(
                 }
 
                 is SmartCaptureUiState.Success -> {
-                    TaskReviewPane(
-                        draft = uiState.draft,
-                        onConfirm = { onConfirmTask(uiState.draft) },
-                        onRetake = onReset
-                    )
+                    Column {
+                        if (uiState.warnings.isNotEmpty()) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                            ) {
+                                Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                                    Spacer(modifier = Modifier.padding(start = 8.dp))
+                                    Text(uiState.warnings.first(), style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                        }
+                        TaskReviewPane(
+                            draft = uiState.draft,
+                            engineUsed = uiState.engineUsed,
+                            onConfirm = { onConfirmTask(uiState.draft) },
+                            onRetake = onReset
+                        )
+                    }
                 }
 
                 is SmartCaptureUiState.Error -> {
@@ -242,6 +257,7 @@ private fun EmptyState(onUploadClick: () -> Unit) {
 @Composable
 private fun TaskReviewPane(
     draft: SmartTaskDraft,
+    engineUsed: String,
     onConfirm: () -> Unit,
     onRetake: () -> Unit
 ) {
@@ -251,7 +267,10 @@ private fun TaskReviewPane(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text("Verify Extracted Task", style = MaterialTheme.typography.titleMedium)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+                Text("Verify Extracted Task", style = MaterialTheme.typography.titleMedium)
+                Text("AI: $engineUsed", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
 
         item {

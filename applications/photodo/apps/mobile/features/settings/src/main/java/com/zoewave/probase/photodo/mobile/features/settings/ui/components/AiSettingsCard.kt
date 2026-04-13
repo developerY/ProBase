@@ -70,10 +70,10 @@ fun AiSettingsCard(
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = "Smart Capture AI", style = MaterialTheme.typography.titleMedium)
-                    val statusText = if (isApiKeySet) {
-                        if (isAiEnabled) "On (Cloud-Enhanced)" else "Off (Key Ready)"
-                    } else {
-                        "Off (No Key)"
+                    val statusText = when {
+                        !isAiEnabled -> "Off (No AI)"
+                        !isApiKeySet -> "On (Local AI)"
+                        else -> "On (Cloud-Enhanced)"
                     }
                     Text(
                         text = statusText,

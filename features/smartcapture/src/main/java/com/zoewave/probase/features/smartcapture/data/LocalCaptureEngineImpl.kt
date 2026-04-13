@@ -19,20 +19,20 @@ class LocalCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
     override suspend fun processImage(bitmap: Bitmap, apiKey: String?): DiagnosticResult {
-        val logs = mutableListOf("Local Engine initialized")
+        val logs = mutableListOf("Local AI Engine initialized")
         val image = InputImage.fromBitmap(bitmap, 0)
-        logs.add("Image converted to ML Input")
+        logs.add("Vision analysis started (ML Kit)")
         
         val visionText = try {
             val result = recognizer.process(image).await().text
-            logs.add("ML Kit OCR successful: ${result.length} characters found")
+            logs.add("Local OCR successful: ${result.length} characters found")
             result
         } catch (e: Exception) {
-            logs.add("ML Kit OCR failed: ${e.message}")
+            logs.add("Local OCR failed: ${e.message}")
             ""
         }
 
-        if (visionText.isBlank()) return DiagnosticResult(SmartTaskDraft(), logs)
+        if (visionText.isBlank()) return DiagnosticResult(SmartTaskDraft(), logs, engineUsed = "Local AI")
 
         val lines = visionText.lines().filter { it.isNotBlank() }
         val taskName = lines.firstOrNull()
@@ -47,7 +47,8 @@ class LocalCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
                 budget = budget,
                 dueDate = dueDate
             ),
-            logs = logs
+            logs = logs,
+            engineUsed = "Local AI"
         )
     }
 

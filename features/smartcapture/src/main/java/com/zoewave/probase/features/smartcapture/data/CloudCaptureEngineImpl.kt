@@ -81,7 +81,7 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
             
             val draft = json.decodeFromString<SmartTaskDraft>(finalJson)
             logs.add("JSON decoding successful")
-            DiagnosticResult(draft, logs)
+            DiagnosticResult(draft, logs, engineUsed = "Cloud AI")
         } catch (e: Exception) {
             logs.add("Gemini API call failed: ${e.message}")
             // Rethrow so the orchestrator knows to fallback

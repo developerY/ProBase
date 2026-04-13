@@ -54,7 +54,12 @@ class SmartCaptureViewModel @Inject constructor(
                     if (result.error != null) {
                         _uiState.value = SmartCaptureUiState.Error(result.error, result.logs)
                     } else {
-                        _uiState.value = SmartCaptureUiState.Success(result.draft.copy(photoUri = uriString), result.logs)
+                        _uiState.value = SmartCaptureUiState.Success(
+                            draft = result.draft.copy(photoUri = uriString),
+                            engineUsed = result.engineUsed,
+                            diagnostics = result.logs,
+                            warnings = result.warnings
+                        )
                     }
                 } catch (e: Exception) {
                     _uiState.value = SmartCaptureUiState.Error(e.message ?: "Unknown error occurred")
@@ -85,7 +90,12 @@ class SmartCaptureViewModel @Inject constructor(
                 )
 
                 val result = orchestrator.processImage(bitmap, apiKey)
-                _uiState.value = SmartCaptureUiState.Success(result.draft, result.logs)
+                _uiState.value = SmartCaptureUiState.Success(
+                    draft = result.draft,
+                    engineUsed = result.engineUsed,
+                    diagnostics = result.logs,
+                    warnings = result.warnings
+                )
             } catch (e: Exception) {
                 _uiState.value = SmartCaptureUiState.Error(e.message ?: "Unknown error occurred")
             }
