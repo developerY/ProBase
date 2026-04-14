@@ -176,7 +176,7 @@ fun AiSettingsCard(
                                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = keyColor)
                                         Spacer(modifier = Modifier.width(8.dp))
                                     }
-                                    Text("Test Connection")
+                                    Text("Test Connection & Discover Models")
                                 }
                                 if (keyTestResult != null) {
                                     Spacer(modifier = Modifier.width(12.dp))
@@ -278,39 +278,59 @@ fun AiSettingsCard(
                     if (availableModels.isNotEmpty()) {
                         val statusColor = when {
                             modelTestResult == null -> MaterialTheme.colorScheme.outline
-                            modelTestResult.contains("Error") || modelTestResult.contains("Connection") || modelTestResult.contains("not enabled") -> MaterialTheme.colorScheme.error
+                            modelTestResult.contains("Error") || 
+                            modelTestResult.contains("Connection") || 
+                            modelTestResult.contains("not enabled") ||
+                            modelTestResult.contains("failed") ||
+                            modelTestResult.contains("404") ||
+                            modelTestResult.contains("403") -> MaterialTheme.colorScheme.error
                             else -> Color(0xFF4CAF50) // Material Green
                         }
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(top = 12.dp)
-                        ) {
-                            Button(
-                                onClick = onTestModelClicked,
-                                enabled = !isTestingModel,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (modelTestResult == null) MaterialTheme.colorScheme.secondaryContainer else statusColor.copy(alpha = 0.1f),
-                                    contentColor = if (modelTestResult == null) MaterialTheme.colorScheme.onSecondaryContainer else statusColor
-                                )
+                        Column(modifier = Modifier.padding(top = 16.dp)) {
+                            Text(
+                                text = "Step 2: Verify Model Functionality",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Some models in the list might be restricted by your billing tier. Ping the selected model to confirm it responds.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(top = 8.dp)
                             ) {
-                                if (isTestingModel) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(16.dp),
-                                        strokeWidth = 2.dp,
-                                        color = statusColor
+                                Button(
+                                    onClick = onTestModelClicked,
+                                    enabled = !isTestingModel,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (modelTestResult == null) MaterialTheme.colorScheme.secondaryContainer else statusColor.copy(alpha = 0.1f),
+                                        contentColor = if (modelTestResult == null) MaterialTheme.colorScheme.onSecondaryContainer else statusColor
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                ) {
+                                    if (isTestingModel) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(16.dp),
+                                            strokeWidth = 2.dp,
+                                            color = statusColor
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
+                                    Text("Ping Selected Model")
                                 }
-                                Text("Test Specific Model")
-                            }
-                            if (modelTestResult != null) {
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    text = modelTestResult,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = statusColor
-                                )
+                                if (modelTestResult != null) {
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = modelTestResult,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = statusColor,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
                             }
                         }
                     }

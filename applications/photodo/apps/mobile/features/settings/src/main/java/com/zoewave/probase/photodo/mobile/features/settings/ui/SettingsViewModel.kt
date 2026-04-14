@@ -51,6 +51,8 @@ class SettingsViewModel @Inject constructor(
         appSettingsRepository.aiModelFlow,
         _isTestingKey,
         _keyTestResult,
+        _isTestingModel,
+        _modelTestResult,
         _fetchedModels,
         _initialExpandedKey,
         _firebaseDeviceId
@@ -64,10 +66,12 @@ class SettingsViewModel @Inject constructor(
             currentAiModel = args[5] as String,
             isTestingKey = args[6] as Boolean,
             keyTestResult = args[7] as String?,
-            availableModels = (args[8] as List<String>?) ?: emptyList(),
-            initialCardKeyToExpand = args[9] as String?,
+            isTestingModel = args[8] as Boolean,
+            modelTestResult = args[9] as String?,
+            availableModels = (args[10] as List<String>?) ?: emptyList(),
+            initialCardKeyToExpand = args[11] as String?,
             appVersion = getAppVersion(),
-            firebaseDeviceId = args[10] as String
+            firebaseDeviceId = args[12] as String
         )
     }.stateIn(
         scope = viewModelScope,
