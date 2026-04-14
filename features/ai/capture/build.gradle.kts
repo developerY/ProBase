@@ -6,22 +6,29 @@ plugins {
 }
 
 android {
-    namespace = "com.zoewave.probase.features.ai.configuration"
+    namespace = "com.zoewave.probase.features.ai.capture"
 }
 
 dependencies {
     // --- Shared Core Projects ---
+    api(project(":core:model"))
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
-    implementation(project(":core:data"))
+
+    // --- ML & AI ---
+    implementation(libs.mlkit.text.recognition)
+    implementation(libs.google.generative.ai)
 
     // --- Feature Dependencies ---
-    implementation(project(":features:ai:capture"))
+    implementation(project(":features:camera"))
 
     // --- Third Party ---
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.coil.compose)
+    implementation(libs.squareup.okhttp)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.google.accompanist.permissions)
 }

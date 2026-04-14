@@ -16,7 +16,7 @@ import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventory
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventoryScreen
 import com.zoewave.probase.features.nfc.ui.NfcUiRoute
 import com.zoewave.probase.features.qrscanner.ui.QRCodeScannerScreen
-import com.zoewave.probase.features.smartcapture.ui.SmartCaptureUiRoute
+import com.zoewave.probase.features.ai.capture.ui.SmartCaptureUiRoute
 import com.zoewave.probase.photodo.features.smartadvice.ui.SmartAdviceUiRoute
 
 fun featureInventoryEntryProvider(

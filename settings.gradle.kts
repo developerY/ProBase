@@ -39,7 +39,6 @@ include(":features:nav3")
 include(":features:weather")
 include(":features:places")
 include(":features:health")
-include(":features:ml")
 include(":features:camera")
 include(":features:calendar")
 
@@ -61,7 +60,8 @@ include(":applications:ashbike:features:places")
 include(":features:ble")
 include(":features:nfc")
 include(":features:qrscanner")
-include(":features:smartcapture")
+include(":features:ai:capture")
+include(":features:ai:vision")
 include(":features:ai:configuration")
 
 

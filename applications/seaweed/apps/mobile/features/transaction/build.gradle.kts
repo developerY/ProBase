@@ -20,7 +20,7 @@ dependencies {
     implementation(project(":applications:seaweed:data"))
     implementation(project(":applications:seaweed:features:main"))
     implementation(project(":applications:seaweed:apps:mobile:features:bills"))
-    implementation(project(":features:ml"))
+    implementation(project(":features:ai:vision"))
 
     implementation(libs.coil.compose)
     implementation(libs.mlkit.text.recognition)

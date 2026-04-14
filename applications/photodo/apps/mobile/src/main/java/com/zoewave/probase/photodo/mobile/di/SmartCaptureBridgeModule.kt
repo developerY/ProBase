@@ -1,6 +1,6 @@
 package com.zoewave.probase.photodo.mobile.di
 
-import com.zoewave.probase.features.smartcapture.domain.SmartCaptureSettings
+import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

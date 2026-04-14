@@ -18,6 +18,7 @@ dependencies {
     // --- PhotoTodo Core ---
     implementation(project(":applications:photodo:db"))
     implementation(project(":applications:photodo:model"))
+    implementation(project(":features:ai:configuration"))
 
     // --- ML & AI ---
     implementation(libs.google.generative.ai)

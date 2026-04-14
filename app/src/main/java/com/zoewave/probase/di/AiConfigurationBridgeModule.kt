@@ -1,6 +1,6 @@
 package com.zoewave.probase.di
 
-import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
+import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -9,11 +9,11 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class SmartCaptureBridgeModule {
+abstract class AiConfigurationBridgeModule {
 
     @Binds
     @Singleton
-    abstract fun bindSmartCaptureSettings(
+    abstract fun bindAiConfigurationSettings(
         impl: FakeSmartCaptureSettings
-    ): SmartCaptureSettings
+    ): AiConfigurationSettings
 }
