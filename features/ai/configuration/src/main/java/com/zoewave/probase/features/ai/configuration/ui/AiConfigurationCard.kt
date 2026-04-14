@@ -55,6 +55,8 @@ fun AiConfigurationCard(
     expanded: Boolean,
     onExpandToggle: () -> Unit,
     modifier: Modifier = Modifier,
+    title: String = "AI Configuration",
+    description: String = "Configure your generative AI settings.",
     viewModel: AiConfigurationViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -64,6 +66,8 @@ fun AiConfigurationCard(
         onExpandToggle = onExpandToggle,
         uiState = uiState,
         onEvent = viewModel::onEvent,
+        title = title,
+        description = description,
         modifier = modifier
     )
 }
@@ -75,6 +79,8 @@ fun AiConfigurationCardContent(
     onExpandToggle: () -> Unit,
     uiState: AiConfigurationUiState,
     onEvent: (AiConfigurationEvent) -> Unit,
+    title: String,
+    description: String,
     modifier: Modifier = Modifier
 ) {
     var editingKey by remember { mutableStateOf("") }
@@ -100,7 +106,7 @@ fun AiConfigurationCardContent(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "Smart Capture AI", style = MaterialTheme.typography.titleMedium)
+                    Text(text = title, style = MaterialTheme.typography.titleMedium)
                     val statusText = when {
                         !uiState.isAiEnabled -> "Off (No AI)"
                         !uiState.isApiKeySet -> "On (Local AI)"
@@ -121,8 +127,8 @@ fun AiConfigurationCardContent(
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     ListItem(
-                        headlineContent = { Text("Enable AI Auto-fill") },
-                        supportingContent = { Text("Use Gemini to automatically fill details from images.") },
+                        headlineContent = { Text("Enable AI Features") },
+                        supportingContent = { Text(description) },
                         trailingContent = {
                             Switch(
                                 checked = uiState.isAiEnabled,

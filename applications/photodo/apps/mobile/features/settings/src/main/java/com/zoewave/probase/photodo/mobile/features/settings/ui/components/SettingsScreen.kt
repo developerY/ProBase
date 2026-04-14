@@ -95,7 +95,9 @@ fun SettingsScreen(
 
                 AiConfigurationCard(
                     expanded = isAiExpanded,
-                    onExpandToggle = { isAiExpanded = !isAiExpanded }
+                    onExpandToggle = { isAiExpanded = !isAiExpanded },
+                    title = "Smart Capture AI",
+                    description = "Use Gemini to automatically fill details from images."
                 )
 
                 PaletteSettingsCard(
