@@ -2,9 +2,7 @@ package com.zoewave.probase.photodo.mobile.features.settings.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -14,7 +12,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -102,10 +99,14 @@ fun SettingsScreen(
                     onAiEnabledToggled = { onEvent(SettingsEvent.OnAiEnabledToggled(it)) },
                     isApiKeySet = uiState.isApiKeySet,
                     currentAiModel = uiState.currentAiModel,
+                    availableModels = uiState.availableModels,
                     onAiModelSelected = { onEvent(SettingsEvent.OnAiModelSelected(it)) },
                     isTestingKey = uiState.isTestingKey,
                     keyTestResult = uiState.keyTestResult,
                     onTestKeyClicked = { onEvent(SettingsEvent.OnTestApiKeyClicked) },
+                    isTestingModel = uiState.isTestingModel,
+                    modelTestResult = uiState.modelTestResult,
+                    onTestModelClicked = { onEvent(SettingsEvent.OnTestModelClicked) },
                     onGeminiApiKeyChanged = { onEvent(SettingsEvent.OnGeminiApiKeyChanged(it)) }
                 )
 

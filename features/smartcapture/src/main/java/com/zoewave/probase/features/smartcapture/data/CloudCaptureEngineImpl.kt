@@ -7,8 +7,19 @@ import com.google.ai.client.generativeai.type.generationConfig
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.smartcapture.domain.DiagnosticResult
 import com.zoewave.probase.features.smartcapture.domain.SmartCaptureEngine
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import javax.inject.Inject
+
+@Serializable
+private data class GeminiModelsResponse(val models: List<GeminiModelDto>)
+
+@Serializable
+private data class GeminiModelDto(val name: String, val supportedGenerationMethods: List<String>)
 
 /**
  * Tier 1: Pro Engine using Gemini 3.1 Flash Lite Cloud SDK.
@@ -16,9 +27,46 @@ import javax.inject.Inject
  */
 class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
 
+    private val httpClient = OkHttpClient()
     private val json = Json { 
         ignoreUnknownKeys = true 
         coerceInputValues = true
+    }
+
+    override suspend fun getAvailableModels(apiKey: String?): List<String> = withContext(Dispatchers.IO) {
+        if (apiKey.isNullOrBlank()) return@withContext emptyList()
+        
+        val url = "https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey"
+        val request = Request.Builder().url(url).build()
+        
+        try {
+            httpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@withContext emptyList()
+                val body = response.body?.string() ?: return@withContext emptyList()
+                val data = json.decodeFromString<GeminiModelsResponse>(body)
+                
+                data.models
+                    .filter { it.supportedGenerationMethods.contains("generateContent") }
+                    .map { it.name.removePrefix("models/") }
+                    .filter { it.contains("gemini") }
+                    .sorted()
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun testModel(apiKey: String, modelName: String): String {
+        val generativeModel = GenerativeModel(
+            modelName = modelName,
+            apiKey = apiKey
+        )
+        return try {
+            val response = generativeModel.generateContent("What is your name and version?")
+            response.text ?: "No response from model"
+        } catch (e: Exception) {
+            e.localizedMessage ?: "Connection Error"
+        }
     }
 
     override suspend fun processImage(

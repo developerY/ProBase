@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -41,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -57,24 +59,20 @@ fun AiSettingsCard(
     onAiEnabledToggled: (Boolean) -> Unit,
     isApiKeySet: Boolean,
     currentAiModel: String,
+    availableModels: List<String>,
     onAiModelSelected: (String) -> Unit,
     isTestingKey: Boolean,
     keyTestResult: String?,
     onTestKeyClicked: () -> Unit,
+    isTestingModel: Boolean,
+    modelTestResult: String?,
+    onTestModelClicked: () -> Unit,
     onGeminiApiKeyChanged: (String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var editingKey by remember { mutableStateOf("") }
     var showKey by remember { mutableStateOf(false) }
     var isModelDropdownExpanded by remember { mutableStateOf(false) }
-
-    val models = listOf(
-        "gemini-1.5-flash",
-        "gemini-1.5-pro",
-        "gemini-3.1-flash-lite-preview",
-        "gemini-3.1-pro-preview",
-        "gemini-3-flash-preview"
-    )
 
     Card(
         modifier = modifier
@@ -158,14 +156,24 @@ fun AiSettingsCard(
                             }
                             
                             // TEST KEY BUTTON
+                            val keyColor = when {
+                                keyTestResult == null -> MaterialTheme.colorScheme.primary
+                                keyTestResult.startsWith("Key Valid") || keyTestResult.startsWith("Valid") -> Color(0xFF4CAF50)
+                                else -> MaterialTheme.colorScheme.error
+                            }
+
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Button(
                                     onClick = onTestKeyClicked,
                                     enabled = !isTestingKey,
-                                    modifier = Modifier.padding(bottom = 8.dp)
+                                    modifier = Modifier.padding(bottom = 8.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (keyTestResult == null) MaterialTheme.colorScheme.primary else keyColor.copy(alpha = 0.1f),
+                                        contentColor = if (keyTestResult == null) MaterialTheme.colorScheme.onPrimary else keyColor
+                                    )
                                 ) {
                                     if (isTestingKey) {
-                                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
+                                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = keyColor)
                                         Spacer(modifier = Modifier.width(8.dp))
                                     }
                                     Text("Test Connection")
@@ -175,7 +183,7 @@ fun AiSettingsCard(
                                     Text(
                                         text = keyTestResult,
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = if (keyTestResult.startsWith("Valid")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                                        color = keyColor
                                     )
                                 }
                             }
@@ -222,17 +230,21 @@ fun AiSettingsCard(
                     )
                     
                     ExposedDropdownMenuBox(
-                        expanded = isModelDropdownExpanded,
-                        onExpandedChange = { isModelDropdownExpanded = it },
+                        expanded = isModelDropdownExpanded && availableModels.isNotEmpty(),
+                        onExpandedChange = { if (availableModels.isNotEmpty()) isModelDropdownExpanded = it },
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                     ) {
                         OutlinedTextField(
-                            value = currentAiModel,
+                            value = if (availableModels.isEmpty()) "Test connection to see models" else currentAiModel,
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Gemini Model") },
                             modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true),
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isModelDropdownExpanded) },
+                            trailingIcon = { 
+                                if (availableModels.isNotEmpty()) {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = isModelDropdownExpanded) 
+                                }
+                            },
                             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                         )
 
@@ -240,7 +252,7 @@ fun AiSettingsCard(
                             expanded = isModelDropdownExpanded,
                             onDismissRequest = { isModelDropdownExpanded = false }
                         ) {
-                            models.forEach { model ->
+                            availableModels.forEach { model ->
                                 DropdownMenuItem(
                                     text = { 
                                         Text(
@@ -252,6 +264,52 @@ fun AiSettingsCard(
                                         onAiModelSelected(model)
                                         isModelDropdownExpanded = false
                                     }
+                                )
+                            }
+                        }
+                    }
+                    Text(
+                        text = if (availableModels.isEmpty()) "Test connection to unlock available models." else "Choose your preferred Gemini model.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+
+                    if (availableModels.isNotEmpty()) {
+                        val statusColor = when {
+                            modelTestResult == null -> MaterialTheme.colorScheme.outline
+                            modelTestResult.contains("Error") || modelTestResult.contains("Connection") || modelTestResult.contains("not enabled") -> MaterialTheme.colorScheme.error
+                            else -> Color(0xFF4CAF50) // Material Green
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(top = 12.dp)
+                        ) {
+                            Button(
+                                onClick = onTestModelClicked,
+                                enabled = !isTestingModel,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (modelTestResult == null) MaterialTheme.colorScheme.secondaryContainer else statusColor.copy(alpha = 0.1f),
+                                    contentColor = if (modelTestResult == null) MaterialTheme.colorScheme.onSecondaryContainer else statusColor
+                                )
+                            ) {
+                                if (isTestingModel) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        strokeWidth = 2.dp,
+                                        color = statusColor
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+                                Text("Test Specific Model")
+                            }
+                            if (modelTestResult != null) {
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = modelTestResult,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = statusColor
                                 )
                             }
                         }
@@ -273,10 +331,14 @@ fun AiSettingsCardCollapsedPreview() {
             onAiEnabledToggled = {},
             isApiKeySet = true,
             currentAiModel = "gemini-1.5-flash",
+            availableModels = listOf("gemini-1.5-flash", "gemini-1.5-pro"),
             onAiModelSelected = {},
             isTestingKey = false,
             keyTestResult = "Valid! Connection successful.",
             onTestKeyClicked = {},
+            isTestingModel = false,
+            modelTestResult = "Gemini 1.5 Flash v1",
+            onTestModelClicked = {},
             onGeminiApiKeyChanged = {}
         )
     }
@@ -293,10 +355,14 @@ fun AiSettingsCardExpandedPreview() {
             onAiEnabledToggled = {},
             isApiKeySet = false,
             currentAiModel = "gemini-3.1-flash-lite-preview",
+            availableModels = listOf("gemini-3.1-flash-lite-preview"),
             onAiModelSelected = {},
             isTestingKey = false,
             keyTestResult = null,
             onTestKeyClicked = {},
+            isTestingModel = false,
+            modelTestResult = null,
+            onTestModelClicked = {},
             onGeminiApiKeyChanged = {}
         )
     }

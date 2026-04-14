@@ -7,8 +7,11 @@ data class SettingsUiState(
     val isApiKeySet: Boolean = false,
     val isAiEnabled: Boolean = false,
     val currentAiModel: String = "gemini-1.5-flash",
+    val availableModels: List<String> = emptyList(),
     val isTestingKey: Boolean = false,
     val keyTestResult: String? = null,
+    val isTestingModel: Boolean = false,
+    val modelTestResult: String? = null,
     val initialCardKeyToExpand: String? = null,
     val appVersion: String = "",
     val firebaseDeviceId: String = ""

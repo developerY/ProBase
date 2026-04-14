@@ -2,7 +2,6 @@ package com.zoewave.probase.features.smartcapture.data
 
 import android.graphics.Bitmap
 import android.util.Log
-import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.smartcapture.domain.DiagnosticResult
 import com.zoewave.probase.features.smartcapture.domain.SmartCaptureEngine
 import javax.inject.Inject
@@ -16,17 +15,17 @@ class SmartCaptureOrchestrator @Inject constructor(
 ) {
     private val TAG = "SmartCaptureOrchestrator"
 
-    suspend fun validateApiKey(apiKey: String, modelName: String): String {
-        return try {
-            val result = cloudEngine.processImage(
-                bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888),
-                apiKey = apiKey,
-                modelName = modelName
-            )
-            "Valid! Connection successful."
-        } catch (e: Exception) {
-            e.localizedMessage ?: "Invalid Key or Connection Error"
+    suspend fun validateApiKey(apiKey: String): Pair<String, List<String>> {
+        val models = cloudEngine.getAvailableModels(apiKey)
+        return if (models.isNotEmpty()) {
+            "Key Valid! Discovered ${models.size} models." to models
+        } else {
+            "Invalid Key or no models available. Check your API key." to emptyList()
         }
+    }
+
+    suspend fun testModel(apiKey: String, modelName: String): String {
+        return cloudEngine.testModel(apiKey, modelName)
     }
 
     suspend fun processImage(

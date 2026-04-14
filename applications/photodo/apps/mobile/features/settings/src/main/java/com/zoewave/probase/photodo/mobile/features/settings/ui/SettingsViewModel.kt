@@ -36,8 +36,12 @@ class SettingsViewModel @Inject constructor(
     // Key Testing State
     private val _isTestingKey = MutableStateFlow(false)
     private val _keyTestResult = MutableStateFlow<String?>(null)
+    private val _isTestingModel = MutableStateFlow(false)
+    private val _modelTestResult = MutableStateFlow<String?>(null)
+    private val _fetchedModels = MutableStateFlow<List<String>?>(null)
 
     // Combines the DB theme preference with the navigation argument into a single UI State
+@Suppress("UNCHECKED_CAST")
     val uiState: StateFlow<SettingsUiState> = combine(
         appSettingsRepository.themePreferenceFlow,
         appSettingsRepository.palettePreferenceFlow,
@@ -47,6 +51,7 @@ class SettingsViewModel @Inject constructor(
         appSettingsRepository.aiModelFlow,
         _isTestingKey,
         _keyTestResult,
+        _fetchedModels,
         _initialExpandedKey,
         _firebaseDeviceId
     ) { args: Array<Any?> ->
@@ -59,9 +64,10 @@ class SettingsViewModel @Inject constructor(
             currentAiModel = args[5] as String,
             isTestingKey = args[6] as Boolean,
             keyTestResult = args[7] as String?,
-            initialCardKeyToExpand = args[8] as String?,
+            availableModels = (args[8] as List<String>?) ?: emptyList(),
+            initialCardKeyToExpand = args[9] as String?,
             appVersion = getAppVersion(),
-            firebaseDeviceId = args[9] as String
+            firebaseDeviceId = args[10] as String
         )
     }.stateIn(
         scope = viewModelScope,
@@ -119,6 +125,9 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.OnTestApiKeyClicked -> {
                 testApiKey()
             }
+            is SettingsEvent.OnTestModelClicked -> {
+                testModel()
+            }
         }
     }
 
@@ -128,7 +137,6 @@ class SettingsViewModel @Inject constructor(
             _keyTestResult.value = "Testing connection..."
             
             val key = appSettingsRepository.getGeminiApiKey()
-            val model = appSettingsRepository.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
             
             if (key.isNullOrBlank()) {
                 _keyTestResult.value = "Error: No API key saved."
@@ -136,9 +144,31 @@ class SettingsViewModel @Inject constructor(
                 return@launch
             }
 
-            val result = orchestrator.validateApiKey(key, model)
-            _keyTestResult.value = result
+            val result = orchestrator.validateApiKey(key)
+            _keyTestResult.value = result.first
+            if (result.second.isNotEmpty()) {
+                _fetchedModels.value = result.second
+            }
             _isTestingKey.value = false
+        }
+    }
+
+    private fun testModel() {
+        viewModelScope.launch {
+            val key = appSettingsRepository.getGeminiApiKey()
+            val model = appSettingsRepository.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
+
+            if (key.isNullOrBlank()) {
+                _keyTestResult.value = "Error: No API key saved."
+                return@launch
+            }
+
+            _isTestingModel.value = true
+            _modelTestResult.value = "Pinging model..."
+
+            val result = orchestrator.testModel(key, model)
+            _modelTestResult.value = result
+            _isTestingModel.value = false
         }
     }
 

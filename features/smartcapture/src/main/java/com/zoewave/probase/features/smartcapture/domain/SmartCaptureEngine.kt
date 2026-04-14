@@ -1,7 +1,6 @@
 package com.zoewave.probase.features.smartcapture.domain
 
 import android.graphics.Bitmap
-import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 
 /**
  * Common interface for multimodal task parsing engines.
@@ -18,4 +17,14 @@ interface SmartCaptureEngine {
         apiKey: String?,
         modelName: String? = null
     ): DiagnosticResult
+
+    /**
+     * Fetches the list of supported models from the engine.
+     */
+    suspend fun getAvailableModels(apiKey: String?): List<String> = emptyList()
+
+    /**
+     * Tests a specific model with a simple prompt.
+     */
+    suspend fun testModel(apiKey: String, modelName: String): String = "Not Supported"
 }
