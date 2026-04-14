@@ -16,6 +16,7 @@ import com.zoewave.probase.features.ai.capture.ui.SmartCaptureUiRoute
 import com.zoewave.probase.photodo.features.camera.ui.CameraResultHandler
 import com.zoewave.probase.photodo.features.camera.ui.SavePhotoViewModel
 import com.zoewave.probase.photodo.features.camera.ui.components.SavePhotoBottomSheet
+import com.zoewave.probase.photodo.features.smartadvice.ui.SmartAdviceUiRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.AdaptiveHomeScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
@@ -258,6 +259,13 @@ fun photoTodoNavEntryProvider(
                     },
                     onClearAiData = viewModel::clearAiData,
                     onSaveClicked = viewModel::saveTask,
+                    onDismiss = navigateBack
+                )
+            }
+
+            is PhotoTodoRoute.SmartAdvice -> {
+                SmartAdviceUiRoute(
+                    projectId = key.projectId,
                     onDismiss = navigateBack
                 )
             }

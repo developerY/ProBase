@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -47,6 +48,59 @@ class SmartAdviceViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _uiState.value = SmartAdviceUiState.Error(e.localizedMessage ?: "Unknown error")
+            }
+        }
+    }
+
+    fun askQuestion(projectId: Long, question: String) {
+        val currentState = _uiState.value
+        if (currentState !is SmartAdviceUiState.Success || question.isBlank()) return
+
+        viewModelScope.launch {
+            _uiState.value = currentState.copy(
+                chatHistory = currentState.chatHistory + ChatMessage(question, isUser = true),
+                isSendingQuestion = true
+            )
+
+            try {
+                val projectDetails = repo.getProjectDetails(projectId).firstOrNull()
+                val categoryId = projectDetails?.project?.categoryId
+                val category = categoryId?.let { repo.getCategoryById(it).firstOrNull() }
+                val apiKey = appSettings.getGeminiApiKey()
+                val model = appSettings.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
+
+                if (projectDetails != null && apiKey != null) {
+                    val answer = engine.askQuestion(
+                        project = projectDetails,
+                        categoryName = category?.name ?: "Unknown",
+                        question = question,
+                        apiKey = apiKey,
+                        modelName = model
+                    )
+                    
+                    _uiState.update { state ->
+                        if (state is SmartAdviceUiState.Success) {
+                            state.copy(
+                                chatHistory = state.chatHistory + ChatMessage(answer, isUser = false),
+                                isSendingQuestion = false
+                            )
+                        } else state
+                    }
+                } else {
+                    // Handle error state if needed
+                    _uiState.update { state ->
+                        if (state is SmartAdviceUiState.Success) state.copy(isSendingQuestion = false) else state
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update { state ->
+                    if (state is SmartAdviceUiState.Success) {
+                        state.copy(
+                            chatHistory = state.chatHistory + ChatMessage("Error: ${e.localizedMessage}", isUser = false),
+                            isSendingQuestion = false
+                        )
+                    } else state
+                }
             }
         }
     }

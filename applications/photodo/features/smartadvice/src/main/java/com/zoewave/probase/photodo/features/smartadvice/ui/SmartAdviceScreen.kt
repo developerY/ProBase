@@ -21,7 +21,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +61,7 @@ fun SmartAdviceUiRoute(
     SmartAdviceScreen(
         uiState = uiState,
         onRetry = { viewModel.fetchAdvice(projectId) },
+        onAskQuestion = { viewModel.askQuestion(projectId, it) },
         onDismiss = onDismiss
     )
 }
@@ -63,6 +70,7 @@ fun SmartAdviceUiRoute(
 internal fun SmartAdviceScreen(
     uiState: SmartAdviceUiState,
     onRetry: () -> Unit,
+    onAskQuestion: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
     Scaffold(
@@ -110,7 +118,16 @@ internal fun SmartAdviceScreen(
                 }
 
                 is SmartAdviceUiState.Success -> {
-                    AdviceContent(advice = uiState.advice)
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            AdviceContent(advice = uiState.advice, chatHistory = uiState.chatHistory)
+                        }
+                        
+                        ChatInput(
+                            isSending = uiState.isSendingQuestion,
+                            onSend = onAskQuestion
+                        )
+                    }
                 }
 
                 is SmartAdviceUiState.Error -> {
@@ -138,7 +155,7 @@ internal fun SmartAdviceScreen(
 }
 
 @Composable
-private fun AdviceContent(advice: ProjectAdvice) {
+private fun AdviceContent(advice: ProjectAdvice, chatHistory: List<ChatMessage>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -163,16 +180,6 @@ private fun AdviceContent(advice: ProjectAdvice) {
             item { AdviceSection(title = "Potential Risks", items = advice.potentialRisks, color = MaterialTheme.colorScheme.error) }
         }
 
-        if (advice.budgetAdvice != null || advice.timeAdvice != null) {
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Resource Optimization", style = MaterialTheme.typography.titleMedium)
-                    advice.budgetAdvice?.let { OptimizationCard(title = "Budget", text = it) }
-                    advice.timeAdvice?.let { OptimizationCard(title = "Time", text = it) }
-                }
-            }
-        }
-
         if (advice.suggestedChecklistItems.isNotEmpty()) {
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -192,6 +199,80 @@ private fun AdviceContent(advice: ProjectAdvice) {
                     }
                 }
             }
+        }
+
+        if (chatHistory.isNotEmpty()) {
+            item {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                Text("Conversation", style = MaterialTheme.typography.titleMedium)
+            }
+            items(chatHistory) { message ->
+                ChatBubble(message)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChatInput(
+    isSending: Boolean,
+    onSend: (String) -> Unit
+) {
+    var text by remember { mutableStateOf("") }
+
+    Surface(
+        tonalElevation = 2.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier.weight(1f),
+                placeholder = { Text("Ask about this project...") },
+                singleLine = false,
+                maxLines = 3,
+                enabled = !isSending
+            )
+            IconButton(
+                onClick = {
+                    onSend(text)
+                    text = ""
+                },
+                enabled = !isSending && text.isNotBlank()
+            ) {
+                if (isSending) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                } else {
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChatBubble(message: ChatMessage) {
+    val alignment = if (message.isUser) Alignment.End else Alignment.Start
+    val containerColor = if (message.isUser) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
+    
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = alignment) {
+        Surface(
+            color = containerColor,
+            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.widthIn(max = 300.dp)
+        ) {
+            Text(
+                text = message.text,
+                modifier = Modifier.padding(12.dp),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }

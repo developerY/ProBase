@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -136,7 +137,14 @@ fun TaskDetailScreen(
                     }
                 },
                 actions = {
-                    if (uiState.loadState is DetailLoadState.Success) {
+                    val state = uiState.loadState
+                    if (state is DetailLoadState.Success) {
+                        IconButton(onClick = { navTo(PhotoTodoRoute.SmartAdvice(state.projectDetails.project.projectId)) }) {
+                            Icon(
+                                Icons.Default.QuestionMark,
+                                contentDescription = "Get AI Help"
+                            )
+                        }
                         IconButton(onClick = { showDeleteProjectConfirmation = true }) {
                             Icon(
                                 Icons.Default.DeleteForever,

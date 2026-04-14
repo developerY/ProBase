@@ -69,4 +69,45 @@ class SmartAdviceEngine @Inject constructor() {
             )
         }
     }
+
+    suspend fun askQuestion(
+        project: ProjectDetails,
+        categoryName: String,
+        question: String,
+        apiKey: String,
+        modelName: String = "gemini-1.5-flash"
+    ): String {
+        val generativeModel = GenerativeModel(
+            modelName = modelName,
+            apiKey = apiKey
+        )
+
+        val taskList = project.tasks.joinToString("\n") { "- ${it.text} (${if (it.isChecked) "Completed" else "Pending"})" }
+        
+        val prompt = content {
+            text("""
+                You are an expert project management consultant. Answer the user's question about their project.
+                
+                PROJECT CONTEXT:
+                - Name: ${project.project.name}
+                - Category: $categoryName
+                - Budget: $${project.project.projectBudget}
+                - Duration Estimate: ${project.project.notes ?: "Not specified"}
+                - Tasks:
+                $taskList
+                
+                USER QUESTION:
+                $question
+                
+                Respond with a helpful, concise answer.
+            """.trimIndent())
+        }
+
+        return try {
+            val response = generativeModel.generateContent(prompt)
+            response.text ?: "No response from AI"
+        } catch (e: Exception) {
+            "Error: ${e.localizedMessage}"
+        }
+    }
 }
