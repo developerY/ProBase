@@ -3,7 +3,7 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.graphics.Bitmap
-import com.zoewave.probase.feature.ml.receipt.SmartReceiptScanner
+import com.zoewave.probase.features.ai.vision.receipt.SmartReceiptScanner
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel

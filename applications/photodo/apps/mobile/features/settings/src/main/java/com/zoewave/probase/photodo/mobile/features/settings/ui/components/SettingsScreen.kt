@@ -2,9 +2,7 @@ package com.zoewave.probase.photodo.mobile.features.settings.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -14,7 +12,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -28,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
+import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationViewModel
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.settings.R
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsEvent
@@ -95,13 +94,11 @@ fun SettingsScreen(
                     }
                 )
 
-                AiSettingsCard(
+                AiConfigurationCard(
                     expanded = isAiExpanded,
                     onExpandToggle = { isAiExpanded = !isAiExpanded },
-                    isAiEnabled = uiState.isAiEnabled,
-                    onAiEnabledToggled = { onEvent(SettingsEvent.OnAiEnabledToggled(it)) },
-                    isApiKeySet = uiState.isApiKeySet,
-                    onGeminiApiKeyChanged = { onEvent(SettingsEvent.OnGeminiApiKeyChanged(it)) }
+                    title = "Smart Capture AI",
+                    description = "Use Gemini to automatically fill details from images."
                 )
 
                 PaletteSettingsCard(

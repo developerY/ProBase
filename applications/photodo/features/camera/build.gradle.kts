@@ -12,6 +12,7 @@ android {
 dependencies {
     // --- Shared Core Projects ---
     implementation(project(":core:ui"))
+    implementation(project(":core:data"))
     api(project(":core:model"))
 
     // --- PhotoTodo Modules ---

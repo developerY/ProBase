@@ -7,12 +7,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.installations.FirebaseInstallations
 import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
+import com.zoewave.probase.features.ai.capture.data.SmartCaptureOrchestrator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -31,6 +33,7 @@ class SettingsViewModel @Inject constructor(
     private val _firebaseDeviceId = MutableStateFlow<String>("Loading...")
 
     // Combines the DB theme preference with the navigation argument into a single UI State
+@Suppress("UNCHECKED_CAST")
     val uiState: StateFlow<SettingsUiState> = combine(
         appSettingsRepository.themePreferenceFlow,
         appSettingsRepository.palettePreferenceFlow,

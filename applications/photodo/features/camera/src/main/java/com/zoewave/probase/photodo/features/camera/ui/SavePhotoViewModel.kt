@@ -7,6 +7,7 @@ import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
+import com.zoewave.probase.core.data.repository.AiComplianceRepository
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.photodo.features.camera.domain.AddPhotoToTaskUseCase
 import com.zoewave.probase.photodo.features.camera.ui.state.SavePhotoUiState
@@ -24,7 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SavePhotoViewModel @Inject constructor(
     private val repo: PhotoDoRepo,
-    private val addPhotoToTask: AddPhotoToTaskUseCase
+    private val addPhotoToTask: AddPhotoToTaskUseCase,
+    private val aiComplianceRepo: AiComplianceRepository
 ) : ViewModel() {
 
     private val _photoUri = MutableStateFlow("")
@@ -38,6 +40,7 @@ class SavePhotoViewModel @Inject constructor(
     private val _budgetInput = MutableStateFlow("")
     private val _dueDateMillis = MutableStateFlow<Long?>(null)
     private val _subTasks = MutableStateFlow<List<String>>(emptyList())
+    private val _aiGeneratedFields = MutableStateFlow<Set<String>>(emptySet())
 
     // Status
     private val _isSaving = MutableStateFlow(false)
@@ -55,6 +58,7 @@ class SavePhotoViewModel @Inject constructor(
         _budgetInput,
         _dueDateMillis,
         _subTasks,
+        _aiGeneratedFields,
         repo.getAllCategories(),
         _isSaving,
         _isSaved,
@@ -71,11 +75,12 @@ class SavePhotoViewModel @Inject constructor(
             budgetInput = args[6] as String,
             dueDateMillis = args[7] as Long?,
             subTasks = args[8] as List<String>,
-            categories = args[9] as List<CategoryEntity>,
-            isSaving = args[10] as Boolean,
-            isSaved = args[11] as Boolean,
-            savedProjectId = args[12] as Long?,
-            savedProjectTitle = args[13] as String?
+            aiGeneratedFields = args[9] as Set<String>,
+            categories = args[10] as List<CategoryEntity>,
+            isSaving = args[11] as Boolean,
+            isSaved = args[12] as Boolean,
+            savedProjectId = args[13] as Long?,
+            savedProjectTitle = args[14] as String?
         )
     }.stateIn(
         scope = viewModelScope,
@@ -95,6 +100,15 @@ class SavePhotoViewModel @Inject constructor(
             _duration.value = draft.duration ?: ""
             _budgetInput.value = if (draft.budget != null && draft.budget!! > 0) draft.budget.toString() else ""
             _subTasks.value = draft.subTasks
+            
+            // Mark fields as AI generated if they were populated
+            val generated = mutableSetOf<String>()
+            if (draft.category != null) generated.add("category")
+            if (draft.projectName != null) generated.add("project")
+            if (draft.taskName != null) generated.add("task")
+            if (draft.duration != null) generated.add("duration")
+            if (draft.budget != null) generated.add("budget")
+            _aiGeneratedFields.value = generated
         } else {
             _isFromAi.value = false
             resetForm()
@@ -109,6 +123,7 @@ class SavePhotoViewModel @Inject constructor(
         _budgetInput.value = ""
         _dueDateMillis.value = null
         _subTasks.value = emptyList()
+        _aiGeneratedFields.value = emptySet()
         _isSaving.value = false
         _isSaved.value = false
         _savedProjectId.value = null
@@ -136,6 +151,23 @@ class SavePhotoViewModel @Inject constructor(
 
     fun removeSubTask(index: Int) {
         _subTasks.update { it.toMutableList().apply { removeAt(index) } }
+    }
+
+    fun getReportIntent(): android.content.Intent {
+        return aiComplianceRepo.getReportIntent()
+    }
+
+    fun clearAiData() {
+        _aiGeneratedFields.value.forEach { field ->
+            when (field) {
+                "category" -> _categoryName.value = ""
+                "project" -> _projectName.value = ""
+                "task" -> _taskName.value = ""
+                "duration" -> _duration.value = ""
+                "budget" -> _budgetInput.value = ""
+            }
+        }
+        _aiGeneratedFields.value = emptySet()
     }
 
     fun saveTask() {

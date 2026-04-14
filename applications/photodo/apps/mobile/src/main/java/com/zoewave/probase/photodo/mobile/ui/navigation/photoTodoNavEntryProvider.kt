@@ -7,14 +7,16 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
-import com.zoewave.probase.features.smartcapture.ui.SmartCaptureUiRoute
+import com.zoewave.probase.features.ai.capture.ui.SmartCaptureUiRoute
 import com.zoewave.probase.photodo.features.camera.ui.CameraResultHandler
 import com.zoewave.probase.photodo.features.camera.ui.SavePhotoViewModel
 import com.zoewave.probase.photodo.features.camera.ui.components.SavePhotoBottomSheet
+import com.zoewave.probase.photodo.features.smartadvice.ui.SmartAdviceUiRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.AdaptiveHomeScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
@@ -218,6 +220,8 @@ fun photoTodoNavEntryProvider(
 
             is PhotoTodoRoute.SavePhoto -> {
                 val viewModel: SavePhotoViewModel = hiltViewModel()
+                val context = LocalContext.current
+                
                 LaunchedEffect(key.photoUri, key.prefilledAiDraft) {
                     viewModel.setInitialData(key.photoUri, key.prefilledAiDraft)
                 }
@@ -249,7 +253,19 @@ fun photoTodoNavEntryProvider(
                     onDueDateChanged = viewModel::setDueDate,
                     onAddSubTask = viewModel::addSubTask,
                     onRemoveSubTask = viewModel::removeSubTask,
+                    onReportIssue = {
+                        val intent = viewModel.getReportIntent()
+                        context.startActivity(intent)
+                    },
+                    onClearAiData = viewModel::clearAiData,
                     onSaveClicked = viewModel::saveTask,
+                    onDismiss = navigateBack
+                )
+            }
+
+            is PhotoTodoRoute.SmartAdvice -> {
+                SmartAdviceUiRoute(
+                    projectId = key.projectId,
                     onDismiss = navigateBack
                 )
             }

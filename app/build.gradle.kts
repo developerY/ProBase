@@ -53,7 +53,13 @@ dependencies {
     implementation(project(":features:qrscanner"))
     implementation(project(":features:camera"))
     implementation(project(":features:calendar"))
-    implementation(project(":features:smartcapture"))
+    implementation(project(":features:ai:capture"))
+    implementation(project(":features:ai:configuration"))
+    implementation(project(":applications:photodo:features:smartadvice"))
+    implementation(project(":applications:photodo:db"))
+    // implementation(project(":applications:photodo:apps:mobile"))
+    implementation(project(":applications:photodo:apps:mobile:features:settings"))
+    implementation(project(":applications:photodo:apps:mobile:core"))
     // implementation(project(":core:ui"))
 
     // ✅ CORE DEPENDENCIES
