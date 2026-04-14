@@ -31,25 +31,26 @@ class SmartCaptureOrchestrator @Inject constructor(
     suspend fun processImage(
         bitmap: Bitmap,
         apiKey: String?,
-        modelName: String? = null
+        modelName: String? = null,
+        userContext: String? = null
     ): DiagnosticResult {
         val totalLogs = mutableListOf<String>()
         return try {
             if (!apiKey.isNullOrBlank()) {
                 Log.d(TAG, "Attempting Tier 1 (Cloud) capture with $modelName...")
                 totalLogs.add("Orchestrator: Cloud API Key present")
-                val result = cloudEngine.processImage(bitmap, apiKey, modelName)
+                val result = cloudEngine.processImage(bitmap, apiKey, modelName, userContext)
                 result.copy(logs = totalLogs + result.logs)
             } else {
                 Log.d(TAG, "No API key provided. Skipping Tier 1.")
                 totalLogs.add("Orchestrator: No Cloud Key, using Local AI")
-                val result = localEngine.processImage(bitmap, null)
+                val result = localEngine.processImage(bitmap, null, userContext = userContext)
                 result.copy(logs = totalLogs + result.logs)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Tier 1 capture failed. Falling back to Tier 2 (Local).", e)
             val fallbackLogs = listOf("Orchestrator: Cloud failed (${e.localizedMessage})", "Triggering Local AI Fallback")
-            val result = localEngine.processImage(bitmap, null)
+            val result = localEngine.processImage(bitmap, null, userContext = userContext)
             result.copy(
                 logs = totalLogs + fallbackLogs + result.logs,
                 warnings = listOf("Cloud analysis unavailable. Using local extraction.")

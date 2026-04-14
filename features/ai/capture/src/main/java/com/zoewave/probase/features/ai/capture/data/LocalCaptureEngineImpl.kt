@@ -21,7 +21,8 @@ class LocalCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
     override suspend fun processImage(
         bitmap: Bitmap,
         apiKey: String?,
-        modelName: String?
+        modelName: String?,
+        userContext: String?
     ): DiagnosticResult {
         val logs = mutableListOf("Local AI Engine initialized")
         val image = InputImage.fromBitmap(bitmap, 0)

@@ -72,7 +72,8 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
     override suspend fun processImage(
         bitmap: Bitmap,
         apiKey: String?,
-        modelName: String?
+        modelName: String?,
+        userContext: String?
     ): DiagnosticResult {
         val logs = mutableListOf("Cloud AI Engine initialized")
         if (apiKey.isNullOrBlank()) {
@@ -83,6 +84,9 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         val finalModelName = modelName ?: "gemini-1.5-flash"
         logs.add("API Key found (length: ${apiKey.length})")
         logs.add("Model: $finalModelName")
+        if (!userContext.isNullOrBlank()) {
+            logs.add("User Context provided: ${userContext.take(20)}...")
+        }
 
         val generativeModel = GenerativeModel(
             modelName = finalModelName,
@@ -96,6 +100,7 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
             image(bitmap)
             text("""
                 You are a smart project management assistant. From this image, deduce what the user is planning to do.
+                ${if (!userContext.isNullOrBlank()) "The user also provided this context: '$userContext'" else ""}
                 If the image is a broken object, a sketch, or a note, guess the average project requirements for this task.
                 Extract the task information into a structured JSON format to autofill a ToDo app.
                 

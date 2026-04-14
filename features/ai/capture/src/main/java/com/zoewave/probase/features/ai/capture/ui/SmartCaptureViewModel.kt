@@ -26,10 +26,17 @@ class SmartCaptureViewModel @Inject constructor(
     private val networkStatsProvider: NetworkStatsProvider
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<SmartCaptureUiState>(SmartCaptureUiState.Idle)
+    private val _uiState = MutableStateFlow<SmartCaptureUiState>(SmartCaptureUiState.Idle())
     val uiState: StateFlow<SmartCaptureUiState> = _uiState.asStateFlow()
 
-    fun analyzePhoto(uriString: String) {
+    fun onUserCommentChanged(comment: String) {
+        val currentState = _uiState.value
+        if (currentState is SmartCaptureUiState.Idle) {
+            _uiState.value = currentState.copy(userComment = comment)
+        }
+    }
+
+    fun analyzePhoto(uriString: String, userContext: String? = null) {
         viewModelScope.launch(Dispatchers.Default) {
             val netType = networkStatsProvider.getNetworkType()
             _uiState.value = SmartCaptureUiState.Loading(
@@ -50,7 +57,7 @@ class SmartCaptureViewModel @Inject constructor(
                         networkSpeed = netType
                     )
 
-                    val result = orchestrator.processImage(bitmap, apiKey, modelName)
+                    val result = orchestrator.processImage(bitmap, apiKey, modelName, userContext)
                     
                     if (result.error != null) {
                         _uiState.value = SmartCaptureUiState.Error(result.error, result.logs)
@@ -71,7 +78,7 @@ class SmartCaptureViewModel @Inject constructor(
         }
     }
 
-    fun analyzePhoto(bitmap: Bitmap) {
+    fun analyzePhoto(bitmap: Bitmap, userContext: String? = null) {
         viewModelScope.launch(Dispatchers.Default) {
             val netType = networkStatsProvider.getNetworkType()
             _uiState.value = SmartCaptureUiState.Loading(
@@ -90,7 +97,7 @@ class SmartCaptureViewModel @Inject constructor(
                     networkSpeed = netType
                 )
 
-                val result = orchestrator.processImage(bitmap, apiKey)
+                val result = orchestrator.processImage(bitmap, apiKey, userContext = userContext)
                 _uiState.value = SmartCaptureUiState.Success(
                     draft = result.draft,
                     engineUsed = result.engineUsed,
@@ -103,7 +110,11 @@ class SmartCaptureViewModel @Inject constructor(
         }
     }
 
+    fun setCapturedUri(uri: String) {
+        _uiState.value = SmartCaptureUiState.Idle(capturedUri = uri)
+    }
+
     fun reset() {
-        _uiState.value = SmartCaptureUiState.Idle
+        _uiState.value = SmartCaptureUiState.Idle()
     }
 }

@@ -5,12 +5,15 @@ import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 
 @Immutable
 sealed interface SmartCaptureUiState {
-    object Idle : SmartCaptureUiState
+    data class Idle(
+        val capturedUri: String? = null,
+        val userComment: String = ""
+    ) : SmartCaptureUiState
     
     data class Loading(
         val logs: List<String> = emptyList(),
         val isUsingCloud: Boolean = false,
-        val networkSpeed: String? = null // Optional: e.g. "LTE", "WiFi"
+        val networkSpeed: String? = null
     ) : SmartCaptureUiState
     
     data class Success(

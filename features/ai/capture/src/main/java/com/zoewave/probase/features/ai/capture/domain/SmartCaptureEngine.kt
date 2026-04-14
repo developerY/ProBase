@@ -15,7 +15,8 @@ interface SmartCaptureEngine {
     suspend fun processImage(
         bitmap: Bitmap,
         apiKey: String?,
-        modelName: String? = null
+        modelName: String? = null,
+        userContext: String? = null
     ): DiagnosticResult
 
     /**

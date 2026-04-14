@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -34,6 +35,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,10 +44,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.ai.capture.ui.state.SmartCaptureUiState
 
@@ -59,10 +63,10 @@ fun SmartCaptureUiRoute(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    // 🚀 NEW: Auto-trigger analysis if we already have a URI
+    // 🚀 Update: Instead of auto-triggering analysis, set the URI so user can add context
     LaunchedEffect(initialPhotoUri) {
-        if (initialPhotoUri != null) {
-            viewModel.analyzePhoto(initialPhotoUri)
+        if (initialPhotoUri != null && uiState is SmartCaptureUiState.Idle && (uiState as SmartCaptureUiState.Idle).capturedUri == null) {
+            viewModel.setCapturedUri(initialPhotoUri)
         }
     }
 
@@ -70,12 +74,7 @@ fun SmartCaptureUiRoute(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         uri?.let {
-            val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, it))
-            } else {
-                MediaStore.Images.Media.getBitmap(context.contentResolver, it)
-            }
-            viewModel.analyzePhoto(bitmap)
+            viewModel.setCapturedUri(it.toString())
         }
     }
 
@@ -83,6 +82,10 @@ fun SmartCaptureUiRoute(
         uiState = uiState,
         onUploadClick = {
             launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        },
+        onCommentChanged = viewModel::onUserCommentChanged,
+        onAnalyzeClick = { uri, comment ->
+            viewModel.analyzePhoto(uri, comment.ifBlank { null })
         },
         onConfirmTask = onCaptureComplete,
         onReset = viewModel::reset,
@@ -94,6 +97,8 @@ fun SmartCaptureUiRoute(
 internal fun SmartCaptureScreen(
     uiState: SmartCaptureUiState,
     onUploadClick: () -> Unit,
+    onCommentChanged: (String) -> Unit,
+    onAnalyzeClick: (String, String) -> Unit,
     onConfirmTask: (SmartTaskDraft) -> Unit,
     onReset: () -> Unit,
     onDismiss: () -> Unit
@@ -122,7 +127,17 @@ internal fun SmartCaptureScreen(
         ) {
             when (uiState) {
                 is SmartCaptureUiState.Idle -> {
-                    EmptyState(onUploadClick = onUploadClick)
+                    if (uiState.capturedUri == null) {
+                        EmptyState(onUploadClick = onUploadClick)
+                    } else {
+                        ContextInputState(
+                            uri = uiState.capturedUri,
+                            comment = uiState.userComment,
+                            onCommentChanged = onCommentChanged,
+                            onAnalyzeClick = { onAnalyzeClick(uiState.capturedUri, uiState.userComment) },
+                            onRetake = onReset
+                        )
+                    }
                 }
 
                 is SmartCaptureUiState.Loading -> {
@@ -212,6 +227,80 @@ internal fun SmartCaptureScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ContextInputState(
+    uri: String,
+    comment: String,
+    onCommentChanged: (String) -> Unit,
+    onAnalyzeClick: () -> Unit,
+    onRetake: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        Card(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            shape = MaterialTheme.shapes.large
+        ) {
+            AsyncImage(
+                model = uri,
+                contentDescription = "Captured image",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "What are you doing?",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            OutlinedTextField(
+                value = comment,
+                onValueChange = onCommentChanged,
+                placeholder = { Text("e.g. Fixing the kitchen sink, or leave blank...") },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 3,
+                shape = MaterialTheme.shapes.medium
+            )
+            Text(
+                "Adding context helps the AI provide better project details.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Button(
+                onClick = onRetake,
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+            ) {
+                Text("Retake")
+            }
+            Button(
+                onClick = onAnalyzeClick,
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+            ) {
+                Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Analyze")
             }
         }
     }
