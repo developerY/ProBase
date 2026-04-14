@@ -30,4 +30,7 @@ sealed interface FeatureInventory : NavKey {
 
     @Serializable
     data object SmartCapture : FeatureInventory
+
+    @Serializable
+    data class SmartAdvice(val projectId: Long) : FeatureInventory
 }

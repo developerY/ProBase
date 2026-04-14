@@ -6,7 +6,4 @@ sealed interface SettingsEvent {
     data class OnPaneContrastSelected(val paneContrastIdentifier: String) : SettingsEvent
     data class OnGeminiApiKeyChanged(val apiKey: String?) : SettingsEvent
     data class OnAiEnabledToggled(val enabled: Boolean) : SettingsEvent
-    data class OnAiModelSelected(val model: String) : SettingsEvent
-    data object OnTestApiKeyClicked : SettingsEvent
-    data object OnTestModelClicked : SettingsEvent
 }

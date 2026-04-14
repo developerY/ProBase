@@ -1,8 +1,9 @@
 package com.zoewave.probase.applications.photodo.db.repo
 
+import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import kotlinx.coroutines.flow.Flow
 
-interface AppSettingsRepository {
+interface AppSettingsRepository : AiConfigurationSettings {
     val themePreferenceFlow: Flow<String>
     suspend fun saveThemePreference(themeIdentifier: String)
     val palettePreferenceFlow: Flow<String>

@@ -23,7 +23,6 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val appSettingsRepository: AppSettingsRepository,
-    private val orchestrator: SmartCaptureOrchestrator,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -33,13 +32,6 @@ class SettingsViewModel @Inject constructor(
     // NEW: Firebase Device ID state
     private val _firebaseDeviceId = MutableStateFlow<String>("Loading...")
 
-    // Key Testing State
-    private val _isTestingKey = MutableStateFlow(false)
-    private val _keyTestResult = MutableStateFlow<String?>(null)
-    private val _isTestingModel = MutableStateFlow(false)
-    private val _modelTestResult = MutableStateFlow<String?>(null)
-    private val _fetchedModels = MutableStateFlow<List<String>?>(null)
-
     // Combines the DB theme preference with the navigation argument into a single UI State
 @Suppress("UNCHECKED_CAST")
     val uiState: StateFlow<SettingsUiState> = combine(
@@ -48,12 +40,6 @@ class SettingsViewModel @Inject constructor(
         appSettingsRepository.paneContrastFlow,
         appSettingsRepository.isGeminiApiKeySetFlow,
         appSettingsRepository.isAiEnabledFlow,
-        appSettingsRepository.aiModelFlow,
-        _isTestingKey,
-        _keyTestResult,
-        _isTestingModel,
-        _modelTestResult,
-        _fetchedModels,
         _initialExpandedKey,
         _firebaseDeviceId
     ) { args: Array<Any?> ->
@@ -63,15 +49,9 @@ class SettingsViewModel @Inject constructor(
             currentPaneContrast = args[2] as String,
             isApiKeySet = args[3] as Boolean,
             isAiEnabled = args[4] as Boolean,
-            currentAiModel = args[5] as String,
-            isTestingKey = args[6] as Boolean,
-            keyTestResult = args[7] as String?,
-            isTestingModel = args[8] as Boolean,
-            modelTestResult = args[9] as String?,
-            availableModels = (args[10] as List<String>?) ?: emptyList(),
-            initialCardKeyToExpand = args[11] as String?,
+            initialCardKeyToExpand = args[5] as String?,
             appVersion = getAppVersion(),
-            firebaseDeviceId = args[12] as String
+            firebaseDeviceId = args[6] as String
         )
     }.stateIn(
         scope = viewModelScope,
@@ -123,56 +103,6 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.OnAiEnabledToggled -> {
                 viewModelScope.launch { appSettingsRepository.saveAiEnabled(event.enabled) }
             }
-            is SettingsEvent.OnAiModelSelected -> {
-                viewModelScope.launch { appSettingsRepository.saveAiModel(event.model) }
-            }
-            is SettingsEvent.OnTestApiKeyClicked -> {
-                testApiKey()
-            }
-            is SettingsEvent.OnTestModelClicked -> {
-                testModel()
-            }
-        }
-    }
-
-    private fun testApiKey() {
-        viewModelScope.launch {
-            _isTestingKey.value = true
-            _keyTestResult.value = "Testing connection..."
-            
-            val key = appSettingsRepository.getGeminiApiKey()
-            
-            if (key.isNullOrBlank()) {
-                _keyTestResult.value = "Error: No API key saved."
-                _isTestingKey.value = false
-                return@launch
-            }
-
-            val result = orchestrator.validateApiKey(key)
-            _keyTestResult.value = result.first
-            if (result.second.isNotEmpty()) {
-                _fetchedModels.value = result.second
-            }
-            _isTestingKey.value = false
-        }
-    }
-
-    private fun testModel() {
-        viewModelScope.launch {
-            val key = appSettingsRepository.getGeminiApiKey()
-            val model = appSettingsRepository.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
-
-            if (key.isNullOrBlank()) {
-                _keyTestResult.value = "Error: No API key saved."
-                return@launch
-            }
-
-            _isTestingModel.value = true
-            _modelTestResult.value = "Pinging model..."
-
-            val result = orchestrator.testModel(key, model)
-            _modelTestResult.value = result
-            _isTestingModel.value = false
         }
     }
 

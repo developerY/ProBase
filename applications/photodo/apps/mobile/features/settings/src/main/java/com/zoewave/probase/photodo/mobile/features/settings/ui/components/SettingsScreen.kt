@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.settings.R
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsEvent
@@ -92,22 +93,9 @@ fun SettingsScreen(
                     }
                 )
 
-                AiSettingsCard(
+                AiConfigurationCard(
                     expanded = isAiExpanded,
-                    onExpandToggle = { isAiExpanded = !isAiExpanded },
-                    isAiEnabled = uiState.isAiEnabled,
-                    onAiEnabledToggled = { onEvent(SettingsEvent.OnAiEnabledToggled(it)) },
-                    isApiKeySet = uiState.isApiKeySet,
-                    currentAiModel = uiState.currentAiModel,
-                    availableModels = uiState.availableModels,
-                    onAiModelSelected = { onEvent(SettingsEvent.OnAiModelSelected(it)) },
-                    isTestingKey = uiState.isTestingKey,
-                    keyTestResult = uiState.keyTestResult,
-                    onTestKeyClicked = { onEvent(SettingsEvent.OnTestApiKeyClicked) },
-                    isTestingModel = uiState.isTestingModel,
-                    modelTestResult = uiState.modelTestResult,
-                    onTestModelClicked = { onEvent(SettingsEvent.OnTestModelClicked) },
-                    onGeminiApiKeyChanged = { onEvent(SettingsEvent.OnGeminiApiKeyChanged(it)) }
+                    onExpandToggle = { isAiExpanded = !isAiExpanded }
                 )
 
                 PaletteSettingsCard(

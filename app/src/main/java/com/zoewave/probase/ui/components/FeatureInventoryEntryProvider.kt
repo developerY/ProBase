@@ -17,6 +17,7 @@ import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventoryScreen
 import com.zoewave.probase.features.nfc.ui.NfcUiRoute
 import com.zoewave.probase.features.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.smartcapture.ui.SmartCaptureUiRoute
+import com.zoewave.probase.photodo.features.smartadvice.ui.SmartAdviceUiRoute
 
 fun featureInventoryEntryProvider(
     key: NavKey,
@@ -95,6 +96,15 @@ fun featureInventoryEntryProvider(
                             // For testing in inventory, just go back. 
                             navigateBack()
                         },
+                        onDismiss = navigateBack
+                    )
+                }
+            }
+
+            is FeatureInventory.SmartAdvice -> {
+                FeatureScaffold(title = "Smart Advice", onBack = navigateBack) {
+                    SmartAdviceUiRoute(
+                        projectId = key.projectId,
                         onDismiss = navigateBack
                     )
                 }

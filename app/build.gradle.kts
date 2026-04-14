@@ -54,6 +54,8 @@ dependencies {
     implementation(project(":features:camera"))
     implementation(project(":features:calendar"))
     implementation(project(":features:smartcapture"))
+    implementation(project(":applications:photodo:features:smartadvice"))
+    implementation(project(":applications:photodo:db"))
     // implementation(project(":core:ui"))
 
     // ✅ CORE DEPENDENCIES

@@ -120,6 +120,7 @@ dependencies {
     implementation(project(":applications:photodo:apps:mobile:features:settings"))
     implementation(project(":applications:photodo:features:camera"))
     implementation(project(":features:smartcapture"))
+    implementation(project(":features:ai:configuration"))
     // implementation(project(":applications:photodo:features:tasks"))
     // implementation(project(":applications:photodo:features:settings"))
 
