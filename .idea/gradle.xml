@@ -81,6 +81,7 @@
             <option value="$PROJECT_DIR$/applications/photodo/features" />
             <option value="$PROJECT_DIR$/applications/photodo/features/calendar" />
             <option value="$PROJECT_DIR$/applications/photodo/features/camera" />
+            <option value="$PROJECT_DIR$/applications/photodo/features/smartadvice" />
             <option value="$PROJECT_DIR$/applications/photodo/features/timebudgeting" />
             <option value="$PROJECT_DIR$/applications/photodo/model" />
             <option value="$PROJECT_DIR$/applications/seaweed" />
@@ -113,16 +114,18 @@
             <option value="$PROJECT_DIR$/core/ui" />
             <option value="$PROJECT_DIR$/core/util" />
             <option value="$PROJECT_DIR$/features" />
+            <option value="$PROJECT_DIR$/features/ai" />
+            <option value="$PROJECT_DIR$/features/ai/capture" />
+            <option value="$PROJECT_DIR$/features/ai/configuration" />
+            <option value="$PROJECT_DIR$/features/ai/vision" />
             <option value="$PROJECT_DIR$/features/ble" />
             <option value="$PROJECT_DIR$/features/calendar" />
             <option value="$PROJECT_DIR$/features/camera" />
             <option value="$PROJECT_DIR$/features/health" />
-            <option value="$PROJECT_DIR$/features/ml" />
             <option value="$PROJECT_DIR$/features/nav3" />
             <option value="$PROJECT_DIR$/features/nfc" />
             <option value="$PROJECT_DIR$/features/places" />
             <option value="$PROJECT_DIR$/features/qrscanner" />
-            <option value="$PROJECT_DIR$/features/smartcapture" />
             <option value="$PROJECT_DIR$/features/weather" />
           </set>
         </option>

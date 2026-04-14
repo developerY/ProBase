@@ -1,7 +1,7 @@
 package com.zoewave.probase.photodo.mobile.di
 
 import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
-import com.zoewave.probase.features.smartcapture.domain.SmartCaptureSettings
+import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -14,4 +14,5 @@ class RealSmartCaptureSettings @Inject constructor(
     override val userApiKeyFlow: Flow<String?> = flow {
         emit(appSettingsRepository.getGeminiApiKey())
     }
+    override val userAiModelFlow: Flow<String> = appSettingsRepository.aiModelFlow
 }

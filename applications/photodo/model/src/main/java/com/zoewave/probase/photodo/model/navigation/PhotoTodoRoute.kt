@@ -68,6 +68,9 @@ sealed class PhotoTodoRoute(
 
     @Serializable
     data class SmartCapture(val photoUri: String) : PhotoTodoRoute(icon = Icons.Default.CameraAlt)
+
+    @Serializable
+    data class SmartAdvice(val projectId: Long) : PhotoTodoRoute(icon = Icons.Default.CheckCircle)
 }
 
 // Your Bottom Bar uses this, so it naturally ignores TaskDetail. Perfect!

@@ -18,7 +18,7 @@ This plan outlines the integration of the multimodal AI Smart Capture feature in
 #### [DataStoreAppSettingsRepository.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/photodo/db/src/main/java/com/zoewave/probase/applications/photodo/db/repo/DataStoreAppSettingsRepository.kt)
 - Implement new flows and save functions using DataStore.
 
-#### [NEW] [RealSmartCaptureSettings.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/photodo/features/smartcapture/src/main/java/com/zoewave/probase/features/smartcapture/data/RealSmartCaptureSettings.kt)
+#### [NEW] [RealSmartCaptureSettings.kt](file:///Users/developer/AndroidStudioProjects/ProBase/applications/photodo/features/smartcapture/src/main/java/com.zoewave.probase.features.ai.capture/data/RealSmartCaptureSettings.kt)
 - Implement `SmartCaptureSettings` by delegating to `AppSettingsRepository`. This connects the feature module to the app's real preferences.
 
 ---

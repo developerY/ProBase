@@ -79,4 +79,16 @@ class DataStoreAppSettingsRepository @Inject constructor(
             preferences[IS_AI_ENABLED_KEY] = enabled
         }
     }
+
+    private val AI_MODEL_KEY = stringPreferencesKey("ai_model_preference")
+
+    override val aiModelFlow: Flow<String> = dataStore.data.map { preferences ->
+        preferences[AI_MODEL_KEY] ?: "gemini-1.5-flash"
+    }
+
+    override suspend fun saveAiModel(model: String) {
+        dataStore.edit { preferences ->
+            preferences[AI_MODEL_KEY] = model
+        }
+    }
 }

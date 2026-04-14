@@ -190,6 +190,10 @@ class TaskDetailViewModel @Inject constructor(
                     }
                 }
             }
+
+            TaskDetailEvent.OnHelpClicked -> {
+                // Navigation handled in UI
+            }
         }
     }
 }

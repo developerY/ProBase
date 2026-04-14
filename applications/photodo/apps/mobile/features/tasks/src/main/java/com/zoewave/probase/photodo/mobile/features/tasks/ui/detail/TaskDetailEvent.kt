@@ -25,4 +25,5 @@ sealed interface TaskDetailEvent {
     // --- UI Toggles ---
     data object OnCameraClick : TaskDetailEvent
     data object OnBackFromCamera : TaskDetailEvent
+    data object OnHelpClicked : TaskDetailEvent
 }
