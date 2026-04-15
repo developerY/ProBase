@@ -22,7 +22,7 @@ class SmartReceiptScanner {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    suspend fun scanReceipt(bitmap: Bitmap): ReceiptResult = withContext(Dispatchers.Default) {
+    suspend fun scanReceipt(bitmap: Bitmap, userContext: String? = null): ReceiptResult = withContext(Dispatchers.Default) {
         val image = InputImage.fromBitmap(bitmap, 0)
         
         // 1. ML Kit Text Extraction
@@ -32,15 +32,17 @@ class SmartReceiptScanner {
             ""
         }
 
-        if (visionText.isBlank()) return@withContext ReceiptResult()
+        if (visionText.isBlank() && userContext == null) return@withContext ReceiptResult()
 
         // 2. Try Gemini Nano
         try {
             // In a real production app, you'd check availability via AICore first.
             // For this implementation, we attempt and catch availability/unsupported errors as a fallback mechanism.
+            val contextPrompt = userContext?.let { "\nUser provided context: $it" } ?: ""
             val prompt = """
-                Extract the merchant name, total amount, and date from the following receipt text. 
+                Extract the merchant name, total amount, and date from the following receipt text or image context. 
                 Suggest a category. 
+                $contextPrompt
                 Return ONLY a valid JSON object with keys: merchant, total, date, category.
                 Text: $visionText
             """.trimIndent()

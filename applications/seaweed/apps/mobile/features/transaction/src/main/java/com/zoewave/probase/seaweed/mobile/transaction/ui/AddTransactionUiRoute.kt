@@ -35,17 +35,21 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -320,6 +324,16 @@ fun AddTransactionScreen(
                 }
             }
 
+            if (uiState.showCaptureTypeSelection) {
+                CaptureTypeSelectionSheet(
+                    comment = uiState.userContextComment,
+                    onCommentChanged = { onEvent(AddTransactionUiEvent.UserCommentChanged(it)) },
+                    onReceiptSelected = { onEvent(AddTransactionUiEvent.SelectReceiptMode) },
+                    onPurchaseSelected = { onEvent(AddTransactionUiEvent.SelectPurchaseMode(uiState.userContextComment)) },
+                    onDismiss = { onEvent(AddTransactionUiEvent.CancelCaptureSelection) }
+                )
+            }
+
             if (uiState.isLoading) {
                 Box(
                     modifier = Modifier
@@ -370,5 +384,87 @@ fun AddTransactionScreenEmptyPreview() {
             onEvent = {},
             navTo = {}
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CaptureTypeSelectionSheet(
+    comment: String,
+    onCommentChanged: (String) -> Unit,
+    onReceiptSelected: () -> Unit,
+    onPurchaseSelected: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Analyze Photo with AI",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Choose how you want the AI to process this image.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            HorizontalDivider()
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Button(
+                    onClick = onReceiptSelected,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                ) {
+                    Text("Receipt")
+                }
+                Button(
+                    onClick = onPurchaseSelected,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Purchase")
+                }
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Add context for Purchase (Optional)",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                OutlinedTextField(
+                    value = comment,
+                    onValueChange = onCommentChanged,
+                    placeholder = { Text("e.g. Buying a new monitor for work...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 3
+                )
+                Text(
+                    text = "Providing details helps the AI better categorize and describe the purchase.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }

@@ -34,7 +34,9 @@ data class AddTransactionUiState(
     val isSplitWidgetVisible: Boolean = false,
     val splitCount: Int = 1,
     val recentCategories: List<String> = emptyList(),
-    val isCategorySuggestionsVisible: Boolean = false
+    val isCategorySuggestionsVisible: Boolean = false,
+    val showCaptureTypeSelection: Boolean = false,
+    val userContextComment: String = ""
 )
 
 sealed interface AddTransactionUiEvent {
@@ -53,6 +55,10 @@ sealed interface AddTransactionUiEvent {
     data class SetCategorySuggestionsVisible(val visible: Boolean) : AddTransactionUiEvent
     data class AdjustAmount(val delta: Double) : AddTransactionUiEvent
     data class ReceiptImageCaptured(val bitmap: Bitmap) : AddTransactionUiEvent
+    object SelectReceiptMode : AddTransactionUiEvent
+    data class SelectPurchaseMode(val comment: String) : AddTransactionUiEvent
+    data class UserCommentChanged(val comment: String) : AddTransactionUiEvent
+    object CancelCaptureSelection : AddTransactionUiEvent
 }
 
 @HiltViewModel
@@ -83,8 +89,23 @@ class AddTransactionViewModel @Inject constructor(
             is AddTransactionUiEvent.CategoryChanged -> _uiState.update { it.copy(category = event.value, errorMessage = null) }
             is AddTransactionUiEvent.DescriptionChanged -> _uiState.update { it.copy(description = event.value, errorMessage = null) }
             is AddTransactionUiEvent.ReceiptAttached -> {
-                _uiState.update { it.copy(receiptUri = event.uri, errorMessage = null) }
-                processReceiptUri(event.uri)
+                _uiState.update { it.copy(receiptUri = event.uri, showCaptureTypeSelection = true, errorMessage = null) }
+            }
+            AddTransactionUiEvent.SelectReceiptMode -> {
+                val uri = _uiState.value.receiptUri
+                _uiState.update { it.copy(showCaptureTypeSelection = false) }
+                if (uri != null) processReceiptUri(uri, null)
+            }
+            is AddTransactionUiEvent.SelectPurchaseMode -> {
+                val uri = _uiState.value.receiptUri
+                _uiState.update { it.copy(showCaptureTypeSelection = false) }
+                if (uri != null) processReceiptUri(uri, event.comment)
+            }
+            is AddTransactionUiEvent.UserCommentChanged -> {
+                _uiState.update { it.copy(userContextComment = event.comment) }
+            }
+            AddTransactionUiEvent.CancelCaptureSelection -> {
+                _uiState.update { it.copy(showCaptureTypeSelection = false, receiptUri = null) }
             }
             AddTransactionUiEvent.SaveTransaction -> saveTransaction()
             AddTransactionUiEvent.BackClicked -> { /* Handled in Route */ }
@@ -121,11 +142,11 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
-    private fun processReceiptImage(bitmap: Bitmap) {
+    private fun processReceiptImage(bitmap: Bitmap, userComment: String? = null) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val result = scanner.scanReceipt(bitmap)
+                val result = scanner.scanReceipt(bitmap, userComment)
                 _uiState.update { 
                     it.copy(
                         amount = if (result.totalAmount > 0) String.format(Locale.getDefault(), "%.2f", result.totalAmount) else it.amount,
@@ -140,12 +161,12 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
-    private fun processReceiptUri(uri: String) {
+    private fun processReceiptUri(uri: String, userComment: String? = null) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             val bitmap = imageLoader.loadBitmap(uri)
             if (bitmap != null) {
-                processReceiptImage(bitmap)
+                processReceiptImage(bitmap, userComment)
             } else {
                 _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to load image for AI analysis") }
             }
