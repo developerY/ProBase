@@ -96,6 +96,10 @@ fun featureInventoryEntryProvider(
                             // For testing in inventory, just go back. 
                             navigateBack()
                         },
+                        onRetakeRequest = {
+                            // In test inventory, "Retake" just goes back
+                            navigateBack()
+                        },
                         onDismiss = navigateBack
                     )
                 }

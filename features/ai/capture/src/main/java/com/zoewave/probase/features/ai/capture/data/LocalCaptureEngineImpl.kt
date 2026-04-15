@@ -22,29 +22,39 @@ class LocalCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         bitmap: Bitmap,
         apiKey: String?,
         modelName: String?,
-        userContext: String?
+        userContext: String?,
+        onLog: (String) -> Unit
     ): DiagnosticResult<SmartTaskDraft> {
         val logs = mutableListOf("Local AI Engine initialized")
+        onLog("Initializing Local AI...")
         val image = InputImage.fromBitmap(bitmap, 0)
         logs.add("Vision analysis started (ML Kit)")
+        onLog("Running Vision OCR (ML Kit)...")
         
         val visionText = try {
             val result = recognizer.process(image).await().text
             logs.add("Local OCR successful: ${result.length} characters found")
+            onLog("OCR successful! Analyzing content...")
             result
         } catch (e: Exception) {
             logs.add("Local OCR failed: ${e.message}")
+            onLog("Local OCR failed: ${e.message}")
             ""
         }
 
-        if (visionText.isBlank()) return DiagnosticResult(SmartTaskDraft(), logs, engineUsed = "Local AI")
+        if (visionText.isBlank()) {
+            onLog("No text found in image.")
+            return DiagnosticResult(SmartTaskDraft(), logs, engineUsed = "Local AI")
+        }
 
+        onLog("Extracting fields with Regex...")
         val lines = visionText.lines().filter { it.isNotBlank() }
         val taskName = lines.firstOrNull()
         val budget = extractBudget(visionText)
         val dueDate = extractDate(visionText)
         
         logs.add("Regex extraction complete")
+        onLog("Extraction complete.")
 
         return DiagnosticResult(
             draft = SmartTaskDraft(

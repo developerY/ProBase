@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -57,7 +58,21 @@ class SmartCaptureViewModel @Inject constructor(
                         networkSpeed = netType
                     )
 
-                    val result = orchestrator.processImage(bitmap, apiKey, modelName, userContext)
+                    val result = orchestrator.processImage(
+                        bitmap = bitmap,
+                        apiKey = apiKey,
+                        modelName = modelName,
+                        userContext = userContext,
+                        onLog = { newLog ->
+                            _uiState.update { currentState ->
+                                if (currentState is SmartCaptureUiState.Loading) {
+                                    currentState.copy(logs = currentState.logs + newLog)
+                                } else {
+                                    currentState
+                                }
+                            }
+                        }
+                    )
                     
                     if (result.error != null) {
                         _uiState.value = SmartCaptureUiState.Error(result.error, result.logs)
@@ -97,7 +112,20 @@ class SmartCaptureViewModel @Inject constructor(
                     networkSpeed = netType
                 )
 
-                val result = orchestrator.processImage(bitmap, apiKey, userContext = userContext)
+                val result = orchestrator.processImage(
+                    bitmap = bitmap,
+                    apiKey = apiKey,
+                    userContext = userContext,
+                    onLog = { newLog ->
+                        _uiState.update { currentState ->
+                            if (currentState is SmartCaptureUiState.Loading) {
+                                currentState.copy(logs = currentState.logs + newLog)
+                            } else {
+                                currentState
+                            }
+                        }
+                    }
+                )
                 _uiState.value = SmartCaptureUiState.Success(
                     draft = result.draft,
                     engineUsed = result.engineUsed,
