@@ -39,6 +39,9 @@ dependencies {
     implementation(project(":applications:seaweed:database"))
     implementation(project(":applications:seaweed:data"))
     implementation(project(":applications:seaweed:features:main"))
+    implementation(project(":applications:seaweed:features:receiptcapture"))
+    implementation(project(":features:ai:capture"))
+    implementation(project(":features:ai:configuration"))
 
     implementation(project(":applications:seaweed:apps:mobile:core"))
     implementation(project(":applications:seaweed:apps:mobile:features:home"))
