@@ -214,6 +214,10 @@ fun photoTodoNavEntryProvider(
                         navigateBack() // Pop SmartCapture
                         navigateTo(PhotoTodoRoute.SavePhoto(photoUri = key.photoUri, prefilledAiDraft = draft))
                     },
+                    onRetakeRequest = {
+                        navigateBack() // Pop SmartCapture
+                        navigateTo(PhotoTodoRoute.Camera())
+                    },
                     onDismiss = navigateBack
                 )
             }

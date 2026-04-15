@@ -16,7 +16,8 @@ interface SmartCaptureEngine {
         bitmap: Bitmap,
         apiKey: String?,
         modelName: String? = null,
-        userContext: String? = null
+        userContext: String? = null,
+        onLog: (String) -> Unit = {}
     ): DiagnosticResult<com.zoewave.probase.core.model.tasks.SmartTaskDraft>
 
     /**

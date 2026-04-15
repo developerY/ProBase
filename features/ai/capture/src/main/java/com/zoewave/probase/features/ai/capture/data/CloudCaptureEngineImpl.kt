@@ -73,9 +73,11 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         bitmap: Bitmap,
         apiKey: String?,
         modelName: String?,
-        userContext: String?
+        userContext: String?,
+        onLog: (String) -> Unit
     ): DiagnosticResult<SmartTaskDraft> {
         val logs = mutableListOf("Cloud AI Engine initialized")
+        onLog("Cloud Engine: Warming up...")
         if (apiKey.isNullOrBlank()) {
             logs.add("Error: API Key is null or blank")
             throw IllegalArgumentException("Missing Gemini API Key for Pro Engine")
@@ -88,6 +90,7 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
             logs.add("User Context provided: ${userContext.take(20)}...")
         }
 
+        onLog("Preparing prompt for $finalModelName...")
         val generativeModel = GenerativeModel(
             modelName = finalModelName,
             apiKey = apiKey,
@@ -128,7 +131,9 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
 
         return try {
             logs.add("Sending multimodal request to Gemini...")
+            onLog("Sending multimodal request to Gemini...")
             val response = generativeModel.generateContent(prompt)
+            onLog("Response received. Parsing JSON...")
             val jsonText = response.text ?: run {
                 logs.add("Gemini returned empty response")
                 return DiagnosticResult(SmartTaskDraft(), logs, engineUsed = "Cloud AI")
@@ -142,9 +147,11 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
             
             val draft = json.decodeFromString<SmartTaskDraft>(finalJson)
             logs.add("JSON decoding successful")
+            onLog("Task extraction successful!")
             DiagnosticResult(draft, logs, engineUsed = "Cloud AI")
         } catch (e: Exception) {
             logs.add("Gemini API call failed: ${e.message}")
+            onLog("Cloud API error: ${e.message}")
             // Rethrow so the orchestrator knows to fallback
             throw e
         }

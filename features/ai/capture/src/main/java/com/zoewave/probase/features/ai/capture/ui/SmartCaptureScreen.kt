@@ -1,9 +1,5 @@
 package com.zoewave.probase.features.ai.capture.ui
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +18,6 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.SdStorage
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -57,10 +52,10 @@ fun SmartCaptureUiRoute(
     viewModel: SmartCaptureViewModel = hiltViewModel(),
     initialPhotoUri: String? = null,
     onCaptureComplete: (SmartTaskDraft) -> Unit,
+    onRetakeRequest: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val context = LocalContext.current
 
     // 🚀 Update: Instead of auto-triggering analysis, set the URI so user can add context
     LaunchedEffect(initialPhotoUri) {
@@ -69,24 +64,14 @@ fun SmartCaptureUiRoute(
         }
     }
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri: Uri? ->
-        uri?.let {
-            viewModel.setCapturedUri(it.toString())
-        }
-    }
-
     SmartCaptureScreen(
         uiState = uiState,
-        onUploadClick = {
-            launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        },
         onCommentChanged = viewModel::onUserCommentChanged,
         onAnalyzeClick = { uri, comment ->
             viewModel.analyzePhoto(uri, comment.ifBlank { null })
         },
         onConfirmTask = onCaptureComplete,
+        onRetake = onRetakeRequest,
         onReset = viewModel::reset,
         onDismiss = onDismiss
     )
@@ -95,10 +80,10 @@ fun SmartCaptureUiRoute(
 @Composable
 internal fun SmartCaptureScreen(
     uiState: SmartCaptureUiState,
-    onUploadClick: () -> Unit,
     onCommentChanged: (String) -> Unit,
     onAnalyzeClick: (String, String) -> Unit,
     onConfirmTask: (SmartTaskDraft) -> Unit,
+    onRetake: () -> Unit,
     onReset: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -127,14 +112,14 @@ internal fun SmartCaptureScreen(
             when (uiState) {
                 is SmartCaptureUiState.Idle -> {
                     if (uiState.capturedUri == null) {
-                        EmptyState(onUploadClick = onUploadClick)
+                        EmptyState()
                     } else {
                         ContextInputState(
                             uri = uiState.capturedUri,
                             comment = uiState.userComment,
                             onCommentChanged = onCommentChanged,
                             onAnalyzeClick = { onAnalyzeClick(uiState.capturedUri, uiState.userComment) },
-                            onRetake = onReset
+                            onRetake = onRetake
                         )
                     }
                 }
@@ -174,7 +159,7 @@ internal fun SmartCaptureScreen(
                                 }
                                 
                                 Spacer(modifier = Modifier.height(8.dp))
-                                uiState.logs.takeLast(3).forEach { log ->
+                                uiState.logs.takeLast(5).forEach { log ->
                                     Text(
                                         text = "> $log",
                                         style = MaterialTheme.typography.bodySmall,
@@ -204,7 +189,7 @@ internal fun SmartCaptureScreen(
                             draft = uiState.draft,
                             engineUsed = uiState.engineUsed,
                             onConfirm = { onConfirmTask(uiState.draft) },
-                            onRetake = onReset
+                            onRetake = onRetake
                         )
                     }
                 }
@@ -306,7 +291,7 @@ private fun ContextInputState(
 }
 
 @Composable
-private fun EmptyState(onUploadClick: () -> Unit) {
+private fun EmptyState() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -326,19 +311,11 @@ private fun EmptyState(onUploadClick: () -> Unit) {
             modifier = Modifier.padding(top = 16.dp)
         )
         Text(
-            "Upload a photo of a note, whiteboard, or screen to automatically extract a structured task.",
+            "Take a photo of a note, whiteboard, or screen to automatically extract a structured task.",
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(vertical = 8.dp),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Button(
-            onClick = onUploadClick,
-            modifier = Modifier.padding(top = 24.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
-        ) {
-            Icon(Icons.Default.CloudUpload, contentDescription = null)
-            Text("Upload Photo", modifier = Modifier.padding(start = 8.dp))
-        }
     }
 }
 
@@ -425,10 +402,10 @@ fun SmartCaptureScreenEmptyPreview() {
                 capturedUri = null,
                 userComment = ""
             ),
-            onUploadClick = {},
             onCommentChanged = {},
             onAnalyzeClick = { _, _ -> },
             onConfirmTask = {},
+            onRetake = {},
             onReset = {},
             onDismiss = {}
         )
@@ -444,10 +421,10 @@ fun SmartCaptureScreenContextInputPreview() {
                 capturedUri = "https://example.com/photo.jpg",
                 userComment = "Fixing the kitchen sink"
             ),
-            onUploadClick = {},
             onCommentChanged = {},
             onAnalyzeClick = { _, _ -> },
             onConfirmTask = {},
+            onRetake = {},
             onReset = {},
             onDismiss = {}
         )
@@ -464,10 +441,10 @@ fun SmartCaptureScreenLoadingPreview() {
                 isUsingCloud = true,
                 networkSpeed = "1.2 MB/s"
             ),
-            onUploadClick = {},
             onCommentChanged = {},
             onAnalyzeClick = { _, _ -> },
             onConfirmTask = {},
+            onRetake = {},
             onReset = {},
             onDismiss = {}
         )
@@ -491,10 +468,10 @@ fun SmartCaptureScreenSuccessPreview() {
                 ),
                 engineUsed = "Cloud AI (Gemini)"
             ),
-            onUploadClick = {},
             onCommentChanged = {},
             onAnalyzeClick = { _, _ -> },
             onConfirmTask = {},
+            onRetake = {},
             onReset = {},
             onDismiss = {}
         )
