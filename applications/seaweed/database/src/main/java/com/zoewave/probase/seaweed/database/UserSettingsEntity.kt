@@ -12,19 +12,25 @@ data class UserSettingsEntity(
     val monthlyIncome: Double,
     val currency: String,
     val themeConfig: SeaweedThemeConfig,
-    val themeMode: ThemeMode = ThemeMode.SYSTEM
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val isAiEnabled: Boolean = false,
+    val aiModel: String = "gemini-1.5-flash"
 )
 
 fun UserSettingsEntity.toDomain() = UserSettings(
     monthlyIncome = monthlyIncome,
     currency = currency,
     themeConfig = themeConfig,
-    themeMode = themeMode
+    themeMode = themeMode,
+    isAiEnabled = isAiEnabled,
+    aiModel = aiModel
 )
 
 fun UserSettings.toEntity() = UserSettingsEntity(
     monthlyIncome = monthlyIncome,
     currency = currency,
     themeConfig = themeConfig,
-    themeMode = themeMode
+    themeMode = themeMode,
+    isAiEnabled = isAiEnabled,
+    aiModel = aiModel
 )

@@ -20,5 +20,7 @@ data class UserSettings(
     val monthlyIncome: Double = 5000.0,
     val currency: String = "USD",
     val themeConfig: SeaweedThemeConfig = SeaweedThemeConfig.DEFAULT,
-    val themeMode: ThemeMode = ThemeMode.SYSTEM
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val isAiEnabled: Boolean = false,
+    val aiModel: String = "gemini-1.5-flash"
 )

@@ -11,6 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
 import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
 import com.zoewave.probase.seaweed.model.ThemeMode
 import com.zoewave.probase.seaweed.model.UserSettings
@@ -86,6 +87,14 @@ fun SettingsScreen(
                     ThemeModeSelectionGroup(
                         currentMode = settings.themeMode,
                         onModeSelected = { onEvent(SettingsUiEvent.UpdateThemeMode(it)) }
+                    )
+
+                    var isAiExpanded by remember { mutableStateOf(false) }
+                    AiConfigurationCard(
+                        expanded = isAiExpanded,
+                        onExpandToggle = { isAiExpanded = !isAiExpanded },
+                        title = "Seaweed Receipt AI",
+                        description = "Use Gemini to automatically extract merchant and amount from receipts."
                     )
                 }
             }

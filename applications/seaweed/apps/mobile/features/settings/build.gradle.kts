@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":applications:seaweed:model"))
     implementation(project(":applications:seaweed:data"))
     implementation(project(":applications:seaweed:features:main"))
+    implementation(project(":features:ai:configuration"))
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.hilt.navigation.compose)

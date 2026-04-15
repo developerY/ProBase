@@ -17,7 +17,7 @@ interface SmartCaptureEngine {
         apiKey: String?,
         modelName: String? = null,
         userContext: String? = null
-    ): DiagnosticResult
+    ): DiagnosticResult<com.zoewave.probase.core.model.tasks.SmartTaskDraft>
 
     /**
      * Fetches the list of supported models from the engine.

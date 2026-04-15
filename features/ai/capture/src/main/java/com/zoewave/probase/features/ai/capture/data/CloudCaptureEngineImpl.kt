@@ -74,7 +74,7 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         apiKey: String?,
         modelName: String?,
         userContext: String?
-    ): DiagnosticResult {
+    ): DiagnosticResult<SmartTaskDraft> {
         val logs = mutableListOf("Cloud AI Engine initialized")
         if (apiKey.isNullOrBlank()) {
             logs.add("Error: API Key is null or blank")

@@ -2,6 +2,7 @@ package com.zoewave.probase.features.ai.capture.data
 
 import android.graphics.Bitmap
 import android.util.Log
+import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.ai.capture.domain.DiagnosticResult
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureEngine
 import javax.inject.Inject
@@ -33,7 +34,7 @@ class SmartCaptureOrchestrator @Inject constructor(
         apiKey: String?,
         modelName: String? = null,
         userContext: String? = null
-    ): DiagnosticResult {
+    ): DiagnosticResult<SmartTaskDraft> {
         val totalLogs = mutableListOf<String>()
         return try {
             if (!apiKey.isNullOrBlank()) {

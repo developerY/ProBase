@@ -23,7 +23,7 @@ class LocalCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         apiKey: String?,
         modelName: String?,
         userContext: String?
-    ): DiagnosticResult {
+    ): DiagnosticResult<SmartTaskDraft> {
         val logs = mutableListOf("Local AI Engine initialized")
         val image = InputImage.fromBitmap(bitmap, 0)
         logs.add("Vision analysis started (ML Kit)")
