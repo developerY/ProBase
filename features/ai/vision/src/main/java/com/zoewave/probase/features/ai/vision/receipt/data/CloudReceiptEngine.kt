@@ -83,7 +83,8 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
                 date = draft.date,
                 category = draft.category,
                 logs = logs,
-                engineUsed = "Cloud AI (Gemini)"
+                engineUsed = "Cloud AI (Gemini)",
+                rawResponse = jsonText
             )
         } catch (e: Exception) {
             logs.add("Cloud API failed: ${e.localizedMessage}")

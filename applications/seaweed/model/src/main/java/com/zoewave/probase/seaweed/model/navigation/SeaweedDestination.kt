@@ -88,6 +88,16 @@ sealed class SeaweedDestination(
         title = "Smart Receipt",
         icon = Icons.Default.Home
     )
+
+    @Serializable
+    data class SmartReceiptDebug(
+        val rawResponse: String,
+        val logs: List<String>,
+        val engineUsed: String
+    ) : SeaweedDestination(
+        title = "AI Debug Info",
+        icon = Icons.Default.Settings
+    )
 }
 
 val topLevelDestinations = listOf(

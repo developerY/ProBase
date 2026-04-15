@@ -3,6 +3,7 @@ package com.zoewave.probase.features.ai.vision.receipt
 import android.graphics.Bitmap
 import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.content
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -41,16 +42,21 @@ class SmartReceiptScanner {
             // For this implementation, we attempt and catch availability/unsupported errors as a fallback mechanism.
             val contextPrompt = userContext?.let { "\nUser provided context: $it" } ?: ""
             val prompt = """
-                Please take your best guess and try to extract the merchant name, total amount, and date from the following receipt text or image context. 
+                You are a smart financial assistant. From this image and user context, extract the merchant name, total amount, and date.
                 Suggest a category. 
                 $contextPrompt
                 Return ONLY a valid JSON object with keys: merchant, totalAmount, date, category.
-                Text: $visionText
+                Text from image: $visionText
             """.trimIndent()
 
             Log.d("SmartReceiptScanner", "AI Prompt: $prompt")
 
-            val response = generativeModel.generateContent(prompt)
+            val inputContent = content {
+                image(bitmap)
+                text(prompt)
+            }
+
+            val response = generativeModel.generateContent(inputContent)
             val jsonText = response.text ?: throw Exception("Empty response")
             
             Log.d("SmartReceiptScanner", "AI Response: $jsonText")

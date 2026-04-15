@@ -24,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Coffee
@@ -86,10 +87,20 @@ fun AddTransactionUiRoute(
     AddTransactionScreen(
         uiState = uiState,
         onEvent = { event ->
-            if (event is AddTransactionUiEvent.BackClicked) {
-                onBack()
-            } else {
-                viewModel.onEvent(event)
+            when (event) {
+                is AddTransactionUiEvent.BackClicked -> onBack()
+                AddTransactionUiEvent.DebugAiClicked -> {
+                    uiState.lastAiDebugInfo?.let { debug ->
+                        navTo(
+                            SeaweedDestination.SmartReceiptDebug(
+                                rawResponse = debug.rawResponse,
+                                logs = debug.logs,
+                                engineUsed = debug.engineUsed
+                            )
+                        )
+                    }
+                }
+                else -> viewModel.onEvent(event)
             }
         },
         navTo = navTo,
@@ -115,6 +126,11 @@ fun AddTransactionScreen(
                     }
                 },
                 actions = {
+                    if (uiState.lastAiDebugInfo != null) {
+                        IconButton(onClick = { onEvent(AddTransactionUiEvent.DebugAiClicked) }) {
+                            Icon(Icons.Default.BugReport, contentDescription = "View AI Debug Info", tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
                     IconButton(onClick = { navTo(SeaweedDestination.Camera) }) {
                         Icon(Icons.Default.CameraAlt, contentDescription = "Take Receipt Photo")
                     }
