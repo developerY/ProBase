@@ -82,6 +82,12 @@ sealed class SeaweedDestination(
         title = "Receipt Camera",
         icon = Icons.Default.Home // Fallback icon
     )
+
+    @Serializable
+    data class SmartReceipt(val photoUri: String) : SeaweedDestination(
+        title = "Smart Receipt",
+        icon = Icons.Default.Home
+    )
 }
 
 val topLevelDestinations = listOf(
