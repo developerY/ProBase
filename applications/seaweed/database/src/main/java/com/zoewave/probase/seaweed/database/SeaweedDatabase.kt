@@ -12,7 +12,7 @@ import com.zoewave.probase.seaweed.database.converter.ExpenseConverters
         UserSettingsEntity::class,
         BudgetTargetEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(ExpenseConverters::class)

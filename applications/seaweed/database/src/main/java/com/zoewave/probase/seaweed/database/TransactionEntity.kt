@@ -10,7 +10,8 @@ data class TransactionEntity(
     val amount: Double,
     val category: String,
     val description: String,
-    val date: Long
+    val date: Long,
+    val receiptUri: String? = null
 )
 
 fun TransactionEntity.toDomain() = Transaction(
@@ -18,7 +19,8 @@ fun TransactionEntity.toDomain() = Transaction(
     amount = amount,
     category = category,
     description = description,
-    date = date
+    date = date,
+    receiptUri = receiptUri
 )
 
 fun Transaction.toEntity() = TransactionEntity(
@@ -26,5 +28,6 @@ fun Transaction.toEntity() = TransactionEntity(
     amount = amount,
     category = category,
     description = description,
-    date = date
+    date = date,
+    receiptUri = receiptUri
 )
