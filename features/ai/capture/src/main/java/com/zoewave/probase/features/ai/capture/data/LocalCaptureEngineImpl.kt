@@ -19,13 +19,19 @@ class LocalCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
     override suspend fun processImage(
-        bitmap: Bitmap,
+        bitmap: Bitmap?,
         apiKey: String?,
         modelName: String?,
         userContext: String?,
         onLog: (String) -> Unit
     ): DiagnosticResult<SmartTaskDraft> {
         val logs = mutableListOf("Local AI Engine initialized")
+        if (bitmap == null) {
+            onLog("Local AI: No image to process.")
+            logs.add("Error: Local AI requires an image for OCR analysis.")
+            return DiagnosticResult(SmartTaskDraft(), logs, error = "Local AI requires an image.", engineUsed = "Local AI")
+        }
+
         onLog("Initializing Local AI...")
         val image = InputImage.fromBitmap(bitmap, 0)
         logs.add("Vision analysis started (ML Kit)")

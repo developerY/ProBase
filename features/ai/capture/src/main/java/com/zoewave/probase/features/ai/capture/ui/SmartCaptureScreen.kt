@@ -86,7 +86,7 @@ fun SmartCaptureUiRoute(
 internal fun SmartCaptureScreen(
     uiState: SmartCaptureUiState,
     onCommentChanged: (String) -> Unit,
-    onAnalyzeClick: (String, String) -> Unit,
+    onAnalyzeClick: (String?, String) -> Unit,
     onConfirmTask: (SmartTaskDraft) -> Unit,
     onRetake: () -> Unit,
     onReset: () -> Unit,
@@ -119,7 +119,11 @@ internal fun SmartCaptureScreen(
             when (uiState) {
                 is SmartCaptureUiState.Idle -> {
                     if (uiState.capturedUri == null) {
-                        EmptyState()
+                        EmptyState(
+                            comment = uiState.userComment,
+                            onCommentChanged = onCommentChanged,
+                            onAnalyzeClick = { onAnalyzeClick(null, uiState.userComment) }
+                        )
                     } else {
                         ContextInputState(
                             uri = uiState.capturedUri,
@@ -356,7 +360,11 @@ private fun ContextInputState(
 }
 
 @Composable
-private fun EmptyState() {
+private fun EmptyState(
+    comment: String,
+    onCommentChanged: (String) -> Unit,
+    onAnalyzeClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -376,11 +384,33 @@ private fun EmptyState() {
             modifier = Modifier.padding(top = 16.dp)
         )
         Text(
-            "Take a photo of a note, whiteboard, or screen to automatically extract a structured task.",
+            "Take a photo or type a task command to have AI automatically generate project details.",
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(vertical = 8.dp),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        OutlinedTextField(
+            value = comment,
+            onValueChange = onCommentChanged,
+            placeholder = { Text("e.g. Clean the car this weekend") },
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 3,
+            shape = MaterialTheme.shapes.medium
+        )
+        
+        if (comment.isNotBlank()) {
+            Button(
+                onClick = onAnalyzeClick,
+                modifier = Modifier.padding(top = 16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+            ) {
+                Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                Text("Analyze Text", modifier = Modifier.padding(start = 8.dp))
+            }
+        }
     }
 }
 
