@@ -11,6 +11,7 @@ android {
 
 dependencies {
     implementation(project(":core:data"))
+    implementation(project(":features:ai:capture"))
 
     // Compose
     implementation(libs.androidx.compose.material3)

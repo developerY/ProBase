@@ -103,6 +103,7 @@
             <option value="$PROJECT_DIR$/applications/seaweed/database" />
             <option value="$PROJECT_DIR$/applications/seaweed/features" />
             <option value="$PROJECT_DIR$/applications/seaweed/features/main" />
+            <option value="$PROJECT_DIR$/applications/seaweed/features/receiptcapture" />
             <option value="$PROJECT_DIR$/applications/seaweed/model" />
             <option value="$PROJECT_DIR$/build-logic" />
             <option value="$PROJECT_DIR$/build-logic/convention" />
