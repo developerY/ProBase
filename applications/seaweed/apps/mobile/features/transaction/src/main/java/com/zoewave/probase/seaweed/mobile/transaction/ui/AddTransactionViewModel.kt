@@ -3,6 +3,7 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.graphics.Bitmap
+import android.util.Log
 import com.zoewave.probase.features.ai.capture.data.ImageLoader
 import com.zoewave.probase.features.ai.vision.receipt.SmartReceiptScanner
 import com.zoewave.probase.seaweed.data.TransactionRepository
@@ -147,16 +148,20 @@ class AddTransactionViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val result = scanner.scanReceipt(bitmap, userComment)
+                Log.d("AddTransactionVM", "AI Result: $result")
                 _uiState.update { 
-                    it.copy(
+                    val updated = it.copy(
                         amount = if (result.totalAmount > 0) String.format(Locale.getDefault(), "%.2f", result.totalAmount) else it.amount,
                         category = result.category ?: it.category,
                         description = result.merchant ?: it.description,
                         isLoading = false,
                         errorMessage = null
                     )
+                    Log.d("AddTransactionVM", "Updating UI State: description=${updated.description}, amount=${updated.amount}, category=${updated.category}")
+                    updated
                 }
             } catch (e: Exception) {
+                Log.e("AddTransactionVM", "AI Analysis failed", e)
                 _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to parse receipt: ${e.message}") }
             }
         }
