@@ -1,9 +1,6 @@
 package com.zoewave.probase.features.ai.capture.ui
 
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -47,10 +44,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
+import com.zoewave.probase.core.ui.theme.AshBikeTheme
 import com.zoewave.probase.features.ai.capture.ui.state.SmartCaptureUiState
 
 @Composable
@@ -414,5 +413,90 @@ private fun TaskField(label: String, value: String) {
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
         Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
         Text(value, style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+@Preview(showBackground = true, name = "Empty State")
+@Composable
+fun SmartCaptureScreenEmptyPreview() {
+    AshBikeTheme {
+        SmartCaptureScreen(
+            uiState = SmartCaptureUiState.Idle(
+                capturedUri = null,
+                userComment = ""
+            ),
+            onUploadClick = {},
+            onCommentChanged = {},
+            onAnalyzeClick = { _, _ -> },
+            onConfirmTask = {},
+            onReset = {},
+            onDismiss = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Context Input State")
+@Composable
+fun SmartCaptureScreenContextInputPreview() {
+    AshBikeTheme {
+        SmartCaptureScreen(
+            uiState = SmartCaptureUiState.Idle(
+                capturedUri = "https://example.com/photo.jpg",
+                userComment = "Fixing the kitchen sink"
+            ),
+            onUploadClick = {},
+            onCommentChanged = {},
+            onAnalyzeClick = { _, _ -> },
+            onConfirmTask = {},
+            onReset = {},
+            onDismiss = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Loading State")
+@Composable
+fun SmartCaptureScreenLoadingPreview() {
+    AshBikeTheme {
+        SmartCaptureScreen(
+            uiState = SmartCaptureUiState.Loading(
+                logs = listOf("Analyzing image...", "OCR successful"),
+                isUsingCloud = true,
+                networkSpeed = "1.2 MB/s"
+            ),
+            onUploadClick = {},
+            onCommentChanged = {},
+            onAnalyzeClick = { _, _ -> },
+            onConfirmTask = {},
+            onReset = {},
+            onDismiss = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Success State")
+@Composable
+fun SmartCaptureScreenSuccessPreview() {
+    AshBikeTheme {
+        SmartCaptureScreen(
+            uiState = SmartCaptureUiState.Success(
+                draft = SmartTaskDraft(
+                    taskName = "Replace Sink Faucet",
+                    category = "Plumbing",
+                    projectName = "Kitchen Renovation",
+                    duration = "2 hours",
+                    dueDate = "2023-12-31",
+                    budget = 150.0,
+                    subTasks = listOf("Buy new faucet", "Remove old faucet", "Install new faucet")
+                ),
+                engineUsed = "Cloud AI (Gemini)"
+            ),
+            onUploadClick = {},
+            onCommentChanged = {},
+            onAnalyzeClick = { _, _ -> },
+            onConfirmTask = {},
+            onReset = {},
+            onDismiss = {}
+        )
     }
 }
