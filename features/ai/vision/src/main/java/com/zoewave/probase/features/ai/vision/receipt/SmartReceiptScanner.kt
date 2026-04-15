@@ -1,7 +1,9 @@
 package com.zoewave.probase.features.ai.vision.receipt
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.content
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -22,7 +24,7 @@ class SmartReceiptScanner {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    suspend fun scanReceipt(bitmap: Bitmap): ReceiptResult = withContext(Dispatchers.Default) {
+    suspend fun scanReceipt(bitmap: Bitmap, userContext: String? = null): ReceiptResult = withContext(Dispatchers.Default) {
         val image = InputImage.fromBitmap(bitmap, 0)
         
         // 1. ML Kit Text Extraction
@@ -32,21 +34,32 @@ class SmartReceiptScanner {
             ""
         }
 
-        if (visionText.isBlank()) return@withContext ReceiptResult()
+        if (visionText.isBlank() && userContext == null) return@withContext ReceiptResult()
 
         // 2. Try Gemini Nano
         try {
             // In a real production app, you'd check availability via AICore first.
             // For this implementation, we attempt and catch availability/unsupported errors as a fallback mechanism.
+            val contextPrompt = userContext?.let { "\nUser provided context: $it" } ?: ""
             val prompt = """
-                Extract the merchant name, total amount, and date from the following receipt text. 
-                Suggest a category. 
-                Return ONLY a valid JSON object with keys: merchant, total, date, category.
-                Text: $visionText
+                what is this a picture of?
+                $contextPrompt
+                Return ONLY a valid JSON object with keys: merchant, totalAmount, date, category, whatIsThis.
+                Field 'whatIsThis' should contain a detailed description of what you see in the image.
+                Text from image: $visionText
             """.trimIndent()
 
-            val response = generativeModel.generateContent(prompt)
+            Log.d("SmartReceiptScanner", "AI Prompt: $prompt")
+
+            val inputContent = content {
+                image(bitmap)
+                text(prompt)
+            }
+
+            val response = generativeModel.generateContent(inputContent)
             val jsonText = response.text ?: throw Exception("Empty response")
+            
+            Log.d("SmartReceiptScanner", "AI Response: $jsonText")
             
             // Clean JSON string in case AI adds markdown wrappers
             val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")

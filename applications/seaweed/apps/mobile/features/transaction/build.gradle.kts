@@ -21,6 +21,8 @@ dependencies {
     implementation(project(":applications:seaweed:features:main"))
     implementation(project(":applications:seaweed:apps:mobile:features:bills"))
     implementation(project(":features:ai:vision"))
+    implementation(project(":features:ai:capture"))
+    implementation(project(":features:ai:configuration"))
 
     implementation(libs.coil.compose)
     implementation(libs.mlkit.text.recognition)

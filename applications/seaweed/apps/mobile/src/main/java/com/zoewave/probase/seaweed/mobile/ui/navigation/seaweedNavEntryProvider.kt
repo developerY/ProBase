@@ -14,6 +14,7 @@ import com.zoewave.probase.seaweed.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionUiEvent
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionViewModel
+import com.zoewave.probase.seaweed.mobile.transaction.ui.AiDebugScreen
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AnalyticsUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.TransactionsUiRoute
 import com.zoewave.probase.seaweed.mobile.ui.components.AdaptiveSeaweedScreen
@@ -113,6 +114,15 @@ fun seaweedNavEntryProvider(
                     initialPhotoUri = key.photoUri,
                     onComplete = onBack,
                     onDismiss = onBack
+                )
+            }
+            is SeaweedDestination.SmartReceiptDebug -> {
+                AiDebugScreen(
+                    rawResponse = key.rawResponse,
+                    logs = key.logs,
+                    engineUsed = key.engineUsed,
+                    whatIsThis = key.whatIsThis,
+                    onBack = onBack
                 )
             }
         }
