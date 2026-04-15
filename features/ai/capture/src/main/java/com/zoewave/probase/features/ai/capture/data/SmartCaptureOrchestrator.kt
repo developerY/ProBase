@@ -37,29 +37,31 @@ class SmartCaptureOrchestrator @Inject constructor(
         onLog: (String) -> Unit = {}
     ): DiagnosticResult<SmartTaskDraft> {
         val totalLogs = mutableListOf<String>()
-        return try {
-            if (!apiKey.isNullOrBlank()) {
-                Log.d(TAG, "Attempting Tier 1 (Cloud) capture with $modelName...")
-                onLog("Tier 1: Cloud AI requested...")
-                totalLogs.add("Orchestrator: Cloud API Key present")
-                val result = cloudEngine.processImage(bitmap, apiKey, modelName, userContext, onLog)
-                result.copy(logs = totalLogs + result.logs)
+        if (!apiKey.isNullOrBlank()) {
+            Log.d(TAG, "Attempting Tier 1 (Cloud) capture with $modelName...")
+            onLog("Tier 1: Cloud AI requested...")
+            totalLogs.add("Orchestrator: Cloud API Key present")
+            
+            val result = cloudEngine.processImage(bitmap, apiKey, modelName, userContext, onLog)
+            
+            if (result.error != null) {
+                Log.w(TAG, "Cloud failed: ${result.error}. Falling back to Local.")
+                onLog("Cloud AI failed (${result.error.take(30)}...). Falling back to Local...")
+                val fallbackLogs = listOf("Orchestrator: Cloud failed (${result.error})", "Triggering Local AI Fallback")
+                val fallbackResult = localEngine.processImage(bitmap, null, userContext = userContext, onLog = onLog)
+                return fallbackResult.copy(
+                    logs = totalLogs + result.logs + fallbackLogs + fallbackResult.logs,
+                    warnings = listOf("Cloud analysis unavailable. Using local extraction.")
+                )
             } else {
-                Log.d(TAG, "No API key provided. Skipping Tier 1.")
-                onLog("Using Tier 2 (Local) AI...")
-                totalLogs.add("Orchestrator: No Cloud Key, using Local AI")
-                val result = localEngine.processImage(bitmap, null, userContext = userContext, onLog = onLog)
-                result.copy(logs = totalLogs + result.logs)
+                return result.copy(logs = totalLogs + result.logs)
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Tier 1 capture failed. Falling back to Tier 2 (Local).", e)
-            onLog("Cloud AI failed. Falling back to Local...")
-            val fallbackLogs = listOf("Orchestrator: Cloud failed (${e.localizedMessage})", "Triggering Local AI Fallback")
+        } else {
+            Log.d(TAG, "No API key provided. Skipping Tier 1.")
+            onLog("Using Tier 2 (Local) AI...")
+            totalLogs.add("Orchestrator: No Cloud Key, using Local AI")
             val result = localEngine.processImage(bitmap, null, userContext = userContext, onLog = onLog)
-            result.copy(
-                logs = totalLogs + fallbackLogs + result.logs,
-                warnings = listOf("Cloud analysis unavailable. Using local extraction.")
-            )
+            return result.copy(logs = totalLogs + result.logs)
         }
     }
 }

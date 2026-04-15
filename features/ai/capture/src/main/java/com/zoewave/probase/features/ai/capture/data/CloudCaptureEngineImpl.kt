@@ -45,14 +45,16 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
                 val body = response.body?.string() ?: return@withContext emptyList()
                 val data = json.decodeFromString<GeminiModelsResponse>(body)
                 
-                data.models
+                val modelNames = data.models
                     .filter { it.supportedGenerationMethods.contains("generateContent") }
-                    .map { it.name.removePrefix("models/") }
+                    .map { it.name }
                     .filter { it.contains("gemini") }
                     .sorted()
+                
+                modelNames
             }
         } catch (e: Exception) {
-            emptyList()
+            emptyList<String>()
         }
     }
 
@@ -152,8 +154,8 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         } catch (e: Exception) {
             logs.add("Gemini API call failed: ${e.message}")
             onLog("Cloud API error: ${e.message}")
-            // Rethrow so the orchestrator knows to fallback
-            throw e
+            // Return instead of throwing to preserve logs in orchestrator
+            DiagnosticResult(SmartTaskDraft(), logs, error = e.message, engineUsed = "Cloud AI")
         }
     }
 }

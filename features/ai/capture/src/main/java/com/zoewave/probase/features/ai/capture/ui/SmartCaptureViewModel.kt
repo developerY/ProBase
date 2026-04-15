@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -49,7 +50,7 @@ class SmartCaptureViewModel @Inject constructor(
             if (bitmap != null) {
                 try {
                     val apiKey = settings.userApiKeyFlow.firstOrNull()
-                    val modelName = settings.userAiModelFlow.firstOrNull()
+                    val modelName = settings.userAiModelFlow.first()
                     val isUsingCloud = !apiKey.isNullOrBlank()
                     
                     _uiState.value = SmartCaptureUiState.Loading(
@@ -104,10 +105,11 @@ class SmartCaptureViewModel @Inject constructor(
             
             try {
                 val apiKey = settings.userApiKeyFlow.firstOrNull()
+                val modelName = settings.userAiModelFlow.first()
                 val isUsingCloud = !apiKey.isNullOrBlank()
                 
                 _uiState.value = SmartCaptureUiState.Loading(
-                    logs = listOf("Processing image...", "Engine: ${if (isUsingCloud) "Cloud" else "Local"}"),
+                    logs = listOf("Processing image...", "Engine: ${if (isUsingCloud) "Cloud ($modelName)" else "Local"}"),
                     isUsingCloud = isUsingCloud,
                     networkSpeed = netType
                 )
@@ -115,6 +117,7 @@ class SmartCaptureViewModel @Inject constructor(
                 val result = orchestrator.processImage(
                     bitmap = bitmap,
                     apiKey = apiKey,
+                    modelName = modelName,
                     userContext = userContext,
                     onLog = { newLog ->
                         _uiState.update { currentState ->
