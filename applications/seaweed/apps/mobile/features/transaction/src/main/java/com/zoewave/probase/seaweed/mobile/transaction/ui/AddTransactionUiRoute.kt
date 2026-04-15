@@ -1,12 +1,17 @@
 package com.zoewave.probase.seaweed.mobile.transaction.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,6 +35,7 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -113,201 +119,219 @@ fun AddTransactionScreen(
         },
         modifier = modifier
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(16.dp)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            uiState.receiptUri?.let { uri ->
-                AsyncImage(
-                    model = uri,
-                    contentDescription = "Receipt",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            OutlinedTextField(
-                value = uiState.description,
-                onValueChange = { onEvent(AddTransactionUiEvent.DescriptionChanged(it)) },
-                label = { Text("Description") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = uiState.amount,
-                onValueChange = { onEvent(AddTransactionUiEvent.AmountChanged(it)) },
-                label = { Text("Amount") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            QuickExpenseBar(
-                onAdjustAmount = { delta -> onEvent(AddTransactionUiEvent.AdjustAmount(delta)) }
-            )
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                uiState.receiptUri?.let { uri ->
+                    AsyncImage(
+                        model = uri,
+                        contentDescription = "Receipt",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
                 OutlinedTextField(
-                    value = uiState.category,
-                    onValueChange = { onEvent(AddTransactionUiEvent.CategoryChanged(it)) },
-                    label = { Text("Category") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onFocusChanged { focusState ->
-                            onEvent(AddTransactionUiEvent.SetCategorySuggestionsVisible(focusState.isFocused))
-                        },
-                    trailingIcon = { Icon(Icons.Default.Category, contentDescription = null) }
+                    value = uiState.description,
+                    onValueChange = { onEvent(AddTransactionUiEvent.DescriptionChanged(it)) },
+                    label = { Text("Description") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = uiState.amount,
+                    onValueChange = { onEvent(AddTransactionUiEvent.AmountChanged(it)) },
+                    label = { Text("Amount") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth()
                 )
 
-                AnimatedVisibility(visible = uiState.isCategorySuggestionsVisible) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (uiState.recentCategories.isNotEmpty()) {
-                            Text("Recent", style = MaterialTheme.typography.labelMedium)
-                            LazyRow(
+                QuickExpenseBar(
+                    onAdjustAmount = { delta -> onEvent(AddTransactionUiEvent.AdjustAmount(delta)) }
+                )
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = uiState.category,
+                        onValueChange = { onEvent(AddTransactionUiEvent.CategoryChanged(it)) },
+                        label = { Text("Category") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusChanged { focusState ->
+                                onEvent(AddTransactionUiEvent.SetCategorySuggestionsVisible(focusState.isFocused))
+                            },
+                        trailingIcon = { Icon(Icons.Default.Category, contentDescription = null) }
+                    )
+
+                    AnimatedVisibility(visible = uiState.isCategorySuggestionsVisible) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (uiState.recentCategories.isNotEmpty()) {
+                                Text("Recent", style = MaterialTheme.typography.labelMedium)
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    contentPadding = PaddingValues(bottom = 8.dp)
+                                ) {
+                                    items(uiState.recentCategories) { category ->
+                                        AssistChip(
+                                            onClick = { onEvent(AddTransactionUiEvent.CategoryChanged(category)) },
+                                            label = { Text(category) }
+                                        )
+                                    }
+                                }
+                            }
+
+                            Text("Suggestions", style = MaterialTheme.typography.labelMedium)
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(bottom = 8.dp)
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                items(uiState.recentCategories) { category ->
-                                    AssistChip(
-                                        onClick = { onEvent(AddTransactionUiEvent.CategoryChanged(category)) },
-                                        label = { Text(category) }
+                                val suggestions = listOf(
+                                    "Food" to Icons.Default.Fastfood,
+                                    "Coffee" to Icons.Default.Coffee,
+                                    "Transport" to Icons.Default.DirectionsBus,
+                                    "Shopping" to Icons.Default.ShoppingBag,
+                                    "Housing" to Icons.Default.Home,
+                                    "Health" to Icons.Default.LocalHospital
+                                )
+                                suggestions.forEach { (name, icon) ->
+                                    val isSelected = uiState.category.equals(name, ignoreCase = true)
+                                    FilterChip(
+                                        selected = isSelected,
+                                        onClick = { onEvent(AddTransactionUiEvent.CategoryChanged(name)) },
+                                        label = { Text(name) },
+                                        leadingIcon = {
+                                            Icon(
+                                                icon,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
                                     )
                                 }
                             }
                         }
+                    }
+                }
 
-                        Text("Suggestions", style = MaterialTheme.typography.labelMedium)
-                        FlowRow(
+                Button(
+                    onClick = { onEvent(AddTransactionUiEvent.SaveTransaction) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val base = uiState.amount.toDoubleOrNull() ?: 0.0
+                    val tip = uiState.customTipAmount.toDoubleOrNull() ?: 0.0
+                    val total = base + tip
+                    if (total > 0 && tip > 0) {
+                        Text("Save (Total: $${String.format(Locale.getDefault(), "%.2f", total)})")
+                    } else {
+                        Text("Save")
+                    }
+                }
+
+                TextButton(
+                    onClick = { onEvent(AddTransactionUiEvent.ToggleTipWidget) },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text(if (uiState.isTipWidgetVisible) "Hide Tip Options" else "Add Tip")
+                }
+
+                AnimatedVisibility(visible = uiState.isTipWidgetVisible) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text("Standard Tips", style = MaterialTheme.typography.labelMedium)
+                        Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            val suggestions = listOf(
-                                "Food" to Icons.Default.Fastfood,
-                                "Coffee" to Icons.Default.Coffee,
-                                "Transport" to Icons.Default.DirectionsBus,
-                                "Shopping" to Icons.Default.ShoppingBag,
-                                "Housing" to Icons.Default.Home,
-                                "Health" to Icons.Default.LocalHospital
-                            )
-                            suggestions.forEach { (name, icon) ->
-                                val isSelected = uiState.category.equals(name, ignoreCase = true)
+                            listOf(10, 15, 18, 20).forEach { percentage ->
                                 FilterChip(
-                                    selected = isSelected,
-                                    onClick = { onEvent(AddTransactionUiEvent.CategoryChanged(name)) },
-                                    label = { Text(name) },
-                                    leadingIcon = {
-                                        Icon(
-                                            icon,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
+                                    selected = uiState.tipPercentage == percentage,
+                                    onClick = { onEvent(AddTransactionUiEvent.SelectTipPercentage(percentage)) },
+                                    label = { Text("$percentage%") }
                                 )
                             }
-                        }
-                    }
-                }
-            }
-
-            Button(
-                onClick = { onEvent(AddTransactionUiEvent.SaveTransaction) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                val base = uiState.amount.toDoubleOrNull() ?: 0.0
-                val tip = uiState.customTipAmount.toDoubleOrNull() ?: 0.0
-                val total = base + tip
-                if (total > 0 && tip > 0) {
-                    Text("Save (Total: $${String.format(Locale.getDefault(), "%.2f", total)})")
-                } else {
-                    Text("Save")
-                }
-            }
-
-            TextButton(
-                onClick = { onEvent(AddTransactionUiEvent.ToggleTipWidget) },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text(if (uiState.isTipWidgetVisible) "Hide Tip Options" else "Add Tip")
-            }
-
-            AnimatedVisibility(visible = uiState.isTipWidgetVisible) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text("Standard Tips", style = MaterialTheme.typography.labelMedium)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        listOf(10, 15, 18, 20).forEach { percentage ->
                             FilterChip(
-                                selected = uiState.tipPercentage == percentage,
-                                onClick = { onEvent(AddTransactionUiEvent.SelectTipPercentage(percentage)) },
-                                label = { Text("$percentage%") }
+                                selected = uiState.tipPercentage == null && uiState.customTipAmount.isNotEmpty(),
+                                onClick = { onEvent(AddTransactionUiEvent.SelectTipPercentage(null)) },
+                                label = { Text("None") }
                             )
                         }
-                        FilterChip(
-                            selected = uiState.tipPercentage == null && uiState.customTipAmount.isNotEmpty(),
-                            onClick = { onEvent(AddTransactionUiEvent.SelectTipPercentage(null)) },
-                            label = { Text("None") }
+                        OutlinedTextField(
+                            value = uiState.customTipAmount,
+                            onValueChange = { onEvent(AddTransactionUiEvent.CustomTipAmountChanged(it)) },
+                            label = { Text("Tip Amount") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
-                    OutlinedTextField(
-                        value = uiState.customTipAmount,
-                        onValueChange = { onEvent(AddTransactionUiEvent.CustomTipAmountChanged(it)) },
-                        label = { Text("Tip Amount") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                }
+
+                TextButton(
+                    onClick = { onEvent(AddTransactionUiEvent.ToggleSplitWidget) },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text(if (uiState.isSplitWidgetVisible) "Hide Split Bill" else "Split Bill")
+                }
+
+                AnimatedVisibility(visible = uiState.isSplitWidgetVisible) {
+                    val base = uiState.amount.toDoubleOrNull() ?: 0.0
+                    val tip = uiState.customTipAmount.toDoubleOrNull() ?: 0.0
+                    val total = base + tip
+                    val perPerson = if (uiState.splitCount > 0) total / uiState.splitCount else total
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text("Split among", style = MaterialTheme.typography.labelMedium)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            IconButton(onClick = { onEvent(AddTransactionUiEvent.SplitCountChanged(uiState.splitCount - 1)) }) {
+                                Icon(Icons.Default.Remove, contentDescription = "Remove person")
+                            }
+                            Text(
+                                text = "${uiState.splitCount} people",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            IconButton(onClick = { onEvent(AddTransactionUiEvent.SplitCountChanged(uiState.splitCount + 1)) }) {
+                                Icon(Icons.Default.Add, contentDescription = "Add person")
+                            }
+                        }
+                        if (uiState.splitCount > 1) {
+                            Text(
+                                text = "Each person pays: $${String.format(Locale.getDefault(), "%.2f", perPerson)}",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                 }
             }
 
-            TextButton(
-                onClick = { onEvent(AddTransactionUiEvent.ToggleSplitWidget) },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text(if (uiState.isSplitWidgetVisible) "Hide Split Bill" else "Split Bill")
-            }
-
-            AnimatedVisibility(visible = uiState.isSplitWidgetVisible) {
-                val base = uiState.amount.toDoubleOrNull() ?: 0.0
-                val tip = uiState.customTipAmount.toDoubleOrNull() ?: 0.0
-                val total = base + tip
-                val perPerson = if (uiState.splitCount > 0) total / uiState.splitCount else total
-
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
+                        .clickable(enabled = false) {},
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("Split among", style = MaterialTheme.typography.labelMedium)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        IconButton(onClick = { onEvent(AddTransactionUiEvent.SplitCountChanged(uiState.splitCount - 1)) }) {
-                            Icon(Icons.Default.Remove, contentDescription = "Remove person")
-                        }
-                        Text(
-                            text = "${uiState.splitCount} people",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        IconButton(onClick = { onEvent(AddTransactionUiEvent.SplitCountChanged(uiState.splitCount + 1)) }) {
-                            Icon(Icons.Default.Add, contentDescription = "Add person")
-                        }
-                    }
-                    if (uiState.splitCount > 1) {
-                        Text(
-                            text = "Each person pays: $${String.format(Locale.getDefault(), "%.2f", perPerson)}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("AI is analyzing receipt...", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -317,7 +341,7 @@ fun AddTransactionScreen(
 
 @Preview(showBackground = true)
 @Composable
-private fun AddTransactionScreenPreview() {
+fun AddTransactionScreenPreview() {
     MaterialTheme {
         AddTransactionScreen(
             uiState = AddTransactionUiState(
@@ -339,7 +363,7 @@ private fun AddTransactionScreenPreview() {
 
 @Preview(showBackground = true, name = "Empty State")
 @Composable
-private fun AddTransactionScreenEmptyPreview() {
+fun AddTransactionScreenEmptyPreview() {
     MaterialTheme {
         AddTransactionScreen(
             uiState = AddTransactionUiState(),

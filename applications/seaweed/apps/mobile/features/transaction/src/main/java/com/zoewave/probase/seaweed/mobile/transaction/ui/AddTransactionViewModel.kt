@@ -3,6 +3,7 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.graphics.Bitmap
+import com.zoewave.probase.features.ai.capture.data.ImageLoader
 import com.zoewave.probase.features.ai.vision.receipt.SmartReceiptScanner
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.model.Transaction
@@ -56,7 +57,8 @@ sealed interface AddTransactionUiEvent {
 
 @HiltViewModel
 class AddTransactionViewModel @Inject constructor(
-    private val repository: TransactionRepository
+    private val repository: TransactionRepository,
+    private val imageLoader: ImageLoader
 ) : ViewModel() {
 
     private val scanner = SmartReceiptScanner()
@@ -80,7 +82,10 @@ class AddTransactionViewModel @Inject constructor(
             is AddTransactionUiEvent.AmountChanged -> _uiState.update { it.copy(amount = event.value, errorMessage = null) }
             is AddTransactionUiEvent.CategoryChanged -> _uiState.update { it.copy(category = event.value, errorMessage = null) }
             is AddTransactionUiEvent.DescriptionChanged -> _uiState.update { it.copy(description = event.value, errorMessage = null) }
-            is AddTransactionUiEvent.ReceiptAttached -> _uiState.update { it.copy(receiptUri = event.uri, errorMessage = null) }
+            is AddTransactionUiEvent.ReceiptAttached -> {
+                _uiState.update { it.copy(receiptUri = event.uri, errorMessage = null) }
+                processReceiptUri(event.uri)
+            }
             AddTransactionUiEvent.SaveTransaction -> saveTransaction()
             AddTransactionUiEvent.BackClicked -> { /* Handled in Route */ }
             AddTransactionUiEvent.SuccessConsumed -> _uiState.update { it.copy(isSuccess = false) }
@@ -131,6 +136,18 @@ class AddTransactionViewModel @Inject constructor(
                 }
             } catch (_: Exception) {
                 _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to parse receipt") }
+            }
+        }
+    }
+
+    private fun processReceiptUri(uri: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val bitmap = imageLoader.loadBitmap(uri)
+            if (bitmap != null) {
+                processReceiptImage(bitmap)
+            } else {
+                _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to load image for AI analysis") }
             }
         }
     }
