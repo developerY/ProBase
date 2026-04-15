@@ -42,10 +42,10 @@ class SmartReceiptScanner {
             // For this implementation, we attempt and catch availability/unsupported errors as a fallback mechanism.
             val contextPrompt = userContext?.let { "\nUser provided context: $it" } ?: ""
             val prompt = """
-                You are a smart financial assistant. From this image and user context, extract the merchant name, total amount, and date.
-                Suggest a category. 
+                what is this a picture of?
                 $contextPrompt
-                Return ONLY a valid JSON object with keys: merchant, totalAmount, date, category.
+                Return ONLY a valid JSON object with keys: merchant, totalAmount, date, category, whatIsThis.
+                Field 'whatIsThis' should contain a detailed description of what you see in the image.
                 Text from image: $visionText
             """.trimIndent()
 

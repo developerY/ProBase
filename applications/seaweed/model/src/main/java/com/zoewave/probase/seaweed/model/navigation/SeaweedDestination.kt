@@ -93,7 +93,8 @@ sealed class SeaweedDestination(
     data class SmartReceiptDebug(
         val rawResponse: String,
         val logs: List<String>,
-        val engineUsed: String
+        val engineUsed: String,
+        val whatIsThis: String? = null
     ) : SeaweedDestination(
         title = "AI Debug Info",
         icon = Icons.Default.Settings

@@ -121,6 +121,7 @@ fun seaweedNavEntryProvider(
                     rawResponse = key.rawResponse,
                     logs = key.logs,
                     engineUsed = key.engineUsed,
+                    whatIsThis = key.whatIsThis,
                     onBack = onBack
                 )
             }

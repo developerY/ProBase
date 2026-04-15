@@ -48,7 +48,8 @@ data class AddTransactionUiState(
 data class AiDebugInfo(
     val rawResponse: String,
     val logs: List<String>,
-    val engineUsed: String
+    val engineUsed: String,
+    val whatIsThis: String? = null
 )
 
 sealed interface AddTransactionUiEvent {
@@ -178,7 +179,8 @@ class AddTransactionViewModel @Inject constructor(
                         lastAiDebugInfo = AiDebugInfo(
                             rawResponse = result.rawResponse ?: "No raw data from engine",
                             logs = result.logs,
-                            engineUsed = result.engineUsed
+                            engineUsed = result.engineUsed,
+                            whatIsThis = result.whatIsThis
                         )
                     )
                     Log.d("AddTransactionVM", "Updating UI State: description=${updated.description}, amount=${updated.amount}, category=${updated.category}")

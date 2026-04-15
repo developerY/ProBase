@@ -25,6 +25,7 @@ fun AiDebugScreen(
     rawResponse: String,
     logs: List<String>,
     engineUsed: String,
+    whatIsThis: String? = null,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -64,6 +65,22 @@ fun AiDebugScreen(
                             Text("Engine Used", style = MaterialTheme.typography.labelSmall)
                             Text(engineUsed, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         }
+                    }
+                }
+            }
+
+            whatIsThis?.let {
+                item {
+                    Text("AI Description (whatIsThis)", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f))
+                    ) {
+                        Text(
+                            text = it,
+                            modifier = Modifier.padding(16.dp),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     }
                 }
             }

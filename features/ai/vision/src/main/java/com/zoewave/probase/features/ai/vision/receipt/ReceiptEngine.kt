@@ -26,5 +26,6 @@ data class ReceiptDiagnosticResult(
     val engineUsed: String = "Unknown",
     val error: String? = null,
     val warnings: List<String> = emptyList(),
-    val rawResponse: String? = null
+    val rawResponse: String? = null,
+    val whatIsThis: String? = null
 )

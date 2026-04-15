@@ -15,7 +15,8 @@ private data class GeminiReceiptDraft(
     val merchant: String? = null,
     val total: Double? = null,
     val date: String? = null,
-    val category: String? = null
+    val category: String? = null,
+    val whatIsThis: String? = null
 )
 
 class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
@@ -50,7 +51,7 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
         val prompt = content {
             image(bitmap)
             text("""
-                Extract financial information from this receipt image. 
+                what is this a picture of?
                 ${if (!userContext.isNullOrBlank()) "Context: '$userContext'" else ""}
                 
                 Fields:
@@ -58,13 +59,15 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
                 - total: The final amount paid. Return strictly as a number (e.g. 15.50).
                 - date: The transaction date. Convert to MM/DD/YYYY format.
                 - category: Suggest a broad category (e.g. Food, Travel, Office, Shopping).
+                - whatIsThis: A detailed description of what this is a picture of.
                 
                 Respond ONLY with valid JSON matching this schema:
                 {
                   "merchant": string or null,
                   "total": number or null,
                   "date": string or null,
-                  "category": string or null
+                  "category": string or null,
+                  "whatIsThis": string or null
                 }
             """.trimIndent())
         }
@@ -84,7 +87,8 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
                 category = draft.category,
                 logs = logs,
                 engineUsed = "Cloud AI (Gemini)",
-                rawResponse = jsonText
+                rawResponse = jsonText,
+                whatIsThis = draft.whatIsThis
             )
         } catch (e: Exception) {
             logs.add("Cloud API failed: ${e.localizedMessage}")
