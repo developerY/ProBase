@@ -152,11 +152,12 @@ class AddTransactionViewModel @Inject constructor(
                         amount = if (result.totalAmount > 0) String.format(Locale.getDefault(), "%.2f", result.totalAmount) else it.amount,
                         category = result.category ?: it.category,
                         description = result.merchant ?: it.description,
-                        isLoading = false
+                        isLoading = false,
+                        errorMessage = null
                     )
                 }
-            } catch (_: Exception) {
-                _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to parse receipt") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to parse receipt: ${e.message}") }
             }
         }
     }

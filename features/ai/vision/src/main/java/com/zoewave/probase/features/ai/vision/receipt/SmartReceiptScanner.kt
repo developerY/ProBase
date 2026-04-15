@@ -43,7 +43,7 @@ class SmartReceiptScanner {
                 Extract the merchant name, total amount, and date from the following receipt text or image context. 
                 Suggest a category. 
                 $contextPrompt
-                Return ONLY a valid JSON object with keys: merchant, total, date, category.
+                Return ONLY a valid JSON object with keys: merchant, totalAmount, date, category.
                 Text: $visionText
             """.trimIndent()
 
