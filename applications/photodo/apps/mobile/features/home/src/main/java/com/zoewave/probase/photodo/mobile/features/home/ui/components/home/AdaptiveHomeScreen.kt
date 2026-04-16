@@ -191,7 +191,7 @@ fun AdaptiveHomeScreen(
                         navTo = { route -> if (route != null) navTo(route) },
                         onDeleteClicked = { categoryToDelete = it },
                         modifier = Modifier.fillMaxSize().padding(paddingValues),
-                        showSummaryHeader = false // 🚀 Donut chart is already in the left pane!
+                        showSummaryHeader = false
                     )
                 },
                 modifier = Modifier.fillMaxSize()

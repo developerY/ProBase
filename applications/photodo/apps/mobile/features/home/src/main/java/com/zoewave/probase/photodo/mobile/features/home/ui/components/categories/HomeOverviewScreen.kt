@@ -307,7 +307,12 @@ fun HomeOverviewContent(
 
                 if (showSummaryHeader && !isSearchMode) {
                     item(span = { GridItemSpan(2) }) {
-                        OverviewSummaryCard(categories = uiState.categories)
+                        OverviewSummaryCard(
+                            categories = uiState.categories,
+                            isExpanded = uiState.isCategoriesSummaryExpanded,
+                            onToggleExpand = { onEvent(HomeEvent.OnToggleCategoriesSummary) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
 
