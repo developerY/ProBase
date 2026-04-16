@@ -114,43 +114,59 @@ fun AdaptiveHomeScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        if (uiState.isLoading) {
-                            item { CircularProgressIndicator() }
-                        } else if (uiState.isEmpty) {
+                        item {
+                            TaskSearchBar(
+                                query = uiState.searchQuery,
+                                onQueryChange = { onEvent(HomeEvent.OnSearchQueryChanged(it)) }
+                            )
+                        }
+
+                        if (uiState.searchQuery.isNotBlank()) {
                             item {
-                                Text(
-                                    stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
-                                    modifier = Modifier.padding(top = 16.dp)
+                                TaskSearchResultsList(
+                                    results = uiState.taskSearchResults,
+                                    navTo = navTo
                                 )
                             }
                         } else {
-                            item {
-                                OverviewSummaryCard(categories = uiState.categories)
-                            }
-
-                            item {
-                                Text(
-                                    stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
-                            }
-
-                            if (uiState.urgentProjects.isEmpty()) {
+                            if (uiState.isLoading) {
+                                item { CircularProgressIndicator() }
+                            } else if (uiState.isEmpty) {
                                 item {
                                     Text(
-                                        stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
+                                        stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
                                         modifier = Modifier.padding(top = 16.dp)
                                     )
                                 }
                             } else {
-                                items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
-                                    HomeProjectRow(
-                                        project = project,
-                                        onEvent = onEvent,
-                                        navTo = navTo
+                                item {
+                                    OverviewSummaryCard(categories = uiState.categories)
+                                }
+
+                                item {
+                                    Text(
+                                        stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(bottom = 8.dp)
                                     )
+                                }
+
+                                if (uiState.urgentProjects.isEmpty()) {
+                                    item {
+                                        Text(
+                                            stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
+                                            modifier = Modifier.padding(top = 16.dp)
+                                        )
+                                    }
+                                } else {
+                                    items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
+                                        HomeProjectRow(
+                                            project = project,
+                                            onEvent = onEvent,
+                                            navTo = navTo
+                                        )
+                                    }
                                 }
                             }
                         }

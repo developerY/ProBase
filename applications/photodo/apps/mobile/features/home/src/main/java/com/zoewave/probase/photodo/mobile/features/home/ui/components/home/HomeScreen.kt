@@ -83,77 +83,92 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp), // 🚀 MAGIC: Replaces all your Spacers!
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            item {
+                TaskSearchBar(
+                    query = uiState.searchQuery,
+                    onQueryChange = { onEvent(HomeEvent.OnSearchQueryChanged(it)) }
+                )
+            }
 
-            // --- 🚀 NEW: Graphic/AI Overview Section (Derivative State) ---
-            if (!uiState.isLoading && !uiState.isEmpty) {
-                // Compute the models on recomposition
+            if (uiState.searchQuery.isNotBlank()) {
                 item {
-                    // 🚀 1. The main "High-Density Wheel" summary card
-                    OverviewSummaryCard(categories = uiState.categories) // ✅ Pass list directly
-                }
-
-                item {
-                    val importantCategories = remember(uiState.categories) {
-                        // Logic: Categories with most pending tasks
-                        uiState.categories
-                            .sortedByDescending { it.totalTasks - it.completedTasks }
-                            .take(5) // Show top 5
-                    }
-                    // 2. The horizontal quick-jump section (Preserved)
-                    CategoryQuickJumpRow(
-                        importantCategories = importantCategories,
-                        onEvent = onEvent,
+                    TaskSearchResultsList(
+                        results = uiState.taskSearchResults,
                         navTo = navTo
                     )
                 }
-            }
-            // --- End New Sections ---
-
-            item {            // --- 3. View All Categories Button (Preserved) ---
-                Button(
-                    onClick = { navTo(PhotoTodoRoute.CategoryGrid) },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_view_all_categories))
-                }
-            }
-
-            item {
-                // --- 4. Jump Back In Section (Preserved Urgent/Fav List) ---
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                    Text(
-                        stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            if (uiState.isLoading) {
-                item { CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp)) }
-            } else if (uiState.isEmpty) {
-                item {
-                    Text(
-                        stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
-                }
             } else {
-                if (uiState.urgentProjects.isEmpty()) {
+                // --- 🚀 NEW: Graphic/AI Overview Section (Derivative State) ---
+                if (!uiState.isLoading && !uiState.isEmpty) {
+                    // Compute the models on recomposition
+                    item {
+                        // 🚀 1. The main "High-Density Wheel" summary card
+                        OverviewSummaryCard(categories = uiState.categories) // ✅ Pass list directly
+                    }
+
+                    item {
+                        val importantCategories = remember(uiState.categories) {
+                            // Logic: Categories with most pending tasks
+                            uiState.categories
+                                .sortedByDescending { it.totalTasks - it.completedTasks }
+                                .take(5) // Show top 5
+                        }
+                        // 2. The horizontal quick-jump section (Preserved)
+                        CategoryQuickJumpRow(
+                            importantCategories = importantCategories,
+                            onEvent = onEvent,
+                            navTo = navTo
+                        )
+                    }
+                }
+                // --- End New Sections ---
+
+                item {            // --- 3. View All Categories Button (Preserved) ---
+                    Button(
+                        onClick = { navTo(PhotoTodoRoute.CategoryGrid) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_view_all_categories))
+                    }
+                }
+
+                item {
+                    // --- 4. Jump Back In Section (Preserved Urgent/Fav List) ---
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                        Text(
+                            stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                if (uiState.isLoading) {
+                    item { CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp)) }
+                } else if (uiState.isEmpty) {
                     item {
                         Text(
-                            stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
+                            stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
                             modifier = Modifier.padding(top = 16.dp)
                         )
                     }
                 } else {
-                    // Use `items` for the dynamic data! It scrolls seamlessly with the `item` blocks above.
-                    items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
-                        HomeProjectRow(
-                            project = project,
-                            onEvent = onEvent, // Pass the channel down
-                            navTo = navTo      // Pass the channel down
-                        )
+                    if (uiState.urgentProjects.isEmpty()) {
+                        item {
+                            Text(
+                                stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
+                                modifier = Modifier.padding(top = 16.dp)
+                            )
+                        }
+                    } else {
+                        // Use `items` for the dynamic data! It scrolls seamlessly with the `item` blocks above.
+                        items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
+                            HomeProjectRow(
+                                project = project,
+                                onEvent = onEvent, // Pass the channel down
+                                navTo = navTo      // Pass the channel down
+                            )
+                        }
                     }
                 }
             }

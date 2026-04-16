@@ -120,6 +120,14 @@ interface PhotoDoDao {
     @Query("SELECT * FROM projects WHERE name LIKE '%' || :searchQuery || '%' OR notes LIKE '%' || :searchQuery || '%'")
     fun searchProjects(searchQuery: String): Flow<List<ProjectEntity>>
 
+    @Transaction
+    @Query("SELECT * FROM projects WHERE name LIKE '%' || :searchQuery || '%' OR notes LIKE '%' || :searchQuery || '%'")
+    fun searchProjectsWithDetails(searchQuery: String): Flow<List<ProjectDetails>>
+
+    @Transaction
+    @Query("SELECT * FROM projects WHERE projectId IN (SELECT DISTINCT projectId FROM tasks WHERE text LIKE '%' || :searchQuery || '%')")
+    fun getProjectsWithMatchingTasks(searchQuery: String): Flow<List<ProjectDetails>>
+
     // --- Task Operations (Checklist) ---
 
     @Upsert

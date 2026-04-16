@@ -11,13 +11,17 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -42,11 +46,30 @@ class HomeViewModel @Inject constructor(
     private val _uiFlags = MutableStateFlow(UiFlags())
 
     // 1. Directly map the relational database stream into our UI State
+    @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<HomeUiState> = combine(
         photoDoRepo.getCategoriesWithProjectsAndTasks(),
+        _uiFlags.flatMapLatest { flags ->
+            if (flags.searchQuery.length >= 2) {
+                photoDoRepo.getProjectsWithMatchingTasks(flags.searchQuery)
+                    .map { projects ->
+                        projects.map { projectDetails ->
+                            TaskSearchResult(
+                                projectId = projectDetails.project.projectId,
+                                projectTitle = projectDetails.project.name,
+                                tasks = projectDetails.tasks.filter { 
+                                    it.text.contains(flags.searchQuery, ignoreCase = true) 
+                                }
+                            )
+                        }
+                    }
+            } else {
+                flowOf(emptyList<TaskSearchResult>())
+            }
+        },
         _uiFlags,
         appSettingsRepository.isAiEnabledFlow
-    ) { categoriesWithProjectsAndTasks, flags, isAiEnabled ->
+    ) { categoriesWithProjectsAndTasks, searchResults, flags, isAiEnabled ->
         val overviewModels = ArrayList<CategoryOverviewUiModel>(categoriesWithProjectsAndTasks.size)
         val urgentProjects = ArrayList<ProjectListUiModel>()
 
@@ -107,6 +130,7 @@ class HomeViewModel @Inject constructor(
                 isQuickProjectSheetOpen = flags.isQuickProjectSheetOpen,
                 quickProjectCategoryOverride = flags.quickProjectCategoryOverride,
                 searchQuery = flags.searchQuery,
+                taskSearchResults = searchResults,
                 isAiEnabled = isAiEnabled
             )
         }
