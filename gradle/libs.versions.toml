@@ -88,6 +88,7 @@ glimmer = "1.0.0-alpha06"
 projectedXR = "1.0.0-alpha04"
 
 # -- Google Services & Firebase --
+playAgeSignals = "0.0.3"
 playServicesCoroutines = "1.10.2"
 mlkitTextRecognition = "16.0.1"
 googleAiEdgeAicore = "0.0.1-exp02"
@@ -247,6 +248,7 @@ androidx-glimmer = { group = "androidx.xr.glimmer", name = "glimmer", version.re
 androidx-projected = { group = "androidx.xr.projected", name = "projected", version.ref = "projectedXR" }
 
 # -- Firebase & ML --
+google-play-age-signals = { group = "com.google.android.play", name = "age-signals", version.ref = "playAgeSignals" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }

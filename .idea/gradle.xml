@@ -122,6 +122,7 @@
             <option value="$PROJECT_DIR$/features/ble" />
             <option value="$PROJECT_DIR$/features/calendar" />
             <option value="$PROJECT_DIR$/features/camera" />
+            <option value="$PROJECT_DIR$/features/compliance" />
             <option value="$PROJECT_DIR$/features/health" />
             <option value="$PROJECT_DIR$/features/nav3" />
             <option value="$PROJECT_DIR$/features/nfc" />
