@@ -1,8 +1,16 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
 import androidx.compose.runtime.Immutable
+import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
+
+@Immutable
+data class TaskSearchResult(
+    val projectId: Long,
+    val projectTitle: String,
+    val tasks: List<TaskEntity>
+)
 
 @Immutable
 data class HomeUiState(
@@ -12,7 +20,9 @@ data class HomeUiState(
     val isQuickProjectSheetOpen: Boolean = false,
     val quickProjectCategoryOverride: String? = null,
     val searchQuery: String = "",
-    val isAiEnabled: Boolean = false
+    val taskSearchResults: List<TaskSearchResult> = emptyList(),
+    val isAiEnabled: Boolean = false,
+    val isCategoriesSummaryExpanded: Boolean = true
 ) {
     val isEmpty: Boolean = !isLoading && categories.isEmpty()
 }

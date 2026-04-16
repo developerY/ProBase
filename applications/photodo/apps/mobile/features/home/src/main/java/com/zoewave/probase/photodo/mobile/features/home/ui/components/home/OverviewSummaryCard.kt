@@ -1,7 +1,11 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,8 +18,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,128 +49,164 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 @Composable
 fun OverviewSummaryCard(
     categories: List<CategoryOverviewUiModel>,
+    isExpanded: Boolean,
+    onToggleExpand: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Transform the categories into colored slices
     val slices = mapCategoriesToWheelSlices(categories)
     val totalCategories = categories.size
 
-    // Expressive, compact card (Height reduced to 160dp)
+    // Expressive, compact card
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(160.dp), // Compact height
+            .clickable { onToggleExpand() },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant, // Using neutral color
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         shape = RoundedCornerShape(20.dp) // express round corners
     ) {
-        // Zero internal padding inside the card!
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.Start, // Legend pushed to the left
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            // --- 🚀 1. The Compact Legend (Left Side) ---
-            Column(
+        Column {
+            // --- HEADER ---
+            Row(
                 modifier = Modifier
-                    .weight(1f) // Legends get space
-                    .fillMaxHeight()
-                    // Minimum padding to group the text nicely
-                    .padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
-                verticalArrangement = Arrangement.Center
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Main Header (Bold, Primary Color)
                 Text(
                     text = stringResource(R.string.applications_photodo_apps_mobile_features_home_total_categories),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
-
-                // Bold Category Count
-                Text(
-                    text = "$totalCategories",
-                    style = MaterialTheme.typography.displayMedium, // Compact but Display font
-                    fontWeight = FontWeight.Black
-                )
-
-                // Tiny Legend Items (Derivative from slices)
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    // Show top 3 in compact legend
-                    slices.take(3).forEach { slice ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            // Tiny Color Dot
-                            Box(modifier = Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).size(8.dp).background(slice.color))
-                            Spacer(modifier = Modifier.size(6.dp))
-                            Text(
-                                text = "${slice.name} (${slice.value})", // I'll keep this as is for now as it's a mix of dynamic data and symbols, or I could use a template
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                                maxLines = 1
-                            )
-                        }
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (!isExpanded) {
+                        Text(
+                            text = "$totalCategories Categories",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
                     }
+                    Icon(
+                        imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
 
-            // --- 🚀 2. The Color Wheel Donut Chart (Right Side) ---
-            Box(
-                modifier = Modifier
-                    .size(140.dp) // Large wheel, packed into compact container
-                    .padding(end = 16.dp), // Standard side padding
-                contentAlignment = Alignment.Center
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(),
+                exit = shrinkVertically()
             ) {
+                // Zero internal padding inside the card!
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp) // Reduced height as header is separate
+                        .padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.Start, // Legend pushed to the left
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
 
-                // --- Part A: The Drawing Canvas ---
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    var currentStartAngle = -90f // Start from the top
-                    val strokeWidth = 24.dp.toPx() // Expressive, thick stroke
-
-                    if (slices.isEmpty()) {
-                        // Empty state placeholder arc
-                        drawArc(
-                            color = Color.LightGray.copy(alpha = 0.3f),
-                            startAngle = 0f,
-                            sweepAngle = 360f,
-                            useCenter = false,
-                            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                    // --- 🚀 1. The Compact Legend (Left Side) ---
+                    Column(
+                        modifier = Modifier
+                            .weight(1f) // Legends get space
+                            .fillMaxHeight()
+                            // Minimum padding to group the text nicely
+                            .padding(start = 16.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        // Bold Category Count
+                        Text(
+                            text = "$totalCategories",
+                            style = MaterialTheme.typography.displayMedium, // Compact but Display font
+                            fontWeight = FontWeight.Black
                         )
-                    } else {
-                        slices.forEach { slice ->
-                            // Draw the colored segment
-                            drawArc(
-                                color = slice.color,
-                                startAngle = currentStartAngle,
-                                sweepAngle = slice.sweepAngle,
-                                useCenter = false,
-                                style = Stroke(width = strokeWidth, cap = StrokeCap.Round) // Rounded expressive ends
-                            )
-                            currentStartAngle += slice.sweepAngle // Increment the angle
+
+                        // Tiny Legend Items (Derivative from slices)
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            // Show top 3 in compact legend
+                            slices.take(3).forEach { slice ->
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    // Tiny Color Dot
+                                    Box(modifier = Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).size(8.dp).background(slice.color))
+                                    Spacer(modifier = Modifier.size(6.dp))
+                                    Text(
+                                        text = "${slice.name} (${slice.value})", // I'll keep this as is for now as it's a mix of dynamic data and symbols, or I could use a template
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                        maxLines = 1
+                                    )
+                                }
+                            }
                         }
                     }
-                }
 
-                // --- Part B: The Center Label (Derivative State) ---
-                // Shows overall progress percentage
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    val totalTasks = slices.sumOf { it.value }
-                    val totalCompleted = categories.sumOf { it.completedTasks }
-                    val progressPercentage = if (totalTasks > 0) (totalCompleted.toFloat() / totalTasks * 100).toInt() else 0
+                    // --- 🚀 2. The Color Wheel Donut Chart (Right Side) ---
+                    Box(
+                        modifier = Modifier
+                            .size(130.dp) // Large wheel, packed into compact container
+                            .padding(end = 16.dp), // Standard side padding
+                        contentAlignment = Alignment.Center
+                    ) {
 
-                    Text(
-                        text = "$progressPercentage%",
-                        style = MaterialTheme.typography.titleLarge, // Big bold center number
-                        fontWeight = FontWeight.Black,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = stringResource(R.string.applications_photodo_apps_mobile_features_home_done),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold
-                    )
+                        // --- Part A: The Drawing Canvas ---
+                        Canvas(modifier = Modifier.fillMaxSize()) {
+                            var currentStartAngle = -90f // Start from the top
+                            val strokeWidth = 20.dp.toPx() // Expressive, thick stroke
+
+                            if (slices.isEmpty()) {
+                                // Empty state placeholder arc
+                                drawArc(
+                                    color = Color.LightGray.copy(alpha = 0.3f),
+                                    startAngle = 0f,
+                                    sweepAngle = 360f,
+                                    useCenter = false,
+                                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                                )
+                            } else {
+                                slices.forEach { slice ->
+                                    // Draw the colored segment
+                                    drawArc(
+                                        color = slice.color,
+                                        startAngle = currentStartAngle,
+                                        sweepAngle = slice.sweepAngle,
+                                        useCenter = false,
+                                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round) // Rounded expressive ends
+                                    )
+                                    currentStartAngle += slice.sweepAngle // Increment the angle
+                                }
+                            }
+                        }
+
+                        // --- Part B: The Center Label (Derivative State) ---
+                        // Shows overall progress percentage
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            val totalTasks = slices.sumOf { it.value }
+                            val totalCompleted = categories.sumOf { it.completedTasks }
+                            val progressPercentage = if (totalTasks > 0) (totalCompleted.toFloat() / totalTasks * 100).toInt() else 0
+
+                            Text(
+                                text = "$progressPercentage%",
+                                style = MaterialTheme.typography.titleLarge, // Big bold center number
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_home_done),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -211,6 +256,8 @@ private fun OverviewSummaryCardPreview() {
     PhotoDoTheme {
         OverviewSummaryCard(
             categories = mockData,
+            isExpanded = true,
+            onToggleExpand = {},
             modifier = Modifier.padding(16.dp)
         )
     }

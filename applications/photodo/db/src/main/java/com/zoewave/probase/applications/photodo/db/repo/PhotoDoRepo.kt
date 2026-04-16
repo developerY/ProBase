@@ -38,6 +38,8 @@ interface PhotoDoRepo {
     suspend fun updateProjectUrgency(projectId: Long, isUrgent: Boolean)
     suspend fun updateProjectFavorite(projectId: Long, isFavorite: Boolean)
     fun searchProjects(searchQuery: String): Flow<List<ProjectEntity>>
+    fun searchProjectsWithDetails(searchQuery: String): Flow<List<ProjectDetails>>
+    fun getProjectsWithMatchingTasks(searchQuery: String): Flow<List<ProjectDetails>>
 
     // --- Task Operations (Checklist) ---
     suspend fun upsertTask(task: TaskEntity): Long

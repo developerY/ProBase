@@ -2,8 +2,11 @@ package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -125,32 +128,54 @@ fun AdaptiveHomeScreen(
                             }
                         } else {
                             item {
-                                OverviewSummaryCard(categories = uiState.categories)
-                            }
-
-                            item {
-                                Text(
-                                    stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(bottom = 8.dp)
+                                OverviewSummaryCard(
+                                    categories = uiState.categories,
+                                    isExpanded = uiState.isCategoriesSummaryExpanded,
+                                    onToggleExpand = { onEvent(HomeEvent.OnToggleCategoriesSummary) }
                                 )
                             }
 
-                            if (uiState.urgentProjects.isEmpty()) {
+                            item {
+                                // --- 4. Jump Back In Section (Preserved Urgent/Fav List) ---
+                                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                                        Text(
+                                            stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+
+                                    TaskSearchBar(
+                                        query = uiState.searchQuery,
+                                        onQueryChange = { onEvent(HomeEvent.OnSearchQueryChanged(it)) }
+                                    )
+                                }
+                            }
+
+                            if (uiState.searchQuery.isNotBlank()) {
                                 item {
-                                    Text(
-                                        stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
-                                        modifier = Modifier.padding(top = 16.dp)
+                                    TaskSearchResultsList(
+                                        results = uiState.taskSearchResults,
+                                        navTo = navTo
                                     )
                                 }
                             } else {
-                                items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
-                                    HomeProjectRow(
-                                        project = project,
-                                        onEvent = onEvent,
-                                        navTo = navTo
-                                    )
+                                if (uiState.urgentProjects.isEmpty()) {
+                                    item {
+                                        Text(
+                                            stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
+                                            modifier = Modifier.padding(top = 16.dp)
+                                        )
+                                    }
+                                } else {
+                                    items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
+                                        HomeProjectRow(
+                                            project = project,
+                                            onEvent = onEvent,
+                                            navTo = navTo
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -166,7 +191,7 @@ fun AdaptiveHomeScreen(
                         navTo = { route -> if (route != null) navTo(route) },
                         onDeleteClicked = { categoryToDelete = it },
                         modifier = Modifier.fillMaxSize().padding(paddingValues),
-                        showSummaryHeader = false // 🚀 Donut chart is already in the left pane!
+                        showSummaryHeader = false
                     )
                 },
                 modifier = Modifier.fillMaxSize()

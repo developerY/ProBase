@@ -7,7 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-@Module
+/*@Module
 @InstallIn(SingletonComponent::class)
 abstract class AiConfigurationBridgeModule {
 
@@ -16,4 +16,4 @@ abstract class AiConfigurationBridgeModule {
     abstract fun bindAiConfigurationSettings(
         impl: FakeSmartCaptureSettings
     ): AiConfigurationSettings
-}
+}*/

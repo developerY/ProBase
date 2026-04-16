@@ -1,6 +1,7 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -83,13 +84,16 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp), // 🚀 MAGIC: Replaces all your Spacers!
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             // --- 🚀 NEW: Graphic/AI Overview Section (Derivative State) ---
             if (!uiState.isLoading && !uiState.isEmpty) {
                 // Compute the models on recomposition
                 item {
                     // 🚀 1. The main "High-Density Wheel" summary card
-                    OverviewSummaryCard(categories = uiState.categories) // ✅ Pass list directly
+                    OverviewSummaryCard(
+                        categories = uiState.categories,
+                        isExpanded = uiState.isCategoriesSummaryExpanded,
+                        onToggleExpand = { onEvent(HomeEvent.OnToggleCategoriesSummary) }
+                    )
                 }
 
                 item {
@@ -120,40 +124,56 @@ fun HomeScreen(
 
             item {
                 // --- 4. Jump Back In Section (Preserved Urgent/Fav List) ---
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                    Text(
-                        stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                        Text(
+                            stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    TaskSearchBar(
+                        query = uiState.searchQuery,
+                        onQueryChange = { onEvent(HomeEvent.OnSearchQueryChanged(it)) }
                     )
                 }
             }
 
-            if (uiState.isLoading) {
-                item { CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp)) }
-            } else if (uiState.isEmpty) {
+            if (uiState.searchQuery.isNotBlank()) {
                 item {
-                    Text(
-                        stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
-                        modifier = Modifier.padding(top = 16.dp)
+                    TaskSearchResultsList(
+                        results = uiState.taskSearchResults,
+                        navTo = navTo
                     )
                 }
             } else {
-                if (uiState.urgentProjects.isEmpty()) {
+                if (uiState.isLoading) {
+                    item { CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp)) }
+                } else if (uiState.isEmpty) {
                     item {
                         Text(
-                            stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
+                            stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
                             modifier = Modifier.padding(top = 16.dp)
                         )
                     }
                 } else {
-                    // Use `items` for the dynamic data! It scrolls seamlessly with the `item` blocks above.
-                    items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
-                        HomeProjectRow(
-                            project = project,
-                            onEvent = onEvent, // Pass the channel down
-                            navTo = navTo      // Pass the channel down
-                        )
+                    if (uiState.urgentProjects.isEmpty()) {
+                        item {
+                            Text(
+                                stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
+                                modifier = Modifier.padding(top = 16.dp)
+                            )
+                        }
+                    } else {
+                        // Use `items` for the dynamic data! It scrolls seamlessly with the `item` blocks above.
+                        items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
+                            HomeProjectRow(
+                                project = project,
+                                onEvent = onEvent, // Pass the channel down
+                                navTo = navTo      // Pass the channel down
+                            )
+                        }
                     }
                 }
             }

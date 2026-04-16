@@ -108,6 +108,14 @@ class PhotoDoRepoImpl @Inject constructor(
         return photoDoDao.searchProjects(searchQuery)
     }
 
+    override fun searchProjectsWithDetails(searchQuery: String): Flow<List<ProjectDetails>> {
+        return photoDoDao.searchProjectsWithDetails(searchQuery)
+    }
+
+    override fun getProjectsWithMatchingTasks(searchQuery: String): Flow<List<ProjectDetails>> {
+        return photoDoDao.getProjectsWithMatchingTasks(searchQuery)
+    }
+
     // --- Task Operations ---
     override suspend fun upsertTask(task: TaskEntity): Long = withContext(Dispatchers.IO) {
         val id = photoDoDao.upsertTask(task)
