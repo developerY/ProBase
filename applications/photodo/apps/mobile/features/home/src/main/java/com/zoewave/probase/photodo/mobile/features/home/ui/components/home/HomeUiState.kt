@@ -21,7 +21,8 @@ data class HomeUiState(
     val quickProjectCategoryOverride: String? = null,
     val searchQuery: String = "",
     val taskSearchResults: List<TaskSearchResult> = emptyList(),
-    val isAiEnabled: Boolean = false
+    val isAiEnabled: Boolean = false,
+    val isCategoriesSummaryExpanded: Boolean = true
 ) {
     val isEmpty: Boolean = !isLoading && categories.isEmpty()
 }

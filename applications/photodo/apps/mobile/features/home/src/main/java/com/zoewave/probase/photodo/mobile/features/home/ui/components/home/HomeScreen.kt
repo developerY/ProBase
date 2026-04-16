@@ -89,7 +89,11 @@ fun HomeScreen(
                 // Compute the models on recomposition
                 item {
                     // 🚀 1. The main "High-Density Wheel" summary card
-                    OverviewSummaryCard(categories = uiState.categories) // ✅ Pass list directly
+                    OverviewSummaryCard(
+                        categories = uiState.categories,
+                        isExpanded = uiState.isCategoriesSummaryExpanded,
+                        onToggleExpand = { onEvent(HomeEvent.OnToggleCategoriesSummary) }
+                    )
                 }
 
                 item {

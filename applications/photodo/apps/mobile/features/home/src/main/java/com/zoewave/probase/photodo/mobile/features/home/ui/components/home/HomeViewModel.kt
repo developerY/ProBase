@@ -40,7 +40,8 @@ class HomeViewModel @Inject constructor(
     private data class UiFlags(
         val isQuickProjectSheetOpen: Boolean = false,
         val quickProjectCategoryOverride: String? = null,
-        val searchQuery: String = ""
+        val searchQuery: String = "",
+        val isCategoriesSummaryExpanded: Boolean = true
     )
 
     private val _uiFlags = MutableStateFlow(UiFlags())
@@ -131,7 +132,8 @@ class HomeViewModel @Inject constructor(
                 quickProjectCategoryOverride = flags.quickProjectCategoryOverride,
                 searchQuery = flags.searchQuery,
                 taskSearchResults = searchResults,
-                isAiEnabled = isAiEnabled
+                isAiEnabled = isAiEnabled,
+                isCategoriesSummaryExpanded = flags.isCategoriesSummaryExpanded
             )
         }
         .flowOn(Dispatchers.Default)
@@ -228,6 +230,12 @@ class HomeViewModel @Inject constructor(
             is HomeEvent.OnSearchQueryChanged -> {
                 _uiFlags.update { 
                     it.copy(searchQuery = event.query)
+                }
+            }
+
+            is HomeEvent.OnToggleCategoriesSummary -> {
+                _uiFlags.update { 
+                    it.copy(isCategoriesSummaryExpanded = !it.isCategoriesSummaryExpanded)
                 }
             }
         }

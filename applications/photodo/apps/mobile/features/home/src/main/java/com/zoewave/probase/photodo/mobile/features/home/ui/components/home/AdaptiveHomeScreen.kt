@@ -128,7 +128,11 @@ fun AdaptiveHomeScreen(
                             }
                         } else {
                             item {
-                                OverviewSummaryCard(categories = uiState.categories)
+                                OverviewSummaryCard(
+                                    categories = uiState.categories,
+                                    isExpanded = uiState.isCategoriesSummaryExpanded,
+                                    onToggleExpand = { onEvent(HomeEvent.OnToggleCategoriesSummary) }
+                                )
                             }
 
                             item {
