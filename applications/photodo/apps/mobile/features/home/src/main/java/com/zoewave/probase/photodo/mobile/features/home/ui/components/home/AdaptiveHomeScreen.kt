@@ -2,8 +2,11 @@ package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -114,44 +117,46 @@ fun AdaptiveHomeScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        item {
-                            TaskSearchBar(
-                                query = uiState.searchQuery,
-                                onQueryChange = { onEvent(HomeEvent.OnSearchQueryChanged(it)) }
-                            )
-                        }
-
-                        if (uiState.searchQuery.isNotBlank()) {
+                        if (uiState.isLoading) {
+                            item { CircularProgressIndicator() }
+                        } else if (uiState.isEmpty) {
                             item {
-                                TaskSearchResultsList(
-                                    results = uiState.taskSearchResults,
-                                    navTo = navTo
+                                Text(
+                                    stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
+                                    modifier = Modifier.padding(top = 16.dp)
                                 )
                             }
                         } else {
-                            if (uiState.isLoading) {
-                                item { CircularProgressIndicator() }
-                            } else if (uiState.isEmpty) {
+                            item {
+                                OverviewSummaryCard(categories = uiState.categories)
+                            }
+
+                            item {
+                                // --- 4. Jump Back In Section (Preserved Urgent/Fav List) ---
+                                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                                        Text(
+                                            stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+
+                                    TaskSearchBar(
+                                        query = uiState.searchQuery,
+                                        onQueryChange = { onEvent(HomeEvent.OnSearchQueryChanged(it)) }
+                                    )
+                                }
+                            }
+
+                            if (uiState.searchQuery.isNotBlank()) {
                                 item {
-                                    Text(
-                                        stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
-                                        modifier = Modifier.padding(top = 16.dp)
+                                    TaskSearchResultsList(
+                                        results = uiState.taskSearchResults,
+                                        navTo = navTo
                                     )
                                 }
                             } else {
-                                item {
-                                    OverviewSummaryCard(categories = uiState.categories)
-                                }
-
-                                item {
-                                    Text(
-                                        stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
-                                        style = MaterialTheme.typography.titleLarge,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(bottom = 8.dp)
-                                    )
-                                }
-
                                 if (uiState.urgentProjects.isEmpty()) {
                                     item {
                                         Text(

@@ -1,6 +1,7 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -83,11 +84,56 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp), // 🚀 MAGIC: Replaces all your Spacers!
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // --- 🚀 NEW: Graphic/AI Overview Section (Derivative State) ---
+            if (!uiState.isLoading && !uiState.isEmpty) {
+                // Compute the models on recomposition
+                item {
+                    // 🚀 1. The main "High-Density Wheel" summary card
+                    OverviewSummaryCard(categories = uiState.categories) // ✅ Pass list directly
+                }
+
+                item {
+                    val importantCategories = remember(uiState.categories) {
+                        // Logic: Categories with most pending tasks
+                        uiState.categories
+                            .sortedByDescending { it.totalTasks - it.completedTasks }
+                            .take(5) // Show top 5
+                    }
+                    // 2. The horizontal quick-jump section (Preserved)
+                    CategoryQuickJumpRow(
+                        importantCategories = importantCategories,
+                        onEvent = onEvent,
+                        navTo = navTo
+                    )
+                }
+            }
+            // --- End New Sections ---
+
+            item {            // --- 3. View All Categories Button (Preserved) ---
+                Button(
+                    onClick = { navTo(PhotoTodoRoute.CategoryGrid) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_view_all_categories))
+                }
+            }
+
             item {
-                TaskSearchBar(
-                    query = uiState.searchQuery,
-                    onQueryChange = { onEvent(HomeEvent.OnSearchQueryChanged(it)) }
-                )
+                // --- 4. Jump Back In Section (Preserved Urgent/Fav List) ---
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                        Text(
+                            stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    TaskSearchBar(
+                        query = uiState.searchQuery,
+                        onQueryChange = { onEvent(HomeEvent.OnSearchQueryChanged(it)) }
+                    )
+                }
             }
 
             if (uiState.searchQuery.isNotBlank()) {
@@ -98,51 +144,6 @@ fun HomeScreen(
                     )
                 }
             } else {
-                // --- 🚀 NEW: Graphic/AI Overview Section (Derivative State) ---
-                if (!uiState.isLoading && !uiState.isEmpty) {
-                    // Compute the models on recomposition
-                    item {
-                        // 🚀 1. The main "High-Density Wheel" summary card
-                        OverviewSummaryCard(categories = uiState.categories) // ✅ Pass list directly
-                    }
-
-                    item {
-                        val importantCategories = remember(uiState.categories) {
-                            // Logic: Categories with most pending tasks
-                            uiState.categories
-                                .sortedByDescending { it.totalTasks - it.completedTasks }
-                                .take(5) // Show top 5
-                        }
-                        // 2. The horizontal quick-jump section (Preserved)
-                        CategoryQuickJumpRow(
-                            importantCategories = importantCategories,
-                            onEvent = onEvent,
-                            navTo = navTo
-                        )
-                    }
-                }
-                // --- End New Sections ---
-
-                item {            // --- 3. View All Categories Button (Preserved) ---
-                    Button(
-                        onClick = { navTo(PhotoTodoRoute.CategoryGrid) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_view_all_categories))
-                    }
-                }
-
-                item {
-                    // --- 4. Jump Back In Section (Preserved Urgent/Fav List) ---
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                        Text(
-                            stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-
                 if (uiState.isLoading) {
                     item { CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp)) }
                 } else if (uiState.isEmpty) {
