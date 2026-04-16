@@ -172,7 +172,6 @@ class SavePhotoViewModel @Inject constructor(
 
     fun saveTask() {
         val uri = _photoUri.value
-        if (uri.isBlank()) return
 
         viewModelScope.launch {
             _isSaving.value = true
@@ -202,8 +201,10 @@ class SavePhotoViewModel @Inject constructor(
                 repo.upsertTask(TaskEntity(projectId = projectId, text = subTaskText))
             }
 
-            // 5. Attach Photo
-            addPhotoToTask(projectId, uri)
+            // 5. Attach Photo (if exists)
+            if (uri.isNotBlank()) {
+                addPhotoToTask(projectId, uri)
+            }
 
             _savedProjectId.value = projectId
             _savedProjectTitle.value = finalProjectName

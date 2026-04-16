@@ -139,12 +139,17 @@ fun TaskDetailScreen(
                 actions = {
                     val state = uiState.loadState
                     if (state is DetailLoadState.Success) {
-                        IconButton(onClick = { navTo(PhotoTodoRoute.SmartAdvice(state.projectDetails.project.projectId)) }) {
-                            Icon(
-                                Icons.Default.QuestionMark,
-                                contentDescription = "Get AI Help"
-                            )
+                        val hasDataForAi = state.projectDetails.tasks.isNotEmpty() || state.projectDetails.photos.isNotEmpty()
+                        
+                        if (uiState.isAiEnabled && hasDataForAi) {
+                            IconButton(onClick = { navTo(PhotoTodoRoute.SmartAdvice(state.projectDetails.project.projectId)) }) {
+                                Icon(
+                                    Icons.Default.QuestionMark,
+                                    contentDescription = "Get AI Help"
+                                )
+                            }
                         }
+
                         IconButton(onClick = { showDeleteProjectConfirmation = true }) {
                             Icon(
                                 Icons.Default.DeleteForever,

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
+import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksSideEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -31,6 +33,7 @@ private const val TAG = "PhotoDoDetailViewModel"
 @OptIn(ExperimentalCoroutinesApi::class)
 class TaskDetailViewModel @Inject constructor(
     private val photoDoRepo: PhotoDoRepo,
+    private val appSettingsRepository: AppSettingsRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -46,28 +49,30 @@ class TaskDetailViewModel @Inject constructor(
         _projectId.value = projectId
     }
 
-    val uiState: StateFlow<TaskDetailUiState> = _projectId
-        .asStateFlow()
-        .filterNotNull()
-        .flatMapLatest { id ->
+    val uiState: StateFlow<TaskDetailUiState> = combine(
+        _projectId.asStateFlow().filterNotNull().flatMapLatest { id ->
             photoDoRepo.getProjectDetails(id)
-                .map { projectDetails ->
-                    if (projectDetails != null) {
-                        TaskDetailUiState(loadState = DetailLoadState.Success(projectDetails))
-                    } else {
-                        TaskDetailUiState(loadState = DetailLoadState.Error("Project has been deleted."))
-                    }
-                }
-                .catch { e ->
-                    Log.e(TAG, "Error loading project details", e)
-                    emit(TaskDetailUiState(loadState = DetailLoadState.Error(e.message ?: "Unknown error")))
-                }
+        },
+        appSettingsRepository.isAiEnabledFlow
+    ) { projectDetails, isAiEnabled ->
+        if (projectDetails != null) {
+            TaskDetailUiState(
+                loadState = DetailLoadState.Success(projectDetails),
+                isAiEnabled = isAiEnabled
+            )
+        } else {
+            TaskDetailUiState(loadState = DetailLoadState.Error("Project has been deleted."))
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = TaskDetailUiState(loadState = DetailLoadState.Loading)
-        )
+    }
+    .catch { e ->
+        Log.e(TAG, "Error loading project details", e)
+        emit(TaskDetailUiState(loadState = DetailLoadState.Error(e.message ?: "Unknown error")))
+    }
+    .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = TaskDetailUiState(loadState = DetailLoadState.Loading)
+    )
 
     fun onEvent(event: TaskDetailEvent) {
         val currentId = _projectId.value ?: return

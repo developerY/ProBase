@@ -16,5 +16,6 @@ sealed interface DetailLoadState {
 @Immutable
 data class TaskDetailUiState(
     val loadState: DetailLoadState = DetailLoadState.Loading,
-    val showCamera: Boolean = false
+    val showCamera: Boolean = false,
+    val isAiEnabled: Boolean = false
 )
