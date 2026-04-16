@@ -13,7 +13,7 @@ interface SmartCaptureEngine {
      * @param modelName Optional model name for cloud engines.
      */
     suspend fun processImage(
-        bitmap: Bitmap,
+        bitmap: Bitmap?,
         apiKey: String?,
         modelName: String? = null,
         userContext: String? = null,

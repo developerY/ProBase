@@ -30,13 +30,20 @@ class SmartCaptureOrchestrator @Inject constructor(
     }
 
     suspend fun processImage(
-        bitmap: Bitmap,
+        bitmap: Bitmap?,
         apiKey: String?,
         modelName: String? = null,
         userContext: String? = null,
         onLog: (String) -> Unit = {}
     ): DiagnosticResult<SmartTaskDraft> {
         val totalLogs = mutableListOf<String>()
+        
+        if (bitmap == null && apiKey.isNullOrBlank()) {
+            onLog("No image and no Cloud AI available.")
+            totalLogs.add("Orchestrator: Text-only analysis requires Cloud AI")
+            return DiagnosticResult(SmartTaskDraft(), totalLogs, error = "Cloud AI is required for text-only analysis.")
+        }
+
         if (!apiKey.isNullOrBlank()) {
             Log.d(TAG, "Attempting Tier 1 (Cloud) capture with $modelName...")
             onLog("Tier 1: Cloud AI requested...")
@@ -45,6 +52,10 @@ class SmartCaptureOrchestrator @Inject constructor(
             val result = cloudEngine.processImage(bitmap, apiKey, modelName, userContext, onLog)
             
             if (result.error != null) {
+                if (bitmap == null) {
+                    // No fallback for text-only
+                    return result.copy(logs = totalLogs + result.logs)
+                }
                 Log.w(TAG, "Cloud failed: ${result.error}. Falling back to Local.")
                 onLog("Cloud AI failed (${result.error.take(30)}...). Falling back to Local...")
                 val fallbackLogs = listOf("Orchestrator: Cloud failed (${result.error})", "Triggering Local AI Fallback")
@@ -60,7 +71,7 @@ class SmartCaptureOrchestrator @Inject constructor(
             Log.d(TAG, "No API key provided. Skipping Tier 1.")
             onLog("Using Tier 2 (Local) AI...")
             totalLogs.add("Orchestrator: No Cloud Key, using Local AI")
-            val result = localEngine.processImage(bitmap, null, userContext = userContext, onLog = onLog)
+            val result = localEngine.processImage(bitmap!!, null, userContext = userContext, onLog = onLog)
             return result.copy(logs = totalLogs + result.logs)
         }
     }

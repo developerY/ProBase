@@ -72,7 +72,7 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
     }
 
     override suspend fun processImage(
-        bitmap: Bitmap,
+        bitmap: Bitmap?,
         apiKey: String?,
         modelName: String?,
         userContext: String?,
@@ -83,6 +83,11 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         if (apiKey.isNullOrBlank()) {
             logs.add("Error: API Key is null or blank")
             throw IllegalArgumentException("Missing Gemini API Key for Pro Engine")
+        }
+
+        if (bitmap == null && userContext.isNullOrBlank()) {
+            logs.add("Error: No image or text provided")
+            return DiagnosticResult(SmartTaskDraft(), logs, error = "No content to analyze", engineUsed = "Cloud AI")
         }
 
         val finalModelName = modelName ?: "gemini-1.5-flash"
@@ -102,11 +107,15 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         )
 
         val prompt = content {
-            image(bitmap)
+            if (bitmap != null) {
+                image(bitmap)
+            }
             text("""
-                You are a smart project management assistant. From this image, deduce what the user is planning to do.
-                ${if (!userContext.isNullOrBlank()) "The user also provided this context: '$userContext'" else ""}
-                If the image is a broken object, a sketch, or a note, guess the average project requirements for this task.
+                You are a smart project management assistant. 
+                ${if (bitmap != null) "From this image, deduce what the user is planning to do." else "The user has provided a text command for a new task."}
+                ${if (!userContext.isNullOrBlank()) "Context/Command: '$userContext'" else ""}
+                
+                ${if (bitmap != null) "If the image is a broken object, a sketch, or a note, guess the average project requirements for this task." else ""}
                 Extract the task information into a structured JSON format to autofill a ToDo app.
                 
                 Fields to find: 

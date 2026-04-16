@@ -38,7 +38,7 @@ class SmartCaptureViewModel @Inject constructor(
         }
     }
 
-    fun analyzePhoto(uriString: String, userContext: String? = null) {
+    fun analyzePhoto(uriString: String?, userContext: String? = null) {
         viewModelScope.launch(Dispatchers.Default) {
             val netType = networkStatsProvider.getNetworkType()
             _uiState.value = SmartCaptureUiState.Loading(
@@ -46,15 +46,24 @@ class SmartCaptureViewModel @Inject constructor(
                 networkSpeed = netType
             )
             
-            val bitmap = imageLoader.loadBitmap(uriString)
-            if (bitmap != null) {
+            val bitmap = uriString?.let { imageLoader.loadBitmap(it) }
+            if (bitmap != null || !userContext.isNullOrBlank()) {
                 try {
                     val apiKey = settings.userApiKeyFlow.firstOrNull()
                     val modelName = settings.userAiModelFlow.first()
                     val isUsingCloud = !apiKey.isNullOrBlank()
                     
+                    val engineDescription = when {
+                        bitmap != null && isUsingCloud -> "Cloud ($modelName)"
+                        bitmap != null -> "Local (ML Kit)"
+                        else -> "Cloud Text-Only"
+                    }
+                    
                     _uiState.value = SmartCaptureUiState.Loading(
-                        logs = listOf("Image loaded", "Engine: ${if (isUsingCloud) "Cloud ($modelName)" else "Local (ML Kit)"}"),
+                        logs = listOf(
+                            if (bitmap != null) "Image loaded" else "Text context provided", 
+                            "Engine: $engineDescription"
+                        ),
                         isUsingCloud = isUsingCloud,
                         networkSpeed = netType
                     )
@@ -89,7 +98,7 @@ class SmartCaptureViewModel @Inject constructor(
                     _uiState.value = SmartCaptureUiState.Error(e.message ?: "Unknown error occurred")
                 }
             } else {
-                _uiState.value = SmartCaptureUiState.Error("Failed to load captured image.")
+                _uiState.value = SmartCaptureUiState.Error("No content provided to analyze.")
             }
         }
     }
