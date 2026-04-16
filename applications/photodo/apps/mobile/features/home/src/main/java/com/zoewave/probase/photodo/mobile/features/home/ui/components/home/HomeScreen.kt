@@ -64,6 +64,10 @@ fun HomeScreen(
                 onCameraClick = {
                     fabMenuExpanded = false
                     navTo(PhotoTodoRoute.Camera(projectId = null))
+                },
+                onSmartCaptureClick = {
+                    fabMenuExpanded = false
+                    navTo(PhotoTodoRoute.SmartCapture())
                 }
             )
         }
@@ -161,7 +165,7 @@ fun HomeScreen(
         uiState = uiState,
         categoryToDelete = categoryToDelete,
         onDismissDeleteConfirmation = { categoryToDelete = null },
-        onEvent = onEvent
+        onEvent = onEvent,
     )
 }
 

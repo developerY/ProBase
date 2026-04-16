@@ -76,7 +76,7 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         apiKey: String?,
         modelName: String?,
         userContext: String?,
-        onLog: (String) -> Unit
+        onLog: (String) -> Unit,
     ): DiagnosticResult<SmartTaskDraft> {
         val logs = mutableListOf("Cloud AI Engine initialized")
         onLog("Cloud Engine: Warming up...")

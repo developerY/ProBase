@@ -58,13 +58,13 @@ fun SmartCaptureUiRoute(
     initialPhotoUri: String? = null,
     onCaptureComplete: (SmartTaskDraft) -> Unit,
     onRetakeRequest: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     // 🚀 Update: Instead of auto-triggering analysis, set the URI so user can add context
     LaunchedEffect(initialPhotoUri) {
-        if (initialPhotoUri != null && uiState is SmartCaptureUiState.Idle && (uiState as SmartCaptureUiState.Idle).capturedUri == null) {
+        if ((initialPhotoUri != null) && uiState is SmartCaptureUiState.Idle && (uiState as SmartCaptureUiState.Idle).capturedUri == null) {
             viewModel.setCapturedUri(initialPhotoUri)
         }
     }
@@ -90,9 +90,9 @@ internal fun SmartCaptureScreen(
     onConfirmTask: (SmartTaskDraft) -> Unit,
     onRetake: () -> Unit,
     onReset: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
-    var showDiagnostics by remember { mutableStateOf(false) }
+    var showDiagnostics by remember { mutableStateOf(value = false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),

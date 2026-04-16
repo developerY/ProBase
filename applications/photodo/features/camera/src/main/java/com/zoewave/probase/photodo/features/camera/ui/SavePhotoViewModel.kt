@@ -88,10 +88,10 @@ class SavePhotoViewModel @Inject constructor(
         initialValue = SavePhotoUiState("")
     )
 
-    fun setInitialData(uri: String, draft: SmartTaskDraft? = null) {
+    fun setInitialData(uri: String?, draft: SmartTaskDraft? = null) {
         if (_photoUri.value == uri && draft == null) return
         
-        _photoUri.value = uri
+        _photoUri.value = uri ?: ""
         if (draft != null) {
             _isFromAi.value = true
             _categoryName.value = draft.category ?: ""

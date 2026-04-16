@@ -11,10 +11,10 @@ import javax.inject.Singleton
 
 @Singleton
 class SmartCaptureOrchestrator @Inject constructor(
-    @Named("Cloud") private val cloudEngine: SmartCaptureEngine,
-    @Named("Local") private val localEngine: SmartCaptureEngine
+    @param:Named("Cloud") private val cloudEngine: SmartCaptureEngine,
+    @param:Named("Local") private val localEngine: SmartCaptureEngine,
 ) {
-    private val TAG = "SmartCaptureOrchestrator"
+    private val tag = "SmartCaptureOrchestrator"
 
     suspend fun validateApiKey(apiKey: String): Pair<String, List<String>> {
         val models = cloudEngine.getAvailableModels(apiKey)
@@ -45,7 +45,7 @@ class SmartCaptureOrchestrator @Inject constructor(
         }
 
         if (!apiKey.isNullOrBlank()) {
-            Log.d(TAG, "Attempting Tier 1 (Cloud) capture with $modelName...")
+            Log.d(tag, "Attempting Tier 1 (Cloud) capture with $modelName...")
             onLog("Tier 1: Cloud AI requested...")
             totalLogs.add("Orchestrator: Cloud API Key present")
             
@@ -56,7 +56,7 @@ class SmartCaptureOrchestrator @Inject constructor(
                     // No fallback for text-only
                     return result.copy(logs = totalLogs + result.logs)
                 }
-                Log.w(TAG, "Cloud failed: ${result.error}. Falling back to Local.")
+                Log.w(tag, "Cloud failed: ${result.error}. Falling back to Local.")
                 onLog("Cloud AI failed (${result.error.take(30)}...). Falling back to Local...")
                 val fallbackLogs = listOf("Orchestrator: Cloud failed (${result.error})", "Triggering Local AI Fallback")
                 val fallbackResult = localEngine.processImage(bitmap, null, userContext = userContext, onLog = onLog)
@@ -67,12 +67,12 @@ class SmartCaptureOrchestrator @Inject constructor(
             } else {
                 return result.copy(logs = totalLogs + result.logs)
             }
-        } else {
-            Log.d(TAG, "No API key provided. Skipping Tier 1.")
-            onLog("Using Tier 2 (Local) AI...")
-            totalLogs.add("Orchestrator: No Cloud Key, using Local AI")
-            val result = localEngine.processImage(bitmap!!, null, userContext = userContext, onLog = onLog)
-            return result.copy(logs = totalLogs + result.logs)
-        }
+            } else {
+                Log.d(tag, "No API key provided. Skipping Tier 1.")
+                onLog("Using Tier 2 (Local) AI...")
+                totalLogs.add("Orchestrator: No Cloud Key, using Local AI")
+                val result = localEngine.processImage(bitmap!!, null, userContext = userContext, onLog = onLog)
+                return result.copy(logs = totalLogs + result.logs)
+            }
     }
 }
