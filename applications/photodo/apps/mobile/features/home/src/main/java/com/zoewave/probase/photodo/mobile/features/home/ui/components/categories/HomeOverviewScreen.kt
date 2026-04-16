@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
@@ -118,6 +119,10 @@ fun HomeOverviewScreen(
                 onCameraClick = {
                     fabMenuExpanded = false
                     navTo(PhotoTodoRoute.Camera(projectId = null))
+                },
+                onSmartCaptureClick = {
+                    fabMenuExpanded = false
+                    navTo(PhotoTodoRoute.SmartCapture())
                 }
             )
         }
@@ -153,6 +158,7 @@ fun HomeOverviewFab(
     onAddCategoryClick: () -> Unit,
     onHomeProjectClick: () -> Unit, // Renamed
     onCameraClick: () -> Unit,
+    onSmartCaptureClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     FloatingActionButtonMenu(
@@ -190,6 +196,12 @@ fun HomeOverviewFab(
             onClick = onCameraClick,
             icon = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
             text = { Text(stringResource(com.zoewave.photodo.model.R.string.applications_photodo_model_route_camera)) }
+        )
+
+        FloatingActionButtonMenuItem(
+            onClick = onSmartCaptureClick,
+            icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null) },
+            text = { Text("AI Task") }
         )
     }
 }

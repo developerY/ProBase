@@ -62,12 +62,12 @@ sealed class PhotoTodoRoute(
 
     @Serializable
     data class SavePhoto(
-        val photoUri: String,
+        val photoUri: String? = null,
         val prefilledAiDraft: SmartTaskDraft? = null
     ) : PhotoTodoRoute(icon = Icons.Default.CameraAlt)
 
     @Serializable
-    data class SmartCapture(val photoUri: String) : PhotoTodoRoute(icon = Icons.Default.CameraAlt)
+    data class SmartCapture(val photoUri: String? = null) : PhotoTodoRoute(icon = Icons.Default.CameraAlt)
 
     @Serializable
     data class SmartAdvice(val projectId: Long) : PhotoTodoRoute(icon = Icons.Default.CheckCircle)

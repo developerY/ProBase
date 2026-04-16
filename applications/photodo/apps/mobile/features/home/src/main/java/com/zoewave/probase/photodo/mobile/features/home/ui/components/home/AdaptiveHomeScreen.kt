@@ -85,7 +85,11 @@ fun AdaptiveHomeScreen(
                     onCameraClick = {
                         fabMenuExpanded = false
                         navTo(PhotoTodoRoute.Camera(projectId = null))
-                    }
+                    },
+                    onSmartCaptureClick = {
+                        fabMenuExpanded = false
+                        navTo(PhotoTodoRoute.SmartCapture())
+                    },
                 )
             }
         ) { paddingValues ->
