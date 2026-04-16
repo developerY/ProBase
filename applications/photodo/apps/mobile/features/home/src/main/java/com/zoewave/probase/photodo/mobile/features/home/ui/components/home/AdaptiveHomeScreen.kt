@@ -90,6 +90,7 @@ fun AdaptiveHomeScreen(
                         fabMenuExpanded = false
                         navTo(PhotoTodoRoute.SmartCapture())
                     },
+                    isAiEnabled = uiState.isAiEnabled
                 )
             }
         ) { paddingValues ->

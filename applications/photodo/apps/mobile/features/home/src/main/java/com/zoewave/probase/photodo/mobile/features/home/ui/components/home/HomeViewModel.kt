@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
+import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
@@ -24,8 +25,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val photoDoRepo: PhotoDoRepo
-    // Inject your repositories here later (e.g., private val tasksRepo: TasksRepository)
+    private val photoDoRepo: PhotoDoRepo,
+    private val appSettingsRepository: AppSettingsRepository
 ) : ViewModel() {
     val TAG = "HomeViewModel"
 
@@ -43,8 +44,9 @@ class HomeViewModel @Inject constructor(
     // 1. Directly map the relational database stream into our UI State
     val uiState: StateFlow<HomeUiState> = combine(
         photoDoRepo.getCategoriesWithProjectsAndTasks(),
-        _uiFlags
-    ) { categoriesWithProjectsAndTasks, flags ->
+        _uiFlags,
+        appSettingsRepository.isAiEnabledFlow
+    ) { categoriesWithProjectsAndTasks, flags, isAiEnabled ->
         val overviewModels = ArrayList<CategoryOverviewUiModel>(categoriesWithProjectsAndTasks.size)
         val urgentProjects = ArrayList<ProjectListUiModel>()
 
@@ -104,7 +106,8 @@ class HomeViewModel @Inject constructor(
                 urgentProjects = urgentProjects,
                 isQuickProjectSheetOpen = flags.isQuickProjectSheetOpen,
                 quickProjectCategoryOverride = flags.quickProjectCategoryOverride,
-                searchQuery = flags.searchQuery
+                searchQuery = flags.searchQuery,
+                isAiEnabled = isAiEnabled
             )
         }
         .flowOn(Dispatchers.Default)

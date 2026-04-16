@@ -68,7 +68,8 @@ fun HomeScreen(
                 onSmartCaptureClick = {
                     fabMenuExpanded = false
                     navTo(PhotoTodoRoute.SmartCapture())
-                }
+                },
+                isAiEnabled = uiState.isAiEnabled
             )
         }
     ) { paddingValues ->

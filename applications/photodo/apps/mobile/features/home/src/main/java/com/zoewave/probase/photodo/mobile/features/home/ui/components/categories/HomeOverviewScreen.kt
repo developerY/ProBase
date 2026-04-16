@@ -70,6 +70,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
@@ -123,7 +124,8 @@ fun HomeOverviewScreen(
                 onSmartCaptureClick = {
                     fabMenuExpanded = false
                     navTo(PhotoTodoRoute.SmartCapture())
-                }
+                },
+                isAiEnabled = uiState.isAiEnabled
             )
         }
     ) { innerPadding ->
@@ -159,6 +161,7 @@ fun HomeOverviewFab(
     onHomeProjectClick: () -> Unit, // Renamed
     onCameraClick: () -> Unit,
     onSmartCaptureClick: () -> Unit,
+    isAiEnabled: Boolean,
     modifier: Modifier = Modifier
 ) {
     FloatingActionButtonMenu(
@@ -198,11 +201,13 @@ fun HomeOverviewFab(
             text = { Text(stringResource(com.zoewave.photodo.model.R.string.applications_photodo_model_route_camera)) }
         )
 
-        FloatingActionButtonMenuItem(
-            onClick = onSmartCaptureClick,
-            icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null) },
-            text = { Text("AI Task") }
-        )
+        if (isAiEnabled) {
+            FloatingActionButtonMenuItem(
+                onClick = onSmartCaptureClick,
+                icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFFFD700)) },
+                text = { Text("AI Task") }
+            )
+        }
     }
 }
 
