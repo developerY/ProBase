@@ -49,6 +49,8 @@ class HomeViewModel @Inject constructor(
     ) { categoriesWithProjectsAndTasks, flags, isAiEnabled ->
         val overviewModels = ArrayList<CategoryOverviewUiModel>(categoriesWithProjectsAndTasks.size)
         val urgentProjects = ArrayList<ProjectListUiModel>()
+        val query = flags.searchQuery.trim()
+        val searchResults = ArrayList<ProjectSearchGroupUiModel>()
 
             for (groupedData in categoriesWithProjectsAndTasks) {
                 val category = groupedData.category
@@ -81,6 +83,27 @@ class HomeViewModel @Inject constructor(
                             )
                         )
                     }
+                    
+                    if (query.isNotBlank()) {
+                        val matchingTasks = tasks.filter { 
+                            it.text.contains(query, ignoreCase = true) 
+                        }
+                        if (matchingTasks.isNotEmpty()) {
+                            searchResults.add(
+                                ProjectSearchGroupUiModel(
+                                    projectId = project.projectId,
+                                    projectName = project.name,
+                                    tasks = matchingTasks.map {
+                                        TaskSearchUiModel(
+                                            taskId = it.taskId,
+                                            taskText = it.text,
+                                            isChecked = it.isChecked
+                                        )
+                                    }
+                                )
+                            )
+                        }
+                    }
                 }
 
                 val progressPercentage = if (totalTasksInCategory > 0) {
@@ -104,6 +127,7 @@ class HomeViewModel @Inject constructor(
             HomeUiState(
                 categories = overviewModels,
                 urgentProjects = urgentProjects,
+                searchResults = searchResults,
                 isQuickProjectSheetOpen = flags.isQuickProjectSheetOpen,
                 quickProjectCategoryOverride = flags.quickProjectCategoryOverride,
                 searchQuery = flags.searchQuery,

@@ -26,4 +26,6 @@
     <string name="applications_photodo_apps_mobile_features_home_collapse_categories_content_desc">Collapse Categories</string>
     <string name="applications_photodo_apps_mobile_features_home_expand_categories_content_desc">Expand Categories</string>
     <string name="applications_photodo_apps_mobile_features_home_budget_status_content_desc">Budget Status</string>
+    <string name="applications_photodo_apps_mobile_features_home_search_tasks_placeholder">Search tasks&#8230;</string>
+    <string name="applications_photodo_apps_mobile_features_home_no_search_results">No tasks found matching \"%1$s\"</string>
 </resources>
