@@ -14,6 +14,7 @@ dependencies {
     // --- Shared Core Projects ---
     implementation(project(":core:model"))
     implementation(project(":core:data"))
+    implementation(project(":features:ai:capture"))
     implementation(project(":features:ai:configuration"))
 
     // --- DataStore ---

@@ -1,4 +1,4 @@
-package com.zoewave.probase.photodo.mobile.di
+package com.zoewave.probase.applications.photodo.db.di
 
 import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings

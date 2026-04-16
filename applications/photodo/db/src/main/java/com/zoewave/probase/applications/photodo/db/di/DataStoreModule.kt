@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
 import com.zoewave.probase.applications.photodo.db.repo.DataStoreAppSettingsRepository
+import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
+import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -38,5 +40,17 @@ abstract class RepositoryModule {
     abstract fun bindAppSettingsRepository(
         impl: DataStoreAppSettingsRepository
     ): AppSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAiConfigurationSettings(
+        impl: AppSettingsRepository
+    ): AiConfigurationSettings
+
+    @Binds
+    @Singleton
+    abstract fun bindSmartCaptureSettings(
+        impl: RealSmartCaptureSettings
+    ): SmartCaptureSettings
 
 }

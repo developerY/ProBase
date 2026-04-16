@@ -11,8 +11,8 @@ android {
 
     defaultConfig {
         applicationId = "com.zoewave.probase.photodo"
-        versionCode = 7
-        versionName = "0.0.2"
+        versionCode = 9
+        versionName = "0.0.7"
         minSdk = 34
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         proguardFiles(
