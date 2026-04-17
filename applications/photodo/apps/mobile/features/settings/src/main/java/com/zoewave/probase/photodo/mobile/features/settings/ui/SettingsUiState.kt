@@ -8,5 +8,10 @@ data class SettingsUiState(
     val isAiEnabled: Boolean = false,
     val initialCardKeyToExpand: String? = null,
     val appVersion: String = "",
-    val firebaseDeviceId: String = ""
+    val firebaseDeviceId: String = "",
+    val ageVerificationStatus: String = "Checking...",
+    val isAgeVerified: Boolean = false,
+    val isThemeExpanded: Boolean = false,
+    val isAiExpanded: Boolean = false,
+    val isAboutExpanded: Boolean = false
 )
