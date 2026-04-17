@@ -17,5 +17,12 @@ sealed interface DetailLoadState {
 data class TaskDetailUiState(
     val loadState: DetailLoadState = DetailLoadState.Loading,
     val showCamera: Boolean = false,
-    val isAiEnabled: Boolean = false
+    val isAiEnabled: Boolean = false,
+    val fabMenuExpanded: Boolean = false,
+    val showAddTaskDialog: Boolean = false,
+    val newTaskText: String = "",
+    val showAddExpenseDialog: Boolean = false,
+    val newExpenseAmount: String = "",
+    val newExpenseDesc: String = "",
+    val showDeleteProjectConfirmation: Boolean = false
 )

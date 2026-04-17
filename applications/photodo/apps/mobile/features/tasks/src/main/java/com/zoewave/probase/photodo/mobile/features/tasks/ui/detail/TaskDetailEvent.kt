@@ -26,4 +26,13 @@ sealed interface TaskDetailEvent {
     data object OnCameraClick : TaskDetailEvent
     data object OnBackFromCamera : TaskDetailEvent
     data object OnHelpClicked : TaskDetailEvent
+
+    // UI State Toggles
+    data class OnFabMenuToggle(val expanded: Boolean) : TaskDetailEvent
+    data class OnShowAddTaskDialog(val show: Boolean) : TaskDetailEvent
+    data class OnNewTaskTextChanged(val text: String) : TaskDetailEvent
+    data class OnShowAddExpenseDialog(val show: Boolean) : TaskDetailEvent
+    data class OnNewExpenseAmountChanged(val amount: String) : TaskDetailEvent
+    data class OnNewExpenseDescChanged(val desc: String) : TaskDetailEvent
+    data class OnShowDeleteProjectConfirmation(val show: Boolean) : TaskDetailEvent
 }

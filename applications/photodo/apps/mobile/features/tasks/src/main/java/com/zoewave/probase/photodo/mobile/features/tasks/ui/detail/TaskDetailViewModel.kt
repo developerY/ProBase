@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -44,6 +45,18 @@ class TaskDetailViewModel @Inject constructor(
     // This makes the ViewModel reactive to navigation arguments and survives process death.
     private val _projectId = MutableStateFlow<Long?>(savedStateHandle.get<Long?>("projectId"))
 
+    private data class UiFlags(
+        val fabMenuExpanded: Boolean = false,
+        val showAddTaskDialog: Boolean = false,
+        val newTaskText: String = "",
+        val showAddExpenseDialog: Boolean = false,
+        val newExpenseAmount: String = "",
+        val newExpenseDesc: String = "",
+        val showDeleteProjectConfirmation: Boolean = false
+    )
+
+    private val _uiFlags = MutableStateFlow(UiFlags())
+
     fun loadTaskDetails(projectId: Long) {
         savedStateHandle["projectId"] = projectId
         _projectId.value = projectId
@@ -53,12 +66,20 @@ class TaskDetailViewModel @Inject constructor(
         _projectId.asStateFlow().filterNotNull().flatMapLatest { id ->
             photoDoRepo.getProjectDetails(id)
         },
-        appSettingsRepository.isAiEnabledFlow
-    ) { projectDetails, isAiEnabled ->
+        appSettingsRepository.isAiEnabledFlow,
+        _uiFlags
+    ) { projectDetails, isAiEnabled, flags ->
         if (projectDetails != null) {
             TaskDetailUiState(
                 loadState = DetailLoadState.Success(projectDetails),
-                isAiEnabled = isAiEnabled
+                isAiEnabled = isAiEnabled,
+                fabMenuExpanded = flags.fabMenuExpanded,
+                showAddTaskDialog = flags.showAddTaskDialog,
+                newTaskText = flags.newTaskText,
+                showAddExpenseDialog = flags.showAddExpenseDialog,
+                newExpenseAmount = flags.newExpenseAmount,
+                newExpenseDesc = flags.newExpenseDesc,
+                showDeleteProjectConfirmation = flags.showDeleteProjectConfirmation
             )
         } else {
             TaskDetailUiState(loadState = DetailLoadState.Error("Project has been deleted."))
@@ -198,6 +219,28 @@ class TaskDetailViewModel @Inject constructor(
 
             TaskDetailEvent.OnHelpClicked -> {
                 // Navigation handled in UI
+            }
+
+            is TaskDetailEvent.OnFabMenuToggle -> {
+                _uiFlags.update { it.copy(fabMenuExpanded = event.expanded) }
+            }
+            is TaskDetailEvent.OnShowAddTaskDialog -> {
+                _uiFlags.update { it.copy(showAddTaskDialog = event.show) }
+            }
+            is TaskDetailEvent.OnNewTaskTextChanged -> {
+                _uiFlags.update { it.copy(newTaskText = event.text) }
+            }
+            is TaskDetailEvent.OnShowAddExpenseDialog -> {
+                _uiFlags.update { it.copy(showAddExpenseDialog = event.show) }
+            }
+            is TaskDetailEvent.OnNewExpenseAmountChanged -> {
+                _uiFlags.update { it.copy(newExpenseAmount = event.amount) }
+            }
+            is TaskDetailEvent.OnNewExpenseDescChanged -> {
+                _uiFlags.update { it.copy(newExpenseDesc = event.desc) }
+            }
+            is TaskDetailEvent.OnShowDeleteProjectConfirmation -> {
+                _uiFlags.update { it.copy(showDeleteProjectConfirmation = event.show) }
             }
         }
     }

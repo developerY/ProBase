@@ -2,6 +2,7 @@ package com.zoewave.probase.photodo.mobile.features.tasks.ui
 
 import com.zoewave.probase.applications.photodo.db.model.ProjectTemplate
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
+import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 
 
 sealed interface TasksEvent {
@@ -50,4 +51,9 @@ sealed interface TasksEvent {
 
     // ✅ Sheet Dismissal
     data object OnDismissBottomSheet : TasksEvent
+
+    // UI State Toggles
+    data class OnFabMenuToggle(val expanded: Boolean) : TasksEvent
+    data class OnShowDeleteCategoryConfirmation(val show: Boolean) : TasksEvent
+    data class OnProjectToDeleteChanged(val project: ProjectListUiModel?) : TasksEvent
 }

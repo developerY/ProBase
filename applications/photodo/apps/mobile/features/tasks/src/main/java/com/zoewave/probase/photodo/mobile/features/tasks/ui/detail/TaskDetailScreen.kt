@@ -50,10 +50,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -82,22 +79,7 @@ fun TaskDetailScreen(
     uiState: TaskDetailUiState,
     onEvent: (TaskDetailEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
-    modifier: Modifier = Modifier
 ) {
-    var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
-
-    // Task Dialog State
-    var showAddTaskDialog by rememberSaveable { mutableStateOf(false) }
-    var newTaskText by rememberSaveable { mutableStateOf("") }
-
-    // 🚀 Expense Dialog State
-    var showAddExpenseDialog by rememberSaveable { mutableStateOf(false) }
-    var newExpenseAmount by rememberSaveable { mutableStateOf("") }
-    var newExpenseDesc by rememberSaveable { mutableStateOf("") }
-
-    // 🚀 Confirmation Dialog States
-    var showDeleteProjectConfirmation by rememberSaveable { mutableStateOf(false) }
-
     val context = LocalContext.current
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -114,11 +96,11 @@ fun TaskDetailScreen(
     }
 
     BackHandler {
-        if (fabMenuExpanded) fabMenuExpanded = false else navTo(null)
+        if (uiState.fabMenuExpanded) onEvent(TaskDetailEvent.OnFabMenuToggle(false)) else navTo(null)
     }
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = {
@@ -150,7 +132,7 @@ fun TaskDetailScreen(
                             }
                         }
 
-                        IconButton(onClick = { showDeleteProjectConfirmation = true }) {
+                        IconButton(onClick = { onEvent(TaskDetailEvent.OnShowDeleteProjectConfirmation(true)) }) {
                             Icon(
                                 Icons.Default.DeleteForever,
                                 contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_delete_project_content_desc)
@@ -162,11 +144,11 @@ fun TaskDetailScreen(
         },
         floatingActionButton = {
             FloatingActionButtonMenu(
-                expanded = fabMenuExpanded,
+                expanded = uiState.fabMenuExpanded,
                 button = {
                     ToggleFloatingActionButton(
-                        checked = fabMenuExpanded,
-                        onCheckedChange = { fabMenuExpanded = !fabMenuExpanded }
+                        checked = uiState.fabMenuExpanded,
+                        onCheckedChange = { onEvent(TaskDetailEvent.OnFabMenuToggle(it)) }
                     ) {
                         val imageVector by remember {
                             derivedStateOf { if (checkedProgress > 0.5f) Icons.Default.Close else Icons.Default.Add }
@@ -181,7 +163,7 @@ fun TaskDetailScreen(
             ) {
                 FloatingActionButtonMenuItem(
                     onClick = {
-                        fabMenuExpanded = false
+                        onEvent(TaskDetailEvent.OnFabMenuToggle(false))
                         val isGranted = ContextCompat.checkSelfPermission(
                             context, Manifest.permission.CAMERA
                         ) == PackageManager.PERMISSION_GRANTED
@@ -200,21 +182,12 @@ fun TaskDetailScreen(
                 )
                 FloatingActionButtonMenuItem(
                     onClick = {
-                        fabMenuExpanded = false
-                        showAddTaskDialog = true
+                        onEvent(TaskDetailEvent.OnFabMenuToggle(false))
+                        onEvent(TaskDetailEvent.OnShowAddTaskDialog(true))
                     },
                     icon = { Icon(Icons.Default.CheckBox, contentDescription = null) },
                     text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_task)) }
                 )
-                // 🚀 NEW: Add Expense FAB Item
-                /* FloatingActionButtonMenuItem(
-                    onClick = {
-                        fabMenuExpanded = false
-                        showAddExpenseDialog = true
-                    },
-                    icon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
-                    text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_expense)) }
-                )*/
             }
         }
     ) { innerPadding ->
@@ -372,17 +345,17 @@ fun TaskDetailScreen(
     // --- DIALOGS ---
 
     // 1. Add Task Dialog
-    if (showAddTaskDialog) {
+    if (uiState.showAddTaskDialog) {
         AlertDialog(
             onDismissRequest = {
-                newTaskText = ""
-                showAddTaskDialog = false
+                onEvent(TaskDetailEvent.OnShowAddTaskDialog(false))
+                onEvent(TaskDetailEvent.OnNewTaskTextChanged(""))
             },
             title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_new_task_title)) },
             text = {
                 OutlinedTextField(
-                    value = newTaskText,
-                    onValueChange = { newTaskText = it },
+                    value = uiState.newTaskText,
+                    onValueChange = { onEvent(TaskDetailEvent.OnNewTaskTextChanged(it)) },
                     placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_new_task_placeholder)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
@@ -392,37 +365,37 @@ fun TaskDetailScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (newTaskText.isNotBlank()) {
-                            onEvent(TaskDetailEvent.OnAddItemClicked(newTaskText.trim()))
-                            newTaskText = ""
-                            showAddTaskDialog = false
+                        if (uiState.newTaskText.isNotBlank()) {
+                            onEvent(TaskDetailEvent.OnAddItemClicked(uiState.newTaskText.trim()))
+                            onEvent(TaskDetailEvent.OnNewTaskTextChanged(""))
+                            onEvent(TaskDetailEvent.OnShowAddTaskDialog(false))
                         }
                     }
                 ) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_button)) }
             },
             dismissButton = {
                 TextButton(onClick = {
-                    newTaskText = ""
-                    showAddTaskDialog = false
+                    onEvent(TaskDetailEvent.OnNewTaskTextChanged(""))
+                    onEvent(TaskDetailEvent.OnShowAddTaskDialog(false))
                 }) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_cancel_button)) }
             }
         )
     }
 
-    // 🚀 2. NEW: Add Expense Dialog
-    if (showAddExpenseDialog) {
+    // 🚀 2. NEW: Add Expense Dialog (Removed but keeping if for refactor completeness if used)
+    if (uiState.showAddExpenseDialog) {
         AlertDialog(
             onDismissRequest = {
-                newExpenseAmount = ""
-                newExpenseDesc = ""
-                showAddExpenseDialog = false
+                onEvent(TaskDetailEvent.OnShowAddExpenseDialog(false))
+                onEvent(TaskDetailEvent.OnNewExpenseAmountChanged(""))
+                onEvent(TaskDetailEvent.OnNewExpenseDescChanged(""))
             },
             title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_expense)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
-                        value = newExpenseDesc,
-                        onValueChange = { newExpenseDesc = it },
+                        value = uiState.newExpenseDesc,
+                        onValueChange = { onEvent(TaskDetailEvent.OnNewExpenseDescChanged(it)) },
                         label = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_expense_description_label)) },
                         placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_expense_description_placeholder)) },
                         singleLine = true,
@@ -430,8 +403,8 @@ fun TaskDetailScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
-                        value = newExpenseAmount,
-                        onValueChange = { newExpenseAmount = it },
+                        value = uiState.newExpenseAmount,
+                        onValueChange = { onEvent(TaskDetailEvent.OnNewExpenseAmountChanged(it)) },
                         label = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_expense_amount_label)) },
                         placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_expense_amount_placeholder)) },
                         singleLine = true,
@@ -444,36 +417,35 @@ fun TaskDetailScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val amount = newExpenseAmount.toDoubleOrNull() ?: 0.0
-                        if (amount > 0 && newExpenseDesc.isNotBlank()) {
-                            // 👇 MAKE SURE TO ADD THIS EVENT TO YOUR SEALED CLASS
-                            onEvent(TaskDetailEvent.OnAddExpenseClicked(description = newExpenseDesc.trim(), amount = amount))
-                            newExpenseAmount = ""
-                            newExpenseDesc = ""
-                            showAddExpenseDialog = false
+                        val amount = uiState.newExpenseAmount.toDoubleOrNull() ?: 0.0
+                        if (amount > 0 && uiState.newExpenseDesc.isNotBlank()) {
+                            onEvent(TaskDetailEvent.OnAddExpenseClicked(description = uiState.newExpenseDesc.trim(), amount = amount))
+                            onEvent(TaskDetailEvent.OnNewExpenseAmountChanged(""))
+                            onEvent(TaskDetailEvent.OnNewExpenseDescChanged(""))
+                            onEvent(TaskDetailEvent.OnShowAddExpenseDialog(false))
                         }
                     }
                 ) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_button)) }
             },
             dismissButton = {
                 TextButton(onClick = {
-                    newExpenseAmount = ""
-                    newExpenseDesc = ""
-                    showAddExpenseDialog = false
+                    onEvent(TaskDetailEvent.OnNewExpenseAmountChanged(""))
+                    onEvent(TaskDetailEvent.OnNewExpenseDescChanged(""))
+                    onEvent(TaskDetailEvent.OnShowAddExpenseDialog(false))
                 }) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_cancel_button)) }
             }
         )
     }
 
-    if (showDeleteProjectConfirmation) {
+    if (uiState.showDeleteProjectConfirmation) {
         AlertDialog(
-            onDismissRequest = { showDeleteProjectConfirmation = false },
+            onDismissRequest = { onEvent(TaskDetailEvent.OnShowDeleteProjectConfirmation(false)) },
             title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_delete_project_title)) },
             text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_delete_project_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        showDeleteProjectConfirmation = false
+                        onEvent(TaskDetailEvent.OnShowDeleteProjectConfirmation(false))
                         onEvent(TaskDetailEvent.OnDeleteTaskListClicked)
                     }
                 ) {
@@ -481,7 +453,7 @@ fun TaskDetailScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteProjectConfirmation = false }) {
+                TextButton(onClick = { onEvent(TaskDetailEvent.OnShowDeleteProjectConfirmation(false)) }) {
                     Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_cancel_button))
                 }
             }
