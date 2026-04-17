@@ -154,7 +154,9 @@ class SavePhotoViewModel @Inject constructor(
     }
 
     fun getReportIntent(): android.content.Intent {
-        return aiComplianceRepo.getReportIntent()
+        // Disabled for PhotoDo mobile app as per user request
+        // return aiComplianceRepo.getReportIntent()
+        return android.content.Intent()
     }
 
     fun clearAiData() {

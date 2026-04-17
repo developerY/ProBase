@@ -43,8 +43,8 @@ class SettingsViewModel @Inject constructor(
     private val _firebaseDeviceId = MutableStateFlow<String>("Loading...")
 
     // NEW: Compliance status state
-    private val _ageVerificationStatus = MutableStateFlow<String>("Checking...")
-    private val _isAgeVerified = MutableStateFlow<Boolean>(false)
+    private val _ageVerificationStatus = MutableStateFlow<String>("Not applicable")
+    private val _isAgeVerified = MutableStateFlow<Boolean>(true)
 
     // Combines the DB theme preference with the navigation argument into a single UI State
 @Suppress("UNCHECKED_CAST")
@@ -89,7 +89,8 @@ class SettingsViewModel @Inject constructor(
 
     init {
         fetchFirebaseDeviceId()
-        fetchComplianceStatus()
+        // Disabled for PhotoDo mobile app as per user request
+        // fetchComplianceStatus()
     }
 
     private fun getAppVersion(): String {
