@@ -19,8 +19,10 @@ import com.zoewave.probase.photodo.features.camera.ui.components.SavePhotoBottom
 import com.zoewave.probase.photodo.features.smartadvice.ui.SmartAdviceUiRoute
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.HomeOverviewScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.AdaptiveHomeScreen
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeScreen
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeViewModel
 import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsUiRoute
+import com.zoewave.probase.photodo.mobile.features.settings.ui.SettingsViewModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksSideEffect
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksViewModel
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.TasksListScreen
@@ -46,28 +48,33 @@ fun photoTodoNavEntryProvider(
         when (key) {
 
             // --- TAB 1: DASHBOARD ---
-            // ... inside your when(key) block:
-
             is PhotoTodoRoute.Home -> {
                 val viewModel: HomeViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                AdaptiveHomeScreen(
-                    uiState = uiState,
-                    onEvent = viewModel::onEvent,
-                    navTo = { route ->
-                        if (route == null) navigateBack() else navigateTo(route)
-                    },
-                    windowSizeClass = windowSizeClass,
-                    modifier = Modifier.fillMaxSize()
-                )
+                
+                if (isExpanded) {
+                    AdaptiveHomeScreen(
+                        uiState = uiState,
+                        onEvent = viewModel::onEvent,
+                        navTo = { route ->
+                            if (route == null) navigateBack() else navigateTo(route)
+                        }
+                    )
+                } else {
+                    HomeScreen(
+                        uiState = uiState,
+                        onEvent = viewModel::onEvent,
+                        navTo = { route ->
+                            if (route == null) navigateBack() else navigateTo(route)
+                        }
+                    )
+                }
             }
 
             is PhotoTodoRoute.CategoryGrid -> {
                 if (isExpanded) {
                     AdaptivePhotoDoScreen(
-                        windowSizeClass = windowSizeClass,
-                        navTo = navigateTo,
-                        modifier = Modifier.fillMaxSize()
+                        navTo = navigateTo
                     )
                 } else {
                     val viewModel: HomeViewModel = hiltViewModel()
@@ -77,8 +84,7 @@ fun photoTodoNavEntryProvider(
                         onEvent = viewModel::onEvent,
                         navTo = { route ->
                             if (route == null) navigateBack() else navigateTo(route)
-                        },
-                        modifier = Modifier.fillMaxSize()
+                        }
                     )
                 }
             }
@@ -87,10 +93,8 @@ fun photoTodoNavEntryProvider(
             is TasksList -> {
                 if (isExpanded) {
                     AdaptivePhotoDoScreen(
-                        windowSizeClass = windowSizeClass,
                         navTo = navigateTo,
-                        initialCategoryId = key.categoryId,
-                        modifier = Modifier.fillMaxSize()
+                        initialCategoryId = key.categoryId
                     )
                 } else {
                     val viewModel: TasksViewModel = hiltViewModel()
@@ -125,8 +129,7 @@ fun photoTodoNavEntryProvider(
                         onEvent = viewModel::onEvent,
                         navTo = { route ->
                             if (route == null) navigateBack() else navigateTo(route)
-                        },
-                        modifier = Modifier.fillMaxSize()
+                        }
                     )
                 }
             }
@@ -135,10 +138,8 @@ fun photoTodoNavEntryProvider(
             is TaskDetail -> {
                 if (isExpanded) {
                     AdaptivePhotoDoScreen(
-                        windowSizeClass = windowSizeClass,
                         navTo = navigateTo,
-                        initialProjectId = key.projectId,
-                        modifier = Modifier.fillMaxSize()
+                        initialProjectId = key.projectId
                     )
                 } else {
                     val viewModel: TaskDetailViewModel = hiltViewModel()
@@ -166,13 +167,10 @@ fun photoTodoNavEntryProvider(
                         onEvent = viewModel::onEvent,
                         navTo = { route ->
                             if (route == null) navigateBack() else navigateTo(route)
-                        },
-                        modifier = Modifier.fillMaxSize()
+                        }
                     )
                 }
             }
-
-
 
             is PhotoTodoRoute.Camera -> {
                 // Grab our stateless Action Handler
@@ -232,14 +230,13 @@ fun photoTodoNavEntryProvider(
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
                 // 🚀 NEW: Automatic navigation back to Home dashboard after success
-                if (uiState.isSaved) {
-                    val savedProjectId = uiState.savedProjectId
-                    val savedProjectTitle = uiState.savedProjectTitle
-                    LaunchedEffect(Unit) {
-                        if (savedProjectId != null && savedProjectTitle != null) {
-                            // First go back to pop SavePhoto, then navigate to TaskDetail
+                LaunchedEffect(uiState.isSaved) {
+                    if (uiState.isSaved) {
+                        val id = uiState.savedProjectId
+                        val title = uiState.savedProjectTitle
+                        if (id != null && title != null) {
                             navigateBack()
-                            navigateTo(PhotoTodoRoute.TaskDetail(savedProjectId, savedProjectTitle))
+                            navigateTo(PhotoTodoRoute.TaskDetail(id, title))
                         } else {
                             navigateBack()
                         }
@@ -276,12 +273,16 @@ fun photoTodoNavEntryProvider(
 
             // --- TAB 3: SETTINGS ---
             is Settings -> {
+                val viewModel: SettingsViewModel = hiltViewModel()
+                LaunchedEffect(key.title) {
+                    viewModel.setInitialExpandedKey(key.title)
+                }
+
                 SettingsUiRoute(
-                    modifier = Modifier.fillMaxSize(),
-                    initialCardKeyToExpand = key.title,
                     navTo = { route ->
                         if (route == null) navigateBack() else navigateTo(route)
                     },
+                    viewModel = viewModel
                 )
             }
 
@@ -299,8 +300,9 @@ fun photoTodoNavEntryProvider(
                 TasksListScreen(
                     uiState = uiState,
                     onEvent = viewModel::onEvent,
-                    navTo = { if (it == null) navigateBack() else navigateTo(it) },
-                    modifier = Modifier.fillMaxSize()
+                    navTo = { route ->
+                        if (route == null) navigateBack() else navigateTo(route)
+                    }
                 )
             }
         }

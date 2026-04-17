@@ -8,7 +8,6 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,9 +36,7 @@ enum class PhotoDoFoldableState {
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AdaptivePhotoDoScreen(
-    windowSizeClass: WindowSizeClass,
     navTo: (PhotoTodoRoute) -> Unit,
-    modifier: Modifier = Modifier,
     initialCategoryId: Long? = null,
     initialProjectId: Long? = null
 ) {
@@ -54,7 +51,6 @@ fun AdaptivePhotoDoScreen(
 
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val scope = rememberCoroutineScope()
-    val paneContrast = LocalPaneContrast.current
 
     // --- VIEW MODELS & DATA FETCHING (Moved to top level for stability!) ---
     val homeViewModel = hiltViewModel<HomeViewModel>()
@@ -98,9 +94,6 @@ fun AdaptivePhotoDoScreen(
         directive = navigator.scaffoldDirective,
         value = navigator.scaffoldValue,
         listPane = {
-            val listBackground = if (paneContrast == "TINTED") MaterialTheme.colorScheme.surfaceContainerLow
-            else MaterialTheme.colorScheme.surface
-
             if (currentState == PhotoDoFoldableState.CATEGORY_AND_PROJECTS) {
                 // Left Pane: Categories
                 HomeOverviewScreen(
@@ -126,8 +119,7 @@ fun AdaptivePhotoDoScreen(
                             }
                             else -> route?.let(navTo)
                         }
-                    },
-                    modifier = Modifier.fillMaxSize().background(listBackground)
+                    }
                 )
             } else {
                 // Left Pane: Projects
@@ -148,14 +140,11 @@ fun AdaptivePhotoDoScreen(
                             }
                             else -> route.let(navTo)
                         }
-                    },
-                    modifier = Modifier.fillMaxSize().background(listBackground)
+                    }
                 )
             }
         },
         detailPane = {
-            val detailBackground = MaterialTheme.colorScheme.surface
-
             if (currentState == PhotoDoFoldableState.CATEGORY_AND_PROJECTS) {
                 // Right Pane: Projects
                 TasksListScreen(
@@ -176,8 +165,7 @@ fun AdaptivePhotoDoScreen(
                             }
                             else -> route.let(navTo)
                         }
-                    },
-                    modifier = Modifier.fillMaxSize().background(detailBackground)
+                    }
                 )
             } else {
                 // Right Pane: Tasks (Detail)
@@ -196,11 +184,10 @@ fun AdaptivePhotoDoScreen(
                         } else {
                             route.let(navTo)
                         }
-                    },
-                    modifier = Modifier.fillMaxSize().background(detailBackground)
+                    }
                 )
             }
         },
-        modifier = modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     )
 }
