@@ -92,37 +92,29 @@ fun HomeOverviewScreen(
     uiState: HomeUiState,
     onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
-    modifier: Modifier = Modifier
 ) {
-
-    // Add these state variables at the top of your composable
-    var showAddCategorySheet by rememberSaveable { mutableStateOf(false) }
-    var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
-    var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
-    var isSearchMode by rememberSaveable { mutableStateOf(false) }
-
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         // 2. Replace the Scaffold's floatingActionButton block with this:
         floatingActionButton = {
             HomeOverviewFab(
-                fabMenuExpanded = fabMenuExpanded,
-                onFabToggle = { fabMenuExpanded = it },
+                fabMenuExpanded = uiState.fabMenuExpanded,
+                onFabToggle = { onEvent(HomeEvent.OnFabMenuToggle(it)) },
                 onAddCategoryClick = {
-                    fabMenuExpanded = false
-                    showAddCategorySheet = true
+                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnShowAddCategoryDialog(true))
                 },
                 onHomeProjectClick = { // Updated parameter name
-                    fabMenuExpanded = false
+                    onEvent(HomeEvent.OnFabMenuToggle(false))
                     // Map to the common Quick Project logic with "Home" override!
                     onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
                 },
                 onCameraClick = {
-                    fabMenuExpanded = false
+                    onEvent(HomeEvent.OnFabMenuToggle(false))
                     navTo(PhotoTodoRoute.Camera(projectId = null))
                 },
                 onSmartCaptureClick = {
-                    fabMenuExpanded = false
+                    onEvent(HomeEvent.OnFabMenuToggle(false))
                     navTo(PhotoTodoRoute.SmartCapture())
                 },
                 isAiEnabled = uiState.isAiEnabled
@@ -131,11 +123,8 @@ fun HomeOverviewScreen(
     ) { innerPadding ->
         HomeOverviewContent(
             uiState = uiState,
-            isSearchMode = isSearchMode,
-            onSearchModeChange = { isSearchMode = it },
             onEvent = onEvent,
             navTo = navTo,
-            onDeleteClicked = { categoryToDelete = it },
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -143,11 +132,11 @@ fun HomeOverviewScreen(
     // ... inside HomeOverviewScreen, just below the Scaffold closing brace ...
 
     HomeOverviewDialogs(
-        showAddCategorySheet = showAddCategorySheet,
-        onDismissAddCategory = { showAddCategorySheet = false },
+        showAddCategorySheet = uiState.showAddCategoryDialog,
+        onDismissAddCategory = { onEvent(HomeEvent.OnShowAddCategoryDialog(false)) },
         uiState = uiState, // Pass the UI State!
-        categoryToDelete = categoryToDelete,
-        onDismissDeleteConfirmation = { categoryToDelete = null },
+        categoryToDelete = uiState.categoryToDelete,
+        onDismissDeleteConfirmation = { onEvent(HomeEvent.OnCategoryToDeleteChanged(null)) },
         onEvent = onEvent
     )
 } // <-- End of HomeOverviewScreen
@@ -214,19 +203,16 @@ fun HomeOverviewFab(
 @Composable
 fun HomeOverviewContent(
     uiState: HomeUiState,
-    isSearchMode: Boolean,
-    onSearchModeChange: (Boolean) -> Unit,
     onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
-    onDeleteClicked: (CategoryOverviewUiModel) -> Unit,
     modifier: Modifier = Modifier,
     showSummaryHeader: Boolean = true
 ) {
-    val filteredCategories = remember(uiState.categories, uiState.searchQuery) {
-        if (uiState.searchQuery.isBlank()) {
+    val filteredCategories = remember(uiState.categories, uiState.categorySearchQuery) {
+        if (uiState.categorySearchQuery.isBlank()) {
             uiState.categories
         } else {
-            uiState.categories.filter { it.name.contains(uiState.searchQuery, ignoreCase = true) }
+            uiState.categories.filter { it.name.contains(uiState.categorySearchQuery, ignoreCase = true) }
         }
     }
 
@@ -252,13 +238,13 @@ fun HomeOverviewContent(
                 // --- 🚀 NEW: Header Row (Shortcuts) ---
                 item(span = { GridItemSpan(2) }) {
                     AnimatedVisibility(
-                        visible = isSearchMode,
+                        visible = uiState.isSearchMode,
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
                         OutlinedTextField(
-                            value = uiState.searchQuery,
-                            onValueChange = { onEvent(HomeEvent.OnSearchQueryChanged(it)) },
+                            value = uiState.categorySearchQuery,
+                            onValueChange = { onEvent(HomeEvent.OnCategorySearchQueryChanged(it)) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 8.dp),
@@ -266,8 +252,8 @@ fun HomeOverviewContent(
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                             trailingIcon = {
                                 IconButton(onClick = {
-                                    onEvent(HomeEvent.OnSearchQueryChanged(""))
-                                    onSearchModeChange(false)
+                                    onEvent(HomeEvent.OnCategorySearchQueryChanged(""))
+                                    onEvent(HomeEvent.OnSearchModeToggle(false))
                                 }) {
                                     Icon(Icons.Default.Close, contentDescription = "Close search")
                                 }
@@ -278,7 +264,7 @@ fun HomeOverviewContent(
                     }
 
                     AnimatedVisibility(
-                        visible = !isSearchMode,
+                        visible = !uiState.isSearchMode,
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
@@ -296,7 +282,7 @@ fun HomeOverviewContent(
                                 color = MaterialTheme.colorScheme.primary
                             )
                             IconButton(
-                                onClick = { onSearchModeChange(true) },
+                                onClick = { onEvent(HomeEvent.OnSearchModeToggle(true)) },
                                 modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
                             ) {
                                 Icon(Icons.Default.Search, contentDescription = "Search")
@@ -305,7 +291,7 @@ fun HomeOverviewContent(
                     }
                 }
 
-                if (showSummaryHeader && !isSearchMode) {
+                if (showSummaryHeader && !uiState.isSearchMode) {
                     item(span = { GridItemSpan(2) }) {
                         OverviewSummaryCard(
                             categories = uiState.categories,
@@ -324,7 +310,7 @@ fun HomeOverviewContent(
                         category = category,
                         index = index,
                         onEvent = onEvent,
-                        onDeleteClicked = onDeleteClicked,
+                        onDeleteClicked = { onEvent(HomeEvent.OnCategoryToDeleteChanged(it)) },
                         navTo = navTo
                     )
                 }

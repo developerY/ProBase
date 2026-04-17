@@ -1,6 +1,7 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
 import com.zoewave.probase.applications.photodo.db.model.ProjectTemplate
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 
 sealed interface HomeEvent {
     data object OnRefresh : HomeEvent
@@ -14,7 +15,14 @@ sealed interface HomeEvent {
     data class OnDeleteCategory(val categoryId: Long) : HomeEvent
 
     data class OnAddQuickProjectClicked(val overrideCategoryName: String? = null) : HomeEvent
-    data class OnSearchQueryChanged(val query: String) : HomeEvent
+    data class OnCategorySearchQueryChanged(val query: String) : HomeEvent
+    data class OnTaskSearchQueryChanged(val query: String) : HomeEvent
     data object OnToggleCategoriesSummary : HomeEvent
     data object OnDismissBottomSheet : HomeEvent
+
+    // UI State Toggles
+    data class OnShowAddCategoryDialog(val show: Boolean) : HomeEvent
+    data class OnCategoryToDeleteChanged(val category: CategoryOverviewUiModel?) : HomeEvent
+    data class OnFabMenuToggle(val expanded: Boolean) : HomeEvent
+    data class OnSearchModeToggle(val enabled: Boolean) : HomeEvent
 }

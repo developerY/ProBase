@@ -40,8 +40,13 @@ class HomeViewModel @Inject constructor(
     private data class UiFlags(
         val isQuickProjectSheetOpen: Boolean = false,
         val quickProjectCategoryOverride: String? = null,
-        val searchQuery: String = "",
-        val isCategoriesSummaryExpanded: Boolean = true
+        val categorySearchQuery: String = "",
+        val taskSearchQuery: String = "",
+        val isCategoriesSummaryExpanded: Boolean = true,
+        val showAddCategoryDialog: Boolean = false,
+        val categoryToDelete: CategoryOverviewUiModel? = null,
+        val fabMenuExpanded: Boolean = false,
+        val isSearchMode: Boolean = false
     )
 
     private val _uiFlags = MutableStateFlow(UiFlags())
@@ -51,15 +56,15 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = combine(
         photoDoRepo.getCategoriesWithProjectsAndTasks(),
         _uiFlags.flatMapLatest { flags ->
-            if (flags.searchQuery.length >= 2) {
-                photoDoRepo.getProjectsWithMatchingTasks(flags.searchQuery)
+            if (flags.taskSearchQuery.length >= 2) {
+                photoDoRepo.getProjectsWithMatchingTasks(flags.taskSearchQuery)
                     .map { projects ->
                         projects.map { projectDetails ->
                             TaskSearchResult(
                                 projectId = projectDetails.project.projectId,
                                 projectTitle = projectDetails.project.name,
                                 tasks = projectDetails.tasks.filter { 
-                                    it.text.contains(flags.searchQuery, ignoreCase = true) 
+                                    it.text.contains(flags.taskSearchQuery, ignoreCase = true) 
                                 }
                             )
                         }
@@ -130,10 +135,15 @@ class HomeViewModel @Inject constructor(
                 urgentProjects = urgentProjects,
                 isQuickProjectSheetOpen = flags.isQuickProjectSheetOpen,
                 quickProjectCategoryOverride = flags.quickProjectCategoryOverride,
-                searchQuery = flags.searchQuery,
+                categorySearchQuery = flags.categorySearchQuery,
+                taskSearchQuery = flags.taskSearchQuery,
                 taskSearchResults = searchResults,
                 isAiEnabled = isAiEnabled,
-                isCategoriesSummaryExpanded = flags.isCategoriesSummaryExpanded
+                isCategoriesSummaryExpanded = flags.isCategoriesSummaryExpanded,
+                showAddCategoryDialog = flags.showAddCategoryDialog,
+                categoryToDelete = flags.categoryToDelete,
+                fabMenuExpanded = flags.fabMenuExpanded,
+                isSearchMode = flags.isSearchMode
             )
         }
         .flowOn(Dispatchers.Default)
@@ -227,9 +237,15 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
-            is HomeEvent.OnSearchQueryChanged -> {
+            is HomeEvent.OnCategorySearchQueryChanged -> {
                 _uiFlags.update { 
-                    it.copy(searchQuery = event.query)
+                    it.copy(categorySearchQuery = event.query)
+                }
+            }
+
+            is HomeEvent.OnTaskSearchQueryChanged -> {
+                _uiFlags.update { 
+                    it.copy(taskSearchQuery = event.query)
                 }
             }
 
@@ -237,6 +253,22 @@ class HomeViewModel @Inject constructor(
                 _uiFlags.update { 
                     it.copy(isCategoriesSummaryExpanded = !it.isCategoriesSummaryExpanded)
                 }
+            }
+
+            is HomeEvent.OnShowAddCategoryDialog -> {
+                _uiFlags.update { it.copy(showAddCategoryDialog = event.show) }
+            }
+
+            is HomeEvent.OnCategoryToDeleteChanged -> {
+                _uiFlags.update { it.copy(categoryToDelete = event.category) }
+            }
+
+            is HomeEvent.OnFabMenuToggle -> {
+                _uiFlags.update { it.copy(fabMenuExpanded = event.expanded) }
+            }
+
+            is HomeEvent.OnSearchModeToggle -> {
+                _uiFlags.update { it.copy(isSearchMode = event.enabled) }
             }
         }
     }
