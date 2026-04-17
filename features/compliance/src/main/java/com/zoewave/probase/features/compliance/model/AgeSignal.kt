@@ -9,7 +9,18 @@ data class AgeSignal(
     val ageRange: AgeRange?,
     val verificationStatus: AgeVerificationStatus,
     val mostRecentApprovalDate: Date?
-)
+) {
+    /**
+     * Authoritative "Clean-Slate" 2026 logic for Cloud AI authorization.
+     */
+    val isAuthorizedForCloudAI: Boolean
+        get() = when (verificationStatus) {
+            AgeVerificationStatus.VERIFIED -> true
+            AgeVerificationStatus.DECLARED -> true
+            AgeVerificationStatus.SUPERVISED -> mostRecentApprovalDate != null
+            else -> false
+        }
+}
 
 enum class AgeRange(val description: String) {
     AGE_0_12("0-12"),

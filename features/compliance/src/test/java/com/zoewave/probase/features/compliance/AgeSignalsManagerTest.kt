@@ -5,14 +5,14 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.tasks.Tasks
-import com.google.android.play.agesignals.model.AgeSignalsErrorCode
 import com.google.android.play.agesignals.AgeSignalsException
 import com.google.android.play.agesignals.AgeSignalsManager
 import com.google.android.play.agesignals.AgeSignalsManagerFactory
-import com.google.android.play.agesignals.AgeSignalsRequest
 import com.google.android.play.agesignals.AgeSignalsResult
+import com.google.android.play.agesignals.model.AgeSignalsErrorCode
 import com.google.android.play.agesignals.model.AgeSignalsVerificationStatus
 import com.zoewave.probase.features.compliance.model.AgeRange
+import com.zoewave.probase.features.compliance.model.AgeSignal
 import com.zoewave.probase.features.compliance.model.AgeVerificationStatus
 import com.zoewave.probase.features.compliance.model.ComplianceError
 import io.mockk.every
@@ -66,6 +66,37 @@ class AgeSignalsManagerTest {
         assertEquals(AgeRange.AGE_18_PLUS, ageSignal.ageRange)
         assertEquals(AgeVerificationStatus.VERIFIED, ageSignal.verificationStatus)
         assertEquals(now, ageSignal.mostRecentApprovalDate)
+        assertTrue(ageSignal.isAuthorizedForCloudAI)
+    }
+
+    @Test
+    fun `isAuthorizedForCloudAI returns true for Verified and Declared statuses`() {
+        val verifiedSignal = AgeSignal(null, AgeVerificationStatus.VERIFIED, null)
+        val declaredSignal = AgeSignal(null, AgeVerificationStatus.DECLARED, null)
+        
+        assertTrue(verifiedSignal.isAuthorizedForCloudAI)
+        assertTrue(declaredSignal.isAuthorizedForCloudAI)
+    }
+
+    @Test
+    fun `isAuthorizedForCloudAI returns true for Supervised with approval date`() {
+        val supervisedSignal = AgeSignal(null, AgeVerificationStatus.SUPERVISED, Date())
+        assertTrue(supervisedSignal.isAuthorizedForCloudAI)
+    }
+
+    @Test
+    fun `isAuthorizedForCloudAI returns false for Supervised without approval date`() {
+        val supervisedSignal = AgeSignal(null, AgeVerificationStatus.SUPERVISED, null)
+        assertTrue(!supervisedSignal.isAuthorizedForCloudAI)
+    }
+
+    @Test
+    fun `isAuthorizedForCloudAI returns false for Unknown or Restricted statuses`() {
+        val unknownSignal = AgeSignal(null, AgeVerificationStatus.UNKNOWN, null)
+        val pendingSignal = AgeSignal(null, AgeVerificationStatus.SUPERVISED_APPROVAL_PENDING, null)
+        
+        assertTrue(!unknownSignal.isAuthorizedForCloudAI)
+        assertTrue(!pendingSignal.isAuthorizedForCloudAI)
     }
 
     @Test
