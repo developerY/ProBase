@@ -5,6 +5,10 @@ import android.util.Log
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.ai.capture.domain.DiagnosticResult
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureEngine
+import com.zoewave.probase.features.compliance.AgeSignalsManager
+import com.zoewave.probase.features.compliance.model.AgeRange
+import com.zoewave.probase.features.compliance.model.AgeVerificationStatus
+import com.zoewave.probase.features.compliance.model.ComplianceError
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -13,6 +17,7 @@ import javax.inject.Singleton
 class SmartCaptureOrchestrator @Inject constructor(
     @param:Named("Cloud") private val cloudEngine: SmartCaptureEngine,
     @param:Named("Local") private val localEngine: SmartCaptureEngine,
+    private val ageSignalsManager: AgeSignalsManager
 ) {
     private val tag = "SmartCaptureOrchestrator"
 
@@ -45,6 +50,52 @@ class SmartCaptureOrchestrator @Inject constructor(
         }
 
         if (!apiKey.isNullOrBlank()) {
+            Log.d(tag, "Performing Compliance Handshake...")
+            onLog("Compliance: Verifying age signal...")
+            val ageSignalResult = ageSignalsManager.getAgeSignal()
+            
+            val isAllowed = ageSignalResult.fold(
+                onSuccess = { signal ->
+                    if (signal.isAuthorizedForCloudAI) {
+                        Log.d(tag, "Compliance: Handshake successful (Status: ${signal.verificationStatus}).")
+                        onLog("Compliance: Handshake successful.")
+                        true
+                    } else {
+                        Log.w(tag, "Compliance: Access restricted (Status: ${signal.verificationStatus}).")
+                        if (signal.verificationStatus == AgeVerificationStatus.SUPERVISED_APPROVAL_PENDING) {
+                            onLog("Compliance: Parental approval required.")
+                        } else {
+                            onLog("Compliance: 13+ Policy check failed.")
+                        }
+                        false
+                    }
+                },
+                onFailure = { error ->
+                    if (error is ComplianceError.SdkVersionOutdated) {
+                        Log.e(tag, "Compliance: SDK version outdated. Blocking Cloud AI.")
+                        onLog("Compliance: SDK Version Outdated. Please update the app.")
+                    } else {
+                        Log.e(tag, "Compliance: Error retrieving signal: ${error.message}")
+                        onLog("Compliance: Verification error.")
+                    }
+                    false
+                }
+            )
+
+            if (!isAllowed) {
+                if (bitmap == null) {
+                    return DiagnosticResult(SmartTaskDraft(), totalLogs, error = "Compliance: Cloud AI access restricted.")
+                }
+                Log.w(tag, "Compliance restricted. Falling back to Local.")
+                onLog("Compliance restricted. Falling back to Local AI...")
+                val fallbackLogs = listOf("Orchestrator: Compliance Check Restricted", "Triggering Local AI Fallback")
+                val fallbackResult = localEngine.processImage(bitmap, null, userContext = userContext, onLog = onLog)
+                return fallbackResult.copy(
+                    logs = totalLogs + fallbackLogs + fallbackResult.logs,
+                    warnings = listOf("Cloud analysis restricted for compliance. Using local extraction.")
+                )
+            }
+
             Log.d(tag, "Attempting Tier 1 (Cloud) capture with $modelName...")
             onLog("Tier 1: Cloud AI requested...")
             totalLogs.add("Orchestrator: Cloud API Key present")

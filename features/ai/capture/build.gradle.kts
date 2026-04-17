@@ -21,6 +21,7 @@ dependencies {
 
     // --- Feature Dependencies ---
     implementation(project(":features:camera"))
+    implementation(project(":features:compliance"))
 
     // --- Third Party ---
     implementation(libs.androidx.compose.material.icons.extended)
