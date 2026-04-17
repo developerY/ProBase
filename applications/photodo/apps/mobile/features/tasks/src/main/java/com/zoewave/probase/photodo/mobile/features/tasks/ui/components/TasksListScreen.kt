@@ -32,10 +32,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -56,25 +53,15 @@ fun TasksListScreen(
     uiState: TasksUiState,
     onEvent: (TasksEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
-    modifier: Modifier = Modifier
 ) {
-    var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
-
-    // Confirmation Dialog State
-    var showDeleteConfirmation by rememberSaveable { mutableStateOf(false) }
-    var projectToDelete by remember { mutableStateOf<ProjectListUiModel?>(null) }
-
-    BackHandler(fabMenuExpanded) { fabMenuExpanded = false }
+    BackHandler(uiState.fabMenuExpanded) { onEvent(TasksEvent.OnFabMenuToggle(false)) }
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text(uiState.categoryName) },
                 navigationIcon = {
-                    // Assume we can always go back if we are in this specific screen? 
-                    // Actually, for top-level it might not show. 
-                    // But in standard Nav3, we just call back.
                     IconButton(onClick = { navTo(null) }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -84,7 +71,7 @@ fun TasksListScreen(
                 },
                 actions = {
                     if (!uiState.isNoCategoriesYet) {
-                        IconButton(onClick = { showDeleteConfirmation = true }) {
+                        IconButton(onClick = { onEvent(TasksEvent.OnShowDeleteCategoryConfirmation(true)) }) {
                             Icon(
                                 Icons.Default.Delete,
                                 contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_category_content_desc)
@@ -97,11 +84,11 @@ fun TasksListScreen(
         // ✅ 1. THE FAB IS RESTORED
         floatingActionButton = {
             FloatingActionButtonMenu(
-                expanded = fabMenuExpanded,
+                expanded = uiState.fabMenuExpanded,
                 button = {
                     ToggleFloatingActionButton(
-                        checked = fabMenuExpanded,
-                        onCheckedChange = { fabMenuExpanded = it }
+                        checked = uiState.fabMenuExpanded,
+                        onCheckedChange = { onEvent(TasksEvent.OnFabMenuToggle(it)) }
                     ) {
                         val imageVector by remember {
                             derivedStateOf {
@@ -118,7 +105,7 @@ fun TasksListScreen(
             ) {
                 FloatingActionButtonMenuItem(
                     onClick = {
-                        fabMenuExpanded = false
+                        onEvent(TasksEvent.OnFabMenuToggle(false))
                         onEvent(TasksEvent.OnAddQuickProjectClicked(overrideCategoryName = null))
                     },
                     icon = { Icon(Icons.AutoMirrored.Filled.FormatListBulleted, contentDescription = null) },
@@ -126,20 +113,12 @@ fun TasksListScreen(
                 )
                 FloatingActionButtonMenuItem(
                     onClick = {
-                        fabMenuExpanded = false
+                        onEvent(TasksEvent.OnFabMenuToggle(false))
                         onEvent(TasksEvent.OnAddListClicked) // Opens the Project Sheet!
                     },
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
                     text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_project)) }
                 )
-                /*FloatingActionButtonMenuItem(
-                    onClick = {
-                        fabMenuExpanded = false
-                        onEvent(TasksEvent.OnAddCategoryClicked) // Opens the Category Sheet!
-                    },
-                    icon = { Icon(Icons.Default.Folder, contentDescription = null) },
-                    text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_category)) }
-                )*/
             }
         }
     ) { localPadding ->
@@ -179,7 +158,7 @@ fun TasksListScreen(
                         ProjectCard(
                             project = project,
                             onEvent = onEvent, // Pass the channel straight down!
-                            onDeleteClicked = { projectToDelete = it },
+                            onDeleteClicked = { onEvent(TasksEvent.OnProjectToDeleteChanged(it)) },
                             navTo = navTo
                         )
                     }
@@ -215,15 +194,15 @@ fun TasksListScreen(
         )
     }
 
-    if (showDeleteConfirmation) {
+    if (uiState.showDeleteConfirmation) {
         AlertDialog(
-            onDismissRequest = { showDeleteConfirmation = false },
+            onDismissRequest = { onEvent(TasksEvent.OnShowDeleteCategoryConfirmation(false)) },
             title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_category_title)) },
             text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_category_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        showDeleteConfirmation = false
+                        onEvent(TasksEvent.OnShowDeleteCategoryConfirmation(false))
                         uiState.categoryId?.let { id ->
                             onEvent(TasksEvent.OnDeleteCategoryClicked(id))
                         }
@@ -233,33 +212,33 @@ fun TasksListScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirmation = false }) {
+                TextButton(onClick = { onEvent(TasksEvent.OnShowDeleteCategoryConfirmation(false)) }) {
                     Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_cancel_button))
                 }
             }
         )
     }
 
-    if (projectToDelete != null) {
+    if (uiState.projectToDelete != null) {
         AlertDialog(
-            onDismissRequest = { projectToDelete = null },
+            onDismissRequest = { onEvent(TasksEvent.OnProjectToDeleteChanged(null)) },
             title = { Text("Delete Project?") },
-            text = { Text("This will permanently delete the '${projectToDelete?.title}' project and all its photos. This action cannot be undone.") },
+            text = { Text("This will permanently delete the '${uiState.projectToDelete.title}' project and all its photos. This action cannot be undone.") },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        projectToDelete?.let {
+                        uiState.projectToDelete.let {
                             onEvent(TasksEvent.OnDeleteProject(it.projectId))
                         }
-                        projectToDelete = null
+                        onEvent(TasksEvent.OnProjectToDeleteChanged(null))
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error) // Fixed color logic
                 ) {
                     Text("Delete")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { projectToDelete = null }) {
+                TextButton(onClick = { onEvent(TasksEvent.OnProjectToDeleteChanged(null)) }) {
                     Text("Cancel")
                 }
             }

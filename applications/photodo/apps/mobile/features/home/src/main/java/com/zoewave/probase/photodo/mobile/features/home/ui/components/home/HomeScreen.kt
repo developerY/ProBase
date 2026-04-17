@@ -40,34 +40,29 @@ import components.home.CategoryQuickJumpRow
 fun HomeScreen(
     uiState: HomeUiState,
     onEvent: (HomeEvent) -> Unit,
-    navTo: (PhotoTodoRoute) -> Unit, // ✅ Restrictive navigation channel enforced
-    modifier: Modifier = Modifier
+    navTo: (PhotoTodoRoute?) -> Unit, // ✅ Restrictive navigation channel enforced
 ) {
-    var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
-    var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
-    var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
-
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         // 🚀 Upgrade: HomeOverviewFab for consistent FAB actions
         floatingActionButton = {
             HomeOverviewFab(
-                fabMenuExpanded = fabMenuExpanded,
-                onFabToggle = { fabMenuExpanded = it },
+                fabMenuExpanded = uiState.fabMenuExpanded,
+                onFabToggle = { onEvent(HomeEvent.OnFabMenuToggle(it)) },
                 onAddCategoryClick = {
-                    fabMenuExpanded = false
-                    showAddCategoryDialog = true
+                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnShowAddCategoryDialog(true))
                 },
                 onHomeProjectClick = {
-                    fabMenuExpanded = false
+                    onEvent(HomeEvent.OnFabMenuToggle(false))
                     onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
                 },
                 onCameraClick = {
-                    fabMenuExpanded = false
+                    onEvent(HomeEvent.OnFabMenuToggle(false))
                     navTo(PhotoTodoRoute.Camera(projectId = null))
                 },
                 onSmartCaptureClick = {
-                    fabMenuExpanded = false
+                    onEvent(HomeEvent.OnFabMenuToggle(false))
                     navTo(PhotoTodoRoute.SmartCapture())
                 },
                 isAiEnabled = uiState.isAiEnabled
@@ -181,11 +176,11 @@ fun HomeScreen(
     }
 
     HomeOverviewDialogs(
-        showAddCategorySheet = showAddCategoryDialog,
-        onDismissAddCategory = { showAddCategoryDialog = false },
+        showAddCategorySheet = uiState.showAddCategoryDialog,
+        onDismissAddCategory = { onEvent(HomeEvent.OnShowAddCategoryDialog(false)) },
         uiState = uiState,
-        categoryToDelete = categoryToDelete,
-        onDismissDeleteConfirmation = { categoryToDelete = null },
+        categoryToDelete = uiState.categoryToDelete,
+        onDismissDeleteConfirmation = { onEvent(HomeEvent.OnCategoryToDeleteChanged(null)) },
         onEvent = onEvent,
     )
 }

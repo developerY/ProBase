@@ -16,10 +16,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -40,21 +36,7 @@ fun SettingsScreen(
     uiState: SettingsUiState,
     onEvent: (SettingsEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
-    modifier: Modifier = Modifier
 ) {
-    // Determine if we should open this card automatically based on the UiState deep-link
-    var isThemeExpanded by rememberSaveable(uiState.initialCardKeyToExpand) {
-        mutableStateOf(uiState.initialCardKeyToExpand == ThemeIdentifiers.SYSTEM)
-    }
-
-    var isAiExpanded by rememberSaveable(uiState.initialCardKeyToExpand) {
-        mutableStateOf(uiState.initialCardKeyToExpand == "AI")
-    }
-
-    var isAboutExpanded by rememberSaveable(uiState.initialCardKeyToExpand) {
-        mutableStateOf(uiState.initialCardKeyToExpand == "ABOUT")
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -70,7 +52,7 @@ fun SettingsScreen(
                 }
             )
         },
-        modifier = modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -86,8 +68,8 @@ fun SettingsScreen(
             ) {
                 ThemeSettingsCard(
                     title = stringResource(R.string.applications_photodo_apps_mobile_features_settings_app_theme_title),
-                    expanded = isThemeExpanded,
-                    onExpandToggle = { isThemeExpanded = !isThemeExpanded },
+                    expanded = uiState.isThemeExpanded,
+                    onExpandToggle = { onEvent(SettingsEvent.OnThemeExpandedToggled(!uiState.isThemeExpanded)) },
                     currentTheme = uiState.currentTheme,
                     onThemeSelected = { newTheme ->
                         onEvent(SettingsEvent.OnThemeSelected(newTheme))
@@ -95,8 +77,8 @@ fun SettingsScreen(
                 )
 
                 AiConfigurationCard(
-                    expanded = isAiExpanded,
-                    onExpandToggle = { isAiExpanded = !isAiExpanded },
+                    expanded = uiState.isAiExpanded,
+                    onExpandToggle = { onEvent(SettingsEvent.OnAiExpandedToggled(!uiState.isAiExpanded)) },
                     title = "Smart Capture AI",
                     description = "Use Gemini to automatically fill details from images."
                 )
@@ -113,19 +95,13 @@ fun SettingsScreen(
                 )
 
                 AboutSettingsCard(
-                    expanded = isAboutExpanded,
-                    onExpandToggle = { isAboutExpanded = !isAboutExpanded },
+                    expanded = uiState.isAboutExpanded,
+                    onExpandToggle = { onEvent(SettingsEvent.OnAboutExpandedToggled(!uiState.isAboutExpanded)) },
                     appVersion = uiState.appVersion,
-                    firebaseDeviceId = uiState.firebaseDeviceId
+                    firebaseDeviceId = uiState.firebaseDeviceId,
+                    ageVerificationStatus = uiState.ageVerificationStatus,
+                    isAgeVerified = uiState.isAgeVerified
                 )
-
-                // Additional settings cards can be added here following the same pattern
-                /*
-                NotificationSettingsCard(
-                    uiState = uiState,
-                    onEvent = onEvent
-                )
-                */
             }
         }
     }

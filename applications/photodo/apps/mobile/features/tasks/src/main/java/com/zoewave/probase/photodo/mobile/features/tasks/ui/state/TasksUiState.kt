@@ -24,5 +24,8 @@ data class TasksUiState(
     // --- NEW: SMART DEFAULT FIELDS ---
     val categoryId: Long? = null,
     val categoryName: String = "Loading...",
-    val isNoCategoriesYet: Boolean = false
+    val isNoCategoriesYet: Boolean = false,
+    val fabMenuExpanded: Boolean = false,
+    val showDeleteConfirmation: Boolean = false,
+    val projectToDelete: ProjectListUiModel? = null
 )

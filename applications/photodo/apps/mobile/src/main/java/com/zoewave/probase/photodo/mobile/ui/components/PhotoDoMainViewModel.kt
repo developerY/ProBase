@@ -3,10 +3,14 @@ package com.zoewave.probase.photodo.mobile.ui.components
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
@@ -14,10 +18,54 @@ class PhotoDoMainViewModel @Inject constructor(
     private val appSettingsRepository: AppSettingsRepository
 ) : ViewModel() {
 
-    val isAiEnabled: StateFlow<Boolean> = appSettingsRepository.isAiEnabledFlow
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
+    private val _backStack = MutableStateFlow<List<PhotoTodoRoute>>(
+        listOf(PhotoTodoRoute.Home)
+    )
+
+    val uiState: StateFlow<PhotoDoMainUiState> = combine(
+        appSettingsRepository.isAiEnabledFlow,
+        _backStack
+    ) { isAiEnabled, backStack ->
+        PhotoDoMainUiState(
+            isAiEnabled = isAiEnabled,
+            backStack = backStack,
+            currentRoute = backStack.lastOrNull() ?: PhotoTodoRoute.Home
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = PhotoDoMainUiState()
+    )
+
+    fun onEvent(event: PhotoDoMainEvent) {
+        when (event) {
+            is PhotoDoMainEvent.OnNavigateTo -> {
+                _backStack.update { currentStack ->
+                    if (event.route == PhotoTodoRoute.Home) {
+                        listOf(PhotoTodoRoute.Home)
+                    } else if (event.route != currentStack.lastOrNull()) {
+                        currentStack + event.route
+                    } else {
+                        currentStack
+                    }
+                }
+            }
+            PhotoDoMainEvent.OnNavigateBack -> {
+                _backStack.update { currentStack ->
+                    if (currentStack.size > 1) currentStack.dropLast(1) else currentStack
+                }
+            }
+        }
+    }
+}
+
+data class PhotoDoMainUiState(
+    val isAiEnabled: Boolean = false,
+    val backStack: List<PhotoTodoRoute> = listOf(PhotoTodoRoute.Home),
+    val currentRoute: PhotoTodoRoute = PhotoTodoRoute.Home
+)
+
+sealed interface PhotoDoMainEvent {
+    data class OnNavigateTo(val route: PhotoTodoRoute) : PhotoDoMainEvent
+    data object OnNavigateBack : PhotoDoMainEvent
 }

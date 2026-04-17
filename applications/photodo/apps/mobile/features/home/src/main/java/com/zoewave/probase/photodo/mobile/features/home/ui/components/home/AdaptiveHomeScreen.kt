@@ -49,164 +49,142 @@ import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 fun AdaptiveHomeScreen(
     uiState: HomeUiState,
     onEvent: (HomeEvent) -> Unit,
-    navTo: (PhotoTodoRoute) -> Unit,
-    windowSizeClass: WindowSizeClass,
-    modifier: Modifier = Modifier
+    navTo: (PhotoTodoRoute?) -> Unit,
 ) {
-    val isExpanded = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+    val navigator = rememberListDetailPaneScaffoldNavigator<Nothing>()
 
-    if (!isExpanded) {
-        HomeScreen(
-            uiState = uiState,
-            onEvent = onEvent,
-            navTo = navTo,
-            modifier = modifier
-        )
-    } else {
-        val navigator = rememberListDetailPaneScaffoldNavigator<Nothing>()
-
-        // Shared dialog/fab states for the adaptive view
-        var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
-        var categoryToDelete by remember { mutableStateOf<CategoryOverviewUiModel?>(null) }
-        var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
-        var isSearchMode by rememberSaveable { mutableStateOf(false) }
-
-        Scaffold(
-            modifier = modifier.fillMaxSize(),
-            floatingActionButton = {
-                HomeOverviewFab(
-                    fabMenuExpanded = fabMenuExpanded,
-                    onFabToggle = { fabMenuExpanded = it },
-                    onAddCategoryClick = {
-                        fabMenuExpanded = false
-                        showAddCategoryDialog = true
-                    },
-                    onHomeProjectClick = {
-                        fabMenuExpanded = false
-                        onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
-                    },
-                    onCameraClick = {
-                        fabMenuExpanded = false
-                        navTo(PhotoTodoRoute.Camera(projectId = null))
-                    },
-                    onSmartCaptureClick = {
-                        fabMenuExpanded = false
-                        navTo(PhotoTodoRoute.SmartCapture())
-                    },
-                    isAiEnabled = uiState.isAiEnabled
-                )
-            }
-        ) { paddingValues ->
-            val paneContrast = LocalPaneContrast.current
-            
-            ListDetailPaneScaffold(
-                directive = navigator.scaffoldDirective,
-                value = navigator.scaffoldValue,
-                listPane = {
-                    // LEFT PANE: The Dashboard (Summary + Jump Back In)
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                if (paneContrast == "TINTED") MaterialTheme.colorScheme.surfaceContainerLow
-                                else MaterialTheme.colorScheme.surface
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        floatingActionButton = {
+            HomeOverviewFab(
+                fabMenuExpanded = uiState.fabMenuExpanded,
+                onFabToggle = { onEvent(HomeEvent.OnFabMenuToggle(it)) },
+                onAddCategoryClick = {
+                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnShowAddCategoryDialog(true))
+                },
+                onHomeProjectClick = {
+                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
+                },
+                onCameraClick = {
+                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    navTo(PhotoTodoRoute.Camera(projectId = null))
+                },
+                onSmartCaptureClick = {
+                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    navTo(PhotoTodoRoute.SmartCapture())
+                },
+                isAiEnabled = uiState.isAiEnabled
+            )
+        }
+    ) { paddingValues ->
+        val paneContrast = LocalPaneContrast.current
+        
+        ListDetailPaneScaffold(
+            directive = navigator.scaffoldDirective,
+            value = navigator.scaffoldValue,
+            listPane = {
+                // LEFT PANE: The Dashboard (Summary + Jump Back In)
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            if (paneContrast == "TINTED") MaterialTheme.colorScheme.surfaceContainerLow
+                            else MaterialTheme.colorScheme.surface
+                        )
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp),
+                    contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (uiState.isLoading) {
+                        item { CircularProgressIndicator() }
+                    } else if (uiState.isEmpty) {
+                        item {
+                            Text(
+                                stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
+                                modifier = Modifier.padding(top = 16.dp)
                             )
-                            .padding(paddingValues)
-                            .padding(horizontal = 16.dp),
-                        contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp),
-                        verticalArrangement = Arrangement.spacedBy(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        if (uiState.isLoading) {
-                            item { CircularProgressIndicator() }
-                        } else if (uiState.isEmpty) {
+                        }
+                    } else {
+                        item {
+                            OverviewSummaryCard(
+                                categories = uiState.categories,
+                                isExpanded = uiState.isCategoriesSummaryExpanded,
+                                onToggleExpand = { onEvent(HomeEvent.OnToggleCategoriesSummary) }
+                            )
+                        }
+
+                        item {
+                            // --- 4. Jump Back In Section (Preserved Urgent/Fav List) ---
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                                    Text(
+                                        stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+
+                                TaskSearchBar(
+                                    query = uiState.taskSearchQuery,
+                                    onQueryChange = { onEvent(HomeEvent.OnTaskSearchQueryChanged(it)) }
+                                )
+                            }
+                        }
+
+                        if (uiState.taskSearchQuery.isNotBlank()) {
                             item {
-                                Text(
-                                    stringResource(R.string.applications_photodo_apps_mobile_features_home_no_data_seed),
-                                    modifier = Modifier.padding(top = 16.dp)
+                                TaskSearchResultsList(
+                                    results = uiState.taskSearchResults,
+                                    navTo = navTo
                                 )
                             }
                         } else {
-                            item {
-                                OverviewSummaryCard(
-                                    categories = uiState.categories,
-                                    isExpanded = uiState.isCategoriesSummaryExpanded,
-                                    onToggleExpand = { onEvent(HomeEvent.OnToggleCategoriesSummary) }
-                                )
-                            }
-
-                            item {
-                                // --- 4. Jump Back In Section (Preserved Urgent/Fav List) ---
-                                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                                        Text(
-                                            stringResource(R.string.applications_photodo_apps_mobile_features_home_jump_back_in),
-                                            style = MaterialTheme.typography.titleLarge,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-
-                                    TaskSearchBar(
-                                        query = uiState.searchQuery,
-                                        onQueryChange = { onEvent(HomeEvent.OnSearchQueryChanged(it)) }
-                                    )
-                                }
-                            }
-
-                            if (uiState.searchQuery.isNotBlank()) {
+                            if (uiState.urgentProjects.isEmpty()) {
                                 item {
-                                    TaskSearchResultsList(
-                                        results = uiState.taskSearchResults,
-                                        navTo = navTo
+                                    Text(
+                                        stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
+                                        modifier = Modifier.padding(top = 16.dp)
                                     )
                                 }
                             } else {
-                                if (uiState.urgentProjects.isEmpty()) {
-                                    item {
-                                        Text(
-                                            stringResource(R.string.applications_photodo_apps_mobile_features_home_no_urgent_projects),
-                                            modifier = Modifier.padding(top = 16.dp)
-                                        )
-                                    }
-                                } else {
-                                    items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
-                                        HomeProjectRow(
-                                            project = project,
-                                            onEvent = onEvent,
-                                            navTo = navTo
-                                        )
-                                    }
+                                items(items = uiState.urgentProjects, key = { it.projectId }) { project ->
+                                    HomeProjectRow(
+                                        project = project,
+                                        onEvent = onEvent,
+                                        navTo = navTo
+                                    )
                                 }
                             }
                         }
                     }
-                },
-                detailPane = {
-                    // RIGHT PANE: The Directory (Full Category Grid)
-                    HomeOverviewContent(
-                        uiState = uiState,
-                        isSearchMode = isSearchMode,
-                        onSearchModeChange = { isSearchMode = it },
-                        onEvent = onEvent,
-                        navTo = { route -> if (route != null) navTo(route) },
-                        onDeleteClicked = { categoryToDelete = it },
-                        modifier = Modifier.fillMaxSize().padding(paddingValues),
-                        showSummaryHeader = false
-                    )
-                },
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-
-        HomeOverviewDialogs(
-            showAddCategorySheet = showAddCategoryDialog,
-            onDismissAddCategory = { showAddCategoryDialog = false },
-            uiState = uiState,
-            categoryToDelete = categoryToDelete,
-            onDismissDeleteConfirmation = { categoryToDelete = null },
-            onEvent = onEvent
+                }
+            },
+            detailPane = {
+                // RIGHT PANE: The Directory (Full Category Grid)
+                HomeOverviewContent(
+                    uiState = uiState,
+                    onEvent = onEvent,
+                    navTo = { route -> if (route != null) navTo(route) },
+                    modifier = Modifier.fillMaxSize().padding(paddingValues),
+                    showSummaryHeader = false
+                )
+            },
+            modifier = Modifier.fillMaxSize()
         )
     }
+
+    HomeOverviewDialogs(
+        showAddCategorySheet = uiState.showAddCategoryDialog,
+        onDismissAddCategory = { onEvent(HomeEvent.OnShowAddCategoryDialog(false)) },
+        uiState = uiState,
+        categoryToDelete = uiState.categoryToDelete,
+        onDismissDeleteConfirmation = { onEvent(HomeEvent.OnCategoryToDeleteChanged(null)) },
+        onEvent = onEvent
+    )
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -226,8 +204,7 @@ fun AdaptiveHomeScreenPreviewCompact() {
                 )
             ),
             onEvent = {},
-            navTo = {},
-            windowSizeClass = calculateFromSize(DpSize(400.dp, 800.dp))
+            navTo = {}
         )
     }
 }
@@ -249,8 +226,7 @@ fun AdaptiveHomeScreenPreviewExpanded() {
                 )
             ),
             onEvent = {},
-            navTo = {},
-            windowSizeClass = calculateFromSize(DpSize(1000.dp, 800.dp))
+            navTo = {}
         )
     }
 }

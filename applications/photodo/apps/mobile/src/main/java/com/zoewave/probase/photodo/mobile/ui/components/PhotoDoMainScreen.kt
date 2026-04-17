@@ -10,9 +10,6 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass.Companion.calculateFromSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -35,51 +32,36 @@ fun PhotoDoMainScreen(
         photoTodoNavEntryProvider(key, size, ai, to, back)
     }
 ) {
-    val isAiEnabled by viewModel.isAiEnabled.collectAsStateWithLifecycle()
-    var backStack by remember { mutableStateOf(listOf<PhotoTodoRoute>(PhotoTodoRoute.Home)) }
-    val currentRoute = backStack.lastOrNull() ?: PhotoTodoRoute.Home
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             PhotoTodoBottomBar(
-                currentRoute = currentRoute,
+                currentRoute = uiState.currentRoute,
                 navTo = { selectedRoute ->
-                    if (currentRoute != selectedRoute) {
-                        // 🚀 ATOMIC UPDATE: Ensure backstack is never transiently empty
-                        backStack = if (selectedRoute == PhotoTodoRoute.Home) {
-                            listOf(PhotoTodoRoute.Home)
-                        } else {
-                            listOf(PhotoTodoRoute.Home, selectedRoute)
-                        }
-                    }
+                    viewModel.onEvent(PhotoDoMainEvent.OnNavigateTo(selectedRoute))
                 }
             )
         }
     ) { innerPadding ->
         NavDisplay(
-            backStack = backStack,
+            backStack = uiState.backStack,
             modifier = Modifier.padding(innerPadding),
             onBack = { 
-                if (backStack.size > 1) {
-                    backStack = backStack.dropLast(1)
-                }
+                viewModel.onEvent(PhotoDoMainEvent.OnNavigateBack)
             },
             entryProvider = { key ->
                 // ✅ DELEGATE: Call the provider function
                 entryProvider(
                     key,
                     windowSizeClass,
-                    isAiEnabled,
+                    uiState.isAiEnabled,
                     { 
-                        if (backStack.size > 1) {
-                            backStack = backStack.dropLast(1)
-                        }
+                        viewModel.onEvent(PhotoDoMainEvent.OnNavigateBack)
                     },
                     { dest ->
-                        if (dest != backStack.lastOrNull()) {
-                            backStack = backStack + dest
-                        }
+                        viewModel.onEvent(PhotoDoMainEvent.OnNavigateTo(dest))
                     }
                 )
             }

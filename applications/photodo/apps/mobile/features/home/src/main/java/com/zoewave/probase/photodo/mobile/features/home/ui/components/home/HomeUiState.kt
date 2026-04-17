@@ -19,10 +19,15 @@ data class HomeUiState(
     val urgentProjects: List<ProjectListUiModel> = emptyList(),
     val isQuickProjectSheetOpen: Boolean = false,
     val quickProjectCategoryOverride: String? = null,
-    val searchQuery: String = "",
+    val categorySearchQuery: String = "",
+    val taskSearchQuery: String = "",
     val taskSearchResults: List<TaskSearchResult> = emptyList(),
     val isAiEnabled: Boolean = false,
-    val isCategoriesSummaryExpanded: Boolean = true
+    val isCategoriesSummaryExpanded: Boolean = true,
+    val showAddCategoryDialog: Boolean = false,
+    val categoryToDelete: CategoryOverviewUiModel? = null,
+    val fabMenuExpanded: Boolean = false,
+    val isSearchMode: Boolean = false
 ) {
     val isEmpty: Boolean = !isLoading && categories.isEmpty()
 }

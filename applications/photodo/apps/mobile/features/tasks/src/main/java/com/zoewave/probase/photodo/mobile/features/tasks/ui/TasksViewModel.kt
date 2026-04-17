@@ -78,7 +78,10 @@ class TasksViewModel @Inject constructor(
         val isAddTaskItemSheetOpen: Boolean = false,
         val isAddPhotoSheetOpen: Boolean = false,
         val isQuickProjectSheetOpen: Boolean = false,
-        val quickProjectCategoryOverride: String? = null
+        val quickProjectCategoryOverride: String? = null,
+        val fabMenuExpanded: Boolean = false,
+        val showDeleteConfirmation: Boolean = false,
+        val projectToDelete: ProjectListUiModel? = null
     )
 
     val uiState: StateFlow<TasksUiState> = combine(
@@ -152,7 +155,10 @@ class TasksViewModel @Inject constructor(
             isAddTaskItemSheetOpen = flags.isAddTaskItemSheetOpen,
             isAddPhotoSheetOpen = flags.isAddPhotoSheetOpen,
             isQuickProjectSheetOpen = flags.isQuickProjectSheetOpen,
-            quickProjectCategoryOverride = flags.quickProjectCategoryOverride
+            quickProjectCategoryOverride = flags.quickProjectCategoryOverride,
+            fabMenuExpanded = flags.fabMenuExpanded,
+            showDeleteConfirmation = flags.showDeleteConfirmation,
+            projectToDelete = flags.projectToDelete
         )
     }.stateIn(
         scope = viewModelScope,
@@ -362,6 +368,18 @@ class TasksViewModel @Inject constructor(
                     // 5. Trigger Navigation Side Effect
                     _effects.send(TasksSideEffect.ProjectCreated(projectId, newProject.name))
                 }
+            }
+
+            is TasksEvent.OnFabMenuToggle -> {
+                _uiFlags.update { it.copy(fabMenuExpanded = event.expanded) }
+            }
+
+            is TasksEvent.OnShowDeleteCategoryConfirmation -> {
+                _uiFlags.update { it.copy(showDeleteConfirmation = event.show) }
+            }
+
+            is TasksEvent.OnProjectToDeleteChanged -> {
+                _uiFlags.update { it.copy(projectToDelete = event.project) }
             }
         }
     }

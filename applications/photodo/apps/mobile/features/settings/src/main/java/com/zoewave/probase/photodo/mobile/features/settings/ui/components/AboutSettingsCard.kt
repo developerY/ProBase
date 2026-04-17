@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -27,6 +29,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -40,6 +43,8 @@ fun AboutSettingsCard(
     onExpandToggle: () -> Unit,
     appVersion: String,
     firebaseDeviceId: String,
+    ageVerificationStatus: String,
+    isAgeVerified: Boolean,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -117,6 +122,42 @@ fun AboutSettingsCard(
                     ) {
                         Text(stringResource(R.string.applications_photodo_apps_mobile_features_settings_about_copy_id))
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // NEW: Regulatory Compliance Section
+                    Text(
+                        text = "Regulatory Compliance",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isAgeVerified) Icons.Default.CheckCircle else Icons.Default.Shield,
+                            contentDescription = null,
+                            tint = if (isAgeVerified) Color(0xFF4CAF50) else MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Column {
+                            Text(
+                                text = "Age Verification Status",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                            Text(
+                                text = ageVerificationStatus,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                    Text(
+                        text = "Authoritative age signals are retrieved in real-time from the Play Store to ensure age-appropriate experiences.",
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
