@@ -28,6 +28,7 @@ class ReceiptOrchestrator @Inject constructor(
         val totalLogs = mutableListOf<String>()
         return try {
             if (!apiKey.isNullOrBlank()) {
+                /*
                 Log.d(tag, "Performing Compliance Handshake...")
                 totalLogs.add("Orchestrator: Compliance check...")
                 
@@ -50,6 +51,7 @@ class ReceiptOrchestrator @Inject constructor(
                         warnings = listOf("Cloud analysis restricted for compliance. Using local extraction.")
                     )
                 }
+                */
 
                 totalLogs.add("Orchestrator: Attempting Cloud Receipt AI")
                 val result = cloudEngine.processReceipt(bitmap, apiKey, modelName, userContext)

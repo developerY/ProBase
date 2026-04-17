@@ -50,6 +50,7 @@ class SmartCaptureOrchestrator @Inject constructor(
         }
 
         if (!apiKey.isNullOrBlank()) {
+            /*
             Log.d(tag, "Performing Compliance Handshake...")
             onLog("Compliance: Verifying age signal...")
             val ageSignalResult = ageSignalsManager.getAgeSignal()
@@ -95,6 +96,7 @@ class SmartCaptureOrchestrator @Inject constructor(
                     warnings = listOf("Cloud analysis restricted for compliance. Using local extraction.")
                 )
             }
+            */
 
             Log.d(tag, "Attempting Tier 1 (Cloud) capture with $modelName...")
             onLog("Tier 1: Cloud AI requested...")
