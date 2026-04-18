@@ -186,7 +186,24 @@ fun HomeOverviewFab(
 
         FloatingActionButtonMenuItem(
             onClick = onCameraClick,
-            icon = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
+            icon = { 
+                Box(contentAlignment = Alignment.Center) {
+
+                    if (isAiEnabled) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            modifier = Modifier
+                                 .size(43.dp)
+                                .align(Alignment.TopEnd)
+                                .padding(top = 1.dp, end = 1.dp),
+                            tint = Color(0xFFD5B409)// Color(0xFFFFD700)
+                        )
+                    }
+                    Icon(Icons.Default.CameraAlt, contentDescription = null)
+
+                }
+            },
             text = { Text(stringResource(com.zoewave.photodo.model.R.string.applications_photodo_model_route_camera)) }
         )
 
