@@ -105,6 +105,9 @@ interface PhotoDoDao {
     @Query("SELECT * FROM projects WHERE projectId = :projectId")
     fun getProjectById(projectId: Long): Flow<ProjectEntity?>
 
+    @Query("SELECT * FROM projects WHERE categoryId = :categoryId AND name = :name LIMIT 1")
+    suspend fun getProjectByNameAndCategory(categoryId: Long, name: String): ProjectEntity?
+
     @Query("SELECT * FROM projects ORDER BY creationDate DESC")
     fun getAllProjects(): Flow<List<ProjectEntity>>
 

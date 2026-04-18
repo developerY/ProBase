@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
@@ -41,8 +42,10 @@ class PhotoDoSyncEngine @Inject constructor(
 
     private val dataClient = Wearable.getDataClient(context)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var isWearableApiAvailable = true
 
     fun startSyncing() {
+        if (!isWearableApiAvailable) return
         scope.launch {
             Log.d(TAG, "Starting sync observer...")
             // Combine categories/projects/tasks with project details (for photo counts)
@@ -62,6 +65,7 @@ class PhotoDoSyncEngine @Inject constructor(
      * Useful for responding to "request sync" pings from the watch.
      */
     fun triggerSync() {
+        if (!isWearableApiAvailable) return
         scope.launch {
             try {
                 Log.d(TAG, "Manual sync trigger received. Performing one-shot broadcast.")
@@ -76,6 +80,7 @@ class PhotoDoSyncEngine @Inject constructor(
     }
 
     private suspend fun broadcast(syncData: List<SyncCategory>) = withContext(Dispatchers.IO) {
+        if (!isWearableApiAvailable) return@withContext
         try {
             val jsonPayload = Json.encodeToString(syncData)
 
@@ -140,6 +145,13 @@ class PhotoDoSyncEngine @Inject constructor(
 
             dataClient.putDataItem(request).await()
             Log.d(TAG, "Successfully broadcasted sync state (${syncData.size} categories)")
+        } catch (e: ApiException) {
+            if (e.statusCode == 17) { // API_UNAVAILABLE
+                Log.w(TAG, "Wearable API is not available on this device. Sync disabled.")
+                isWearableApiAvailable = false
+            } else {
+                Log.e(TAG, "Failed to broadcast sync state (API Error: ${e.statusCode})", e)
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to broadcast sync state", e)
         }

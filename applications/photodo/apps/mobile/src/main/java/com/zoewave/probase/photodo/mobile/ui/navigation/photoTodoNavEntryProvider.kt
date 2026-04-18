@@ -225,15 +225,18 @@ fun photoTodoNavEntryProvider(
                 val context = LocalContext.current
                 
                 LaunchedEffect(key.photoUri, key.prefilledAiDraft) {
+                    Log.d("SavePhotoDebug", "NavEntry: Calling setInitialData for uri: ${key.photoUri}")
                     viewModel.setInitialData(key.photoUri, key.prefilledAiDraft)
                 }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
                 // 🚀 NEW: Automatic navigation back to Home dashboard after success
                 LaunchedEffect(uiState.isSaved) {
+                    Log.d("SavePhotoDebug", "NavEntry: uiState.isSaved changed to: ${uiState.isSaved}")
                     if (uiState.isSaved) {
                         val id = uiState.savedProjectId
                         val title = uiState.savedProjectTitle
+                        Log.d("SavePhotoDebug", "NavEntry: Auto-navigating to Detail for ID: $id")
                         if (id != null && title != null) {
                             navigateBack()
                             navigateTo(PhotoTodoRoute.TaskDetail(id, title))

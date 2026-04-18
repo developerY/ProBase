@@ -1,9 +1,9 @@
 package com.zoewave.probase.photodo.features.camera.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
-import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
@@ -12,7 +12,6 @@ import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.photodo.features.camera.domain.AddPhotoToTaskUseCase
 import com.zoewave.probase.photodo.features.camera.ui.state.SavePhotoUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -60,15 +59,32 @@ class SavePhotoViewModel @Inject constructor(
         _subTasks,
         _aiGeneratedFields,
         repo.getAllCategories(),
+        repo.getAllProjects(), // 🚀 NEW: Fetch existing projects
         _isSaving,
         _isSaved,
         _savedProjectId,
         _savedProjectTitle
     ) { args: Array<Any?> ->
+        val categories = args[10] as List<CategoryEntity>
+        val allProjects = args[11] as List<ProjectEntity>
+        val currentCategoryName = args[2] as String
+
+        // 🚀 NEW: Filter projects by the currently selected category name
+        val filteredProjects = if (currentCategoryName.isNotBlank()) {
+            val matchedCategoryId = categories.find { it.name.equals(currentCategoryName, ignoreCase = true) }?.categoryId
+            if (matchedCategoryId != null) {
+                allProjects.filter { it.categoryId == matchedCategoryId }
+            } else {
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+
         SavePhotoUiState(
             photoUri = args[0] as String,
             isFromAi = args[1] as Boolean,
-            categoryName = args[2] as String,
+            categoryName = currentCategoryName,
             projectName = args[3] as String,
             taskName = args[4] as String,
             duration = args[5] as String,
@@ -76,11 +92,12 @@ class SavePhotoViewModel @Inject constructor(
             dueDateMillis = args[7] as Long?,
             subTasks = args[8] as List<String>,
             aiGeneratedFields = args[9] as Set<String>,
-            categories = args[10] as List<CategoryEntity>,
-            isSaving = args[11] as Boolean,
-            isSaved = args[12] as Boolean,
-            savedProjectId = args[13] as Long?,
-            savedProjectTitle = args[14] as String?
+            categories = categories,
+            projects = filteredProjects, // 🚀 NEW: Use filtered list
+            isSaving = args[12] as Boolean,
+            isSaved = args[13] as Boolean,
+            savedProjectId = args[14] as Long?,
+            savedProjectTitle = args[15] as String?
         )
     }.stateIn(
         scope = viewModelScope,
@@ -89,8 +106,19 @@ class SavePhotoViewModel @Inject constructor(
     )
 
     fun setInitialData(uri: String?, draft: SmartTaskDraft? = null) {
-        if (_photoUri.value == uri && draft == null) return
+        Log.d("SavePhotoDebug", "ViewModel: setInitialData called. Current isSaved: ${_isSaved.value}")
+        if (_photoUri.value == uri && draft == null) {
+            Log.d("SavePhotoDebug", "ViewModel: setInitialData ignored (same URI and no draft)")
+            return
+        }
         
+        // 🚀 CRITICAL: Reset the status flags so we don't skip the form if the ViewModel is reused.
+        Log.d("SavePhotoDebug", "ViewModel: Resetting status flags to false")
+        _isSaving.value = false
+        _isSaved.value = false
+        _savedProjectId.value = null
+        _savedProjectTitle.value = null
+
         _photoUri.value = uri ?: ""
         if (draft != null) {
             _isFromAi.value = true
@@ -182,16 +210,37 @@ class SavePhotoViewModel @Inject constructor(
             val finalCategory = _categoryName.value.ifBlank { "Uncategorized" }
             val categoryId = repo.getOrCreateCategoryByName(finalCategory)
 
-            // 2. Create Project
+            // 2. Check for Existing Project in this Category
             val finalProjectName = _projectName.value.ifBlank { _taskName.value.ifBlank { "New Project" } }
-            val newProject = ProjectEntity(
-                categoryId = categoryId,
-                name = finalProjectName,
-                projectBudget = _budgetInput.value.toDoubleOrNull() ?: 0.0,
-                dueDate = _dueDateMillis.value,
-                notes = if (_duration.value.isNotBlank()) "Duration: ${_duration.value}" else null
-            )
-            val projectId = repo.upsertProject(newProject)
+            val existingProject = repo.getProjectByNameAndCategory(categoryId, finalProjectName)
+
+            val inputBudget = _budgetInput.value.toDoubleOrNull() ?: 0.0
+            val projectId = if (existingProject != null) {
+                Log.d("ProjectDebug", "Merging into existing project: ${existingProject.name} (ID: ${existingProject.projectId})")
+                
+                // 🚀 MERGE LOGIC:
+                // 1. Add budgets together
+                // 2. Use new due date if provided
+                val updatedProject = existingProject.copy(
+                    projectBudget = existingProject.projectBudget + inputBudget,
+                    dueDate = _dueDateMillis.value ?: existingProject.dueDate,
+                    lastModified = System.currentTimeMillis()
+                )
+                repo.updateProject(updatedProject)
+                existingProject.projectId
+            } else {
+                Log.d("ProjectDebug", "Creating new project: $finalProjectName in Category ID: $categoryId")
+                val newProject = ProjectEntity(
+                    categoryId = categoryId,
+                    name = finalProjectName,
+                    projectBudget = inputBudget,
+                    dueDate = _dueDateMillis.value,
+                    notes = if (_duration.value.isNotBlank()) "Duration: ${_duration.value}" else null
+                )
+                repo.upsertProject(newProject)
+            }
+
+            Log.d("ProjectDebug", "Final Project ID for navigation: $projectId")
 
             // 3. Create Main Task (if name provided)
             if (_taskName.value.isNotBlank()) {
@@ -212,6 +261,7 @@ class SavePhotoViewModel @Inject constructor(
             _savedProjectTitle.value = finalProjectName
             _isSaving.value = false
             _isSaved.value = true
+            Log.d("SavePhotoDebug", "ViewModel: saveTask complete. isSaved set to true for ID: $projectId")
         }
     }
 }

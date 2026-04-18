@@ -84,6 +84,10 @@ class PhotoDoRepoImpl @Inject constructor(
         return photoDoDao.getProjectById(projectId)
     }
 
+    override suspend fun getProjectByNameAndCategory(categoryId: Long, name: String): ProjectEntity? {
+        return photoDoDao.getProjectByNameAndCategory(categoryId, name)
+    }
+
     override fun getAllProjects(): Flow<List<ProjectEntity>> {
         return photoDoDao.getAllProjects()
     }
