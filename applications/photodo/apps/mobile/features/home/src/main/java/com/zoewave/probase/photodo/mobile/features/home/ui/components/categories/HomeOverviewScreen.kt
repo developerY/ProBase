@@ -1,6 +1,11 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -71,6 +76,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
@@ -190,14 +196,39 @@ fun HomeOverviewFab(
                 Box(contentAlignment = Alignment.Center) {
 
                     if (isAiEnabled) {
+                        val infiniteTransition = rememberInfiniteTransition(label = "SparklePulse")
+                        val scale by infiniteTransition.animateFloat(
+                            initialValue = 0.8f,
+                            targetValue = 1.2f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(durationMillis = 1000),
+                                repeatMode = RepeatMode.Reverse
+                            ),
+                            label = "SparkleScale"
+                        )
+                        val alpha by infiniteTransition.animateFloat(
+                            initialValue = 0.6f,
+                            targetValue = 1.0f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(durationMillis = 1000),
+                                repeatMode = RepeatMode.Reverse
+                            ),
+                            label = "SparkleAlpha"
+                        )
+
                         Icon(
                             imageVector = Icons.Default.AutoAwesome,
                             contentDescription = null,
                             modifier = Modifier
-                                 .size(43.dp)
+                                .size(43.dp)
                                 .align(Alignment.TopEnd)
-                                .padding(top = 1.dp, end = 1.dp),
-                            tint = Color(0xFFD5B409)// Color(0xFFFFD700)
+                                .padding(top = 1.dp, end = 1.dp)
+                                .graphicsLayer(
+                                    scaleX = scale,
+                                    scaleY = scale,
+                                    alpha = alpha
+                                ),
+                            tint = Color(0xFFD5B409)
                         )
                     }
                     Icon(Icons.Default.CameraAlt, contentDescription = null)
