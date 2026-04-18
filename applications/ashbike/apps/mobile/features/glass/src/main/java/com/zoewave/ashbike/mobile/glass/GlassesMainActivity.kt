@@ -16,6 +16,7 @@ import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import com.zoewave.ashbike.data.repository.bike.BikeRepository
 import com.zoewave.ashbike.mobile.glass.audio.VoiceGearController
 import com.zoewave.ashbike.mobile.glass.ui.GlassApp
+import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -27,6 +28,7 @@ class GlassesMainActivity : ComponentActivity() {
 
     // Inject the shared repository instance
     @Inject lateinit var repository: BikeRepository
+    @Inject lateinit var firebaseLiveSessionManager: FirebaseLiveSessionManager
     private lateinit var audioInterface: AudioInterface
     private lateinit var voiceGearController: VoiceGearController
 
@@ -51,9 +53,14 @@ class GlassesMainActivity : ComponentActivity() {
         lifecycle.addObserver(audioInterface)
 
         voiceGearController = VoiceGearController(this, repository) { command ->
-            audioInterface.speak("Changing $command")
+            if (command == "AI Assistant") {
+                firebaseLiveSessionManager.startConversation()
+            } else {
+                audioInterface.speak("Changing $command")
+            }
         }
         lifecycle.addObserver(voiceGearController)
+        lifecycle.addObserver(firebaseLiveSessionManager)
 
         checkAndRequestAudioPermission()
 

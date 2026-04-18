@@ -132,6 +132,10 @@ class VoiceGearController(
                 onCommandDetected("Gear Down")
                 scope.launch { repository.gearDown() }
             }
+            normalized.contains("hey ash") || normalized.contains("talk to ash") -> {
+                Log.i(TAG, "Triggering AI Assistant")
+                onCommandDetected("AI Assistant")
+            }
         }
     }
 
