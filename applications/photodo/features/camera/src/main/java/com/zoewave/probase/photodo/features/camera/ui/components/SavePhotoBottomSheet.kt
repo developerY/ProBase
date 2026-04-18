@@ -148,6 +148,7 @@ internal fun SavePhotoForm(
     val containerColor = if (uiState.isFromAi) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f) else Color.Transparent
 
     var isCategoryDropdownExpanded by remember { mutableStateOf(false) }
+    var isProjectDropdownExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -252,15 +253,46 @@ internal fun SavePhotoForm(
 
         FormSection(title = "Project Details", themeColor = themeColor) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                AiEnhancedTextField(
-                    value = uiState.projectName,
-                    onValueChange = onProjectNameChanged,
-                    label = "Project Name",
-                    isAiGenerated = uiState.aiGeneratedFields.contains("project"),
-                    onReportClick = onReportIssue,
-                    onClearAiClick = onClearAiData,
+                ExposedDropdownMenuBox(
+                    expanded = isProjectDropdownExpanded,
+                    onExpandedChange = { isProjectDropdownExpanded = it },
                     modifier = Modifier.fillMaxWidth()
-                )
+                ) {
+                    AiEnhancedTextField(
+                        value = uiState.projectName,
+                        onValueChange = onProjectNameChanged,
+                        label = "Project Name",
+                        isAiGenerated = uiState.aiGeneratedFields.contains("project"),
+                        onReportClick = onReportIssue,
+                        onClearAiClick = onClearAiData,
+                        modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, true),
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isProjectDropdownExpanded) 
+                        },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = isProjectDropdownExpanded,
+                        onDismissRequest = { isProjectDropdownExpanded = false }
+                    ) {
+                        // Show unique project names from current category if possible, or all projects
+                        val filteredProjects = uiState.projects
+                            .filter { it.name.isNotBlank() }
+                            .distinctBy { it.name }
+                        
+                        filteredProjects.forEach { project ->
+                            DropdownMenuItem(
+                                text = { Text(project.name) },
+                                onClick = {
+                                    onProjectNameChanged(project.name)
+                                    isProjectDropdownExpanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                            )
+                        }
+                    }
+                }
 
                 QuickIconRow(
                     items = projectTemplates,

@@ -3,7 +3,6 @@ package com.zoewave.probase.photodo.features.camera.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
-import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
@@ -12,7 +11,6 @@ import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.photodo.features.camera.domain.AddPhotoToTaskUseCase
 import com.zoewave.probase.photodo.features.camera.ui.state.SavePhotoUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -60,6 +58,7 @@ class SavePhotoViewModel @Inject constructor(
         _subTasks,
         _aiGeneratedFields,
         repo.getAllCategories(),
+        repo.getAllProjects(), // 🚀 NEW: Fetch existing projects
         _isSaving,
         _isSaved,
         _savedProjectId,
@@ -77,10 +76,11 @@ class SavePhotoViewModel @Inject constructor(
             subTasks = args[8] as List<String>,
             aiGeneratedFields = args[9] as Set<String>,
             categories = args[10] as List<CategoryEntity>,
-            isSaving = args[11] as Boolean,
-            isSaved = args[12] as Boolean,
-            savedProjectId = args[13] as Long?,
-            savedProjectTitle = args[14] as String?
+            projects = args[11] as List<ProjectEntity>, // 🚀 NEW: Map projects
+            isSaving = args[12] as Boolean,
+            isSaved = args[13] as Boolean,
+            savedProjectId = args[14] as Long?,
+            savedProjectTitle = args[15] as String?
         )
     }.stateIn(
         scope = viewModelScope,
