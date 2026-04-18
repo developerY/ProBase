@@ -64,10 +64,26 @@ class SavePhotoViewModel @Inject constructor(
         _savedProjectId,
         _savedProjectTitle
     ) { args: Array<Any?> ->
+        val categories = args[10] as List<CategoryEntity>
+        val allProjects = args[11] as List<ProjectEntity>
+        val currentCategoryName = args[2] as String
+
+        // 🚀 NEW: Filter projects by the currently selected category name
+        val filteredProjects = if (currentCategoryName.isNotBlank()) {
+            val matchedCategoryId = categories.find { it.name.equals(currentCategoryName, ignoreCase = true) }?.categoryId
+            if (matchedCategoryId != null) {
+                allProjects.filter { it.categoryId == matchedCategoryId }
+            } else {
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+
         SavePhotoUiState(
             photoUri = args[0] as String,
             isFromAi = args[1] as Boolean,
-            categoryName = args[2] as String,
+            categoryName = currentCategoryName,
             projectName = args[3] as String,
             taskName = args[4] as String,
             duration = args[5] as String,
@@ -75,8 +91,8 @@ class SavePhotoViewModel @Inject constructor(
             dueDateMillis = args[7] as Long?,
             subTasks = args[8] as List<String>,
             aiGeneratedFields = args[9] as Set<String>,
-            categories = args[10] as List<CategoryEntity>,
-            projects = args[11] as List<ProjectEntity>, // 🚀 NEW: Map projects
+            categories = categories,
+            projects = filteredProjects, // 🚀 NEW: Use filtered list
             isSaving = args[12] as Boolean,
             isSaved = args[13] as Boolean,
             savedProjectId = args[14] as Long?,
