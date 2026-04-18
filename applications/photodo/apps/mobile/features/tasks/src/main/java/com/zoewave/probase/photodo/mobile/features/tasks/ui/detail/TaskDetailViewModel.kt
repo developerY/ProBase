@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -64,11 +63,13 @@ class TaskDetailViewModel @Inject constructor(
 
     val uiState: StateFlow<TaskDetailUiState> = combine(
         _projectId.asStateFlow().filterNotNull().flatMapLatest { id ->
+            Log.d("ProjectDebug", "TaskDetailViewModel: Fetching details for Project ID: $id")
             photoDoRepo.getProjectDetails(id)
         },
         appSettingsRepository.isAiEnabledFlow,
         _uiFlags
     ) { projectDetails, isAiEnabled, flags ->
+        Log.d("ProjectDebug", "TaskDetailViewModel: Received details? ${projectDetails != null}")
         if (projectDetails != null) {
             TaskDetailUiState(
                 loadState = DetailLoadState.Success(projectDetails),
@@ -82,6 +83,7 @@ class TaskDetailViewModel @Inject constructor(
                 showDeleteProjectConfirmation = flags.showDeleteProjectConfirmation
             )
         } else {
+            Log.w("ProjectDebug", "TaskDetailViewModel: Project NOT FOUND in DB!")
             TaskDetailUiState(loadState = DetailLoadState.Error("Project has been deleted."))
         }
     }
@@ -155,6 +157,17 @@ class TaskDetailViewModel @Inject constructor(
             }
             is TaskDetailEvent.OnEditList -> {
                 // TODO: Update project title/description
+                /*viewModelScope.launch {
+                    val currentState = uiState.value.loadState
+                    if (currentState is DetailLoadState.Success) {
+                        photoDoRepo.updateProject(
+                            currentState.projectDetails.project.copy(
+                                title = event.title,
+                                description = event.description
+                            )
+                        )
+                    }
+                }*/
             }
 
             // --- UI TOGGLES ---

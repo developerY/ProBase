@@ -1,5 +1,6 @@
 package com.zoewave.probase.photodo.features.camera.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
@@ -107,6 +108,12 @@ class SavePhotoViewModel @Inject constructor(
     fun setInitialData(uri: String?, draft: SmartTaskDraft? = null) {
         if (_photoUri.value == uri && draft == null) return
         
+        // 🚀 CRITICAL: Reset the status flags so we don't skip the form if the ViewModel is reused.
+        _isSaving.value = false
+        _isSaved.value = false
+        _savedProjectId.value = null
+        _savedProjectTitle.value = null
+
         _photoUri.value = uri ?: ""
         if (draft != null) {
             _isFromAi.value = true
@@ -203,10 +210,10 @@ class SavePhotoViewModel @Inject constructor(
             val existingProject = repo.getProjectByNameAndCategory(categoryId, finalProjectName)
 
             val projectId = if (existingProject != null) {
-                // Reuse existing project ID
+                Log.d("ProjectDebug", "Reusing existing project: ${existingProject.name} (ID: ${existingProject.projectId})")
                 existingProject.projectId
             } else {
-                // Create new Project
+                Log.d("ProjectDebug", "Creating new project: $finalProjectName in Category ID: $categoryId")
                 val newProject = ProjectEntity(
                     categoryId = categoryId,
                     name = finalProjectName,
@@ -216,6 +223,8 @@ class SavePhotoViewModel @Inject constructor(
                 )
                 repo.upsertProject(newProject)
             }
+
+            Log.d("ProjectDebug", "Final Project ID for navigation: $projectId")
 
             // 3. Create Main Task (if name provided)
             if (_taskName.value.isNotBlank()) {

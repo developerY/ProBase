@@ -1,5 +1,6 @@
 package com.zoewave.probase.photodo.mobile.ui.components
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -59,10 +60,16 @@ fun AdaptivePhotoDoScreen(
 
     // Sync categories and projects viewmodels with our top-level remembered state
     LaunchedEffect(selectedCategoryId) {
-        selectedCategoryId?.let { tasksViewModel.setCategoryId(it) }
+        selectedCategoryId?.let { 
+            Log.d("ProjectDebug", "AdaptivePhotoDoScreen: Syncing Category ID: $it")
+            tasksViewModel.setCategoryId(it) 
+        }
     }
     LaunchedEffect(selectedProjectId) {
-        selectedProjectId?.let { detailViewModel.loadTaskDetails(it) }
+        selectedProjectId?.let { 
+            Log.d("ProjectDebug", "AdaptivePhotoDoScreen: Syncing Project ID: $it")
+            detailViewModel.loadTaskDetails(it) 
+        }
     }
 
     // 🚀 NEW: Ensure we navigate to the Detail pane if starting with a project ID
