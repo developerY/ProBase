@@ -28,7 +28,8 @@ dependencies {
     implementation(libs.androidx.glimmer)
     implementation(libs.androidx.projected)
 
-    // --- 3. Firebase (AI / Vertex) ---
+    // --- 3. AI & Gemini (Isolated Firebase SDK) ---
+    implementation(project(":features:ai:firebase"))
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.ai)
 
