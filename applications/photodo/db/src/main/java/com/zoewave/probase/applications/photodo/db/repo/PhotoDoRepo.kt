@@ -32,6 +32,7 @@ interface PhotoDoRepo {
     suspend fun deleteProject(project: ProjectEntity)
     suspend fun deleteProjectById(projectId: Long)
     fun getProjectById(projectId: Long): Flow<ProjectEntity?>
+    suspend fun getProjectByNameAndCategory(categoryId: Long, name: String): ProjectEntity?
     fun getAllProjects(): Flow<List<ProjectEntity>>
     fun getProjectsForCategory(categoryId: Long): Flow<List<ProjectEntity>>
     suspend fun updateProject(project: ProjectEntity)

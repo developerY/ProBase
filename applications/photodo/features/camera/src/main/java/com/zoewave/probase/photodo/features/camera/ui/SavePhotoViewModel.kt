@@ -198,16 +198,24 @@ class SavePhotoViewModel @Inject constructor(
             val finalCategory = _categoryName.value.ifBlank { "Uncategorized" }
             val categoryId = repo.getOrCreateCategoryByName(finalCategory)
 
-            // 2. Create Project
+            // 2. Check for Existing Project in this Category
             val finalProjectName = _projectName.value.ifBlank { _taskName.value.ifBlank { "New Project" } }
-            val newProject = ProjectEntity(
-                categoryId = categoryId,
-                name = finalProjectName,
-                projectBudget = _budgetInput.value.toDoubleOrNull() ?: 0.0,
-                dueDate = _dueDateMillis.value,
-                notes = if (_duration.value.isNotBlank()) "Duration: ${_duration.value}" else null
-            )
-            val projectId = repo.upsertProject(newProject)
+            val existingProject = repo.getProjectByNameAndCategory(categoryId, finalProjectName)
+
+            val projectId = if (existingProject != null) {
+                // Reuse existing project ID
+                existingProject.projectId
+            } else {
+                // Create new Project
+                val newProject = ProjectEntity(
+                    categoryId = categoryId,
+                    name = finalProjectName,
+                    projectBudget = _budgetInput.value.toDoubleOrNull() ?: 0.0,
+                    dueDate = _dueDateMillis.value,
+                    notes = if (_duration.value.isNotBlank()) "Duration: ${_duration.value}" else null
+                )
+                repo.upsertProject(newProject)
+            }
 
             // 3. Create Main Task (if name provided)
             if (_taskName.value.isNotBlank()) {
