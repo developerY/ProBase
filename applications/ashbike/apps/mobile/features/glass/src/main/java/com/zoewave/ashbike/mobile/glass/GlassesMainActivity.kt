@@ -1,12 +1,22 @@
 package com.zoewave.ashbike.mobile.glass
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.annotation.OptIn
+import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import androidx.xr.glimmer.GlimmerTheme
+import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
+import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import com.zoewave.ashbike.data.repository.bike.BikeRepository
+import com.zoewave.ashbike.mobile.glass.audio.VoiceGearController
 import com.zoewave.ashbike.mobile.glass.ui.GlassApp
+import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -18,7 +28,20 @@ class GlassesMainActivity : ComponentActivity() {
 
     // Inject the shared repository instance
     @Inject lateinit var repository: BikeRepository
+    @Inject lateinit var firebaseLiveSessionManager: FirebaseLiveSessionManager
     private lateinit var audioInterface: AudioInterface
+    private lateinit var voiceGearController: VoiceGearController
+
+    @OptIn(ExperimentalProjectedApi::class)
+    private val requestPermissionLauncher =
+        registerForActivityResult(ProjectedPermissionsResultContract()) { results ->
+            if (results[Manifest.permission.RECORD_AUDIO] == true) {
+                onPermissionGranted()
+            } else {
+                onPermissionDenied()
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -28,6 +51,18 @@ class GlassesMainActivity : ComponentActivity() {
             getString(R.string.applications_ashbike_apps_mobile_features_glass_hello_ai_glasses)
         )
         lifecycle.addObserver(audioInterface)
+
+        voiceGearController = VoiceGearController(this, repository) { command ->
+            if (command == "AI Assistant") {
+                firebaseLiveSessionManager.startConversation()
+            } else {
+                audioInterface.speak("Changing $command")
+            }
+        }
+        lifecycle.addObserver(voiceGearController)
+        lifecycle.addObserver(firebaseLiveSessionManager)
+
+        checkAndRequestAudioPermission()
 
         setContent {
             GlimmerTheme {
@@ -49,6 +84,39 @@ class GlassesMainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun checkAndRequestAudioPermission() {
+        val permission = Manifest.permission.RECORD_AUDIO
+        val permissionStatus = ContextCompat.checkSelfPermission(this, permission)
+
+        if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
+            onPermissionGranted()
+        } else {
+            requestAudioPermission()
+        }
+    }
+
+    @OptIn(ExperimentalProjectedApi::class)
+    private fun requestAudioPermission() {
+        val params = ProjectedPermissionsRequestParams(
+            permissions = listOf(Manifest.permission.RECORD_AUDIO),
+            rationale = "Microphone access is essential for hands-free gear changes on these AI glasses."
+        )
+        // Speak rationale as recommended by XR docs
+        audioInterface.speak("Please review the microphone permission request on your phone to enable voice commands.")
+        requestPermissionLauncher.launch(listOf(params))
+    }
+
+    private fun onPermissionGranted() {
+        voiceGearController.startListening()
+    }
+
+    private fun onPermissionDenied() {
+        Log.w("GlassesMainActivity", "Microphone permission denied. Voice commands will be disabled.")
+        // We could also finish() here if voice is considered critical, 
+        // but for now we just log it as the UI buttons still work.
+    }
+
 
     override fun onStart() {
         super.onStart()
