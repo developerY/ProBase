@@ -106,9 +106,14 @@ class SavePhotoViewModel @Inject constructor(
     )
 
     fun setInitialData(uri: String?, draft: SmartTaskDraft? = null) {
-        if (_photoUri.value == uri && draft == null) return
+        Log.d("SavePhotoDebug", "ViewModel: setInitialData called. Current isSaved: ${_isSaved.value}")
+        if (_photoUri.value == uri && draft == null) {
+            Log.d("SavePhotoDebug", "ViewModel: setInitialData ignored (same URI and no draft)")
+            return
+        }
         
         // 🚀 CRITICAL: Reset the status flags so we don't skip the form if the ViewModel is reused.
+        Log.d("SavePhotoDebug", "ViewModel: Resetting status flags to false")
         _isSaving.value = false
         _isSaved.value = false
         _savedProjectId.value = null
@@ -209,15 +214,26 @@ class SavePhotoViewModel @Inject constructor(
             val finalProjectName = _projectName.value.ifBlank { _taskName.value.ifBlank { "New Project" } }
             val existingProject = repo.getProjectByNameAndCategory(categoryId, finalProjectName)
 
+            val inputBudget = _budgetInput.value.toDoubleOrNull() ?: 0.0
             val projectId = if (existingProject != null) {
-                Log.d("ProjectDebug", "Reusing existing project: ${existingProject.name} (ID: ${existingProject.projectId})")
+                Log.d("ProjectDebug", "Merging into existing project: ${existingProject.name} (ID: ${existingProject.projectId})")
+                
+                // 🚀 MERGE LOGIC:
+                // 1. Add budgets together
+                // 2. Use new due date if provided
+                val updatedProject = existingProject.copy(
+                    projectBudget = existingProject.projectBudget + inputBudget,
+                    dueDate = _dueDateMillis.value ?: existingProject.dueDate,
+                    lastModified = System.currentTimeMillis()
+                )
+                repo.updateProject(updatedProject)
                 existingProject.projectId
             } else {
                 Log.d("ProjectDebug", "Creating new project: $finalProjectName in Category ID: $categoryId")
                 val newProject = ProjectEntity(
                     categoryId = categoryId,
                     name = finalProjectName,
-                    projectBudget = _budgetInput.value.toDoubleOrNull() ?: 0.0,
+                    projectBudget = inputBudget,
                     dueDate = _dueDateMillis.value,
                     notes = if (_duration.value.isNotBlank()) "Duration: ${_duration.value}" else null
                 )
@@ -245,6 +261,7 @@ class SavePhotoViewModel @Inject constructor(
             _savedProjectTitle.value = finalProjectName
             _isSaving.value = false
             _isSaved.value = true
+            Log.d("SavePhotoDebug", "ViewModel: saveTask complete. isSaved set to true for ID: $projectId")
         }
     }
 }
