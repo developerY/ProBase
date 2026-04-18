@@ -62,10 +62,13 @@ fun SmartCaptureUiRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // 🚀 Update: Instead of auto-triggering analysis, set the URI so user can add context
+    // 🚀 Reset the ViewModel state whenever a new initialPhotoUri arrives from navigation.
+    // This ensures we clear any "cached" results from previous analyses.
     LaunchedEffect(initialPhotoUri) {
-        if ((initialPhotoUri != null) && uiState is SmartCaptureUiState.Idle && (uiState as SmartCaptureUiState.Idle).capturedUri == null) {
+        if (initialPhotoUri != null) {
             viewModel.setCapturedUri(initialPhotoUri)
+        } else {
+            viewModel.reset()
         }
     }
 
