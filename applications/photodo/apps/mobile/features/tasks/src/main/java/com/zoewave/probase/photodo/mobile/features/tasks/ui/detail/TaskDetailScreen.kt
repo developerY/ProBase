@@ -185,7 +185,7 @@ fun TaskDetailScreen(
 
                                         // Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = "AI",
+                                            text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_help_from_genai),
                                             style = MaterialTheme.typography.labelLarge,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary

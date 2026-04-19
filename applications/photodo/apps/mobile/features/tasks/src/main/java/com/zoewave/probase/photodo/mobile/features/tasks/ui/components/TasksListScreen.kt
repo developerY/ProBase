@@ -109,7 +109,7 @@ fun TasksListScreen(
                         onEvent(TasksEvent.OnAddQuickProjectClicked(overrideCategoryName = null))
                     },
                     icon = { Icon(Icons.AutoMirrored.Filled.FormatListBulleted, contentDescription = null) },
-                    text = { Text("Quick Project") }
+                    text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_project)) }
                 )
                 FloatingActionButtonMenuItem(
                     onClick = {
@@ -222,8 +222,8 @@ fun TasksListScreen(
     if (uiState.projectToDelete != null) {
         AlertDialog(
             onDismissRequest = { onEvent(TasksEvent.OnProjectToDeleteChanged(null)) },
-            title = { Text("Delete Project?") },
-            text = { Text("This will permanently delete the '${uiState.projectToDelete.title}' project and all its photos. This action cannot be undone.") },
+            title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_project_title)) },
+            text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_project_message, uiState.projectToDelete.title)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -234,12 +234,12 @@ fun TasksListScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error) // Fixed color logic
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_delete_button))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onEvent(TasksEvent.OnProjectToDeleteChanged(null)) }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_cancel_button))
                 }
             }
         )

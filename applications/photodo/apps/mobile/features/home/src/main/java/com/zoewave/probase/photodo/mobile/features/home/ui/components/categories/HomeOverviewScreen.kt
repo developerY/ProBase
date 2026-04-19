@@ -253,7 +253,7 @@ fun HomeOverviewFab(
             FloatingActionButtonMenuItem(
                 onClick = onSmartCaptureClick,
                 icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFFFD700)) },
-                text = { Text("AI Task") }
+                text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_ai_task)) }
             )
         }
     }
@@ -307,14 +307,14 @@ fun HomeOverviewContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 8.dp),
-                            placeholder = { Text("Search categories...") },
+                            placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_search_categories_placeholder)) },
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                             trailingIcon = {
                                 IconButton(onClick = {
                                     onEvent(HomeEvent.OnCategorySearchQueryChanged(""))
                                     onEvent(HomeEvent.OnSearchModeToggle(false))
                                 }) {
-                                    Icon(Icons.Default.Close, contentDescription = "Close search")
+                                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_close_search_content_desc))
                                 }
                             },
                             singleLine = true,
@@ -335,7 +335,7 @@ fun HomeOverviewContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "PhotoDo",
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_home_app_title),
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Black,
                                 color = MaterialTheme.colorScheme.primary
@@ -344,7 +344,7 @@ fun HomeOverviewContent(
                                 onClick = { onEvent(HomeEvent.OnSearchModeToggle(true)) },
                                 modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
                             ) {
-                                Icon(Icons.Default.Search, contentDescription = "Search")
+                                Icon(Icons.Default.Search, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_search_content_desc))
                             }
                         }
                     }
@@ -418,8 +418,8 @@ fun HomeOverviewDialogs(
     categoryToDelete?.let { category ->
         AlertDialog(
             onDismissRequest = onDismissDeleteConfirmation,
-            title = { Text("Delete Category?") },
-            text = { Text("This will permanently delete the '${category.name}' category and all its projects. This action cannot be undone.") },
+            title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_delete_category_title)) },
+            text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_delete_category_message, category.name)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -427,10 +427,10 @@ fun HomeOverviewDialogs(
                         onDismissDeleteConfirmation()
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) { Text("Delete") }
+                ) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_delete_button)) }
             },
             dismissButton = {
-                TextButton(onClick = onDismissDeleteConfirmation) { Text("Cancel") }
+                TextButton(onClick = onDismissDeleteConfirmation) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_cancel_button)) }
             }
         )
     }
@@ -443,6 +443,7 @@ fun AddCategoryBottomSheet(
     onCategoryCreated: (String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var newCategoryName by rememberSaveable { mutableStateOf("") }
 
@@ -465,7 +466,7 @@ fun AddCategoryBottomSheet(
 
             // --- QUICK PICK SECTION ---
             Text(
-                text = "Quick Pick",
+                text = stringResource(R.string.applications_photodo_apps_mobile_features_home_quick_pick),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -484,7 +485,8 @@ fun AddCategoryBottomSheet(
                                 .size(48.dp)
                                 .clip(CircleShape)
                                 .clickable {
-                                    onCategoryCreated(template.name, template.iconName)
+                                    val templateName = context.getString(template.nameRes)
+                                    onCategoryCreated(templateName, template.iconName)
                                 },
                             color = MaterialTheme.colorScheme.primaryContainer,
                             shape = CircleShape
@@ -492,14 +494,14 @@ fun AddCategoryBottomSheet(
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = template.icon,
-                                    contentDescription = template.name,
+                                    contentDescription = stringResource(template.nameRes),
                                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
                         }
                         Text(
-                            text = template.name,
+                            text = stringResource(template.nameRes),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -527,14 +529,14 @@ fun AddCategoryBottomSheet(
     }
 }
 
-private data class CategoryTemplate(val name: String, val icon: ImageVector, val iconName: String)
+private data class CategoryTemplate(val nameRes: Int, val icon: ImageVector, val iconName: String)
 
 private val categoryTemplates = listOf(
-    CategoryTemplate("Work", Icons.Default.Work, "Work"),
-    CategoryTemplate("Personal", Icons.Default.Person, "Person"),
-    CategoryTemplate("Home", Icons.Default.Home, "Home"),
-    CategoryTemplate("Shopping", Icons.Default.ShoppingCart, "ShoppingCart"),
-    CategoryTemplate("Travel", Icons.Default.Flight, "Flight")
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_home_category_template_work, Icons.Default.Work, "Work"),
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_home_category_template_personal, Icons.Default.Person, "Person"),
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_home_category_template_home, Icons.Default.Home, "Home"),
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_home_category_template_shopping, Icons.Default.ShoppingCart, "ShoppingCart"),
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_home_category_template_travel, Icons.Default.Flight, "Flight")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -631,7 +633,7 @@ fun CategoryDashboardCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${category.totalProjects} Projects",
+                    text = stringResource(R.string.applications_photodo_apps_mobile_features_home_projects_count, category.totalProjects),
                     style = MaterialTheme.typography.bodyMedium,
                     color = contentColor.copy(alpha = 0.8f)
                 )

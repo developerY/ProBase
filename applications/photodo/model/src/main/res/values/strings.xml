@@ -4,4 +4,7 @@
     <string name="applications_photodo_model_route_tasks">Tasks</string>
     <string name="applications_photodo_model_route_settings">Settings</string>
     <string name="applications_photodo_model_route_camera">Camera</string>
+    <string name="applications_photodo_model_default_smart_capture_category">Smart Capture</string>
+    <string name="applications_photodo_model_default_smart_project_name">New Smart Project</string>
+    <string name="applications_photodo_model_default_uncategorized">Uncategorized</string>
 </resources>

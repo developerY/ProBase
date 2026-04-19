@@ -22,9 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.components.icons.BudgetTrendIcon
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
@@ -77,7 +79,7 @@ fun HomeProjectRow(
                         Text(project.title, style = MaterialTheme.typography.bodyLarge)
                         if (project.progressText.isNotEmpty()) {
                             Text(
-                                text = " • ${project.progressText}",
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_home_progress_label, project.progressText),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(start = 4.dp)
@@ -87,13 +89,15 @@ fun HomeProjectRow(
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         // 1. The Dynamic "Smart Subtitle"
-                        val subtitleText = remember(project.categoryName, project.dueDateMillis) {
+                        val bulletSeparator = stringResource(R.string.applications_photodo_apps_mobile_features_home_bullet_separator)
+                        val subtitleText = remember(project.categoryName, project.dueDateMillis, bulletSeparator) {
                             buildString {
                                 append(project.categoryName)
                                 project.dueDateMillis?.let { dueDate ->
                                     val formatter = SimpleDateFormat("MMM dd", Locale.getDefault())
                                     val dateStr = formatter.format(Date(dueDate))
-                                    append(" • $dateStr")
+                                    append(bulletSeparator)
+                                    append(dateStr)
                                 }
                             }
                         }
@@ -108,7 +112,7 @@ fun HomeProjectRow(
                         // --- BUDGET DISPLAY ---
                         if (project.hasBudget) {
                             Text(
-                                " • ",
+                                stringResource(R.string.applications_photodo_apps_mobile_features_home_bullet_separator),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -118,7 +122,7 @@ fun HomeProjectRow(
                                 else -> MaterialTheme.colorScheme.primary
                             }
                             Text(
-                                "$${project.currentSpend.toInt()} / $${project.projectBudget.toInt()}",
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_home_budget_range_format, project.currentSpend.toInt(), project.projectBudget.toInt()),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = budgetColor
                             )
@@ -134,7 +138,7 @@ fun HomeProjectRow(
                     project = project,
                     modifier = Modifier.padding(end = 8.dp)
                 )
-                Icon(Icons.Default.ChevronRight, contentDescription = "Go", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(Icons.Default.ChevronRight, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_go_content_desc), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

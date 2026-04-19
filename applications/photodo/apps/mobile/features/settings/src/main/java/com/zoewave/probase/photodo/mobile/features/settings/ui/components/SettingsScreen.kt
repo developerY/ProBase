@@ -79,8 +79,8 @@ fun SettingsScreen(
                 AiConfigurationCard(
                     expanded = uiState.isAiExpanded,
                     onExpandToggle = { onEvent(SettingsEvent.OnAiExpandedToggled(!uiState.isAiExpanded)) },
-                    title = "Smart Capture AI",
-                    description = "Use Gemini to automatically fill details from images."
+                    title = stringResource(R.string.applications_photodo_apps_mobile_features_settings_ai_config_title),
+                    description = stringResource(R.string.applications_photodo_apps_mobile_features_settings_ai_config_description)
                 )
 
                 PaletteSettingsCard(

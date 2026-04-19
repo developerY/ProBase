@@ -174,11 +174,11 @@ fun PaletteSettingsCard(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Two-Pane Contrast",
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_two_pane_contrast_title),
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
-                                text = "Apply a subtle tint to the dashboard side on large screens",
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_settings_palette_two_pane_contrast_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -202,11 +202,11 @@ fun PaletteSettingsCard(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Enable UI Animations",
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_settings_ui_animations_title),
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
-                                text = "Smooth transitions for charts and numbers",
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_settings_ui_animations_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

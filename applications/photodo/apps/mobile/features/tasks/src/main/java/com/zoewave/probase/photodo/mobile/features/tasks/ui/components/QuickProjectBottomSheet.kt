@@ -26,9 +26,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.tasks.R
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.TasksEvent
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.TasksUiState
 
@@ -47,10 +49,10 @@ fun QuickProjectContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Dynamic title based on override
-        val titleText = if (uiState.quickProjectCategoryOverride != null) "Home Project" else "Quick Project"
+        val titleText = if (uiState.quickProjectCategoryOverride != null) stringResource(R.string.applications_photodo_apps_mobile_features_tasks_home_project) else stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_project)
         val subtitlePrefix = when {
             uiState.quickProjectCategoryOverride != null -> uiState.quickProjectCategoryOverride
-            uiState.isNoCategoriesYet -> "Default"
+            uiState.isNoCategoriesYet -> stringResource(R.string.applications_photodo_apps_mobile_features_tasks_default_category)
             else -> uiState.categoryName
         }
 
@@ -66,30 +68,33 @@ fun QuickProjectContent(
                 color = MaterialTheme.colorScheme.primary
             )
             IconButton(onClick = { onEvent(TasksEvent.OnDismissBottomSheet) }) {
-                Icon(Icons.Default.Close, contentDescription = "Close")
+                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_close))
             }
         }
 
         // --- ITEMS ---
+        val fixLabel = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_project_fix)
         QuickProjectItem(
-            title = "Quick Fix",
-            subtitle = "$subtitlePrefix • $50 Budget",
+            title = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_fix),
+            subtitle = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_project_subtitle_format, subtitlePrefix, 50),
             icon = Icons.Default.Build,
-            onClick = { onEvent(TasksEvent.OnAddQuickProject("fix", subtitlePrefix, 50.0)) }
+            onClick = { onEvent(TasksEvent.OnAddQuickProject(fixLabel, subtitlePrefix, 50.0)) }
         )
 
+        val buyLabel = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_project_buy)
         QuickProjectItem(
-            title = "Quick Buy",
-            subtitle = "$subtitlePrefix • $100 Budget",
+            title = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_buy),
+            subtitle = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_project_subtitle_format, subtitlePrefix, 100),
             icon = Icons.Default.ShoppingCart,
-            onClick = { onEvent(TasksEvent.OnAddQuickProject("buy", subtitlePrefix, 100.0)) }
+            onClick = { onEvent(TasksEvent.OnAddQuickProject(buyLabel, subtitlePrefix, 100.0)) }
         )
 
+        val findLabel = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_project_find)
         QuickProjectItem(
-            title = "Quick Find",
-            subtitle = "$subtitlePrefix • Search & Discover",
+            title = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_find),
+            subtitle = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_project_subtitle_search_format, subtitlePrefix, stringResource(R.string.applications_photodo_apps_mobile_features_tasks_search_discover)),
             icon = Icons.Default.Search,
-            onClick = { onEvent(TasksEvent.OnAddQuickProject("find", subtitlePrefix, 0.0)) }
+            onClick = { onEvent(TasksEvent.OnAddQuickProject(findLabel, subtitlePrefix, 0.0)) }
         )
     }
 }

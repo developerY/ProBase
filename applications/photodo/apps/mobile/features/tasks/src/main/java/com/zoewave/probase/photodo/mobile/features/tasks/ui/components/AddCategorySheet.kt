@@ -85,7 +85,7 @@ fun AddCategorySheetContent(
 
         // --- QUICK PICK SECTION ---
         Text(
-            text = "Quick Pick",
+            text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_pick),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary
         )
@@ -95,10 +95,12 @@ fun AddCategorySheetContent(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             categoryTemplates.forEach { template ->
+                val templateName = stringResource(template.nameRes)
                 QuickCategoryIcon(
-                    template = template,
+                    name = templateName,
+                    icon = template.icon,
                     onClick = {
-                        onDraftCategoryNameChanged(template.name)
+                        onDraftCategoryNameChanged(templateName)
                         onSaveDraftClicked()
                     }
                 )
@@ -126,7 +128,8 @@ fun AddCategorySheetContent(
 
 @Composable
 private fun QuickCategoryIcon(
-    template: CategoryTemplate,
+    name: String,
+    icon: ImageVector,
     onClick: () -> Unit
 ) {
     Column(
@@ -143,29 +146,29 @@ private fun QuickCategoryIcon(
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
-                    imageVector = template.icon,
-                    contentDescription = template.name,
+                    imageVector = icon,
+                    contentDescription = name,
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(24.dp)
                 )
             }
         }
         Text(
-            text = template.name,
+            text = name,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
 
-private data class CategoryTemplate(val name: String, val icon: ImageVector)
+private data class CategoryTemplate(val nameRes: Int, val icon: ImageVector)
 
 private val categoryTemplates = listOf(
-    CategoryTemplate("Work", Icons.Default.Work),
-    CategoryTemplate("Personal", Icons.Default.Person),
-    CategoryTemplate("Home", Icons.Default.Home),
-    CategoryTemplate("Shopping", Icons.Default.ShoppingCart),
-    CategoryTemplate("Travel", Icons.Default.Flight)
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_tasks_category_template_work, Icons.Default.Work),
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_tasks_category_template_personal, Icons.Default.Person),
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_tasks_category_template_home, Icons.Default.Home),
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_tasks_category_template_shopping, Icons.Default.ShoppingCart),
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_tasks_category_template_travel, Icons.Default.Flight)
 )
 
 @Preview(showBackground = true)

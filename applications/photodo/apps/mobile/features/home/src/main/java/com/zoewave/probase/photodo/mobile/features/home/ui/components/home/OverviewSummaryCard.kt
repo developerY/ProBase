@@ -117,7 +117,7 @@ fun OverviewSummaryCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (!isExpanded) {
                         Text(
-                            text = "$animatedCategoryCount Categories",
+                            text = stringResource(R.string.applications_photodo_apps_mobile_features_home_categories_count, animatedCategoryCount),
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.padding(end = 8.dp)
                         )
@@ -189,7 +189,7 @@ fun OverviewSummaryCard(
                                     
                                     // Row 2: Navigation Label
                                     Text(
-                                        text = "View Categories",
+                                        text = stringResource(R.string.applications_photodo_apps_mobile_features_home_view_categories),
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White.copy(alpha = 0.9f)
@@ -212,7 +212,7 @@ fun OverviewSummaryCard(
                                         )
                                         Spacer(modifier = Modifier.size(6.dp))
                                         Text(
-                                            text = "${slice.name} (${slice.value})", // I'll keep this as is for now as it's a mix of dynamic data and symbols, or I could use a template
+                                            text = stringResource(R.string.applications_photodo_apps_mobile_features_home_category_value, slice.name, slice.value),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
                                                 alpha = 0.8f
@@ -279,7 +279,7 @@ fun OverviewSummaryCard(
                                 )
 
                                 Text(
-                                    text = "$animatedProgress%",
+                                    text = stringResource(R.string.applications_photodo_apps_mobile_features_home_percentage, animatedProgress),
                                     style = MaterialTheme.typography.titleLarge, // Big bold center number
                                     fontWeight = FontWeight.Black,
                                     color = MaterialTheme.colorScheme.primary
