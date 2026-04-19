@@ -6,11 +6,11 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.annotation.OptIn
-import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import androidx.xr.glimmer.GlimmerTheme
+import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
 import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import com.zoewave.ashbike.data.repository.bike.BikeRepository
@@ -22,7 +22,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
+@OptIn(ExperimentalProjectedApi::class, ExperimentalProjectedApi::class)
+@kotlin.OptIn(ExperimentalProjectedApi::class)
 @AndroidEntryPoint // <--- Required for Hilt injection
 class GlassesMainActivity : ComponentActivity() {
 
@@ -32,7 +33,6 @@ class GlassesMainActivity : ComponentActivity() {
     private lateinit var audioInterface: AudioInterface
     private lateinit var voiceGearController: VoiceGearController
 
-    @OptIn(ExperimentalProjectedApi::class)
     private val requestPermissionLauncher =
         registerForActivityResult(ProjectedPermissionsResultContract()) { results ->
             if (results[Manifest.permission.RECORD_AUDIO] == true) {
@@ -54,7 +54,9 @@ class GlassesMainActivity : ComponentActivity() {
 
         voiceGearController = VoiceGearController(this, repository) { command ->
             if (command == "AI Assistant") {
-                firebaseLiveSessionManager.startConversation()
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                    firebaseLiveSessionManager.startConversation()
+                }
             } else {
                 audioInterface.speak("Changing $command")
             }
