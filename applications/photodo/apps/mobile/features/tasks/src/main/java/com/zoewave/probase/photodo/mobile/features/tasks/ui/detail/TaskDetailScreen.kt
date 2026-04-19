@@ -6,6 +6,11 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,12 +30,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,9 +58,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -124,11 +132,72 @@ fun TaskDetailScreen(
                         val hasDataForAi = state.projectDetails.tasks.isNotEmpty() || state.projectDetails.photos.isNotEmpty()
                         
                         if (uiState.isAiEnabled && hasDataForAi) {
-                            IconButton(onClick = { navTo(PhotoTodoRoute.SmartAdvice(state.projectDetails.project.projectId)) }) {
-                                Icon(
-                                    Icons.Default.QuestionMark,
-                                    contentDescription = "Get AI Help"
-                                )
+                            TextButton(
+                                onClick = { navTo(PhotoTodoRoute.SmartAdvice(state.projectDetails.project.projectId)) },
+                                modifier = Modifier.padding(end = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        if (uiState.animationsEnabled) {
+                                            val infiniteTransition = rememberInfiniteTransition(label = "AiSparklePulse")
+                                            val scale by infiniteTransition.animateFloat(
+                                                initialValue = 0.8f,
+                                                targetValue = 1.2f,
+                                                animationSpec = infiniteRepeatable(
+                                                    animation = tween(durationMillis = 1000),
+                                                    repeatMode = RepeatMode.Reverse
+                                                ),
+                                                label = "AiSparkleScale"
+                                            )
+                                            val alpha by infiniteTransition.animateFloat(
+                                                initialValue = 0.6f,
+                                                targetValue = 1.0f,
+                                                animationSpec = infiniteRepeatable(
+                                                    animation = tween(durationMillis = 1000),
+                                                    repeatMode = RepeatMode.Reverse
+                                                ),
+                                                label = "AiSparkleAlpha"
+                                            )
+
+                                            Icon(
+                                                imageVector = Icons.Default.AutoAwesome,
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .size(20.dp)
+                                                    .align(Alignment.TopEnd)
+                                                    .graphicsLayer(
+                                                        scaleX = scale,
+                                                        scaleY = scale,
+                                                        alpha = alpha
+                                                    ),
+                                                tint = Color(0xFFD5B409)
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Default.AutoAwesome,
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .size(20.dp)
+                                                    .align(Alignment.TopEnd),
+                                                tint = Color(0xFFD5B409)
+                                            )
+                                        }
+
+                                        // Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "AI",
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+
+                                        /*Icon(
+                                            Icons.Default.QuestionMark,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )*/
+                                    }
+                                }
                             }
                         }
 

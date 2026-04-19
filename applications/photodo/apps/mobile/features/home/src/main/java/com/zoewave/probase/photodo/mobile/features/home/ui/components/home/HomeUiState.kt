@@ -27,7 +27,8 @@ data class HomeUiState(
     val showAddCategoryDialog: Boolean = false,
     val categoryToDelete: CategoryOverviewUiModel? = null,
     val fabMenuExpanded: Boolean = false,
-    val isSearchMode: Boolean = false
+    val isSearchMode: Boolean = false,
+    val animationsEnabled: Boolean = true
 ) {
     val isEmpty: Boolean = !isLoading && categories.isEmpty()
 }
