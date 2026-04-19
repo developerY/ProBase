@@ -1,9 +1,12 @@
 package com.zoewave.probase.features.ai.firebase.data
 
+import android.Manifest
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.google.firebase.ai.LiveSession
+import com.google.firebase.ai.type.LiveSession
+import com.google.firebase.ai.type.PublicPreviewAPI
 import com.zoewave.probase.features.ai.firebase.domain.GeminiFirebaseManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +18,7 @@ import javax.inject.Inject
 /**
  * Handles the lifecycle and connection of a Gemini Live session.
  */
+@OptIn(PublicPreviewAPI::class)
 class FirebaseLiveSessionManager @Inject constructor(
     private val geminiFirebaseManager: GeminiFirebaseManager
 ) : DefaultLifecycleObserver {
@@ -25,6 +29,7 @@ class FirebaseLiveSessionManager @Inject constructor(
     /**
      * Starts the audio conversation session.
      */
+    @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     fun startConversation() {
         scope.launch {
             try {
