@@ -1,6 +1,10 @@
 package com.zoewave.probase.photodo.mobile.features.home.ui.components.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
@@ -28,6 +32,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +61,18 @@ fun OverviewSummaryCard(
     // Transform the categories into colored slices
     val slices = mapCategoriesToWheelSlices(categories)
     val totalCategories = categories.size
+
+    val animatedCategoryCount by animateIntAsState(
+        targetValue = totalCategories,
+        animationSpec = tween(durationMillis = 800),
+        label = "CategoryCount"
+    )
+
+    val chartRevealProgress by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = tween(durationMillis = 1500, easing = LinearOutSlowInEasing),
+        label = "ChartReveal"
+    )
 
     // Expressive, compact card
     Card(
@@ -87,7 +104,7 @@ fun OverviewSummaryCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (!isExpanded) {
                         Text(
-                            text = "$totalCategories Categories",
+                            text = "$animatedCategoryCount Categories",
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.padding(end = 8.dp)
                         )
@@ -126,7 +143,7 @@ fun OverviewSummaryCard(
                     ) {
                         // Bold Category Count
                         Text(
-                            text = "$totalCategories",
+                            text = "$animatedCategoryCount",
                             style = MaterialTheme.typography.displayMedium, // Compact but Display font
                             fontWeight = FontWeight.Black
                         )
@@ -178,11 +195,11 @@ fun OverviewSummaryCard(
                                     drawArc(
                                         color = slice.color,
                                         startAngle = currentStartAngle,
-                                        sweepAngle = slice.sweepAngle,
+                                        sweepAngle = slice.sweepAngle * chartRevealProgress,
                                         useCenter = false,
                                         style = Stroke(width = strokeWidth, cap = StrokeCap.Round) // Rounded expressive ends
                                     )
-                                    currentStartAngle += slice.sweepAngle // Increment the angle
+                                    currentStartAngle += slice.sweepAngle * chartRevealProgress // Increment the angle
                                 }
                             }
                         }
@@ -194,8 +211,14 @@ fun OverviewSummaryCard(
                             val totalCompleted = categories.sumOf { it.completedTasks }
                             val progressPercentage = if (totalTasks > 0) (totalCompleted.toFloat() / totalTasks * 100).toInt() else 0
 
+                            val animatedProgress by animateIntAsState(
+                                targetValue = progressPercentage,
+                                animationSpec = tween(durationMillis = 800),
+                                label = "ProgressPercentage"
+                            )
+
                             Text(
-                                text = "$progressPercentage%",
+                                text = "$animatedProgress%",
                                 style = MaterialTheme.typography.titleLarge, // Big bold center number
                                 fontWeight = FontWeight.Black,
                                 color = MaterialTheme.colorScheme.primary
