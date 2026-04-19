@@ -158,14 +158,33 @@ class SavePhotoViewModel @Inject constructor(
         _savedProjectTitle.value = null
     }
 
-    fun setCategoryName(name: String) { _categoryName.value = name }
-    fun setProjectName(name: String) { _projectName.value = name }
-    fun setTaskName(name: String) { _taskName.value = name }
-    fun setDuration(duration: String) { _duration.value = duration }
-    fun setBudgetInput(budget: String) { _budgetInput.value = budget }
-    fun setDueDate(timestamp: Long?) { _dueDateMillis.value = timestamp }
+    fun onEvent(event: SavePhotoEvent) {
+        when (event) {
+            is SavePhotoEvent.OnCategoryNameChanged -> setCategoryName(event.name)
+            is SavePhotoEvent.OnProjectNameChanged -> setProjectName(event.name)
+            is SavePhotoEvent.OnTaskNameChanged -> setTaskName(event.name)
+            is SavePhotoEvent.OnDurationChanged -> setDuration(event.duration)
+            is SavePhotoEvent.OnBudgetInputChanged -> setBudgetInput(event.budget)
+            is SavePhotoEvent.OnAdjustBudget -> adjustBudget(event.adjustment)
+            is SavePhotoEvent.OnDueDateChanged -> setDueDate(event.timestamp)
+            SavePhotoEvent.OnReportIssue -> {
+                // Reporting is handled via Intent in the UI layer (NavEntry)
+                // but we can expose the intent here if needed, or just let UI handle it.
+            }
+            SavePhotoEvent.OnClearAiData -> clearAiData()
+            SavePhotoEvent.OnSaveClicked -> saveTask()
+            SavePhotoEvent.OnDismiss -> { /* Handled by navigation */ }
+        }
+    }
+
+    private fun setCategoryName(name: String) { _categoryName.value = name }
+    private fun setProjectName(name: String) { _projectName.value = name }
+    private fun setTaskName(name: String) { _taskName.value = name }
+    private fun setDuration(duration: String) { _duration.value = duration }
+    private fun setBudgetInput(budget: String) { _budgetInput.value = budget }
+    private fun setDueDate(timestamp: Long?) { _dueDateMillis.value = timestamp }
     
-    fun adjustBudget(adjustment: Double) {
+    private fun adjustBudget(adjustment: Double) {
         val current = _budgetInput.value.toDoubleOrNull() ?: 0.0
         val newValue = (current + adjustment).coerceAtLeast(0.0)
         _budgetInput.value = if (newValue % 1 == 0.0) newValue.toLong().toString() else newValue.toString()

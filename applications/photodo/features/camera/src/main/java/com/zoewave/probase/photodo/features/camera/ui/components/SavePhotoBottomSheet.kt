@@ -66,7 +66,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.photodo.features.camera.R
+import com.zoewave.probase.photodo.features.camera.ui.SavePhotoEvent
 import com.zoewave.probase.photodo.features.camera.ui.state.SavePhotoUiState
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -75,46 +77,28 @@ import java.util.Locale
 @Composable
 fun SavePhotoBottomSheet(
     uiState: SavePhotoUiState,
-    onCategoryNameChanged: (String) -> Unit,
-    onProjectNameChanged: (String) -> Unit,
-    onTaskNameChanged: (String) -> Unit,
-    onDurationChanged: (String) -> Unit,
-    onBudgetInputChanged: (String) -> Unit,
-    onAdjustBudget: (Double) -> Unit,
-    onDueDateChanged: (Long?) -> Unit,
-    onReportIssue: () -> Unit,
-    onClearAiData: () -> Unit,
-    onSaveClicked: () -> Unit,
-    onDismiss: () -> Unit,
+    onEvent: (SavePhotoEvent) -> Unit,
+    navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showDatePicker by remember { mutableStateOf(value = false) }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { onEvent(SavePhotoEvent.OnDismiss) },
         sheetState = sheetState,
         modifier = modifier.imePadding()
     ) {
         SavePhotoForm(
             uiState = uiState,
-            onCategoryNameChanged = onCategoryNameChanged,
-            onProjectNameChanged = onProjectNameChanged,
-            onTaskNameChanged = onTaskNameChanged,
-            onDurationChanged = onDurationChanged,
-            onBudgetInputChanged = onBudgetInputChanged,
-            onAdjustBudget = onAdjustBudget,
-            onShowDatePicker = { showDatePicker = true },
-            onReportIssue = onReportIssue,
-            onClearAiData = onClearAiData,
-            onSaveClicked = onSaveClicked,
-            onDismiss = onDismiss
+            onEvent = onEvent,
+            onShowDatePicker = { showDatePicker = true }
         )
 
         if (showDatePicker) {
             com.zoewave.probase.photodo.mobile.features.tasks.ui.components.PhotoDoDatePicker(
                 onDateSelected = { 
-                    onDueDateChanged(it)
+                    onEvent(SavePhotoEvent.OnDueDateChanged(it))
                     showDatePicker = false
                 },
                 onDismiss = { showDatePicker = false }
@@ -127,17 +111,8 @@ fun SavePhotoBottomSheet(
 @Composable
 internal fun SavePhotoForm(
     uiState: SavePhotoUiState,
-    onCategoryNameChanged: (String) -> Unit,
-    onProjectNameChanged: (String) -> Unit,
-    onTaskNameChanged: (String) -> Unit,
-    onDurationChanged: (String) -> Unit,
-    onBudgetInputChanged: (String) -> Unit,
-    onAdjustBudget: (Double) -> Unit,
-    onShowDatePicker: () -> Unit,
-    onReportIssue: () -> Unit,
-    onClearAiData: () -> Unit,
-    onSaveClicked: () -> Unit,
-    onDismiss: () -> Unit
+    onEvent: (SavePhotoEvent) -> Unit,
+    onShowDatePicker: () -> Unit
 ) {
     val themeColor = if (uiState.isFromAi) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
 
@@ -175,18 +150,18 @@ internal fun SavePhotoForm(
                     color = themeColor
                 )
             }
-            IconButton(onClick = onDismiss) {
+            IconButton(onClick = { onEvent(SavePhotoEvent.OnDismiss) }) {
                 Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_photodo_features_camera_close))
             }
         }
 
         // --- SECTION 1: CATEGORY ---
         val categorySuggestions = listOf(
-            "Home" to Icons.Default.Home,
-            "Work" to Icons.Default.Business,
-            "Personal" to Icons.Default.BeachAccess,
-            "Shopping" to Icons.Default.ShoppingCart,
-            "Health" to Icons.Default.Favorite
+            stringResource(R.string.applications_photodo_apps_mobile_features_home_suggestion_home) to Icons.Default.Home,
+            stringResource(R.string.applications_photodo_apps_mobile_features_home_suggestion_work) to Icons.Default.Business,
+            stringResource(R.string.applications_photodo_apps_mobile_features_home_suggestion_personal) to Icons.Default.BeachAccess,
+            stringResource(R.string.applications_photodo_apps_mobile_features_home_suggestion_shopping) to Icons.Default.ShoppingCart,
+            stringResource(R.string.applications_photodo_apps_mobile_features_home_suggestion_health) to Icons.Default.Favorite
         )
 
         FormSection(title = stringResource(R.string.applications_photodo_features_camera_category_section), themeColor = themeColor) {
@@ -198,11 +173,11 @@ internal fun SavePhotoForm(
                 ) {
                     AiEnhancedTextField(
                         value = uiState.categoryName,
-                        onValueChange = onCategoryNameChanged,
+                        onValueChange = { onEvent(SavePhotoEvent.OnCategoryNameChanged(it)) },
                         label = stringResource(R.string.applications_photodo_features_camera_category_name_label),
                         isAiGenerated = uiState.aiGeneratedFields.contains("category"),
-                        onReportClick = onReportIssue,
-                        onClearAiClick = onClearAiData,
+                        onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
+                        onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                         modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCategoryDropdownExpanded) 
@@ -218,7 +193,7 @@ internal fun SavePhotoForm(
                             DropdownMenuItem(
                                 text = { Text(category.name) },
                                 onClick = {
-                                    onCategoryNameChanged(category.name)
+                                    onEvent(SavePhotoEvent.OnCategoryNameChanged(category.name))
                                     isCategoryDropdownExpanded = false
                                 },
                                 contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
@@ -229,7 +204,7 @@ internal fun SavePhotoForm(
                 
                 QuickIconRow(
                     items = categorySuggestions,
-                    onItemSelected = onCategoryNameChanged,
+                    onItemSelected = { onEvent(SavePhotoEvent.OnCategoryNameChanged(it)) },
                     themeColor = themeColor
                 )
             }
@@ -237,12 +212,12 @@ internal fun SavePhotoForm(
 
         // --- SECTION 2: PROJECT ---
         val projectTemplates = listOf(
-            "Kitchen" to Icons.Default.Kitchen,
-            "Garden" to Icons.Default.Yard,
-            "Car" to Icons.Default.DirectionsCar,
-            "Office" to Icons.Default.Business,
-            "Home" to Icons.Default.Home,
-            "Holiday" to Icons.Default.BeachAccess
+            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_template_kitchen) to Icons.Default.Kitchen,
+            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_template_garden) to Icons.Default.Yard,
+            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_template_car) to Icons.Default.DirectionsCar,
+            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_template_office) to Icons.Default.Business,
+            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_suggestion_home) to Icons.Default.Home,
+            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_template_holiday) to Icons.Default.BeachAccess
         )
 
         FormSection(title = stringResource(R.string.applications_photodo_features_camera_project_details_section), themeColor = themeColor) {
@@ -254,11 +229,11 @@ internal fun SavePhotoForm(
                 ) {
                     AiEnhancedTextField(
                         value = uiState.projectName,
-                        onValueChange = onProjectNameChanged,
+                        onValueChange = { onEvent(SavePhotoEvent.OnProjectNameChanged(it)) },
                         label = stringResource(R.string.applications_photodo_features_camera_project_name_label),
                         isAiGenerated = uiState.aiGeneratedFields.contains("project"),
-                        onReportClick = onReportIssue,
-                        onClearAiClick = onClearAiData,
+                        onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
+                        onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                         modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = isProjectDropdownExpanded) 
@@ -279,7 +254,7 @@ internal fun SavePhotoForm(
                             DropdownMenuItem(
                                 text = { Text(project.name) },
                                 onClick = {
-                                    onProjectNameChanged(project.name)
+                                    onEvent(SavePhotoEvent.OnProjectNameChanged(project.name))
                                     isProjectDropdownExpanded = false
                                 },
                                 contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
@@ -290,18 +265,18 @@ internal fun SavePhotoForm(
 
                 QuickIconRow(
                     items = projectTemplates,
-                    onItemSelected = onProjectNameChanged,
+                    onItemSelected = { onEvent(SavePhotoEvent.OnProjectNameChanged(it)) },
                     themeColor = themeColor
                 )
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     AiEnhancedTextField(
                         value = uiState.duration,
-                        onValueChange = onDurationChanged,
+                        onValueChange = { onEvent(SavePhotoEvent.OnDurationChanged(it)) },
                         label = stringResource(R.string.applications_photodo_features_camera_duration_label),
                         isAiGenerated = uiState.aiGeneratedFields.contains("duration"),
-                        onReportClick = onReportIssue,
-                        onClearAiClick = onClearAiData,
+                        onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
+                        onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                         modifier = Modifier.weight(1f),
                         leadingIcon = { Icon(Icons.Default.Timer, contentDescription = null) },
                         placeholder = stringResource(R.string.applications_photodo_features_camera_duration_placeholder)
@@ -329,44 +304,44 @@ internal fun SavePhotoForm(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     AiEnhancedTextField(
                         value = uiState.budgetInput,
-                        onValueChange = onBudgetInputChanged,
+                        onValueChange = { onEvent(SavePhotoEvent.OnBudgetInputChanged(it)) },
                         label = stringResource(R.string.applications_photodo_features_camera_total_budget_label),
                         isAiGenerated = uiState.aiGeneratedFields.contains("budget"),
-                        onReportClick = onReportIssue,
-                        onClearAiClick = onClearAiData,
+                        onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
+                        onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                         modifier = Modifier.fillMaxWidth(),
                         prefix = { Text(stringResource(R.string.applications_photodo_features_camera_currency_symbol)) }
                     )
-                    QuickExpenseBar(onAdjustAmount = onAdjustBudget)
+                    QuickExpenseBar(onAdjustAmount = { onEvent(SavePhotoEvent.OnAdjustBudget(it)) })
                 }
             }
         }
 
         // --- SECTION 3: TASK ---
         val taskTemplates = listOf(
-            "Fix" to Icons.Default.Build,
-            "Buy" to Icons.Default.ShoppingCart,
-            "Clean" to Icons.Default.CleaningServices,
-            "Call" to Icons.Default.Call,
-            "Find" to Icons.Default.Search,
-            "Organize" to Icons.Default.Layers
+            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_task_fix) to Icons.Default.Build,
+            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_task_buy) to Icons.Default.ShoppingCart,
+            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_task_clean) to Icons.Default.CleaningServices,
+            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_task_call) to Icons.Default.Call,
+            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_task_find) to Icons.Default.Search,
+            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_task_organize) to Icons.Default.Layers
         )
 
         FormSection(title = stringResource(R.string.applications_photodo_features_camera_task_section), themeColor = themeColor) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 AiEnhancedTextField(
                     value = uiState.taskName,
-                    onValueChange = onTaskNameChanged,
+                    onValueChange = { onEvent(SavePhotoEvent.OnTaskNameChanged(it)) },
                     label = stringResource(R.string.applications_photodo_features_camera_main_task_name_label),
                     isAiGenerated = uiState.aiGeneratedFields.contains("task"),
-                    onReportClick = onReportIssue,
-                    onClearAiClick = onClearAiData,
+                    onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
+                    onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 QuickIconRow(
                     items = taskTemplates,
-                    onItemSelected = onTaskNameChanged,
+                    onItemSelected = { onEvent(SavePhotoEvent.OnTaskNameChanged(it)) },
                     themeColor = themeColor
                 )
             }
@@ -374,7 +349,7 @@ internal fun SavePhotoForm(
 
         // --- SAVE BUTTON ---
         Button(
-            onClick = onSaveClicked,
+            onClick = { onEvent(SavePhotoEvent.OnSaveClicked) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             enabled = !uiState.isSaving && uiState.taskName.isNotBlank(),
             colors = ButtonDefaults.buttonColors(containerColor = themeColor)

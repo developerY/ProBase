@@ -7,12 +7,11 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.features.ai.capture.ui.SmartCaptureUiRoute
+import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.photodo.features.camera.ui.CameraResultHandler
 import com.zoewave.probase.photodo.features.camera.ui.SavePhotoViewModel
 import com.zoewave.probase.photodo.features.camera.ui.components.SavePhotoBottomSheet
@@ -222,7 +221,6 @@ fun photoTodoNavEntryProvider(
 
             is PhotoTodoRoute.SavePhoto -> {
                 val viewModel: SavePhotoViewModel = hiltViewModel()
-                val context = LocalContext.current
                 
                 LaunchedEffect(key.photoUri, key.prefilledAiDraft) {
                     Log.d("SavePhotoDebug", "NavEntry: Calling setInitialData for uri: ${key.photoUri}")
@@ -248,22 +246,10 @@ fun photoTodoNavEntryProvider(
 
                 SavePhotoBottomSheet(
                     uiState = uiState,
-                    onCategoryNameChanged = viewModel::setCategoryName,
-                    onProjectNameChanged = viewModel::setProjectName,
-                    onTaskNameChanged = viewModel::setTaskName,
-                    onDurationChanged = viewModel::setDuration,
-                    onBudgetInputChanged = viewModel::setBudgetInput,
-                    onAdjustBudget = viewModel::adjustBudget,
-                    onDueDateChanged = viewModel::setDueDate,
-                    onAddSubTask = viewModel::addSubTask,
-                    onRemoveSubTask = viewModel::removeSubTask,
-                    onReportIssue = {
-                        val intent = viewModel.getReportIntent()
-                        context.startActivity(intent)
-                    },
-                    onClearAiData = viewModel::clearAiData,
-                    onSaveClicked = viewModel::saveTask,
-                    onDismiss = navigateBack
+                    onEvent = viewModel::onEvent,
+                    navTo = { route ->
+                        if (route == null) navigateBack() else navigateTo(route)
+                    }
                 )
             }
 
