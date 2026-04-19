@@ -13,5 +13,6 @@ data class SettingsUiState(
     val isAgeVerified: Boolean = false,
     val isThemeExpanded: Boolean = false,
     val isAiExpanded: Boolean = false,
-    val isAboutExpanded: Boolean = false
+    val isAboutExpanded: Boolean = false,
+    val animationsEnabled: Boolean = true
 )

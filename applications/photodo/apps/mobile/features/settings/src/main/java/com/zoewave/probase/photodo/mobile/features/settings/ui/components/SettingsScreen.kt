@@ -91,6 +91,10 @@ fun SettingsScreen(
                     currentPaneContrast = uiState.currentPaneContrast,
                     onPaneContrastSelected = { newOption ->
                         onEvent(SettingsEvent.OnPaneContrastSelected(newOption))
+                    },
+                    animationsEnabled = uiState.animationsEnabled,
+                    onAnimationsEnabledToggled = { enabled ->
+                        onEvent(SettingsEvent.OnAnimationsEnabledToggled(enabled))
                     }
                 )
 

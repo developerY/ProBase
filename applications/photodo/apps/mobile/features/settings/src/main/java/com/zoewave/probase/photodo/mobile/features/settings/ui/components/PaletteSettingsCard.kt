@@ -35,6 +35,8 @@ fun PaletteSettingsCard(
     onPaletteSelected: (String) -> Unit,
     currentPaneContrast: String,
     onPaneContrastSelected: (String) -> Unit,
+    animationsEnabled: Boolean,
+    onAnimationsEnabledToggled: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // State is safely encapsulated inside the component
@@ -187,6 +189,31 @@ fun PaletteSettingsCard(
                                 val newOption = if (isChecked) "TINTED" else "FLAT"
                                 onPaneContrastSelected(newOption)
                             }
+                        )
+                    }
+
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+                    // --- UI ANIMATIONS TOGGLE ---
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Enable UI Animations",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "Smooth transitions for charts and numbers",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = animationsEnabled,
+                            onCheckedChange = onAnimationsEnabledToggled
                         )
                     }
                 }

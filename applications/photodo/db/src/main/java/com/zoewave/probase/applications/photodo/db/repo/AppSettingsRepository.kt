@@ -10,4 +10,6 @@ interface AppSettingsRepository : AiConfigurationSettings {
     suspend fun savePalettePreference(paletteIdentifier: String)
     val paneContrastFlow: Flow<String>
     suspend fun savePaneContrast(paneContrastIdentifier: String)
+    val animationsEnabledFlow: Flow<Boolean>
+    suspend fun saveAnimationsEnabled(enabled: Boolean)
 }

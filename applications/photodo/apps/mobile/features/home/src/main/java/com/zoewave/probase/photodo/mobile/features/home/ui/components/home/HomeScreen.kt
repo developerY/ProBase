@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -61,7 +60,8 @@ fun HomeScreen(
                     onEvent(HomeEvent.OnFabMenuToggle(false))
                     navTo(PhotoTodoRoute.SmartCapture())
                 },
-                isAiEnabled = uiState.isAiEnabled
+                isAiEnabled = uiState.isAiEnabled,
+                animationsEnabled = uiState.animationsEnabled
             )
         }
     ) { paddingValues ->
@@ -83,7 +83,9 @@ fun HomeScreen(
                     OverviewSummaryCard(
                         categories = uiState.categories,
                         isExpanded = uiState.isCategoriesSummaryExpanded,
-                        onToggleExpand = { onEvent(HomeEvent.OnToggleCategoriesSummary) }
+                        onToggleExpand = { onEvent(HomeEvent.OnToggleCategoriesSummary) },
+                        onViewAllClick = { navTo(PhotoTodoRoute.CategoryGrid) },
+                        animationsEnabled = uiState.animationsEnabled
                     )
                 }
 
@@ -103,15 +105,6 @@ fun HomeScreen(
                 }
             }
             // --- End New Sections ---
-
-            item {            // --- 3. View All Categories Button (Preserved) ---
-                Button(
-                    onClick = { navTo(PhotoTodoRoute.CategoryGrid) },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_view_all_categories))
-                }
-            }
 
             item {
                 // --- 4. Jump Back In Section (Preserved Urgent/Fav List) ---

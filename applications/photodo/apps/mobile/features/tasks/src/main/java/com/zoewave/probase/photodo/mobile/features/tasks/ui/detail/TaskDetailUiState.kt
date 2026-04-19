@@ -24,5 +24,6 @@ data class TaskDetailUiState(
     val showAddExpenseDialog: Boolean = false,
     val newExpenseAmount: String = "",
     val newExpenseDesc: String = "",
-    val showDeleteProjectConfirmation: Boolean = false
+    val showDeleteProjectConfirmation: Boolean = false,
+    val animationsEnabled: Boolean = true
 )

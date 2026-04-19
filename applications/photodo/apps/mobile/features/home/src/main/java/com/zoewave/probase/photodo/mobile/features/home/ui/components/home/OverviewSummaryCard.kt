@@ -25,11 +25,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,6 +61,8 @@ fun OverviewSummaryCard(
     categories: List<CategoryOverviewUiModel>,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
+    onViewAllClick: () -> Unit,
+    animationsEnabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     // Transform the categories into colored slices
@@ -73,13 +76,13 @@ fun OverviewSummaryCard(
     }
 
     val animatedCategoryCount by animateIntAsState(
-        targetValue = if (revealTrigger) totalCategories else 0,
+        targetValue = if (animationsEnabled && revealTrigger) totalCategories else totalCategories,
         animationSpec = tween(durationMillis = 800),
         label = "CategoryCount"
     )
 
     val chartRevealProgress by animateFloatAsState(
-        targetValue = if (revealTrigger) 1f else 0f,
+        targetValue = if (!animationsEnabled) 1f else if (revealTrigger) 1f else 0f,
         animationSpec = tween(durationMillis = 1500, easing = LinearOutSlowInEasing),
         label = "ChartReveal"
     )
@@ -110,7 +113,7 @@ fun OverviewSummaryCard(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
-                
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (!isExpanded) {
                         Text(
@@ -132,112 +135,161 @@ fun OverviewSummaryCard(
                 enter = expandVertically(),
                 exit = shrinkVertically()
             ) {
-                // Zero internal padding inside the card!
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp) // Reduced height as header is separate
-                        .padding(bottom = 12.dp),
-                    horizontalArrangement = Arrangement.Start, // Legend pushed to the left
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    // --- 🚀 1. The Compact Legend (Left Side) ---
-                    Column(
+                Column {
+                    // Zero internal padding inside the card!
+                    Row(
                         modifier = Modifier
-                            .weight(1f) // Legends get space
-                            .fillMaxHeight()
-                            // Minimum padding to group the text nicely
-                            .padding(start = 16.dp),
-                        verticalArrangement = Arrangement.Center
+                            .fillMaxWidth()
+                            .height(160.dp) // 🚀 Increased from 140.dp to prevent clipping
+                            .padding(bottom = 12.dp),
+                        horizontalArrangement = Arrangement.Start, // Legend pushed to the left
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Bold Category Count
-                        Text(
-                            text = "$animatedCategoryCount",
-                            style = MaterialTheme.typography.displayMedium, // Compact but Display font
-                            fontWeight = FontWeight.Black
-                        )
 
-                        // Tiny Legend Items (Derivative from slices)
-                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            // Show top 3 in compact legend
-                            slices.take(3).forEach { slice ->
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    // Tiny Color Dot
-                                    Box(modifier = Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).size(8.dp).background(slice.color))
-                                    Spacer(modifier = Modifier.size(6.dp))
+                        // --- 🚀 1. The Hub (Left Side) ---
+                        Column(
+                            modifier = Modifier
+                                .weight(1f) // Legends get space
+                                .fillMaxHeight()
+                                // Minimum padding to group the text nicely
+                                .padding(start = 16.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            // 🚀 NEW: Two-Row Navigation Hub Button
+                            Surface(
+                                onClick = onViewAllClick,
+                                modifier = Modifier.size(height = 76.dp, width = 110.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                color = Color(0xFF4A4E69), // 🚀 Distinct color from category slices
+                                contentColor = Color.White,
+                                shadowElevation = 4.dp
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
+                                    modifier = Modifier.fillMaxSize().padding(4.dp)
+                                ) {
+                                    // Row 1: Icon and Number
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.FolderSpecial,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.size(8.dp))
+                                        Text(
+                                            text = "$animatedCategoryCount",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                    }
+                                    
+                                    // Row 2: Navigation Label
                                     Text(
-                                        text = "${slice.name} (${slice.value})", // I'll keep this as is for now as it's a mix of dynamic data and symbols, or I could use a template
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                                        maxLines = 1
+                                        text = "View Categories",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White.copy(alpha = 0.9f)
                                     )
                                 }
                             }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // Tiny Legend Items (Derivative from slices)
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                // Show top 3 in compact legend
+                                slices.take(3).forEach { slice ->
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        // Tiny Color Dot
+                                        Box(
+                                            modifier = Modifier.size(8.dp)
+                                                .clip(RoundedCornerShape(4.dp)).size(8.dp)
+                                                .background(slice.color)
+                                        )
+                                        Spacer(modifier = Modifier.size(6.dp))
+                                        Text(
+                                            text = "${slice.name} (${slice.value})", // I'll keep this as is for now as it's a mix of dynamic data and symbols, or I could use a template
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                alpha = 0.8f
+                                            ),
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
+                            }
                         }
-                    }
 
-                    // --- 🚀 2. The Color Wheel Donut Chart (Right Side) ---
-                    Box(
-                        modifier = Modifier
-                            .size(130.dp) // Large wheel, packed into compact container
-                            .padding(end = 16.dp), // Standard side padding
-                        contentAlignment = Alignment.Center
-                    ) {
+                        // --- 🚀 2. The Color Wheel Donut Chart (Right Side) ---
+                        Box(
+                            modifier = Modifier
+                                .size(130.dp) // Large wheel, packed into compact container
+                                .padding(end = 16.dp), // Standard side padding
+                            contentAlignment = Alignment.Center
+                        ) {
 
-                        // --- Part A: The Drawing Canvas ---
-                        Canvas(modifier = Modifier.fillMaxSize()) {
-                            var currentStartAngle = -90f // Start from the top
-                            val strokeWidth = 20.dp.toPx() // Expressive, thick stroke
+                            // --- Part A: The Drawing Canvas ---
+                            Canvas(modifier = Modifier.fillMaxSize()) {
+                                var currentStartAngle = -90f // Start from the top
+                                val strokeWidth = 20.dp.toPx() // Expressive, thick stroke
 
-                            if (slices.isEmpty()) {
-                                // Empty state placeholder arc
-                                drawArc(
-                                    color = Color.LightGray.copy(alpha = 0.3f),
-                                    startAngle = 0f,
-                                    sweepAngle = 360f,
-                                    useCenter = false,
-                                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                                )
-                            } else {
-                                slices.forEach { slice ->
-                                    // Draw the colored segment
+                                if (slices.isEmpty()) {
+                                    // Empty state placeholder arc
                                     drawArc(
-                                        color = slice.color,
-                                        startAngle = currentStartAngle,
-                                        sweepAngle = slice.sweepAngle * chartRevealProgress,
+                                        color = Color.LightGray.copy(alpha = 0.3f),
+                                        startAngle = 0f,
+                                        sweepAngle = 360f,
                                         useCenter = false,
-                                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round) // Rounded expressive ends
+                                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                                     )
-                                    currentStartAngle += slice.sweepAngle * chartRevealProgress // Increment the angle
+                                } else {
+                                    slices.forEach { slice ->
+                                        // Draw the colored segment
+                                        drawArc(
+                                            color = slice.color,
+                                            startAngle = currentStartAngle,
+                                            sweepAngle = slice.sweepAngle * chartRevealProgress,
+                                            useCenter = false,
+                                            style = Stroke(
+                                                width = strokeWidth,
+                                                cap = StrokeCap.Round
+                                            ) // Rounded expressive ends
+                                        )
+                                        currentStartAngle += slice.sweepAngle * chartRevealProgress // Increment the angle
+                                    }
                                 }
                             }
-                        }
 
-                        // --- Part B: The Center Label (Derivative State) ---
-                        // Shows overall progress percentage
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            val totalTasks = slices.sumOf { it.value }
-                            val totalCompleted = categories.sumOf { it.completedTasks }
-                            val progressPercentage = if (totalTasks > 0) (totalCompleted.toFloat() / totalTasks * 100).toInt() else 0
+                            // --- Part B: The Center Label (Derivative State) ---
+                            // Shows overall progress percentage
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                val totalTasks = slices.sumOf { it.value }
+                                val totalCompleted = categories.sumOf { it.completedTasks }
+                                val progressPercentage =
+                                    if (totalTasks > 0) (totalCompleted.toFloat() / totalTasks * 100).toInt() else 0
 
-                            val animatedProgress by animateIntAsState(
-                                targetValue = if (revealTrigger) progressPercentage else 0,
-                                animationSpec = tween(durationMillis = 800),
-                                label = "ProgressPercentage"
-                            )
+                                val animatedProgress by animateIntAsState(
+                                    targetValue = if (animationsEnabled && revealTrigger) progressPercentage else progressPercentage,
+                                    animationSpec = tween(durationMillis = 800),
+                                    label = "ProgressPercentage"
+                                )
 
-                            Text(
-                                text = "$animatedProgress%",
-                                style = MaterialTheme.typography.titleLarge, // Big bold center number
-                                fontWeight = FontWeight.Black,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = stringResource(R.string.applications_photodo_apps_mobile_features_home_done),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold
-                            )
+                                Text(
+                                    text = "$animatedProgress%",
+                                    style = MaterialTheme.typography.titleLarge, // Big bold center number
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = stringResource(R.string.applications_photodo_apps_mobile_features_home_done),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
@@ -291,6 +343,7 @@ private fun OverviewSummaryCardPreview() {
             categories = mockData,
             isExpanded = true,
             onToggleExpand = {},
+            onViewAllClick = {},
             modifier = Modifier.padding(16.dp)
         )
     }

@@ -54,12 +54,13 @@ class SettingsViewModel @Inject constructor(
         appSettingsRepository.paneContrastFlow,
         appSettingsRepository.isGeminiApiKeySetFlow,
         appSettingsRepository.isAiEnabledFlow,
+        appSettingsRepository.animationsEnabledFlow,
         _firebaseDeviceId,
         _ageVerificationStatus,
         _isAgeVerified,
         _uiFlags
     ) { args: Array<Any?> ->
-        val flags = args[8] as UiFlags
+        val flags = args[9] as UiFlags
         
         // Auto-expand logic (only once on init)
         val finalThemeExpanded = flags.isThemeExpanded || (flags.initialExpandedKey == "SYSTEM")
@@ -72,11 +73,12 @@ class SettingsViewModel @Inject constructor(
             currentPaneContrast = args[2] as String,
             isApiKeySet = args[3] as Boolean,
             isAiEnabled = args[4] as Boolean,
+            animationsEnabled = args[5] as Boolean,
             initialCardKeyToExpand = flags.initialExpandedKey,
             appVersion = getAppVersion(),
-            firebaseDeviceId = args[5] as String,
-            ageVerificationStatus = args[6] as String,
-            isAgeVerified = args[7] as Boolean,
+            firebaseDeviceId = args[6] as String,
+            ageVerificationStatus = args[7] as String,
+            isAgeVerified = args[8] as Boolean,
             isThemeExpanded = finalThemeExpanded,
             isAiExpanded = finalAiExpanded,
             isAboutExpanded = finalAboutExpanded
@@ -150,6 +152,9 @@ class SettingsViewModel @Inject constructor(
             }
             is SettingsEvent.OnAiEnabledToggled -> {
                 viewModelScope.launch { appSettingsRepository.saveAiEnabled(event.enabled) }
+            }
+            is SettingsEvent.OnAnimationsEnabledToggled -> {
+                viewModelScope.launch { appSettingsRepository.saveAnimationsEnabled(event.enabled) }
             }
 
             is SettingsEvent.OnThemeExpandedToggled -> {

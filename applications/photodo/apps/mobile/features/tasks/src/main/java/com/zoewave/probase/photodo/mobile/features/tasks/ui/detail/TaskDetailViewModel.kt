@@ -67,13 +67,15 @@ class TaskDetailViewModel @Inject constructor(
             photoDoRepo.getProjectDetails(id)
         },
         appSettingsRepository.isAiEnabledFlow,
+        appSettingsRepository.animationsEnabledFlow,
         _uiFlags
-    ) { projectDetails, isAiEnabled, flags ->
+    ) { projectDetails, isAiEnabled, animationsEnabled, flags ->
         Log.d("ProjectDebug", "TaskDetailViewModel: Received details? ${projectDetails != null}")
         if (projectDetails != null) {
             TaskDetailUiState(
                 loadState = DetailLoadState.Success(projectDetails),
                 isAiEnabled = isAiEnabled,
+                animationsEnabled = animationsEnabled,
                 fabMenuExpanded = flags.fabMenuExpanded,
                 showAddTaskDialog = flags.showAddTaskDialog,
                 newTaskText = flags.newTaskText,

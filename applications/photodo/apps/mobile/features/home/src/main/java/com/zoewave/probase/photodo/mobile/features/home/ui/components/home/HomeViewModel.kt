@@ -74,8 +74,9 @@ class HomeViewModel @Inject constructor(
             }
         },
         _uiFlags,
-        appSettingsRepository.isAiEnabledFlow
-    ) { categoriesWithProjectsAndTasks, searchResults, flags, isAiEnabled ->
+        appSettingsRepository.isAiEnabledFlow,
+        appSettingsRepository.animationsEnabledFlow
+    ) { categoriesWithProjectsAndTasks, searchResults, flags, isAiEnabled, animationsEnabled ->
         val overviewModels = ArrayList<CategoryOverviewUiModel>(categoriesWithProjectsAndTasks.size)
         val urgentProjects = ArrayList<ProjectListUiModel>()
 
@@ -143,7 +144,8 @@ class HomeViewModel @Inject constructor(
                 showAddCategoryDialog = flags.showAddCategoryDialog,
                 categoryToDelete = flags.categoryToDelete,
                 fabMenuExpanded = flags.fabMenuExpanded,
-                isSearchMode = flags.isSearchMode
+                isSearchMode = flags.isSearchMode,
+                animationsEnabled = animationsEnabled
             )
         }
         .flowOn(Dispatchers.Default)

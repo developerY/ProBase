@@ -123,7 +123,8 @@ fun HomeOverviewScreen(
                     onEvent(HomeEvent.OnFabMenuToggle(false))
                     navTo(PhotoTodoRoute.SmartCapture())
                 },
-                isAiEnabled = uiState.isAiEnabled
+                isAiEnabled = uiState.isAiEnabled,
+                animationsEnabled = uiState.animationsEnabled
             )
         }
     ) { innerPadding ->
@@ -157,6 +158,7 @@ fun HomeOverviewFab(
     onCameraClick: () -> Unit,
     onSmartCaptureClick: () -> Unit,
     isAiEnabled: Boolean,
+    animationsEnabled: Boolean,
     modifier: Modifier = Modifier
 ) {
     FloatingActionButtonMenu(
@@ -197,24 +199,33 @@ fun HomeOverviewFab(
 
                     if (isAiEnabled) {
                         val infiniteTransition = rememberInfiniteTransition(label = "SparklePulse")
-                        val scale by infiniteTransition.animateFloat(
-                            initialValue = 0.8f,
-                            targetValue = 1.2f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(durationMillis = 1000),
-                                repeatMode = RepeatMode.Reverse
-                            ),
-                            label = "SparkleScale"
-                        )
-                        val alpha by infiniteTransition.animateFloat(
-                            initialValue = 0.6f,
-                            targetValue = 1.0f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(durationMillis = 1000),
-                                repeatMode = RepeatMode.Reverse
-                            ),
-                            label = "SparkleAlpha"
-                        )
+                        val scale by if (animationsEnabled) {
+                            infiniteTransition.animateFloat(
+                                initialValue = 0.8f,
+                                targetValue = 1.2f,
+                                animationSpec = infiniteRepeatable(
+                                    animation = tween(durationMillis = 1000),
+                                    repeatMode = RepeatMode.Reverse
+                                ),
+                                label = "SparkleScale"
+                            )
+                        } else {
+                            remember { mutableStateOf(1f) }
+                        }
+
+                        val alpha by if (animationsEnabled) {
+                            infiniteTransition.animateFloat(
+                                initialValue = 0.6f,
+                                targetValue = 1.0f,
+                                animationSpec = infiniteRepeatable(
+                                    animation = tween(durationMillis = 1000),
+                                    repeatMode = RepeatMode.Reverse
+                                ),
+                                label = "SparkleAlpha"
+                            )
+                        } else {
+                            remember { mutableStateOf(1f) }
+                        }
 
                         Icon(
                             imageVector = Icons.Default.AutoAwesome,
@@ -345,7 +356,9 @@ fun HomeOverviewContent(
                             categories = uiState.categories,
                             isExpanded = uiState.isCategoriesSummaryExpanded,
                             onToggleExpand = { onEvent(HomeEvent.OnToggleCategoriesSummary) },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            onViewAllClick = { onEvent },
+                            animationsEnabled = true
                         )
                     }
                 }

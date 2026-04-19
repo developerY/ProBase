@@ -91,4 +91,16 @@ class DataStoreAppSettingsRepository @Inject constructor(
             preferences[AI_MODEL_KEY] = model
         }
     }
+
+    private val ANIMATIONS_ENABLED_KEY = booleanPreferencesKey("animations_enabled")
+
+    override val animationsEnabledFlow: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[ANIMATIONS_ENABLED_KEY] ?: true
+    }
+
+    override suspend fun saveAnimationsEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[ANIMATIONS_ENABLED_KEY] = enabled
+        }
+    }
 }
