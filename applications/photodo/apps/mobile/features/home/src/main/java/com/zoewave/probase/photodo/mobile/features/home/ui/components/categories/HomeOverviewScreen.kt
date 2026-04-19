@@ -122,7 +122,7 @@ fun HomeOverviewScreen(
                 },
                 onSmartCaptureClick = {
                     onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
-                    navTo(PhotoTodoRoute.SmartCapture())
+                    navTo(PhotoTodoRoute.SmartCapture(photoUri = ""))
                 },
                 isAiEnabled = uiState.isAiEnabled,
                 animationsEnabled = uiState.animationsEnabled

@@ -7,7 +7,6 @@ import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectEntity
 import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.applications.photodo.db.repo.PhotoDoRepo
-import com.zoewave.probase.core.data.repository.AiComplianceRepository
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.photodo.features.camera.domain.AddPhotoToTaskUseCase
 import com.zoewave.probase.photodo.features.camera.ui.state.SavePhotoUiState
@@ -24,8 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SavePhotoViewModel @Inject constructor(
     private val repo: PhotoDoRepo,
-    private val addPhotoToTask: AddPhotoToTaskUseCase,
-    private val aiComplianceRepo: AiComplianceRepository
+    private val addPhotoToTask: AddPhotoToTaskUseCase
 ) : ViewModel() {
 
     private val _photoUri = MutableStateFlow("")
@@ -65,7 +63,9 @@ class SavePhotoViewModel @Inject constructor(
         _savedProjectId,
         _savedProjectTitle
     ) { args: Array<Any?> ->
+        @Suppress("UNCHECKED_CAST")
         val categories = args[10] as List<CategoryEntity>
+        @Suppress("UNCHECKED_CAST")
         val allProjects = args[11] as List<ProjectEntity>
         val currentCategoryName = args[2] as String
 
@@ -81,6 +81,11 @@ class SavePhotoViewModel @Inject constructor(
             emptyList()
         }
 
+        @Suppress("UNCHECKED_CAST")
+        val subTasks = args[8] as List<String>
+        @Suppress("UNCHECKED_CAST")
+        val aiGeneratedFields = args[9] as Set<String>
+
         SavePhotoUiState(
             photoUri = args[0] as String,
             isFromAi = args[1] as Boolean,
@@ -90,8 +95,8 @@ class SavePhotoViewModel @Inject constructor(
             duration = args[5] as String,
             budgetInput = args[6] as String,
             dueDateMillis = args[7] as Long?,
-            subTasks = args[8] as List<String>,
-            aiGeneratedFields = args[9] as Set<String>,
+            subTasks = subTasks,
+            aiGeneratedFields = aiGeneratedFields,
             categories = categories,
             projects = filteredProjects, // 🚀 NEW: Use filtered list
             isSaving = args[12] as Boolean,
@@ -131,11 +136,11 @@ class SavePhotoViewModel @Inject constructor(
             
             // Mark fields as AI generated if they were populated
             val generated = mutableSetOf<String>()
-            if (draft.category != null) generated.add("category")
-            if (draft.projectName != null) generated.add("project")
-            if (draft.taskName != null) generated.add("task")
-            if (draft.duration != null) generated.add("duration")
-            if (draft.budget != null) generated.add("budget")
+            if (draft.category != null) generated.add(FIELD_CATEGORY)
+            if (draft.projectName != null) generated.add(FIELD_PROJECT)
+            if (draft.taskName != null) generated.add(FIELD_TASK)
+            if (draft.duration != null) generated.add(FIELD_DURATION)
+            if (draft.budget != null) generated.add(FIELD_BUDGET)
             _aiGeneratedFields.value = generated
         } else {
             _isFromAi.value = false
@@ -190,30 +195,14 @@ class SavePhotoViewModel @Inject constructor(
         _budgetInput.value = if (newValue % 1 == 0.0) newValue.toLong().toString() else newValue.toString()
     }
 
-    fun addSubTask(text: String) {
-        if (text.isNotBlank()) {
-            _subTasks.update { it + text }
-        }
-    }
-
-    fun removeSubTask(index: Int) {
-        _subTasks.update { it.toMutableList().apply { removeAt(index) } }
-    }
-
-    fun getReportIntent(): android.content.Intent {
-        // Disabled for PhotoDo mobile app as per user request
-        // return aiComplianceRepo.getReportIntent()
-        return android.content.Intent()
-    }
-
     fun clearAiData() {
         _aiGeneratedFields.value.forEach { field ->
             when (field) {
-                "category" -> _categoryName.value = ""
-                "project" -> _projectName.value = ""
-                "task" -> _taskName.value = ""
-                "duration" -> _duration.value = ""
-                "budget" -> _budgetInput.value = ""
+                FIELD_CATEGORY -> _categoryName.value = ""
+                FIELD_PROJECT -> _projectName.value = ""
+                FIELD_TASK -> _taskName.value = ""
+                FIELD_DURATION -> _duration.value = ""
+                FIELD_BUDGET -> _budgetInput.value = ""
             }
         }
         _aiGeneratedFields.value = emptySet()
@@ -282,5 +271,13 @@ class SavePhotoViewModel @Inject constructor(
             _isSaved.value = true
             Log.d("SavePhotoDebug", "ViewModel: saveTask complete. isSaved set to true for ID: $projectId")
         }
+    }
+
+    companion object {
+        const val FIELD_CATEGORY = "category"
+        const val FIELD_PROJECT = "project"
+        const val FIELD_TASK = "task"
+        const val FIELD_DURATION = "duration"
+        const val FIELD_BUDGET = "budget"
     }
 }

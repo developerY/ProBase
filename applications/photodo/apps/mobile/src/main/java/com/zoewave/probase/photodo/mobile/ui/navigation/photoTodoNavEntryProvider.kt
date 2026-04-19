@@ -117,7 +117,7 @@ fun photoTodoNavEntryProvider(
                             when (effect) {
                                 TasksSideEffect.NavigateBack -> navigateBack()
                                 is TasksSideEffect.ProjectCreated -> {
-                                    navigateTo(PhotoTodoRoute.TaskDetail(effect.projectId, effect.title))
+                                    navigateTo(TaskDetail(effect.projectId, effect.title))
                                 }
                             }
                         }
@@ -155,7 +155,7 @@ fun photoTodoNavEntryProvider(
                             when (effect) {
                                 TasksSideEffect.NavigateBack -> navigateBack()
                                 is TasksSideEffect.ProjectCreated -> {
-                                    navigateTo(PhotoTodoRoute.TaskDetail(effect.projectId, effect.title))
+                                    navigateTo(TaskDetail(effect.projectId, effect.title))
                                 }
                             }
                         }
@@ -189,11 +189,11 @@ fun photoTodoNavEntryProvider(
                             } else if (isAiEnabled) {
                                 // 🚀 NEW: Tier 1 (Cloud) enabled, go to SmartCapture review first!
                                 navigateBack() // Pop camera
-                                navigateTo(PhotoTodoRoute.SmartCapture(uriString))
+                                navigateTo(PhotoTodoRoute.SmartCapture(photoUri = uriString))
                             } else {
                                 // standard flow
                                 navigateBack()
-                                navigateTo(PhotoTodoRoute.SavePhoto(uriString))
+                                navigateTo(PhotoTodoRoute.SavePhoto(photoUri = uriString))
                             }
                         } else {
                             navigateBack()
