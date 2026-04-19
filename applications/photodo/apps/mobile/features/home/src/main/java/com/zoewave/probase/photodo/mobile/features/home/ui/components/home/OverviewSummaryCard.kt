@@ -32,7 +32,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,14 +66,20 @@ fun OverviewSummaryCard(
     val slices = mapCategoriesToWheelSlices(categories)
     val totalCategories = categories.size
 
+    // 🚀 NEW: Trigger to start animations from zero every time the card is displayed
+    var revealTrigger by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        revealTrigger = true
+    }
+
     val animatedCategoryCount by animateIntAsState(
-        targetValue = totalCategories,
+        targetValue = if (revealTrigger) totalCategories else 0,
         animationSpec = tween(durationMillis = 800),
         label = "CategoryCount"
     )
 
     val chartRevealProgress by animateFloatAsState(
-        targetValue = 1f,
+        targetValue = if (revealTrigger) 1f else 0f,
         animationSpec = tween(durationMillis = 1500, easing = LinearOutSlowInEasing),
         label = "ChartReveal"
     )
@@ -212,7 +222,7 @@ fun OverviewSummaryCard(
                             val progressPercentage = if (totalTasks > 0) (totalCompleted.toFloat() / totalTasks * 100).toInt() else 0
 
                             val animatedProgress by animateIntAsState(
-                                targetValue = progressPercentage,
+                                targetValue = if (revealTrigger) progressPercentage else 0,
                                 animationSpec = tween(durationMillis = 800),
                                 label = "ProgressPercentage"
                             )
