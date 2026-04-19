@@ -157,11 +157,11 @@ internal fun SavePhotoForm(
 
         // --- SECTION 1: CATEGORY ---
         val categorySuggestions = listOf(
-            stringResource(R.string.applications_photodo_apps_mobile_features_home_suggestion_home) to Icons.Default.Home,
-            stringResource(R.string.applications_photodo_apps_mobile_features_home_suggestion_work) to Icons.Default.Business,
-            stringResource(R.string.applications_photodo_apps_mobile_features_home_suggestion_personal) to Icons.Default.BeachAccess,
-            stringResource(R.string.applications_photodo_apps_mobile_features_home_suggestion_shopping) to Icons.Default.ShoppingCart,
-            stringResource(R.string.applications_photodo_apps_mobile_features_home_suggestion_health) to Icons.Default.Favorite
+            stringResource(R.string.applications_photodo_features_camera_suggestion_home) to Icons.Default.Home,
+            stringResource(R.string.applications_photodo_features_camera_suggestion_work) to Icons.Default.Business,
+            stringResource(R.string.applications_photodo_features_camera_suggestion_personal) to Icons.Default.BeachAccess,
+            stringResource(R.string.applications_photodo_features_camera_suggestion_shopping) to Icons.Default.ShoppingCart,
+            stringResource(R.string.applications_photodo_features_camera_suggestion_health) to Icons.Default.Favorite
         )
 
         FormSection(title = stringResource(R.string.applications_photodo_features_camera_category_section), themeColor = themeColor) {
@@ -212,12 +212,12 @@ internal fun SavePhotoForm(
 
         // --- SECTION 2: PROJECT ---
         val projectTemplates = listOf(
-            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_template_kitchen) to Icons.Default.Kitchen,
-            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_template_garden) to Icons.Default.Yard,
-            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_template_car) to Icons.Default.DirectionsCar,
-            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_template_office) to Icons.Default.Business,
-            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_suggestion_home) to Icons.Default.Home,
-            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_template_holiday) to Icons.Default.BeachAccess
+            stringResource(R.string.applications_photodo_features_camera_template_kitchen) to Icons.Default.Kitchen,
+            stringResource(R.string.applications_photodo_features_camera_template_garden) to Icons.Default.Yard,
+            stringResource(R.string.applications_photodo_features_camera_template_car) to Icons.Default.DirectionsCar,
+            stringResource(R.string.applications_photodo_features_camera_template_office) to Icons.Default.Business,
+            stringResource(R.string.applications_photodo_features_camera_suggestion_home) to Icons.Default.Home,
+            stringResource(R.string.applications_photodo_features_camera_template_holiday) to Icons.Default.BeachAccess
         )
 
         FormSection(title = stringResource(R.string.applications_photodo_features_camera_project_details_section), themeColor = themeColor) {
@@ -319,12 +319,12 @@ internal fun SavePhotoForm(
 
         // --- SECTION 3: TASK ---
         val taskTemplates = listOf(
-            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_task_fix) to Icons.Default.Build,
-            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_task_buy) to Icons.Default.ShoppingCart,
-            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_task_clean) to Icons.Default.CleaningServices,
-            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_task_call) to Icons.Default.Call,
-            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_task_find) to Icons.Default.Search,
-            stringResource(com.zoewave.probase.photodo.mobile.features.home.R.string.applications_photodo_apps_mobile_features_home_task_organize) to Icons.Default.Layers
+            stringResource(R.string.applications_photodo_features_camera_task_fix) to Icons.Default.Build,
+            stringResource(R.string.applications_photodo_features_camera_task_buy) to Icons.Default.ShoppingCart,
+            stringResource(R.string.applications_photodo_features_camera_task_clean) to Icons.Default.CleaningServices,
+            stringResource(R.string.applications_photodo_features_camera_task_call) to Icons.Default.Call,
+            stringResource(R.string.applications_photodo_features_camera_task_find) to Icons.Default.Search,
+            stringResource(R.string.applications_photodo_features_camera_task_organize) to Icons.Default.Layers
         )
 
         FormSection(title = stringResource(R.string.applications_photodo_features_camera_task_section), themeColor = themeColor) {

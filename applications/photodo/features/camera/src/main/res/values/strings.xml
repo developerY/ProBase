@@ -17,4 +17,22 @@
     <string name="applications_photodo_features_camera_clear_ai_data">Clear AI Data</string>
     <string name="applications_photodo_features_camera_report_bad_ai_output">Report bad AI output</string>
     <string name="applications_photodo_features_camera_currency_symbol">$</string>
+
+    <!-- Suggestions & Templates -->
+    <string name="applications_photodo_features_camera_suggestion_home">Home</string>
+    <string name="applications_photodo_features_camera_suggestion_work">Work</string>
+    <string name="applications_photodo_features_camera_suggestion_personal">Personal</string>
+    <string name="applications_photodo_features_camera_suggestion_shopping">Shopping</string>
+    <string name="applications_photodo_features_camera_suggestion_health">Health</string>
+    <string name="applications_photodo_features_camera_template_kitchen">Kitchen</string>
+    <string name="applications_photodo_features_camera_template_garden">Garden</string>
+    <string name="applications_photodo_features_camera_template_car">Car</string>
+    <string name="applications_photodo_features_camera_template_office">Office</string>
+    <string name="applications_photodo_features_camera_template_holiday">Holiday</string>
+    <string name="applications_photodo_features_camera_task_fix">Fix</string>
+    <string name="applications_photodo_features_camera_task_buy">Buy</string>
+    <string name="applications_photodo_features_camera_task_clean">Clean</string>
+    <string name="applications_photodo_features_camera_task_call">Call</string>
+    <string name="applications_photodo_features_camera_task_find">Find</string>
+    <string name="applications_photodo_features_camera_task_organize">Organize</string>
 </resources>
