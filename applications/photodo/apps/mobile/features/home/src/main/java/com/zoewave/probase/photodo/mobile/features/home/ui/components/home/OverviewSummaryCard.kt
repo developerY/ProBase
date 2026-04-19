@@ -62,15 +62,15 @@ fun OverviewSummaryCard(
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
     onViewAllClick: () -> Unit,
+    modifier: Modifier = Modifier,
     animationsEnabled: Boolean = true,
-    modifier: Modifier = Modifier
 ) {
     // Transform the categories into colored slices
     val slices = mapCategoriesToWheelSlices(categories)
     val totalCategories = categories.size
 
     // 🚀 NEW: Trigger to start animations from zero every time the card is displayed
-    var revealTrigger by remember { mutableStateOf(false) }
+    var revealTrigger by remember { mutableStateOf(value = false) }
     LaunchedEffect(Unit) {
         revealTrigger = true
     }
@@ -181,7 +181,7 @@ fun OverviewSummaryCard(
                                         )
                                         Spacer(modifier = Modifier.size(8.dp))
                                         Text(
-                                            text = "$animatedCategoryCount",
+                                            text = animatedCategoryCount.toString(),
                                             style = MaterialTheme.typography.titleLarge,
                                             fontWeight = FontWeight.Black
                                         )
@@ -270,7 +270,7 @@ fun OverviewSummaryCard(
                                 val totalTasks = slices.sumOf { it.value }
                                 val totalCompleted = categories.sumOf { it.completedTasks }
                                 val progressPercentage =
-                                    if (totalTasks > 0) (totalCompleted.toFloat() / totalTasks * 100).toInt() else 0
+                                    if (totalTasks > 0) ((totalCompleted.toFloat() / totalTasks) * 100).toInt() else 0
 
                                 val animatedProgress by animateIntAsState(
                                     targetValue = if (animationsEnabled && revealTrigger) progressPercentage else progressPercentage,

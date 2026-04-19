@@ -99,28 +99,29 @@ fun HomeOverviewScreen(
     onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
 ) {
+    val homeCategoryName = stringResource(R.string.applications_photodo_apps_mobile_features_home_category_template_home)
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         // 2. Replace the Scaffold's floatingActionButton block with this:
         floatingActionButton = {
             HomeOverviewFab(
                 fabMenuExpanded = uiState.fabMenuExpanded,
-                onFabToggle = { onEvent(HomeEvent.OnFabMenuToggle(it)) },
+                onFabToggle = { onEvent(HomeEvent.OnFabMenuToggle(expanded = it)) },
                 onAddCategoryClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
-                    onEvent(HomeEvent.OnShowAddCategoryDialog(true))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
+                    onEvent(HomeEvent.OnShowAddCategoryDialog(show = true))
                 },
                 onHomeProjectClick = { // Updated parameter name
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
                     // Map to the common Quick Project logic with "Home" override!
-                    onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
+                    onEvent(HomeEvent.OnAddQuickProjectClicked(homeCategoryName))
                 },
                 onCameraClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
                     navTo(PhotoTodoRoute.Camera(projectId = null))
                 },
                 onSmartCaptureClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
                     navTo(PhotoTodoRoute.SmartCapture())
                 },
                 isAiEnabled = uiState.isAiEnabled,
@@ -210,7 +211,7 @@ fun HomeOverviewFab(
                                 label = "SparkleScale"
                             )
                         } else {
-                            remember { mutableStateOf(1f) }
+                            remember { androidx.compose.runtime.mutableFloatStateOf(1f) }
                         }
 
                         val alpha by if (animationsEnabled) {
@@ -224,7 +225,7 @@ fun HomeOverviewFab(
                                 label = "SparkleAlpha"
                             )
                         } else {
-                            remember { mutableStateOf(1f) }
+                            remember { androidx.compose.runtime.mutableFloatStateOf(1f) }
                         }
 
                         Icon(
@@ -282,7 +283,6 @@ fun HomeOverviewContent(
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else if (uiState.isEmpty) {
             EmptyHomeState(
-                onEvent = onEvent,
                 navTo = navTo,
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -357,8 +357,8 @@ fun HomeOverviewContent(
                             isExpanded = uiState.isCategoriesSummaryExpanded,
                             onToggleExpand = { onEvent(HomeEvent.OnToggleCategoriesSummary) },
                             modifier = Modifier.fillMaxWidth(),
-                            onViewAllClick = { onEvent },
-                            animationsEnabled = true
+                            onViewAllClick = { navTo(PhotoTodoRoute.CategoryGrid) },
+                            animationsEnabled = uiState.animationsEnabled
                         )
                     }
                 }
@@ -370,7 +370,6 @@ fun HomeOverviewContent(
                     CategoryDashboardCard(
                         category = category,
                         index = index,
-                        onEvent = onEvent,
                         onDeleteClicked = { onEvent(HomeEvent.OnCategoryToDeleteChanged(it)) },
                         navTo = navTo
                     )
@@ -443,7 +442,6 @@ fun AddCategoryBottomSheet(
     onCategoryCreated: (String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var newCategoryName by rememberSaveable { mutableStateOf("") }
 
@@ -476,6 +474,7 @@ fun AddCategoryBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 categoryTemplates.forEach { template ->
+                    val templateName = stringResource(template.nameRes)
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -485,7 +484,6 @@ fun AddCategoryBottomSheet(
                                 .size(48.dp)
                                 .clip(CircleShape)
                                 .clickable {
-                                    val templateName = context.getString(template.nameRes)
                                     onCategoryCreated(templateName, template.iconName)
                                 },
                             color = MaterialTheme.colorScheme.primaryContainer,
@@ -494,14 +492,14 @@ fun AddCategoryBottomSheet(
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = template.icon,
-                                    contentDescription = stringResource(template.nameRes),
+                                    contentDescription = templateName,
                                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
                         }
                         Text(
-                            text = stringResource(template.nameRes),
+                            text = templateName,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -544,7 +542,6 @@ private val categoryTemplates = listOf(
 fun CategoryDashboardCard(
     category: CategoryOverviewUiModel,
     index: Int,
-    onEvent: (HomeEvent) -> Unit,
     onDeleteClicked: (CategoryOverviewUiModel) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
@@ -665,7 +662,6 @@ fun CategoryDashboardCard(
 
 @Composable
 fun EmptyHomeState(
-    onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {

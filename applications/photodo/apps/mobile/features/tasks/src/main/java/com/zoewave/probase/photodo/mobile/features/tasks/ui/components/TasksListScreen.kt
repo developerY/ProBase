@@ -54,7 +54,7 @@ fun TasksListScreen(
     onEvent: (TasksEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
 ) {
-    BackHandler(uiState.fabMenuExpanded) { onEvent(TasksEvent.OnFabMenuToggle(false)) }
+    BackHandler(uiState.fabMenuExpanded) { onEvent(TasksEvent.OnFabMenuToggle(expanded = false)) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -65,7 +65,7 @@ fun TasksListScreen(
                     IconButton(onClick = { navTo(null) }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_back_content_desc)
+                            contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_back_content_desc),
                         )
                     }
                 },
@@ -227,9 +227,7 @@ fun TasksListScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        uiState.projectToDelete.let {
-                            onEvent(TasksEvent.OnDeleteProject(it.projectId))
-                        }
+                        onEvent(TasksEvent.OnDeleteProject(uiState.projectToDelete.projectId))
                         onEvent(TasksEvent.OnProjectToDeleteChanged(null))
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error) // Fixed color logic
@@ -318,7 +316,7 @@ fun TasksListBudgetScreenPreview() {
                         isFavorite = true,
                         currentSpend = 150.0,
                         projectBudget = 200.0, // 🟢 Will show up GREEN (Under budget),
-                        dueDateMillis = System.currentTimeMillis() + 86400000L * 3,
+                        dueDateMillis = System.currentTimeMillis() + (86400000L * 3),
                     ),
                     ProjectListUiModel(
                         projectId = 3,
