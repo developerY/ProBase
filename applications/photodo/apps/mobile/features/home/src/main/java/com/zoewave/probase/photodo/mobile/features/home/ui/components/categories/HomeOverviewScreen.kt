@@ -199,7 +199,7 @@ fun HomeOverviewFab(
                 Box(contentAlignment = Alignment.Center) {
 
                     if (isAiEnabled) {
-                        val infiniteTransition = rememberInfiniteTransition(label = "SparklePulse")
+                        val infiniteTransition = rememberInfiniteTransition(label = LABEL_SPARKLE_PULSE)
                         val scale by if (animationsEnabled) {
                             infiniteTransition.animateFloat(
                                 initialValue = 0.8f,
@@ -208,7 +208,7 @@ fun HomeOverviewFab(
                                     animation = tween(durationMillis = 1000),
                                     repeatMode = RepeatMode.Reverse
                                 ),
-                                label = "SparkleScale"
+                                label = LABEL_SPARKLE_SCALE
                             )
                         } else {
                             remember { androidx.compose.runtime.mutableFloatStateOf(1f) }
@@ -222,7 +222,7 @@ fun HomeOverviewFab(
                                     animation = tween(durationMillis = 1000),
                                     repeatMode = RepeatMode.Reverse
                                 ),
-                                label = "SparkleAlpha"
+                                label = LABEL_SPARKLE_ALPHA
                             )
                         } else {
                             remember { androidx.compose.runtime.mutableFloatStateOf(1f) }
@@ -543,7 +543,7 @@ fun CategoryDashboardCard(
     category: CategoryOverviewUiModel,
     index: Int,
     onDeleteClicked: (CategoryOverviewUiModel) -> Unit,
-    navTo: (PhotoTodoRoute?) -> Unit,
+    @Suppress("UNUSED_PARAMETER") navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Dynamically cycle through Material 3 expressive container colors!
@@ -662,7 +662,7 @@ fun CategoryDashboardCard(
 
 @Composable
 fun EmptyHomeState(
-    navTo: (PhotoTodoRoute?) -> Unit,
+    @Suppress("UNUSED_PARAMETER") navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -765,3 +765,7 @@ private fun HomeOverviewScreenEmptyPreview() {
         }
     }
 }
+
+private const val LABEL_SPARKLE_PULSE = "SparklePulse"
+private const val LABEL_SPARKLE_SCALE = "SparkleScale"
+private const val LABEL_SPARKLE_ALPHA = "SparkleAlpha"

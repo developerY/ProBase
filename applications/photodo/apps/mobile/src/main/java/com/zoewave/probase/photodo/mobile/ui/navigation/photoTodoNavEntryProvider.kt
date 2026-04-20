@@ -179,8 +179,8 @@ fun photoTodoNavEntryProvider(
                     navTo = { routeString ->
                         Log.d("CameraDebug", "5. Host App received navTo string: $routeString")
 
-                        if (routeString.startsWith("result_ok:")) {
-                            val uriString = routeString.removePrefix("result_ok:")
+                        if (routeString.startsWith(PROTOCOL_RESULT_OK)) {
+                            val uriString = routeString.removePrefix(PROTOCOL_RESULT_OK)
                             Log.d("CameraDebug", "G. Host App extracted URI, executing save UseCase...")
                             val projectId = key.projectId
                             if (projectId != null) {
@@ -237,7 +237,7 @@ fun photoTodoNavEntryProvider(
                         Log.d("SavePhotoDebug", "NavEntry: Auto-navigating to Detail for ID: $id")
                         if (id != null && title != null) {
                             navigateBack()
-                            navigateTo(PhotoTodoRoute.TaskDetail(id, title))
+                            navigateTo(TaskDetail(id, title))
                         } else {
                             navigateBack()
                         }
@@ -297,3 +297,5 @@ fun photoTodoNavEntryProvider(
         }
     }
 }
+
+private const val PROTOCOL_RESULT_OK = "result_ok:"

@@ -137,7 +137,7 @@ fun TaskDetailScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Box(contentAlignment = Alignment.Center) {
                                         if (uiState.animationsEnabled) {
-                                            val infiniteTransition = rememberInfiniteTransition(label = "AiSparklePulse")
+                                            val infiniteTransition = rememberInfiniteTransition(label = LABEL_SPARKLE_PULSE)
                                             val scale by infiniteTransition.animateFloat(
                                                 initialValue = 0.8f,
                                                 targetValue = 1.2f,
@@ -145,7 +145,7 @@ fun TaskDetailScreen(
                                                     animation = tween(durationMillis = 1000),
                                                     repeatMode = RepeatMode.Reverse
                                                 ),
-                                                label = "AiSparkleScale"
+                                                label = LABEL_SPARKLE_SCALE
                                             )
                                             val alpha by infiniteTransition.animateFloat(
                                                 initialValue = 0.6f,
@@ -154,7 +154,7 @@ fun TaskDetailScreen(
                                                     animation = tween(durationMillis = 1000),
                                                     repeatMode = RepeatMode.Reverse
                                                 ),
-                                                label = "AiSparkleAlpha"
+                                                label = LABEL_SPARKLE_ALPHA
                                             )
 
                                             Icon(
@@ -558,3 +558,7 @@ fun TaskDetailScreenPreview() {
         )
     }
 }
+
+private const val LABEL_SPARKLE_PULSE = "AiSparklePulse"
+private const val LABEL_SPARKLE_SCALE = "AiSparkleScale"
+private const val LABEL_SPARKLE_ALPHA = "AiSparkleAlpha"

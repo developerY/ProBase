@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.photodo.features.camera.R
 import com.zoewave.probase.photodo.features.camera.ui.SavePhotoEvent
+import com.zoewave.probase.photodo.features.camera.ui.SavePhotoViewModel
 import com.zoewave.probase.photodo.features.camera.ui.state.SavePhotoUiState
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import java.text.SimpleDateFormat
@@ -78,7 +79,7 @@ import java.util.Locale
 fun SavePhotoBottomSheet(
     uiState: SavePhotoUiState,
     onEvent: (SavePhotoEvent) -> Unit,
-    navTo: (PhotoTodoRoute?) -> Unit,
+    @Suppress("UNUSED_PARAMETER") navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -175,7 +176,7 @@ internal fun SavePhotoForm(
                         value = uiState.categoryName,
                         onValueChange = { onEvent(SavePhotoEvent.OnCategoryNameChanged(it)) },
                         label = stringResource(R.string.applications_photodo_features_camera_category_name_label),
-                        isAiGenerated = uiState.aiGeneratedFields.contains("category"),
+                        isAiGenerated = uiState.aiGeneratedFields.contains(SavePhotoViewModel.FIELD_CATEGORY),
                         onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
                         onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                         modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
@@ -231,7 +232,7 @@ internal fun SavePhotoForm(
                         value = uiState.projectName,
                         onValueChange = { onEvent(SavePhotoEvent.OnProjectNameChanged(it)) },
                         label = stringResource(R.string.applications_photodo_features_camera_project_name_label),
-                        isAiGenerated = uiState.aiGeneratedFields.contains("project"),
+                        isAiGenerated = uiState.aiGeneratedFields.contains(SavePhotoViewModel.FIELD_PROJECT),
                         onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
                         onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                         modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
@@ -274,7 +275,7 @@ internal fun SavePhotoForm(
                         value = uiState.duration,
                         onValueChange = { onEvent(SavePhotoEvent.OnDurationChanged(it)) },
                         label = stringResource(R.string.applications_photodo_features_camera_duration_label),
-                        isAiGenerated = uiState.aiGeneratedFields.contains("duration"),
+                        isAiGenerated = uiState.aiGeneratedFields.contains(SavePhotoViewModel.FIELD_DURATION),
                         onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
                         onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                         modifier = Modifier.weight(1f),
@@ -306,7 +307,7 @@ internal fun SavePhotoForm(
                         value = uiState.budgetInput,
                         onValueChange = { onEvent(SavePhotoEvent.OnBudgetInputChanged(it)) },
                         label = stringResource(R.string.applications_photodo_features_camera_total_budget_label),
-                        isAiGenerated = uiState.aiGeneratedFields.contains("budget"),
+                        isAiGenerated = uiState.aiGeneratedFields.contains(SavePhotoViewModel.FIELD_BUDGET),
                         onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
                         onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                         modifier = Modifier.fillMaxWidth(),
@@ -333,7 +334,7 @@ internal fun SavePhotoForm(
                     value = uiState.taskName,
                     onValueChange = { onEvent(SavePhotoEvent.OnTaskNameChanged(it)) },
                     label = stringResource(R.string.applications_photodo_features_camera_main_task_name_label),
-                    isAiGenerated = uiState.aiGeneratedFields.contains("task"),
+                    isAiGenerated = uiState.aiGeneratedFields.contains(SavePhotoViewModel.FIELD_TASK),
                     onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
                     onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                     modifier = Modifier.fillMaxWidth()
