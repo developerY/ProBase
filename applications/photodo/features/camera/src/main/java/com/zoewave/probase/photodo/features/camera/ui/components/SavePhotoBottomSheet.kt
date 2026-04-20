@@ -62,10 +62,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
+import com.zoewave.probase.photodo.features.camera.R
+import com.zoewave.probase.photodo.features.camera.ui.SavePhotoEvent
+import com.zoewave.probase.photodo.features.camera.ui.SavePhotoViewModel
 import com.zoewave.probase.photodo.features.camera.ui.state.SavePhotoUiState
-import com.zoewave.probase.photodo.mobile.features.tasks.ui.components.PhotoDoDatePicker
+import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -74,50 +78,28 @@ import java.util.Locale
 @Composable
 fun SavePhotoBottomSheet(
     uiState: SavePhotoUiState,
-    onCategoryNameChanged: (String) -> Unit,
-    onProjectNameChanged: (String) -> Unit,
-    onTaskNameChanged: (String) -> Unit,
-    onDurationChanged: (String) -> Unit,
-    onBudgetInputChanged: (String) -> Unit,
-    onAdjustBudget: (Double) -> Unit,
-    onDueDateChanged: (Long?) -> Unit,
-    onAddSubTask: (String) -> Unit,
-    onRemoveSubTask: (Int) -> Unit,
-    onReportIssue: () -> Unit,
-    onClearAiData: () -> Unit,
-    onSaveClicked: () -> Unit,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    onEvent: (SavePhotoEvent) -> Unit,
+    @Suppress("UNUSED_PARAMETER") navTo: (PhotoTodoRoute?) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var showDatePicker by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(value = false) }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { onEvent(SavePhotoEvent.OnDismiss) },
         sheetState = sheetState,
         modifier = modifier.imePadding()
     ) {
         SavePhotoForm(
             uiState = uiState,
-            onCategoryNameChanged = onCategoryNameChanged,
-            onProjectNameChanged = onProjectNameChanged,
-            onTaskNameChanged = onTaskNameChanged,
-            onDurationChanged = onDurationChanged,
-            onBudgetInputChanged = onBudgetInputChanged,
-            onAdjustBudget = onAdjustBudget,
-            onShowDatePicker = { showDatePicker = true },
-            onAddSubTask = onAddSubTask,
-            onRemoveSubTask = onRemoveSubTask,
-            onReportIssue = onReportIssue,
-            onClearAiData = onClearAiData,
-            onSaveClicked = onSaveClicked,
-            onDismiss = onDismiss
+            onEvent = onEvent,
+            onShowDatePicker = { showDatePicker = true }
         )
 
         if (showDatePicker) {
-            PhotoDoDatePicker(
+            com.zoewave.probase.photodo.mobile.features.tasks.ui.components.PhotoDoDatePicker(
                 onDateSelected = { 
-                    onDueDateChanged(it)
+                    onEvent(SavePhotoEvent.OnDueDateChanged(it))
                     showDatePicker = false
                 },
                 onDismiss = { showDatePicker = false }
@@ -130,22 +112,10 @@ fun SavePhotoBottomSheet(
 @Composable
 internal fun SavePhotoForm(
     uiState: SavePhotoUiState,
-    onCategoryNameChanged: (String) -> Unit,
-    onProjectNameChanged: (String) -> Unit,
-    onTaskNameChanged: (String) -> Unit,
-    onDurationChanged: (String) -> Unit,
-    onBudgetInputChanged: (String) -> Unit,
-    onAdjustBudget: (Double) -> Unit,
-    onShowDatePicker: () -> Unit,
-    onAddSubTask: (String) -> Unit,
-    onRemoveSubTask: (Int) -> Unit,
-    onReportIssue: () -> Unit,
-    onClearAiData: () -> Unit,
-    onSaveClicked: () -> Unit,
-    onDismiss: () -> Unit
+    onEvent: (SavePhotoEvent) -> Unit,
+    onShowDatePicker: () -> Unit
 ) {
     val themeColor = if (uiState.isFromAi) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
-    val containerColor = if (uiState.isFromAi) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f) else Color.Transparent
 
     var isCategoryDropdownExpanded by remember { mutableStateOf(false) }
     var isProjectDropdownExpanded by remember { mutableStateOf(false) }
@@ -176,26 +146,26 @@ internal fun SavePhotoForm(
                     Spacer(modifier = Modifier.width(8.dp))
                 }
                 Text(
-                    text = if (uiState.isFromAi) "AI Smart Task" else "Create Task",
+                    text = if (uiState.isFromAi) stringResource(R.string.applications_photodo_features_camera_ai_smart_task) else stringResource(R.string.applications_photodo_features_camera_create_task),
                     style = MaterialTheme.typography.headlineSmall,
                     color = themeColor
                 )
             }
-            IconButton(onClick = onDismiss) {
-                Icon(Icons.Default.Close, contentDescription = "Close")
+            IconButton(onClick = { onEvent(SavePhotoEvent.OnDismiss) }) {
+                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_photodo_features_camera_close))
             }
         }
 
         // --- SECTION 1: CATEGORY ---
         val categorySuggestions = listOf(
-            "Home" to Icons.Default.Home,
-            "Work" to Icons.Default.Business,
-            "Personal" to Icons.Default.BeachAccess,
-            "Shopping" to Icons.Default.ShoppingCart,
-            "Health" to Icons.Default.Favorite
+            stringResource(R.string.applications_photodo_features_camera_suggestion_home) to Icons.Default.Home,
+            stringResource(R.string.applications_photodo_features_camera_suggestion_work) to Icons.Default.Business,
+            stringResource(R.string.applications_photodo_features_camera_suggestion_personal) to Icons.Default.BeachAccess,
+            stringResource(R.string.applications_photodo_features_camera_suggestion_shopping) to Icons.Default.ShoppingCart,
+            stringResource(R.string.applications_photodo_features_camera_suggestion_health) to Icons.Default.Favorite
         )
 
-        FormSection(title = "Category", themeColor = themeColor) {
+        FormSection(title = stringResource(R.string.applications_photodo_features_camera_category_section), themeColor = themeColor) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 ExposedDropdownMenuBox(
                     expanded = isCategoryDropdownExpanded,
@@ -204,12 +174,12 @@ internal fun SavePhotoForm(
                 ) {
                     AiEnhancedTextField(
                         value = uiState.categoryName,
-                        onValueChange = onCategoryNameChanged,
-                        label = "Category Name",
-                        isAiGenerated = uiState.aiGeneratedFields.contains("category"),
-                        onReportClick = onReportIssue,
-                        onClearAiClick = onClearAiData,
-                        modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, true),
+                        onValueChange = { onEvent(SavePhotoEvent.OnCategoryNameChanged(it)) },
+                        label = stringResource(R.string.applications_photodo_features_camera_category_name_label),
+                        isAiGenerated = uiState.aiGeneratedFields.contains(SavePhotoViewModel.FIELD_CATEGORY),
+                        onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
+                        onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCategoryDropdownExpanded) 
                         },
@@ -224,7 +194,7 @@ internal fun SavePhotoForm(
                             DropdownMenuItem(
                                 text = { Text(category.name) },
                                 onClick = {
-                                    onCategoryNameChanged(category.name)
+                                    onEvent(SavePhotoEvent.OnCategoryNameChanged(category.name))
                                     isCategoryDropdownExpanded = false
                                 },
                                 contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
@@ -235,7 +205,7 @@ internal fun SavePhotoForm(
                 
                 QuickIconRow(
                     items = categorySuggestions,
-                    onItemSelected = onCategoryNameChanged,
+                    onItemSelected = { onEvent(SavePhotoEvent.OnCategoryNameChanged(it)) },
                     themeColor = themeColor
                 )
             }
@@ -243,15 +213,15 @@ internal fun SavePhotoForm(
 
         // --- SECTION 2: PROJECT ---
         val projectTemplates = listOf(
-            "Kitchen" to Icons.Default.Kitchen,
-            "Garden" to Icons.Default.Yard,
-            "Car" to Icons.Default.DirectionsCar,
-            "Office" to Icons.Default.Business,
-            "Home" to Icons.Default.Home,
-            "Holiday" to Icons.Default.BeachAccess
+            stringResource(R.string.applications_photodo_features_camera_template_kitchen) to Icons.Default.Kitchen,
+            stringResource(R.string.applications_photodo_features_camera_template_garden) to Icons.Default.Yard,
+            stringResource(R.string.applications_photodo_features_camera_template_car) to Icons.Default.DirectionsCar,
+            stringResource(R.string.applications_photodo_features_camera_template_office) to Icons.Default.Business,
+            stringResource(R.string.applications_photodo_features_camera_suggestion_home) to Icons.Default.Home,
+            stringResource(R.string.applications_photodo_features_camera_template_holiday) to Icons.Default.BeachAccess
         )
 
-        FormSection(title = "Project Details", themeColor = themeColor) {
+        FormSection(title = stringResource(R.string.applications_photodo_features_camera_project_details_section), themeColor = themeColor) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 ExposedDropdownMenuBox(
                     expanded = isProjectDropdownExpanded,
@@ -260,12 +230,12 @@ internal fun SavePhotoForm(
                 ) {
                     AiEnhancedTextField(
                         value = uiState.projectName,
-                        onValueChange = onProjectNameChanged,
-                        label = "Project Name",
-                        isAiGenerated = uiState.aiGeneratedFields.contains("project"),
-                        onReportClick = onReportIssue,
-                        onClearAiClick = onClearAiData,
-                        modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, true),
+                        onValueChange = { onEvent(SavePhotoEvent.OnProjectNameChanged(it)) },
+                        label = stringResource(R.string.applications_photodo_features_camera_project_name_label),
+                        isAiGenerated = uiState.aiGeneratedFields.contains(SavePhotoViewModel.FIELD_PROJECT),
+                        onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
+                        onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = true),
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = isProjectDropdownExpanded) 
                         },
@@ -285,7 +255,7 @@ internal fun SavePhotoForm(
                             DropdownMenuItem(
                                 text = { Text(project.name) },
                                 onClick = {
-                                    onProjectNameChanged(project.name)
+                                    onEvent(SavePhotoEvent.OnProjectNameChanged(project.name))
                                     isProjectDropdownExpanded = false
                                 },
                                 contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
@@ -296,26 +266,26 @@ internal fun SavePhotoForm(
 
                 QuickIconRow(
                     items = projectTemplates,
-                    onItemSelected = onProjectNameChanged,
+                    onItemSelected = { onEvent(SavePhotoEvent.OnProjectNameChanged(it)) },
                     themeColor = themeColor
                 )
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     AiEnhancedTextField(
                         value = uiState.duration,
-                        onValueChange = onDurationChanged,
-                        label = "Duration",
-                        isAiGenerated = uiState.aiGeneratedFields.contains("duration"),
-                        onReportClick = onReportIssue,
-                        onClearAiClick = onClearAiData,
+                        onValueChange = { onEvent(SavePhotoEvent.OnDurationChanged(it)) },
+                        label = stringResource(R.string.applications_photodo_features_camera_duration_label),
+                        isAiGenerated = uiState.aiGeneratedFields.contains(SavePhotoViewModel.FIELD_DURATION),
+                        onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
+                        onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                         modifier = Modifier.weight(1f),
                         leadingIcon = { Icon(Icons.Default.Timer, contentDescription = null) },
-                        placeholder = "e.g. 2h"
+                        placeholder = stringResource(R.string.applications_photodo_features_camera_duration_placeholder)
                     )
 
                     val dateText = uiState.dueDateMillis?.let {
                         SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(it))
-                    } ?: "Set Date"
+                    } ?: stringResource(R.string.applications_photodo_features_camera_set_date)
                     
                     Button(
                         onClick = onShowDatePicker,
@@ -335,44 +305,44 @@ internal fun SavePhotoForm(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     AiEnhancedTextField(
                         value = uiState.budgetInput,
-                        onValueChange = onBudgetInputChanged,
-                        label = "Total Budget",
-                        isAiGenerated = uiState.aiGeneratedFields.contains("budget"),
-                        onReportClick = onReportIssue,
-                        onClearAiClick = onClearAiData,
+                        onValueChange = { onEvent(SavePhotoEvent.OnBudgetInputChanged(it)) },
+                        label = stringResource(R.string.applications_photodo_features_camera_total_budget_label),
+                        isAiGenerated = uiState.aiGeneratedFields.contains(SavePhotoViewModel.FIELD_BUDGET),
+                        onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
+                        onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                         modifier = Modifier.fillMaxWidth(),
-                        prefix = { Text("$") }
+                        prefix = { Text(stringResource(R.string.applications_photodo_features_camera_currency_symbol)) }
                     )
-                    QuickExpenseBar(onAdjustAmount = onAdjustBudget)
+                    QuickExpenseBar(onAdjustAmount = { onEvent(SavePhotoEvent.OnAdjustBudget(it)) })
                 }
             }
         }
 
         // --- SECTION 3: TASK ---
         val taskTemplates = listOf(
-            "Fix" to Icons.Default.Build,
-            "Buy" to Icons.Default.ShoppingCart,
-            "Clean" to Icons.Default.CleaningServices,
-            "Call" to Icons.Default.Call,
-            "Find" to Icons.Default.Search,
-            "Organize" to Icons.Default.Layers
+            stringResource(R.string.applications_photodo_features_camera_task_fix) to Icons.Default.Build,
+            stringResource(R.string.applications_photodo_features_camera_task_buy) to Icons.Default.ShoppingCart,
+            stringResource(R.string.applications_photodo_features_camera_task_clean) to Icons.Default.CleaningServices,
+            stringResource(R.string.applications_photodo_features_camera_task_call) to Icons.Default.Call,
+            stringResource(R.string.applications_photodo_features_camera_task_find) to Icons.Default.Search,
+            stringResource(R.string.applications_photodo_features_camera_task_organize) to Icons.Default.Layers
         )
 
-        FormSection(title = "Task", themeColor = themeColor) {
+        FormSection(title = stringResource(R.string.applications_photodo_features_camera_task_section), themeColor = themeColor) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 AiEnhancedTextField(
                     value = uiState.taskName,
-                    onValueChange = onTaskNameChanged,
-                    label = "Main Task Name",
-                    isAiGenerated = uiState.aiGeneratedFields.contains("task"),
-                    onReportClick = onReportIssue,
-                    onClearAiClick = onClearAiData,
+                    onValueChange = { onEvent(SavePhotoEvent.OnTaskNameChanged(it)) },
+                    label = stringResource(R.string.applications_photodo_features_camera_main_task_name_label),
+                    isAiGenerated = uiState.aiGeneratedFields.contains(SavePhotoViewModel.FIELD_TASK),
+                    onReportClick = { onEvent(SavePhotoEvent.OnReportIssue) },
+                    onClearAiClick = { onEvent(SavePhotoEvent.OnClearAiData) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 QuickIconRow(
                     items = taskTemplates,
-                    onItemSelected = onTaskNameChanged,
+                    onItemSelected = { onEvent(SavePhotoEvent.OnTaskNameChanged(it)) },
                     themeColor = themeColor
                 )
             }
@@ -380,7 +350,7 @@ internal fun SavePhotoForm(
 
         // --- SAVE BUTTON ---
         Button(
-            onClick = onSaveClicked,
+            onClick = { onEvent(SavePhotoEvent.OnSaveClicked) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             enabled = !uiState.isSaving && uiState.taskName.isNotBlank(),
             colors = ButtonDefaults.buttonColors(containerColor = themeColor)
@@ -388,7 +358,7 @@ internal fun SavePhotoForm(
             if (uiState.isSaving) {
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
             } else {
-                Text("Create & View Project")
+                Text(stringResource(R.string.applications_photodo_features_camera_create_view_project))
             }
         }
     }
@@ -443,7 +413,7 @@ private fun AiEnhancedTextField(
                 if (isAiGenerated) {
                     Icon(
                         Icons.Default.AutoAwesome, 
-                        "AI Generated", 
+                        stringResource(R.string.applications_photodo_features_camera_ai_generated_content_desc), 
                         tint = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.size(20.dp)
                     )
@@ -455,7 +425,7 @@ private fun AiEnhancedTextField(
 
         DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
             DropdownMenuItem(
-                text = { Text("Clear AI Data") },
+                text = { Text(stringResource(R.string.applications_photodo_features_camera_clear_ai_data)) },
                 onClick = {
                     showMenu = false
                     onClearAiClick()
@@ -463,7 +433,7 @@ private fun AiEnhancedTextField(
                 leadingIcon = { Icon(Icons.Default.Close, null) }
             )
             DropdownMenuItem(
-                text = { Text("Report bad AI output") },
+                text = { Text(stringResource(R.string.applications_photodo_features_camera_report_bad_ai_output)) },
                 onClick = {
                     showMenu = false
                     onReportClick()

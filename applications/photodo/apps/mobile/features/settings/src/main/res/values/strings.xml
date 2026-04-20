@@ -14,6 +14,12 @@
     <string name="applications_photodo_apps_mobile_features_settings_palette_default_summary">Default</string>
     <string name="applications_photodo_apps_mobile_features_settings_palette_default">Default Professional</string>
     <string name="applications_photodo_apps_mobile_features_settings_palette_expressive">Material 3 Expressive (Wallpaper)</string>
+    <string name="applications_photodo_apps_mobile_features_settings_palette_two_pane_contrast_title">Two-Pane Contrast</string>
+    <string name="applications_photodo_apps_mobile_features_settings_palette_two_pane_contrast_description">Apply a subtle tint to the dashboard side on large screens</string>
+    <string name="applications_photodo_apps_mobile_features_settings_ai_config_title">Smart Capture AI</string>
+    <string name="applications_photodo_apps_mobile_features_settings_ai_config_description">Use Gemini to automatically fill details from images.</string>
+    <string name="applications_photodo_apps_mobile_features_settings_ui_animations_title">Enable UI Animations</string>
+    <string name="applications_photodo_apps_mobile_features_settings_ui_animations_description">Smooth transitions for charts and numbers</string>
     <string name="applications_photodo_apps_mobile_features_settings_theme_settings_content_description">Theme Settings</string>
     <string name="applications_photodo_apps_mobile_features_settings_collapse_content_description">Collapse</string>
     <string name="applications_photodo_apps_mobile_features_settings_expand_content_description">Expand</string>
@@ -29,4 +35,9 @@
     <string name="applications_photodo_apps_mobile_features_settings_about_eula">EULA</string>
     <string name="applications_photodo_apps_mobile_features_settings_about_copy_id">Copy ID</string>
     <string name="applications_photodo_apps_mobile_features_settings_about_id_copied">ID copied to clipboard</string>
+    <string name="applications_photodo_apps_mobile_features_settings_about_regulatory_compliance_title">Regulatory Compliance</string>
+    <string name="applications_photodo_apps_mobile_features_settings_about_age_verification_status_label">Age Verification Status</string>
+    <string name="applications_photodo_apps_mobile_features_settings_about_age_verification_description">Authoritative age signals are retrieved in real-time from the Play Store to ensure age-appropriate experiences.</string>
+    <string name="applications_photodo_apps_mobile_features_settings_privacy_policy_url">https://github.com/your-org/probase/blob/main/applications/photodo/docs/PrivacyPolicy.md</string>
+    <string name="applications_photodo_apps_mobile_features_settings_eula_url">https://github.com/your-org/probase/blob/main/applications/photodo/docs/EULA.md</string>
 </resources>

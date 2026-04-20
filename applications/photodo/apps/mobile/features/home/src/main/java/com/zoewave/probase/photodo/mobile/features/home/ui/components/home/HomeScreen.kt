@@ -37,6 +37,7 @@ fun HomeScreen(
     onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit, // ✅ Restrictive navigation channel enforced
 ) {
+    val homeCategoryName = stringResource(R.string.applications_photodo_apps_mobile_features_home_category_template_home)
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         // 🚀 Upgrade: HomeOverviewFab for consistent FAB actions
@@ -45,19 +46,19 @@ fun HomeScreen(
                 fabMenuExpanded = uiState.fabMenuExpanded,
                 onFabToggle = { onEvent(HomeEvent.OnFabMenuToggle(it)) },
                 onAddCategoryClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
-                    onEvent(HomeEvent.OnShowAddCategoryDialog(true))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
+                    onEvent(HomeEvent.OnShowAddCategoryDialog(show = true))
                 },
                 onHomeProjectClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
-                    onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
+                    onEvent(HomeEvent.OnAddQuickProjectClicked(homeCategoryName))
                 },
                 onCameraClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
                     navTo(PhotoTodoRoute.Camera(projectId = null))
                 },
                 onSmartCaptureClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
                     navTo(PhotoTodoRoute.SmartCapture())
                 },
                 isAiEnabled = uiState.isAiEnabled,
@@ -194,7 +195,7 @@ private fun HomeScreenPreview() {
                         categoryName = "Nature",
                         isFavorite = true,
                         isUrgent = true,
-                        dueDateMillis = System.currentTimeMillis() + 86400000L * 7 // 1 week from now
+                        dueDateMillis = System.currentTimeMillis() + (86400000L * 7) // 1 week from now
                     ),
                     ProjectListUiModel(
                         projectId = 2L,
@@ -204,7 +205,7 @@ private fun HomeScreenPreview() {
                         isUrgent = false,
                         currentSpend = 270.0,
                         projectBudget = 200.0,
-                        dueDateMillis = System.currentTimeMillis() + 86400000L * 3 // 3 days from now
+                        dueDateMillis = System.currentTimeMillis() + (86400000L * 3), // 3 days from now
                     )
                 )
             ),

@@ -131,7 +131,7 @@ fun AddProjectBottomSheetContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (uiState.isFromAi) "AI Smart Draft" else stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_project),
+                text = if (uiState.isFromAi) stringResource(R.string.applications_photodo_apps_mobile_features_tasks_ai_smart_draft) else stringResource(R.string.applications_photodo_apps_mobile_features_tasks_new_project),
                 style = MaterialTheme.typography.headlineSmall,
                 color = themeColor
             )
@@ -149,7 +149,7 @@ fun AddProjectBottomSheetContent(
 
         // --- QUICK PICK SECTION ---
         Text(
-            text = "Quick Pick",
+            text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_quick_pick),
             style = MaterialTheme.typography.labelMedium,
             color = themeColor
         )
@@ -257,7 +257,7 @@ fun AddProjectBottomSheetContent(
         // --- QUICK BUDGET SECTION ---
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                text = "Adjust Budget",
+                text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_adjust_budget),
                 style = MaterialTheme.typography.labelMedium,
                 color = themeColor
             )

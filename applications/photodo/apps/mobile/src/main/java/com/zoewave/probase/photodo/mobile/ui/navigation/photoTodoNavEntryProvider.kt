@@ -7,12 +7,11 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.features.ai.capture.ui.SmartCaptureUiRoute
+import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.photodo.features.camera.ui.CameraResultHandler
 import com.zoewave.probase.photodo.features.camera.ui.SavePhotoViewModel
 import com.zoewave.probase.photodo.features.camera.ui.components.SavePhotoBottomSheet
@@ -118,7 +117,7 @@ fun photoTodoNavEntryProvider(
                             when (effect) {
                                 TasksSideEffect.NavigateBack -> navigateBack()
                                 is TasksSideEffect.ProjectCreated -> {
-                                    navigateTo(PhotoTodoRoute.TaskDetail(effect.projectId, effect.title))
+                                    navigateTo(TaskDetail(effect.projectId, effect.title))
                                 }
                             }
                         }
@@ -156,7 +155,7 @@ fun photoTodoNavEntryProvider(
                             when (effect) {
                                 TasksSideEffect.NavigateBack -> navigateBack()
                                 is TasksSideEffect.ProjectCreated -> {
-                                    navigateTo(PhotoTodoRoute.TaskDetail(effect.projectId, effect.title))
+                                    navigateTo(TaskDetail(effect.projectId, effect.title))
                                 }
                             }
                         }
@@ -180,8 +179,8 @@ fun photoTodoNavEntryProvider(
                     navTo = { routeString ->
                         Log.d("CameraDebug", "5. Host App received navTo string: $routeString")
 
-                        if (routeString.startsWith("result_ok:")) {
-                            val uriString = routeString.removePrefix("result_ok:")
+                        if (routeString.startsWith(PROTOCOL_RESULT_OK)) {
+                            val uriString = routeString.removePrefix(PROTOCOL_RESULT_OK)
                             Log.d("CameraDebug", "G. Host App extracted URI, executing save UseCase...")
                             val projectId = key.projectId
                             if (projectId != null) {
@@ -190,11 +189,11 @@ fun photoTodoNavEntryProvider(
                             } else if (isAiEnabled) {
                                 // 🚀 NEW: Tier 1 (Cloud) enabled, go to SmartCapture review first!
                                 navigateBack() // Pop camera
-                                navigateTo(PhotoTodoRoute.SmartCapture(uriString))
+                                navigateTo(PhotoTodoRoute.SmartCapture(photoUri = uriString))
                             } else {
                                 // standard flow
                                 navigateBack()
-                                navigateTo(PhotoTodoRoute.SavePhoto(uriString))
+                                navigateTo(PhotoTodoRoute.SavePhoto(photoUri = uriString))
                             }
                         } else {
                             navigateBack()
@@ -222,7 +221,6 @@ fun photoTodoNavEntryProvider(
 
             is PhotoTodoRoute.SavePhoto -> {
                 val viewModel: SavePhotoViewModel = hiltViewModel()
-                val context = LocalContext.current
                 
                 LaunchedEffect(key.photoUri, key.prefilledAiDraft) {
                     Log.d("SavePhotoDebug", "NavEntry: Calling setInitialData for uri: ${key.photoUri}")
@@ -239,7 +237,7 @@ fun photoTodoNavEntryProvider(
                         Log.d("SavePhotoDebug", "NavEntry: Auto-navigating to Detail for ID: $id")
                         if (id != null && title != null) {
                             navigateBack()
-                            navigateTo(PhotoTodoRoute.TaskDetail(id, title))
+                            navigateTo(TaskDetail(id, title))
                         } else {
                             navigateBack()
                         }
@@ -248,22 +246,10 @@ fun photoTodoNavEntryProvider(
 
                 SavePhotoBottomSheet(
                     uiState = uiState,
-                    onCategoryNameChanged = viewModel::setCategoryName,
-                    onProjectNameChanged = viewModel::setProjectName,
-                    onTaskNameChanged = viewModel::setTaskName,
-                    onDurationChanged = viewModel::setDuration,
-                    onBudgetInputChanged = viewModel::setBudgetInput,
-                    onAdjustBudget = viewModel::adjustBudget,
-                    onDueDateChanged = viewModel::setDueDate,
-                    onAddSubTask = viewModel::addSubTask,
-                    onRemoveSubTask = viewModel::removeSubTask,
-                    onReportIssue = {
-                        val intent = viewModel.getReportIntent()
-                        context.startActivity(intent)
-                    },
-                    onClearAiData = viewModel::clearAiData,
-                    onSaveClicked = viewModel::saveTask,
-                    onDismiss = navigateBack
+                    onEvent = viewModel::onEvent,
+                    navTo = { route ->
+                        if (route == null) navigateBack() else navigateTo(route)
+                    }
                 )
             }
 
@@ -311,3 +297,5 @@ fun photoTodoNavEntryProvider(
         }
     }
 }
+
+private const val PROTOCOL_RESULT_OK = "result_ok:"

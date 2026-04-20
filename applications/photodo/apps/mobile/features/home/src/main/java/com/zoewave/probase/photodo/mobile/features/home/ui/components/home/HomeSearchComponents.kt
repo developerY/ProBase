@@ -10,9 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
 
 @Composable
@@ -27,12 +29,12 @@ fun TaskSearchBar(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        placeholder = { Text("Search tasks...") },
+        placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_search_tasks_placeholder)) },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         trailingIcon = {
             if (query.isNotBlank()) {
                 IconButton(onClick = { onQueryChange("") }) {
-                    Icon(Icons.Default.Close, contentDescription = "Clear search")
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_clear_search_content_desc))
                 }
             }
         },
@@ -59,7 +61,7 @@ fun TaskSearchResultsList(
     ) {
         if (results.isEmpty()) {
             Text(
-                text = "No matching tasks found.",
+                text = stringResource(R.string.applications_photodo_apps_mobile_features_home_no_matching_tasks),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(16.dp)

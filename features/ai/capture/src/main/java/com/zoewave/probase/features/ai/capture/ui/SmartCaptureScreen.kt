@@ -43,6 +43,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,6 +52,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.core.ui.theme.AshBikeTheme
+import com.zoewave.probase.features.ai.capture.R
 import com.zoewave.probase.features.ai.capture.ui.state.SmartCaptureUiState
 
 @Composable
@@ -107,9 +110,9 @@ internal fun SmartCaptureScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Smart Capture", style = MaterialTheme.typography.headlineSmall)
+                Text(stringResource(R.string.features_ai_capture_smart_capture_title), style = MaterialTheme.typography.headlineSmall)
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "Close")
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.features_ai_capture_smart_capture_close_content_desc))
                 }
             }
         }
@@ -145,7 +148,7 @@ internal fun SmartCaptureScreen(
                     ) {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.tertiary)
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("AI is parsing your image...", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.features_ai_capture_smart_capture_loading_description), style = MaterialTheme.typography.bodyMedium)
                         
                         // 🚀 NEW: Diagnostics View
                         Spacer(modifier = Modifier.height(24.dp))
@@ -163,7 +166,7 @@ internal fun SmartCaptureScreen(
                                     )
                                     Spacer(modifier = Modifier.padding(start = 8.dp))
                                     Text(
-                                        text = if (uiState.isUsingCloud) "Attempting Cloud AI..." else "Local AI (Vision)",
+                                        text = if (uiState.isUsingCloud) stringResource(R.string.features_ai_capture_smart_capture_cloud_ai_label) else stringResource(R.string.features_ai_capture_smart_capture_local_ai_label),
                                         style = MaterialTheme.typography.labelSmall
                                     )
                                     if (uiState.networkSpeed != null) {
@@ -212,7 +215,7 @@ internal fun SmartCaptureScreen(
                                     IconButton(onClick = { showDiagnostics = true }) {
                                         Icon(
                                             Icons.AutoMirrored.Filled.HelpOutline,
-                                            contentDescription = "Show diagnostics",
+                                            contentDescription = stringResource(R.string.features_ai_capture_smart_capture_ai_warning_content_desc),
                                             modifier = Modifier.size(16.dp),
                                             tint = MaterialTheme.colorScheme.error
                                         )
@@ -249,7 +252,7 @@ internal fun SmartCaptureScreen(
                             textAlign = TextAlign.Center
                         )
                         Button(onClick = onReset, modifier = Modifier.padding(top = 16.dp)) {
-                            Text("Try Again")
+                            Text(stringResource(R.string.features_ai_capture_smart_capture_try_again))
                         }
                     }
                 }
@@ -265,7 +268,7 @@ private fun DiagnosticsDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Cloud Fallback Diagnostics") },
+        title = { Text(stringResource(R.string.features_ai_capture_smart_capture_ai_diagnostics_title)) },
         text = {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
@@ -282,7 +285,7 @@ private fun DiagnosticsDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(stringResource(R.string.features_ai_capture_smart_capture_ai_diagnostics_close))
             }
         }
     )
@@ -319,20 +322,20 @@ private fun ContextInputState(
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                "What are you doing?",
+                stringResource(R.string.features_ai_capture_smart_capture_context_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
             OutlinedTextField(
                 value = comment,
                 onValueChange = onCommentChanged,
-                placeholder = { Text("e.g. Fixing the kitchen sink, or leave blank...") },
+                placeholder = { Text(stringResource(R.string.features_ai_capture_smart_capture_context_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = 3,
                 shape = MaterialTheme.shapes.medium
             )
             Text(
-                "Adding context helps the AI provide better project details.",
+                stringResource(R.string.features_ai_capture_smart_capture_context_description),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -347,7 +350,7 @@ private fun ContextInputState(
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
             ) {
-                Text("Retake")
+                Text(stringResource(R.string.features_ai_capture_smart_capture_retake_button))
             }
             Button(
                 onClick = onAnalyzeClick,
@@ -356,7 +359,7 @@ private fun ContextInputState(
             ) {
                 Icon(Icons.Default.AutoAwesome, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Analyze")
+                Text(stringResource(R.string.features_ai_capture_smart_capture_analyze_button))
             }
         }
     }
@@ -382,12 +385,12 @@ private fun EmptyState(
             tint = MaterialTheme.colorScheme.tertiary
         )
         Text(
-            "Extract Tasks with AI",
+            stringResource(R.string.features_ai_capture_smart_capture_empty_title),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(top = 16.dp)
         )
         Text(
-            "Take a photo or type a task command to have AI automatically generate project details.",
+            stringResource(R.string.features_ai_capture_smart_capture_empty_description),
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(vertical = 8.dp),
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -398,7 +401,7 @@ private fun EmptyState(
         OutlinedTextField(
             value = comment,
             onValueChange = onCommentChanged,
-            placeholder = { Text("e.g. Clean the car this weekend") },
+            placeholder = { Text(stringResource(R.string.features_ai_capture_smart_capture_empty_placeholder)) },
             modifier = Modifier.fillMaxWidth(),
             maxLines = 3,
             shape = MaterialTheme.shapes.medium
@@ -411,7 +414,7 @@ private fun EmptyState(
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
             ) {
                 Icon(Icons.Default.AutoAwesome, contentDescription = null)
-                Text("Analyze Text", modifier = Modifier.padding(start = 8.dp))
+                Text(stringResource(R.string.features_ai_capture_smart_capture_analyze_text_button), modifier = Modifier.padding(start = 8.dp))
             }
         }
     }
@@ -431,8 +434,8 @@ private fun TaskReviewPane(
     ) {
         item {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
-                Text("Verify Extracted Task", style = MaterialTheme.typography.titleMedium)
-                Text("AI: $engineUsed", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.features_ai_capture_smart_capture_review_title), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.features_ai_capture_smart_capture_review_ai_label, engineUsed), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
 
@@ -444,16 +447,16 @@ private fun TaskReviewPane(
                 )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    TaskField("Task Name", draft.taskName ?: "Unknown")
-                    TaskField("Category", draft.category ?: "General")
-                    TaskField("Project", draft.projectName ?: "None")
-                    TaskField("Duration", draft.duration ?: "Not set")
-                    TaskField("Due Date", draft.dueDate ?: "Not set")
-                    TaskField("Budget", draft.budget?.let { "$$it" } ?: "None")
+                    TaskField(stringResource(R.string.features_ai_capture_smart_capture_field_task_name), draft.taskName ?: stringResource(R.string.features_ai_capture_smart_capture_value_unknown))
+                    TaskField(stringResource(R.string.features_ai_capture_smart_capture_field_category), draft.category ?: stringResource(R.string.features_ai_capture_smart_capture_value_general))
+                    TaskField(stringResource(R.string.features_ai_capture_smart_capture_field_project), draft.projectName ?: stringResource(R.string.features_ai_capture_smart_capture_value_none))
+                    TaskField(stringResource(R.string.features_ai_capture_smart_capture_field_duration), draft.duration ?: stringResource(R.string.features_ai_capture_smart_capture_value_not_set))
+                    TaskField(stringResource(R.string.features_ai_capture_smart_capture_field_due_date), draft.dueDate ?: stringResource(R.string.features_ai_capture_smart_capture_value_not_set))
+                    TaskField(stringResource(R.string.features_ai_capture_smart_capture_field_budget), draft.budget?.let { stringResource(R.string.features_ai_capture_smart_capture_value_budget_format, it) } ?: stringResource(R.string.features_ai_capture_smart_capture_value_none))
                     
                     if (draft.subTasks.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Sub-tasks", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
+                        Text(stringResource(R.string.features_ai_capture_smart_capture_review_subtasks), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
                         draft.subTasks.forEach { subTask ->
                             Text("• $subTask", style = MaterialTheme.typography.bodyMedium)
                         }
@@ -468,7 +471,7 @@ private fun TaskReviewPane(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Button(onClick = onRetake, modifier = Modifier.weight(1f)) {
-                    Text("Retake")
+                    Text(stringResource(R.string.features_ai_capture_smart_capture_retake_button))
                 }
                 Button(
                     onClick = onConfirm, 
@@ -476,7 +479,7 @@ private fun TaskReviewPane(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
                 ) {
                     Icon(Icons.Default.Check, contentDescription = null)
-                    Text("Confirm", modifier = Modifier.padding(start = 8.dp))
+                    Text(stringResource(R.string.features_ai_capture_smart_capture_review_confirm), modifier = Modifier.padding(start = 8.dp))
                 }
             }
         }

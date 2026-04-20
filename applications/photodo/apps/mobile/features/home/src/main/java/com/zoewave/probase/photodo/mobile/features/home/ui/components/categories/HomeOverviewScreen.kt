@@ -99,29 +99,30 @@ fun HomeOverviewScreen(
     onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit, // ✅ Standardized Navigation Channel
 ) {
+    val homeCategoryName = stringResource(R.string.applications_photodo_apps_mobile_features_home_category_template_home)
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         // 2. Replace the Scaffold's floatingActionButton block with this:
         floatingActionButton = {
             HomeOverviewFab(
                 fabMenuExpanded = uiState.fabMenuExpanded,
-                onFabToggle = { onEvent(HomeEvent.OnFabMenuToggle(it)) },
+                onFabToggle = { onEvent(HomeEvent.OnFabMenuToggle(expanded = it)) },
                 onAddCategoryClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
-                    onEvent(HomeEvent.OnShowAddCategoryDialog(true))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
+                    onEvent(HomeEvent.OnShowAddCategoryDialog(show = true))
                 },
                 onHomeProjectClick = { // Updated parameter name
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
                     // Map to the common Quick Project logic with "Home" override!
-                    onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
+                    onEvent(HomeEvent.OnAddQuickProjectClicked(homeCategoryName))
                 },
                 onCameraClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
                     navTo(PhotoTodoRoute.Camera(projectId = null))
                 },
                 onSmartCaptureClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
-                    navTo(PhotoTodoRoute.SmartCapture())
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
+                    navTo(PhotoTodoRoute.SmartCapture(photoUri = ""))
                 },
                 isAiEnabled = uiState.isAiEnabled,
                 animationsEnabled = uiState.animationsEnabled
@@ -198,7 +199,7 @@ fun HomeOverviewFab(
                 Box(contentAlignment = Alignment.Center) {
 
                     if (isAiEnabled) {
-                        val infiniteTransition = rememberInfiniteTransition(label = "SparklePulse")
+                        val infiniteTransition = rememberInfiniteTransition(label = LABEL_SPARKLE_PULSE)
                         val scale by if (animationsEnabled) {
                             infiniteTransition.animateFloat(
                                 initialValue = 0.8f,
@@ -207,10 +208,10 @@ fun HomeOverviewFab(
                                     animation = tween(durationMillis = 1000),
                                     repeatMode = RepeatMode.Reverse
                                 ),
-                                label = "SparkleScale"
+                                label = LABEL_SPARKLE_SCALE
                             )
                         } else {
-                            remember { mutableStateOf(1f) }
+                            remember { androidx.compose.runtime.mutableFloatStateOf(1f) }
                         }
 
                         val alpha by if (animationsEnabled) {
@@ -221,10 +222,10 @@ fun HomeOverviewFab(
                                     animation = tween(durationMillis = 1000),
                                     repeatMode = RepeatMode.Reverse
                                 ),
-                                label = "SparkleAlpha"
+                                label = LABEL_SPARKLE_ALPHA
                             )
                         } else {
-                            remember { mutableStateOf(1f) }
+                            remember { androidx.compose.runtime.mutableFloatStateOf(1f) }
                         }
 
                         Icon(
@@ -253,7 +254,7 @@ fun HomeOverviewFab(
             FloatingActionButtonMenuItem(
                 onClick = onSmartCaptureClick,
                 icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFFFD700)) },
-                text = { Text("AI Task") }
+                text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_ai_task)) }
             )
         }
     }
@@ -282,7 +283,6 @@ fun HomeOverviewContent(
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else if (uiState.isEmpty) {
             EmptyHomeState(
-                onEvent = onEvent,
                 navTo = navTo,
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -307,14 +307,14 @@ fun HomeOverviewContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 8.dp),
-                            placeholder = { Text("Search categories...") },
+                            placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_search_categories_placeholder)) },
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                             trailingIcon = {
                                 IconButton(onClick = {
                                     onEvent(HomeEvent.OnCategorySearchQueryChanged(""))
                                     onEvent(HomeEvent.OnSearchModeToggle(false))
                                 }) {
-                                    Icon(Icons.Default.Close, contentDescription = "Close search")
+                                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_close_search_content_desc))
                                 }
                             },
                             singleLine = true,
@@ -335,7 +335,7 @@ fun HomeOverviewContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "PhotoDo",
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_home_app_title),
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Black,
                                 color = MaterialTheme.colorScheme.primary
@@ -344,7 +344,7 @@ fun HomeOverviewContent(
                                 onClick = { onEvent(HomeEvent.OnSearchModeToggle(true)) },
                                 modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
                             ) {
-                                Icon(Icons.Default.Search, contentDescription = "Search")
+                                Icon(Icons.Default.Search, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_search_content_desc))
                             }
                         }
                     }
@@ -357,8 +357,8 @@ fun HomeOverviewContent(
                             isExpanded = uiState.isCategoriesSummaryExpanded,
                             onToggleExpand = { onEvent(HomeEvent.OnToggleCategoriesSummary) },
                             modifier = Modifier.fillMaxWidth(),
-                            onViewAllClick = { onEvent },
-                            animationsEnabled = true
+                            onViewAllClick = { navTo(PhotoTodoRoute.CategoryGrid) },
+                            animationsEnabled = uiState.animationsEnabled
                         )
                     }
                 }
@@ -370,7 +370,6 @@ fun HomeOverviewContent(
                     CategoryDashboardCard(
                         category = category,
                         index = index,
-                        onEvent = onEvent,
                         onDeleteClicked = { onEvent(HomeEvent.OnCategoryToDeleteChanged(it)) },
                         navTo = navTo
                     )
@@ -418,8 +417,8 @@ fun HomeOverviewDialogs(
     categoryToDelete?.let { category ->
         AlertDialog(
             onDismissRequest = onDismissDeleteConfirmation,
-            title = { Text("Delete Category?") },
-            text = { Text("This will permanently delete the '${category.name}' category and all its projects. This action cannot be undone.") },
+            title = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_delete_category_title)) },
+            text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_delete_category_message, category.name)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -427,10 +426,10 @@ fun HomeOverviewDialogs(
                         onDismissDeleteConfirmation()
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) { Text("Delete") }
+                ) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_delete_button)) }
             },
             dismissButton = {
-                TextButton(onClick = onDismissDeleteConfirmation) { Text("Cancel") }
+                TextButton(onClick = onDismissDeleteConfirmation) { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_cancel_button)) }
             }
         )
     }
@@ -465,7 +464,7 @@ fun AddCategoryBottomSheet(
 
             // --- QUICK PICK SECTION ---
             Text(
-                text = "Quick Pick",
+                text = stringResource(R.string.applications_photodo_apps_mobile_features_home_quick_pick),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -475,6 +474,7 @@ fun AddCategoryBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 categoryTemplates.forEach { template ->
+                    val templateName = stringResource(template.nameRes)
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -484,7 +484,7 @@ fun AddCategoryBottomSheet(
                                 .size(48.dp)
                                 .clip(CircleShape)
                                 .clickable {
-                                    onCategoryCreated(template.name, template.iconName)
+                                    onCategoryCreated(templateName, template.iconName)
                                 },
                             color = MaterialTheme.colorScheme.primaryContainer,
                             shape = CircleShape
@@ -492,14 +492,14 @@ fun AddCategoryBottomSheet(
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = template.icon,
-                                    contentDescription = template.name,
+                                    contentDescription = templateName,
                                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
                         }
                         Text(
-                            text = template.name,
+                            text = templateName,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -527,14 +527,14 @@ fun AddCategoryBottomSheet(
     }
 }
 
-private data class CategoryTemplate(val name: String, val icon: ImageVector, val iconName: String)
+private data class CategoryTemplate(val nameRes: Int, val icon: ImageVector, val iconName: String)
 
 private val categoryTemplates = listOf(
-    CategoryTemplate("Work", Icons.Default.Work, "Work"),
-    CategoryTemplate("Personal", Icons.Default.Person, "Person"),
-    CategoryTemplate("Home", Icons.Default.Home, "Home"),
-    CategoryTemplate("Shopping", Icons.Default.ShoppingCart, "ShoppingCart"),
-    CategoryTemplate("Travel", Icons.Default.Flight, "Flight")
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_home_category_template_work, Icons.Default.Work, "Work"),
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_home_category_template_personal, Icons.Default.Person, "Person"),
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_home_category_template_home, Icons.Default.Home, "Home"),
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_home_category_template_shopping, Icons.Default.ShoppingCart, "ShoppingCart"),
+    CategoryTemplate(R.string.applications_photodo_apps_mobile_features_home_category_template_travel, Icons.Default.Flight, "Flight")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -542,9 +542,8 @@ private val categoryTemplates = listOf(
 fun CategoryDashboardCard(
     category: CategoryOverviewUiModel,
     index: Int,
-    onEvent: (HomeEvent) -> Unit,
     onDeleteClicked: (CategoryOverviewUiModel) -> Unit,
-    navTo: (PhotoTodoRoute?) -> Unit,
+    @Suppress("UNUSED_PARAMETER") navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Dynamically cycle through Material 3 expressive container colors!
@@ -631,7 +630,7 @@ fun CategoryDashboardCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${category.totalProjects} Projects",
+                    text = stringResource(R.string.applications_photodo_apps_mobile_features_home_projects_count, category.totalProjects),
                     style = MaterialTheme.typography.bodyMedium,
                     color = contentColor.copy(alpha = 0.8f)
                 )
@@ -663,7 +662,6 @@ fun CategoryDashboardCard(
 
 @Composable
 fun EmptyHomeState(
-    onEvent: (HomeEvent) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -767,3 +765,7 @@ private fun HomeOverviewScreenEmptyPreview() {
         }
     }
 }
+
+private const val LABEL_SPARKLE_PULSE = "SparklePulse"
+private const val LABEL_SPARKLE_SCALE = "SparkleScale"
+private const val LABEL_SPARKLE_ALPHA = "SparkleAlpha"

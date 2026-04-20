@@ -49,6 +49,8 @@ fun AboutSettingsCard(
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
+    val privacyPolicyUrl = stringResource(R.string.applications_photodo_apps_mobile_features_settings_privacy_policy_url)
+    val eulaUrl = stringResource(R.string.applications_photodo_apps_mobile_features_settings_eula_url)
 
     Card(
         modifier = modifier
@@ -127,7 +129,7 @@ fun AboutSettingsCard(
 
                     // NEW: Regulatory Compliance Section
                     Text(
-                        text = "Regulatory Compliance",
+                        text = stringResource(R.string.applications_photodo_apps_mobile_features_settings_about_regulatory_compliance_title),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
@@ -144,7 +146,7 @@ fun AboutSettingsCard(
                         )
                         Column {
                             Text(
-                                text = "Age Verification Status",
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_settings_about_age_verification_status_label),
                                 style = MaterialTheme.typography.labelMedium
                             )
                             Text(
@@ -154,7 +156,7 @@ fun AboutSettingsCard(
                         }
                     }
                     Text(
-                        text = "Authoritative age signals are retrieved in real-time from the Play Store to ensure age-appropriate experiences.",
+                        text = stringResource(R.string.applications_photodo_apps_mobile_features_settings_about_age_verification_description),
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(top = 8.dp)
                     )
@@ -174,7 +176,7 @@ fun AboutSettingsCard(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
-                            .clickable { uriHandler.openUri("https://github.com/your-org/probase/blob/main/applications/photodo/docs/PrivacyPolicy.md") }
+                            .clickable { uriHandler.openUri(privacyPolicyUrl) }
                             .padding(vertical = 8.dp)
                             .fillMaxWidth()
                     )
@@ -184,7 +186,7 @@ fun AboutSettingsCard(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
-                            .clickable { uriHandler.openUri("https://github.com/your-org/probase/blob/main/applications/photodo/docs/EULA.md") }
+                            .clickable { uriHandler.openUri(eulaUrl) }
                             .padding(vertical = 8.dp)
                             .fillMaxWidth()
                     )

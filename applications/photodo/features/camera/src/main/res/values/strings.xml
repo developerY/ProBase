@@ -1,0 +1,38 @@
+<resources>
+    <string name="applications_photodo_features_camera_ai_smart_task">AI Smart Task</string>
+    <string name="applications_photodo_features_camera_create_task">Create Task</string>
+    <string name="applications_photodo_features_camera_close">Close</string>
+    <string name="applications_photodo_features_camera_category_section">Category</string>
+    <string name="applications_photodo_features_camera_category_name_label">Category Name</string>
+    <string name="applications_photodo_features_camera_project_details_section">Project Details</string>
+    <string name="applications_photodo_features_camera_project_name_label">Project Name</string>
+    <string name="applications_photodo_features_camera_duration_label">Duration</string>
+    <string name="applications_photodo_features_camera_duration_placeholder">e.g. 2h</string>
+    <string name="applications_photodo_features_camera_set_date">Set Date</string>
+    <string name="applications_photodo_features_camera_total_budget_label">Total Budget</string>
+    <string name="applications_photodo_features_camera_task_section">Task</string>
+    <string name="applications_photodo_features_camera_main_task_name_label">Main Task Name</string>
+    <string name="applications_photodo_features_camera_create_view_project">Create &amp; View Project</string>
+    <string name="applications_photodo_features_camera_ai_generated_content_desc">AI Generated</string>
+    <string name="applications_photodo_features_camera_clear_ai_data">Clear AI Data</string>
+    <string name="applications_photodo_features_camera_report_bad_ai_output">Report bad AI output</string>
+    <string name="applications_photodo_features_camera_currency_symbol">$</string>
+
+    <!-- Suggestions & Templates -->
+    <string name="applications_photodo_features_camera_suggestion_home">Home</string>
+    <string name="applications_photodo_features_camera_suggestion_work">Work</string>
+    <string name="applications_photodo_features_camera_suggestion_personal">Personal</string>
+    <string name="applications_photodo_features_camera_suggestion_shopping">Shopping</string>
+    <string name="applications_photodo_features_camera_suggestion_health">Health</string>
+    <string name="applications_photodo_features_camera_template_kitchen">Kitchen</string>
+    <string name="applications_photodo_features_camera_template_garden">Garden</string>
+    <string name="applications_photodo_features_camera_template_car">Car</string>
+    <string name="applications_photodo_features_camera_template_office">Office</string>
+    <string name="applications_photodo_features_camera_template_holiday">Holiday</string>
+    <string name="applications_photodo_features_camera_task_fix">Fix</string>
+    <string name="applications_photodo_features_camera_task_buy">Buy</string>
+    <string name="applications_photodo_features_camera_task_clean">Clean</string>
+    <string name="applications_photodo_features_camera_task_call">Call</string>
+    <string name="applications_photodo_features_camera_task_find">Find</string>
+    <string name="applications_photodo_features_camera_task_organize">Organize</string>
+</resources>

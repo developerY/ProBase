@@ -43,27 +43,28 @@ fun AdaptiveHomeScreen(
     navTo: (PhotoTodoRoute?) -> Unit,
 ) {
     val navigator = rememberListDetailPaneScaffoldNavigator<Nothing>()
+    val homeCategoryName = stringResource(R.string.applications_photodo_apps_mobile_features_home_category_template_home)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
             HomeOverviewFab(
                 fabMenuExpanded = uiState.fabMenuExpanded,
-                onFabToggle = { onEvent(HomeEvent.OnFabMenuToggle(it)) },
+                onFabToggle = { onEvent(HomeEvent.OnFabMenuToggle(expanded = it)) },
                 onAddCategoryClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
-                    onEvent(HomeEvent.OnShowAddCategoryDialog(true))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
+                    onEvent(HomeEvent.OnShowAddCategoryDialog(show = true))
                 },
                 onHomeProjectClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
-                    onEvent(HomeEvent.OnAddQuickProjectClicked("Home"))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
+                    onEvent(HomeEvent.OnAddQuickProjectClicked(homeCategoryName))
                 },
                 onCameraClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
                     navTo(PhotoTodoRoute.Camera(projectId = null))
                 },
                 onSmartCaptureClick = {
-                    onEvent(HomeEvent.OnFabMenuToggle(false))
+                    onEvent(HomeEvent.OnFabMenuToggle(expanded = false))
                     navTo(PhotoTodoRoute.SmartCapture())
                 },
                 isAiEnabled = uiState.isAiEnabled,
@@ -162,7 +163,7 @@ fun AdaptiveHomeScreen(
                 HomeOverviewContent(
                     uiState = uiState,
                     onEvent = onEvent,
-                    navTo = { route -> if (route != null) navTo(route) },
+                    navTo = { route -> route?.let(navTo) },
                     modifier = Modifier.fillMaxSize().padding(paddingValues),
                     showSummaryHeader = false
                 )
@@ -190,11 +191,11 @@ fun AdaptiveHomeScreenPreviewCompact() {
             uiState = HomeUiState(
                 categories = listOf(
                     CategoryOverviewUiModel(1L, "Work", 3, 10, 5, 0.5f),
-                    CategoryOverviewUiModel(2L, "Personal", 2, 5, 2, 0.4f)
+                    CategoryOverviewUiModel(2L, "Personal", 2, 5, 2, 0.4f),
                 ),
                 urgentProjects = listOf(
                     ProjectListUiModel(1L, "Project A", "Work", isUrgent = true),
-                    ProjectListUiModel(2L, "Project B", "Personal", isUrgent = true)
+                    ProjectListUiModel(2L, "Project B", "Personal", isUrgent = true),
                 )
             ),
             onEvent = {},
@@ -212,11 +213,11 @@ fun AdaptiveHomeScreenPreviewExpanded() {
             uiState = HomeUiState(
                 categories = listOf(
                     CategoryOverviewUiModel(1L, "Work", 3, 10, 5, 0.5f),
-                    CategoryOverviewUiModel(2L, "Personal", 2, 5, 2, 0.4f)
+                    CategoryOverviewUiModel(2L, "Personal", 2, 5, 2, 0.4f),
                 ),
                 urgentProjects = listOf(
                     ProjectListUiModel(1L, "Project A", "Work", isUrgent = true),
-                    ProjectListUiModel(2L, "Project B", "Personal", isUrgent = true)
+                    ProjectListUiModel(2L, "Project B", "Personal", isUrgent = true),
                 )
             ),
             onEvent = {},

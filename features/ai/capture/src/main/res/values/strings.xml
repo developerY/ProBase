@@ -1,0 +1,37 @@
+<resources>
+    <string name="features_ai_capture_smart_capture_title">Smart Capture</string>
+    <string name="features_ai_capture_smart_capture_loading_description">AI is parsing your image…</string>
+    <string name="features_ai_capture_smart_capture_cloud_ai_label">Attempting Cloud AI…</string>
+    <string name="features_ai_capture_smart_capture_local_ai_label">Local AI (Vision)</string>
+    <string name="features_ai_capture_smart_capture_try_again">Try Again</string>
+    <string name="features_ai_capture_smart_capture_context_title">What are you doing?</string>
+    <string name="features_ai_capture_smart_capture_context_placeholder">e.g. \"Cleaning the garage\", \"Moving house\"</string>
+    <string name="features_ai_capture_smart_capture_context_description">Adding context helps the AI provide better project details.</string>
+    <string name="features_ai_capture_smart_capture_analyze_button">Analyze Image</string>
+    <string name="features_ai_capture_smart_capture_retake_button">Retake</string>
+    <string name="features_ai_capture_smart_capture_empty_title">Type what you want to do…</string>
+    <string name="features_ai_capture_smart_capture_empty_placeholder">e.g. \"Clean the car\", \"Buy groceries\"</string>
+    <string name="features_ai_capture_smart_capture_empty_description">Take a photo or type a task command to have AI automatically generate project details.</string>
+    <string name="features_ai_capture_smart_capture_analyze_text_button">Analyze Text</string>
+    <string name="features_ai_capture_smart_capture_review_title">AI Smart Extraction</string>
+    <string name="features_ai_capture_smart_capture_review_discard">Discard</string>
+    <string name="features_ai_capture_smart_capture_review_confirm">Confirm &amp; Update</string>
+    <string name="features_ai_capture_smart_capture_review_subtasks">Sub-tasks</string>
+    <string name="features_ai_capture_smart_capture_review_ai_label">AI: %1$s</string>
+    <string name="features_ai_capture_smart_capture_field_task_name">Task Name</string>
+    <string name="features_ai_capture_smart_capture_field_category">Category</string>
+    <string name="features_ai_capture_smart_capture_field_project">Project</string>
+    <string name="features_ai_capture_smart_capture_field_duration">Duration</string>
+    <string name="features_ai_capture_smart_capture_field_due_date">Due Date</string>
+    <string name="features_ai_capture_smart_capture_field_budget">Budget</string>
+    <string name="features_ai_capture_smart_capture_value_unknown">Unknown</string>
+    <string name="features_ai_capture_smart_capture_value_general">General</string>
+    <string name="features_ai_capture_smart_capture_value_none">None</string>
+    <string name="features_ai_capture_smart_capture_value_not_set">Not set</string>
+    <string name="features_ai_capture_smart_capture_value_budget_format">$%1$.2f</string>
+    <string name="features_ai_capture_smart_capture_ai_warning_title">Cloud analysis unavailable</string>
+    <string name="features_ai_capture_smart_capture_ai_warning_content_desc">View details</string>
+    <string name="features_ai_capture_smart_capture_ai_diagnostics_title">AI Capture Diagnostics</string>
+    <string name="features_ai_capture_smart_capture_ai_diagnostics_close">OK</string>
+    <string name="features_ai_capture_smart_capture_close_content_desc">Close</string>
+</resources>

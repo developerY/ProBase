@@ -2,7 +2,6 @@ package com.zoewave.probase.photodo.mobile.features.tasks.ui.detail
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -94,12 +93,11 @@ fun TaskDetailScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            val state = uiState.loadState
-            if (state is DetailLoadState.Success) {
+            (uiState.loadState as? DetailLoadState.Success)?.let { state ->
                 navTo(PhotoTodoRoute.Camera(projectId = state.projectDetails.project.projectId))
             }
         } else {
-            Toast.makeText(context, context.getString(R.string.applications_photodo_apps_mobile_features_tasks_detail_camera_permission_required), Toast.LENGTH_LONG).show()
+            // Permission denied: show fallback Toast or UI
         }
     }
 
@@ -139,7 +137,7 @@ fun TaskDetailScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Box(contentAlignment = Alignment.Center) {
                                         if (uiState.animationsEnabled) {
-                                            val infiniteTransition = rememberInfiniteTransition(label = "AiSparklePulse")
+                                            val infiniteTransition = rememberInfiniteTransition(label = LABEL_SPARKLE_PULSE)
                                             val scale by infiniteTransition.animateFloat(
                                                 initialValue = 0.8f,
                                                 targetValue = 1.2f,
@@ -147,7 +145,7 @@ fun TaskDetailScreen(
                                                     animation = tween(durationMillis = 1000),
                                                     repeatMode = RepeatMode.Reverse
                                                 ),
-                                                label = "AiSparkleScale"
+                                                label = LABEL_SPARKLE_SCALE
                                             )
                                             val alpha by infiniteTransition.animateFloat(
                                                 initialValue = 0.6f,
@@ -156,7 +154,7 @@ fun TaskDetailScreen(
                                                     animation = tween(durationMillis = 1000),
                                                     repeatMode = RepeatMode.Reverse
                                                 ),
-                                                label = "AiSparkleAlpha"
+                                                label = LABEL_SPARKLE_ALPHA
                                             )
 
                                             Icon(
@@ -185,7 +183,7 @@ fun TaskDetailScreen(
 
                                         // Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = "AI",
+                                            text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_help_from_genai),
                                             style = MaterialTheme.typography.labelLarge,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary
@@ -232,14 +230,13 @@ fun TaskDetailScreen(
             ) {
                 FloatingActionButtonMenuItem(
                     onClick = {
-                        onEvent(TaskDetailEvent.OnFabMenuToggle(false))
+                        onEvent(TaskDetailEvent.OnFabMenuToggle(expanded = false))
                         val isGranted = ContextCompat.checkSelfPermission(
                             context, Manifest.permission.CAMERA
                         ) == PackageManager.PERMISSION_GRANTED
 
                         if (isGranted) {
-                            val state = uiState.loadState
-                            if (state is DetailLoadState.Success) {
+                            (uiState.loadState as? DetailLoadState.Success)?.let { state ->
                                 navTo(PhotoTodoRoute.Camera(projectId = state.projectDetails.project.projectId))
                             }
                         } else {
@@ -251,8 +248,8 @@ fun TaskDetailScreen(
                 )
                 FloatingActionButtonMenuItem(
                     onClick = {
-                        onEvent(TaskDetailEvent.OnFabMenuToggle(false))
-                        onEvent(TaskDetailEvent.OnShowAddTaskDialog(true))
+                        onEvent(TaskDetailEvent.OnFabMenuToggle(expanded = false))
+                        onEvent(TaskDetailEvent.OnShowAddTaskDialog(show = true))
                     },
                     icon = { Icon(Icons.Default.CheckBox, contentDescription = null) },
                     text = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_tasks_detail_add_task)) }
@@ -277,8 +274,8 @@ fun TaskDetailScreen(
                     val dueDateMillis = data.project.dueDate // Assuming it's in your ProjectEntity!
 
                     // 🚀 Extract budget data safely from the Project entity
-                    val totalBudget = data.project.projectBudget ?: 0.0
-                    val currentSpend = data.project.currentSpend ?: 0.0
+                    val totalBudget = data.project.projectBudget
+                    val currentSpend = data.project.currentSpend
                     val hasBudget = totalBudget > 0
 
                     LazyColumn(
@@ -294,7 +291,7 @@ fun TaskDetailScreen(
                                         .fillMaxWidth()
                                         .padding(horizontal = 16.dp)
                                         .padding(top = 16.dp, bottom = 8.dp), // Spacing to separate from top bar and budget
-                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.CalendarMonth,
@@ -329,17 +326,10 @@ fun TaskDetailScreen(
                             item {
                                 QuickExpenseBar(
                                     onAdjustAmount = { adjustmentAmount ->
-                                        // Automatically generate a generic description based on + or -
-                                        val description = if (adjustmentAmount > 0) {
-                                            context.getString(R.string.applications_photodo_apps_mobile_features_tasks_detail_quick_edit_plus)
-                                        } else {
-                                            context.getString(R.string.applications_photodo_apps_mobile_features_tasks_detail_quick_edit_minus)
-                                        }
-
                                         // Fire the exact same event the full dialog uses!
                                         onEvent(
                                             TaskDetailEvent.OnAddExpenseClicked(
-                                                description = description,
+                                                description = "",
                                                 amount = adjustmentAmount
                                             )
                                         )
@@ -487,7 +477,7 @@ fun TaskDetailScreen(
                 TextButton(
                     onClick = {
                         val amount = uiState.newExpenseAmount.toDoubleOrNull() ?: 0.0
-                        if (amount > 0 && uiState.newExpenseDesc.isNotBlank()) {
+                        if ((amount > 0) && uiState.newExpenseDesc.isNotBlank()) {
                             onEvent(TaskDetailEvent.OnAddExpenseClicked(description = uiState.newExpenseDesc.trim(), amount = amount))
                             onEvent(TaskDetailEvent.OnNewExpenseAmountChanged(""))
                             onEvent(TaskDetailEvent.OnNewExpenseDescChanged(""))
@@ -538,7 +528,7 @@ fun TaskDetailScreenPreview() {
         categoryId = 1,
         name = "Kitchen Renovation",
         projectBudget = 500.0,
-        currentSpend = 150.0
+        currentSpend = 150.0,
     )
     val sampleTasks = listOf(
         TaskEntity(taskId = 1, projectId = 1, text = "Buy white paint", isChecked = false),
@@ -568,3 +558,7 @@ fun TaskDetailScreenPreview() {
         )
     }
 }
+
+private const val LABEL_SPARKLE_PULSE = "AiSparklePulse"
+private const val LABEL_SPARKLE_SCALE = "AiSparkleScale"
+private const val LABEL_SPARKLE_ALPHA = "AiSparkleAlpha"
