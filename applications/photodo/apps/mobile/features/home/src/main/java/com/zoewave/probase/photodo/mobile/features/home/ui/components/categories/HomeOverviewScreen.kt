@@ -662,7 +662,7 @@ fun CategoryDashboardCard(
 
 @Composable
 fun EmptyHomeState(
-    @Suppress("UNUSED_PARAMETER") navTo: (PhotoTodoRoute?) -> Unit,
+    navTo: (PhotoTodoRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
