@@ -25,4 +25,5 @@ sealed interface HomeEvent {
     data class OnCategoryToDeleteChanged(val category: CategoryOverviewUiModel?) : HomeEvent
     data class OnFabMenuToggle(val expanded: Boolean) : HomeEvent
     data class OnSearchModeToggle(val enabled: Boolean) : HomeEvent
+    data class OnSearchScopeChanged(val scope: SearchScope) : HomeEvent
 }

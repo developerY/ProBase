@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -46,7 +45,8 @@ class HomeViewModel @Inject constructor(
         val showAddCategoryDialog: Boolean = false,
         val categoryToDelete: CategoryOverviewUiModel? = null,
         val fabMenuExpanded: Boolean = false,
-        val isSearchMode: Boolean = false
+        val isSearchMode: Boolean = false,
+        val searchScope: SearchScope = SearchScope.CATEGORIES
     )
 
     private val _uiFlags = MutableStateFlow(UiFlags())
@@ -56,19 +56,25 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = combine(
         photoDoRepo.getCategoriesWithProjectsAndTasks(),
         _uiFlags.flatMapLatest { flags ->
-            if (flags.taskSearchQuery.length >= 2) {
-                photoDoRepo.getProjectsWithMatchingTasks(flags.taskSearchQuery)
-                    .map { projects ->
-                        projects.map { projectDetails ->
-                            TaskSearchResult(
-                                projectId = projectDetails.project.projectId,
-                                projectTitle = projectDetails.project.name,
-                                tasks = projectDetails.tasks.filter { 
-                                    it.text.contains(flags.taskSearchQuery, ignoreCase = true) 
-                                }
-                            )
-                        }
+            val query = if (flags.isSearchMode) flags.categorySearchQuery else flags.taskSearchQuery
+            if (query.length >= 2) {
+                // Combine results from searching project names and matching tasks
+                combine(
+                    photoDoRepo.searchProjectsWithDetails(query),
+                    photoDoRepo.getProjectsWithMatchingTasks(query)
+                ) { byName, byTask ->
+                    // Merge and deduplicate by projectId
+                    val merged = (byName + byTask).distinctBy { it.project.projectId }
+                    merged.map { projectDetails ->
+                        TaskSearchResult(
+                            projectId = projectDetails.project.projectId,
+                            projectTitle = projectDetails.project.name,
+                            tasks = projectDetails.tasks.filter { 
+                                it.text.contains(query, ignoreCase = true) 
+                            }
+                        )
                     }
+                }
             } else {
                 flowOf(emptyList<TaskSearchResult>())
             }
@@ -145,6 +151,7 @@ class HomeViewModel @Inject constructor(
                 categoryToDelete = flags.categoryToDelete,
                 fabMenuExpanded = flags.fabMenuExpanded,
                 isSearchMode = flags.isSearchMode,
+                searchScope = flags.searchScope,
                 animationsEnabled = animationsEnabled
             )
         }
@@ -271,6 +278,10 @@ class HomeViewModel @Inject constructor(
 
             is HomeEvent.OnSearchModeToggle -> {
                 _uiFlags.update { it.copy(isSearchMode = event.enabled) }
+            }
+
+            is HomeEvent.OnSearchScopeChanged -> {
+                _uiFlags.update { it.copy(searchScope = event.scope) }
             }
         }
     }
