@@ -49,6 +49,8 @@ fun AboutSettingsCard(
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
+    val privacyPolicyUrl = stringResource(R.string.applications_photodo_apps_mobile_features_settings_privacy_policy_url)
+    val eulaUrl = stringResource(R.string.applications_photodo_apps_mobile_features_settings_eula_url)
 
     Card(
         modifier = modifier
@@ -174,7 +176,7 @@ fun AboutSettingsCard(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
-                            .clickable { uriHandler.openUri(context.getString(R.string.applications_photodo_apps_mobile_features_settings_privacy_policy_url)) }
+                            .clickable { uriHandler.openUri(privacyPolicyUrl) }
                             .padding(vertical = 8.dp)
                             .fillMaxWidth()
                     )
@@ -184,7 +186,7 @@ fun AboutSettingsCard(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
-                            .clickable { uriHandler.openUri(context.getString(R.string.applications_photodo_apps_mobile_features_settings_eula_url)) }
+                            .clickable { uriHandler.openUri(eulaUrl) }
                             .padding(vertical = 8.dp)
                             .fillMaxWidth()
                     )
