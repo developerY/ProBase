@@ -59,6 +59,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -88,6 +91,8 @@ import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeEvent
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.HomeUiState
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.SearchScope
+import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.TaskSearchResult
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.OverviewSummaryCard
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.home.components.bottomsheets.QuickTemplateBottomSheet
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
@@ -301,25 +306,54 @@ fun HomeOverviewContent(
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
-                        OutlinedTextField(
-                            value = uiState.categorySearchQuery,
-                            onValueChange = { onEvent(HomeEvent.OnCategorySearchQueryChanged(it)) },
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 8.dp),
-                            placeholder = { Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_search_categories_placeholder)) },
-                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                            trailingIcon = {
-                                IconButton(onClick = {
-                                    onEvent(HomeEvent.OnCategorySearchQueryChanged(""))
-                                    onEvent(HomeEvent.OnSearchModeToggle(false))
-                                }) {
-                                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_close_search_content_desc))
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = uiState.categorySearchQuery,
+                                onValueChange = { onEvent(HomeEvent.OnCategorySearchQueryChanged(it)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                placeholder = { 
+                                    Text(
+                                        if (uiState.searchScope == SearchScope.CATEGORIES) 
+                                            stringResource(R.string.applications_photodo_apps_mobile_features_home_search_categories_placeholder)
+                                        else 
+                                            stringResource(R.string.applications_photodo_apps_mobile_features_home_search_projects_placeholder)
+                                    ) 
+                                },
+                                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                                trailingIcon = {
+                                    IconButton(onClick = {
+                                        onEvent(HomeEvent.OnCategorySearchQueryChanged(""))
+                                        onEvent(HomeEvent.OnSearchModeToggle(false))
+                                    }) {
+                                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_photodo_apps_mobile_features_home_close_search_content_desc))
+                                    }
+                                },
+                                singleLine = true,
+                                shape = RoundedCornerShape(16.dp)
+                            )
+
+                            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                                SegmentedButton(
+                                    selected = uiState.searchScope == SearchScope.CATEGORIES,
+                                    onClick = { onEvent(HomeEvent.OnSearchScopeChanged(SearchScope.CATEGORIES)) },
+                                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
+                                ) {
+                                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_search_scope_categories))
                                 }
-                            },
-                            singleLine = true,
-                            shape = RoundedCornerShape(16.dp)
-                        )
+                                SegmentedButton(
+                                    selected = uiState.searchScope == SearchScope.PROJECTS,
+                                    onClick = { onEvent(HomeEvent.OnSearchScopeChanged(SearchScope.PROJECTS)) },
+                                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
+                                ) {
+                                    Text(stringResource(R.string.applications_photodo_apps_mobile_features_home_search_scope_projects))
+                                }
+                            }
+                        }
                     }
 
                     AnimatedVisibility(
@@ -363,15 +397,97 @@ fun HomeOverviewContent(
                     }
                 }
 
-                itemsIndexed(
-                    items = filteredCategories,
-                    key = { _, category -> category.id }
-                ) { index, category ->
-                    CategoryDashboardCard(
-                        category = category,
-                        index = index,
-                        onDeleteClicked = { onEvent(HomeEvent.OnCategoryToDeleteChanged(it)) },
-                        navTo = navTo
+                if (uiState.isSearchMode && uiState.searchScope == SearchScope.PROJECTS) {
+                    if (uiState.taskSearchResults.isEmpty() && uiState.categorySearchQuery.length >= 2) {
+                        item(span = { GridItemSpan(2) }) {
+                            Text(
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_home_no_matching_tasks),
+                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    } else {
+                        itemsIndexed(
+                            items = uiState.taskSearchResults,
+                            key = { _, result -> "search_${result.projectId}" }
+                        ) { _, result ->
+                            ProjectSearchResultCard(
+                                result = result,
+                                onClick = {
+                                    navTo(PhotoTodoRoute.TaskDetail(result.projectId, result.projectTitle))
+                                },
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                        }
+                    }
+                } else {
+                    itemsIndexed(
+                        items = filteredCategories,
+                        key = { _, category -> category.id }
+                    ) { index, category ->
+                        CategoryDashboardCard(
+                            category = category,
+                            index = index,
+                            onDeleteClicked = { onEvent(HomeEvent.OnCategoryToDeleteChanged(it)) },
+                            navTo = navTo
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProjectSearchResultCard(
+    result: TaskSearchResult,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = result.projectTitle,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            
+            if (result.tasks.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                result.tasks.take(3).forEach { task ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Checklist,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = task.text,
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1
+                        )
+                    }
+                }
+                if (result.tasks.size > 3) {
+                    Text(
+                        text = "+ ${result.tasks.size - 3} more tasks",
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(start = 24.dp, top = 4.dp),
+                        color = MaterialTheme.colorScheme.secondary
                     )
                 }
             }

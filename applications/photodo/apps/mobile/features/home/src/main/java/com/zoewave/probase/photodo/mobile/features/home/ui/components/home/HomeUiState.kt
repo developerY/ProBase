@@ -6,6 +6,11 @@ import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories
 import com.zoewave.probase.photodo.mobile.features.tasks.ui.state.ProjectListUiModel
 
 @Immutable
+enum class SearchScope {
+    CATEGORIES, PROJECTS
+}
+
+@Immutable
 data class TaskSearchResult(
     val projectId: Long,
     val projectTitle: String,
@@ -28,6 +33,7 @@ data class HomeUiState(
     val categoryToDelete: CategoryOverviewUiModel? = null,
     val fabMenuExpanded: Boolean = false,
     val isSearchMode: Boolean = false,
+    val searchScope: SearchScope = SearchScope.CATEGORIES,
     val animationsEnabled: Boolean = true
 ) {
     val isEmpty: Boolean = !isLoading && categories.isEmpty()

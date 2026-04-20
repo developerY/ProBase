@@ -103,4 +103,7 @@
     <string name="applications_photodo_apps_mobile_features_home_budget_range_format">$%1$d / $%2$d</string>
     <string name="applications_photodo_apps_mobile_features_home_percentage">%1$d%%</string>
     <string name="applications_photodo_apps_mobile_features_home_currency_symbol">$</string>
+    <string name="applications_photodo_apps_mobile_features_home_search_scope_categories">Categories</string>
+    <string name="applications_photodo_apps_mobile_features_home_search_scope_projects">Projects</string>
+    <string name="applications_photodo_apps_mobile_features_home_search_projects_placeholder">Search projects…</string>
 </resources>
