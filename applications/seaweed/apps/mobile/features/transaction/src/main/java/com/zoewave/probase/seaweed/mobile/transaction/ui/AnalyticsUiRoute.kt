@@ -2,6 +2,8 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,25 +22,33 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,10 +56,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.core.ui.components.BarData
 import com.zoewave.probase.core.ui.components.SimpleBarChart
+import com.zoewave.probase.seaweed.mobile.transaction.ui.components.SpendingHeatmap
+import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.HabitInsight
 import com.zoewave.probase.seaweed.model.SpendingPeriod
 import com.zoewave.probase.seaweed.model.TrendPoint
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import java.util.Locale
 
 @Composable
@@ -114,132 +129,268 @@ private fun AnalyticsContent(
     uiState: AnalyticsUiState,
     @Suppress("UnusedParameter") onEvent: (AnalyticsUiEvent) -> Unit,
     @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AnalyticsViewModel = hiltViewModel()
 ) {
     var selectedPeriod by remember { mutableStateOf(SpendingPeriod.DAILY) }
     var selectedTrendPoint by remember { mutableStateOf<TrendPoint?>(null) }
+    var selectedHeatmapDate by remember { mutableStateOf<LocalDate?>(null) }
+    var isHabitsExpanded by remember { mutableStateOf(false) }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+
+    val filteredTransactions = remember(selectedCategory, uiState.allTransactions) {
+        if (selectedCategory == null) uiState.allTransactions
+        else uiState.allTransactions.filter { it.category == selectedCategory }
+    }
+
+    val trends = remember(filteredTransactions, selectedCategory) {
+        viewModel.calculateTrendsForTransactions(filteredTransactions)
+    }
+
+    val heatmapData = remember(filteredTransactions, selectedCategory) {
+        viewModel.calculateHeatmapDataForTransactions(filteredTransactions)
+    }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Spending Trends", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        
-                        Row {
-                            SpendingPeriod.entries.forEach { period ->
-                                FilterChip(
-                                    selected = selectedPeriod == period,
-                                    onClick = { 
-                                        selectedPeriod = period 
-                                        selectedTrendPoint = null
-                                    },
-                                    label = { Text(period.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                                    modifier = Modifier.padding(start = 4.dp)
-                                )
-                            }
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    val trendData = uiState.spendingTrends[selectedPeriod] ?: emptyList()
-                    if (trendData.isNotEmpty()) {
-                        SimpleBarChart(
-                            data = trendData.map { BarData(it.label, it.value) },
-                            onBarClick = { barData ->
-                                selectedTrendPoint = trendData.find { it.label == barData.label }
-                            },
-                            selectedBar = selectedTrendPoint?.let { BarData(it.label, it.value) },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    } else {
-                        Box(Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                            Text("No data for this period")
-                        }
-                    }
-                }
-            }
-        }
-
-        item {
-            AnimatedVisibility(visible = selectedTrendPoint != null) {
-                selectedTrendPoint?.let { point ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = "Details for ${point.label}",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Text("Total spent", style = MaterialTheme.typography.labelSmall)
-                                    Text(
-                                        text = String.format(Locale.getDefault(), "$%.2f", point.value),
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        fontWeight = FontWeight.Black
-                                    )
-                                }
-                                Column(horizontalAlignment = Alignment.End) {
-                                    Text("Transactions", style = MaterialTheme.typography.labelSmall)
-                                    Text(
-                                        text = "${point.transactionCount}",
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        fontWeight = FontWeight.Black
-                                    )
-                                }
-                            }
-                            val topCategory = point.topCategory
-                            if (topCategory != null) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text("Top Category", style = MaterialTheme.typography.labelSmall)
-                                Text(
-                                    text = topCategory,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         if (uiState.habitInsights.isNotEmpty()) {
             item {
-                Text("Spending Habits", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            "Spending Habits",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        if (selectedCategory != null) {
+                            Text(
+                                "Filtering by: $selectedCategory",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                    IconButton(onClick = { isHabitsExpanded = !isHabitsExpanded }) {
+                        Icon(
+                            imageVector = if (isHabitsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = if (isHabitsExpanded) "Collapse" else "Expand"
+                        )
+                    }
+                }
             }
             
-            items(uiState.habitInsights) { insight ->
-                HabitInsightCard(insight = insight)
+            if (isHabitsExpanded) {
+                items(uiState.habitInsights) { insight ->
+                    HabitInsightCard(
+                        insight = insight,
+                        isSelected = selectedCategory == insight.category,
+                        onClick = {
+                            selectedCategory = if (selectedCategory == insight.category) null else insight.category
+                            selectedTrendPoint = null
+                            selectedHeatmapDate = null
+                        }
+                    )
+                }
             }
         }
+
+        item {
+            TabRow(
+                selectedTabIndex = selectedTabIndex,
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.primary,
+                divider = { HorizontalDivider() }
+            ) {
+                Tab(
+                    selected = selectedTabIndex == 0,
+                    onClick = { selectedTabIndex = 0 },
+                    text = { Text("Trends") }
+                )
+                Tab(
+                    selected = selectedTabIndex == 1,
+                    onClick = { selectedTabIndex = 1 },
+                    text = { Text("Heatmap") }
+                )
+            }
+        }
+
+        if (selectedTabIndex == 0) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Summary", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            
+                            Row {
+                                SpendingPeriod.entries.forEach { period ->
+                                    FilterChip(
+                                        selected = selectedPeriod == period,
+                                        onClick = { 
+                                            selectedPeriod = period 
+                                            selectedTrendPoint = null
+                                        },
+                                        label = { Text(period.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                        modifier = Modifier.padding(start = 4.dp)
+                                    )
+                                }
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        val trendData = trends[selectedPeriod] ?: emptyList()
+                        if (trendData.isNotEmpty()) {
+                            SimpleBarChart(
+                                data = trendData.map { BarData(it.label, it.value) },
+                                onBarClick = { barData ->
+                                    selectedTrendPoint = trendData.find { it.label == barData.label }
+                                },
+                                selectedBar = selectedTrendPoint?.let { BarData(it.label, it.value) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        } else {
+                            Box(Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+                                Text("No data for this period")
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                AnimatedVisibility(visible = selectedTrendPoint != null) {
+                    selectedTrendPoint?.let { point ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = "Details for ${point.label}",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column {
+                                        Text("Total spent", style = MaterialTheme.typography.labelSmall)
+                                        Text(
+                                            text = String.format(Locale.getDefault(), "$%.2f", point.value),
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                    }
+                                    Column(horizontalAlignment = Alignment.End) {
+                                        Text("Transactions", style = MaterialTheme.typography.labelSmall)
+                                        Text(
+                                            text = "${point.transactionCount}",
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                    }
+                                }
+                                val topCategory = point.topCategory
+                                if (topCategory != null) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text("Top Category", style = MaterialTheme.typography.labelSmall)
+                                    Text(
+                                        text = topCategory,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (selectedTabIndex == 1) {
+            item {
+                Column {
+                    Text(
+                        "Spending Heatmap",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    SpendingHeatmap(
+                        heatmapData = heatmapData,
+                        selectedDate = selectedHeatmapDate,
+                        onDayClick = { selectedHeatmapDate = it }
+                    )
+                }
+            }
+
+            item {
+                AnimatedVisibility(visible = selectedHeatmapDate != null) {
+                    val zoneId = ZoneId.systemDefault()
+                    val dayTransactions = filteredTransactions.filter {
+                        Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() == selectedHeatmapDate
+                    }
+                    
+                    Column {
+                        Text(
+                            text = "Transactions for ${selectedHeatmapDate?.toString()}",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                        if (dayTransactions.isEmpty()) {
+                            Text("No transactions for this day", style = MaterialTheme.typography.bodyMedium)
+                        } else {
+                            dayTransactions.forEach { transaction ->
+                                TransactionItem(
+                                    transaction = transaction,
+                                    onDelete = {},
+                                    onClick = {}
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /* Spending Habits moved to the top */
     }
 }
 
 @Composable
-private fun HabitInsightCard(insight: HabitInsight) {
+private fun HabitInsightCard(
+    insight: HabitInsight,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .border(
+                width = if (isSelected) 2.dp else 0.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                shape = CardDefaults.shape
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -269,11 +420,32 @@ private fun HabitInsightCard(insight: HabitInsight) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Text(
-                    text = String.format(Locale.getDefault(), "Total: $%.2f this month", insight.totalAmount),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                
+                val budgetLimit = insight.budgetLimit
+                if (budgetLimit != null) {
+                    val progress = (insight.totalAmount / budgetLimit).toFloat()
+                    val progressColor = if (progress > 0.9f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    
+                    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                        LinearProgressIndicator(
+                            progress = { progress.coerceIn(0f, 1f) },
+                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
+                            color = progressColor,
+                            trackColor = progressColor.copy(alpha = 0.2f)
+                        )
+                        Text(
+                            text = String.format(Locale.getDefault(), "$%.2f of $%.0f budget", insight.totalAmount, budgetLimit),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (progress > 0.9f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    Text(
+                        text = String.format(Locale.getDefault(), "Total: $%.2f this month", insight.totalAmount),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
