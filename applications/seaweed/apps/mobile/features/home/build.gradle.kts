@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":core:util"))
     implementation(project(":applications:seaweed:model"))
     implementation(project(":applications:seaweed:data"))
+    implementation(project(":applications:seaweed:apps:mobile:core"))
     implementation(project(":applications:seaweed:features:main"))
     implementation(project(":applications:seaweed:apps:mobile:features:transaction"))
     implementation(libs.androidx.compose.material3)

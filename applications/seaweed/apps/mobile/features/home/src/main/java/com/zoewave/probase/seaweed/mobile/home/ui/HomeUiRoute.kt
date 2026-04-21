@@ -42,11 +42,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.seaweed.mobile.home.ui.components.CategoryBudgetProgressBar
-import com.zoewave.probase.seaweed.mobile.home.ui.components.DonutChart
-import com.zoewave.probase.seaweed.mobile.home.ui.components.FixedCostsSummaryCard
-import com.zoewave.probase.seaweed.mobile.home.ui.components.RealMoneyHeroCard
-import com.zoewave.probase.seaweed.mobile.home.ui.components.UnallocatedMoneyCard
+import com.zoewave.probase.seaweed.mobile.core.ui.components.CategoryBudgetProgressBar
+import com.zoewave.probase.seaweed.mobile.core.ui.components.DonutChart
+import com.zoewave.probase.seaweed.mobile.core.ui.components.FixedCostsSummaryCard
+import com.zoewave.probase.seaweed.mobile.core.ui.components.RealMoneyHeroCard
+import com.zoewave.probase.seaweed.mobile.core.ui.components.UnallocatedMoneyCard
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import com.zoewave.probase.seaweed.model.Transaction

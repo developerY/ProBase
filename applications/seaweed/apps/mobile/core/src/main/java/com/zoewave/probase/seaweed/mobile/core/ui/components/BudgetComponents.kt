@@ -1,4 +1,4 @@
-package com.zoewave.probase.seaweed.mobile.home.ui.components
+package com.zoewave.probase.seaweed.mobile.core.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.model.BudgetTarget
-import com.zoewave.probase.seaweed.model.CategoryOverview
+import com.zoewave.probase.seaweed.model.FinancialProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -21,9 +21,9 @@ class BudgetViewModel @Inject constructor(
     val uiState: StateFlow<BudgetUiState> = _uiState.asStateFlow()
 
     init {
-        financialRepository.getCategoryOverviews()
-            .onEach { overviews ->
-                _uiState.value = BudgetUiState.Success(overviews)
+        financialRepository.getFinancialProfile()
+            .onEach { profile ->
+                _uiState.value = BudgetUiState.Success(profile)
             }
             .launchIn(viewModelScope)
     }
@@ -45,7 +45,7 @@ class BudgetViewModel @Inject constructor(
 
 sealed interface BudgetUiState {
     object Loading : BudgetUiState
-    data class Success(val categories: List<CategoryOverview>) : BudgetUiState
+    data class Success(val profile: FinancialProfile) : BudgetUiState
 }
 
 sealed interface BudgetUiEvent {

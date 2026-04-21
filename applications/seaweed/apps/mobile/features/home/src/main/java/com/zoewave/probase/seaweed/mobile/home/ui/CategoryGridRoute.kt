@@ -19,7 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.core.ui.R as CoreUiR
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
-import com.zoewave.probase.seaweed.mobile.home.ui.components.CategoryQuickJumpCard
+import com.zoewave.probase.seaweed.mobile.core.ui.components.CategoryQuickJumpCard
 
 @Composable
 fun CategoryGridRoute(
