@@ -24,6 +24,8 @@ data class AnalyticsUiState(
     val isLoading: Boolean = true,
     val spendingTrends: Map<SpendingPeriod, List<TrendPoint>> = emptyMap(),
     val habitInsights: List<HabitInsight> = emptyList(),
+    val heatmapData: Map<LocalDate, Double> = emptyMap(),
+    val allTransactions: List<Transaction> = emptyList(),
 )
 
 sealed interface AnalyticsUiEvent {
@@ -40,7 +42,9 @@ class AnalyticsViewModel @Inject constructor(
             AnalyticsUiState(
                 isLoading = false,
                 spendingTrends = calculateTrends(transactions),
-                habitInsights = calculateHabitInsights(transactions)
+                habitInsights = calculateHabitInsights(transactions),
+                heatmapData = calculateHeatmapData(transactions),
+                allTransactions = transactions
             )
         }.stateIn(
             scope = viewModelScope,
@@ -134,5 +138,15 @@ class AnalyticsViewModel @Inject constructor(
                     trendMessage = trendMessage
                 )
             }.sortedByDescending { it.totalAmount }
+    }
+
+    private fun calculateHeatmapData(transactions: List<Transaction>): Map<LocalDate, Double> {
+        val zoneId = ZoneId.systemDefault()
+        return transactions
+            .map { it to Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() }
+            .groupBy { it.second }
+            .mapValues { (_, dailyTransactions) ->
+                dailyTransactions.sumOf { it.first.amount }
+            }
     }
 }

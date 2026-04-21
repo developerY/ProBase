@@ -96,6 +96,17 @@ fun SettingsScreen(
                         title = "Seaweed Receipt AI",
                         description = "Use Gemini to automatically extract merchant and amount from receipts."
                     )
+
+                    HorizontalDivider()
+
+                    Text("Developer Options", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
+                    Button(
+                        onClick = { onEvent(SettingsUiEvent.GenerateTestData) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+                    ) {
+                        Text("Generate 3 Months of Random Data")
+                    }
                 }
             }
         }

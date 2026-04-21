@@ -46,10 +46,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.core.ui.components.BarData
 import com.zoewave.probase.core.ui.components.SimpleBarChart
+import com.zoewave.probase.seaweed.mobile.transaction.ui.components.SpendingHeatmap
+import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.HabitInsight
 import com.zoewave.probase.seaweed.model.SpendingPeriod
+import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.TrendPoint
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import java.util.Locale
 
 @Composable
@@ -118,12 +124,23 @@ private fun AnalyticsContent(
 ) {
     var selectedPeriod by remember { mutableStateOf(SpendingPeriod.DAILY) }
     var selectedTrendPoint by remember { mutableStateOf<TrendPoint?>(null) }
+    var selectedHeatmapDate by remember { mutableStateOf<LocalDate?>(null) }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
+        if (uiState.habitInsights.isNotEmpty()) {
+            item {
+                Text("Spending Habits", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+            
+            items(uiState.habitInsights) { insight ->
+                HabitInsightCard(insight = insight)
+            }
+        }
+
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -167,6 +184,57 @@ private fun AnalyticsContent(
                     } else {
                         Box(Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
                             Text("No data for this period")
+                        }
+                    }
+                }
+            }
+        }
+
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        "Spending Heatmap",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SpendingHeatmap(
+                        heatmapData = uiState.heatmapData,
+                        selectedDate = selectedHeatmapDate,
+                        onDayClick = { selectedHeatmapDate = it }
+                    )
+                }
+            }
+        }
+
+        item {
+            AnimatedVisibility(visible = selectedHeatmapDate != null) {
+                val zoneId = ZoneId.systemDefault()
+                val dayTransactions = uiState.allTransactions.filter {
+                    Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() == selectedHeatmapDate
+                }
+                
+                Column {
+                    Text(
+                        text = "Transactions for ${selectedHeatmapDate?.toString()}",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                    if (dayTransactions.isEmpty()) {
+                        Text("No transactions for this day", style = MaterialTheme.typography.bodyMedium)
+                    } else {
+                        dayTransactions.forEach { transaction ->
+                            TransactionItem(
+                                transaction = transaction,
+                                onDelete = {},
+                                onClick = {}
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
                 }
@@ -224,15 +292,7 @@ private fun AnalyticsContent(
             }
         }
 
-        if (uiState.habitInsights.isNotEmpty()) {
-            item {
-                Text("Spending Habits", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            }
-            
-            items(uiState.habitInsights) { insight ->
-                HabitInsightCard(insight = insight)
-            }
-        }
+        /* Spending Habits moved to the top */
     }
 }
 
