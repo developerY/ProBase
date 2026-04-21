@@ -35,10 +35,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,7 +60,6 @@ import com.zoewave.probase.seaweed.mobile.transaction.ui.components.SpendingHeat
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.HabitInsight
 import com.zoewave.probase.seaweed.model.SpendingPeriod
-import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.TrendPoint
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.time.Instant
@@ -134,8 +136,8 @@ private fun AnalyticsContent(
     var selectedTrendPoint by remember { mutableStateOf<TrendPoint?>(null) }
     var selectedHeatmapDate by remember { mutableStateOf<LocalDate?>(null) }
     var isHabitsExpanded by remember { mutableStateOf(false) }
-    var isTrendsExpanded by remember { mutableStateOf(true) }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     val filteredTransactions = remember(selectedCategory, uiState.allTransactions) {
         if (selectedCategory == null) uiState.allTransactions
@@ -201,26 +203,26 @@ private fun AnalyticsContent(
         }
 
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            TabRow(
+                selectedTabIndex = selectedTabIndex,
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.primary,
+                divider = { HorizontalDivider() }
             ) {
-                Text(
-                    "Spending Trends",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                Tab(
+                    selected = selectedTabIndex == 0,
+                    onClick = { selectedTabIndex = 0 },
+                    text = { Text("Trends") }
                 )
-                IconButton(onClick = { isTrendsExpanded = !isTrendsExpanded }) {
-                    Icon(
-                        imageVector = if (isTrendsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (isTrendsExpanded) "Collapse" else "Expand"
-                    )
-                }
+                Tab(
+                    selected = selectedTabIndex == 1,
+                    onClick = { selectedTabIndex = 1 },
+                    text = { Text("Heatmap") }
+                )
             }
         }
 
-        if (isTrendsExpanded) {
+        if (selectedTabIndex == 0) {
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -322,46 +324,48 @@ private fun AnalyticsContent(
             }
         }
 
-        item {
-            Column {
-                Text(
-                    "Spending Heatmap",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-                SpendingHeatmap(
-                    heatmapData = heatmapData,
-                    selectedDate = selectedHeatmapDate,
-                    onDayClick = { selectedHeatmapDate = it }
-                )
-            }
-        }
-
-        item {
-            AnimatedVisibility(visible = selectedHeatmapDate != null) {
-                val zoneId = ZoneId.systemDefault()
-                val dayTransactions = filteredTransactions.filter {
-                    Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() == selectedHeatmapDate
-                }
-                
+        if (selectedTabIndex == 1) {
+            item {
                 Column {
                     Text(
-                        text = "Transactions for ${selectedHeatmapDate?.toString()}",
-                        style = MaterialTheme.typography.titleSmall,
+                        "Spending Heatmap",
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    if (dayTransactions.isEmpty()) {
-                        Text("No transactions for this day", style = MaterialTheme.typography.bodyMedium)
-                    } else {
-                        dayTransactions.forEach { transaction ->
-                            TransactionItem(
-                                transaction = transaction,
-                                onDelete = {},
-                                onClick = {}
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
+                    SpendingHeatmap(
+                        heatmapData = heatmapData,
+                        selectedDate = selectedHeatmapDate,
+                        onDayClick = { selectedHeatmapDate = it }
+                    )
+                }
+            }
+
+            item {
+                AnimatedVisibility(visible = selectedHeatmapDate != null) {
+                    val zoneId = ZoneId.systemDefault()
+                    val dayTransactions = filteredTransactions.filter {
+                        Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() == selectedHeatmapDate
+                    }
+                    
+                    Column {
+                        Text(
+                            text = "Transactions for ${selectedHeatmapDate?.toString()}",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                        if (dayTransactions.isEmpty()) {
+                            Text("No transactions for this day", style = MaterialTheme.typography.bodyMedium)
+                        } else {
+                            dayTransactions.forEach { transaction ->
+                                TransactionItem(
+                                    transaction = transaction,
+                                    onDelete = {},
+                                    onClick = {}
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
                         }
                     }
                 }
