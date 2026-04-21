@@ -16,9 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -167,8 +167,8 @@ private fun DayBox(
             .clip(RoundedCornerShape(4.dp))
             .background(color)
             .border(
-                width = if (isSelected) 2.dp else 0.5.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                width = if (isSelected) 3.dp else 0.5.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
                 shape = RoundedCornerShape(4.dp)
             )
             .clickable { onClick() },
@@ -177,8 +177,12 @@ private fun DayBox(
         Text(
             text = day.toString(),
             fontSize = 10.sp,
-            color = if (intensity > 0.6f) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-            fontWeight = if (intensity > 0f) FontWeight.Bold else FontWeight.Normal
+            color = when {
+                isSelected -> MaterialTheme.colorScheme.onSecondaryContainer
+                intensity > 0.6f -> MaterialTheme.colorScheme.onPrimary
+                else -> MaterialTheme.colorScheme.onSurface
+            },
+            fontWeight = if (intensity > 0f || isSelected) FontWeight.Bold else FontWeight.Normal
         )
     }
 }
