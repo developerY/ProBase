@@ -135,7 +135,7 @@ private fun AnalyticsContent(
     var selectedPeriod by remember { mutableStateOf(SpendingPeriod.DAILY) }
     var selectedTrendPoint by remember { mutableStateOf<TrendPoint?>(null) }
     var selectedHeatmapDate by remember { mutableStateOf<LocalDate?>(null) }
-    var isHabitsExpanded by remember { mutableStateOf(false) }
+    var isHabitsExpanded by remember { mutableStateOf(true) }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
@@ -345,7 +345,7 @@ private fun AnalyticsContent(
                 AnimatedVisibility(visible = selectedHeatmapDate != null) {
                     val zoneId = ZoneId.systemDefault()
                     val dayTransactions = filteredTransactions.filter {
-                        Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() == selectedHeatmapDate
+                        it.amount < 0 && Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() == selectedHeatmapDate
                     }
                     
                     Column {

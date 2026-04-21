@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.math.absoluteValue
 
 data class AnalyticsUiState(
     val isLoading: Boolean = true,
@@ -67,15 +68,16 @@ class AnalyticsViewModel @Inject constructor(
 
     private fun calculateTrends(transactions: List<Transaction>): Map<SpendingPeriod, List<TrendPoint>> {
         val zoneId = ZoneId.systemDefault()
+        val expenses = transactions.filter { it.amount < 0 }
         
         // Daily Trends (last 7 days)
-        val daily = transactions
+        val daily = expenses
             .map { it to Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() }
             .groupBy { it.second }
             .map { (date, dailyTransactions) ->
                 TrendPoint(
                     label = date.format(DateTimeFormatter.ofPattern("MMM dd")),
-                    value = dailyTransactions.sumOf { it.first.amount },
+                    value = dailyTransactions.sumOf { it.first.amount }.absoluteValue,
                     timestamp = dailyTransactions.first().first.date,
                     transactionCount = dailyTransactions.size,
                     topCategory = dailyTransactions.groupBy { it.first.category }.maxByOrNull { it.value.size }?.key
@@ -84,13 +86,13 @@ class AnalyticsViewModel @Inject constructor(
 
         // Weekly Trends (last 4 weeks)
         val weekFields = WeekFields.of(Locale.getDefault())
-        val weekly = transactions
+        val weekly = expenses
             .map { it to Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() }
             .groupBy { it.second.get(weekFields.weekOfWeekBasedYear()) }
             .map { (week, weeklyTransactions) ->
                 TrendPoint(
                     label = "Week $week",
-                    value = weeklyTransactions.sumOf { it.first.amount },
+                    value = weeklyTransactions.sumOf { it.first.amount }.absoluteValue,
                     timestamp = weeklyTransactions.minOf { it.first.date },
                     transactionCount = weeklyTransactions.size,
                     topCategory = weeklyTransactions.groupBy { it.first.category }.maxByOrNull { it.value.size }?.key
@@ -98,13 +100,13 @@ class AnalyticsViewModel @Inject constructor(
             }.sortedBy { it.timestamp }.takeLast(4)
 
         // Monthly Trends (last 6 months)
-        val monthly = transactions
+        val monthly = expenses
             .map { it to Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() }
             .groupBy { it.second.month }
             .map { (month, monthlyTransactions) ->
                 TrendPoint(
                     label = month.name.lowercase(Locale.ROOT).replaceFirstChar { it.uppercase() }.take(3),
-                    value = monthlyTransactions.sumOf { it.first.amount },
+                    value = monthlyTransactions.sumOf { it.first.amount }.absoluteValue,
                     timestamp = monthlyTransactions.minOf { it.first.date },
                     transactionCount = monthlyTransactions.size,
                     topCategory = monthlyTransactions.groupBy { it.first.category }.maxByOrNull { it.value.size }?.key
@@ -122,22 +124,23 @@ class AnalyticsViewModel @Inject constructor(
         transactions: List<Transaction>,
         budgets: List<BudgetTarget>
     ): List<HabitInsight> {
-        if (transactions.isEmpty()) return emptyList()
+        val expenses = transactions.filter { it.amount < 0 }
+        if (expenses.isEmpty()) return emptyList()
         
         val zoneId = ZoneId.systemDefault()
         val now = LocalDate.now(zoneId)
         val thirtyDaysAgo = now.minusDays(30)
         
-        val recentTransactions = transactions.filter {
+        val recentTransactions = expenses.filter {
             Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate().isAfter(thirtyDaysAgo)
         }
 
         return recentTransactions.groupBy { it.category }
             .mapNotNull { (category, categoryTransactions) ->
                 val frequency = categoryTransactions.size
-                if (frequency < 4) return@mapNotNull null
+                if (frequency < 1) return@mapNotNull null
                 
-                val totalAmount = categoryTransactions.sumOf { it.amount }
+                val totalAmount = categoryTransactions.sumOf { it.amount }.absoluteValue
                 val dailyAverage = totalAmount / 30.0
                 
                 val trendMessage = when {
@@ -159,11 +162,11 @@ class AnalyticsViewModel @Inject constructor(
 
     private fun calculateHeatmapData(transactions: List<Transaction>): Map<LocalDate, Double> {
         val zoneId = ZoneId.systemDefault()
-        return transactions
+        return transactions.filter { it.amount < 0 }
             .map { it to Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() }
             .groupBy { it.second }
             .mapValues { (_, dailyTransactions) ->
-                dailyTransactions.sumOf { it.first.amount }
+                dailyTransactions.sumOf { it.first.amount }.absoluteValue
             }
     }
 }
