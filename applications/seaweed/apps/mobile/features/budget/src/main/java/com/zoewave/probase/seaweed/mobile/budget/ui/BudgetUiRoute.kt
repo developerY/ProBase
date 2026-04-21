@@ -1,45 +1,30 @@
 package com.zoewave.probase.seaweed.mobile.budget.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.seaweed.mobile.core.ui.components.CategoryBudgetProgressBar
+import com.zoewave.probase.seaweed.mobile.core.ui.components.UnallocatedMoneyCard
 import com.zoewave.probase.seaweed.model.CategoryOverview
+import com.zoewave.probase.seaweed.model.FinancialProfile
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
+import java.util.Locale
 
 @Composable
 fun BudgetUiRoute(
@@ -91,19 +76,49 @@ fun BudgetScreen(
                 }
             }
             is BudgetUiState.Success -> {
+                val profile = uiState.profile
+                var editingCategory by remember { mutableStateOf<CategoryOverview?>(null) }
+
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(padding),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(uiState.categories) { category ->
-                        BudgetItem(
-                            category = category,
-                            onUpdateLimit = { newLimit ->
-                                onEvent(BudgetUiEvent.UpdateBudget(category.name, newLimit))
-                            }
+                    item {
+                        BudgetSummaryCard(profile = profile)
+                    }
+
+                    item {
+                        UnallocatedMoneyCard(unallocatedAmount = profile.unallocatedMoney)
+                    }
+
+                    item {
+                        Text(
+                            text = "Category Budgets",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(top = 8.dp)
                         )
                     }
+
+                    items(profile.categoryOverviews) { category ->
+                        BudgetItem(
+                            category = category,
+                            onEdit = { editingCategory = it },
+                            onDelete = { onEvent(BudgetUiEvent.DeleteBudget(category.name)) }
+                        )
+                    }
+                }
+
+                if (editingCategory != null) {
+                    BudgetEditBottomSheet(
+                        category = editingCategory!!,
+                        onDismiss = { editingCategory = null },
+                        onSave = { limit ->
+                            onEvent(BudgetUiEvent.UpdateBudget(editingCategory!!.name, limit))
+                            editingCategory = null
+                        }
+                    )
                 }
             }
         }
@@ -111,60 +126,116 @@ fun BudgetScreen(
 }
 
 @Composable
-private fun BudgetItem(
-    category: CategoryOverview,
-    onUpdateLimit: (Double) -> Unit
-) {
-    var showDialog by remember { mutableStateOf(false) }
-    var limitInput by remember { mutableStateOf(category.limitAmount.toString()) }
-
+private fun BudgetSummaryCard(profile: FinancialProfile) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        onClick = { showDialog = true }
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(category.name, style = MaterialTheme.typography.titleMedium)
+            Text("Total Monthly Budget", style = MaterialTheme.typography.labelSmall)
+            Text(
+                text = "$${String.format(Locale.getDefault(), "%.2f", profile.totalBudgetedAmount)}",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Black
+            )
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
-                progress = { 
-                    val limit = category.limitAmount ?: 0.0
-                    (category.totalAmount / limit.coerceAtLeast(1.0)).toFloat() 
-                },
-                modifier = Modifier.fillMaxWidth(),
+                progress = { (profile.totalBudgetedAmount / profile.realStartingBalance).toFloat().coerceIn(0f, 1f) },
+                modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f)
             )
+            Text(
+                text = "$${String.format(Locale.getDefault(), "%.0f", profile.realStartingBalance)} available after fixed costs",
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun BudgetItem(
+    category: CategoryOverview,
+    onEdit: (CategoryOverview) -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                Text("Spent: $${category.totalAmount}", style = MaterialTheme.typography.bodySmall)
-                Text("Limit: $${category.limitAmount ?: "No limit"}", style = MaterialTheme.typography.bodySmall)
+                CategoryBudgetProgressBar(
+                    category = category,
+                    modifier = Modifier.weight(1f)
+                )
+                Row {
+                    IconButton(onClick = { onEdit(category) }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(20.dp))
+                    }
+                    if (category.limitAmount != null) {
+                        IconButton(onClick = onDelete) {
+                            Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(20.dp))
+                        }
+                    }
+                }
             }
         }
     }
+}
 
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text("Update Limit for ${category.name}") },
-            text = {
-                OutlinedTextField(
-                    value = limitInput,
-                    onValueChange = { limitInput = it },
-                    label = { Text("New Limit") }
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        limitInput.toDoubleOrNull()?.let { onUpdateLimit(it) }
-                        showDialog = false
-                    }
-                ) { Text("Save") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BudgetEditBottomSheet(
+    category: CategoryOverview,
+    onDismiss: () -> Unit,
+    onSave: (Double) -> Unit
+) {
+    var limitInput by remember { mutableStateOf(category.limitAmount?.toString() ?: "") }
+    val sheetState = rememberModalBottomSheetState()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Set Budget for ${category.name}",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            
+            OutlinedTextField(
+                value = limitInput,
+                onValueChange = { limitInput = it },
+                label = { Text("Monthly Limit") },
+                modifier = Modifier.fillMaxWidth(),
+                prefix = { Text("$") }
+            )
+
+            Button(
+                onClick = {
+                    limitInput.toDoubleOrNull()?.let { onSave(it) }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = limitInput.toDoubleOrNull() != null
+            ) {
+                Text("Save Budget")
             }
-        )
+        }
     }
 }
 
@@ -174,9 +245,19 @@ private fun BudgetScreenPreview() {
     MaterialTheme {
         BudgetScreen(
             uiState = BudgetUiState.Success(
-                categories = listOf(
-                    CategoryOverview("Food", 42.0, 1, 100.0),
-                    CategoryOverview("Coffee", 15.0, 1, 50.0)
+                profile = FinancialProfile(
+                    monthlyIncome = 5000.0,
+                    totalFixedCosts = 1500.0,
+                    realStartingBalance = 3500.0,
+                    monthlyVariableSpending = 1200.0,
+                    flexibleMoneyRemaining = 2300.0,
+                    totalBudgetedAmount = 2000.0,
+                    unallocatedMoney = 1500.0,
+                    categoryOverviews = listOf(
+                        CategoryOverview("Food", 400.0, 15, 500.0, 100.0, 0.8f),
+                        CategoryOverview("Coffee", 150.0, 20, 100.0, -50.0, 1.5f)
+                    ),
+                    monthProgress = 0.5f
                 )
             ),
             onEvent = {},

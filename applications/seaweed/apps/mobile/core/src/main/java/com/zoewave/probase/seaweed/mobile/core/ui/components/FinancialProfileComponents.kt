@@ -1,4 +1,4 @@
-package com.zoewave.probase.seaweed.mobile.home.ui.components
+package com.zoewave.probase.seaweed.mobile.core.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -111,21 +111,5 @@ fun FixedCostsSummaryCard(
                 Text("$${String.format(Locale.getDefault(), "%.2f", startingBalance)}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black)
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun RealMoneyHeroCardPreview() {
-    MaterialTheme {
-        RealMoneyHeroCard(flexibleRemaining = 1234.56, monthProgress = 0.65f, modifier = Modifier.padding(16.dp))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun FixedCostsSummaryCardPreview() {
-    MaterialTheme {
-        FixedCostsSummaryCard(totalFixedCosts = 1500.0, income = 5000.0, navTo = {}, modifier = Modifier.padding(16.dp))
     }
 }
