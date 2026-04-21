@@ -2,7 +2,9 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
+import com.zoewave.probase.seaweed.model.BudgetTarget
 import com.zoewave.probase.seaweed.model.HabitInsight
 import com.zoewave.probase.seaweed.model.SpendingPeriod
 import com.zoewave.probase.seaweed.model.Transaction
@@ -10,7 +12,7 @@ import com.zoewave.probase.seaweed.model.TrendPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import java.time.Instant
 import java.time.LocalDate
@@ -34,23 +36,26 @@ sealed interface AnalyticsUiEvent {
 
 @HiltViewModel
 class AnalyticsViewModel @Inject constructor(
-    private val repository: TransactionRepository
+    private val repository: TransactionRepository,
+    private val budgetRepository: BudgetTargetRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<AnalyticsUiState> = repository.getAllTransactions()
-        .map { transactions ->
-            AnalyticsUiState(
-                isLoading = false,
-                spendingTrends = calculateTrends(transactions),
-                habitInsights = calculateHabitInsights(transactions),
-                heatmapData = calculateHeatmapData(transactions),
-                allTransactions = transactions
-            )
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = AnalyticsUiState()
+    val uiState: StateFlow<AnalyticsUiState> = combine(
+        repository.getAllTransactions(),
+        budgetRepository.getAllBudgets()
+    ) { transactions, budgets ->
+        AnalyticsUiState(
+            isLoading = false,
+            spendingTrends = calculateTrends(transactions),
+            habitInsights = calculateHabitInsights(transactions, budgets),
+            heatmapData = calculateHeatmapData(transactions),
+            allTransactions = transactions
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = AnalyticsUiState()
+    )
 
     fun calculateTrendsForTransactions(transactions: List<Transaction>): Map<SpendingPeriod, List<TrendPoint>> {
         return calculateTrends(transactions)
@@ -113,7 +118,10 @@ class AnalyticsViewModel @Inject constructor(
         )
     }
 
-    private fun calculateHabitInsights(transactions: List<Transaction>): List<HabitInsight> {
+    private fun calculateHabitInsights(
+        transactions: List<Transaction>,
+        budgets: List<BudgetTarget>
+    ): List<HabitInsight> {
         if (transactions.isEmpty()) return emptyList()
         
         val zoneId = ZoneId.systemDefault()
@@ -143,7 +151,8 @@ class AnalyticsViewModel @Inject constructor(
                     frequency = frequency,
                     totalAmount = totalAmount,
                     dailyAverage = dailyAverage,
-                    trendMessage = trendMessage
+                    trendMessage = trendMessage,
+                    budgetLimit = budgets.find { it.categoryName == category }?.limitAmount
                 )
             }.sortedByDescending { it.totalAmount }
     }

@@ -29,8 +29,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -414,11 +416,32 @@ private fun HabitInsightCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Text(
-                    text = String.format(Locale.getDefault(), "Total: $%.2f this month", insight.totalAmount),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                
+                val budgetLimit = insight.budgetLimit
+                if (budgetLimit != null) {
+                    val progress = (insight.totalAmount / budgetLimit).toFloat()
+                    val progressColor = if (progress > 0.9f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    
+                    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                        LinearProgressIndicator(
+                            progress = { progress.coerceIn(0f, 1f) },
+                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
+                            color = progressColor,
+                            trackColor = progressColor.copy(alpha = 0.2f)
+                        )
+                        Text(
+                            text = String.format(Locale.getDefault(), "$%.2f of $%.0f budget", insight.totalAmount, budgetLimit),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (progress > 0.9f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    Text(
+                        text = String.format(Locale.getDefault(), "Total: $%.2f this month", insight.totalAmount),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }

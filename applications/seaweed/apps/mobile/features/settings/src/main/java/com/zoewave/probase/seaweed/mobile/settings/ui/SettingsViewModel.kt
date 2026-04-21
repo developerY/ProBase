@@ -2,8 +2,10 @@ package com.zoewave.probase.seaweed.mobile.settings.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.data.UserSettingsRepository
+import com.zoewave.probase.seaweed.model.BudgetTarget
 import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
 import com.zoewave.probase.seaweed.model.ThemeMode
 import com.zoewave.probase.seaweed.model.Transaction
@@ -19,6 +21,7 @@ import kotlin.random.Random
 class SettingsViewModel @Inject constructor(
     private val userSettingsRepository: UserSettingsRepository,
     private val transactionRepository: TransactionRepository,
+    private val budgetRepository: BudgetTargetRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
@@ -55,6 +58,21 @@ class SettingsViewModel @Inject constructor(
 
     private suspend fun generateRandomTransactions() {
         val categories = listOf("Food", "Transport", "Shopping", "Entertainment", "Health", "Utilities")
+        
+        // Generate random budgets first
+        categories.forEach { category ->
+            val limit = when (category) {
+                "Food" -> Random.nextDouble(300.0, 600.0)
+                "Transport" -> Random.nextDouble(100.0, 300.0)
+                "Shopping" -> Random.nextDouble(200.0, 800.0)
+                "Entertainment" -> Random.nextDouble(100.0, 400.0)
+                "Health" -> Random.nextDouble(50.0, 200.0)
+                "Utilities" -> Random.nextDouble(200.0, 500.0)
+                else -> 500.0
+            }
+            budgetRepository.saveBudget(BudgetTarget(category, limit))
+        }
+
         val now = System.currentTimeMillis()
         val ninetyDaysMillis = 90L * 24 * 60 * 60 * 1000
 

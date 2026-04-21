@@ -17,7 +17,8 @@ data class HabitInsight(
     val frequency: Int,
     val totalAmount: Double,
     val dailyAverage: Double,
-    val trendMessage: String
+    val trendMessage: String,
+    val budgetLimit: Double? = null
 )
 
 enum class SpendingPeriod {
