@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -125,6 +127,8 @@ private fun AnalyticsContent(
     var selectedPeriod by remember { mutableStateOf(SpendingPeriod.DAILY) }
     var selectedTrendPoint by remember { mutableStateOf<TrendPoint?>(null) }
     var selectedHeatmapDate by remember { mutableStateOf<LocalDate?>(null) }
+    var isHabitsExpanded by remember { mutableStateOf(false) }
+    var isTrendsExpanded by remember { mutableStateOf(true) }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -133,81 +137,167 @@ private fun AnalyticsContent(
     ) {
         if (uiState.habitInsights.isNotEmpty()) {
             item {
-                Text("Spending Habits", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            }
-            
-            items(uiState.habitInsights) { insight ->
-                HabitInsightCard(insight = insight)
-            }
-        }
-
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Spending Trends", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        
-                        Row {
-                            SpendingPeriod.entries.forEach { period ->
-                                FilterChip(
-                                    selected = selectedPeriod == period,
-                                    onClick = { 
-                                        selectedPeriod = period 
-                                        selectedTrendPoint = null
-                                    },
-                                    label = { Text(period.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                                    modifier = Modifier.padding(start = 4.dp)
-                                )
-                            }
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    val trendData = uiState.spendingTrends[selectedPeriod] ?: emptyList()
-                    if (trendData.isNotEmpty()) {
-                        SimpleBarChart(
-                            data = trendData.map { BarData(it.label, it.value) },
-                            onBarClick = { barData ->
-                                selectedTrendPoint = trendData.find { it.label == barData.label }
-                            },
-                            selectedBar = selectedTrendPoint?.let { BarData(it.label, it.value) },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    } else {
-                        Box(Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                            Text("No data for this period")
-                        }
-                    }
-                }
-            }
-        }
-
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        "Spending Heatmap",
+                        "Spending Habits",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    SpendingHeatmap(
-                        heatmapData = uiState.heatmapData,
-                        selectedDate = selectedHeatmapDate,
-                        onDayClick = { selectedHeatmapDate = it }
+                    IconButton(onClick = { isHabitsExpanded = !isHabitsExpanded }) {
+                        Icon(
+                            imageVector = if (isHabitsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = if (isHabitsExpanded) "Collapse" else "Expand"
+                        )
+                    }
+                }
+            }
+            
+            if (isHabitsExpanded) {
+                items(uiState.habitInsights) { insight ->
+                    HabitInsightCard(insight = insight)
+                }
+            }
+        }
+
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Spending Trends",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(onClick = { isTrendsExpanded = !isTrendsExpanded }) {
+                    Icon(
+                        imageVector = if (isTrendsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = if (isTrendsExpanded) "Collapse" else "Expand"
                     )
                 }
+            }
+        }
+
+        if (isTrendsExpanded) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Summary", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            
+                            Row {
+                                SpendingPeriod.entries.forEach { period ->
+                                    FilterChip(
+                                        selected = selectedPeriod == period,
+                                        onClick = { 
+                                            selectedPeriod = period 
+                                            selectedTrendPoint = null
+                                        },
+                                        label = { Text(period.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                        modifier = Modifier.padding(start = 4.dp)
+                                    )
+                                }
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        val trendData = uiState.spendingTrends[selectedPeriod] ?: emptyList()
+                        if (trendData.isNotEmpty()) {
+                            SimpleBarChart(
+                                data = trendData.map { BarData(it.label, it.value) },
+                                onBarClick = { barData ->
+                                    selectedTrendPoint = trendData.find { it.label == barData.label }
+                                },
+                                selectedBar = selectedTrendPoint?.let { BarData(it.label, it.value) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        } else {
+                            Box(Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+                                Text("No data for this period")
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                AnimatedVisibility(visible = selectedTrendPoint != null) {
+                    selectedTrendPoint?.let { point ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = "Details for ${point.label}",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column {
+                                        Text("Total spent", style = MaterialTheme.typography.labelSmall)
+                                        Text(
+                                            text = String.format(Locale.getDefault(), "$%.2f", point.value),
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                    }
+                                    Column(horizontalAlignment = Alignment.End) {
+                                        Text("Transactions", style = MaterialTheme.typography.labelSmall)
+                                        Text(
+                                            text = "${point.transactionCount}",
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                    }
+                                }
+                                val topCategory = point.topCategory
+                                if (topCategory != null) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text("Top Category", style = MaterialTheme.typography.labelSmall)
+                                    Text(
+                                        text = topCategory,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        item {
+            Column {
+                Text(
+                    "Spending Heatmap",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                SpendingHeatmap(
+                    heatmapData = uiState.heatmapData,
+                    selectedDate = selectedHeatmapDate,
+                    onDayClick = { selectedHeatmapDate = it }
+                )
             }
         }
 
@@ -235,57 +325,6 @@ private fun AnalyticsContent(
                                 onClick = {}
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    }
-                }
-            }
-        }
-
-        item {
-            AnimatedVisibility(visible = selectedTrendPoint != null) {
-                selectedTrendPoint?.let { point ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = "Details for ${point.label}",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Text("Total spent", style = MaterialTheme.typography.labelSmall)
-                                    Text(
-                                        text = String.format(Locale.getDefault(), "$%.2f", point.value),
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        fontWeight = FontWeight.Black
-                                    )
-                                }
-                                Column(horizontalAlignment = Alignment.End) {
-                                    Text("Transactions", style = MaterialTheme.typography.labelSmall)
-                                    Text(
-                                        text = "${point.transactionCount}",
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        fontWeight = FontWeight.Black
-                                    )
-                                }
-                            }
-                            val topCategory = point.topCategory
-                            if (topCategory != null) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text("Top Category", style = MaterialTheme.typography.labelSmall)
-                                Text(
-                                    text = topCategory,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
                         }
                     }
                 }

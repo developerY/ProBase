@@ -6,13 +6,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,15 +48,26 @@ fun SpendingHeatmap(
     val currentMonth = YearMonth.now()
     val months = (0 until monthsToDisplay).map { currentMonth.minusMonths(it.toLong()) }.reversed()
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        months.forEach { month ->
-            MonthHeatmap(
-                month = month,
-                heatmapData = heatmapData,
-                selectedDate = selectedDate,
-                onDayClick = onDayClick,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 4.dp)
+    ) {
+        items(months) { month ->
+            Card(
+                modifier = Modifier.width(300.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                )
+            ) {
+                MonthHeatmap(
+                    month = month,
+                    heatmapData = heatmapData,
+                    selectedDate = selectedDate,
+                    onDayClick = onDayClick,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
         }
     }
 }
