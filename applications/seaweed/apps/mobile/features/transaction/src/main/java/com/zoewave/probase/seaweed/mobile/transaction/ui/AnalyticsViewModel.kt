@@ -52,6 +52,14 @@ class AnalyticsViewModel @Inject constructor(
             initialValue = AnalyticsUiState()
         )
 
+    fun calculateTrendsForTransactions(transactions: List<Transaction>): Map<SpendingPeriod, List<TrendPoint>> {
+        return calculateTrends(transactions)
+    }
+
+    fun calculateHeatmapDataForTransactions(transactions: List<Transaction>): Map<LocalDate, Double> {
+        return calculateHeatmapData(transactions)
+    }
+
     private fun calculateTrends(transactions: List<Transaction>): Map<SpendingPeriod, List<TrendPoint>> {
         val zoneId = ZoneId.systemDefault()
         

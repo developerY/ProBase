@@ -2,6 +2,8 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -122,13 +125,28 @@ private fun AnalyticsContent(
     uiState: AnalyticsUiState,
     @Suppress("UnusedParameter") onEvent: (AnalyticsUiEvent) -> Unit,
     @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AnalyticsViewModel = hiltViewModel()
 ) {
     var selectedPeriod by remember { mutableStateOf(SpendingPeriod.DAILY) }
     var selectedTrendPoint by remember { mutableStateOf<TrendPoint?>(null) }
     var selectedHeatmapDate by remember { mutableStateOf<LocalDate?>(null) }
     var isHabitsExpanded by remember { mutableStateOf(false) }
     var isTrendsExpanded by remember { mutableStateOf(true) }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+
+    val filteredTransactions = remember(selectedCategory, uiState.allTransactions) {
+        if (selectedCategory == null) uiState.allTransactions
+        else uiState.allTransactions.filter { it.category == selectedCategory }
+    }
+
+    val trends = remember(filteredTransactions, selectedCategory) {
+        viewModel.calculateTrendsForTransactions(filteredTransactions)
+    }
+
+    val heatmapData = remember(filteredTransactions, selectedCategory) {
+        viewModel.calculateHeatmapDataForTransactions(filteredTransactions)
+    }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -142,11 +160,20 @@ private fun AnalyticsContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        "Spending Habits",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column {
+                        Text(
+                            "Spending Habits",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        if (selectedCategory != null) {
+                            Text(
+                                "Filtering by: $selectedCategory",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                     IconButton(onClick = { isHabitsExpanded = !isHabitsExpanded }) {
                         Icon(
                             imageVector = if (isHabitsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
@@ -158,7 +185,15 @@ private fun AnalyticsContent(
             
             if (isHabitsExpanded) {
                 items(uiState.habitInsights) { insight ->
-                    HabitInsightCard(insight = insight)
+                    HabitInsightCard(
+                        insight = insight,
+                        isSelected = selectedCategory == insight.category,
+                        onClick = {
+                            selectedCategory = if (selectedCategory == insight.category) null else insight.category
+                            selectedTrendPoint = null
+                            selectedHeatmapDate = null
+                        }
+                    )
                 }
             }
         }
@@ -214,7 +249,7 @@ private fun AnalyticsContent(
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        val trendData = uiState.spendingTrends[selectedPeriod] ?: emptyList()
+                        val trendData = trends[selectedPeriod] ?: emptyList()
                         if (trendData.isNotEmpty()) {
                             SimpleBarChart(
                                 data = trendData.map { BarData(it.label, it.value) },
@@ -294,7 +329,7 @@ private fun AnalyticsContent(
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
                 SpendingHeatmap(
-                    heatmapData = uiState.heatmapData,
+                    heatmapData = heatmapData,
                     selectedDate = selectedHeatmapDate,
                     onDayClick = { selectedHeatmapDate = it }
                 )
@@ -304,7 +339,7 @@ private fun AnalyticsContent(
         item {
             AnimatedVisibility(visible = selectedHeatmapDate != null) {
                 val zoneId = ZoneId.systemDefault()
-                val dayTransactions = uiState.allTransactions.filter {
+                val dayTransactions = filteredTransactions.filter {
                     Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() == selectedHeatmapDate
                 }
                 
@@ -336,9 +371,20 @@ private fun AnalyticsContent(
 }
 
 @Composable
-private fun HabitInsightCard(insight: HabitInsight) {
+private fun HabitInsightCard(
+    insight: HabitInsight,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .border(
+                width = if (isSelected) 2.dp else 0.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                shape = CardDefaults.shape
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
