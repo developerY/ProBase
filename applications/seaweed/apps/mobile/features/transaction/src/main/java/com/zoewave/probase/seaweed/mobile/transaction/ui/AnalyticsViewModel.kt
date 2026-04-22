@@ -125,8 +125,6 @@ class AnalyticsViewModel @Inject constructor(
         budgets: List<BudgetTarget>
     ): List<HabitInsight> {
         val expenses = transactions.filter { it.amount < 0 }
-        if (expenses.isEmpty()) return emptyList()
-        
         val zoneId = ZoneId.systemDefault()
         val now = LocalDate.now(zoneId)
         val thirtyDaysAgo = now.minusDays(30)
@@ -135,29 +133,32 @@ class AnalyticsViewModel @Inject constructor(
             Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate().isAfter(thirtyDaysAgo)
         }
 
-        return recentTransactions.groupBy { it.category }
-            .mapNotNull { (category, categoryTransactions) ->
-                val frequency = categoryTransactions.size
-                if (frequency < 1) return@mapNotNull null
-                
-                val totalAmount = categoryTransactions.sumOf { it.amount }.absoluteValue
-                val dailyAverage = totalAmount / 30.0
-                
-                val trendMessage = when {
-                    dailyAverage > 10.0 -> "This habit costs you over $${String.format(Locale.getDefault(), "%.0f", dailyAverage * 365 / 12)} per month!"
-                    frequency > 15 -> "You're doing this almost every other day."
-                    else -> "Frequent spending in this category."
-                }
+        val transactionCategories = recentTransactions.groupBy { it.category }
+        val budgetCategories = budgets.associateBy { it.categoryName }
+        val allCategoryNames = (transactionCategories.keys + budgetCategories.keys).distinct()
 
-                HabitInsight(
-                    category = category,
-                    frequency = frequency,
-                    totalAmount = totalAmount,
-                    dailyAverage = dailyAverage,
-                    trendMessage = trendMessage,
-                    budgetLimit = budgets.find { it.categoryName == category }?.limitAmount
-                )
-            }.sortedByDescending { it.totalAmount }
+        return allCategoryNames.map { category ->
+            val categoryTransactions = transactionCategories[category] ?: emptyList()
+            val frequency = categoryTransactions.size
+            val totalAmount = categoryTransactions.sumOf { it.amount }.absoluteValue
+            val dailyAverage = totalAmount / 30.0
+            
+            val trendMessage = when {
+                frequency == 0 -> "No spending in the last 30 days."
+                dailyAverage > 10.0 -> "This habit costs you over $${String.format(Locale.getDefault(), "%.0f", dailyAverage * 365 / 12)} per month!"
+                frequency > 15 -> "You're doing this almost every other day."
+                else -> "Frequent spending in this category."
+            }
+
+            HabitInsight(
+                category = category,
+                frequency = frequency,
+                totalAmount = totalAmount,
+                dailyAverage = dailyAverage,
+                trendMessage = trendMessage,
+                budgetLimit = budgetCategories[category]?.limitAmount
+            )
+        }.sortedByDescending { it.totalAmount }
     }
 
     private fun calculateHeatmapData(transactions: List<Transaction>): Map<LocalDate, Double> {
