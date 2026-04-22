@@ -23,18 +23,22 @@ fun GlucoseTab(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(bottom = 16.dp),
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         CgmDashboard(
             reading = latestReading,
-            onScanClick = { viewModel.triggerScan() }
+            onScanClick = { viewModel.triggerScan() },
+            modifier = Modifier.padding(top = 16.dp)
         )
 
         CgmSelector(
             selectedSource = selectedSource,
-            onSourceSelected = { viewModel.switchSource(it) }
+            onSourceSelected = { viewModel.switchSource(it) },
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 16.dp)
         )
     }
 }
