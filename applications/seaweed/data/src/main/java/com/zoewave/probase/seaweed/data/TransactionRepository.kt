@@ -9,4 +9,5 @@ interface TransactionRepository {
     suspend fun addTransaction(transaction: Transaction)
     suspend fun deleteTransaction(id: String)
     suspend fun deleteTransactionsByCategory(category: String)
+    suspend fun updateTransactionsCategory(fromCategory: String, toCategory: String)
 }

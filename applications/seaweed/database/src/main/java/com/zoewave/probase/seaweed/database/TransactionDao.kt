@@ -22,4 +22,7 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions WHERE category = :category")
     suspend fun deleteTransactionsByCategory(category: String)
+
+    @Query("UPDATE transactions SET category = :toCategory WHERE category = :fromCategory")
+    suspend fun updateTransactionsCategory(fromCategory: String, toCategory: String)
 }
