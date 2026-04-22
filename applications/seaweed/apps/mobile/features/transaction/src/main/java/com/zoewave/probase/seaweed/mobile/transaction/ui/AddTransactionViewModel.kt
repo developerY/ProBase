@@ -7,6 +7,7 @@ import android.util.Log
 import com.zoewave.probase.features.ai.capture.data.ImageLoader
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptOrchestrator
+import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +16,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -78,6 +78,7 @@ sealed interface AddTransactionUiEvent {
 @HiltViewModel
 class AddTransactionViewModel @Inject constructor(
     private val repository: TransactionRepository,
+    private val budgetRepository: BudgetTargetRepository,
     private val imageLoader: ImageLoader,
     private val orchestrator: ReceiptOrchestrator,
     private val aiSettings: AiConfigurationSettings
@@ -87,11 +88,13 @@ class AddTransactionViewModel @Inject constructor(
     
     val uiState: StateFlow<AddTransactionUiState> = combine(
         _uiState,
-        repository.getAllTransactions().map { transactions ->
-            transactions.map { it.category }.distinct().take(10)
-        }
-    ) { state, recent ->
-        state.copy(recentCategories = recent)
+        repository.getAllTransactions(),
+        budgetRepository.getAllBudgets()
+    ) { state, transactions, budgets ->
+        val transactionCategories = transactions.map { it.category }.distinct()
+        val budgetCategories = budgets.map { it.categoryName }
+        val allCategories = (transactionCategories + budgetCategories).distinct().sorted()
+        state.copy(recentCategories = allCategories)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
