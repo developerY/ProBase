@@ -1,9 +1,9 @@
 package com.zoewave.probase.features.ai.firebase.domain
 
-import com.google.firebase.ai.GenerativeBackend
+import com.google.firebase.Firebase
 import com.google.firebase.ai.GenerativeModel
-import com.google.firebase.ai.Firebase
 import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.PublicPreviewAPI
 import com.google.firebase.ai.type.ResponseModality
 import com.google.firebase.ai.type.liveGenerationConfig

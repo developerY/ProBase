@@ -125,6 +125,8 @@
             <option value="$PROJECT_DIR$/features/camera" />
             <option value="$PROJECT_DIR$/features/compliance" />
             <option value="$PROJECT_DIR$/features/health" />
+            <option value="$PROJECT_DIR$/features/health/cgm" />
+            <option value="$PROJECT_DIR$/features/health/core" />
             <option value="$PROJECT_DIR$/features/nav3" />
             <option value="$PROJECT_DIR$/features/nfc" />
             <option value="$PROJECT_DIR$/features/places" />

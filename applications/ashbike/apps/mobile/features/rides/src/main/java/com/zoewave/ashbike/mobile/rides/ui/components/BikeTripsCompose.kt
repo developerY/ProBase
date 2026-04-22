@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.rides.R
 import com.zoewave.ashbike.mobile.rides.ui.RidesEvent
 import com.zoewave.ashbike.mobile.rides.ui.model.BikeRideUiModel
-import com.zoewave.probase.features.health.ui.HealthEvent
-import com.zoewave.probase.features.health.ui.HealthUiState
+import com.zoewave.probase.features.health.core.ui.HealthEvent
+import com.zoewave.probase.features.health.core.ui.HealthUiState
 
 @Composable
 fun BikeTripsCompose(
