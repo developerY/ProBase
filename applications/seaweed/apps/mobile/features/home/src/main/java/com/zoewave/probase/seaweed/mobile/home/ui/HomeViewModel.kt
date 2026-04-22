@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
+import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.data.TestDataGenerator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,6 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: TransactionRepository,
+    private val budgetRepository: BudgetTargetRepository,
     private val financialRepository: FinancialRepository,
     private val testDataGenerator: TestDataGenerator
 ) : ViewModel() {
@@ -51,6 +53,16 @@ class HomeViewModel @Inject constructor(
                 viewModelScope.launch {
                     testDataGenerator.generateSingleRandomTransaction()
                 }
+            }
+            is HomeUiEvent.DeleteCategory -> {
+                viewModelScope.launch {
+                    repository.deleteTransactionsByCategory(event.category)
+                    budgetRepository.deleteBudget(event.category)
+                }
+            }
+            HomeUiEvent.Refresh -> {
+                // The combine flow will automatically refresh if underlying flows emit.
+                // If we need a force refresh, we could trigger a dummy emit here.
             }
             HomeUiEvent.OnBackClicked -> { /* Handled in Route */ }
         }
