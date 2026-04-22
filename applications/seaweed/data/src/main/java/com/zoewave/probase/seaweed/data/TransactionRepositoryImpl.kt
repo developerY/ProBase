@@ -26,4 +26,8 @@ class TransactionRepositoryImpl @Inject constructor(
     override suspend fun deleteTransaction(id: String) {
         transactionDao.deleteTransaction(id)
     }
+
+    override suspend fun deleteTransactionsByCategory(category: String) {
+        transactionDao.deleteTransactionsByCategory(category)
+    }
 }

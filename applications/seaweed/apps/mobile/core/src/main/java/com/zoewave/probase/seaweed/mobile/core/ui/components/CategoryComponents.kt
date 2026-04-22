@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import java.util.Locale
@@ -35,6 +38,7 @@ import kotlin.math.absoluteValue
 fun CategoryQuickJumpCard(
     category: CategoryOverview,
     onClick: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val colorIndex = category.name.hashCode().absoluteValue % categoryColors.size
@@ -54,18 +58,35 @@ fun CategoryQuickJumpCard(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(
-                    imageVector = Icons.Default.Category,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Text(
-                    text = category.name,
-                    style = MaterialTheme.typography.labelLarge,
-                    maxLines = 1,
-                    fontWeight = FontWeight.Bold
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.Category,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text(
+                        text = category.name,
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 1,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        modifier = Modifier.size(16.dp),
+                        tint = color.copy(alpha = 0.7f)
+                    )
+                }
             }
 
             Column {
@@ -135,3 +156,16 @@ val categoryColors = listOf(
 
 private val String.absoluteValue: Int
     get() = if (this.hashCode() == Int.MIN_VALUE) 0 else Math.abs(this.hashCode())
+
+@Preview(showBackground = true)
+@Composable
+private fun CategoryQuickJumpCardPreview() {
+    MaterialTheme {
+        CategoryQuickJumpCard(
+            category = CategoryOverview("Shopping", 250.0, 5, 500.0),
+            onClick = {},
+            onDelete = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
