@@ -6,6 +6,7 @@ import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.data.TestDataGenerator
+import com.zoewave.probase.seaweed.model.BudgetTarget
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -60,9 +61,16 @@ class HomeViewModel @Inject constructor(
                     budgetRepository.deleteBudget(event.category)
                 }
             }
-            HomeUiEvent.Refresh -> {
-                // The combine flow will automatically refresh if underlying flows emit.
-                // If we need a force refresh, we could trigger a dummy emit here.
+            is HomeUiEvent.AddCategory -> {
+                viewModelScope.launch {
+                    budgetRepository.saveBudget(BudgetTarget(event.name, 0.0))
+                }
+            }
+            is HomeUiEvent.CombineCategories -> {
+                viewModelScope.launch {
+                    repository.updateTransactionsCategory(event.from, event.to)
+                    budgetRepository.deleteBudget(event.from)
+                }
             }
             HomeUiEvent.OnBackClicked -> { /* Handled in Route */ }
         }

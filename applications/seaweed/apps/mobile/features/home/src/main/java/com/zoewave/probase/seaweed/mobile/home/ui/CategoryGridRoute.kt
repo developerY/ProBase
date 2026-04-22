@@ -2,8 +2,13 @@ package com.zoewave.probase.seaweed.mobile.home.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -11,8 +16,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Merge
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -21,10 +28,13 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -75,6 +86,8 @@ fun CategoryGridScreen(
 ) {
     var categoryToDelete by remember { mutableStateOf<String?>(null) }
     var showMenu by remember { mutableStateOf(false) }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showCombineSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -97,20 +110,20 @@ fun CategoryGridScreen(
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text(stringResource(CoreUiR.string.core_ui_add_random_data)) },
+                        text = { Text("Add Category") },
                         onClick = {
-                            onEvent(HomeUiEvent.AddRandomTransaction)
+                            showAddDialog = true
                             showMenu = false
                         },
                         leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) }
                     )
                     DropdownMenuItem(
-                        text = { Text("Refresh") },
+                        text = { Text("Combine Categories") },
                         onClick = {
-                            onEvent(HomeUiEvent.Refresh)
+                            showCombineSheet = true
                             showMenu = false
                         },
-                        leadingIcon = { Icon(Icons.Default.Refresh, contentDescription = null) }
+                        leadingIcon = { Icon(Icons.Default.Merge, contentDescription = null) }
                     )
                 }
             }
@@ -138,6 +151,46 @@ fun CategoryGridScreen(
                             onDelete = { categoryToDelete = category.name }
                         )
                     }
+                }
+
+                if (showAddDialog) {
+                    var newCategoryName by remember { mutableStateOf("") }
+                    AlertDialog(
+                        onDismissRequest = { showAddDialog = false },
+                        title = { Text("Add New Category") },
+                        text = {
+                            OutlinedTextField(
+                                value = newCategoryName,
+                                onValueChange = { newCategoryName = it },
+                                label = { Text("Category Name") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    if (newCategoryName.isNotBlank()) {
+                                        onEvent(HomeUiEvent.AddCategory(newCategoryName))
+                                        showAddDialog = false
+                                    }
+                                }
+                            ) { Text("Add") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showAddDialog = false }) { Text("Cancel") }
+                        }
+                    )
+                }
+
+                if (showCombineSheet) {
+                    CombineCategoriesBottomSheet(
+                        categories = uiState.categoriesSummary.map { it.name },
+                        onDismiss = { showCombineSheet = false },
+                        onCombine = { from, to ->
+                            onEvent(HomeUiEvent.CombineCategories(from, to))
+                            showCombineSheet = false
+                        }
+                    )
                 }
             }
         }
@@ -167,6 +220,95 @@ fun CategoryGridScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CombineCategoriesBottomSheet(
+    categories: List<String>,
+    onDismiss: () -> Unit,
+    onCombine: (String, String) -> Unit
+) {
+    var fromCategory by remember { mutableStateOf(categories.firstOrNull() ?: "") }
+    var toCategory by remember { mutableStateOf(categories.getOrNull(1) ?: categories.firstOrNull() ?: "") }
+    val sheetState = rememberModalBottomSheetState()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text("Combine Categories", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text("Move all transactions from one category into another.", style = MaterialTheme.typography.bodyMedium)
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                CategoryPicker(
+                    label = "From",
+                    selected = fromCategory,
+                    options = categories,
+                    onSelected = { fromCategory = it },
+                    modifier = Modifier.weight(1f)
+                )
+                CategoryPicker(
+                    label = "To",
+                    selected = toCategory,
+                    options = categories.filter { it != fromCategory },
+                    onSelected = { toCategory = it },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Button(
+                onClick = { onCombine(fromCategory, toCategory) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = fromCategory.isNotBlank() && toCategory.isNotBlank() && fromCategory != toCategory
+            ) {
+                Text("Combine")
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryPicker(
+    label: String,
+    selected: String,
+    options: List<String>,
+    onSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = modifier) {
+        OutlinedTextField(
+            value = selected,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            modifier = Modifier.fillMaxWidth(),
+            trailingIcon = {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                }
+            }
+        )
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onSelected(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun CategoryGridScreenPreview() {
@@ -175,23 +317,9 @@ private fun CategoryGridScreenPreview() {
             uiState = HomeUiState.Success(
                 categoriesSummary = listOf(
                     CategoryOverview("Food", 42.0, 1, 100.0),
-                    CategoryOverview("Coffee", 15.0, 1, 50.0),
-                    CategoryOverview("Transport", 80.0, 1, 150.0),
-                    CategoryOverview("Shopping", 250.0, 1, 500.0)
+                    CategoryOverview("Coffee", 15.0, 1, 50.0)
                 )
             ),
-            onEvent = {},
-            navTo = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun CategoryGridScreenLoadingPreview() {
-    MaterialTheme {
-        CategoryGridScreen(
-            uiState = HomeUiState.Loading,
             onEvent = {},
             navTo = {}
         )
