@@ -11,7 +11,7 @@ import com.zoewave.probase.feature.weather.ui.WeatherUiRoute
 import com.zoewave.probase.features.ble.ui.BluetoothLeRoute
 import com.zoewave.probase.features.calendar.ui.CalendarUiRoute
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
-import com.zoewave.probase.features.health.ui.HealthRoute
+import com.zoewave.probase.features.health.core.ui.HealthRoute
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventory
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventoryScreen
 import com.zoewave.probase.features.nfc.ui.NfcUiRoute
