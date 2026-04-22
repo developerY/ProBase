@@ -1,9 +1,11 @@
 package com.zoewave.probase.features.health.cgm.ui.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
@@ -41,8 +43,8 @@ fun CgmSelector(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(manufacturers) { info ->
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            manufacturers.forEach { info ->
                 ManufacturerItem(
                     info = info,
                     isSelected = selectedSource == info.source,
