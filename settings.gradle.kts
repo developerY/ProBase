@@ -39,6 +39,8 @@ include(":features:nav3")
 include(":features:weather")
 include(":features:places")
 include(":features:health")
+include(":features:health:core")
+include(":features:health:cgm")
 include(":features:camera")
 include(":features:calendar")
 
