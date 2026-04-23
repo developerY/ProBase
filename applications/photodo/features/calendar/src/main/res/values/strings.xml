@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_photodo_features_calendar_title">PhotoDo Calendar Sync</string>
+    <string name="applications_photodo_features_calendar_loading">Loading sync status&#8230;</string>
+    <string name="applications_photodo_features_calendar_coming_soon">Task synchronization logic coming soon.</string>
+</resources>

@@ -88,4 +88,6 @@
     <string name="applications_photodo_apps_mobile_features_tasks_category_template_home">Home</string>
     <string name="applications_photodo_apps_mobile_features_tasks_category_template_shopping">Shopping</string>
     <string name="applications_photodo_apps_mobile_features_tasks_category_template_travel">Travel</string>
+    <string name="applications_photodo_apps_mobile_features_tasks_progress_label"> • %1$s</string>
+    <string name="applications_photodo_apps_mobile_features_tasks_bullet_separator"> • </string>
 </resources>
