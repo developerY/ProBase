@@ -117,7 +117,10 @@ fun AboutSettingsCard(
                     TextButton(
                         onClick = {
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            val clip = ClipData.newPlainText("Firebase Device ID", firebaseDeviceId)
+                            val clip = ClipData.newPlainText(
+                                context.getString(R.string.applications_photodo_apps_mobile_features_settings_about_id_label_clipboard), 
+                                firebaseDeviceId
+                            )
                             clipboard.setPrimaryClip(clip)
                             Toast.makeText(context, R.string.applications_photodo_apps_mobile_features_settings_about_id_copied, Toast.LENGTH_SHORT).show()
                         }
