@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Warning
@@ -21,16 +23,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,13 +35,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.zoewave.probase.photodo.features.smartadvice.domain.ProjectAdvice
+import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @Composable
 fun SmartAdviceUiRoute(
@@ -167,7 +171,15 @@ private fun AdviceContent(advice: ProjectAdvice, chatHistory: List<ChatMessage>)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Summary", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.tertiary)
-                    Text(advice.summary, style = MaterialTheme.typography.bodyLarge)
+                    MarkdownText(
+                        markdown = advice.summary,
+                        style = TextStyle(
+                            color = Color(0xFF1F3A5F),
+                            fontSize = 16.sp,
+                            lineHeight = 24.sp,
+                            textAlign = TextAlign.Justify,
+                        ),
+                    )
                 }
             }
         }
@@ -190,10 +202,12 @@ private fun AdviceContent(advice: ProjectAdvice, chatHistory: List<ChatMessage>)
                             color = MaterialTheme.colorScheme.surfaceVariant,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                text = "• $item", 
+                            MarkdownText(
+                                markdown = "• $item", 
                                 modifier = Modifier.padding(8.dp),
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                ),
                             )
                         }
                     }
@@ -261,28 +275,45 @@ private fun ChatInput(
 private fun ChatBubble(message: ChatMessage) {
     val alignment = if (message.isUser) Alignment.End else Alignment.Start
     val containerColor = if (message.isUser) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
-    
+    val contentColor = if (message.isUser) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer
+
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = alignment) {
         Surface(
             color = containerColor,
+            contentColor = contentColor,
             shape = MaterialTheme.shapes.medium,
             modifier = Modifier.widthIn(max = 300.dp)
         ) {
-            Text(
-                text = message.text,
-                modifier = Modifier.padding(12.dp),
-                style = MaterialTheme.typography.bodyMedium
-            )
+            if (message.isUser) {
+                Text(
+                    text = message.text,
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                MarkdownText(
+                    markdown = message.text,
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = contentColor
+                    ),
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun AdviceSection(title: String, items: List<String>, color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.tertiary) {
+private fun AdviceSection(title: String, items: List<String>, color: Color = MaterialTheme.colorScheme.tertiary) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(title, style = MaterialTheme.typography.titleMedium, color = color)
         items.forEach { item ->
-            Text(text = "• $item", style = MaterialTheme.typography.bodyMedium)
+            MarkdownText(
+                markdown = "• $item",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+            )
         }
     }
 }
