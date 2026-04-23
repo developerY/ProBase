@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_goswift_apps_mobile_features_nutrition_log_meal">Log Meal</string>
+    <string name="applications_goswift_apps_mobile_features_nutrition_food_name">Food Name</string>
+    <string name="applications_goswift_apps_mobile_features_nutrition_calories_label">Calories (kcal)</string>
+    <string name="applications_goswift_apps_mobile_features_nutrition_add_log">Add Log</string>
+    <string name="applications_goswift_apps_mobile_features_nutrition_recent_meals">Recent Meals</string>
+    <string name="applications_goswift_apps_mobile_features_nutrition_daily_calories">Daily Calories</string>
+    <string name="applications_goswift_apps_mobile_features_nutrition_kcal_format">%1$.0f kcal</string>
+</resources>

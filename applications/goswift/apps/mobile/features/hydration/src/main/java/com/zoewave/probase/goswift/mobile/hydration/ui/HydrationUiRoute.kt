@@ -12,10 +12,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
+import com.zoewave.probase.goswift.mobile.hydration.R
 import com.zoewave.probase.goswift.mobile.hydration.ui.components.WavyWaterLevel
 import java.time.Instant
 import java.time.ZoneId
@@ -60,7 +62,7 @@ fun HydrationScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Intelligent Hydration") })
+            TopAppBar(title = { Text(stringResource(R.string.applications_goswift_apps_mobile_features_hydration_title)) })
         },
         modifier = modifier
     ) { padding ->
@@ -82,7 +84,7 @@ fun HydrationScreen(
                     
                     Spacer(Modifier.height(24.dp))
                     
-                    Text("Quick Log", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.applications_goswift_apps_mobile_features_hydration_quick_log), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         HydrationQuickLogButton("250ml", 0.25) { onEvent(HydrationUiEvent.AddWater(0.25)) }
@@ -92,7 +94,11 @@ fun HydrationScreen(
                     
                     Spacer(Modifier.height(24.dp))
                     
-                    Text("Recent Logs", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Start))
+                    Text(
+                        text = stringResource(R.string.applications_goswift_apps_mobile_features_hydration_recent_logs), 
+                        style = MaterialTheme.typography.titleMedium, 
+                        modifier = Modifier.align(Alignment.Start)
+                    )
                     Spacer(Modifier.height(8.dp))
                     
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -121,8 +127,11 @@ fun HydrationProgressCard(current: Double, target: Double) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             
-            Text("Daily Progress", style = MaterialTheme.typography.labelLarge)
-            Text(String.format("%.2fL / %.2fL", current, target), style = MaterialTheme.typography.displayMedium)
+            Text(stringResource(R.string.applications_goswift_apps_mobile_features_hydration_daily_progress), style = MaterialTheme.typography.labelLarge)
+            Text(
+                text = stringResource(R.string.applications_goswift_apps_mobile_features_hydration_progress_format, current, target), 
+                style = MaterialTheme.typography.displayMedium
+            )
         }
     }
 }
@@ -146,7 +155,10 @@ fun HydrationLogItem(log: HydrationLog) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("${(log.amountLiters * 1000).toInt()} ml", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = stringResource(R.string.applications_goswift_apps_mobile_features_hydration_ml_format, (log.amountLiters * 1000).toInt()), 
+                style = MaterialTheme.typography.bodyLarge
+            )
             Text(time, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
         }
     }

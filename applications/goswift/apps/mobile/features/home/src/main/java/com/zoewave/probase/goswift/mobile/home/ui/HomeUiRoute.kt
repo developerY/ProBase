@@ -8,12 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
-import java.util.Locale
+import com.zoewave.probase.goswift.mobile.home.R
 
 @Composable
 fun HomeUiRoute(
@@ -57,10 +58,13 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("GoSwift Dashboard") },
+                title = { Text(stringResource(R.string.applications_goswift_apps_mobile_features_home_title)) },
                 actions = {
                     IconButton(onClick = { onEvent(HomeUiEvent.Refresh) }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh Health Data")
+                        Icon(
+                            Icons.Default.Refresh, 
+                            contentDescription = stringResource(R.string.applications_goswift_apps_mobile_features_home_refresh_cd)
+                        )
                     }
                 }
             )
@@ -90,36 +94,48 @@ fun HomeScreen(
                             modifier = Modifier.padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text("Current Caffeine", style = MaterialTheme.typography.labelLarge)
-                            Text("${uiState.currentCaffeineMg} mg", style = MaterialTheme.typography.displayLarge)
+                            Text(
+                                text = stringResource(R.string.applications_goswift_apps_mobile_features_home_current_caffeine), 
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                            Text(
+                                text = stringResource(R.string.applications_goswift_apps_mobile_features_home_caffeine_mg, uiState.currentCaffeineMg), 
+                                style = MaterialTheme.typography.displayLarge
+                            )
                         }
                     }
 
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         InfoSection(
-                            title = "Sleep Duration", 
+                            title = stringResource(R.string.applications_goswift_apps_mobile_features_home_sleep_duration), 
                             content = uiState.sleepDuration, 
                             modifier = Modifier.weight(1f)
                         )
                         InfoSection(
-                            title = "Exercise", 
-                            content = "${uiState.exerciseMinutes} min", 
+                            title = stringResource(R.string.applications_goswift_apps_mobile_features_home_exercise), 
+                            content = stringResource(R.string.applications_goswift_apps_mobile_features_home_exercise_min, uiState.exerciseMinutes), 
                             modifier = Modifier.weight(1f)
                         )
                     }
 
                     InfoSection(
-                        title = "Daily Hydration", 
-                        content = String.format(Locale.getDefault(), "%.2f L logged", uiState.hydrationProgress)
+                        title = stringResource(R.string.applications_goswift_apps_mobile_features_home_daily_hydration), 
+                        content = stringResource(R.string.applications_goswift_apps_mobile_features_home_hydration_logged, uiState.hydrationProgress)
                     )
 
                     InfoSection(
-                        title = "Daily Calories", 
-                        content = String.format(Locale.getDefault(), "%.0f kcal logged", uiState.caloriesIntake)
+                        title = stringResource(R.string.applications_goswift_apps_mobile_features_home_daily_calories), 
+                        content = stringResource(R.string.applications_goswift_apps_mobile_features_home_calories_logged, uiState.caloriesIntake)
                     )
 
-                    InfoSection(title = "Recommendation", content = uiState.nextDoseRecommendation)
-                    InfoSection(title = "Sleep Impact", content = uiState.sleepQualityImpact)
+                    InfoSection(
+                        title = stringResource(R.string.applications_goswift_apps_mobile_features_home_recommendation), 
+                        content = uiState.nextDoseRecommendation
+                    )
+                    InfoSection(
+                        title = stringResource(R.string.applications_goswift_apps_mobile_features_home_sleep_impact), 
+                        content = uiState.sleepQualityImpact
+                    )
                 }
             }
         }
