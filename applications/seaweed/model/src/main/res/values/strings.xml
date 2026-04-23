@@ -6,4 +6,8 @@
     <string name="applications_seaweed_model_route_transactions">Transactions</string>
     <string name="applications_seaweed_model_route_settings">Settings</string>
     <string name="applications_seaweed_model_route_add_transaction">Add Transaction</string>
+    <string name="applications_seaweed_model_route_analytics">Spending Analytics</string>
+    <string name="applications_seaweed_model_route_camera">Receipt Camera</string>
+    <string name="applications_seaweed_model_route_smart_receipt">Smart Receipt</string>
+    <string name="applications_seaweed_model_route_debug_ai">AI Debug Info</string>
 </resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_seaweed_apps_mobile_features_settings_title">Settings</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_income">Income</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_monthly_income">Monthly Income</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_theme_appearance">Theme Appearance</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_theme_mode">Theme Mode</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_receipt_ai_title">Seaweed Receipt AI</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_receipt_ai_desc">Use Gemini to automatically extract merchant and amount from receipts.</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_developer_options">Developer Options</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_generate_test_data">Generate 3 Months of Random Data</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_theme_default">Default</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_theme_coral">Coral</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_mode_system">System Default</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_mode_light">Light</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_mode_dark">Dark</string>
+</resources>

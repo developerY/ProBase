@@ -49,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,6 +57,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.core.ui.components.BarData
 import com.zoewave.probase.core.ui.components.SimpleBarChart
+import com.zoewave.probase.seaweed.mobile.transaction.R
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.SpendingHeatmap
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.HabitInsight
@@ -66,6 +68,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
+import com.zoewave.probase.core.ui.R as CoreUiR
 
 @Composable
 fun AnalyticsUiRoute(
@@ -113,10 +116,13 @@ fun AnalyticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Spending Analytics") },
+                title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_analytics_title)) },
                 navigationIcon = {
                     IconButton(onClick = { onEvent(AnalyticsUiEvent.OnBackClicked) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(CoreUiR.string.cd_navigate_back)
+                        )
                     }
                 }
             )
@@ -181,13 +187,13 @@ private fun AnalyticsContent(
                 ) {
                     Column {
                         Text(
-                            "Spending Habits",
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_spending_habits),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         if (selectedCategory != null) {
                             Text(
-                                "Filtering by: $selectedCategory",
+                                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_filtering_by, selectedCategory!!),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -196,7 +202,10 @@ private fun AnalyticsContent(
                     IconButton(onClick = { isHabitsExpanded = !isHabitsExpanded }) {
                         Icon(
                             imageVector = if (isHabitsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = if (isHabitsExpanded) "Collapse" else "Expand"
+                            contentDescription = if (isHabitsExpanded) 
+                                stringResource(CoreUiR.string.action_collapse) 
+                            else 
+                                stringResource(CoreUiR.string.action_expand)
                         )
                     }
                 }
@@ -227,12 +236,12 @@ private fun AnalyticsContent(
                 Tab(
                     selected = selectedTabIndex == 0,
                     onClick = { selectedTabIndex = 0 },
-                    text = { Text("Trends") }
+                    text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_trends)) }
                 )
                 Tab(
                     selected = selectedTabIndex == 1,
                     onClick = { selectedTabIndex = 1 },
-                    text = { Text("Heatmap") }
+                    text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_heatmap)) }
                 )
             }
         }
@@ -249,7 +258,11 @@ private fun AnalyticsContent(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Summary", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_summary), 
+                                style = MaterialTheme.typography.titleSmall, 
+                                fontWeight = FontWeight.SemiBold
+                            )
                             
                             Row {
                                 SpendingPeriod.entries.forEach { period ->
@@ -280,7 +293,7 @@ private fun AnalyticsContent(
                             )
                         } else {
                             Box(Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                                Text("No data for this period")
+                                Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_no_data_period))
                             }
                         }
                     }
@@ -296,7 +309,7 @@ private fun AnalyticsContent(
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "Details for ${point.label}",
+                                    text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_details_for, point.label),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -306,15 +319,21 @@ private fun AnalyticsContent(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Column {
-                                        Text("Total spent", style = MaterialTheme.typography.labelSmall)
                                         Text(
-                                            text = String.format(Locale.getDefault(), "$%.2f", point.value),
+                                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_total_spent), 
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                        Text(
+                                            text = stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.2f", point.value)),
                                             style = MaterialTheme.typography.headlineSmall,
                                             fontWeight = FontWeight.Black
                                         )
                                     }
                                     Column(horizontalAlignment = Alignment.End) {
-                                        Text("Transactions", style = MaterialTheme.typography.labelSmall)
+                                        Text(
+                                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_transactions), 
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
                                         Text(
                                             text = "${point.transactionCount}",
                                             style = MaterialTheme.typography.headlineSmall,
@@ -325,7 +344,10 @@ private fun AnalyticsContent(
                                 val topCategory = point.topCategory
                                 if (topCategory != null) {
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    Text("Top Category", style = MaterialTheme.typography.labelSmall)
+                                    Text(
+                                        text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_top_category), 
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
                                     Text(
                                         text = topCategory,
                                         style = MaterialTheme.typography.bodyLarge,
@@ -343,7 +365,7 @@ private fun AnalyticsContent(
             item {
                 Column {
                     Text(
-                        "Spending Heatmap",
+                        text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_spending_heatmap),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 16.dp)
@@ -365,13 +387,16 @@ private fun AnalyticsContent(
                     
                     Column {
                         Text(
-                            text = "Transactions for ${selectedHeatmapDate?.toString()}",
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_transactions_for, selectedHeatmapDate?.toString() ?: ""),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
                         if (dayTransactions.isEmpty()) {
-                            Text("No transactions for this day", style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_no_transactions_day), 
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         } else {
                             dayTransactions.forEach { transaction ->
                                 TransactionItem(
@@ -449,14 +474,21 @@ private fun HabitInsightCard(
                             trackColor = progressColor.copy(alpha = 0.2f)
                         )
                         Text(
-                            text = String.format(Locale.getDefault(), "$%.2f of $%.0f budget", insight.totalAmount, budgetLimit),
+                            text = stringResource(
+                                R.string.applications_seaweed_apps_mobile_features_transaction_budget_of, 
+                                String.format(Locale.getDefault(), "$%.2f", insight.totalAmount),
+                                String.format(Locale.getDefault(), "$%.0f", budgetLimit)
+                            ),
                             style = MaterialTheme.typography.labelSmall,
                             color = if (progress > 0.9f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 } else {
                     Text(
-                        text = String.format(Locale.getDefault(), "Total: $%.2f this month", insight.totalAmount),
+                        text = stringResource(
+                            R.string.applications_seaweed_apps_mobile_features_transaction_total_this_month, 
+                            String.format(Locale.getDefault(), "$%.2f", insight.totalAmount)
+                        ),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

@@ -14,10 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.seaweed.mobile.transaction.R
+import com.zoewave.probase.core.ui.R as CoreUiR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,10 +34,13 @@ fun AiDebugScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("AI Debug Info") },
+                title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_debug_ai_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(CoreUiR.string.cd_navigate_back)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -62,7 +68,7 @@ fun AiDebugScreen(
                         Icon(Icons.Default.BugReport, contentDescription = null)
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
-                            Text("Engine Used", style = MaterialTheme.typography.labelSmall)
+                            Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_debug_engine_used), style = MaterialTheme.typography.labelSmall)
                             Text(engineUsed, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -71,7 +77,7 @@ fun AiDebugScreen(
 
             whatIsThis?.let {
                 item {
-                    Text("AI Description (whatIsThis)", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_debug_ai_description), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
                     Card(
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f))
@@ -86,7 +92,7 @@ fun AiDebugScreen(
             }
 
             item {
-                Text("Process Logs", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_debug_process_logs), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
             }
 
             items(logs) { log ->
@@ -111,7 +117,7 @@ fun AiDebugScreen(
                 ) {
                     Icon(Icons.Default.Code, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Raw AI JSON Response", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_debug_raw_json), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
                 }
             }
 
@@ -123,7 +129,7 @@ fun AiDebugScreen(
                         .padding(16.dp)
                 ) {
                     Text(
-                        text = if (rawResponse.isBlank()) "No response data available" else rawResponse,
+                        text = if (rawResponse.isBlank()) stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_debug_no_data) else rawResponse,
                         color = Color(0xFF00FF00), // Matrix Green
                         fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,

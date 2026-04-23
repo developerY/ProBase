@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_seaweed_apps_mobile_features_bills_title">Cyclic Bills</string>
+    <string name="applications_seaweed_apps_mobile_features_bills_add">Add Bill</string>
+    <string name="applications_seaweed_apps_mobile_features_bills_impact_header">Real Starting Balance</string>
+    <string name="applications_seaweed_apps_mobile_features_bills_after_fixed">After -$%1$s in fixed monthly bills</string>
+</resources>

@@ -7,11 +7,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.seaweed.model.Transaction
 import java.util.Locale
+import com.zoewave.probase.core.ui.R as CoreUiR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,13 +45,13 @@ fun TransactionItem(
                 Text(text = transaction.category, style = MaterialTheme.typography.bodySmall)
             }
             Text(
-                text = "$${String.format(Locale.getDefault(), "%.2f", transaction.amount)}",
+                text = stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.2f", transaction.amount)),
                 style = MaterialTheme.typography.titleLarge,
                 color = if (transaction.amount < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Black
             )
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete")
+                Icon(Icons.Default.Delete, contentDescription = stringResource(CoreUiR.string.action_delete))
             }
         }
     }

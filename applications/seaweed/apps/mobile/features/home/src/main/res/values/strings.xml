@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_seaweed_apps_mobile_features_home_manage_budgets">Manage Budgets</string>
+    <string name="applications_seaweed_apps_mobile_features_home_actions_cd">Actions</string>
+    <string name="applications_seaweed_apps_mobile_features_home_combine_categories">Combine Categories</string>
+    <string name="applications_seaweed_apps_mobile_features_home_delete_category">Delete Category</string>
+    <string name="applications_seaweed_apps_mobile_features_home_delete_category_confirm">Are you sure you want to delete \'%1$s\' and all its transactions? This cannot be undone.</string>
+    <string name="applications_seaweed_apps_mobile_features_home_combine_desc">Move all transactions from one category into another.</string>
+    <string name="applications_seaweed_apps_mobile_features_home_label_from">From</string>
+    <string name="applications_seaweed_apps_mobile_features_home_label_to">To</string>
+</resources>

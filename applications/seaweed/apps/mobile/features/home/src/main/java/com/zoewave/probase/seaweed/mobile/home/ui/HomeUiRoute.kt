@@ -42,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.seaweed.mobile.home.R
 import com.zoewave.probase.seaweed.mobile.core.ui.components.CategoryBudgetProgressBar
 import com.zoewave.probase.seaweed.mobile.core.ui.components.DonutChart
 import com.zoewave.probase.seaweed.mobile.core.ui.components.FixedCostsSummaryCard
@@ -284,7 +285,7 @@ fun OverviewSummaryCard(
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "$${String.format(Locale.getDefault(), "%.0f", totalSpending)}",
+                        text = stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.0f", totalSpending)),
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Black
                     )
@@ -320,7 +321,7 @@ fun OverviewSummaryCard(
                 onClick = { navTo(SeaweedDestination.Budget) },
                 modifier = Modifier.align(Alignment.End)
             ) {
-                Text("Manage Budgets")
+                Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_manage_budgets))
                 Icon(Icons.Default.ChevronRight, contentDescription = null)
             }
         }

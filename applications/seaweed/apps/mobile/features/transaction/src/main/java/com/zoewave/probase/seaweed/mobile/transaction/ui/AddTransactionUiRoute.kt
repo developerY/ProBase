@@ -58,6 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,8 +67,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
+import com.zoewave.probase.seaweed.mobile.transaction.R
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
+import com.zoewave.probase.core.ui.R as CoreUiR
 
 @Composable
 fun AddTransactionUiRoute(
@@ -134,20 +137,30 @@ fun AddTransactionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Add Transaction") },
+                title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_add_title)) },
                 navigationIcon = {
                     IconButton(onClick = { onEvent(AddTransactionUiEvent.BackClicked) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(CoreUiR.string.cd_navigate_back)
+                        )
                     }
                 },
                 actions = {
                     if (uiState.lastAiDebugInfo != null) {
                         IconButton(onClick = { onEvent(AddTransactionUiEvent.DebugAiClicked) }) {
-                            Icon(Icons.Default.BugReport, contentDescription = "View AI Debug Info", tint = MaterialTheme.colorScheme.primary)
+                            Icon(
+                                Icons.Default.BugReport, 
+                                contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_view_ai_debug), 
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
                     IconButton(onClick = { navTo(SeaweedDestination.Camera) }) {
-                        Icon(Icons.Default.CameraAlt, contentDescription = "Take Receipt Photo")
+                        Icon(
+                            Icons.Default.CameraAlt, 
+                            contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_take_photo)
+                        )
                     }
                 }
             )
@@ -166,7 +179,7 @@ fun AddTransactionScreen(
                 uiState.receiptUri?.let { uri ->
                     AsyncImage(
                         model = uri,
-                        contentDescription = "Receipt",
+                        contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_cd_receipt),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp),
@@ -176,13 +189,13 @@ fun AddTransactionScreen(
                 OutlinedTextField(
                     value = uiState.description,
                     onValueChange = { onEvent(AddTransactionUiEvent.DescriptionChanged(it)) },
-                    label = { Text("Description") },
+                    label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_description)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = uiState.amount,
                     onValueChange = { onEvent(AddTransactionUiEvent.AmountChanged(it)) },
-                    label = { Text("Amount") },
+                    label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_amount)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -195,7 +208,7 @@ fun AddTransactionScreen(
                     OutlinedTextField(
                         value = uiState.category,
                         onValueChange = { onEvent(AddTransactionUiEvent.CategoryChanged(it)) },
-                        label = { Text("Category") },
+                        label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_category)) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .onFocusChanged { focusState ->
@@ -207,7 +220,10 @@ fun AddTransactionScreen(
                     AnimatedVisibility(visible = uiState.isCategorySuggestionsVisible) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             if (uiState.recentCategories.isNotEmpty()) {
-                                Text("Recent", style = MaterialTheme.typography.labelMedium)
+                                Text(
+                                    text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_recent), 
+                                    style = MaterialTheme.typography.labelMedium
+                                )
                                 LazyRow(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     contentPadding = PaddingValues(bottom = 8.dp)
@@ -221,7 +237,10 @@ fun AddTransactionScreen(
                                 }
                             }
 
-                            Text("Suggestions", style = MaterialTheme.typography.labelMedium)
+                            Text(
+                                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_suggestions), 
+                                style = MaterialTheme.typography.labelMedium
+                            )
                             FlowRow(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -263,9 +282,14 @@ fun AddTransactionScreen(
                     val tip = uiState.customTipAmount.toDoubleOrNull() ?: 0.0
                     val total = base + tip
                     if (total > 0 && tip > 0) {
-                        Text("Save (Total: $${String.format(Locale.getDefault(), "%.2f", total)})")
+                        Text(
+                            text = stringResource(
+                                R.string.applications_seaweed_apps_mobile_features_transaction_save_total, 
+                                String.format(Locale.getDefault(), "%.2f", total)
+                            )
+                        )
                     } else {
-                        Text("Save")
+                        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_save))
                     }
                 }
 
@@ -273,7 +297,12 @@ fun AddTransactionScreen(
                     onClick = { onEvent(AddTransactionUiEvent.ToggleTipWidget) },
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
-                    Text(if (uiState.isTipWidgetVisible) "Hide Tip Options" else "Add Tip")
+                    Text(
+                        text = if (uiState.isTipWidgetVisible) 
+                            stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_hide_tip) 
+                        else 
+                            stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_add_tip)
+                    )
                 }
 
                 AnimatedVisibility(visible = uiState.isTipWidgetVisible) {
@@ -281,7 +310,10 @@ fun AddTransactionScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text("Standard Tips", style = MaterialTheme.typography.labelMedium)
+                        Text(
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_standard_tips), 
+                            style = MaterialTheme.typography.labelMedium
+                        )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -296,13 +328,13 @@ fun AddTransactionScreen(
                             FilterChip(
                                 selected = uiState.tipPercentage == null && uiState.customTipAmount.isNotEmpty(),
                                 onClick = { onEvent(AddTransactionUiEvent.SelectTipPercentage(null)) },
-                                label = { Text("None") }
+                                label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_none)) }
                             )
                         }
                         OutlinedTextField(
                             value = uiState.customTipAmount,
                             onValueChange = { onEvent(AddTransactionUiEvent.CustomTipAmountChanged(it)) },
-                            label = { Text("Tip Amount") },
+                            label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_tip_amount)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -313,7 +345,12 @@ fun AddTransactionScreen(
                     onClick = { onEvent(AddTransactionUiEvent.ToggleSplitWidget) },
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
-                    Text(if (uiState.isSplitWidgetVisible) "Hide Split Bill" else "Split Bill")
+                    Text(
+                        text = if (uiState.isSplitWidgetVisible) 
+                            stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_hide_split) 
+                        else 
+                            stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_split_bill)
+                    )
                 }
 
                 AnimatedVisibility(visible = uiState.isSplitWidgetVisible) {
@@ -326,27 +363,33 @@ fun AddTransactionScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text("Split among", style = MaterialTheme.typography.labelMedium)
+                        Text(
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_split_among), 
+                            style = MaterialTheme.typography.labelMedium
+                        )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             IconButton(onClick = { onEvent(AddTransactionUiEvent.SplitCountChanged(uiState.splitCount - 1)) }) {
-                                Icon(Icons.Default.Remove, contentDescription = "Remove person")
+                                Icon(Icons.Default.Remove, contentDescription = null)
                             }
                             Text(
-                                text = "${uiState.splitCount} people",
+                                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_people_count, uiState.splitCount),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold
                             )
                             IconButton(onClick = { onEvent(AddTransactionUiEvent.SplitCountChanged(uiState.splitCount + 1)) }) {
-                                Icon(Icons.Default.Add, contentDescription = "Add person")
+                                Icon(Icons.Default.Add, contentDescription = null)
                             }
                         }
                         if (uiState.splitCount > 1) {
                             Text(
-                                text = "Each person pays: $${String.format(Locale.getDefault(), "%.2f", perPerson)}",
+                                text = stringResource(
+                                    R.string.applications_seaweed_apps_mobile_features_transaction_each_pays, 
+                                    stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.2f", perPerson))
+                                ),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -376,7 +419,10 @@ fun AddTransactionScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator()
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("AI is analyzing receipt...", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_ai_analyzing), 
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     }
                 }
             }

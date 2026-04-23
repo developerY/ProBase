@@ -45,6 +45,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,12 +53,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.seaweed.mobile.bills.ui.BillsScreen
 import com.zoewave.probase.seaweed.mobile.bills.ui.BillsViewModel
+import com.zoewave.probase.seaweed.mobile.transaction.R
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.model.navigation.TransactionTab
 import kotlinx.coroutines.launch
 import java.util.Locale
+import com.zoewave.probase.core.ui.R as CoreUiR
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -171,13 +174,19 @@ fun TransactionsListPane(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Transactions") },
+                title = { Text(stringResource(CoreUiR.string.core_ui_transactions_title)) },
                 actions = {
                     IconButton(onClick = { onEvent(TransactionsUiEvent.NavigateTo(SeaweedDestination.Analytics)) }) {
-                        Icon(Icons.Default.Analytics, contentDescription = "Analytics")
+                        Icon(
+                            Icons.Default.Analytics, 
+                            contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_analytics_title)
+                        )
                     }
                     IconButton(onClick = { onEvent(TransactionsUiEvent.NavigateTo(SeaweedDestination.Budget)) }) {
-                        Icon(Icons.Default.PieChart, contentDescription = "Budget")
+                        Icon(
+                            Icons.Default.PieChart, 
+                            contentDescription = stringResource(CoreUiR.string.action_settings)
+                        )
                     }
                 }
             )
@@ -185,11 +194,17 @@ fun TransactionsListPane(
         floatingActionButton = {
             if (uiState is TransactionsUiState.Success && uiState.selectedTab == TransactionTab.RECENT) {
                 FloatingActionButton(onClick = { navTo(SeaweedDestination.AddTransaction) }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Transaction")
+                    Icon(
+                        Icons.Default.Add, 
+                        contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_add_title)
+                    )
                 }
             } else if (uiState is TransactionsUiState.Success && uiState.selectedTab == TransactionTab.CYCLIC) {
                 FloatingActionButton(onClick = { /* TODO: Show Add Bill Dialog */ }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Bill")
+                    Icon(
+                        Icons.Default.Add, 
+                        contentDescription = stringResource(com.zoewave.probase.seaweed.mobile.bills.R.string.applications_seaweed_apps_mobile_features_bills_add)
+                    )
                 }
             }
         }
@@ -209,12 +224,12 @@ fun TransactionsListPane(
                         Tab(
                             selected = uiState.selectedTab == TransactionTab.RECENT,
                             onClick = { onEvent(TransactionsUiEvent.SelectTab(TransactionTab.RECENT)) },
-                            text = { Text("Recent") }
+                            text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_recent_tab)) }
                         )
                         Tab(
                             selected = uiState.selectedTab == TransactionTab.CYCLIC,
                             onClick = { onEvent(TransactionsUiEvent.SelectTab(TransactionTab.CYCLIC)) },
-                            text = { Text("Cyclic") }
+                            text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_cyclic_tab)) }
                         )
                     }
 
@@ -253,7 +268,7 @@ private fun RecentTransactionsContent(
         )
         if (uiState.filteredTransactions.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No transactions yet")
+                Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_no_transactions))
             }
         } else {
             LazyColumn(
@@ -286,10 +301,13 @@ fun TransactionDetailPane(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Transaction Details") },
+                title = { Text(stringResource(CoreUiR.string.core_ui_transaction_details)) },
                 navigationIcon = {
                     IconButton(onClick = { onEvent(TransactionsUiEvent.OnBack) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(CoreUiR.string.cd_navigate_back)
+                        )
                     }
                 },
                 actions = {
@@ -298,7 +316,10 @@ fun TransactionDetailPane(
                             onEvent(TransactionsUiEvent.DeleteTransaction(transaction.id))
                             onEvent(TransactionsUiEvent.OnBack)
                         }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete")
+                            Icon(
+                                Icons.Default.Delete, 
+                                contentDescription = stringResource(CoreUiR.string.action_delete)
+                            )
                         }
                     }
                 }
@@ -326,9 +347,12 @@ fun TransactionDetailPane(
                     )
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Amount", style = MaterialTheme.typography.labelSmall)
                         Text(
-                            text = "$${String.format(Locale.getDefault(), "%.2f", transaction.amount)}",
+                            text = stringResource(CoreUiR.string.core_ui_text_amount), 
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        Text(
+                            text = stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.2f", transaction.amount)),
                             style = MaterialTheme.typography.headlineSmall,
                             color = if (transaction.amount < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                         )
@@ -341,13 +365,19 @@ fun TransactionDetailPane(
                 ) {
                     Card(modifier = Modifier.weight(1f)) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Category", style = MaterialTheme.typography.labelSmall)
+                            Text(
+                                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_category), 
+                                style = MaterialTheme.typography.labelSmall
+                            )
                             Text(transaction.category, style = MaterialTheme.typography.titleMedium)
                         }
                     }
                     Card(modifier = Modifier.weight(1f)) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Date", style = MaterialTheme.typography.labelSmall)
+                            Text(
+                                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_date), 
+                                style = MaterialTheme.typography.labelSmall
+                            )
                             val dateString = java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(transaction.date)
                             Text(
                                 text = dateString,
@@ -359,7 +389,7 @@ fun TransactionDetailPane(
             }
         } else {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("Select a transaction to see details")
+                Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_select_to_see_details))
             }
         }
     }
@@ -381,7 +411,7 @@ fun CategoryFilterRow(
             FilterChip(
                 selected = selectedCategory == null,
                 onClick = { onSelect(null) },
-                label = { Text("All") }
+                label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_all_filter)) }
             )
         }
         items(categories) { category ->

@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.seaweed.mobile.home.R
 import com.zoewave.probase.seaweed.mobile.core.ui.components.CategoryQuickJumpCard
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
@@ -95,7 +96,10 @@ fun CategoryGridScreen(
                 title = { Text(stringResource(CoreUiR.string.core_ui_all_categories)) },
                 navigationIcon = {
                     IconButton(onClick = { onEvent(HomeUiEvent.OnBackClicked) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(CoreUiR.string.cd_navigate_back)
+                        )
                     }
                 }
             )
@@ -103,14 +107,17 @@ fun CategoryGridScreen(
         floatingActionButton = {
             Box {
                 FloatingActionButton(onClick = { showMenu = true }) {
-                    Icon(Icons.Default.Add, contentDescription = "Actions")
+                    Icon(
+                        Icons.Default.Add, 
+                        contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_home_actions_cd)
+                    )
                 }
                 DropdownMenu(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Add Category") },
+                        text = { Text(stringResource(CoreUiR.string.core_ui_add_new_category)) },
                         onClick = {
                             showAddDialog = true
                             showMenu = false
@@ -118,7 +125,7 @@ fun CategoryGridScreen(
                         leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) }
                     )
                     DropdownMenuItem(
-                        text = { Text("Combine Categories") },
+                        text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_combine_categories)) },
                         onClick = {
                             showCombineSheet = true
                             showMenu = false
@@ -157,12 +164,12 @@ fun CategoryGridScreen(
                     var newCategoryName by remember { mutableStateOf("") }
                     AlertDialog(
                         onDismissRequest = { showAddDialog = false },
-                        title = { Text("Add New Category") },
+                        title = { Text(stringResource(CoreUiR.string.core_ui_add_new_category)) },
                         text = {
                             OutlinedTextField(
                                 value = newCategoryName,
                                 onValueChange = { newCategoryName = it },
-                                label = { Text("Category Name") },
+                                label = { Text(stringResource(CoreUiR.string.core_ui_category_name)) },
                                 modifier = Modifier.fillMaxWidth()
                             )
                         },
@@ -174,10 +181,10 @@ fun CategoryGridScreen(
                                         showAddDialog = false
                                     }
                                 }
-                            ) { Text("Add") }
+                            ) { Text(stringResource(CoreUiR.string.core_ui_action_add)) }
                         },
                         dismissButton = {
-                            TextButton(onClick = { showAddDialog = false }) { Text("Cancel") }
+                            TextButton(onClick = { showAddDialog = false }) { Text(stringResource(CoreUiR.string.action_cancel)) }
                         }
                     )
                 }
@@ -199,8 +206,15 @@ fun CategoryGridScreen(
     if (categoryToDelete != null) {
         AlertDialog(
             onDismissRequest = { categoryToDelete = null },
-            title = { Text("Delete Category") },
-            text = { Text("Are you sure you want to delete '$categoryToDelete' and all its transactions? This cannot be undone.") },
+            title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_delete_category)) },
+            text = { 
+                Text(
+                    stringResource(
+                        R.string.applications_seaweed_apps_mobile_features_home_delete_category_confirm, 
+                        categoryToDelete!!
+                    )
+                ) 
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -208,12 +222,15 @@ fun CategoryGridScreen(
                         categoryToDelete = null
                     }
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(
+                        text = stringResource(CoreUiR.string.action_delete), 
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             },
             dismissButton = {
                 TextButton(onClick = { categoryToDelete = null }) {
-                    Text("Cancel")
+                    Text(stringResource(CoreUiR.string.action_cancel))
                 }
             }
         )
@@ -242,19 +259,26 @@ private fun CombineCategoriesBottomSheet(
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Combine Categories", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text("Move all transactions from one category into another.", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_home_combine_categories), 
+                style = MaterialTheme.typography.titleLarge, 
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_home_combine_desc), 
+                style = MaterialTheme.typography.bodyMedium
+            )
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 CategoryPicker(
-                    label = "From",
+                    label = stringResource(R.string.applications_seaweed_apps_mobile_features_home_label_from),
                     selected = fromCategory,
                     options = categories,
                     onSelected = { fromCategory = it },
                     modifier = Modifier.weight(1f)
                 )
                 CategoryPicker(
-                    label = "To",
+                    label = stringResource(R.string.applications_seaweed_apps_mobile_features_home_label_to),
                     selected = toCategory,
                     options = categories.filter { it != fromCategory },
                     onSelected = { toCategory = it },
@@ -267,7 +291,7 @@ private fun CombineCategoriesBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = fromCategory.isNotBlank() && toCategory.isNotBlank() && fromCategory != toCategory
             ) {
-                Text("Combine")
+                Text(stringResource(CoreUiR.string.core_ui_action_combine))
             }
         }
     }

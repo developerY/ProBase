@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_seaweed_apps_mobile_features_budget_title">Budget Management</string>
+    <string name="applications_seaweed_apps_mobile_features_budget_category_budgets">Category Budgets</string>
+    <string name="applications_seaweed_apps_mobile_features_budget_total_monthly">Total Monthly Budget</string>
+    <string name="applications_seaweed_apps_mobile_features_budget_available_after_fixed">%1$s available after fixed costs</string>
+    <string name="applications_seaweed_apps_mobile_features_budget_set_for">Set Budget for %1$s</string>
+    <string name="applications_seaweed_apps_mobile_features_budget_monthly_limit">Monthly Limit</string>
+    <string name="applications_seaweed_apps_mobile_features_budget_save">Save Budget</string>
+</resources>
