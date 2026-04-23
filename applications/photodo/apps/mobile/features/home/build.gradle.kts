@@ -15,7 +15,7 @@ android {
 dependencies {
     // --- Shared Core Projects ---
     // implementation(project(":core:model"))
-    // implementation(project(":core:ui"))
+    implementation(project(":core:ui"))
     // implementation(project(":core:network"))
     // implementation(project(":core:data"))
     implementation(project(":applications:photodo:db"))
