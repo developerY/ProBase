@@ -44,11 +44,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.zoewave.probase.features.ai.configuration.R
+import com.zoewave.probase.core.ui.R as CoreUiR
 
 
 @Composable
@@ -56,8 +59,8 @@ fun AiConfigurationCard(
     expanded: Boolean,
     onExpandToggle: () -> Unit,
     modifier: Modifier = Modifier,
-    title: String = "AI Configuration",
-    description: String = "Configure your generative AI settings.",
+    title: String = stringResource(R.string.features_ai_configuration_title),
+    description: String = stringResource(R.string.features_ai_configuration_desc),
     viewModel: AiConfigurationViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -109,9 +112,9 @@ fun AiConfigurationCardContent(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = title, style = MaterialTheme.typography.titleMedium)
                     val statusText = when {
-                        !uiState.isAiEnabled -> "Off (No AI)"
-                        !uiState.isApiKeySet -> "On (Local AI)"
-                        else -> "On (Cloud-Enhanced)"
+                        !uiState.isAiEnabled -> stringResource(R.string.features_ai_configuration_status_off)
+                        !uiState.isApiKeySet -> stringResource(R.string.features_ai_configuration_status_local)
+                        else -> stringResource(R.string.features_ai_configuration_status_cloud)
                     }
                     Text(
                         text = statusText,
@@ -128,7 +131,7 @@ fun AiConfigurationCardContent(
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     ListItem(
-                        headlineContent = { Text("Enable AI Features") },
+                        headlineContent = { Text(stringResource(R.string.features_ai_configuration_enable_features)) },
                         supportingContent = { Text(description) },
                         trailingContent = {
                             Switch(
@@ -141,12 +144,12 @@ fun AiConfigurationCardContent(
                     Spacer(modifier = Modifier.padding(vertical = 8.dp))
 
                     Text(
-                        text = "BYOK (Bring Your Own Key)",
+                        text = stringResource(R.string.features_ai_configuration_byok_title),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "Get your free API key from Google AI Studio. Cloud features include mandatory reporting tools; flagging an output will redirect you to Google’s external feedback portal.",
+                        text = stringResource(R.string.features_ai_configuration_byok_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 4.dp)
@@ -160,12 +163,12 @@ fun AiConfigurationCardContent(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = "✅ Gemini API Key is configured",
+                                    text = stringResource(R.string.features_ai_configuration_key_configured),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.primary
                                 )
                                 TextButton(onClick = { onEvent(AiConfigurationEvent.OnGeminiApiKeyChanged(null)) }) {
-                                    Text("Remove", color = MaterialTheme.colorScheme.error)
+                                    Text(stringResource(CoreUiR.string.action_delete), color = MaterialTheme.colorScheme.error)
                                 }
                             }
                             
@@ -189,7 +192,7 @@ fun AiConfigurationCardContent(
                                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = keyColor)
                                         Spacer(modifier = Modifier.width(8.dp))
                                     }
-                                    Text("Test Connection & Discover Models")
+                                    Text(stringResource(R.string.features_ai_configuration_test_connection))
                                 }
                                 if (uiState.keyTestResult != null) {
                                     Spacer(modifier = Modifier.width(12.dp))
@@ -206,7 +209,14 @@ fun AiConfigurationCardContent(
                     OutlinedTextField(
                         value = editingKey,
                         onValueChange = { editingKey = it },
-                        label = { Text(if (uiState.isApiKeySet) "Update API Key" else "Enter Gemini API Key") },
+                        label = { 
+                            Text(
+                                if (uiState.isApiKeySet) 
+                                    stringResource(R.string.features_ai_configuration_update_key) 
+                                else 
+                                    stringResource(R.string.features_ai_configuration_enter_key)
+                            ) 
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         leadingIcon = { Icon(Icons.Default.Key, contentDescription = null) },
                         trailingIcon = {
@@ -229,14 +239,14 @@ fun AiConfigurationCardContent(
                             },
                             modifier = Modifier.align(Alignment.End).padding(top = 8.dp)
                         ) {
-                            Text("Save Key")
+                            Text(stringResource(R.string.features_ai_configuration_save_key))
                         }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Preferred AI Model",
+                        text = stringResource(R.string.features_ai_configuration_preferred_model),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -247,10 +257,13 @@ fun AiConfigurationCardContent(
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                     ) {
                         OutlinedTextField(
-                            value = if (uiState.availableModels.isEmpty()) "Test connection to see models" else uiState.currentAiModel,
+                            value = if (uiState.availableModels.isEmpty()) 
+                                stringResource(R.string.features_ai_configuration_test_connection_hint) 
+                            else 
+                                uiState.currentAiModel,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Gemini Model") },
+                            label = { Text(stringResource(R.string.features_ai_configuration_model_placeholder)) },
                             modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true),
                             trailingIcon = { 
                                 if (uiState.availableModels.isNotEmpty()) {
@@ -281,7 +294,10 @@ fun AiConfigurationCardContent(
                         }
                     }
                     Text(
-                        text = if (uiState.availableModels.isEmpty()) "Test connection to unlock available models." else "Choose your preferred Gemini model.",
+                        text = if (uiState.availableModels.isEmpty()) 
+                            stringResource(R.string.features_ai_configuration_unlock_models_hint) 
+                        else 
+                            stringResource(R.string.features_ai_configuration_choose_model_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 4.dp)
@@ -301,12 +317,12 @@ fun AiConfigurationCardContent(
 
                         Column(modifier = Modifier.padding(top = 16.dp)) {
                             Text(
-                                text = "Step 2: Verify Model Functionality",
+                                text = stringResource(R.string.features_ai_configuration_verify_model_title),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Text(
-                                text = "Ping the selected model to confirm it responds.",
+                                text = stringResource(R.string.features_ai_configuration_verify_model_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(vertical = 4.dp)
@@ -332,7 +348,7 @@ fun AiConfigurationCardContent(
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
                                     }
-                                    Text("Ping Selected Model")
+                                    Text(stringResource(R.string.features_ai_configuration_ping_model))
                                 }
                                 if (uiState.modelTestResult != null) {
                                     Spacer(modifier = Modifier.width(12.dp))

@@ -19,7 +19,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.nfc.R
 import com.zoewave.probase.features.nfc.ui.NfcRwEvent
 import com.zoewave.probase.features.nfc.ui.NfcUiState
 
@@ -48,10 +50,10 @@ internal fun NfcScanScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Scanning... Please tap an NFC tag.")
+        Text(stringResource(R.string.features_nfc_scanning_instructions))
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = { onEvent(NfcRwEvent.StopScan) }) {
-            Text("Stop Scan")
+            Text(stringResource(R.string.features_nfc_action_stop_scan))
         }
     }
 }

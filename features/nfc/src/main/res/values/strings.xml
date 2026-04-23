@@ -13,4 +13,23 @@
     <string name="features_nfc_nfc_status_writing_to_tag">Writing to Tag…</string>
     <string name="features_nfc_nfc_not_supported_message">Your device does not support NFC.</string>
     <string name="features_nfc_nfc_action_retry">Retry</string>
+    <string name="features_nfc_scanning_instructions">Scanning&#8230; Please tap an NFC tag.</string>
+    <string name="features_nfc_action_stop_scan">Stop Scan</string>
+    <string name="features_nfc_app_title">NFC Scanner App</string>
+    <string name="features_nfc_tab_scan">Scan</string>
+    <string name="features_nfc_tab_write">Write</string>
+    <string name="features_nfc_tab_settings">Settings</string>
+    <string name="features_nfc_ready_instructions">NFC is ready. Tap the button to start scanning.</string>
+    <string name="features_nfc_action_start_scan">Start Scan</string>
+    <string name="features_nfc_write_title">Write to NFC Tag</string>
+    <string name="features_nfc_scanned_success">NFC Tag Scanned Successfully!</string>
+    <string name="features_nfc_tag_info">Tag Info: %1$s</string>
+    <string name="features_nfc_action_scan_again">Scan Again</string>
+    <string name="features_nfc_disabled_message">NFC is disabled. Please enable NFC in your device settings.</string>
+    <string name="features_nfc_action_enable_nfc">Enable NFC</string>
+    <string name="features_nfc_unknown_tab">Unknown Tab</string>
+    <string name="features_nfc_label_text_to_write">Text to Write</string>
+    <string name="features_nfc_approach_tag_instructions">Approach an NFC tag to write the above text.</string>
+    <string name="features_nfc_action_stop_write">Stop Write</string>
+    <string name="features_nfc_action_start_write">Start Write</string>
 </resources>

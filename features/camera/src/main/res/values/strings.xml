@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="features_camera_capture_photo">Capture Photo</string>
+    <string name="features_camera_cd_captured_image">Captured Image</string>
+    <string name="features_camera_photo_label">Photo</string>
+    <string name="features_camera_photo_desc">Captured Image</string>
+    <string name="features_camera_permission_rationale">The camera is important for this feature. Please grant the permission.</string>
+    <string name="features_camera_permission_denied">Camera permission is required to take photos. Please enable it in settings.</string>
+</resources>

@@ -34,4 +34,6 @@
     <string name="features_ai_capture_smart_capture_ai_diagnostics_title">AI Capture Diagnostics</string>
     <string name="features_ai_capture_smart_capture_ai_diagnostics_close">OK</string>
     <string name="features_ai_capture_smart_capture_close_content_desc">Close</string>
+    <string name="features_ai_capture_smart_capture_cd_captured_image">Captured image</string>
+    <string name="features_ai_capture_smart_capture_bullet_format">&#8226; %1$s</string>
 </resources>

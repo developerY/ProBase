@@ -12,8 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-////import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.nfc.R
 import com.zoewave.probase.features.nfc.ui.NfcRwEvent
 import com.zoewave.probase.features.nfc.ui.NfcUiState
 
@@ -27,28 +28,18 @@ fun TagScanned(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("NFC Tag Scanned Successfully!")
+        Text(stringResource(R.string.features_nfc_scanned_success))
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Tag Info: ${uiState.tagInfo}")
+        Text(stringResource(R.string.features_nfc_tag_info, uiState.tagInfo))
         Spacer(modifier = Modifier.height(16.dp))
         Row {
             Button(onClick = { onEvent(NfcRwEvent.StopScan) }) {
-                Text("Stop Scan")
+                Text(stringResource(R.string.features_nfc_action_stop_scan))
             }
             Spacer(modifier = Modifier.width(16.dp))
             Button(onClick = { onEvent(NfcRwEvent.StartScan) }) {
-                Text("Scan Again")
+                Text(stringResource(R.string.features_nfc_action_scan_again))
             }
         }
     }
 }
-
-/* Preview
-@Composable
-@Preview
-fun TagScannedPreview() {
-    val sampleTagInfo = "Sample Tag Info"
-    val sampleUiState = NfcUiState.TagScanned(sampleTagInfo)
-    TagScanned(uiState = sampleUiState, onEvent = {})
-}
-*/

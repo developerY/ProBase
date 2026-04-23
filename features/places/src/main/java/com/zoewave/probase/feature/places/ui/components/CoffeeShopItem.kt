@@ -15,8 +15,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.model.yelp.BusinessInfo
+import com.zoewave.probase.features.places.R
+import com.zoewave.probase.core.ui.R as CoreUiR
 
 @Composable
 fun CoffeeShopItem(business: BusinessInfo) {
@@ -30,11 +33,14 @@ fun CoffeeShopItem(business: BusinessInfo) {
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = business.name ?: "Unknown Coffee Shop",
+                text = business.name ?: stringResource(R.string.features_places_unknown_shop),
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "Rating: ${business.rating ?: "N/A"}",
+                text = stringResource(
+                    R.string.features_places_rating_format, 
+                    business.rating?.toString() ?: stringResource(CoreUiR.string.text_na)
+                ),
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(text = business.price ?: "", style = MaterialTheme.typography.bodySmall)

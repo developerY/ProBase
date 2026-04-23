@@ -12,9 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 ////import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.features.nfc.R
+import com.zoewave.probase.core.ui.R as CoreUiR
 
 @Composable
 fun ErrorScreen(
@@ -32,7 +35,7 @@ fun ErrorScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Error: $message",
+                text = stringResource(R.string.features_nfc_nfc_status_error, message),
                 color = Color.Red,
                 fontSize = 18.sp,
                 //fontWeight = FontWeight.Bold,
@@ -46,7 +49,7 @@ fun ErrorScreen(
                     )
                 ) {
                     Text(
-                        text = "Retry",
+                        text = stringResource(CoreUiR.string.core_ui_action_retry),
                         color = Color.White,
                         fontSize = 18.sp,
                         //fontWeight = FontWeight.Bold,

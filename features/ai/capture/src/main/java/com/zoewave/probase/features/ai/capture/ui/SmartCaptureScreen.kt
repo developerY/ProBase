@@ -314,7 +314,7 @@ private fun ContextInputState(
         ) {
             AsyncImage(
                 model = uri,
-                contentDescription = "Captured image",
+                contentDescription = stringResource(R.string.features_ai_capture_smart_capture_cd_captured_image),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
@@ -458,7 +458,10 @@ private fun TaskReviewPane(
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(stringResource(R.string.features_ai_capture_smart_capture_review_subtasks), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
                         draft.subTasks.forEach { subTask ->
-                            Text("• $subTask", style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                text = stringResource(R.string.features_ai_capture_smart_capture_bullet_format, subTask), 
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
                     }
                 }
