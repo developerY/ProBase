@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -47,7 +48,7 @@ import com.zoewave.probase.core.ui.R as CoreUiR
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun StatusBar(
-    permissionState: MultiplePermissionsState,
+    permissionState: MultiplePermissionsState?,
     onManagePermissionsClick: () -> Unit,
     scanState: ScanState // Add scanState parameter
 ) {
@@ -76,7 +77,6 @@ fun StatusBar(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                // Scan state
                 // Scan state with icons
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -129,7 +129,7 @@ fun StatusBar(
 
             // Content: List permissions when expanded
             if (isExpanded) {
-                permissionState.permissions.forEach { permission ->
+                permissionState?.permissions?.forEach { permission ->
                     Row( // This Row is a @Composable context
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(vertical = 4.dp)
@@ -253,28 +253,17 @@ private fun getFriendlyName(permission: String): String {
     }
 }
 
-/*
 @OptIn(ExperimentalPermissionsApi::class)
 @Preview(showBackground = true)
 @Composable
 fun StatusBarPreview() {
-    // Mock permissions state for preview
-    val permissions = listOf(
-        android.Manifest.permission.BLUETOOTH_SCAN,
-        android.Manifest.permission.BLUETOOTH_CONNECT,
-        android.Manifest.permission.ACCESS_FINE_LOCATION
-    )
-
-    val permissionState = rememberMultiplePermissionsState(permissions) {
-        /* Handle permission requests */
+    MaterialTheme {
+        StatusBar(
+            permissionState = null,
+            onManagePermissionsClick = { },
+            scanState = ScanState.SCANNING
+        )
     }
-
-    StatusBar(
-        permissionState = permissionState,
-        onManagePermissionsClick = { /* Mock click */ },
-        scanState = ScanState.SCANNING // Example scan state
-    )
 }
-*/
 
 

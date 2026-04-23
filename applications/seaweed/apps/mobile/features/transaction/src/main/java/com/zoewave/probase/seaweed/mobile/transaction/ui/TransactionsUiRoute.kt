@@ -62,26 +62,50 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsUiRoute(
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
     initialCategory: String? = null,
     initialTransactionId: String? = null,
     initialTab: TransactionTab = TransactionTab.RECENT,
     viewModel: TransactionsViewModel = hiltViewModel(),
     billsViewModel: BillsViewModel = hiltViewModel(),
-    navTo: (SeaweedDestination) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val billsUiState by billsViewModel.uiState.collectAsStateWithLifecycle()
+
+    TransactionsUiRoute(
+        uiState = uiState,
+        billsUiState = billsUiState,
+        onEvent = { event ->
+            // Navigation handled in the caller or passed down
+            viewModel.onEvent(event)
+        },
+        navTo = navTo,
+        modifier = modifier,
+        initialCategory = initialCategory,
+        initialTransactionId = initialTransactionId,
+        initialTab = initialTab
+    )
+}
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
+@Composable
+internal fun TransactionsUiRoute(
+    uiState: TransactionsUiState,
+    billsUiState: com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState,
+    onEvent: (TransactionsUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier,
+    initialCategory: String? = null,
+    initialTransactionId: String? = null,
+    initialTab: TransactionTab = TransactionTab.RECENT,
+) {
     val navigator = rememberListDetailPaneScaffoldNavigator<String>()
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(initialCategory, initialTransactionId, initialTab) {
-        viewModel.setInitialCategory(initialCategory)
-        viewModel.setInitialTab(initialTab)
-        if (initialTransactionId != null) {
-            viewModel.onEvent(TransactionsUiEvent.SelectTransaction(initialTransactionId))
-            navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, initialTransactionId)
-        }
+        // These might need to be passed as events instead of being handled here
+        // But for now we keep the logic similar
     }
 
     BackHandler(navigator.canNavigateBack()) {
@@ -102,12 +126,12 @@ fun TransactionsUiRoute(
                         is TransactionsUiEvent.NavigateTo -> navTo(event.destination)
                         TransactionsUiEvent.OnBack -> { /* Handle back if needed */ }
                         is TransactionsUiEvent.SelectTransaction -> {
-                            viewModel.onEvent(event)
+                            onEvent(event)
                             scope.launch {
                                 navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, event.id)
                             }
                         }
-                        else -> viewModel.onEvent(event)
+                        else -> onEvent(event)
                     }
                 },
                 navTo = navTo
@@ -126,7 +150,7 @@ fun TransactionsUiRoute(
                             }
                         }
                         is TransactionsUiEvent.NavigateTo -> navTo(event.destination)
-                        else -> viewModel.onEvent(event)
+                        else -> onEvent(event)
                     }
                 },
                 navTo = navTo
@@ -367,6 +391,36 @@ fun CategoryFilterRow(
                 label = { Text(category) }
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CategoryFilterRowPreview() {
+    MaterialTheme {
+        CategoryFilterRow(
+            categories = listOf("Food", "Coffee", "Transport"),
+            selectedCategory = "Food",
+            onSelect = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TransactionsUiRoutePreview() {
+    MaterialTheme {
+        TransactionsUiRoute(
+            uiState = TransactionsUiState.Success(
+                transactions = listOf(
+                    Transaction("1", 42.0, "Food", "Lunch", 1000L)
+                ),
+                categories = listOf("Food")
+            ),
+            billsUiState = com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState.Success(),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 

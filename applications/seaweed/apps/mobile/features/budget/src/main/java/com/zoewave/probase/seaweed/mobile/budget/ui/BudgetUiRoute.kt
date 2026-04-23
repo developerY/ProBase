@@ -28,13 +28,13 @@ import java.util.Locale
 
 @Composable
 fun BudgetUiRoute(
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: BudgetViewModel = hiltViewModel(),
-    onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    BudgetScreen(
+    BudgetUiRoute(
         uiState = uiState,
         onEvent = { event ->
             if (event is BudgetUiEvent.OnBackClicked) {
@@ -44,6 +44,21 @@ fun BudgetUiRoute(
             }
         },
         navTo = {},
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun BudgetUiRoute(
+    uiState: BudgetUiState,
+    onEvent: (BudgetUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    BudgetScreen(
+        uiState = uiState,
+        onEvent = onEvent,
+        navTo = navTo,
         modifier = modifier
     )
 }
@@ -236,6 +251,65 @@ private fun BudgetEditBottomSheet(
                 Text("Save Budget")
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BudgetSummaryCardPreview() {
+    MaterialTheme {
+        BudgetSummaryCard(
+            profile = FinancialProfile(
+                monthlyIncome = 5000.0,
+                totalFixedCosts = 1500.0,
+                realStartingBalance = 3500.0,
+                monthlyVariableSpending = 1200.0,
+                flexibleMoneyRemaining = 2300.0,
+                totalBudgetedAmount = 2000.0,
+                unallocatedMoney = 1500.0,
+                categoryOverviews = emptyList(),
+                monthProgress = 0.5f
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BudgetItemPreview() {
+    MaterialTheme {
+        BudgetItem(
+            category = CategoryOverview("Food", 400.0, 15, 500.0, 100.0, 0.8f),
+            onEdit = {},
+            onDelete = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BudgetUiRoutePreview() {
+    MaterialTheme {
+        BudgetUiRoute(
+            uiState = BudgetUiState.Success(
+                profile = FinancialProfile(
+                    monthlyIncome = 5000.0,
+                    totalFixedCosts = 1500.0,
+                    realStartingBalance = 3500.0,
+                    monthlyVariableSpending = 1200.0,
+                    flexibleMoneyRemaining = 2300.0,
+                    totalBudgetedAmount = 2000.0,
+                    unallocatedMoney = 1500.0,
+                    categoryOverviews = listOf(
+                        CategoryOverview("Food", 400.0, 15, 500.0, 100.0, 0.8f),
+                        CategoryOverview("Coffee", 150.0, 20, 100.0, -50.0, 1.5f)
+                    ),
+                    monthProgress = 0.5f
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 

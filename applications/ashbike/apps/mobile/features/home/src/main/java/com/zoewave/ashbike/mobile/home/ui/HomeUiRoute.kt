@@ -11,11 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -23,11 +23,6 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.zoewave.ashbike.mobile.glass.GlassesMainActivity
 import com.zoewave.ashbike.mobile.home.components.BikeDashboardContent
 import com.zoewave.ashbike.mobile.home.components.WaitingForGpsScreen
-import com.zoewave.probase.core.ui.BikeScreen
-import com.zoewave.probase.core.ui.NavigationCommand
-import com.zoewave.probase.feature.places.ui.CoffeeShopEvent
-import com.zoewave.probase.feature.places.ui.CoffeeShopUIState
-import com.zoewave.probase.feature.places.ui.CoffeeShopViewModel
 import com.zoewave.ashbike.mobile.home.ui.BikeSideEffect
 import com.zoewave.ashbike.mobile.home.ui.HomeEvent
 import com.zoewave.ashbike.mobile.home.ui.HomeUiState
@@ -35,6 +30,9 @@ import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.ashbike.features.main.ui.ErrorScreen
 import com.zoewave.probase.ashbike.features.main.ui.LoadingScreen
+import com.zoewave.probase.feature.places.ui.CoffeeShopEvent
+import com.zoewave.probase.feature.places.ui.CoffeeShopUIState
+import com.zoewave.probase.feature.places.ui.CoffeeShopViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 
@@ -42,35 +40,27 @@ import kotlinx.coroutines.flow.collectLatest
 @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
 @Composable
 fun HomeUiRoute(
-    modifier: Modifier = Modifier,
     navTo: (AshBikeDestination) -> Unit,
-    viewModel: HomeViewModel
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
-    // val healthViewModel = hiltViewModel<HealthViewModel>()
-    // val nfcViewModel = hiltViewModel<NfcViewModel>()
-    val coffeeShopViewModel = hiltViewModel<CoffeeShopViewModel>() // Added CoffeeShopViewModel
+    val coffeeShopViewModel = hiltViewModel<CoffeeShopViewModel>()
 
-    val homeUiState by viewModel.uiState.collectAsState()
-    val cafeUiState by coffeeShopViewModel.uiState.collectAsState() // Added Cafe UI State
+    val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val cafeUiState by coffeeShopViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    // --- 2. GLASS CONNECTION LISTENER (The Fix) ---
-    // This listens to the hardware: Is the cable plugged in?
     LaunchedEffect(Unit) {
-        // Only run on Android 15+ (Baklava/VanillaIceCream)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-            // "this.coroutineContext" is valid here inside LaunchedEffect
             ProjectedContext.isProjectedDeviceConnected(context, this.coroutineContext)
                 .collectLatest { isConnected ->
                     viewModel.updateGlassConnection(isConnected)
                 }
         } else {
-            // Fallback for older devices
             viewModel.updateGlassConnection(false)
         }
     }
 
-    // --- 3. LIFECYCLE: Bind/Unbind Bike Service ---
     DisposableEffect(Unit) {
         viewModel.bikeServiceManager.bindService(context)
         onDispose {
@@ -78,25 +68,18 @@ fun HomeUiRoute(
         }
     }
 
-    // --- 4. NAV 3: LISTEN FOR NAVIGATION EVENTS ---
-    // When the VM says "Go to Settings", this block runs and calls navTo().
     LaunchedEffect(viewModel) {
         viewModel.navigationChannel.collect { destination ->
-            Log.d("HomeUiRoute", "Received Nav 3 Event: $destination")
             navTo(destination)
         }
     }
 
-    // --- 4. SIDE EFFECTS: Launching Activities & Toasts ---
-    // This listens for "One-off" commands from the ViewModel
     LaunchedEffect(key1 = true) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 is BikeSideEffect.LaunchGlassProjection -> {
-                    // LOGIC: Attempt to launch on the external glass display
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
                         try {
-                            // This specifically targets the Glasses
                             val options = ProjectedContext.createProjectedActivityOptions(context)
                             val intent = Intent(context, GlassesMainActivity::class.java).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -117,95 +100,94 @@ fun HomeUiRoute(
         }
     }
 
-    val permissionState = rememberPermissionState(
-        Manifest.permission.ACCESS_FINE_LOCATION
+    val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+
+    HomeUiRoute(
+        homeUiState = homeUiState,
+        cafeUiState = cafeUiState,
+        onHomeEvent = viewModel::onEvent,
+        onCoffeeShopEvent = coffeeShopViewModel::onEvent,
+        onPermissionRequest = { permissionState.launchPermissionRequest() },
+        onOpenSettings = {
+            context.startActivity(
+                Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            )
+        },
+        navTo = navTo,
+        modifier = modifier
     )
+}
 
-    // We removed the manual navigation logic here. We just forward the event
-    // to the ViewModel. The VM will emit to 'navigationChannel' if needed.
-    val eventHandler = { event: HomeEvent ->
-        viewModel.onEvent(event)
-    }
-
-    // --- G. UI RENDER LOGIC ---
-    when (val currentHomeUiState = homeUiState) {
+@Composable
+internal fun HomeUiRoute(
+    homeUiState: HomeUiState,
+    cafeUiState: CoffeeShopUIState,
+    onHomeEvent: (HomeEvent) -> Unit,
+    onCoffeeShopEvent: (CoffeeShopEvent) -> Unit,
+    onPermissionRequest: () -> Unit,
+    onOpenSettings: () -> Unit,
+    navTo: (AshBikeDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    when (homeUiState) {
         is HomeUiState.WaitingForGps -> {
             WaitingForGpsScreen(
-                onRequestPermission = { permissionState.launchPermissionRequest() },
-                onEnableGpsSettings = {
-                    context.startActivity(
-                        Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                    )
-                }
+                onRequestPermission = onPermissionRequest,
+                onEnableGpsSettings = onOpenSettings
             )
         }
 
         is HomeUiState.Success -> {
-            val coffeeShops = when (val currentCafeUiState = cafeUiState) {
-                is CoffeeShopUIState.Success -> currentCafeUiState.coffeeShops
+            val coffeeShops = when (cafeUiState) {
+                is CoffeeShopUIState.Success -> cafeUiState.coffeeShops
                 else -> emptyList()
             }
 
             val onFindCafes = {
-                val currentLocation = currentHomeUiState.bikeData.location
+                val currentLocation = homeUiState.bikeData.location
                 if (currentLocation != null && (currentLocation.latitude != 0.0 || currentLocation.longitude != 0.0)) {
-                    coffeeShopViewModel.onEvent(
+                    onCoffeeShopEvent(
                         CoffeeShopEvent.FindCafesInArea(
                             latitude = currentLocation.latitude,
                             longitude = currentLocation.longitude,
-                            radius = 1000.0 // Radius in meters
+                            radius = 1000.0
                         )
                     )
-                } else {
-                    Log.d("BikeUiRoute", "Cannot find cafes: Location not available or is (0,0)")
-                    // Optionally, inform the user e.g., via a Toast or a Snackbar
                 }
             }
 
-
-            // Check if we actually have a valid location before showing Dashboard
-            val hasValidLocation = currentHomeUiState.bikeData.location?.let {
+            val hasValidLocation = homeUiState.bikeData.location?.let {
                 it.latitude != 0.0 || it.longitude != 0.0
             } ?: false
 
             if (hasValidLocation) {
                 BikeDashboardContent(
                     modifier = modifier.fillMaxSize(),
-                    uiState = currentHomeUiState,
-                    onHomeEvent = eventHandler,
+                    uiState = homeUiState,
+                    onHomeEvent = onHomeEvent,
                     navTo = navTo,
-                    coffeeShops = coffeeShops, // Passed coffeeShops
-                    placeName = null, // Passed null for placeName, decide source later
-                    onFindCafes = onFindCafes as () -> Unit // Passed onFindCafes lambda
+                    coffeeShops = coffeeShops,
+                    placeName = null,
+                    onFindCafes = onFindCafes
                 )
             } else {
                 WaitingForGpsScreen(
-                    onRequestPermission = { permissionState.launchPermissionRequest() },
-                    onEnableGpsSettings = {
-                        context.startActivity(
-                            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            }
-                        )
-                    }
+                    onRequestPermission = onPermissionRequest,
+                    onEnableGpsSettings = onOpenSettings
                 )
             }
         }
 
         is HomeUiState.Error -> {
             ErrorScreen(
-                errorMessage = currentHomeUiState.message,
-                onRetry = { viewModel.onEvent(HomeEvent.StartRide) }
+                errorMessage = homeUiState.message,
+                onRetry = { onHomeEvent(HomeEvent.StartRide) }
             )
         }
 
-        HomeUiState.Loading -> {
-            LoadingScreen()
-        }
-
-        HomeUiState.Idle -> {
+        HomeUiState.Loading, HomeUiState.Idle -> {
             LoadingScreen()
         }
     }

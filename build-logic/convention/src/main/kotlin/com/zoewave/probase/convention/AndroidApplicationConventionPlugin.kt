@@ -23,7 +23,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 configureBuildTypes(this)
 
                 // Target SDK is an application-only property
-                defaultConfig.targetSdk = libs.findVersion("android-targetSdk").get().toString().toInt()
+                defaultConfig.targetSdk = libs.findVersionInt("android-targetSdk")
 
                 // Application-specific build type settings
                 val release = buildTypes.getByName("release")

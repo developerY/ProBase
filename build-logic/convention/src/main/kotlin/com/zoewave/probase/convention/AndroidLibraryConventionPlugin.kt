@@ -21,6 +21,9 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 // Shared base logic for SDKs, Java 21, and Kotlin
                 configureKotlinAndroid(this)
 
+                // Target SDK is also relevant for libraries if we want to ensure behavior
+                // Note: compileSdk is handled in configureKotlinAndroid
+
                 // Standard Android library test runner configuration
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                 testOptions.animationsDisabled = true

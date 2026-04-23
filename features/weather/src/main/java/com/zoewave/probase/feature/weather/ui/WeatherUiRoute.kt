@@ -7,71 +7,72 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.feature.weather.ui.components.WeatherScreen
 
 
 @Composable
 fun WeatherUiRoute(
     modifier: Modifier = Modifier,
-    viewModel: WeatherViewModel = hiltViewModel()
+    viewModel: WeatherViewModel = hiltViewModel(),
 ) {
-    val uiState = viewModel.uiState.collectAsState().value
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    WeatherUiRoute(
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun WeatherUiRoute(
+    uiState: WeatherUiState,
+    onEvent: (WeatherEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     when (uiState) {
         is WeatherUiState.Loading -> {
-            LoadingScreen()
+            LoadingScreen(modifier = modifier)
         }
 
         is WeatherUiState.Error -> {
-            ErrorScreen(errorMessage = uiState.message) {
-                viewModel.onEvent(WeatherEvent.LoadBike)
-            }
+            ErrorScreen(
+                errorMessage = uiState.message,
+                onRetry = { onEvent(WeatherEvent.LoadBike) },
+                modifier = modifier
+            )
         }
 
         is WeatherUiState.Success -> {
-
-            /*UnifiedWeatherCard(
-                weatherCondition = uiState.weatherOpen.weatherCondition,
-                temperature = uiState.weatherOpen.temperature,
-                conditionText = uiState.weatherOpen.conditionText,
-                location = uiState.weatherOpen.location,
-                windDegree = uiState.weatherOpen.windDegree
-            )*/
-
-
             WeatherScreen(
-                modifier = modifier,
                 weather = uiState.weatherOpen,
                 settings = uiState.settings,
-                location = uiState.location,   // <-- Pass the location here
-                onEvent = { event -> viewModel.onEvent(event) },
+                location = uiState.location,
+                onEvent = onEvent,
+                modifier = modifier
             )
-
-
-            /*BikeHomeScreen(
-               modifier = modifier,
-               settings = uiState.settings,
-               location = uiState.location,   // <-- Pass the location here
-               onEvent = { event -> viewModel.onEvent(event) },
-               navTo = navTo
-           )*/
         }
     }
 }
 
 // These will be move to a common directory.
 @Composable
-fun LoadingScreen() {
-    Text(text = "Loading...", modifier = Modifier.fillMaxSize())
+fun LoadingScreen(modifier: Modifier = Modifier) {
+    Text(text = "Loading...", modifier = modifier.fillMaxSize())
 }
 
 @Composable
-fun ErrorScreen(errorMessage: String, onRetry: () -> Unit) {
-    Column(modifier = Modifier
+fun ErrorScreen(
+    errorMessage: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier
         .fillMaxSize()
         .padding(16.dp)) {
         Text(

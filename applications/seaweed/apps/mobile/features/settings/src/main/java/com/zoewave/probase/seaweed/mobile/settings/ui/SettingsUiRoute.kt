@@ -19,13 +19,13 @@ import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 
 @Composable
 fun SettingsUiRoute(
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
-    navTo: (SeaweedDestination) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    SettingsScreen(
+    SettingsUiRoute(
         uiState = uiState,
         onEvent = { event ->
             if (event is SettingsUiEvent.NavigateTo) {
@@ -34,6 +34,21 @@ fun SettingsUiRoute(
                 viewModel.onEvent(event)
             }
         },
+        navTo = navTo,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun SettingsUiRoute(
+    uiState: SettingsUiState,
+    onEvent: (SettingsUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SettingsScreen(
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo,
         modifier = modifier
     )
@@ -178,6 +193,32 @@ private fun ThemeOption(
                 .padding(start = 16.dp)
                 .weight(1f),
             style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ThemeOptionPreview() {
+    MaterialTheme {
+        ThemeOption(label = "Light", isSelected = true, onClick = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsUiRoutePreview() {
+    MaterialTheme {
+        SettingsUiRoute(
+            uiState = SettingsUiState.Success(
+                settings = UserSettings(
+                    monthlyIncome = 5000.0,
+                    themeConfig = SeaweedThemeConfig.DEFAULT,
+                    themeMode = ThemeMode.SYSTEM
+                )
+            ),
+            onEvent = {},
+            navTo = {}
         )
     }
 }
