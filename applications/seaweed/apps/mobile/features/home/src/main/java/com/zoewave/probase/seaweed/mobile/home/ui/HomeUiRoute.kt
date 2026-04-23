@@ -56,15 +56,30 @@ import com.zoewave.probase.core.ui.R as CoreUiR
 
 @Composable
 fun HomeUiRoute(
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    navTo: (SeaweedDestination) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    HomeScreen(
+    HomeUiRoute(
         uiState = uiState,
         onEvent = viewModel::onEvent,
+        navTo = navTo,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun HomeUiRoute(
+    uiState: HomeUiState,
+    onEvent: (HomeUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HomeScreen(
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo,
         modifier = modifier
     )
@@ -309,6 +324,80 @@ fun OverviewSummaryCard(
                 Icon(Icons.Default.ChevronRight, contentDescription = null)
             }
         }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 1280, heightDp = 800)
+@Composable
+private fun HomeExpandedContentPreview() {
+    MaterialTheme {
+        HomeExpandedContent(
+            uiState = HomeUiState.Success(
+                transactions = listOf(Transaction("1", 42.0, "Food", "Lunch", 1000L)),
+                categoriesSummary = listOf(CategoryOverview("Food", 42.0, 1, 100.0)),
+                flexibleMoneyRemaining = 500.0,
+                monthProgress = 0.5f
+            ),
+            onEvent = {},
+            navTo = {},
+            padding = PaddingValues(0.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeCompactContentPreview() {
+    MaterialTheme {
+        HomeCompactContent(
+            uiState = HomeUiState.Success(
+                transactions = listOf(Transaction("1", 42.0, "Food", "Lunch", 1000L)),
+                categoriesSummary = listOf(CategoryOverview("Food", 42.0, 1, 100.0)),
+                flexibleMoneyRemaining = 500.0,
+                monthProgress = 0.5f
+            ),
+            onEvent = {},
+            navTo = {},
+            padding = PaddingValues(0.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun OverviewSummaryCardPreview() {
+    MaterialTheme {
+        OverviewSummaryCard(
+            categories = listOf(
+                CategoryOverview("Food", 42.0, 1, 100.0),
+                CategoryOverview("Coffee", 15.0, 1, 50.0)
+            ),
+            navTo = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeUiRoutePreview() {
+    MaterialTheme {
+        HomeUiRoute(
+            uiState = HomeUiState.Success(
+                transactions = listOf(
+                    Transaction("1", 42.0, "Food", "Lunch", 1000L),
+                    Transaction("2", 15.0, "Coffee", "Latte", 2000L)
+                ),
+                categoriesSummary = listOf(
+                    CategoryOverview("Food", 42.0, 1, 100.0),
+                    CategoryOverview("Coffee", 15.0, 1, 50.0)
+                ),
+                flexibleMoneyRemaining = 500.0,
+                monthProgress = 0.5f
+            ),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 

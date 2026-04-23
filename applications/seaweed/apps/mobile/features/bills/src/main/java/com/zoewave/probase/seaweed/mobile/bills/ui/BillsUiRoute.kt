@@ -27,14 +27,14 @@ import java.util.Locale
 
 @Composable
 fun BillsUiRoute(
+    onBack: () -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: BillsViewModel = hiltViewModel(),
-    navTo: (SeaweedDestination) -> Unit,
-    onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    BillsScreen(
+    BillsUiRoute(
         uiState = uiState,
         onEvent = { event ->
             if (event is BillsUiEvent.OnBackClicked) {
@@ -43,6 +43,21 @@ fun BillsUiRoute(
                 viewModel.onEvent(event)
             }
         },
+        navTo = navTo,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun BillsUiRoute(
+    uiState: BillsUiState,
+    onEvent: (BillsUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    BillsScreen(
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo,
         modifier = modifier
     )
@@ -201,6 +216,52 @@ private fun BillItem(
                 Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BillImpactHeaderPreview() {
+    MaterialTheme {
+        BillImpactHeader(income = 5000.0, totalCosts = 1260.0)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CategoryHeaderPreview() {
+    MaterialTheme {
+        CategoryHeader(category = ExpenseCategory.HOUSING)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BillItemPreview() {
+    MaterialTheme {
+        BillItem(
+            expense = RecurringExpense("1", "Rent", 1200.0, ExpenseFrequency.MONTHLY, ExpenseCategory.HOUSING),
+            onAmountChange = {},
+            onDelete = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BillsUiRoutePreview() {
+    MaterialTheme {
+        BillsUiRoute(
+            uiState = BillsUiState.Success(
+                expenses = listOf(
+                    RecurringExpense("1", "Rent", 1200.0, ExpenseFrequency.MONTHLY, ExpenseCategory.HOUSING)
+                ),
+                monthlyIncome = 5000.0,
+                totalFixedCosts = 1200.0
+            ),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 

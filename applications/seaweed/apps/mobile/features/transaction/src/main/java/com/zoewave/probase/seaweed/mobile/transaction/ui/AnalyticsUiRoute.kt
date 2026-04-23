@@ -69,13 +69,13 @@ import java.util.Locale
 
 @Composable
 fun AnalyticsUiRoute(
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AnalyticsViewModel = hiltViewModel(),
-    onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    AnalyticsScreen(
+    AnalyticsUiRoute(
         uiState = uiState,
         onEvent = { event ->
             when (event) {
@@ -83,6 +83,21 @@ fun AnalyticsUiRoute(
             }
         },
         navTo = {}, // Placeholder if navigation from here is needed
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun AnalyticsUiRoute(
+    uiState: AnalyticsUiState,
+    onEvent: (AnalyticsUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AnalyticsScreen(
+        uiState = uiState,
+        onEvent = onEvent,
+        navTo = navTo,
         modifier = modifier
     )
 }
@@ -448,6 +463,40 @@ private fun HabitInsightCard(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HabitInsightCardPreview() {
+    MaterialTheme {
+        HabitInsightCard(
+            insight = HabitInsight("Coffee", 20, 80.0, 2.6, "You're doing this almost every day!"),
+            isSelected = false,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AnalyticsUiRoutePreview() {
+    MaterialTheme {
+        AnalyticsUiRoute(
+            uiState = AnalyticsUiState(
+                isLoading = false,
+                spendingTrends = mapOf(
+                    SpendingPeriod.DAILY to listOf(
+                        TrendPoint("Oct 01", 42.0, 1000L, 2, "Food")
+                    )
+                ),
+                habitInsights = listOf(
+                    HabitInsight("Coffee", 20, 80.0, 2.6, "You're doing this almost every day!")
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 

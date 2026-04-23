@@ -71,10 +71,10 @@ import java.util.Locale
 
 @Composable
 fun AddTransactionUiRoute(
+    navTo: (SeaweedDestination) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AddTransactionViewModel = hiltViewModel(),
-    navTo: (SeaweedDestination) -> Unit,
-    onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -84,7 +84,7 @@ fun AddTransactionUiRoute(
         }
     }
 
-    AddTransactionScreen(
+    AddTransactionUiRoute(
         uiState = uiState,
         onEvent = { event ->
             when (event) {
@@ -103,6 +103,21 @@ fun AddTransactionUiRoute(
                 else -> viewModel.onEvent(event)
             }
         },
+        navTo = navTo,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun AddTransactionUiRoute(
+    uiState: AddTransactionUiState,
+    onEvent: (AddTransactionUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AddTransactionScreen(
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo,
         modifier = modifier
     )
@@ -366,6 +381,36 @@ fun AddTransactionScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CaptureTypeSelectionSheetPreview() {
+    MaterialTheme {
+        CaptureTypeSelectionSheet(
+            comment = "Lunch with friends",
+            onCommentChanged = {},
+            onReceiptSelected = {},
+            onPurchaseSelected = {},
+            onDismiss = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AddTransactionUiRoutePreview() {
+    MaterialTheme {
+        AddTransactionUiRoute(
+            uiState = AddTransactionUiState(
+                amount = "42.00",
+                category = "Food",
+                description = "Lunch"
+            ),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 
