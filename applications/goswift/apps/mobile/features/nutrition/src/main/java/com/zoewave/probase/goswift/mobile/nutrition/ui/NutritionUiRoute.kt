@@ -23,22 +23,35 @@ import java.util.Locale
 @Composable
 fun NutritionUiRoute(
     modifier: Modifier = Modifier,
-    viewModel: NutritionViewModel = hiltViewModel()
+    viewModel: NutritionViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    NutritionScreen(
-        modifier = modifier,
+    NutritionUiRoute(
         uiState = uiState,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun NutritionUiRoute(
+    uiState: NutritionUiState,
+    onEvent: (NutritionUiEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    NutritionScreen(
+        uiState = uiState,
+        onEvent = onEvent,
+        modifier = modifier
     )
 }
 
 @Composable
 fun NutritionScreen(
-    modifier: Modifier = Modifier,
     uiState: NutritionUiState,
-    onEvent: (NutritionUiEvent) -> Unit
+    onEvent: (NutritionUiEvent) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var foodName by remember { mutableStateOf("") }
     var calories by remember { mutableStateOf("") }

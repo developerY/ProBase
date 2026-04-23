@@ -17,25 +17,42 @@ import java.util.Locale
 
 @Composable
 fun HomeUiRoute(
+    navTo: (GoSwiftDestination) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    navTo: (GoSwiftDestination) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    HomeScreen(
-        modifier = modifier,
+    HomeUiRoute(
         uiState = uiState,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        navTo = navTo,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun HomeUiRoute(
+    uiState: HomeUiState,
+    onEvent: (HomeUiEvent) -> Unit,
+    navTo: (GoSwiftDestination) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HomeScreen(
+        uiState = uiState,
+        onEvent = onEvent,
+        navTo = navTo,
+        modifier = modifier
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
     uiState: HomeUiState,
-    onEvent: (HomeUiEvent) -> Unit
+    onEvent: (HomeUiEvent) -> Unit,
+    @Suppress("UnusedParameter") navTo: (GoSwiftDestination) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         topBar = {
@@ -120,15 +137,44 @@ fun InfoSection(title: String, content: String, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
+private fun InfoSectionPreview() {
+    MaterialTheme {
+        InfoSection(title = "Title", content = "Content text")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeUiRoutePreview() {
+    MaterialTheme {
+        HomeUiRoute(
+            uiState = HomeUiState.Success(
+                currentCaffeineMg = 120,
+                nextDoseRecommendation = "Energy level optimal. Wait 2 hours.",
+                sleepQualityImpact = "High levels might disrupt sleep.",
+                sleepDuration = "7h 30m",
+                exerciseMinutes = 45
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 fun HomeScreenPreview() {
-    HomeScreen(
-        uiState = HomeUiState.Success(
-            currentCaffeineMg = 120,
-            nextDoseRecommendation = "Energy level optimal. Wait 2 hours.",
-            sleepQualityImpact = "High levels might disrupt sleep.",
-            sleepDuration = "7h 30m",
-            exerciseMinutes = 45
-        ),
-        onEvent = {}
-    )
+    MaterialTheme {
+        HomeScreen(
+            uiState = HomeUiState.Success(
+                currentCaffeineMg = 120,
+                nextDoseRecommendation = "Energy level optimal. Wait 2 hours.",
+                sleepQualityImpact = "High levels might disrupt sleep.",
+                sleepDuration = "7h 30m",
+                exerciseMinutes = 45
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
 }

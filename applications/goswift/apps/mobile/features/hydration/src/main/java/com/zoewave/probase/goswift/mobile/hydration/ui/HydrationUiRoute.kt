@@ -23,25 +23,40 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun HydrationUiRoute(
+    navTo: (GoSwiftDestination) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HydrationViewModel = hiltViewModel(),
-    navTo: (GoSwiftDestination) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    HydrationScreen(
-        modifier = modifier,
+    HydrationUiRoute(
         uiState = uiState,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        navTo = navTo,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun HydrationUiRoute(
+    uiState: HydrationUiState,
+    onEvent: (HydrationUiEvent) -> Unit,
+    @Suppress("UnusedParameter") navTo: (GoSwiftDestination) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HydrationScreen(
+        uiState = uiState,
+        onEvent = onEvent,
+        modifier = modifier
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HydrationScreen(
-    modifier: Modifier = Modifier,
     uiState: HydrationUiState,
-    onEvent: (HydrationUiEvent) -> Unit
+    onEvent: (HydrationUiEvent) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         topBar = {
