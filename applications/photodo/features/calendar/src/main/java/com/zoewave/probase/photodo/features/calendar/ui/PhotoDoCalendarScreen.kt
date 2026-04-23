@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.photodo.features.calendar.R
 
 @Composable
 internal fun PhotoDoCalendarScreen(
@@ -23,7 +25,7 @@ internal fun PhotoDoCalendarScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             Text(
-                text = "PhotoDo Calendar Sync",
+                text = stringResource(R.string.applications_photodo_features_calendar_title),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(16.dp)
             )
@@ -31,9 +33,15 @@ internal fun PhotoDoCalendarScreen(
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             if (uiState.isLoading) {
-                Text("Loading sync status...", modifier = Modifier.padding(16.dp))
+                Text(
+                    text = stringResource(R.string.applications_photodo_features_calendar_loading), 
+                    modifier = Modifier.padding(16.dp)
+                )
             } else {
-                Text("Task synchronization logic coming soon.", modifier = Modifier.padding(16.dp))
+                Text(
+                    text = stringResource(R.string.applications_photodo_features_calendar_coming_soon), 
+                    modifier = Modifier.padding(16.dp)
+                )
             }
         }
     }
