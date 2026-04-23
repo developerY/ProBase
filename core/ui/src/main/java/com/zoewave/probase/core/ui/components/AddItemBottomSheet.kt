@@ -35,10 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 // import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.core.ui.R
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,13 +85,17 @@ fun AddItemBottomSheet(
                 .navigationBarsPadding()
                 .padding(bottom = 24.dp),
         ) {
-            Text("Add New Item", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(bottom = 24.dp))
+            Text(
+                text = stringResource(R.string.core_ui_add_new_item), 
+                style = MaterialTheme.typography.headlineSmall, 
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
             OutlinedTextField(
                 value = itemName,
                 onValueChange = { itemName = it },
                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-                label = { Text("What needs to be done?") },
-                leadingIcon = { Icon(imageVector = Icons.Default.Edit, contentDescription = "Item Name") },
+                label = { Text(stringResource(R.string.core_ui_item_placeholder)) },
+                leadingIcon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.core_ui_item_placeholder)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { handleSave() })
@@ -100,12 +106,12 @@ fun AddItemBottomSheet(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(onClick = { handleSave() }, enabled = isSaveEnabled) {
-                    Icon(imageVector = Icons.Default.CheckCircle, contentDescription = "Save Item", modifier = Modifier.height(18.dp))
+                    Icon(imageVector = Icons.Default.CheckCircle, contentDescription = stringResource(R.string.core_ui_save_item), modifier = Modifier.height(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Save Item")
+                    Text(stringResource(R.string.core_ui_save_item))
                 }
             }
         }

@@ -35,9 +35,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.core.ui.R
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,13 +85,17 @@ fun AddCatBottomSheet(
                 .navigationBarsPadding()
                 .padding(bottom = 24.dp),
         ) {
-            Text("Add New Category", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(bottom = 24.dp))
+            Text(
+                text = stringResource(R.string.core_ui_add_new_category), 
+                style = MaterialTheme.typography.headlineSmall, 
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
             OutlinedTextField(
                 value = categoryName,
                 onValueChange = { categoryName = it },
                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-                label = { Text("Category Name") },
-                leadingIcon = { Icon(imageVector = Icons.Default.Create, contentDescription = "Category Name") },
+                label = { Text(stringResource(R.string.core_ui_category_name)) },
+                leadingIcon = { Icon(imageVector = Icons.Default.Create, contentDescription = stringResource(R.string.core_ui_category_name)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next),
             )
@@ -98,8 +104,8 @@ fun AddCatBottomSheet(
                 value = categoryDescription,
                 onValueChange = { categoryDescription = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Description") },
-                leadingIcon = { Icon(imageVector = Icons.Default.Create, contentDescription = "Category Description") },
+                label = { Text(stringResource(R.string.core_ui_description)) },
+                leadingIcon = { Icon(imageVector = Icons.Default.Create, contentDescription = stringResource(R.string.core_ui_description)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { handleSave() })
@@ -110,12 +116,12 @@ fun AddCatBottomSheet(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(onClick = { handleSave() }, enabled = isSaveEnabled) {
-                    Icon(imageVector = Icons.Default.CheckCircle, contentDescription = "Save Category", modifier = Modifier.height(18.dp))
+                    Icon(imageVector = Icons.Default.CheckCircle, contentDescription = stringResource(R.string.core_ui_save_category), modifier = Modifier.height(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Save Category")
+                    Text(stringResource(R.string.core_ui_save_category))
                 }
             }
         }
