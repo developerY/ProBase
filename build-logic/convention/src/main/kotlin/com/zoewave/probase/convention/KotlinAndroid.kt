@@ -3,8 +3,10 @@ package com.zoewave.probase.convention
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
@@ -15,17 +17,15 @@ internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension,
 ) {
     // Compile and Min SDK versions from the Version Catalog
-    commonExtension.compileSdk = libs.findVersion("android-compileSdk").get().toString().toInt()
-    commonExtension.defaultConfig.minSdk = libs.findVersion("android-minSdk").get().toString().toInt()
+    commonExtension.compileSdk = libs.findVersionInt("android-compileSdk")
+    commonExtension.defaultConfig.minSdk = libs.findVersionInt("android-minSdk")
 
     // Align source and target compatibility with Java 21
     commonExtension.compileOptions.sourceCompatibility = JavaVersion.VERSION_21
     commonExtension.compileOptions.targetCompatibility = JavaVersion.VERSION_21
 
     // Align Kotlin compiler tasks with the JVM 21 target
-    tasks.withType<KotlinCompile>().configureEach {
-        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
-    }
+    configureKotlin()
 }
 
 /**
@@ -51,4 +51,28 @@ internal fun Project.configureBuildTypes(
     // Ensure minification is disabled for debug builds
     val debug = commonExtension.buildTypes.getByName("debug")
     debug.isMinifyEnabled = false
+}
+
+private fun Project.configureKotlin() {
+    // Use jvmToolchain for consistent builds across environments
+    extensions.configure<KotlinAndroidProjectExtension> {
+        jvmToolchain(21)
+    }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+            // Enable warnings as errors for a "Gold Standard" codebase
+            allWarningsAsErrors.set(
+                providers.gradleProperty("allWarningsAsErrors")
+                    .getOrElse("false")
+                    .toBoolean()
+            )
+            freeCompilerArgs.addAll(
+                "-opt-in=kotlin.RequiresOptIn",
+                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+            )
+        }
+    }
 }

@@ -2,7 +2,6 @@ package com.zoewave.probase.convention
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.dependencies
 
 /**
  * A common convention plugin for Google Firebase dependencies.
@@ -12,14 +11,7 @@ import org.gradle.kotlin.dsl.dependencies
 class AndroidFirebaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            dependencies {
-                val bom = libs.findLibrary("firebase-bom").get()
-                add("implementation", platform(bom))
-                add("implementation", libs.findLibrary("firebase-analytics").get())
-                add("implementation", libs.findLibrary("firebase-crashlytics").get())
-                add("implementation", libs.findLibrary("firebase-installations").get())
-                add("implementation", libs.findLibrary("kotlinx-coroutines-play-services").get())
-            }
+            configureFirebase()
         }
     }
 }

@@ -19,9 +19,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.zoewave.probase.core.model.ble.DeviceService
 import com.zoewave.probase.core.model.ble.GattConnectionState
 import com.zoewave.probase.core.model.ble.ScanState
-import com.zoewave.probase.core.model.ble.DeviceService
 import com.zoewave.probase.features.ble.ui.components.BluetoothLeSuccessScreen
 import com.zoewave.probase.features.ble.ui.components.ErrorScreen
 import com.zoewave.probase.features.ble.ui.components.LoadingScreen
@@ -90,7 +90,7 @@ internal fun BluetoothLeRoute(
 
     Column(modifier = modifier.fillMaxSize()) {
         StatusBar(
-            permissionState = permissionState,
+            permissionState = permissionState!!,
             onManagePermissionsClick = {
                 permissionState?.launchMultiplePermissionRequest()
             },

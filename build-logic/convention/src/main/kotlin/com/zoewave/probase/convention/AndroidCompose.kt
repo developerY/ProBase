@@ -2,7 +2,9 @@ package com.zoewave.probase.convention
 
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 
 /**
  * Shared configuration logic for Jetpack Compose features.
@@ -34,5 +36,11 @@ internal fun Project.configureAndroidCompose(
             // Instrumentation testing with JUnit4
             add("androidTestImplementation", libs.findLibrary("androidx-compose-ui-test-junit4").get())
         }
+    }
+
+    extensions.configure<ComposeCompilerGradlePluginExtension> {
+        // includeSourceInformation = true // Optional: good for debugging
+        // metricsDestination = layout.buildDirectory.dir("compose_metrics")
+        // reportsDestination = layout.buildDirectory.dir("compose_reports")
     }
 }

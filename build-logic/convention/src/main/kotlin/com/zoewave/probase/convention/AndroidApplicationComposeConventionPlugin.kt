@@ -9,13 +9,13 @@ import org.gradle.kotlin.dsl.getByType
 class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
+            pluginManager.apply("composetemplate.android.application")
             // Apply the Compose Compiler Plugin (Critical for Kotlin 2.0+)
             pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
 
             val extension = extensions.getByType<ApplicationExtension>()
             configureAndroidCompose(extension)
 
-            // ✅ ADD THIS BLOCK
             // Applications always need 'activity-compose' to set the content view.
             dependencies {
                 add("implementation", libs.findLibrary("androidx-activity-compose").get())
