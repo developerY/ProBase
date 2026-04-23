@@ -54,9 +54,8 @@ import java.util.Locale
 fun ProjectCard(
     project: ProjectListUiModel,
     onEvent: (TasksEvent) -> Unit,
-    onDeleteClicked: (ProjectListUiModel) -> Unit,
     navTo: (PhotoTodoRoute?) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val errorColor = MaterialTheme.colorScheme.error
     val financialStatusColor = remember(project.isOverBudget, project.isNearBudgetLimit) {
@@ -125,7 +124,7 @@ fun ProjectCard(
                         )
                         if (project.progressText.isNotEmpty()) {
                             Text(
-                                text = " • ${project.progressText}",
+                                text = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_progress_label, project.progressText),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(start = 4.dp)
@@ -133,13 +132,15 @@ fun ProjectCard(
                         }
                     }
                     // 🚀 The Dynamic "Smart Subtitle"
-                    val subtitleText = remember(project.categoryName, project.dueDateMillis) {
+                    val bulletSeparator = stringResource(R.string.applications_photodo_apps_mobile_features_tasks_bullet_separator)
+                    val subtitleText = remember(project.categoryName, project.dueDateMillis, bulletSeparator) {
                         buildString {
                             append(project.categoryName)
                             project.dueDateMillis?.let { dueDate ->
                                 val formatter = SimpleDateFormat("MMM dd", Locale.getDefault())
                                 val dateStr = formatter.format(Date(dueDate))
-                                append(" • $dateStr")
+                                append(bulletSeparator)
+                                append(dateStr)
                             }
                         }
                     }
@@ -254,7 +255,6 @@ fun ProjectCardPreview() {
                 thumbnailUri = "https://picsum.photos/200" // Added for preview
             ),
             onEvent = {},
-            onDeleteClicked = {},
             navTo = {}
         )
     }
@@ -277,7 +277,6 @@ fun ProjectCardBudgetPreview() {
                 totalTasksCount = 10
             ),
             onEvent = {},
-            onDeleteClicked = {},
             navTo = {}
         )
     }
@@ -300,7 +299,6 @@ fun ProjectCardUrgentOverBudgetPreview() {
                 totalTasksCount = 12
             ),
             onEvent = {},
-            onDeleteClicked = {},
             navTo = {}
         )
     }

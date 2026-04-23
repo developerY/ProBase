@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_photodo_apps_wear_features_project_no_projects">No Projects Yet</string>
+    <string name="applications_photodo_apps_wear_features_project_spent_format">Spent: $%1$s</string>
+</resources>

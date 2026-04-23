@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_photodo_apps_wear_features_home_sync_phone">Open PhotoDo on phone to sync</string>
+    <string name="applications_photodo_apps_wear_features_home_sync_now">Sync Now</string>
+    <string name="applications_photodo_apps_wear_features_home_categories">Categories</string>
+    <string name="applications_photodo_apps_wear_features_home_tasks_count_format">%1$d/%2$d tasks</string>
+</resources>

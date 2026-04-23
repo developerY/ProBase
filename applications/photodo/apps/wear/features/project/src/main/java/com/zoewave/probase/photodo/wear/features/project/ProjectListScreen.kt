@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
@@ -32,7 +33,7 @@ fun ProjectListScreen(
                 CircularProgressIndicator()
             }
             ProjectListUiState.Empty -> {
-                Text("No Projects Yet")
+                Text(stringResource(R.string.applications_photodo_apps_wear_features_project_no_projects))
             }
             is ProjectListUiState.Success -> {
                 ScalingLazyColumn(

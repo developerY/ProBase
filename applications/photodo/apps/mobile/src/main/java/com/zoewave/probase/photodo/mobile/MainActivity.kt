@@ -11,24 +11,21 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
-import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
 import com.zoewave.probase.photodo.mobile.core.ui.theme.LocalPaneContrast
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.ui.components.PhotoDoMainScreen
+import com.zoewave.probase.photodo.mobile.ui.components.PhotoDoMainViewModel
+import com.zoewave.probase.photodo.mobile.ui.components.PhotoDoMainUiState
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    // 1. Inject the repo directly into the Activity to get the root state
-    @Inject
-    lateinit var appSettingsRepository: AppSettingsRepository
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,14 +42,11 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-
-            // 2. Collect the current theme state
-            val themePreference by appSettingsRepository.themePreferenceFlow.collectAsState(initial = "SYSTEM")
-            val palettePreference by appSettingsRepository.palettePreferenceFlow.collectAsState(initial = "DEFAULT") // NEW
-            val paneContrastPreference by appSettingsRepository.paneContrastFlow.collectAsState(initial = "TINTED")
+            val viewModel: PhotoDoMainViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
             // 3. Determine true/false for Dark Mode
-            val isDarkTheme = when (themePreference) {
+            val isDarkTheme = when (uiState.theme) {
                 "DARK" -> true
                 "LIGHT" -> false
                 else -> isSystemInDarkTheme() // "SYSTEM" fallback
@@ -61,15 +55,15 @@ class MainActivity : ComponentActivity() {
             // 4. Pass it to your beautiful custom theme!
             PhotoDoTheme(
                 darkTheme = isDarkTheme,
-                palette = palettePreference
+                palette = uiState.palette
             ) {
                 val windowSizeClass = calculateWindowSizeClass(this)
-                CompositionLocalProvider(LocalPaneContrast provides paneContrastPreference) {
+                CompositionLocalProvider(LocalPaneContrast provides uiState.paneContrast) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        PhotoDoMainScreen(windowSizeClass = windowSizeClass)
+                        PhotoDoMainScreen(windowSizeClass = windowSizeClass, viewModel = viewModel)
                     }
                 }
             }

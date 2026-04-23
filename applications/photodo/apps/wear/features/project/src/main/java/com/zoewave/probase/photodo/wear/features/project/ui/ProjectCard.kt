@@ -14,11 +14,13 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.TitleCard
 import com.zoewave.probase.photodo.data.util.loadAssetAsBitmap
 import com.zoewave.probase.photodo.wear.features.project.ProjectWearUiModel
+import com.zoewave.probase.photodo.wear.features.project.R
 import java.util.Locale
 
 @Composable
@@ -71,7 +73,12 @@ fun ProjectCard(
                 contentScale = ContentScale.Crop
             )
         }
-        Text("Spent: $${String.format(Locale.getDefault(), "%.2f", project.currentSpend)}")
+        Text(
+            text = stringResource(
+                R.string.applications_photodo_apps_wear_features_project_spent_format, 
+                String.format(Locale.getDefault(), "%.2f", project.currentSpend)
+            )
+        )
     }
 }
 
