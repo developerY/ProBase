@@ -2,10 +2,10 @@ package com.zoewave.probase.features.nfc.ui
 
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.features.nfc.ui.components.screens.ErrorScreen
 import com.zoewave.probase.features.nfc.ui.components.screens.LoadingScreen
 import com.zoewave.probase.features.nfc.ui.components.screens.NfcAppScreen
@@ -14,15 +14,28 @@ import com.zoewave.probase.features.nfc.ui.components.screens.NfcAppScreen
 @Composable
 fun NfcUiRoute(
     modifier: Modifier = Modifier,
-    viewModel: NfcViewModel = hiltViewModel()
+    viewModel: NfcViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    NfcUiRoute(
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun NfcUiRoute(
+    uiState: NfcUiState,
+    onEvent: (NfcRwEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     when (uiState) {
         is NfcUiState.Error -> {
             ErrorScreen(
-                message = (uiState as NfcUiState.Error).message,
-                onRetry = { viewModel.onEvent(NfcRwEvent.Retry) }
+                message = uiState.message,
+                onRetry = { onEvent(NfcRwEvent.Retry) }
             )
         }
 
@@ -39,9 +52,9 @@ fun NfcUiRoute(
         is NfcUiState.WriteError,
         is NfcUiState.WriteSuccess -> {
             NfcAppScreen(
-                modifier = modifier,
                 uiState = uiState,
-                onEvent = { event -> viewModel.onEvent(event) }
+                onEvent = onEvent,
+                modifier = modifier
             )
         }
     }

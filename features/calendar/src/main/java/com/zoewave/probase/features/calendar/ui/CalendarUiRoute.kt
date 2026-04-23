@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -46,7 +47,8 @@ import java.util.Locale
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CalendarUiRoute(
-    viewModel: CalendarViewModel = hiltViewModel()
+    modifier: Modifier = Modifier,
+    viewModel: CalendarViewModel = hiltViewModel(),
 ) {
     val calendarPermissionsState = rememberMultiplePermissionsState(
         listOf(
@@ -56,25 +58,41 @@ fun CalendarUiRoute(
     )
 
     if (calendarPermissionsState.allPermissionsGranted) {
-        val uiState by viewModel.uiState.collectAsState()
-        CalendarScreen(
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        CalendarUiRoute(
             uiState = uiState,
-            onDeleteEvent = viewModel::deleteEvent
+            onDeleteEvent = viewModel::deleteEvent,
+            modifier = modifier
         )
     } else {
         PermissionRequestContent(
-            permissionsState = calendarPermissionsState
+            permissionsState = calendarPermissionsState,
+            modifier = modifier
         )
     }
+}
+
+@Composable
+internal fun CalendarUiRoute(
+    uiState: CalendarUiState,
+    onDeleteEvent: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    CalendarScreen(
+        uiState = uiState,
+        onDeleteEvent = onDeleteEvent,
+        modifier = modifier
+    )
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun PermissionRequestContent(
-    permissionsState: MultiplePermissionsState
+    permissionsState: MultiplePermissionsState,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -114,9 +132,10 @@ private fun PermissionRequestContent(
 @Composable
 internal fun CalendarScreen(
     uiState: CalendarUiState,
-    onDeleteEvent: (Long) -> Unit
+    onDeleteEvent: (Long) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         if (uiState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else if (uiState.errorMessage != null) {
