@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_goswift_apps_mobile_features_home_title">GoSwift Dashboard</string>
+    <string name="applications_goswift_apps_mobile_features_home_refresh_cd">Refresh Health Data</string>
+    <string name="applications_goswift_apps_mobile_features_home_current_caffeine">Current Caffeine</string>
+    <string name="applications_goswift_apps_mobile_features_home_sleep_duration">Sleep Duration</string>
+    <string name="applications_goswift_apps_mobile_features_home_exercise">Exercise</string>
+    <string name="applications_goswift_apps_mobile_features_home_daily_hydration">Daily Hydration</string>
+    <string name="applications_goswift_apps_mobile_features_home_daily_calories">Daily Calories</string>
+    <string name="applications_goswift_apps_mobile_features_home_recommendation">Recommendation</string>
+    <string name="applications_goswift_apps_mobile_features_home_sleep_impact">Sleep Impact</string>
+    <string name="applications_goswift_apps_mobile_features_home_caffeine_mg">%1$d mg</string>
+    <string name="applications_goswift_apps_mobile_features_home_exercise_min">%1$d min</string>
+    <string name="applications_goswift_apps_mobile_features_home_hydration_logged">%1$.2f L logged</string>
+    <string name="applications_goswift_apps_mobile_features_home_calories_logged">%1$.0f kcal logged</string>
+</resources>

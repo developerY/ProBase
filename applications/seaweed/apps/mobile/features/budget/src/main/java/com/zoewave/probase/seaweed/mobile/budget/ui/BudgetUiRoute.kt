@@ -14,17 +14,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.seaweed.mobile.budget.R
 import com.zoewave.probase.seaweed.mobile.core.ui.components.CategoryBudgetProgressBar
 import com.zoewave.probase.seaweed.mobile.core.ui.components.UnallocatedMoneyCard
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import com.zoewave.probase.seaweed.model.FinancialProfile
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
+import com.zoewave.probase.core.ui.R as CoreUiR
 
 @Composable
 fun BudgetUiRoute(
@@ -74,10 +77,13 @@ fun BudgetScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Budget Management") },
+                title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_budget_title)) },
                 navigationIcon = {
                     IconButton(onClick = { onEvent(BudgetUiEvent.OnBackClicked) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(CoreUiR.string.cd_navigate_back)
+                        )
                     }
                 }
             )
@@ -109,7 +115,7 @@ fun BudgetScreen(
 
                     item {
                         Text(
-                            text = "Category Budgets",
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_budget_category_budgets),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(top = 8.dp)
@@ -150,9 +156,12 @@ private fun BudgetSummaryCard(profile: FinancialProfile) {
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Total Monthly Budget", style = MaterialTheme.typography.labelSmall)
             Text(
-                text = "$${String.format(Locale.getDefault(), "%.2f", profile.totalBudgetedAmount)}",
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_budget_total_monthly), 
+                style = MaterialTheme.typography.labelSmall
+            )
+            Text(
+                text = stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.2f", profile.totalBudgetedAmount)),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Black
             )
@@ -164,7 +173,10 @@ private fun BudgetSummaryCard(profile: FinancialProfile) {
                 trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f)
             )
             Text(
-                text = "$${String.format(Locale.getDefault(), "%.0f", profile.realStartingBalance)} available after fixed costs",
+                text = stringResource(
+                    R.string.applications_seaweed_apps_mobile_features_budget_available_after_fixed, 
+                    String.format(Locale.getDefault(), "$%.0f", profile.realStartingBalance)
+                ),
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -193,11 +205,19 @@ private fun BudgetItem(
                 )
                 Row {
                     IconButton(onClick = { onEdit(category) }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(20.dp))
+                        Icon(
+                            Icons.Default.Edit, 
+                            contentDescription = stringResource(CoreUiR.string.action_edit), 
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                     if (category.limitAmount != null) {
                         IconButton(onClick = onDelete) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(20.dp))
+                            Icon(
+                                Icons.Default.Delete, 
+                                contentDescription = stringResource(CoreUiR.string.action_delete), 
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
                 }
@@ -228,7 +248,7 @@ private fun BudgetEditBottomSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Set Budget for ${category.name}",
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_budget_set_for, category.name),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -236,7 +256,7 @@ private fun BudgetEditBottomSheet(
             OutlinedTextField(
                 value = limitInput,
                 onValueChange = { limitInput = it },
-                label = { Text("Monthly Limit") },
+                label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_budget_monthly_limit)) },
                 modifier = Modifier.fillMaxWidth(),
                 prefix = { Text("$") }
             )
@@ -248,7 +268,7 @@ private fun BudgetEditBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = limitInput.toDoubleOrNull() != null
             ) {
-                Text("Save Budget")
+                Text(stringResource(R.string.applications_seaweed_apps_mobile_features_budget_save))
             }
         }
     }

@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -50,6 +51,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import com.zoewave.probase.features.camera.R
 import com.zoewave.probase.features.camera.ui.CamEvent
 import com.zoewave.probase.features.camera.ui.CamUIState
 import kotlinx.coroutines.Dispatchers
@@ -57,6 +59,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.zoewave.probase.core.ui.R as CoreUiR
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -167,8 +170,8 @@ fun CameraScreen(
                                     override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                                         savedImageUri = Uri.fromFile(photoFile)
                                         onEvent(CamEvent.AddItem(
-                                            name = "Photo",
-                                            description = "Captured Image",
+                                            name = context.getString(R.string.features_camera_photo_label),
+                                            description = context.getString(R.string.features_camera_photo_desc),
                                             imgPath = savedImageUri.toString()
                                         ))
                                     }
@@ -182,7 +185,7 @@ fun CameraScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Capture Photo")
+                    Text(stringResource(R.string.features_camera_capture_photo))
                 }
 
                 // ✅ FIX: Use Coil to safely load the high-res image
@@ -190,7 +193,7 @@ fun CameraScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     AsyncImage(
                         model = uri,
-                        contentDescription = "Captured Image",
+                        contentDescription = stringResource(R.string.features_camera_cd_captured_image),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp),
@@ -202,9 +205,9 @@ fun CameraScreen(
     } else {
         // Permission Denied State
         val textToShow = if (cameraPermissionState.status.shouldShowRationale) {
-            "The camera is important for this feature. Please grant the permission."
+            stringResource(R.string.features_camera_permission_rationale)
         } else {
-            "Camera permission is required to take photos. Please enable it in settings."
+            stringResource(R.string.features_camera_permission_denied)
         }
 
         Column(
@@ -228,7 +231,12 @@ fun CameraScreen(
                     context.startActivity(intent)
                 }
             }) {
-                Text(if (cameraPermissionState.status.shouldShowRationale) "Grant Permission" else "Open Settings")
+                Text(
+                    if (cameraPermissionState.status.shouldShowRationale) 
+                        stringResource(CoreUiR.string.action_grant_permissions) 
+                    else 
+                        stringResource(CoreUiR.string.action_open_settings)
+                )
             }
         }
     }

@@ -10,15 +10,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.goswift.mobile.nutrition.R
 import com.zoewave.probase.goswift.mobile.nutrition.ui.components.CalorieBubbleContainer
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @Composable
 fun NutritionUiRoute(
@@ -78,13 +79,13 @@ fun NutritionScreen(
                 
                 Spacer(Modifier.height(24.dp))
                 
-                Text("Log Meal", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.applications_goswift_apps_mobile_features_nutrition_log_meal), style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(8.dp))
                 
                 OutlinedTextField(
                     value = foodName,
                     onValueChange = { foodName = it },
-                    label = { Text("Food Name") },
+                    label = { Text(stringResource(R.string.applications_goswift_apps_mobile_features_nutrition_food_name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -93,7 +94,7 @@ fun NutritionScreen(
                 OutlinedTextField(
                     value = calories,
                     onValueChange = { calories = it },
-                    label = { Text("Calories (kcal)") },
+                    label = { Text(stringResource(R.string.applications_goswift_apps_mobile_features_nutrition_calories_label)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -111,12 +112,16 @@ fun NutritionScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Add Log")
+                    Text(stringResource(R.string.applications_goswift_apps_mobile_features_nutrition_add_log))
                 }
                 
                 Spacer(Modifier.height(24.dp))
                 
-                Text("Recent Meals", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Start))
+                Text(
+                    text = stringResource(R.string.applications_goswift_apps_mobile_features_nutrition_recent_meals), 
+                    style = MaterialTheme.typography.titleMedium, 
+                    modifier = Modifier.align(Alignment.Start)
+                )
                 Spacer(Modifier.height(8.dp))
                 
                 LazyColumn(
@@ -144,8 +149,14 @@ fun DailyCalorieCard(calories: Double) {
         ) {
             Icon(Icons.Default.Restaurant, contentDescription = null, modifier = Modifier.size(48.dp))
             Spacer(Modifier.height(8.dp))
-            Text("Daily Calories", style = MaterialTheme.typography.labelLarge)
-            Text(String.format(Locale.getDefault(), "%.0f kcal", calories), style = MaterialTheme.typography.displayMedium)
+            Text(
+                text = stringResource(R.string.applications_goswift_apps_mobile_features_nutrition_daily_calories), 
+                style = MaterialTheme.typography.labelLarge
+            )
+            Text(
+                text = stringResource(R.string.applications_goswift_apps_mobile_features_nutrition_kcal_format, calories), 
+                style = MaterialTheme.typography.displayMedium
+            )
         }
     }
 }
@@ -166,7 +177,10 @@ fun MealLogItem(log: MealLog) {
                 Text(log.name, style = MaterialTheme.typography.bodyLarge)
                 Text(time, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
             }
-            Text(String.format(Locale.getDefault(), "%.0f kcal", log.calories), style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = stringResource(R.string.applications_goswift_apps_mobile_features_nutrition_kcal_format, log.calories), 
+                style = MaterialTheme.typography.titleMedium
+            )
         }
     }
 }

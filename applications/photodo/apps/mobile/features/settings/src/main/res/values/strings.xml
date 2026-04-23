@@ -34,6 +34,7 @@
     <string name="applications_photodo_apps_mobile_features_settings_about_privacy_policy">Privacy Policy</string>
     <string name="applications_photodo_apps_mobile_features_settings_about_eula">EULA</string>
     <string name="applications_photodo_apps_mobile_features_settings_about_copy_id">Copy ID</string>
+    <string name="applications_photodo_apps_mobile_features_settings_about_id_label_clipboard">Firebase Device ID</string>
     <string name="applications_photodo_apps_mobile_features_settings_about_id_copied">ID copied to clipboard</string>
     <string name="applications_photodo_apps_mobile_features_settings_about_regulatory_compliance_title">Regulatory Compliance</string>
     <string name="applications_photodo_apps_mobile_features_settings_about_age_verification_status_label">Age Verification Status</string>

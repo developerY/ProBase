@@ -24,7 +24,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.nfc.R
 import com.zoewave.probase.features.nfc.ui.NfcRwEvent
 import com.zoewave.probase.features.nfc.ui.NfcUiState
 
@@ -68,7 +70,7 @@ fun NfcWriteScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Write to NFC Tag", style = MaterialTheme.typography.headlineSmall)
+        Text(stringResource(R.string.features_nfc_write_title), style = MaterialTheme.typography.headlineSmall)
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
             value = text,
@@ -76,20 +78,20 @@ fun NfcWriteScreen(
                 text = newText
                 onEvent(NfcRwEvent.UpdateWriteText(newText))
             },
-            label = { Text("Text to Write") },
+            label = { Text(stringResource(R.string.features_nfc_label_text_to_write)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
         if (isWriting) {
-            Text("Approach an NFC tag to write the above text.")
+            Text(stringResource(R.string.features_nfc_approach_tag_instructions))
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = { onEvent(NfcRwEvent.StopWrite) }) {
-                Text("Stop Write")
+                Text(stringResource(R.string.features_nfc_action_stop_write))
             }
         } else {
             Button(onClick = { onEvent(NfcRwEvent.StartWrite) }) {
-                Text("Start Write")
+                Text(stringResource(R.string.features_nfc_action_start_write))
             }
         }
     }

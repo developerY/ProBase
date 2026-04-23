@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_photodo_features_smartadvice_title">AI Project Advisor</string>
+    <string name="applications_photodo_features_smartadvice_close">Close</string>
+    <string name="applications_photodo_features_smartadvice_analyzing">Gemini is analyzing your project&#8230;</string>
+    <string name="applications_photodo_features_smartadvice_try_again">Try Again</string>
+    <string name="applications_photodo_features_smartadvice_summary">Summary</string>
+    <string name="applications_photodo_features_smartadvice_tips">Expert Tips</string>
+    <string name="applications_photodo_features_smartadvice_risks">Potential Risks</string>
+    <string name="applications_photodo_features_smartadvice_tasks">Suggested Tasks</string>
+    <string name="applications_photodo_features_smartadvice_conversation">Conversation</string>
+    <string name="applications_photodo_features_smartadvice_input_placeholder">Ask about this project&#8230;</string>
+    <string name="applications_photodo_features_smartadvice_send">Send</string>
+</resources>

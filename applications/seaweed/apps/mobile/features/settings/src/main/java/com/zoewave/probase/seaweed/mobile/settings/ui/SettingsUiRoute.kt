@@ -7,11 +7,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
+import com.zoewave.probase.seaweed.mobile.settings.R
 import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
 import com.zoewave.probase.seaweed.model.ThemeMode
 import com.zoewave.probase.seaweed.model.UserSettings
@@ -64,7 +66,7 @@ fun SettingsScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Settings") })
+            TopAppBar(title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_title)) })
         },
         modifier = modifier.fillMaxSize()
     ) { padding ->
@@ -84,21 +86,21 @@ fun SettingsScreen(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    Text("Income", style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_income), style = MaterialTheme.typography.titleLarge)
                     OutlinedTextField(
                         value = settings.monthlyIncome.toString(),
                         onValueChange = { val income = it.toDoubleOrNull() ?: 0.0; onEvent(SettingsUiEvent.UpdateIncome(income)) },
-                        label = { Text("Monthly Income") },
+                        label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_monthly_income)) },
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Text("Theme Appearance", style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_appearance), style = MaterialTheme.typography.titleLarge)
                     ThemeConfigSelectionGroup(
                         currentConfig = settings.themeConfig,
                         onConfigSelected = { onEvent(SettingsUiEvent.UpdateTheme(it)) }
                     )
 
-                    Text("Theme Mode", style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_mode), style = MaterialTheme.typography.titleLarge)
                     ThemeModeSelectionGroup(
                         currentMode = settings.themeMode,
                         onModeSelected = { onEvent(SettingsUiEvent.UpdateThemeMode(it)) }
@@ -108,19 +110,19 @@ fun SettingsScreen(
                     AiConfigurationCard(
                         expanded = isAiExpanded,
                         onExpandToggle = { isAiExpanded = !isAiExpanded },
-                        title = "Seaweed Receipt AI",
-                        description = "Use Gemini to automatically extract merchant and amount from receipts."
+                        title = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_title),
+                        description = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_desc)
                     )
 
                     HorizontalDivider()
 
-                    Text("Developer Options", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_developer_options), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
                     Button(
                         onClick = { onEvent(SettingsUiEvent.GenerateTestData) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
                     ) {
-                        Text("Generate 3 Months of Random Data")
+                        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_generate_test_data))
                     }
                 }
             }
@@ -135,12 +137,12 @@ private fun ThemeConfigSelectionGroup(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         ThemeOption(
-            label = "Default",
+            label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_default),
             isSelected = currentConfig == SeaweedThemeConfig.DEFAULT,
             onClick = { onConfigSelected(SeaweedThemeConfig.DEFAULT) }
         )
         ThemeOption(
-            label = "Coral",
+            label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_coral),
             isSelected = currentConfig == SeaweedThemeConfig.CORAL,
             onClick = { onConfigSelected(SeaweedThemeConfig.CORAL) }
         )
@@ -154,17 +156,17 @@ private fun ThemeModeSelectionGroup(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         ThemeOption(
-            label = "System Default",
+            label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_mode_system),
             isSelected = currentMode == ThemeMode.SYSTEM,
             onClick = { onModeSelected(ThemeMode.SYSTEM) }
         )
         ThemeOption(
-            label = "Light",
+            label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_mode_light),
             isSelected = currentMode == ThemeMode.LIGHT,
             onClick = { onModeSelected(ThemeMode.LIGHT) }
         )
         ThemeOption(
-            label = "Dark",
+            label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_mode_dark),
             isSelected = currentMode == ThemeMode.DARK,
             onClick = { onModeSelected(ThemeMode.DARK) }
         )

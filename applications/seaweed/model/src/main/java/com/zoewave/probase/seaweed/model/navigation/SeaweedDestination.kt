@@ -73,19 +73,19 @@ sealed class SeaweedDestination(
 
     @Serializable
     data object Analytics : SeaweedDestination(
-        title = "Spending Analytics",
+        titleRes = R.string.applications_seaweed_model_route_analytics,
         icon = Icons.Default.PieChart // We can use Analytics or PieChart
     )
 
     @Serializable
     data object Camera : SeaweedDestination(
-        title = "Receipt Camera",
+        titleRes = R.string.applications_seaweed_model_route_camera,
         icon = Icons.Default.Home // Fallback icon
     )
 
     @Serializable
     data class SmartReceipt(val photoUri: String) : SeaweedDestination(
-        title = "Smart Receipt",
+        titleRes = R.string.applications_seaweed_model_route_smart_receipt,
         icon = Icons.Default.Home
     )
 
@@ -96,7 +96,7 @@ sealed class SeaweedDestination(
         val engineUsed: String,
         val whatIsThis: String? = null
     ) : SeaweedDestination(
-        title = "AI Debug Info",
+        titleRes = R.string.applications_seaweed_model_route_debug_ai,
         icon = Icons.Default.Settings
     )
 }

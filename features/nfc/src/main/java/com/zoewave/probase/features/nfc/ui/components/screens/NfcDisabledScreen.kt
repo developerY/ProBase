@@ -10,9 +10,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-////import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.nfc.R
 
 @Composable
 fun NfcDisabledScreen(onEnableNfc: () -> Unit) {
@@ -23,19 +24,10 @@ fun NfcDisabledScreen(onEnableNfc: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("NFC is disabled. Please enable NFC in your device settings.")
+        Text(stringResource(R.string.features_nfc_disabled_message))
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onEnableNfc) {
-            Text("Enable NFC")
+            Text(stringResource(R.string.features_nfc_action_enable_nfc))
         }
     }
 }
-/*
-@Preview
-@Composable
-fun NfcDisabledScreenPreview() {
-    NfcDisabledScreen(onEnableNfc = {
-        // Handle NFC enabling here if needed for preview
-    })
-}
-*/

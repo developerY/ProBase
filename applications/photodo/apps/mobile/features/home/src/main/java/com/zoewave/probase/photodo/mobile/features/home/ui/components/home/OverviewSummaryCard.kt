@@ -52,6 +52,8 @@ import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
 import com.zoewave.probase.photodo.mobile.features.home.R
 import com.zoewave.probase.photodo.mobile.features.home.ui.components.categories.CategoryOverviewUiModel
 
+import com.zoewave.probase.core.ui.R as CoreUiR
+
 /**
  * 🚀 High-Density Data Visualization Card.
  * Replaces the blue metrics card with a compact "Color Wheel of Events" (Donut Chart).
@@ -124,7 +126,10 @@ fun OverviewSummaryCard(
                     }
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        contentDescription = if (isExpanded) 
+                            stringResource(CoreUiR.string.action_collapse) 
+                        else 
+                            stringResource(CoreUiR.string.action_expand),
                         modifier = Modifier.size(24.dp)
                     )
                 }

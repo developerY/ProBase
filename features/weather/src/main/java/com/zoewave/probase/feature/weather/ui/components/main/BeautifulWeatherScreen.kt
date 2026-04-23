@@ -27,8 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.ashbike.features.weather.R
 import com.zoewave.probase.core.model.weather.Weather
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +39,7 @@ fun BeautifulWeatherScreenOne(weather: Weather) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Current Weather") }
+                title = { Text(stringResource(R.string.features_weather_title)) }
             )
         },
         content = { innerPadding ->
@@ -90,7 +92,7 @@ fun BeautifulWeatherCardOne(weather: Weather, modifier: Modifier = Modifier) {
             ) {
                 Icon(
                     imageVector = Icons.Filled.WbSunny,
-                    contentDescription = "Sunny",
+                    contentDescription = stringResource(R.string.features_weather_cd_sunny),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(64.dp)
                 )
@@ -98,7 +100,7 @@ fun BeautifulWeatherCardOne(weather: Weather, modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
             // Temperature display.
             Text(
-                text = "${weather.temperature}°C",
+                text = stringResource(R.string.features_weather_temp_c_format, weather.temperature),
                 style = MaterialTheme.typography.displaySmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface

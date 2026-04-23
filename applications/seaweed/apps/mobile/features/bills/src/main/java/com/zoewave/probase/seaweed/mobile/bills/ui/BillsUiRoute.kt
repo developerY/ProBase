@@ -13,17 +13,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.seaweed.mobile.bills.R
 import com.zoewave.probase.seaweed.model.ExpenseCategory
 import com.zoewave.probase.seaweed.model.ExpenseFrequency
 import com.zoewave.probase.seaweed.model.RecurringExpense
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
+import com.zoewave.probase.core.ui.R as CoreUiR
 
 @Composable
 fun BillsUiRoute(
@@ -74,17 +77,23 @@ fun BillsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Cyclic Bills") },
+                title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_bills_title)) },
                 navigationIcon = {
                     IconButton(onClick = { onEvent(BillsUiEvent.OnBackClicked) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(CoreUiR.string.cd_navigate_back)
+                        )
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { /* TODO: Show Add Dialog */ }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Bill")
+                Icon(
+                    Icons.Default.Add, 
+                    contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_bills_add)
+                )
             }
         },
         modifier = modifier.fillMaxSize()
@@ -141,15 +150,21 @@ private fun BillImpactHeader(income: Double, totalCosts: Double) {
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Real Starting Balance", style = MaterialTheme.typography.labelLarge)
             Text(
-                text = "$${String.format(Locale.getDefault(), "%.2f", remaining)}",
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_bills_impact_header), 
+                style = MaterialTheme.typography.labelLarge
+            )
+            Text(
+                text = stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.2f", remaining)),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Black
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "After -$${String.format(Locale.getDefault(), "%.0f", totalCosts)} in fixed monthly bills",
+                text = stringResource(
+                    R.string.applications_seaweed_apps_mobile_features_bills_after_fixed, 
+                    String.format(Locale.getDefault(), "%.0f", totalCosts)
+                ),
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -206,14 +221,18 @@ private fun BillItem(
                     it.toDoubleOrNull()?.let { amount -> onAmountChange(amount) }
                 },
                 modifier = Modifier.width(100.dp),
-                label = { Text("Amount") },
+                label = { Text(stringResource(CoreUiR.string.core_ui_text_amount)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium
             )
             
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
+                Icon(
+                    Icons.Default.Delete, 
+                    contentDescription = stringResource(CoreUiR.string.action_delete), 
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }

@@ -41,12 +41,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.zoewave.probase.photodo.features.smartadvice.R
 import com.zoewave.probase.photodo.features.smartadvice.domain.ProjectAdvice
 import dev.jeziellago.compose.markdowntext.MarkdownText
 
@@ -95,10 +97,16 @@ internal fun SmartAdviceScreen(
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.padding(start = 8.dp))
-                    Text("AI Project Advisor", style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        text = stringResource(R.string.applications_photodo_features_smartadvice_title), 
+                        style = MaterialTheme.typography.titleLarge
+                    )
                 }
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "Close")
+                    Icon(
+                        Icons.Default.Close, 
+                        contentDescription = stringResource(R.string.applications_photodo_features_smartadvice_close)
+                    )
                 }
             }
         }
@@ -117,7 +125,10 @@ internal fun SmartAdviceScreen(
                     ) {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.tertiary)
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("Gemini is analyzing your project...", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            text = stringResource(R.string.applications_photodo_features_smartadvice_analyzing), 
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     }
                 }
 
@@ -149,7 +160,7 @@ internal fun SmartAdviceScreen(
                             modifier = Modifier.padding(top = 16.dp)
                         )
                         Button(onClick = onRetry, modifier = Modifier.padding(top = 24.dp)) {
-                            Text("Try Again")
+                            Text(stringResource(R.string.applications_photodo_features_smartadvice_try_again))
                         }
                     }
                 }
@@ -170,7 +181,11 @@ private fun AdviceContent(advice: ProjectAdvice, chatHistory: List<ChatMessage>)
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f))
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Summary", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.tertiary)
+                    Text(
+                        text = stringResource(R.string.applications_photodo_features_smartadvice_summary), 
+                        style = MaterialTheme.typography.labelLarge, 
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
                     MarkdownText(
                         markdown = advice.summary,
                         style = TextStyle(
@@ -185,17 +200,31 @@ private fun AdviceContent(advice: ProjectAdvice, chatHistory: List<ChatMessage>)
         }
 
         if (advice.tips.isNotEmpty()) {
-            item { AdviceSection(title = "Expert Tips", items = advice.tips) }
+            item { 
+                AdviceSection(
+                    title = stringResource(R.string.applications_photodo_features_smartadvice_tips), 
+                    items = advice.tips
+                ) 
+            }
         }
 
         if (advice.potentialRisks.isNotEmpty()) {
-            item { AdviceSection(title = "Potential Risks", items = advice.potentialRisks, color = MaterialTheme.colorScheme.error) }
+            item { 
+                AdviceSection(
+                    title = stringResource(R.string.applications_photodo_features_smartadvice_risks), 
+                    items = advice.potentialRisks, 
+                    color = MaterialTheme.colorScheme.error
+                ) 
+            }
         }
 
         if (advice.suggestedChecklistItems.isNotEmpty()) {
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Suggested Tasks", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = stringResource(R.string.applications_photodo_features_smartadvice_tasks), 
+                        style = MaterialTheme.typography.titleMedium
+                    )
                     advice.suggestedChecklistItems.forEach { item ->
                         Surface(
                             shape = MaterialTheme.shapes.small,
@@ -218,7 +247,10 @@ private fun AdviceContent(advice: ProjectAdvice, chatHistory: List<ChatMessage>)
         if (chatHistory.isNotEmpty()) {
             item {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                Text("Conversation", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = stringResource(R.string.applications_photodo_features_smartadvice_conversation), 
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
             items(chatHistory) { message ->
                 ChatBubble(message)
@@ -249,7 +281,9 @@ private fun ChatInput(
                 value = text,
                 onValueChange = { text = it },
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("Ask about this project...") },
+                placeholder = { 
+                    Text(stringResource(R.string.applications_photodo_features_smartadvice_input_placeholder)) 
+                },
                 singleLine = false,
                 maxLines = 3,
                 enabled = !isSending
@@ -264,7 +298,10 @@ private fun ChatInput(
                 if (isSending) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                 } else {
-                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
+                    Icon(
+                        Icons.AutoMirrored.Filled.Send, 
+                        contentDescription = stringResource(R.string.applications_photodo_features_smartadvice_send)
+                    )
                 }
             }
         }

@@ -34,4 +34,19 @@
     <string name="core_ui_quick_expense_add">Add amount</string>
     <string name="core_ui_quick_expense_subtract">Subtract amount</string>
     <string name="core_ui_quick_expense_amount_format">$%1$d</string>
+    <string name="core_ui_text_amount">Amount</string>
+    <string name="core_ui_add_new_category">Add New Category</string>
+    <string name="core_ui_category_name">Category Name</string>
+    <string name="core_ui_description">Description</string>
+    <string name="core_ui_save_category">Save Category</string>
+    <string name="core_ui_add_new_list">Add New List</string>
+    <string name="core_ui_list_name">List Name</string>
+    <string name="core_ui_save_list">Save List</string>
+    <string name="core_ui_add_new_item">Add New Item</string>
+    <string name="core_ui_item_placeholder">What needs to be done?</string>
+    <string name="core_ui_save_item">Save Item</string>
+    <string name="core_ui_action_add">Add</string>
+    <string name="core_ui_action_combine">Combine</string>
+    <string name="core_ui_currency_format">$%1$s</string>
+    <string name="core_ui_action_retry">Retry</string>
 </resources>

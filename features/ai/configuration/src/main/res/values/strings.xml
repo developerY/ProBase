@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="features_ai_configuration_title">AI Configuration</string>
+    <string name="features_ai_configuration_desc">Configure your generative AI settings.</string>
+    <string name="features_ai_configuration_status_off">Off (No AI)</string>
+    <string name="features_ai_configuration_status_local">On (Local AI)</string>
+    <string name="features_ai_configuration_status_cloud">On (Cloud-Enhanced)</string>
+    <string name="features_ai_configuration_enable_features">Enable AI Features</string>
+    <string name="features_ai_configuration_byok_title">BYOK (Bring Your Own Key)</string>
+    <string name="features_ai_configuration_byok_desc">Get your free API key from Google AI Studio. Cloud features include mandatory reporting tools; flagging an output will redirect you to Google’s external feedback portal.</string>
+    <string name="features_ai_configuration_key_configured">✅ Gemini API Key is configured</string>
+    <string name="features_ai_configuration_test_connection">Test Connection &amp; Discover Models</string>
+    <string name="features_ai_configuration_update_key">Update API Key</string>
+    <string name="features_ai_configuration_enter_key">Enter Gemini API Key</string>
+    <string name="features_ai_configuration_save_key">Save Key</string>
+    <string name="features_ai_configuration_preferred_model">Preferred AI Model</string>
+    <string name="features_ai_configuration_model_placeholder">Gemini Model</string>
+    <string name="features_ai_configuration_test_connection_hint">Test connection to see models</string>
+    <string name="features_ai_configuration_choose_model_hint">Choose your preferred Gemini model.</string>
+    <string name="features_ai_configuration_unlock_models_hint">Test connection to unlock available models.</string>
+    <string name="features_ai_configuration_verify_model_title">Step 2: Verify Model Functionality</string>
+    <string name="features_ai_configuration_verify_model_desc">Ping the selected model to confirm it responds.</string>
+    <string name="features_ai_configuration_ping_model">Ping Selected Model</string>
+</resources>

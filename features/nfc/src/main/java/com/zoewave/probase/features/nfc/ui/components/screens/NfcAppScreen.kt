@@ -25,7 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.nfc.R
 import com.zoewave.probase.features.nfc.ui.NfcRwEvent
 import com.zoewave.probase.features.nfc.ui.NfcUiState
 
@@ -42,7 +44,7 @@ fun NfcAppScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("NFC Scanner App") }
+                title = { Text(stringResource(R.string.features_nfc_app_title)) }
             )
         },
         bottomBar = {
@@ -50,20 +52,20 @@ fun NfcAppScreen(
                 NavigationBarItem(
                     selected = selectedTab == "scan",
                     onClick = { selectedTab = "scan" },
-                    icon = { Icon(Icons.Default.Nfc, contentDescription = "Scan") },
-                    label = { Text("Scan") }
+                    icon = { Icon(Icons.Default.Nfc, contentDescription = stringResource(R.string.features_nfc_tab_scan)) },
+                    label = { Text(stringResource(R.string.features_nfc_tab_scan)) }
                 )
                 NavigationBarItem(
                     selected = selectedTab == "write",
                     onClick = { selectedTab = "write" },
-                    icon = { Icon(Icons.Default.Save, contentDescription = "Write") },
-                    label = { Text("Write") }
+                    icon = { Icon(Icons.Default.Save, contentDescription = stringResource(R.string.features_nfc_tab_write)) },
+                    label = { Text(stringResource(R.string.features_nfc_tab_write)) }
                 )
                 NavigationBarItem(
                     selected = selectedTab == "settings",
                     onClick = { selectedTab = "settings" },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                    label = { Text("Settings") }
+                    icon = { Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.features_nfc_tab_settings)) },
+                    label = { Text(stringResource(R.string.features_nfc_tab_settings)) }
                 )
             }
         },
@@ -151,7 +153,7 @@ fun NfcAppScreen(
                                 .padding(innerPadding),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("Unknown Tab")
+                            Text(stringResource(R.string.features_nfc_unknown_tab))
                         }
                     }
                 }

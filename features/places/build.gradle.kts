@@ -14,9 +14,7 @@ dependencies {
     // --- 1. Shared Modules ---
     implementation(project(":core:model"))
     implementation(project(":core:network"))
-
-    // If you have specific UI components in core:ui, include this too:
-    // implementation(project(":core:ui"))
+    implementation(project(":core:ui"))
 
     // --- 2. Core Android ---
     implementation(libs.androidx.core.ktx)

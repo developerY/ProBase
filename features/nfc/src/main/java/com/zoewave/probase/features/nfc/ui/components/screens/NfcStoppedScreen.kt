@@ -10,7 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.nfc.R
 import com.zoewave.probase.features.nfc.ui.NfcRwEvent
 
 // NFC available but not scanning yet.
@@ -23,10 +25,10 @@ fun NfcStoppedScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("NFC is ready. Tap the button to start scanning.")
+        Text(stringResource(R.string.features_nfc_ready_instructions))
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = { onEvent(NfcRwEvent.StartScan) }) {
-            Text("Start Scan")
+            Text(stringResource(R.string.features_nfc_action_start_scan))
         }
     }
 }
