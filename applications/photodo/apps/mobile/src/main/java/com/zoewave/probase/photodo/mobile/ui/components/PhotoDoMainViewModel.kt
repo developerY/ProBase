@@ -24,10 +24,16 @@ class PhotoDoMainViewModel @Inject constructor(
 
     val uiState: StateFlow<PhotoDoMainUiState> = combine(
         appSettingsRepository.isAiEnabledFlow,
+        appSettingsRepository.themePreferenceFlow,
+        appSettingsRepository.palettePreferenceFlow,
+        appSettingsRepository.paneContrastFlow,
         _backStack
-    ) { isAiEnabled, backStack ->
+    ) { isAiEnabled, theme, palette, contrast, backStack ->
         PhotoDoMainUiState(
             isAiEnabled = isAiEnabled,
+            theme = theme,
+            palette = palette,
+            paneContrast = contrast,
             backStack = backStack,
             currentRoute = backStack.lastOrNull() ?: PhotoTodoRoute.Home
         )
@@ -61,6 +67,9 @@ class PhotoDoMainViewModel @Inject constructor(
 
 data class PhotoDoMainUiState(
     val isAiEnabled: Boolean = false,
+    val theme: String = "SYSTEM",
+    val palette: String = "DEFAULT",
+    val paneContrast: String = "TINTED",
     val backStack: List<PhotoTodoRoute> = listOf(PhotoTodoRoute.Home),
     val currentRoute: PhotoTodoRoute = PhotoTodoRoute.Home
 )

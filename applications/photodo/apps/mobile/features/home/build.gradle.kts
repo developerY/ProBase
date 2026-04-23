@@ -4,6 +4,7 @@ plugins {
     id("composetemplate.android.library.compose")
     id("composetemplate.android.hilt")
     id("composetemplate.kotlin.serialization")
+    id("composetemplate.test")
 }
 
 android {

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_photodo_apps_wear_features_task_project_not_found">Project Not Found</string>
+    <string name="applications_photodo_apps_wear_features_task_thumbnail_cd">Project Thumbnail</string>
+    <string name="applications_photodo_apps_wear_features_task_photos_count_format">Total Photos: %1$d</string>
+    <string name="applications_photodo_apps_wear_features_task_tasks">Tasks</string>
+</resources>

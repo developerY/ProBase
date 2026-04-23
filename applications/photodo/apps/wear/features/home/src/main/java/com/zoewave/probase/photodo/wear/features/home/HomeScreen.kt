@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
@@ -41,6 +42,7 @@ import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.TitleCard
 import com.zoewave.probase.photodo.data.util.loadAssetAsBitmap
+import com.zoewave.probase.photodo.wear.features.home.R
 
 @Composable
 fun HomeScreen(
@@ -67,7 +69,7 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Open PhotoDo on phone to sync",
+                        text = stringResource(R.string.applications_photodo_apps_wear_features_home_sync_phone),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -82,10 +84,10 @@ fun HomeScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Sync"
+                            contentDescription = stringResource(R.string.applications_photodo_apps_wear_features_home_sync_now)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Sync Now")
+                        Text(stringResource(R.string.applications_photodo_apps_wear_features_home_sync_now))
                     }
                 }
             }
@@ -97,7 +99,7 @@ fun HomeScreen(
                 ) {
                     item {
                         ListHeader {
-                            Text("Categories")
+                            Text(stringResource(R.string.applications_photodo_apps_wear_features_home_categories))
                         }
                     }
                     items(uiState.categories) { category ->
@@ -136,7 +138,7 @@ private fun CategoryItem(
         onClick = onClick,
         title = titleBlock,
         subtitle = {
-            Text("${category.completedTasks}/${category.totalTasks} tasks")
+            Text(stringResource(R.string.applications_photodo_apps_wear_features_home_tasks_count_format, category.completedTasks, category.totalTasks))
         },
         modifier = Modifier.fillMaxWidth()
     ) {

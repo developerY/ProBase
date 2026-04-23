@@ -8,6 +8,7 @@ plugins {
 
     // ✅ 2. Required for Type-Safe Navigation & Nav3
     id("composetemplate.kotlin.serialization")
+    id("composetemplate.test")
 }
 
 android {

@@ -10,6 +10,7 @@ class FeatureConventionPlugin : Plugin<Project> {
             pluginManager.apply {
                 apply("composetemplate.android.library")
                 apply("composetemplate.android.hilt")
+                apply("composetemplate.test")
             }
 
             dependencies {

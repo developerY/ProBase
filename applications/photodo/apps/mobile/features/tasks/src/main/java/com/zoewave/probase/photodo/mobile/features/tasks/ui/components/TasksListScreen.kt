@@ -158,7 +158,6 @@ fun TasksListScreen(
                         ProjectCard(
                             project = project,
                             onEvent = onEvent, // Pass the channel straight down!
-                            onDeleteClicked = { onEvent(TasksEvent.OnProjectToDeleteChanged(it)) },
                             navTo = navTo
                         )
                     }

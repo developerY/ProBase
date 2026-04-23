@@ -20,6 +20,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
@@ -68,7 +69,7 @@ fun TaskDetailScreen(
                 CircularProgressIndicator()
             }
             TaskDetailUiState.Empty -> {
-                Text("Project Not Found")
+                Text(stringResource(R.string.applications_photodo_apps_wear_features_task_project_not_found))
             }
             is TaskDetailUiState.Success -> {
                 ScalingLazyColumn(
@@ -93,7 +94,7 @@ fun TaskDetailScreen(
                             ) {
                                 Image(
                                     bitmap = bitmap.asImageBitmap(),
-                                    contentDescription = "Project Thumbnail",
+                                    contentDescription = stringResource(R.string.applications_photodo_apps_wear_features_task_thumbnail_cd),
                                     modifier = Modifier
                                         .size(140.dp)
                                         .rotate(90f)
@@ -108,7 +109,7 @@ fun TaskDetailScreen(
                     if (uiState.photoCount > 0) {
                         item {
                             Text(
-                                "Total Photos: ${uiState.photoCount}",
+                                text = stringResource(R.string.applications_photodo_apps_wear_features_task_photos_count_format, uiState.photoCount),
                                 style = MaterialTheme.typography.labelSmall,
                                 modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                             )
@@ -118,7 +119,7 @@ fun TaskDetailScreen(
                     // --- TASKS ---
                     item {
                         Text(
-                            "Tasks",
+                            text = stringResource(R.string.applications_photodo_apps_wear_features_task_tasks),
                             style = MaterialTheme.typography.labelSmall,
                             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                         )
