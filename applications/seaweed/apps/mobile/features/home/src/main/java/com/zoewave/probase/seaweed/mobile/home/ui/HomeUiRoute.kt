@@ -1,5 +1,6 @@
 package com.zoewave.probase.seaweed.mobile.home.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,9 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -36,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -146,6 +150,7 @@ private fun HomeExpandedContent(
                 flexibleRemaining = uiState.flexibleMoneyRemaining,
                 monthProgress = uiState.monthProgress
             )
+            AnalyticsPromotionCard(navTo = navTo)
             OverviewSummaryCard(
                 categories = uiState.categoriesSummary,
                 navTo = navTo
@@ -211,6 +216,9 @@ private fun HomeCompactContent(
             )
         }
         item {
+            AnalyticsPromotionCard(navTo = navTo)
+        }
+        item {
             FixedCostsSummaryCard(
                 totalFixedCosts = uiState.totalFixedCosts,
                 income = uiState.monthlyIncome,
@@ -246,6 +254,62 @@ private fun HomeCompactContent(
                 transaction = transaction,
                 onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
                 onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
+            )
+        }
+    }
+}
+
+@Composable
+fun AnalyticsPromotionCard(
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = { navTo(SeaweedDestination.Analytics) },
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+        ),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.tertiary),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Analytics,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onTertiary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Spending Insights",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "See trends and habits over the last 3 months",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+                )
+            }
+            
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
             )
         }
     }
