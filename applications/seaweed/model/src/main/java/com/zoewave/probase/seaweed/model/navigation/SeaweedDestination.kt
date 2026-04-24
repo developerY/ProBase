@@ -103,7 +103,6 @@ sealed class SeaweedDestination(
 
 val topLevelDestinations = listOf(
     SeaweedDestination.Home,
-    SeaweedDestination.Budget,
     SeaweedDestination.Transactions(),
     SeaweedDestination.Settings
 )

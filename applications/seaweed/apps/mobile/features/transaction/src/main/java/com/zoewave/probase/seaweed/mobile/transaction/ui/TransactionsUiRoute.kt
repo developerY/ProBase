@@ -182,12 +182,6 @@ fun TransactionsListPane(
                             contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_analytics_title)
                         )
                     }
-                    IconButton(onClick = { onEvent(TransactionsUiEvent.NavigateTo(SeaweedDestination.Budget)) }) {
-                        Icon(
-                            Icons.Default.PieChart, 
-                            contentDescription = stringResource(CoreUiR.string.action_settings)
-                        )
-                    }
                 }
             )
         },
