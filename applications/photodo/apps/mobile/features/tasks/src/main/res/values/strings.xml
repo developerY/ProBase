@@ -56,6 +56,7 @@
     <string name="applications_photodo_apps_mobile_features_tasks_financial_status_content_desc">Financial Status</string>
     <string name="applications_photodo_apps_mobile_features_tasks_budget_label">Budget</string>
     <string name="applications_photodo_apps_mobile_features_tasks_amount_format">$%1$d</string>
+    <string name="applications_photodo_apps_mobile_features_tasks_budget_ratio_format">%1$s / %2$s</string>
     <string name="applications_photodo_apps_mobile_features_tasks_detail_get_ai_help_content_desc">Get AI Help</string>
     <string name="applications_photodo_apps_mobile_features_tasks_detail_help_from_genai">Help from GenAI</string>
     <string name="applications_photodo_apps_mobile_features_tasks_detail_project_not_found">Project has been deleted.</string>

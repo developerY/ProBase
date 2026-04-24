@@ -214,7 +214,11 @@ fun ProjectCard(
                     }
 
                     Text(
-                        text = "${currencyFormatter.format(project.currentSpend)} / ${currencyFormatter.format(project.projectBudget)}",
+                        text = stringResource(
+                            R.string.applications_photodo_apps_mobile_features_tasks_budget_ratio_format,
+                            currencyFormatter.format(project.currentSpend),
+                            currencyFormatter.format(project.projectBudget)
+                        ),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = if (project.isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface

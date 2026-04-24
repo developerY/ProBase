@@ -11,4 +11,9 @@
     <string name="applications_photodo_features_smartadvice_conversation">Conversation</string>
     <string name="applications_photodo_features_smartadvice_input_placeholder">Ask about this project&#8230;</string>
     <string name="applications_photodo_features_smartadvice_send">Send</string>
+    <string name="applications_photodo_features_smartadvice_error_missing_data">Missing project data or API key.</string>
+    <string name="applications_photodo_features_smartadvice_error_ai_prefix">Error: %1$s</string>
+    <string name="applications_photodo_features_smartadvice_error_generic">Unknown error</string>
+    <string name="applications_photodo_features_smartadvice_error_no_response">No response from AI</string>
+    <string name="applications_photodo_features_smartadvice_error_empty_response">Empty response from AI</string>
 </resources>

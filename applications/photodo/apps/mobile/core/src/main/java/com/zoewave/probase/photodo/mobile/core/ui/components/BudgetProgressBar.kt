@@ -61,7 +61,11 @@ fun BudgetProgressBar(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "$formattedSpend / $formattedBudget",
+                text = stringResource(
+                    R.string.applications_photodo_apps_mobile_core_budget_ratio_format,
+                    formattedSpend,
+                    formattedBudget
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -96,7 +96,11 @@ fun BudgetProgressBarSummary(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "$formattedSpend / $formattedBudget",
+                text = stringResource(
+                    R.string.applications_photodo_apps_mobile_features_tasks_budget_ratio_format,
+                    formattedSpend,
+                    formattedBudget
+                ),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = if (rawPercentage >= 1.0f) FontWeight.Bold else FontWeight.Normal,
                 color = if (rawPercentage >= 1.0f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
