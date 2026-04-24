@@ -148,7 +148,12 @@ private fun HomeExpandedContent(
             RealMoneyHeroCard(
                 flexibleRemaining = uiState.flexibleMoneyRemaining,
                 monthProgress = uiState.monthProgress,
-                onAnalyticsClick = { navTo(SeaweedDestination.Analytics) }
+                trailingContent = {
+                    AnalyticsPromotionCard(
+                        onClick = { navTo(SeaweedDestination.Analytics) },
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
             )
             OverviewSummaryCard(
                 categories = uiState.categoriesSummary,
@@ -212,7 +217,12 @@ private fun HomeCompactContent(
             RealMoneyHeroCard(
                 flexibleRemaining = uiState.flexibleMoneyRemaining,
                 monthProgress = uiState.monthProgress,
-                onAnalyticsClick = { navTo(SeaweedDestination.Analytics) }
+                trailingContent = {
+                    AnalyticsPromotionCard(
+                        onClick = { navTo(SeaweedDestination.Analytics) },
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
             )
         }
         item {
@@ -251,6 +261,35 @@ private fun HomeCompactContent(
                 transaction = transaction,
                 onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
                 onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
+            )
+        }
+    }
+}
+
+@Composable
+fun AnalyticsPromotionCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier.size(48.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+        ),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Analytics,
+                contentDescription = "Spending Insights",
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.tertiary
             )
         }
     }

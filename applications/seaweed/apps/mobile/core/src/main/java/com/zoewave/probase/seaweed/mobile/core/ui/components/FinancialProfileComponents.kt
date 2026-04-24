@@ -22,7 +22,7 @@ fun RealMoneyHeroCard(
     flexibleRemaining: Double,
     monthProgress: Float,
     modifier: Modifier = Modifier,
-    onAnalyticsClick: (() -> Unit)? = null
+    trailingContent: @Composable (BoxScope.() -> Unit)? = null
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -59,22 +59,11 @@ fun RealMoneyHeroCard(
                 )
             }
 
-            if (onAnalyticsClick != null) {
-                IconButton(
-                    onClick = onAnalyticsClick,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            shape = CircleShape
-                        )
+            if (trailingContent != null) {
+                Box(
+                    modifier = Modifier.align(Alignment.TopEnd)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Analytics,
-                        contentDescription = "Spending Analytics",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    trailingContent()
                 }
             }
         }
