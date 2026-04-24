@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_kocolor_apps_mobile_core_app_name">KoColor</string>
+    <string name="applications_kocolor_apps_mobile_core_theme_system">System</string>
+    <string name="applications_kocolor_apps_mobile_core_theme_light">Light</string>
+    <string name="applications_kocolor_apps_mobile_core_theme_dark">Dark</string>
+    <string name="applications_kocolor_apps_mobile_core_palette_classic">Classic</string>
+    <string name="applications_kocolor_apps_mobile_core_palette_pastel">Pastel</string>
+    <string name="applications_kocolor_apps_mobile_core_palette_vibrant">Vibrant</string>
+    <string name="applications_kocolor_apps_mobile_core_palette_luxury">Luxury</string>
+    <string name="applications_kocolor_apps_mobile_core_palette_dynamic">Dynamic (Android 12+)</string>
+    <string name="applications_kocolor_apps_mobile_core_settings_theme_title">App Theme</string>
+    <string name="applications_kocolor_apps_mobile_core_settings_palette_title">Color Palette</string>
+</resources>
