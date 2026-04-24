@@ -25,9 +25,16 @@ fun SeaweedBottomBar(
                 else -> ""
             }
             NavigationBarItem(
-                selected = currentDestination::class == destination::class || 
-                           (destination is SeaweedDestination.Transactions && currentDestination is SeaweedDestination.CategoryGrid) ||
-                           (destination is SeaweedDestination.Transactions && currentDestination is SeaweedDestination.Budget),
+                selected = when (destination) {
+                    is SeaweedDestination.Home -> currentDestination is SeaweedDestination.Home || 
+                                                 currentDestination is SeaweedDestination.Budget || 
+                                                 currentDestination is SeaweedDestination.CategoryGrid
+                    is SeaweedDestination.Transactions -> currentDestination is SeaweedDestination.Transactions || 
+                                                         currentDestination is SeaweedDestination.Analytics || 
+                                                         currentDestination is SeaweedDestination.Bills
+                    is SeaweedDestination.Settings -> currentDestination is SeaweedDestination.Settings
+                    else -> false
+                },
                 onClick = { navTo(destination) },
                 icon = { Icon(imageVector = destination.icon, contentDescription = label) },
                 label = { Text(label) }
