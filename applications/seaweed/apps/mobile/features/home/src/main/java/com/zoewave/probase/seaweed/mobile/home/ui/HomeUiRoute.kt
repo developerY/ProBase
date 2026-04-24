@@ -281,7 +281,12 @@ fun AnalyticsPromotionCard(
             contentColor = MaterialTheme.colorScheme.onTertiaryContainer
         ),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp,
+            pressedElevation = 2.dp,
+            focusedElevation = 8.dp,
+            hoveredElevation = 8.dp
+        )
     ) {
         Column(
             modifier = Modifier
@@ -294,14 +299,14 @@ fun AnalyticsPromotionCard(
                 imageVector = Icons.Default.Analytics,
                 contentDescription = "Spending Insights",
                 modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.tertiary
+                tint = MaterialTheme.colorScheme.onTertiaryContainer
             )
             Text(
                 text = "Analytics",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
                 fontSize = 10.sp,
-                color = MaterialTheme.colorScheme.tertiary
+                color = MaterialTheme.colorScheme.onTertiaryContainer
             )
         }
     }
