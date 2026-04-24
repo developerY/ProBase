@@ -1,6 +1,5 @@
 package com.zoewave.probase.seaweed.mobile.home.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -148,9 +147,9 @@ private fun HomeExpandedContent(
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(24.dp)) {
             RealMoneyHeroCard(
                 flexibleRemaining = uiState.flexibleMoneyRemaining,
-                monthProgress = uiState.monthProgress
+                monthProgress = uiState.monthProgress,
+                onAnalyticsClick = { navTo(SeaweedDestination.Analytics) }
             )
-            AnalyticsPromotionCard(navTo = navTo)
             OverviewSummaryCard(
                 categories = uiState.categoriesSummary,
                 navTo = navTo
@@ -212,11 +211,9 @@ private fun HomeCompactContent(
         item {
             RealMoneyHeroCard(
                 flexibleRemaining = uiState.flexibleMoneyRemaining,
-                monthProgress = uiState.monthProgress
+                monthProgress = uiState.monthProgress,
+                onAnalyticsClick = { navTo(SeaweedDestination.Analytics) }
             )
-        }
-        item {
-            AnalyticsPromotionCard(navTo = navTo)
         }
         item {
             FixedCostsSummaryCard(
@@ -254,62 +251,6 @@ private fun HomeCompactContent(
                 transaction = transaction,
                 onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
                 onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
-            )
-        }
-    }
-}
-
-@Composable
-fun AnalyticsPromotionCard(
-    navTo: (SeaweedDestination) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = { navTo(SeaweedDestination.Analytics) },
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-        ),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.tertiary),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Analytics,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onTertiary,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Spending Insights",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "See trends and habits over the last 3 months",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
-                )
-            }
-            
-            Icon(
-                Icons.Default.ChevronRight,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
             )
         }
     }
