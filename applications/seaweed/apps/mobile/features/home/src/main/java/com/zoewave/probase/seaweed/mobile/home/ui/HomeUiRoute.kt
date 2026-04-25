@@ -3,7 +3,6 @@ package com.zoewave.probase.seaweed.mobile.home.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,7 +27,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -52,31 +50,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.core.util.CurrencyUtils
-import com.zoewave.probase.seaweed.mobile.home.R
 import com.zoewave.probase.seaweed.mobile.core.ui.components.CategoryBudgetProgressBar
 import com.zoewave.probase.seaweed.mobile.core.ui.components.DonutChart
 import com.zoewave.probase.seaweed.mobile.core.ui.components.FixedCostsSummaryCard
 import com.zoewave.probase.seaweed.mobile.core.ui.components.RealMoneyHeroCard
 import com.zoewave.probase.seaweed.mobile.core.ui.components.UnallocatedMoneyCard
+import com.zoewave.probase.seaweed.mobile.home.R
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import com.zoewave.probase.seaweed.model.SpendingType
-import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
-import java.util.Locale
 import kotlin.math.absoluteValue
-import com.zoewave.probase.core.ui.R as CoreUiR
 
 @Composable
 fun HomeUiRoute(
@@ -180,14 +171,14 @@ private fun HomeExpandedContent(
             }
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 60 })) {
                 RealMoneyHeroCard(
-                    flexibleRemaining = profile.flexibleMoneyRemainingCents,
+                    flexibleRemainingCents = profile.flexibleMoneyRemainingCents,
                     monthProgress = profile.monthProgress
                 )
             }
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 80 })) {
                 FixedCostsSummaryCard(
-                    totalFixedCosts = profile.totalFixedCostsCents,
-                    income = profile.monthlyIncomeCents,
+                    totalFixedCostsCents = profile.totalFixedCostsCents,
+                    incomeCents = profile.monthlyIncomeCents,
                     navTo = navTo
                 )
             }
@@ -203,7 +194,7 @@ private fun HomeExpandedContent(
                 )
             }
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 140 })) {
-                UnallocatedMoneyCard(unallocatedAmount = profile.unallocatedMoneyCents)
+                UnallocatedMoneyCard(unallocatedAmountCents = profile.unallocatedMoneyCents)
             }
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -255,6 +246,8 @@ private fun HomeCompactContent(
         isVisible = true
     }
 
+    val profile = uiState.profile
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -284,8 +277,8 @@ private fun HomeCompactContent(
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 60 })
             ) {
                 RealMoneyHeroCard(
-                    flexibleRemaining = uiState.profile.flexibleMoneyRemainingCents,
-                    monthProgress = uiState.profile.monthProgress
+                    flexibleRemainingCents = profile.flexibleMoneyRemainingCents,
+                    monthProgress = profile.monthProgress
                 )
             }
         }
@@ -295,8 +288,8 @@ private fun HomeCompactContent(
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 80 })
             ) {
                 FixedCostsSummaryCard(
-                    totalFixedCosts = uiState.profile.totalFixedCostsCents,
-                    income = uiState.profile.monthlyIncomeCents,
+                    totalFixedCostsCents = profile.totalFixedCostsCents,
+                    incomeCents = profile.monthlyIncomeCents,
                     navTo = navTo
                 )
             }
@@ -327,7 +320,7 @@ private fun HomeCompactContent(
                 visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 140 })
             ) {
-                UnallocatedMoneyCard(unallocatedAmount = uiState.profile.unallocatedMoneyCents)
+                UnallocatedMoneyCard(unallocatedAmountCents = profile.unallocatedMoneyCents)
             }
         }
         item {
