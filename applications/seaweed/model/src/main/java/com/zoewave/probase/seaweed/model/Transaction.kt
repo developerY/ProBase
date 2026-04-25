@@ -9,5 +9,6 @@ data class Transaction(
     val category: String,
     val description: String,
     val date: Long,
-    val receiptUri: String? = null
+    val receiptUri: String? = null,
+    val importance: SpendingImportance = SpendingImportance.REQUIRED
 )

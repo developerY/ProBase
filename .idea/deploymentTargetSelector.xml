@@ -37,10 +37,10 @@
       </SelectionState>
       <SelectionState runConfigName="applications.photodo.apps.mobile">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-04-18T18:57:49.441733Z">
+        <DropdownSelection timestamp="2026-04-25T18:39:40.239030Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Pixel_10_Pro_Fold.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Pixel_10_Pro.avd" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -51,7 +51,7 @@
       </SelectionState>
       <SelectionState runConfigName="applications.seaweed.apps.mobile">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-04-24T20:58:48.181150Z">
+        <DropdownSelection timestamp="2026-04-25T18:40:41.370248Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Pixel_10_Pro.avd" />

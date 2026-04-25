@@ -29,6 +29,7 @@ data class RecurringExpense(
     val category: ExpenseCategory,
     val isDefault: Boolean = false,
     val nextBillingDate: Long? = null,
+    val importance: SpendingImportance = SpendingImportance.REQUIRED
 ) {
     val monthlyImpact: Double
         get() = when (frequency) {
