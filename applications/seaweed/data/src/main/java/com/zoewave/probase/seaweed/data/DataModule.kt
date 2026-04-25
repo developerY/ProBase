@@ -32,4 +32,10 @@ abstract class DataModule {
     abstract fun bindBudgetTargetRepository(
         impl: BudgetTargetRepositoryImpl
     ): BudgetTargetRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCategoryRepository(
+        impl: CategoryRepositoryImpl
+    ): CategoryRepository
 }

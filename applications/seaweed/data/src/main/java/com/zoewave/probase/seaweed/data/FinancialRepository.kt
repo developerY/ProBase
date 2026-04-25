@@ -4,7 +4,6 @@ import com.zoewave.probase.seaweed.model.CategoryOverview
 import com.zoewave.probase.seaweed.model.FinancialProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,13 +19,16 @@ class FinancialRepository @Inject constructor(
     fun getFinancialProfile(): Flow<FinancialProfile> =
         combine(
             userSettingsRepository.getUserSettings(),
-            recurringExpenseRepository.getTotalMonthlyImpact(),
+            //recurringExpenseRepository.getTotalMonthlyImpact(),
+            recurringExpenseRepository.getTotalMonthlyImpactCents(),
             transactionRepository.getAllTransactions(),
-            budgetTargetRepository.getTotalBudgetedAmount(),
+            //budgetTargetRepository.getTotalBudgetedAmountCents()
+            budgetTargetRepository.getTotalBudgetedAmountCents(),
             getCategoryOverviews()
         ) { settings, fixedCosts, transactions, budgeted, categories ->
-            val income = settings.monthlyIncome
-            val realStarting = income - fixedCosts
+            val income = (settings.monthlyIncome * 100).toLong()
+            val fixed = (fixedCosts * 100).toLong()
+            val realStarting = income - fixed
             
             val now = Calendar.getInstance()
             val startOfMonth = now.apply {
@@ -38,18 +40,20 @@ class FinancialRepository @Inject constructor(
             }.timeInMillis
 
             val monthlyVariable = transactions
-                .filter { it.date >= startOfMonth && it.amount < 0 }
-                .sumOf { it.amount }
+                .filter { it.timestamp >= startOfMonth && it.amountCents < 0 }
+                .sumOf { it.amountCents }
                 .absoluteValue
 
+            val budgetedCents = (budgeted * 100).toLong()
+
             FinancialProfile(
-                monthlyIncome = income,
-                totalFixedCosts = fixedCosts,
-                realStartingBalance = realStarting,
-                monthlyVariableSpending = monthlyVariable,
-                flexibleMoneyRemaining = realStarting - monthlyVariable,
-                totalBudgetedAmount = budgeted,
-                unallocatedMoney = realStarting - budgeted,
+                monthlyIncomeCents = income,
+                totalFixedCostsCents = fixed,
+                realStartingBalanceCents = realStarting,
+                monthlyVariableSpendingCents = monthlyVariable,
+                flexibleMoneyRemainingCents = realStarting - monthlyVariable,
+                totalBudgetedAmountCents = budgetedCents,
+                unallocatedMoneyCents = realStarting - budgetedCents,
                 categoryOverviews = categories,
                 monthProgress = getMonthProgress()
             )
@@ -69,25 +73,26 @@ class FinancialRepository @Inject constructor(
                 set(Calendar.MILLISECOND, 0)
             }.timeInMillis
 
-            val monthlyTransactions = transactions.filter { it.date >= startOfMonth && it.amount < 0 }
+            val monthlyTransactions = transactions.filter { it.timestamp >= startOfMonth && it.amountCents < 0 }
             val budgetsMap = budgets.associateBy { it.categoryName }
             
-            val allCategoryNames = (monthlyTransactions.map { it.category } + budgets.map { it.categoryName }).distinct()
+            // This is still using category strings from transactions, need to bridge with categoryId later
+            val allCategoryNames = (monthlyTransactions.map { it.categoryId } + budgets.map { it.categoryName }).distinct()
 
             allCategoryNames.map { categoryName ->
-                val spent = monthlyTransactions.filter { it.category == categoryName }.sumOf { it.amount }.absoluteValue
-                val count = monthlyTransactions.count { it.category == categoryName }
-                val limit = budgetsMap[categoryName]?.limitAmount
+                val spent = monthlyTransactions.filter { it.categoryId == categoryName }.sumOf { it.amountCents }.absoluteValue
+                val count = monthlyTransactions.count { it.categoryId == categoryName }
+                val limit = budgetsMap[categoryName]?.limitAmountCents
                 
                 CategoryOverview(
                     name = categoryName,
-                    totalAmount = spent,
+                    totalAmountCents = spent,
                     transactionCount = count,
-                    limitAmount = limit,
-                    remainingAmount = limit?.let { it - spent },
-                    progressPercentage = limit?.let { (spent / it).toFloat() } ?: 0f
+                    limitAmountCents = limit,
+                    remainingAmountCents = limit?.let { it - spent },
+                    progressPercentage = limit?.let { (spent.toFloat() / it).coerceIn(0f, 2f) } ?: 0f
                 )
-            }.sortedByDescending { it.totalAmount }
+            }.sortedByDescending { it.totalAmountCents }
         }
 
     fun getMonthProgress(): Float {
@@ -96,9 +101,4 @@ class FinancialRepository @Inject constructor(
         val currentDay = now.get(Calendar.DAY_OF_MONTH)
         return currentDay.toFloat() / daysInMonth
     }
-    
-    // Helper methods for individual metrics
-    fun getMonthlyIncome(): Flow<Double> = userSettingsRepository.getUserSettings().map { it.monthlyIncome }
-    fun getTotalMonthlyFixedCosts(): Flow<Double> = recurringExpenseRepository.getTotalMonthlyImpact()
-    fun getFlexibleMoneyRemaining(): Flow<Double> = getFinancialProfile().map { it.flexibleMoneyRemaining }
 }

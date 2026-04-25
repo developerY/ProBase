@@ -26,6 +26,6 @@ class BudgetTargetRepositoryImpl @Inject constructor(
         dao.deleteBudget(categoryName)
     }
 
-    override fun getTotalBudgetedAmount(): Flow<Double> =
-        getAllBudgets().map { budgets -> budgets.sumOf { it.limitAmount } }
+    override fun getTotalBudgetedAmountCents(): Flow<Long> =
+        getAllBudgets().map { budgets -> budgets.sumOf { it.limitAmountCents } }
 }

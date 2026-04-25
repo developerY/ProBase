@@ -7,6 +7,6 @@ interface RecurringExpenseRepository {
     fun getAllExpenses(): Flow<List<RecurringExpense>>
     suspend fun saveExpense(expense: RecurringExpense)
     suspend fun deleteExpense(id: String)
-    fun getTotalMonthlyImpact(): Flow<Double>
+    fun getTotalMonthlyImpactCents(): Flow<Long>
     suspend fun initializeDefaultExpenses()
 }

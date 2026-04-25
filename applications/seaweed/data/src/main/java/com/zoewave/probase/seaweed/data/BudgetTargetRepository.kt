@@ -8,5 +8,5 @@ interface BudgetTargetRepository {
     fun getBudget(categoryName: String): Flow<BudgetTarget?>
     suspend fun saveBudget(budget: BudgetTarget)
     suspend fun deleteBudget(categoryName: String)
-    fun getTotalBudgetedAmount(): Flow<Double>
+    fun getTotalBudgetedAmountCents(): Flow<Long>
 }
