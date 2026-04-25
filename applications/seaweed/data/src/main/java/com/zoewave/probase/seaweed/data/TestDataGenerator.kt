@@ -1,6 +1,7 @@
 package com.zoewave.probase.seaweed.data
 
 import com.zoewave.probase.seaweed.model.BudgetTarget
+import com.zoewave.probase.seaweed.model.SpendingImportance
 import com.zoewave.probase.seaweed.model.Transaction
 import java.util.UUID
 import javax.inject.Inject
@@ -48,12 +49,18 @@ class TestDataGenerator @Inject constructor(
                 else -> Random.nextDouble(1.0, 100.0)
             } * -1.0 
 
+            val importance = when (category) {
+                "Shopping", "Entertainment" -> SpendingImportance.OPTIONAL
+                else -> SpendingImportance.REQUIRED
+            }
+
             val transaction = Transaction(
                 id = UUID.randomUUID().toString(),
                 amount = amount,
                 category = category,
                 description = "Random $category expense",
-                date = date
+                date = date,
+                importance = importance
             )
             transactionRepository.addTransaction(transaction)
         }
@@ -62,13 +69,18 @@ class TestDataGenerator @Inject constructor(
     suspend fun generateSingleRandomTransaction() {
         val category = categories.random()
         val amount = Random.nextDouble(5.0, 100.0) * -1.0
+        val importance = when (category) {
+            "Shopping", "Entertainment" -> SpendingImportance.OPTIONAL
+            else -> SpendingImportance.REQUIRED
+        }
         
         val transaction = Transaction(
             id = UUID.randomUUID().toString(),
             amount = amount,
             category = category,
             description = "Quick random expense",
-            date = System.currentTimeMillis()
+            date = System.currentTimeMillis(),
+            importance = importance
         )
         transactionRepository.addTransaction(transaction)
     }
