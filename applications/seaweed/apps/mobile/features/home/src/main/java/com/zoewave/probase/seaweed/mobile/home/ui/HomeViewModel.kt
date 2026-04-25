@@ -49,6 +49,7 @@ class HomeViewModel @Inject constructor(
                 }
                 is HomeUiEvent.DeleteCategory -> {
                     repository.deleteTransactionsByCategory(event.category)
+                    budgetRepository.deleteBudget(event.category)
                     // TODO: handle category entity deletion if needed
                 }
                 is HomeUiEvent.CombineCategories -> {
