@@ -153,7 +153,7 @@ fun BudgetScreen(
                         BudgetItem(
                             category = category,
                             onEdit = { editingCategory = it },
-                            onDelete = { onEvent(BudgetUiEvent.DeleteBudget(category.name)) }
+                            onDelete = { onEvent(BudgetUiEvent.DeleteBudget(category.id)) }
                         )
                     }
                 }
@@ -163,7 +163,7 @@ fun BudgetScreen(
                         category = editingCategory!!,
                         onDismiss = { editingCategory = null },
                         onSave = { limit ->
-                            onEvent(BudgetUiEvent.UpdateBudget(editingCategory!!.name, limit))
+                            onEvent(BudgetUiEvent.UpdateBudget(editingCategory!!.id, limit))
                             editingCategory = null
                         }
                     )

@@ -32,10 +32,10 @@ class BudgetViewModel @Inject constructor(
         viewModelScope.launch {
             when (event) {
                 is BudgetUiEvent.UpdateBudget -> {
-                    repository.saveBudget(BudgetTarget(event.categoryName, (event.limitAmount * 100).toLong()))
+                    repository.saveBudget(BudgetTarget(event.categoryId, (event.limitAmount * 100).toLong()))
                 }
                 is BudgetUiEvent.DeleteBudget -> {
-                    repository.deleteBudget(event.categoryName)
+                    repository.deleteBudget(event.categoryId)
                 }
                 BudgetUiEvent.OnBackClicked -> { /* Handled in Route */ }
             }
@@ -49,7 +49,7 @@ sealed interface BudgetUiState {
 }
 
 sealed interface BudgetUiEvent {
-    data class UpdateBudget(val categoryName: String, val limitAmount: Double) : BudgetUiEvent
-    data class DeleteBudget(val categoryName: String) : BudgetUiEvent
+    data class UpdateBudget(val categoryId: String, val limitAmount: Double) : BudgetUiEvent
+    data class DeleteBudget(val categoryId: String) : BudgetUiEvent
     object OnBackClicked : BudgetUiEvent
 }
