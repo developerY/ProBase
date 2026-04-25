@@ -407,8 +407,10 @@ private fun AnalyticsContent(
                             )
                         } else {
                             dayTransactions.forEach { transaction ->
+                                val categoryName = uiState.categoriesMap[transaction.categoryId]?.name ?: transaction.categoryId
                                 TransactionItem(
                                     transaction = transaction,
+                                    categoryName = categoryName,
                                     onDelete = {},
                                     onClick = {}
                                 )

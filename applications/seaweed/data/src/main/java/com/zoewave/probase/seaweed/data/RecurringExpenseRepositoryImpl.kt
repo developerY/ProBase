@@ -36,8 +36,8 @@ class RecurringExpenseRepositoryImpl @Inject constructor(
                 RecurringExpense(UUID.randomUUID().toString(), "Electricity", 0L, ExpenseFrequency.MONTHLY, "utilities_id", true, defaultType = SpendingType.NEED),
                 RecurringExpense(UUID.randomUUID().toString(), "Mobile Phone", 0L, ExpenseFrequency.MONTHLY, "comm_id", true, defaultType = SpendingType.NEED),
                 RecurringExpense(UUID.randomUUID().toString(), "Internet", 0L, ExpenseFrequency.MONTHLY, "comm_id", true, defaultType = SpendingType.NEED),
-                RecurringExpense(UUID.randomUUID().toString(), "Netflix", 0L, ExpenseFrequency.MONTHLY, "sub_id", true, defaultType = SpendingType.WANT),
-                RecurringExpense(UUID.randomUUID().toString(), "Spotify", 0L, ExpenseFrequency.MONTHLY, "sub_id", true, defaultType = SpendingType.WANT),
+                RecurringExpense(UUID.randomUUID().toString(), "Netflix", 0L, ExpenseFrequency.MONTHLY, "entertainment_id", true, defaultType = SpendingType.WANT),
+                RecurringExpense(UUID.randomUUID().toString(), "Spotify", 0L, ExpenseFrequency.MONTHLY, "entertainment_id", true, defaultType = SpendingType.WANT),
                 RecurringExpense(UUID.randomUUID().toString(), "Gym", 0L, ExpenseFrequency.MONTHLY, "sub_id", true, defaultType = SpendingType.WANT)
             )
             dao.insertExpenses(defaults.map { it.toEntity() })

@@ -33,14 +33,15 @@ class CategoryRepositoryImpl @Inject constructor(
         val existing = dao.getAllCategories().first()
         if (existing.isEmpty()) {
             val defaults = listOf(
-                Category(UUID.randomUUID().toString(), "Rent", SpendingType.NEED),
-                Category(UUID.randomUUID().toString(), "Groceries", SpendingType.NEED),
-                Category(UUID.randomUUID().toString(), "Healthcare", SpendingType.NEED),
-                Category(UUID.randomUUID().toString(), "Utilities", SpendingType.NEED),
-                Category(UUID.randomUUID().toString(), "Netflix", SpendingType.WANT),
-                Category(UUID.randomUUID().toString(), "Spotify", SpendingType.WANT),
-                Category(UUID.randomUUID().toString(), "Dining Out", SpendingType.WANT),
-                Category(UUID.randomUUID().toString(), "Shopping", SpendingType.WANT)
+                Category("housing_id", "Rent", SpendingType.NEED),
+                Category("food_id", "Groceries", SpendingType.NEED),
+                Category("health_id", "Healthcare", SpendingType.NEED),
+                Category("utilities_id", "Utilities", SpendingType.NEED),
+                Category("comm_id", "Communication", SpendingType.NEED),
+                Category("entertainment_id", "Entertainment", SpendingType.WANT),
+                Category("sub_id", "Subscriptions", SpendingType.WANT),
+                Category("dining_id", "Dining Out", SpendingType.WANT),
+                Category("shopping_id", "Shopping", SpendingType.WANT)
             )
             defaults.forEach { dao.insertCategory(it.toEntity()) }
         }

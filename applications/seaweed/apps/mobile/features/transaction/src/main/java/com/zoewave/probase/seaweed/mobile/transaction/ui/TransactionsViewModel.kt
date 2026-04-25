@@ -67,6 +67,7 @@ class TransactionsViewModel @Inject constructor(
         val selectedTab = params[5] as TransactionTab
 
         val categories = categoryModels.map { it.name }.sorted()
+        val catMap = categoryModels.associate { it.id to it.name }
         val filteredTransactions = if (selectedCategoryName == null) {
             transactions
         } else {
@@ -77,6 +78,7 @@ class TransactionsViewModel @Inject constructor(
             transactions = transactions,
             filteredTransactions = filteredTransactions,
             categories = categories,
+            categoryMap = catMap,
             selectedCategory = selectedCategoryName,
             selectedTransactionId = selectedTransactionId,
             selectedTransaction = selectedTransaction,

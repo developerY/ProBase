@@ -22,6 +22,7 @@ import com.zoewave.probase.core.ui.R as CoreUiR
 @Composable
 fun TransactionItem(
     transaction: Transaction,
+    categoryName: String,
     onDelete: () -> Unit,
     onClick: () -> Unit = {},
     isSelected: Boolean = false
@@ -45,7 +46,7 @@ fun TransactionItem(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                 )
-                Text(text = transaction.categoryId, style = MaterialTheme.typography.bodySmall)
+                Text(text = categoryName, style = MaterialTheme.typography.bodySmall)
             }
             Text(
                 text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_currency_format, CurrencyUtils.formatCents(transaction.amountCents)),
@@ -66,6 +67,7 @@ private fun TransactionItemPreview() {
     MaterialTheme {
         TransactionItem(
             transaction = Transaction("1", 4200L, "food_id", "Lunch with friends", 1000L, defaultType = SpendingType.NEED),
+            categoryName = "Food",
             onDelete = {},
             onClick = {},
             isSelected = false
@@ -79,6 +81,7 @@ private fun TransactionItemSelectedPreview() {
     MaterialTheme {
         TransactionItem(
             transaction = Transaction("1", -1500L, "coffee_id", "Morning Latte", 1000L, defaultType = SpendingType.WANT),
+            categoryName = "Coffee",
             onDelete = {},
             onClick = {},
             isSelected = true

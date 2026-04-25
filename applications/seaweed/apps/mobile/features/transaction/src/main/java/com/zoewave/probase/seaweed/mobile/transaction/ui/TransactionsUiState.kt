@@ -10,6 +10,7 @@ sealed interface TransactionsUiState {
         val transactions: List<Transaction> = emptyList(),
         val filteredTransactions: List<Transaction> = emptyList(),
         val categories: List<String> = emptyList(),
+        val categoryMap: Map<String, String> = emptyMap(),
         val selectedCategory: String? = null,
         val selectedTransactionId: String? = null,
         val selectedTransaction: Transaction? = null,

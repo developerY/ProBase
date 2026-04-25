@@ -221,9 +221,11 @@ private fun HomeExpandedContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(uiState.transactions.take(10), key = { it.id }) { transaction ->
+                    val categoryName = profile.categoryOverviews.find { it.id == transaction.categoryId }?.name ?: transaction.categoryId
                     AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 180 })) {
                         TransactionItem(
                             transaction = transaction,
+                            categoryName = categoryName,
                             onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
                             onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
                         )
@@ -349,12 +351,14 @@ private fun HomeCompactContent(
             }
         }
         items(uiState.transactions.take(5), key = { it.id }) { transaction ->
+            val categoryName = profile.categoryOverviews.find { it.id == transaction.categoryId }?.name ?: transaction.categoryId
             AnimatedVisibility(
                 visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 200 })
             ) {
                 TransactionItem(
                     transaction = transaction,
+                    categoryName = categoryName,
                     onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
                     onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
                 )

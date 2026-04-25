@@ -153,7 +153,8 @@ fun BillsScreen(
                         
                         groupedExpenses.forEach { (categoryId, expenses) ->
                             stickyHeader {
-                                CategoryHeader(categoryId = categoryId)
+                                val categoryName = uiState.categoryMap[categoryId] ?: categoryId
+                                CategoryHeader(categoryName = categoryName)
                             }
                             items(expenses, key = { it.id }) { expense ->
                                 BillItem(
@@ -204,13 +205,13 @@ private fun BillImpactHeader(income: Double, totalCosts: Double) {
 }
 
 @Composable
-private fun CategoryHeader(categoryId: String) {
+private fun CategoryHeader(categoryName: String) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface
     ) {
         Text(
-            text = categoryId, // TODO: look up name from repository or map
+            text = categoryName,
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
@@ -306,7 +307,7 @@ private fun BillImpactHeaderPreview() {
 @Composable
 private fun CategoryHeaderPreview() {
     MaterialTheme {
-        CategoryHeader(categoryId = "housing_id")
+        CategoryHeader(categoryName = "Housing")
     }
 }
 

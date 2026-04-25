@@ -269,8 +269,10 @@ private fun RecentTransactionsContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(uiState.filteredTransactions, key = { it.id }) { transaction ->
+                    val categoryName = uiState.categoryMap[transaction.categoryId] ?: transaction.categoryId
                     TransactionItem(
                         transaction = transaction,
+                        categoryName = categoryName,
                         onDelete = { onEvent(TransactionsUiEvent.DeleteTransaction(transaction.id)) },
                         onClick = { onEvent(TransactionsUiEvent.SelectTransaction(transaction.id)) },
                         isSelected = uiState.selectedTransactionId == transaction.id
@@ -361,7 +363,8 @@ fun TransactionDetailPane(
                                 text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_category), 
                                 style = MaterialTheme.typography.labelSmall
                             )
-                            Text(transaction.categoryId, style = MaterialTheme.typography.titleMedium)
+                            val categoryName = (uiState as? TransactionsUiState.Success)?.categoryMap?.get(transaction.categoryId) ?: transaction.categoryId
+                            Text(categoryName, style = MaterialTheme.typography.titleMedium)
                         }
                     }
                     Card(modifier = Modifier.weight(1f)) {
@@ -437,7 +440,8 @@ private fun TransactionsUiRoutePreview() {
                 transactions = listOf(
                     Transaction("1", 4200L, "food_id", "Lunch", 1000L, defaultType = SpendingType.NEED)
                 ),
-                categories = listOf("Food")
+                categories = listOf("Food"),
+                categoryMap = mapOf("food_id" to "Food")
             ),
             billsUiState = com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState.Success(),
             onEvent = {},
@@ -456,7 +460,8 @@ private fun TransactionsListPanePreview() {
                     Transaction("1", 4200L, "food_id", "Lunch", 1000L, defaultType = SpendingType.NEED),
                     Transaction("2", 1500L, "coffee_id", "Latte", 2000L, defaultType = SpendingType.WANT)
                 ),
-                categories = listOf("Food", "Coffee")
+                categories = listOf("Food", "Coffee"),
+                categoryMap = mapOf("food_id" to "Food", "coffee_id" to "Coffee")
             ),
             billsUiState = com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState.Success(),
             onEvent = {},
@@ -471,7 +476,8 @@ private fun TransactionDetailPanePreview() {
     MaterialTheme {
         TransactionDetailPane(
             uiState = TransactionsUiState.Success(
-                selectedTransaction = Transaction("1", 4200L, "food_id", "Lunch with friends", 1000L, defaultType = SpendingType.NEED)
+                selectedTransaction = Transaction("1", 4200L, "food_id", "Lunch with friends", 1000L, defaultType = SpendingType.NEED),
+                categoryMap = mapOf("food_id" to "Food")
             ),
             onEvent = {},
             navTo = {}
