@@ -53,7 +53,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.core.ui.components.BarData
 import com.zoewave.probase.core.ui.components.SimpleBarChart
@@ -167,11 +167,14 @@ private fun AnalyticsContent(
 
     val filteredTransactions = remember(selectedCategory, uiState.allTransactions) {
         if (selectedCategory == null) uiState.allTransactions
-        else uiState.allTransactions.filter { it.categoryId == selectedCategory }
+        else {
+            val catId = uiState.categoriesMap.values.find { it.name == selectedCategory }?.id
+            uiState.allTransactions.filter { it.categoryId == catId }
+        }
     }
 
     val trends = remember(filteredTransactions, selectedCategory) {
-        viewModel.calculateTrendsForTransactions(filteredTransactions)
+        viewModel.calculateTrendsForTransactions(filteredTransactions, uiState.categoriesMap)
     }
 
     val heatmapData = remember(filteredTransactions, selectedCategory) {
