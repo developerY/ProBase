@@ -1,6 +1,16 @@
 package com.zoewave.probase.seaweed.mobile.budget.ui
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -8,25 +18,42 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.mobile.budget.R
 import com.zoewave.probase.seaweed.mobile.core.ui.components.CategoryBudgetProgressBar
 import com.zoewave.probase.seaweed.mobile.core.ui.components.UnallocatedMoneyCard
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import com.zoewave.probase.seaweed.model.FinancialProfile
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
-import java.util.Locale
 import com.zoewave.probase.core.ui.R as CoreUiR
 
 @Composable
@@ -110,7 +137,7 @@ fun BudgetScreen(
                     }
 
                     item {
-                        UnallocatedMoneyCard(unallocatedAmount = profile.unallocatedMoney)
+                        UnallocatedMoneyCard(unallocatedAmountCents = profile.unallocatedMoneyCents)
                     }
 
                     item {
@@ -161,13 +188,13 @@ private fun BudgetSummaryCard(profile: FinancialProfile) {
                 style = MaterialTheme.typography.labelSmall
             )
             Text(
-                text = stringResource(R.string.applications_seaweed_apps_mobile_features_budget_currency_format, String.format(Locale.getDefault(), "%.2f", profile.totalBudgetedAmount)),
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_budget_currency_format, CurrencyUtils.formatCents(profile.totalBudgetedAmountCents)),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Black
             )
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
-                progress = { (profile.totalBudgetedAmount / profile.realStartingBalance).toFloat().coerceIn(0f, 1f) },
+                progress = { (profile.totalBudgetedAmountCents.toFloat() / profile.realStartingBalanceCents).coerceIn(0f, 1f) },
                 modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f)
@@ -175,7 +202,7 @@ private fun BudgetSummaryCard(profile: FinancialProfile) {
             Text(
                 text = stringResource(
                     R.string.applications_seaweed_apps_mobile_features_budget_available_after_fixed, 
-                    String.format(Locale.getDefault(), "$%.0f", profile.realStartingBalance)
+                    "$${CurrencyUtils.formatCents(profile.realStartingBalanceCents)}"
                 ),
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.padding(top = 4.dp)
@@ -211,7 +238,7 @@ private fun BudgetItem(
                             modifier = Modifier.size(20.dp)
                         )
                     }
-                    if (category.limitAmount != null) {
+                    if (category.limitAmountCents != null) {
                         IconButton(onClick = onDelete) {
                             Icon(
                                 Icons.Default.Delete, 
@@ -233,7 +260,7 @@ private fun BudgetEditBottomSheet(
     onDismiss: () -> Unit,
     onSave: (Double) -> Unit
 ) {
-    var limitInput by remember { mutableStateOf(category.limitAmount?.toString() ?: "") }
+    var limitInput by remember { mutableStateOf(category.limitAmountCents?.let { it.toDouble() / 100.0 }?.toString() ?: "") }
     val sheetState = rememberModalBottomSheetState()
 
     ModalBottomSheet(
@@ -280,13 +307,13 @@ private fun BudgetSummaryCardPreview() {
     MaterialTheme {
         BudgetSummaryCard(
             profile = FinancialProfile(
-                monthlyIncome = 5000.0,
-                totalFixedCosts = 1500.0,
-                realStartingBalance = 3500.0,
-                monthlyVariableSpending = 1200.0,
-                flexibleMoneyRemaining = 2300.0,
-                totalBudgetedAmount = 2000.0,
-                unallocatedMoney = 1500.0,
+                monthlyIncomeCents = 500000L,
+                totalFixedCostsCents = 150000L,
+                realStartingBalanceCents = 350000L,
+                monthlyVariableSpendingCents = 120000L,
+                flexibleMoneyRemainingCents = 230000L,
+                totalBudgetedAmountCents = 200000L,
+                unallocatedMoneyCents = 150000L,
                 categoryOverviews = emptyList(),
                 monthProgress = 0.5f
             )
@@ -299,7 +326,7 @@ private fun BudgetSummaryCardPreview() {
 private fun BudgetItemPreview() {
     MaterialTheme {
         BudgetItem(
-            category = CategoryOverview("Food", 400.0, 15, 500.0, 100.0, 0.8f),
+            category = CategoryOverview("food_id", "Food", 40000L, 15, 50000L, 10000L, 0.8f),
             onEdit = {},
             onDelete = {}
         )
@@ -313,16 +340,16 @@ private fun BudgetUiRoutePreview() {
         BudgetUiRoute(
             uiState = BudgetUiState.Success(
                 profile = FinancialProfile(
-                    monthlyIncome = 5000.0,
-                    totalFixedCosts = 1500.0,
-                    realStartingBalance = 3500.0,
-                    monthlyVariableSpending = 1200.0,
-                    flexibleMoneyRemaining = 2300.0,
-                    totalBudgetedAmount = 2000.0,
-                    unallocatedMoney = 1500.0,
+                    monthlyIncomeCents = 500000L,
+                    totalFixedCostsCents = 150000L,
+                    realStartingBalanceCents = 350000L,
+                    monthlyVariableSpendingCents = 120000L,
+                    flexibleMoneyRemainingCents = 230000L,
+                    totalBudgetedAmountCents = 200000L,
+                    unallocatedMoneyCents = 150000L,
                     categoryOverviews = listOf(
-                        CategoryOverview("Food", 400.0, 15, 500.0, 100.0, 0.8f),
-                        CategoryOverview("Coffee", 150.0, 20, 100.0, -50.0, 1.5f)
+                        CategoryOverview("food_id", "Food", 40000L, 15, 50000L, 10000L, 0.8f),
+                        CategoryOverview("coffee_id", "Coffee", 15000L, 20, 10000L, -5000L, 1.5f)
                     ),
                     monthProgress = 0.5f
                 )
@@ -340,16 +367,16 @@ private fun BudgetScreenPreview() {
         BudgetScreen(
             uiState = BudgetUiState.Success(
                 profile = FinancialProfile(
-                    monthlyIncome = 5000.0,
-                    totalFixedCosts = 1500.0,
-                    realStartingBalance = 3500.0,
-                    monthlyVariableSpending = 1200.0,
-                    flexibleMoneyRemaining = 2300.0,
-                    totalBudgetedAmount = 2000.0,
-                    unallocatedMoney = 1500.0,
+                    monthlyIncomeCents = 500000L,
+                    totalFixedCostsCents = 150000L,
+                    realStartingBalanceCents = 350000L,
+                    monthlyVariableSpendingCents = 120000L,
+                    flexibleMoneyRemainingCents = 230000L,
+                    totalBudgetedAmountCents = 200000L,
+                    unallocatedMoneyCents = 150000L,
                     categoryOverviews = listOf(
-                        CategoryOverview("Food", 400.0, 15, 500.0, 100.0, 0.8f),
-                        CategoryOverview("Coffee", 150.0, 20, 100.0, -50.0, 1.5f)
+                        CategoryOverview("food_id", "Food", 40000L, 15, 50000L, 10000L, 0.8f),
+                        CategoryOverview("coffee_id", "Coffee", 15000L, 20, 10000L, -5000L, 1.5f)
                     ),
                     monthProgress = 0.5f
                 )
