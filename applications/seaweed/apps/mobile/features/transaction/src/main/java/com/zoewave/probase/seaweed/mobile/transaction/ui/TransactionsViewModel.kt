@@ -2,7 +2,11 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
+import com.zoewave.probase.seaweed.model.Category
+import com.zoewave.probase.seaweed.model.SpendingType
+import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.navigation.TransactionTab
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +22,8 @@ import javax.inject.Inject
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class TransactionsViewModel @Inject constructor(
-    private val repository: TransactionRepository
+    private val repository: TransactionRepository,
+    private val categoryRepository: CategoryRepository
 ) : ViewModel() {
 
     private val _selectedCategory = MutableStateFlow<String?>(null)
@@ -46,25 +51,27 @@ class TransactionsViewModel @Inject constructor(
 
     val uiState: StateFlow<TransactionsUiState> = combine(
         repository.getAllTransactions(),
+        categoryRepository.getAllCategories(),
         _selectedCategory,
         _selectedTransactionId,
         _selectedTransaction,
         _selectedTab
-    ) { transactions, selectedCategory, selectedTransactionId, selectedTransaction, selectedTab ->
-        val categories = transactions.map { it.category }.distinct().sorted()
-        val filteredTransactions = if (selectedCategory == null) {
-            transactions
+    ) { txs, cats, selCat, selId, selTx, selTab ->
+        val categoryNames = cats.map { it.name }.sorted()
+        val filteredTransactions = if (selCat == null) {
+            txs
         } else {
-            transactions.filter { it.category == selectedCategory }
+            val catId = cats.find { it.name == selCat }?.id
+            txs.filter { it.categoryId == catId }
         }
         TransactionsUiState.Success(
-            transactions = transactions,
+            transactions = txs,
             filteredTransactions = filteredTransactions,
-            categories = categories,
-            selectedCategory = selectedCategory,
-            selectedTransactionId = selectedTransactionId,
-            selectedTransaction = selectedTransaction,
-            selectedTab = selectedTab
+            categories = categoryNames,
+            selectedCategory = selCat,
+            selectedTransactionId = selId,
+            selectedTransaction = selTx,
+            selectedTab = selTab
         )
     }.stateIn(
         scope = viewModelScope,
@@ -87,6 +94,14 @@ class TransactionsViewModel @Inject constructor(
             }
             is TransactionsUiEvent.SelectTab -> {
                 _selectedTab.value = event.tab
+            }
+            is TransactionsUiEvent.UpdateImportance -> {
+                viewModelScope.launch {
+                    val transaction = (uiState.value as? TransactionsUiState.Success)?.transactions?.find { it.id == event.id }
+                    transaction?.let {
+                        repository.addTransaction(it.copy(userOverrideType = event.importance))
+                    }
+                }
             }
             is TransactionsUiEvent.NavigateTo -> { /* Handled in Route */ }
             TransactionsUiEvent.OnBack -> { /* Handled in Route */ }
