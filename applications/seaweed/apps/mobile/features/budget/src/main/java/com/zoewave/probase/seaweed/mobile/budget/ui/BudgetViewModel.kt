@@ -32,7 +32,7 @@ class BudgetViewModel @Inject constructor(
         viewModelScope.launch {
             when (event) {
                 is BudgetUiEvent.UpdateBudget -> {
-                    repository.saveBudget(BudgetTarget(event.categoryName, event.limitAmount))
+                    repository.saveBudget(BudgetTarget(event.categoryName, (event.limitAmount * 100).toLong()))
                 }
                 is BudgetUiEvent.DeleteBudget -> {
                     repository.deleteBudget(event.categoryName)

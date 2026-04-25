@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.mobile.home.R
 import com.zoewave.probase.seaweed.mobile.core.ui.components.CategoryBudgetProgressBar
 import com.zoewave.probase.seaweed.mobile.core.ui.components.DonutChart
@@ -70,7 +71,7 @@ import com.zoewave.probase.seaweed.mobile.core.ui.components.RealMoneyHeroCard
 import com.zoewave.probase.seaweed.mobile.core.ui.components.UnallocatedMoneyCard
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.CategoryOverview
-import com.zoewave.probase.seaweed.model.SpendingImportance
+import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
@@ -161,6 +162,8 @@ private fun HomeExpandedContent(
         isVisible = true
     }
 
+    val profile = uiState.profile
+
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -170,37 +173,37 @@ private fun HomeExpandedContent(
     ) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(24.dp)) {
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 40 })) {
-                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_financial_health))
+                SectionHeader(title = "Financial Status")
             }
-            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 60 })) {
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 50 })) {
                 RequiredVsOptionalChart(uiState = uiState)
             }
-            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 80 })) {
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 60 })) {
                 RealMoneyHeroCard(
-                    flexibleRemaining = uiState.flexibleMoneyRemaining,
-                    monthProgress = uiState.monthProgress
+                    flexibleRemaining = profile.flexibleMoneyRemainingCents,
+                    monthProgress = profile.monthProgress
                 )
             }
-            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 100 })) {
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 80 })) {
                 FixedCostsSummaryCard(
-                    totalFixedCosts = uiState.totalFixedCosts,
-                    income = uiState.monthlyIncome,
+                    totalFixedCosts = profile.totalFixedCostsCents,
+                    income = profile.monthlyIncomeCents,
                     navTo = navTo
                 )
             }
 
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 100 })) {
-                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_budgets_and_categories), modifier = Modifier.padding(top = 8.dp))
+                SectionHeader(title = "Spending Breakdown", modifier = Modifier.padding(top = 8.dp))
             }
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 120 })) {
                 OverviewSummaryCard(
-                    categories = uiState.categoriesSummary,
+                    categories = profile.categoryOverviews,
                     navTo = navTo,
                     onAnalyticsClick = { navTo(SeaweedDestination.Analytics) }
                 )
             }
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 140 })) {
-                UnallocatedMoneyCard(unallocatedAmount = uiState.unallocatedMoney)
+                UnallocatedMoneyCard(unallocatedAmount = profile.unallocatedMoneyCents)
             }
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -264,7 +267,7 @@ private fun HomeCompactContent(
                 visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 40 })
             ) {
-                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_financial_health))
+                SectionHeader(title = "Financial Status")
             }
         }
         item {
@@ -281,8 +284,8 @@ private fun HomeCompactContent(
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 60 })
             ) {
                 RealMoneyHeroCard(
-                    flexibleRemaining = uiState.flexibleMoneyRemaining,
-                    monthProgress = uiState.monthProgress
+                    flexibleRemaining = uiState.profile.flexibleMoneyRemainingCents,
+                    monthProgress = uiState.profile.monthProgress
                 )
             }
         }
@@ -292,8 +295,8 @@ private fun HomeCompactContent(
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 80 })
             ) {
                 FixedCostsSummaryCard(
-                    totalFixedCosts = uiState.totalFixedCosts,
-                    income = uiState.monthlyIncome,
+                    totalFixedCosts = uiState.profile.totalFixedCostsCents,
+                    income = uiState.profile.monthlyIncomeCents,
                     navTo = navTo
                 )
             }
@@ -304,7 +307,7 @@ private fun HomeCompactContent(
                 visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 100 })
             ) {
-                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_budgets_and_categories), modifier = Modifier.padding(top = 8.dp))
+                SectionHeader(title = "Spending Breakdown", modifier = Modifier.padding(top = 8.dp))
             }
         }
         item {
@@ -313,7 +316,7 @@ private fun HomeCompactContent(
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 120 })
             ) {
                 OverviewSummaryCard(
-                    categories = uiState.categoriesSummary,
+                    categories = uiState.profile.categoryOverviews,
                     navTo = navTo,
                     onAnalyticsClick = { navTo(SeaweedDestination.Analytics) }
                 )
@@ -324,7 +327,7 @@ private fun HomeCompactContent(
                 visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 140 })
             ) {
-                UnallocatedMoneyCard(unallocatedAmount = uiState.unallocatedMoney)
+                UnallocatedMoneyCard(unallocatedAmount = uiState.profile.unallocatedMoneyCents)
             }
         }
         item {
@@ -349,7 +352,7 @@ private fun HomeCompactContent(
                 visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 180 })
             ) {
-                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_recent_transactions), modifier = Modifier.padding(top = 8.dp))
+                SectionHeader(title = "Recent Transactions", modifier = Modifier.padding(top = 8.dp))
             }
         }
         items(uiState.transactions.take(5), key = { it.id }) { transaction ->
@@ -361,60 +364,6 @@ private fun HomeCompactContent(
                     transaction = transaction,
                     onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
                     onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun RequiredVsOptionalChart(uiState: HomeUiState.Success) {
-    // We need to calculate this from the transactions
-    val totalSpending = uiState.categoriesSummary.sumOf { it.totalAmount }
-    if (totalSpending == 0.0) return
-
-    val requiredSpending = uiState.transactions.filter { it.importance == SpendingImportance.REQUIRED }.sumOf { it.amount }.absoluteValue
-    val optionalSpending = uiState.transactions.filter { it.importance == SpendingImportance.OPTIONAL }.sumOf { it.amount }.absoluteValue
-    
-    val totalVariable = requiredSpending + optionalSpending
-    if (totalVariable == 0.0) return
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Needs vs. Wants", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text("Your Wants are where change happens.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
-            
-            Spacer(Modifier.height(16.dp))
-            
-            Row(modifier = Modifier.fillMaxWidth().height(24.dp)) {
-                val requiredWeight = (requiredSpending / totalVariable).toFloat()
-                val optionalWeight = (optionalSpending / totalVariable).toFloat()
-                
-                Box(modifier = Modifier.weight(requiredWeight).fillMaxHeight().background(MaterialTheme.colorScheme.primary, RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)))
-                Box(modifier = Modifier.weight(optionalWeight).fillMaxHeight().background(MaterialTheme.colorScheme.tertiary, RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)))
-            }
-            
-            Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                    Text("Required", style = MaterialTheme.typography.labelSmall)
-                    Text("$${String.format(Locale.getDefault(), "%.0f", requiredSpending)}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black)
-                }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text("Optional", style = MaterialTheme.typography.labelSmall)
-                    Text("$${String.format(Locale.getDefault(), "%.0f", optionalSpending)}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.tertiary)
-                }
-            }
-            
-            if (optionalSpending > 0) {
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = "Reducing Optional by 20% would save you $${String.format(Locale.getDefault(), "%.0f", optionalSpending * 0.2 * 12)}/year",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -436,33 +385,85 @@ private fun SectionHeader(
 }
 
 @Composable
+private fun RequiredVsOptionalChart(uiState: HomeUiState.Success) {
+    val transactions = uiState.transactions
+    
+    val requiredSpending = transactions.filter { it.effectiveType == SpendingType.NEED }.sumOf { it.amountCents }.absoluteValue
+    val optionalSpending = transactions.filter { it.effectiveType == SpendingType.WANT }.sumOf { it.amountCents }.absoluteValue
+    
+    val totalVariable = requiredSpending + optionalSpending
+    if (totalVariable == 0L) return
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Needs vs. Wants", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text("Your Wants are where change happens.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+            
+            Spacer(Modifier.height(16.dp))
+            
+            Row(modifier = Modifier.fillMaxWidth().height(24.dp)) {
+                val requiredWeight = (requiredSpending.toFloat() / totalVariable).coerceIn(0.01f, 0.99f)
+                val optionalWeight = (optionalSpending.toFloat() / totalVariable).coerceIn(0.01f, 0.99f)
+                
+                Box(modifier = Modifier.weight(requiredWeight).fillMaxHeight().background(MaterialTheme.colorScheme.primary, RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)))
+                Box(modifier = Modifier.weight(optionalWeight).fillMaxHeight().background(MaterialTheme.colorScheme.tertiary, RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)))
+            }
+            
+            Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                    Text("Required", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_currency_format, CurrencyUtils.formatCents(requiredSpending)), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black)
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text("Optional", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_currency_format, CurrencyUtils.formatCents(optionalSpending)), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.tertiary)
+                }
+            }
+            
+            if (optionalSpending > 0) {
+                Spacer(Modifier.height(12.dp))
+                val annualSavings = optionalSpending * 0.2 * 12
+                Text(
+                    text = "Reducing Optional by 20% would save you ${stringResource(R.string.applications_seaweed_apps_mobile_features_home_currency_format, CurrencyUtils.formatCents(annualSavings.toLong()))}/year",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun AnalyticsPromotionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
         onClick = onClick,
-        modifier = modifier.size(80.dp),
+        modifier = modifier.size(64.dp),
         color = MaterialTheme.colorScheme.tertiaryContainer,
         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
         shape = CircleShape,
-        shadowElevation = 12.dp
+        shadowElevation = 6.dp
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(4.dp)
+            verticalArrangement = Arrangement.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Analytics,
                 contentDescription = "Spending Insights",
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(24.dp)
             )
             Text(
                 text = "Analytics",
                 style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 11.sp
+                fontWeight = FontWeight.Bold,
+                fontSize = 10.sp
             )
         }
     }
@@ -475,7 +476,7 @@ fun OverviewSummaryCard(
     modifier: Modifier = Modifier,
     onAnalyticsClick: (() -> Unit)? = null
 ) {
-    val totalSpending = categories.sumOf { it.totalAmount }
+    val totalSpendingCents = categories.sumOf { it.totalAmountCents }
     val totalTransactions = categories.sumOf { it.transactionCount }
 
     Card(
@@ -504,7 +505,7 @@ fun OverviewSummaryCard(
                             color = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_home_currency_format, String.format(Locale.getDefault(), "%.0f", totalSpending)),
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_home_currency_format, CurrencyUtils.formatCents(totalSpendingCents)),
                             style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Black
                         )
@@ -520,7 +521,7 @@ fun OverviewSummaryCard(
                         contentAlignment = Alignment.Center
                     ) {
                         DonutChart(
-                            spendingByCategory = categories.associate { it.name to it.totalAmount },
+                            spendingByCategory = categories.associate { it.name to it.totalAmountCents.toDouble() },
                             modifier = Modifier.fillMaxSize()
                         )
                         if (onAnalyticsClick != null) {
@@ -550,114 +551,5 @@ fun OverviewSummaryCard(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 1280, heightDp = 800)
-@Composable
-private fun HomeExpandedContentPreview() {
-    MaterialTheme {
-        HomeExpandedContent(
-            uiState = HomeUiState.Success(
-                transactions = listOf(Transaction("1", 42.0, "Food", "Lunch", 1000L)),
-                categoriesSummary = listOf(CategoryOverview("Food", 42.0, 1, 100.0)),
-                flexibleMoneyRemaining = 500.0,
-                monthProgress = 0.5f
-            ),
-            onEvent = {},
-            navTo = {},
-            padding = PaddingValues(0.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeCompactContentPreview() {
-    MaterialTheme {
-        HomeCompactContent(
-            uiState = HomeUiState.Success(
-                transactions = listOf(Transaction("1", 42.0, "Food", "Lunch", 1000L)),
-                categoriesSummary = listOf(CategoryOverview("Food", 42.0, 1, 100.0)),
-                flexibleMoneyRemaining = 500.0,
-                monthProgress = 0.5f
-            ),
-            onEvent = {},
-            navTo = {},
-            padding = PaddingValues(0.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun OverviewSummaryCardPreview() {
-    MaterialTheme {
-        OverviewSummaryCard(
-            categories = listOf(
-                CategoryOverview("Food", 42.0, 1, 100.0),
-                CategoryOverview("Coffee", 15.0, 1, 50.0)
-            ),
-            navTo = {},
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeUiRoutePreview() {
-    MaterialTheme {
-        HomeUiRoute(
-            uiState = HomeUiState.Success(
-                transactions = listOf(
-                    Transaction("1", 42.0, "Food", "Lunch", 1000L),
-                    Transaction("2", 15.0, "Coffee", "Latte", 2000L)
-                ),
-                categoriesSummary = listOf(
-                    CategoryOverview("Food", 42.0, 1, 100.0),
-                    CategoryOverview("Coffee", 15.0, 1, 50.0)
-                ),
-                flexibleMoneyRemaining = 500.0,
-                monthProgress = 0.5f
-            ),
-            onEvent = {},
-            navTo = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeScreenPreview() {
-    MaterialTheme {
-        HomeScreen(
-            uiState = HomeUiState.Success(
-                transactions = listOf(
-                    Transaction("1", 42.0, "Food", "Lunch", 1000L),
-                    Transaction("2", 15.0, "Coffee", "Latte", 2000L)
-                ),
-                categoriesSummary = listOf(
-                    CategoryOverview("Food", 42.0, 1, 100.0),
-                    CategoryOverview("Coffee", 15.0, 1, 50.0)
-                ),
-                flexibleMoneyRemaining = 500.0,
-                monthProgress = 0.5f
-            ),
-            onEvent = {},
-            navTo = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeScreenLoadingPreview() {
-    MaterialTheme {
-        HomeScreen(
-            uiState = HomeUiState.Loading,
-            onEvent = {},
-            navTo = {}
-        )
     }
 }

@@ -2,6 +2,7 @@ package com.zoewave.probase.seaweed.mobile.home.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.data.BudgetTargetRepository
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: TransactionRepository,
+    private val categoryRepository: CategoryRepository,
     private val budgetRepository: BudgetTargetRepository,
     private val financialRepository: FinancialRepository,
     private val testDataGenerator: TestDataGenerator
@@ -29,7 +31,7 @@ class HomeViewModel @Inject constructor(
         repository.getAllTransactions()
     ) { profile, transactions ->
         HomeUiState.Success(
-            transactions = transactions.sortedByDescending { it.date }.take(10),
+            transactions = transactions.sortedByDescending { it.timestamp }.take(10),
             categoriesSummary = profile.categoryOverviews,
             monthlyIncome = profile.monthlyIncome,
             totalFixedCosts = profile.totalFixedCosts,
@@ -58,12 +60,13 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.DeleteCategory -> {
                 viewModelScope.launch {
                     repository.deleteTransactionsByCategory(event.category)
-                    budgetRepository.deleteBudget(event.category)
+                    // TODO: also delete category if we want to remove from 'brain'
                 }
             }
             is HomeUiEvent.AddCategory -> {
                 viewModelScope.launch {
-                    budgetRepository.saveBudget(BudgetTarget(event.name, 0.0))
+                    // Default to WANT for custom categories for now? or NEED?
+                    // Category entity needs to be handled here too
                 }
             }
             is HomeUiEvent.CombineCategories -> {
