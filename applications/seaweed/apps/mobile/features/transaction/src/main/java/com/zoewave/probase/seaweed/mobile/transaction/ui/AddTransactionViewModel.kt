@@ -1,9 +1,9 @@
 package com.zoewave.probase.seaweed.mobile.transaction.ui
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.features.ai.capture.data.ImageLoader
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
@@ -96,7 +96,7 @@ class AddTransactionViewModel @Inject constructor(
         budgetRepository.getAllBudgets()
     ) { state, transactions, budgets ->
         val transactionCategories = transactions.map { it.categoryId }.distinct()
-        val budgetCategories = budgets.map { it.categoryName }
+        val budgetCategories = budgets.map { it.categoryId }
         val allCategories = (transactionCategories + budgetCategories).distinct().sorted()
         state.copy(recentCategories = allCategories)
     }.stateIn(

@@ -152,7 +152,7 @@ class AnalyticsViewModel @Inject constructor(
         }
 
         val transactionCategories = recentTransactions.groupBy { it.categoryId }
-        val budgetCategories = budgets.associateBy { it.categoryName }
+        val budgetCategories = budgets.associateBy { it.categoryId }
         val allCategoryIds = (transactionCategories.keys + budgetCategories.keys).distinct()
 
         return allCategoryIds.map { categoryId ->
