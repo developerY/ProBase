@@ -2,6 +2,7 @@ package com.zoewave.probase.seaweed.database
 
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
+import com.zoewave.probase.seaweed.model.SpendingImportance
 import com.zoewave.probase.seaweed.model.Transaction
 
 @Entity(tableName = "transactions")
@@ -11,7 +12,8 @@ data class TransactionEntity(
     val category: String,
     val description: String,
     val date: Long,
-    val receiptUri: String? = null
+    val receiptUri: String? = null,
+    val importance: SpendingImportance = SpendingImportance.REQUIRED
 )
 
 fun TransactionEntity.toDomain() = Transaction(
@@ -20,7 +22,8 @@ fun TransactionEntity.toDomain() = Transaction(
     category = category,
     description = description,
     date = date,
-    receiptUri = receiptUri
+    receiptUri = receiptUri,
+    importance = importance
 )
 
 fun Transaction.toEntity() = TransactionEntity(
@@ -29,5 +32,6 @@ fun Transaction.toEntity() = TransactionEntity(
     category = category,
     description = description,
     date = date,
-    receiptUri = receiptUri
+    receiptUri = receiptUri,
+    importance = importance
 )
