@@ -11,7 +11,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.mobile.transaction.R
+import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
 import java.util.Locale
 import com.zoewave.probase.core.ui.R as CoreUiR
@@ -43,12 +45,12 @@ fun TransactionItem(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                 )
-                Text(text = transaction.category, style = MaterialTheme.typography.bodySmall)
+                Text(text = transaction.categoryId, style = MaterialTheme.typography.bodySmall)
             }
             Text(
-                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_currency_format, String.format(Locale.getDefault(), "%.2f", transaction.amount)),
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_currency_format, CurrencyUtils.formatCents(transaction.amountCents)),
                 style = MaterialTheme.typography.titleLarge,
-                color = if (transaction.amount < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                color = if (transaction.amountCents < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Black
             )
             IconButton(onClick = onDelete) {
@@ -63,7 +65,7 @@ fun TransactionItem(
 private fun TransactionItemPreview() {
     MaterialTheme {
         TransactionItem(
-            transaction = Transaction("1", 42.0, "Food", "Lunch with friends", 1000L),
+            transaction = Transaction("1", 4200L, "food_id", "Lunch with friends", 1000L, defaultType = SpendingType.NEED),
             onDelete = {},
             onClick = {},
             isSelected = false
@@ -76,7 +78,7 @@ private fun TransactionItemPreview() {
 private fun TransactionItemSelectedPreview() {
     MaterialTheme {
         TransactionItem(
-            transaction = Transaction("1", -15.0, "Coffee", "Morning Latte", 1000L),
+            transaction = Transaction("1", -1500L, "coffee_id", "Morning Latte", 1000L, defaultType = SpendingType.WANT),
             onDelete = {},
             onClick = {},
             isSelected = true

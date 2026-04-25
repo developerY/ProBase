@@ -6,12 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -20,7 +17,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,10 +47,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.mobile.bills.ui.BillsScreen
 import com.zoewave.probase.seaweed.mobile.bills.ui.BillsViewModel
 import com.zoewave.probase.seaweed.mobile.transaction.R
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
+import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.model.navigation.TransactionTab
@@ -346,9 +344,9 @@ fun TransactionDetailPane(
                             style = MaterialTheme.typography.labelSmall
                         )
                         Text(
-                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_currency_format, String.format(Locale.getDefault(), "%.2f", transaction.amount)),
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_currency_format, CurrencyUtils.formatCents(transaction.amountCents)),
                             style = MaterialTheme.typography.headlineSmall,
-                            color = if (transaction.amount < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                            color = if (transaction.amountCents < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -363,7 +361,7 @@ fun TransactionDetailPane(
                                 text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_category), 
                                 style = MaterialTheme.typography.labelSmall
                             )
-                            Text(transaction.category, style = MaterialTheme.typography.titleMedium)
+                            Text(transaction.categoryId, style = MaterialTheme.typography.titleMedium)
                         }
                     }
                     Card(modifier = Modifier.weight(1f)) {
@@ -372,7 +370,7 @@ fun TransactionDetailPane(
                                 text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_date), 
                                 style = MaterialTheme.typography.labelSmall
                             )
-                            val dateString = java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(transaction.date)
+                            val dateString = java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(transaction.timestamp)
                             Text(
                                 text = dateString,
                                 style = MaterialTheme.typography.titleMedium
@@ -437,7 +435,7 @@ private fun TransactionsUiRoutePreview() {
         TransactionsUiRoute(
             uiState = TransactionsUiState.Success(
                 transactions = listOf(
-                    Transaction("1", 42.0, "Food", "Lunch", 1000L)
+                    Transaction("1", 4200L, "food_id", "Lunch", 1000L, defaultType = SpendingType.NEED)
                 ),
                 categories = listOf("Food")
             ),
@@ -455,8 +453,8 @@ private fun TransactionsListPanePreview() {
         TransactionsListPane(
             uiState = TransactionsUiState.Success(
                 transactions = listOf(
-                    Transaction("1", 42.0, "Food", "Lunch", 1000L),
-                    Transaction("2", 15.0, "Coffee", "Latte", 2000L)
+                    Transaction("1", 4200L, "food_id", "Lunch", 1000L, defaultType = SpendingType.NEED),
+                    Transaction("2", 1500L, "coffee_id", "Latte", 2000L, defaultType = SpendingType.WANT)
                 ),
                 categories = listOf("Food", "Coffee")
             ),
@@ -473,7 +471,7 @@ private fun TransactionDetailPanePreview() {
     MaterialTheme {
         TransactionDetailPane(
             uiState = TransactionsUiState.Success(
-                selectedTransaction = Transaction("1", 42.0, "Food", "Lunch with friends", 1000L)
+                selectedTransaction = Transaction("1", 4200L, "food_id", "Lunch with friends", 1000L, defaultType = SpendingType.NEED)
             ),
             onEvent = {},
             navTo = {}

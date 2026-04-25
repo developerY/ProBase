@@ -160,9 +160,14 @@ private fun AnalyticsContent(
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
+    val maxSpending = remember(uiState.heatmapData) {
+        val maxVal = if (uiState.heatmapData.isEmpty()) 0L else uiState.heatmapData.values.max()
+        maxVal.toDouble()
+    }
+
     val filteredTransactions = remember(selectedCategory, uiState.allTransactions) {
         if (selectedCategory == null) uiState.allTransactions
-        else uiState.allTransactions.filter { it.category == selectedCategory }
+        else uiState.allTransactions.filter { it.categoryId == selectedCategory }
     }
 
     val trends = remember(filteredTransactions, selectedCategory) {
@@ -382,7 +387,7 @@ private fun AnalyticsContent(
                 AnimatedVisibility(visible = selectedHeatmapDate != null) {
                     val zoneId = ZoneId.systemDefault()
                     val dayTransactions = filteredTransactions.filter {
-                        it.amount < 0 && Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() == selectedHeatmapDate
+                        it.amountCents < 0 && Instant.ofEpochMilli(it.timestamp).atZone(zoneId).toLocalDate() == selectedHeatmapDate
                     }
                     
                     Column {

@@ -68,7 +68,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.seaweed.mobile.transaction.R
-import com.zoewave.probase.seaweed.model.SpendingImportance
+import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
 import com.zoewave.probase.core.ui.R as CoreUiR
@@ -216,13 +216,13 @@ fun AddTransactionScreen(
                         fontWeight = FontWeight.Bold
                     )
                     FilterChip(
-                        selected = uiState.importance == SpendingImportance.REQUIRED,
-                        onClick = { onEvent(AddTransactionUiEvent.ImportanceChanged(SpendingImportance.REQUIRED)) },
+                        selected = uiState.importance == SpendingType.NEED,
+                        onClick = { onEvent(AddTransactionUiEvent.ImportanceChanged(SpendingType.NEED)) },
                         label = { Text("Required") }
                     )
                     FilterChip(
-                        selected = uiState.importance == SpendingImportance.OPTIONAL,
-                        onClick = { onEvent(AddTransactionUiEvent.ImportanceChanged(SpendingImportance.OPTIONAL)) },
+                        selected = uiState.importance == SpendingType.WANT,
+                        onClick = { onEvent(AddTransactionUiEvent.ImportanceChanged(SpendingType.WANT)) },
                         label = { Text("Optional") }
                     )
                 }

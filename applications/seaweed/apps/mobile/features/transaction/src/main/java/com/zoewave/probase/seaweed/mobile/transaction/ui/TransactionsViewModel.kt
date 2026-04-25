@@ -56,22 +56,31 @@ class TransactionsViewModel @Inject constructor(
         _selectedTransactionId,
         _selectedTransaction,
         _selectedTab
-    ) { txs, cats, selCat, selId, selTx, selTab ->
-        val categoryNames = cats.map { it.name }.sorted()
-        val filteredTransactions = if (selCat == null) {
-            txs
+    ) { params: Array<Any?> ->
+        @Suppress("UNCHECKED_CAST")
+        val transactions = params[0] as List<Transaction>
+        @Suppress("UNCHECKED_CAST")
+        val categoryModels = params[1] as List<Category>
+        val selectedCategoryName = params[2] as String?
+        val selectedTransactionId = params[3] as String?
+        val selectedTransaction = params[4] as Transaction?
+        val selectedTab = params[5] as TransactionTab
+
+        val categories = categoryModels.map { it.name }.sorted()
+        val filteredTransactions = if (selectedCategoryName == null) {
+            transactions
         } else {
-            val catId = cats.find { it.name == selCat }?.id
-            txs.filter { it.categoryId == catId }
+            val catId = categoryModels.find { it.name == selectedCategoryName }?.id
+            transactions.filter { it.categoryId == catId }
         }
         TransactionsUiState.Success(
-            transactions = txs,
+            transactions = transactions,
             filteredTransactions = filteredTransactions,
-            categories = categoryNames,
-            selectedCategory = selCat,
-            selectedTransactionId = selId,
-            selectedTransaction = selTx,
-            selectedTab = selTab
+            categories = categories,
+            selectedCategory = selectedCategoryName,
+            selectedTransactionId = selectedTransactionId,
+            selectedTransaction = selectedTransaction,
+            selectedTab = selectedTab
         )
     }.stateIn(
         scope = viewModelScope,
