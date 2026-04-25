@@ -161,7 +161,7 @@ private fun BudgetSummaryCard(profile: FinancialProfile) {
                 style = MaterialTheme.typography.labelSmall
             )
             Text(
-                text = stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.2f", profile.totalBudgetedAmount)),
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_budget_currency_format, String.format(Locale.getDefault(), "%.2f", profile.totalBudgetedAmount)),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Black
             )

@@ -8,4 +8,15 @@
     <string name="applications_seaweed_apps_mobile_features_home_combine_desc">Move all transactions from one category into another.</string>
     <string name="applications_seaweed_apps_mobile_features_home_label_from">From</string>
     <string name="applications_seaweed_apps_mobile_features_home_label_to">To</string>
+    <string name="applications_seaweed_apps_mobile_features_home_financial_health">Financial Health</string>
+    <string name="applications_seaweed_apps_mobile_features_home_budgets_and_categories">Budgets &amp; Categories</string>
+    <string name="applications_seaweed_apps_mobile_features_home_recent_activity">Recent Activity</string>
+    <string name="applications_seaweed_apps_mobile_features_home_summary_title">Seaweed Summary</string>
+    <string name="applications_seaweed_apps_mobile_features_home_add_random_data">Add Random Data</string>
+    <string name="applications_seaweed_apps_mobile_features_home_recent_transactions">Recent Transactions</string>
+    <string name="applications_seaweed_apps_mobile_features_home_all_categories">All Categories</string>
+    <string name="applications_seaweed_apps_mobile_features_home_spending_summary">Spending Summary</string>
+    <string name="applications_seaweed_apps_mobile_features_home_transactions_count">%1$d transactions across %2$d categories</string>
+    <string name="applications_seaweed_apps_mobile_features_home_currency_format">$%1$s</string>
+    <string name="applications_seaweed_apps_mobile_features_home_view_all">View All</string>
 </resources>

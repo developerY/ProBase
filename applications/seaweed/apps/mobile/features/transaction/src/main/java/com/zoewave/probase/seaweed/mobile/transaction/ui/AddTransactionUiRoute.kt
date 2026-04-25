@@ -388,7 +388,7 @@ fun AddTransactionScreen(
                             Text(
                                 text = stringResource(
                                     R.string.applications_seaweed_apps_mobile_features_transaction_each_pays, 
-                                    stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.2f", perPerson))
+                                    stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_currency_format, String.format(Locale.getDefault(), "%.2f", perPerson))
                                 ),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary

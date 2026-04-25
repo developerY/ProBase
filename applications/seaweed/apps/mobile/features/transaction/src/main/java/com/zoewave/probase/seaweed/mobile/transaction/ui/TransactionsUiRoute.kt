@@ -174,7 +174,7 @@ fun TransactionsListPane(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(CoreUiR.string.core_ui_transactions_title)) },
+                title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_transactions_title)) },
                 actions = {
                     IconButton(onClick = { onEvent(TransactionsUiEvent.NavigateTo(SeaweedDestination.Analytics)) }) {
                         Icon(
@@ -295,7 +295,7 @@ fun TransactionDetailPane(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(CoreUiR.string.core_ui_transaction_details)) },
+                title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_details_title)) },
                 navigationIcon = {
                     IconButton(onClick = { onEvent(TransactionsUiEvent.OnBack) }) {
                         Icon(
@@ -342,11 +342,11 @@ fun TransactionDetailPane(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = stringResource(CoreUiR.string.core_ui_text_amount), 
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_amount_label), 
                             style = MaterialTheme.typography.labelSmall
                         )
                         Text(
-                            text = stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.2f", transaction.amount)),
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_currency_format, String.format(Locale.getDefault(), "%.2f", transaction.amount)),
                             style = MaterialTheme.typography.headlineSmall,
                             color = if (transaction.amount < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                         )

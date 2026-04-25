@@ -7,4 +7,5 @@
     <string name="applications_seaweed_apps_mobile_features_budget_set_for">Set Budget for %1$s</string>
     <string name="applications_seaweed_apps_mobile_features_budget_monthly_limit">Monthly Limit</string>
     <string name="applications_seaweed_apps_mobile_features_budget_save">Save Budget</string>
+    <string name="applications_seaweed_apps_mobile_features_budget_currency_format">$%1$s</string>
 </resources>
