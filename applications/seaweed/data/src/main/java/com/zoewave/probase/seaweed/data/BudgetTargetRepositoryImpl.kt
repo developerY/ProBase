@@ -15,15 +15,15 @@ class BudgetTargetRepositoryImpl @Inject constructor(
     override fun getAllBudgets(): Flow<List<BudgetTarget>> =
         dao.getAllBudgets().map { entities -> entities.map { it.toDomain() } }
 
-    override fun getBudget(categoryName: String): Flow<BudgetTarget?> =
-        dao.getBudget(categoryName).map { it?.toDomain() }
+    override fun getBudget(categoryId: String): Flow<BudgetTarget?> =
+        dao.getBudget(categoryId).map { it?.toDomain() }
 
     override suspend fun saveBudget(budget: BudgetTarget) {
         dao.saveBudget(budget.toEntity())
     }
 
-    override suspend fun deleteBudget(categoryName: String) {
-        dao.deleteBudget(categoryName)
+    override suspend fun deleteBudget(categoryId: String) {
+        dao.deleteBudget(categoryId)
     }
 
     override fun getTotalBudgetedAmountCents(): Flow<Long> =

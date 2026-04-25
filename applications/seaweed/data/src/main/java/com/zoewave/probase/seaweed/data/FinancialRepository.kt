@@ -76,10 +76,10 @@ class FinancialRepository @Inject constructor(
             }.timeInMillis
 
             val monthlyTransactions = transactions.filter { it.timestamp >= startOfMonth && it.amountCents < 0 }
-            val budgetsMap = budgets.associateBy { it.categoryName }
+            val budgetsMap = budgets.associateBy { it.categoryId }
             val categoriesMap = categories.associateBy { it.id }
             
-            val allCategoryIds = (monthlyTransactions.map { it.categoryId } + budgets.map { it.categoryName }).distinct()
+            val allCategoryIds = (monthlyTransactions.map { it.categoryId } + budgets.map { it.categoryId }).distinct()
 
             allCategoryIds.map { categoryId ->
                 val spent = monthlyTransactions.filter { it.categoryId == categoryId }.sumOf { it.amountCents }.absoluteValue

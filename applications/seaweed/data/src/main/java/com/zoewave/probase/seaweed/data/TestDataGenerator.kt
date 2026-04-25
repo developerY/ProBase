@@ -30,7 +30,7 @@ class TestDataGenerator @Inject constructor(
                 "Shopping" -> 500.0
                 else -> 100.0
             }
-            budgetRepository.saveBudget(BudgetTarget(category.name, CurrencyUtils.toCents(limitAmount)))
+            budgetRepository.saveBudget(BudgetTarget(category.id, CurrencyUtils.toCents(limitAmount)))
         }
 
         val now = System.currentTimeMillis()
