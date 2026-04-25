@@ -6,7 +6,9 @@ import com.zoewave.probase.core.util.network.NetworkStatsProvider
 import com.zoewave.probase.features.ai.capture.data.ImageLoader
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptOrchestrator
+import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.data.TransactionRepository
+import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.features.receiptcapture.domain.SmartReceiptDraft
 import com.zoewave.probase.seaweed.features.receiptcapture.ui.state.SmartReceiptUiState
@@ -92,11 +94,12 @@ class SmartReceiptViewModel @Inject constructor(
             val amount = draft.total ?: 0.0
             val transaction = Transaction(
                 id = UUID.randomUUID().toString(),
+                amountCents = CurrencyUtils.toCents(amount),
+                categoryId = draft.category ?: "general_id",
                 description = draft.merchant ?: "Unknown Merchant",
-                amount = amount,
-                category = draft.category ?: "General",
-                date = System.currentTimeMillis(), // Ideally parse draft.date MM/DD/YYYY
-                receiptUri = draft.photoUri
+                timestamp = System.currentTimeMillis(),
+                receiptUri = draft.photoUri,
+                defaultType = SpendingType.NEED
             )
             transactionRepo.addTransaction(transaction)
             _uiState.value = SmartReceiptUiState.Idle() // Reset after save
