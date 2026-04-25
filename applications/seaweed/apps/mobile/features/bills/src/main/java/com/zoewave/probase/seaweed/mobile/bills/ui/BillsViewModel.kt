@@ -7,6 +7,7 @@ import com.zoewave.probase.seaweed.data.RecurringExpenseRepository
 import com.zoewave.probase.seaweed.model.ExpenseCategory
 import com.zoewave.probase.seaweed.model.ExpenseFrequency
 import com.zoewave.probase.seaweed.model.RecurringExpense
+import com.zoewave.probase.seaweed.model.SpendingImportance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -63,6 +64,12 @@ class BillsViewModel @Inject constructor(
                         repository.saveExpense(it.copy(amount = event.amount))
                     }
                 }
+                is BillsUiEvent.UpdateExpenseImportance -> {
+                    val expense = (uiState.value as? BillsUiState.Success)?.expenses?.find { it.id == event.id }
+                    expense?.let {
+                        repository.saveExpense(it.copy(importance = event.importance))
+                    }
+                }
                 is BillsUiEvent.DeleteExpense -> {
                     repository.deleteExpense(event.id)
                 }
@@ -93,12 +100,14 @@ sealed interface BillsUiState {
 
 sealed interface BillsUiEvent {
     data class UpdateExpenseAmount(val id: String, val amount: Double) : BillsUiEvent
+    data class UpdateExpenseImportance(val id: String, val importance: SpendingImportance) : BillsUiEvent
     data class DeleteExpense(val id: String) : BillsUiEvent
     data class AddExpense(
         val name: String,
         val amount: Double,
         val frequency: ExpenseFrequency,
-        val category: ExpenseCategory
+        val category: ExpenseCategory,
+        val importance: SpendingImportance = SpendingImportance.REQUIRED
     ) : BillsUiEvent
     object OnBackClicked : BillsUiEvent
 }

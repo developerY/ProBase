@@ -1,6 +1,7 @@
 package com.zoewave.probase.seaweed.mobile.bills.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,6 +54,7 @@ import com.zoewave.probase.seaweed.mobile.bills.R
 import com.zoewave.probase.seaweed.model.ExpenseCategory
 import com.zoewave.probase.seaweed.model.ExpenseFrequency
 import com.zoewave.probase.seaweed.model.RecurringExpense
+import com.zoewave.probase.seaweed.model.SpendingImportance
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
 import com.zoewave.probase.core.ui.R as CoreUiR
@@ -154,6 +159,7 @@ fun BillsScreen(
                                 BillItem(
                                     expense = expense,
                                     onAmountChange = { onEvent(BillsUiEvent.UpdateExpenseAmount(expense.id, it)) },
+                                    onImportanceChange = { onEvent(BillsUiEvent.UpdateExpenseImportance(expense.id, it)) },
                                     onDelete = { onEvent(BillsUiEvent.DeleteExpense(expense.id)) }
                                 )
                             }
@@ -217,6 +223,7 @@ private fun CategoryHeader(category: ExpenseCategory) {
 private fun BillItem(
     expense: RecurringExpense,
     onAmountChange: (Double) -> Unit,
+    onImportanceChange: (SpendingImportance) -> Unit,
     onDelete: () -> Unit
 ) {
     var textValue by remember(expense.amount) { 
@@ -232,7 +239,16 @@ private fun BillItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(expense.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(expense.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        imageVector = if (expense.importance == SpendingImportance.REQUIRED) Icons.Default.Star else Icons.Default.StarOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = if (expense.importance == SpendingImportance.REQUIRED) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                    )
+                }
                 Text(
                     text = expense.frequency.name.lowercase().replaceFirstChar { it.uppercase() },
                     style = MaterialTheme.typography.labelSmall,
@@ -240,25 +256,38 @@ private fun BillItem(
                 )
             }
             
-            OutlinedTextField(
-                value = textValue,
-                onValueChange = { 
-                    textValue = it
-                    it.toDoubleOrNull()?.let { amount -> onAmountChange(amount) }
-                },
-                modifier = Modifier.width(100.dp),
-                label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_bills_amount_label)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true,
-                textStyle = MaterialTheme.typography.bodyMedium
-            )
-            
-            IconButton(onClick = onDelete) {
-                Icon(
-                    Icons.Default.Delete, 
-                    contentDescription = stringResource(CoreUiR.string.action_delete), 
-                    tint = MaterialTheme.colorScheme.error
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = if (expense.importance == SpendingImportance.REQUIRED) "Required" else "Optional",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (expense.importance == SpendingImportance.REQUIRED) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.clickable { 
+                        onImportanceChange(
+                            if (expense.importance == SpendingImportance.REQUIRED) SpendingImportance.OPTIONAL else SpendingImportance.REQUIRED
+                        )
+                    }
                 )
+                Spacer(Modifier.width(8.dp))
+                OutlinedTextField(
+                    value = textValue,
+                    onValueChange = { 
+                        textValue = it
+                        it.toDoubleOrNull()?.let { amount -> onAmountChange(amount) }
+                    },
+                    modifier = Modifier.width(90.dp),
+                    label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_bills_amount_label)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyMedium
+                )
+                
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Default.Delete, 
+                        contentDescription = stringResource(CoreUiR.string.action_delete), 
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
@@ -287,6 +316,7 @@ private fun BillItemPreview() {
         BillItem(
             expense = RecurringExpense("1", "Rent", 1200.0, ExpenseFrequency.MONTHLY, ExpenseCategory.HOUSING),
             onAmountChange = {},
+            onImportanceChange = {},
             onDelete = {}
         )
     }
