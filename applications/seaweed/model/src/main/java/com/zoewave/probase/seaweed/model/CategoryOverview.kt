@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CategoryOverview(
+    val id: String,
     val name: String,
     val totalAmountCents: Long,
     val transactionCount: Int,
