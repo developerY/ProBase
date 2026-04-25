@@ -14,7 +14,8 @@ class FinancialRepository @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val recurringExpenseRepository: RecurringExpenseRepository,
     private val userSettingsRepository: UserSettingsRepository,
-    private val budgetTargetRepository: BudgetTargetRepository
+    private val budgetTargetRepository: BudgetTargetRepository,
+    private val categoryRepository: CategoryRepository
 ) {
     fun getFinancialProfile(): Flow<FinancialProfile> =
         combine(
@@ -62,8 +63,9 @@ class FinancialRepository @Inject constructor(
     fun getCategoryOverviews(): Flow<List<CategoryOverview>> =
         combine(
             transactionRepository.getAllTransactions(),
-            budgetTargetRepository.getAllBudgets()
-        ) { transactions, budgets ->
+            budgetTargetRepository.getAllBudgets(),
+            categoryRepository.getAllCategories()
+        ) { transactions, budgets, categories ->
             val now = Calendar.getInstance()
             val startOfMonth = now.apply {
                 set(Calendar.DAY_OF_MONTH, 1)
@@ -75,17 +77,19 @@ class FinancialRepository @Inject constructor(
 
             val monthlyTransactions = transactions.filter { it.timestamp >= startOfMonth && it.amountCents < 0 }
             val budgetsMap = budgets.associateBy { it.categoryName }
+            val categoriesMap = categories.associateBy { it.id }
             
-            // This is still using category strings from transactions, need to bridge with categoryId later
-            val allCategoryNames = (monthlyTransactions.map { it.categoryId } + budgets.map { it.categoryName }).distinct()
+            val allCategoryIds = (monthlyTransactions.map { it.categoryId } + budgets.map { it.categoryName }).distinct()
 
-            allCategoryNames.map { categoryName ->
-                val spent = monthlyTransactions.filter { it.categoryId == categoryName }.sumOf { it.amountCents }.absoluteValue
-                val count = monthlyTransactions.count { it.categoryId == categoryName }
-                val limit = budgetsMap[categoryName]?.limitAmountCents
+            allCategoryIds.map { categoryId ->
+                val spent = monthlyTransactions.filter { it.categoryId == categoryId }.sumOf { it.amountCents }.absoluteValue
+                val count = monthlyTransactions.count { it.categoryId == categoryId }
+                val limit = budgetsMap[categoryId]?.limitAmountCents
+                val name = categoriesMap[categoryId]?.name ?: categoryId
                 
                 CategoryOverview(
-                    name = categoryName,
+                    id = categoryId,
+                    name = name,
                     totalAmountCents = spent,
                     transactionCount = count,
                     limitAmountCents = limit,
