@@ -57,4 +57,8 @@
     <string name="applications_seaweed_apps_mobile_features_transaction_debug_process_logs">Process Logs</string>
     <string name="applications_seaweed_apps_mobile_features_transaction_debug_raw_json">Raw AI JSON Response</string>
     <string name="applications_seaweed_apps_mobile_features_transaction_debug_no_data">No response data available</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_transactions_title">Transactions</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_details_title">Transaction Details</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_currency_format">$%1$s</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_amount_label">Amount</string>
 </resources>

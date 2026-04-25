@@ -1,9 +1,12 @@
 package com.zoewave.probase.seaweed.mobile.core.ui.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,6 +24,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -117,41 +122,55 @@ fun DonutChart(
     val totalSpending = spendingByCategory.values.sum()
     if (totalSpending == 0.0) return
 
+    val animationProgress = remember { Animatable(0f) }
+    LaunchedEffect(spendingByCategory) {
+        animationProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 1000)
+        )
+    }
+
     Canvas(modifier = modifier) {
-        val strokeWidth = 24f
+        val strokeWidth = 32f
+        val gapDegree = 2f // Degree for segment gaps
         
         // Background ring
         drawCircle(
-            color = Color.LightGray.copy(alpha = 0.2f),
+            color = Color.LightGray.copy(alpha = 0.1f),
             style = Stroke(width = strokeWidth)
         )
         
         var startAngle = -90f
         spendingByCategory.keys.forEachIndexed { index, category ->
             val amount = spendingByCategory[category] ?: 0.0
-            val sweepAngle = (amount / totalSpending).toFloat() * 360f
+            val fullSweepAngle = (amount / totalSpending).toFloat() * 360f
             
-            if (sweepAngle > 0) {
+            // Apply animation and leave a small gap for segments
+            val sweepAngle = (fullSweepAngle * animationProgress.value)
+            
+            if (sweepAngle > gapDegree) {
                 drawArc(
                     color = categoryColors[index % categoryColors.size],
-                    startAngle = startAngle,
-                    sweepAngle = sweepAngle,
+                    startAngle = startAngle + (gapDegree / 2f),
+                    sweepAngle = sweepAngle - gapDegree,
                     useCenter = false,
                     style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                 )
             }
-            startAngle += sweepAngle
+            startAngle += fullSweepAngle
         }
     }
 }
 
 val categoryColors = listOf(
-    Color(0xFF6750A4), // Purple
-    Color(0xFF006C4C), // Green
-    Color(0xFFB3261E), // Red
-    Color(0xFF625B71), // Muted Purple
-    Color(0xFF7D5260), // Muted Red
-    Color(0xFF006A6A)  // Teal
+    Color(0xFF6750A4), // Deep Purple
+    Color(0xFF006C4C), // Emerald Green
+    Color(0xFFB3261E), // Deep Red
+    Color(0xFF2196F3), // Bright Blue
+    Color(0xFFFF9800), // Amber
+    Color(0xFF009688), // Teal
+    Color(0xFFE91E63), // Pink
+    Color(0xFF9C27B0)  // Purple
 )
 
 private val String.absoluteValue: Int

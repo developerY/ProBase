@@ -324,7 +324,7 @@ private fun AnalyticsContent(
                                             style = MaterialTheme.typography.labelSmall
                                         )
                                         Text(
-                                            text = stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.2f", point.value)),
+                                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_currency_format, String.format(Locale.getDefault(), "%.2f", point.value)),
                                             style = MaterialTheme.typography.headlineSmall,
                                             fontWeight = FontWeight.Black
                                         )

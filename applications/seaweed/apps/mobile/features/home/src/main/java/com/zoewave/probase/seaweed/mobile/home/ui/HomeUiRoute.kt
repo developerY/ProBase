@@ -1,5 +1,10 @@
 package com.zoewave.probase.seaweed.mobile.home.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,16 +36,24 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -105,10 +119,10 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(CoreUiR.string.core_ui_summary_title)) },
+                title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_summary_title)) },
                 actions = {
                     IconButton(onClick = { onEvent(HomeUiEvent.AddRandomTransaction) }) {
-                        Icon(Icons.Default.Add, contentDescription = stringResource(CoreUiR.string.core_ui_add_random_data))
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_home_add_random_data))
                     }
                 }
             )
@@ -139,6 +153,11 @@ private fun HomeExpandedContent(
     navTo: (SeaweedDestination) -> Unit,
     padding: PaddingValues
 ) {
+    var isVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        isVisible = true
+    }
+
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -147,54 +166,68 @@ private fun HomeExpandedContent(
         horizontalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(24.dp)) {
-            RealMoneyHeroCard(
-                flexibleRemaining = uiState.flexibleMoneyRemaining,
-                monthProgress = uiState.monthProgress,
-                trailingContent = {
-                    AnalyticsPromotionCard(
-                        onClick = { navTo(SeaweedDestination.Analytics) },
-                        modifier = Modifier.padding(12.dp)
-                    )
-                }
-            )
-            OverviewSummaryCard(
-                categories = uiState.categoriesSummary,
-                navTo = navTo
-            )
-            UnallocatedMoneyCard(unallocatedAmount = uiState.unallocatedMoney)
-            FixedCostsSummaryCard(
-                totalFixedCosts = uiState.totalFixedCosts,
-                income = uiState.monthlyIncome,
-                navTo = navTo
-            )
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 40 })) {
+                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_financial_health))
+            }
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 60 })) {
+                RealMoneyHeroCard(
+                    flexibleRemaining = uiState.flexibleMoneyRemaining,
+                    monthProgress = uiState.monthProgress
+                )
+            }
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 80 })) {
+                FixedCostsSummaryCard(
+                    totalFixedCosts = uiState.totalFixedCosts,
+                    income = uiState.monthlyIncome,
+                    navTo = navTo
+                )
+            }
+
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 100 })) {
+                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_budgets_and_categories), modifier = Modifier.padding(top = 8.dp))
+            }
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 120 })) {
+                OverviewSummaryCard(
+                    categories = uiState.categoriesSummary,
+                    navTo = navTo,
+                    onAnalyticsClick = { navTo(SeaweedDestination.Analytics) }
+                )
+            }
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 140 })) {
+                UnallocatedMoneyCard(unallocatedAmount = uiState.unallocatedMoney)
+            }
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(CoreUiR.string.core_ui_recent_transactions),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = stringResource(CoreUiR.string.core_ui_view_all),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable { navTo(SeaweedDestination.Transactions(null)) }
-                )
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 160 })) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.applications_seaweed_apps_mobile_features_home_recent_transactions),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = stringResource(R.string.applications_seaweed_apps_mobile_features_home_view_all),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clickable { navTo(SeaweedDestination.Transactions(null)) }
+                    )
+                }
             }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(uiState.transactions.take(10), key = { it.id }) { transaction ->
-                    TransactionItem(
-                        transaction = transaction,
-                        onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
-                        onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
-                    )
+                    AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 180 })) {
+                        TransactionItem(
+                            transaction = transaction,
+                            onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
+                            onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
+                        )
+                    }
                 }
             }
         }
@@ -208,64 +241,130 @@ private fun HomeCompactContent(
     navTo: (SeaweedDestination) -> Unit,
     padding: PaddingValues
 ) {
+    var isVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        isVisible = true
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(padding),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            RealMoneyHeroCard(
-                flexibleRemaining = uiState.flexibleMoneyRemaining,
-                monthProgress = uiState.monthProgress,
-                trailingContent = {
-                    AnalyticsPromotionCard(
-                        onClick = { navTo(SeaweedDestination.Analytics) },
-                        modifier = Modifier.padding(12.dp)
-                    )
-                }
-            )
-        }
-        item {
-            FixedCostsSummaryCard(
-                totalFixedCosts = uiState.totalFixedCosts,
-                income = uiState.monthlyIncome,
-                navTo = navTo
-            )
-        }
-        item {
-            OverviewSummaryCard(
-                categories = uiState.categoriesSummary,
-                navTo = navTo
-            )
-        }
-        item {
-            UnallocatedMoneyCard(unallocatedAmount = uiState.unallocatedMoney)
-        }
-        item {
-            Button(
-                onClick = { navTo(SeaweedDestination.CategoryGrid) },
-                modifier = Modifier.fillMaxWidth()
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 40 })
             ) {
-                Text(stringResource(CoreUiR.string.core_ui_all_categories))
+                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_financial_health))
             }
         }
         item {
-            Text(
-                text = stringResource(CoreUiR.string.core_ui_recent_transactions),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 60 })
+            ) {
+                RealMoneyHeroCard(
+                    flexibleRemaining = uiState.flexibleMoneyRemaining,
+                    monthProgress = uiState.monthProgress
+                )
+            }
+        }
+        item {
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 80 })
+            ) {
+                FixedCostsSummaryCard(
+                    totalFixedCosts = uiState.totalFixedCosts,
+                    income = uiState.monthlyIncome,
+                    navTo = navTo
+                )
+            }
+        }
+        
+        item {
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 100 })
+            ) {
+                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_budgets_and_categories), modifier = Modifier.padding(top = 8.dp))
+            }
+        }
+        item {
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 120 })
+            ) {
+                OverviewSummaryCard(
+                    categories = uiState.categoriesSummary,
+                    navTo = navTo,
+                    onAnalyticsClick = { navTo(SeaweedDestination.Analytics) }
+                )
+            }
+        }
+        item {
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 140 })
+            ) {
+                UnallocatedMoneyCard(unallocatedAmount = uiState.unallocatedMoney)
+            }
+        }
+        item {
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 160 })
+            ) {
+                OutlinedButton(
+                    onClick = { navTo(SeaweedDestination.CategoryGrid) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(Icons.Default.GridView, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_all_categories))
+                }
+            }
+        }
+        
+        item {
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 180 })
+            ) {
+                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_recent_transactions), modifier = Modifier.padding(top = 8.dp))
+            }
         }
         items(uiState.transactions.take(5), key = { it.id }) { transaction ->
-            TransactionItem(
-                transaction = transaction,
-                onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
-                onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
-            )
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 200 })
+            ) {
+                TransactionItem(
+                    transaction = transaction,
+                    onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
+                    onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun SectionHeader(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+    )
 }
 
 @Composable
@@ -273,40 +372,29 @@ fun AnalyticsPromotionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    Surface(
         onClick = onClick,
-        modifier = modifier.width(64.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-        ),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp,
-            pressedElevation = 2.dp,
-            focusedElevation = 8.dp,
-            hoveredElevation = 8.dp
-        )
+        modifier = modifier.size(80.dp),
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        shape = CircleShape,
+        shadowElevation = 12.dp
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp, horizontal = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(4.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Analytics,
                 contentDescription = "Spending Insights",
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onTertiaryContainer
+                modifier = Modifier.size(32.dp)
             )
             Text(
                 text = "Analytics",
                 style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                fontSize = 10.sp,
-                color = MaterialTheme.colorScheme.onTertiaryContainer
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 11.sp
             )
         }
     }
@@ -316,7 +404,8 @@ fun AnalyticsPromotionCard(
 fun OverviewSummaryCard(
     categories: List<CategoryOverview>,
     navTo: (SeaweedDestination) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onAnalyticsClick: (() -> Unit)? = null
 ) {
     val totalSpending = categories.sumOf { it.totalAmount }
     val totalTransactions = categories.sumOf { it.transactionCount }
@@ -330,60 +419,67 @@ fun OverviewSummaryCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(20.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.Center
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = stringResource(CoreUiR.string.core_ui_spending_summary),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.0f", totalSpending)),
-                        style = MaterialTheme.typography.displaySmall,
-                        fontWeight = FontWeight.Black
-                    )
-                    Text(
-                        text = stringResource(CoreUiR.string.core_ui_transactions_count, totalTransactions, categories.size),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-                }
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_home_spending_summary),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_home_currency_format, String.format(Locale.getDefault(), "%.0f", totalSpending)),
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_home_transactions_count, totalTransactions, categories.size),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
 
-                Box(
-                    modifier = Modifier.size(100.dp),
-                    contentAlignment = Alignment.Center
+                    Box(
+                        modifier = Modifier.size(120.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        DonutChart(
+                            spendingByCategory = categories.associate { it.name to it.totalAmount },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        if (onAnalyticsClick != null) {
+                            AnalyticsPromotionCard(
+                                onClick = onAnalyticsClick
+                            )
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    categories.take(3).forEach { category ->
+                        CategoryBudgetProgressBar(category = category)
+                    }
+                }
+                
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                
+                TextButton(
+                    onClick = { navTo(SeaweedDestination.Budget) },
+                    modifier = Modifier.align(Alignment.End)
                 ) {
-                    DonutChart(
-                        spendingByCategory = categories.associate { it.name to it.totalAmount },
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_manage_budgets))
+                    Icon(Icons.Default.ChevronRight, contentDescription = null)
                 }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                categories.take(3).forEach { category ->
-                    CategoryBudgetProgressBar(category = category)
-                }
-            }
-            
-            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
-            
-            TextButton(
-                onClick = { navTo(SeaweedDestination.Budget) },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_manage_budgets))
-                Icon(Icons.Default.ChevronRight, contentDescription = null)
             }
         }
     }

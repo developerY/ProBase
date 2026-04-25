@@ -1,7 +1,17 @@
 package com.zoewave.probase.seaweed.mobile.bills.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,8 +19,24 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -155,7 +181,7 @@ private fun BillImpactHeader(income: Double, totalCosts: Double) {
                 style = MaterialTheme.typography.labelLarge
             )
             Text(
-                text = stringResource(CoreUiR.string.core_ui_currency_format, String.format(Locale.getDefault(), "%.2f", remaining)),
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_bills_currency_format, String.format(Locale.getDefault(), "%.2f", remaining)),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Black
             )
@@ -221,7 +247,7 @@ private fun BillItem(
                     it.toDoubleOrNull()?.let { amount -> onAmountChange(amount) }
                 },
                 modifier = Modifier.width(100.dp),
-                label = { Text(stringResource(CoreUiR.string.core_ui_text_amount)) },
+                label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_bills_amount_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium

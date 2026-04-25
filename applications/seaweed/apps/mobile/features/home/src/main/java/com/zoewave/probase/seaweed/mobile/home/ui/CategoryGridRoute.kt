@@ -3,10 +3,8 @@ package com.zoewave.probase.seaweed.mobile.home.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -48,8 +46,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.seaweed.mobile.home.R
 import com.zoewave.probase.seaweed.mobile.core.ui.components.CategoryQuickJumpCard
+import com.zoewave.probase.seaweed.mobile.home.R
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.core.ui.R as CoreUiR
@@ -93,7 +91,7 @@ fun CategoryGridScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(CoreUiR.string.core_ui_all_categories)) },
+                title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_all_categories)) },
                 navigationIcon = {
                     IconButton(onClick = { onEvent(HomeUiEvent.OnBackClicked) }) {
                         Icon(
