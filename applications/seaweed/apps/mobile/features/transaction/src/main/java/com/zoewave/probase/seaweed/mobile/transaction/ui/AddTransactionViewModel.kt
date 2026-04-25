@@ -9,6 +9,7 @@ import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSetti
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptOrchestrator
 import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
+import com.zoewave.probase.seaweed.model.SpendingImportance
 import com.zoewave.probase.seaweed.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +29,7 @@ data class AddTransactionUiState(
     val amount: String = "",
     val category: String = "",
     val description: String = "",
+    val importance: SpendingImportance = SpendingImportance.REQUIRED,
     val receiptUri: String? = null,
     val isSuccess: Boolean = false,
     val isLoading: Boolean = false,
@@ -55,6 +57,7 @@ data class AiDebugInfo(
 sealed interface AddTransactionUiEvent {
     data class AmountChanged(val value: String) : AddTransactionUiEvent
     data class CategoryChanged(val value: String) : AddTransactionUiEvent
+    data class ImportanceChanged(val value: SpendingImportance) : AddTransactionUiEvent
     data class DescriptionChanged(val value: String) : AddTransactionUiEvent
     data class ReceiptAttached(val uri: String) : AddTransactionUiEvent
     object SaveTransaction : AddTransactionUiEvent
@@ -105,6 +108,7 @@ class AddTransactionViewModel @Inject constructor(
         when (event) {
             is AddTransactionUiEvent.AmountChanged -> _uiState.update { it.copy(amount = event.value, errorMessage = null) }
             is AddTransactionUiEvent.CategoryChanged -> _uiState.update { it.copy(category = event.value, errorMessage = null) }
+            is AddTransactionUiEvent.ImportanceChanged -> _uiState.update { it.copy(importance = event.value) }
             is AddTransactionUiEvent.DescriptionChanged -> _uiState.update { it.copy(description = event.value, errorMessage = null) }
             is AddTransactionUiEvent.ReceiptAttached -> {
                 _uiState.update { it.copy(receiptUri = event.uri, showCaptureTypeSelection = true, errorMessage = null) }
@@ -226,7 +230,8 @@ class AddTransactionViewModel @Inject constructor(
                 category = _uiState.value.category,
                 description = _uiState.value.description,
                 date = System.currentTimeMillis(),
-                receiptUri = _uiState.value.receiptUri
+                receiptUri = _uiState.value.receiptUri,
+                importance = _uiState.value.importance
             )
             try {
                 repository.addTransaction(transaction)

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -69,9 +70,11 @@ import com.zoewave.probase.seaweed.mobile.core.ui.components.RealMoneyHeroCard
 import com.zoewave.probase.seaweed.mobile.core.ui.components.UnallocatedMoneyCard
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.CategoryOverview
+import com.zoewave.probase.seaweed.model.SpendingImportance
 import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
+import kotlin.math.absoluteValue
 import com.zoewave.probase.core.ui.R as CoreUiR
 
 @Composable
@@ -170,12 +173,15 @@ private fun HomeExpandedContent(
                 SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_financial_health))
             }
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 60 })) {
+                RequiredVsOptionalChart(uiState = uiState)
+            }
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 80 })) {
                 RealMoneyHeroCard(
                     flexibleRemaining = uiState.flexibleMoneyRemaining,
                     monthProgress = uiState.monthProgress
                 )
             }
-            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 80 })) {
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 100 })) {
                 FixedCostsSummaryCard(
                     totalFixedCosts = uiState.totalFixedCosts,
                     income = uiState.monthlyIncome,
@@ -264,6 +270,14 @@ private fun HomeCompactContent(
         item {
             AnimatedVisibility(
                 visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 50 })
+            ) {
+                RequiredVsOptionalChart(uiState = uiState)
+            }
+        }
+        item {
+            AnimatedVisibility(
+                visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 60 })
             ) {
                 RealMoneyHeroCard(
@@ -347,6 +361,60 @@ private fun HomeCompactContent(
                     transaction = transaction,
                     onDelete = { onEvent(HomeUiEvent.DeleteTransaction(transaction.id)) },
                     onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RequiredVsOptionalChart(uiState: HomeUiState.Success) {
+    // We need to calculate this from the transactions
+    val totalSpending = uiState.categoriesSummary.sumOf { it.totalAmount }
+    if (totalSpending == 0.0) return
+
+    val requiredSpending = uiState.transactions.filter { it.importance == SpendingImportance.REQUIRED }.sumOf { it.amount }.absoluteValue
+    val optionalSpending = uiState.transactions.filter { it.importance == SpendingImportance.OPTIONAL }.sumOf { it.amount }.absoluteValue
+    
+    val totalVariable = requiredSpending + optionalSpending
+    if (totalVariable == 0.0) return
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Needs vs. Wants", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text("Your Wants are where change happens.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+            
+            Spacer(Modifier.height(16.dp))
+            
+            Row(modifier = Modifier.fillMaxWidth().height(24.dp)) {
+                val requiredWeight = (requiredSpending / totalVariable).toFloat()
+                val optionalWeight = (optionalSpending / totalVariable).toFloat()
+                
+                Box(modifier = Modifier.weight(requiredWeight).fillMaxHeight().background(MaterialTheme.colorScheme.primary, RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)))
+                Box(modifier = Modifier.weight(optionalWeight).fillMaxHeight().background(MaterialTheme.colorScheme.tertiary, RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)))
+            }
+            
+            Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                    Text("Required", style = MaterialTheme.typography.labelSmall)
+                    Text("$${String.format(Locale.getDefault(), "%.0f", requiredSpending)}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black)
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text("Optional", style = MaterialTheme.typography.labelSmall)
+                    Text("$${String.format(Locale.getDefault(), "%.0f", optionalSpending)}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.tertiary)
+                }
+            }
+            
+            if (optionalSpending > 0) {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = "Reducing Optional by 20% would save you $${String.format(Locale.getDefault(), "%.0f", optionalSpending * 0.2 * 12)}/year",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

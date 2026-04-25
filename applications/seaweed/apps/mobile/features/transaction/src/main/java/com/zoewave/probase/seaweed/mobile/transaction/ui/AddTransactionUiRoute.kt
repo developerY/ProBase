@@ -68,6 +68,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.seaweed.mobile.transaction.R
+import com.zoewave.probase.seaweed.model.SpendingImportance
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
 import com.zoewave.probase.core.ui.R as CoreUiR
@@ -115,7 +116,7 @@ fun AddTransactionUiRoute(
 internal fun AddTransactionUiRoute(
     uiState: AddTransactionUiState,
     onEvent: (AddTransactionUiEvent) -> Unit,
-    navTo: (SeaweedDestination) -> Unit,
+    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
     AddTransactionScreen(
@@ -203,6 +204,28 @@ fun AddTransactionScreen(
                 QuickExpenseBar(
                     onAdjustAmount = { delta -> onEvent(AddTransactionUiEvent.AdjustAmount(delta)) }
                 )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = "Importance:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    FilterChip(
+                        selected = uiState.importance == SpendingImportance.REQUIRED,
+                        onClick = { onEvent(AddTransactionUiEvent.ImportanceChanged(SpendingImportance.REQUIRED)) },
+                        label = { Text("Required") }
+                    )
+                    FilterChip(
+                        selected = uiState.importance == SpendingImportance.OPTIONAL,
+                        onClick = { onEvent(AddTransactionUiEvent.ImportanceChanged(SpendingImportance.OPTIONAL)) },
+                        label = { Text("Optional") }
+                    )
+                }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
