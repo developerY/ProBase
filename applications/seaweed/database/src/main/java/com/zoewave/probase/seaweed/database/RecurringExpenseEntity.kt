@@ -2,41 +2,40 @@ package com.zoewave.probase.seaweed.database
 
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
-import com.zoewave.probase.seaweed.model.ExpenseCategory
 import com.zoewave.probase.seaweed.model.ExpenseFrequency
 import com.zoewave.probase.seaweed.model.RecurringExpense
-import com.zoewave.probase.seaweed.model.SpendingImportance
+import com.zoewave.probase.seaweed.model.SpendingType
 
 @Entity(tableName = "recurring_expenses")
 data class RecurringExpenseEntity(
     @PrimaryKey val id: String,
     val name: String,
-    val amount: Double,
+    val averageAmountCents: Long,
     val frequency: ExpenseFrequency,
-    val category: ExpenseCategory,
+    val categoryId: String,
     val isDefault: Boolean,
     val nextBillingDate: Long?,
-    val importance: SpendingImportance = SpendingImportance.REQUIRED
+    val defaultType: SpendingType = SpendingType.NEED
 )
 
 fun RecurringExpenseEntity.toDomain() = RecurringExpense(
     id = id,
     name = name,
-    amount = amount,
+    averageAmountCents = averageAmountCents,
     frequency = frequency,
-    category = category,
+    categoryId = categoryId,
     isDefault = isDefault,
     nextBillingDate = nextBillingDate,
-    importance = importance
+    defaultType = defaultType
 )
 
 fun RecurringExpense.toEntity() = RecurringExpenseEntity(
     id = id,
     name = name,
-    amount = amount,
+    averageAmountCents = averageAmountCents,
     frequency = frequency,
-    category = category,
+    categoryId = categoryId,
     isDefault = isDefault,
     nextBillingDate = nextBillingDate,
-    importance = importance
+    defaultType = defaultType
 )

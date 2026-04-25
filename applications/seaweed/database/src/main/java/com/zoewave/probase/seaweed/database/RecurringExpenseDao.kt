@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RecurringExpenseDao {
-    @Query("SELECT * FROM recurring_expenses ORDER BY category ASC")
+    @Query("SELECT * FROM recurring_expenses ORDER BY categoryId ASC")
     fun getAllExpenses(): Flow<List<RecurringExpenseEntity>>
 
     @Query("SELECT * FROM recurring_expenses WHERE id = :id")
