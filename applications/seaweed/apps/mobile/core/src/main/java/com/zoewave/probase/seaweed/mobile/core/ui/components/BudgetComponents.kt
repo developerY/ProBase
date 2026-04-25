@@ -20,7 +20,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.model.CategoryOverview
-import java.util.Locale
 
 @Composable
 fun CategoryBudgetProgressBar(
@@ -45,10 +44,11 @@ fun CategoryBudgetProgressBar(
             } else {
                 spentText
             }
+            val limit = category.limitAmountCents
             Text(
                 text = budgetText,
                 style = MaterialTheme.typography.labelSmall,
-                color = if (category.limitAmountCents != null && category.totalAmountCents > category.limitAmountCents) 
+                color = if (limit != null && category.totalAmountCents > limit)
                         MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -105,10 +105,10 @@ private fun CategoryBudgetProgressBarPreview() {
     MaterialTheme {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             CategoryBudgetProgressBar(
-                category = CategoryOverview("Food", 4200L, 1, 10000L, 5800L, 0.42f)
+                category = CategoryOverview("food_id", "Food", 4200L, 1, 10000L, 5800L, 0.42f)
             )
             CategoryBudgetProgressBar(
-                category = CategoryOverview("Entertainment", 12000L, 1, 10000L, -2000L, 1.2f)
+                category = CategoryOverview("entertainment_id", "Entertainment", 12000L, 1, 10000L, -2000L, 1.2f)
             )
         }
     }

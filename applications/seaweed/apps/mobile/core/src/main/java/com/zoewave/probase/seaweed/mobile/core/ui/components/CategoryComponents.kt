@@ -180,7 +180,7 @@ private val String.absoluteValue: Int
 private fun CategoryQuickJumpCardPreview() {
     MaterialTheme {
         CategoryQuickJumpCard(
-            category = CategoryOverview("Shopping", 25000L, 5, 50000L, 25000L, 0.5f),
+            category = CategoryOverview("shopping_id", "Shopping", 25000L, 5, 50000L, 25000L, 0.5f),
             onClick = {},
             onDelete = {},
             modifier = Modifier.padding(16.dp)
