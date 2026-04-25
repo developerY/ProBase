@@ -7,7 +7,7 @@ import com.zoewave.probase.seaweed.data.RecurringExpenseRepository
 import com.zoewave.probase.seaweed.model.ExpenseCategory
 import com.zoewave.probase.seaweed.model.ExpenseFrequency
 import com.zoewave.probase.seaweed.model.RecurringExpense
-import com.zoewave.probase.seaweed.model.SpendingImportance
+import com.zoewave.probase.seaweed.model.SpendingType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,10 +33,11 @@ class BillsViewModel @Inject constructor(
             
             financialRepository.getFinancialProfile()
                 .onEach { profile ->
+                    val currentState = _uiState.value
                     _uiState.value = BillsUiState.Success(
-                        expenses = (uiState.value as? BillsUiState.Success)?.expenses ?: emptyList(),
-                        monthlyIncome = profile.monthlyIncome,
-                        totalFixedCosts = profile.totalFixedCosts
+                        expenses = (currentState as? BillsUiState.Success)?.expenses ?: emptyList(),
+                        monthlyIncome = profile.monthlyIncomeCents.toDouble() / 100.0,
+                        totalFixedCosts = profile.totalFixedCostsCents.toDouble() / 100.0
                     )
                 }
                 .launchIn(viewModelScope)
@@ -47,7 +48,6 @@ class BillsViewModel @Inject constructor(
                     if (currentState is BillsUiState.Success) {
                         _uiState.value = currentState.copy(expenses = expenses)
                     } else {
-                        // If it's still loading or first time, we'll get another update from financialProfile soon
                         _uiState.value = BillsUiState.Success(expenses = expenses)
                     }
                 }
@@ -61,13 +61,13 @@ class BillsViewModel @Inject constructor(
                 is BillsUiEvent.UpdateExpenseAmount -> {
                     val expense = (uiState.value as? BillsUiState.Success)?.expenses?.find { it.id == event.id }
                     expense?.let {
-                        repository.saveExpense(it.copy(amount = event.amount))
+                        repository.saveExpense(it.copy(averageAmountCents = (event.amount * 100).toLong()))
                     }
                 }
                 is BillsUiEvent.UpdateExpenseImportance -> {
                     val expense = (uiState.value as? BillsUiState.Success)?.expenses?.find { it.id == event.id }
                     expense?.let {
-                        repository.saveExpense(it.copy(importance = event.importance))
+                        repository.saveExpense(it.copy(defaultType = event.importance))
                     }
                 }
                 is BillsUiEvent.DeleteExpense -> {
@@ -77,9 +77,10 @@ class BillsViewModel @Inject constructor(
                     val newExpense = RecurringExpense(
                         id = UUID.randomUUID().toString(),
                         name = event.name,
-                        amount = event.amount,
+                        averageAmountCents = (event.amount * 100).toLong(),
                         frequency = event.frequency,
-                        category = event.category
+                        categoryId = "misc_id", // Placeholder
+                        defaultType = event.importance
                     )
                     repository.saveExpense(newExpense)
                 }
@@ -100,14 +101,14 @@ sealed interface BillsUiState {
 
 sealed interface BillsUiEvent {
     data class UpdateExpenseAmount(val id: String, val amount: Double) : BillsUiEvent
-    data class UpdateExpenseImportance(val id: String, val importance: SpendingImportance) : BillsUiEvent
+    data class UpdateExpenseImportance(val id: String, val importance: SpendingType) : BillsUiEvent
     data class DeleteExpense(val id: String) : BillsUiEvent
     data class AddExpense(
         val name: String,
         val amount: Double,
         val frequency: ExpenseFrequency,
         val category: ExpenseCategory,
-        val importance: SpendingImportance = SpendingImportance.REQUIRED
+        val importance: SpendingType = SpendingType.NEED
     ) : BillsUiEvent
     object OnBackClicked : BillsUiEvent
 }

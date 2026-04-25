@@ -54,7 +54,7 @@ import com.zoewave.probase.seaweed.mobile.bills.R
 import com.zoewave.probase.seaweed.model.ExpenseCategory
 import com.zoewave.probase.seaweed.model.ExpenseFrequency
 import com.zoewave.probase.seaweed.model.RecurringExpense
-import com.zoewave.probase.seaweed.model.SpendingImportance
+import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
 import com.zoewave.probase.core.ui.R as CoreUiR
@@ -137,7 +137,7 @@ fun BillsScreen(
                     }
                 }
                 is BillsUiState.Success -> {
-                    val groupedExpenses = uiState.expenses.groupBy { it.category }
+                    val groupedExpenses = uiState.expenses.groupBy { it.categoryId }
                     
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -151,9 +151,9 @@ fun BillsScreen(
                             )
                         }
                         
-                        groupedExpenses.forEach { (category, expenses) ->
+                        groupedExpenses.forEach { (categoryId, expenses) ->
                             stickyHeader {
-                                CategoryHeader(category = category)
+                                CategoryHeader(categoryId = categoryId)
                             }
                             items(expenses, key = { it.id }) { expense ->
                                 BillItem(
@@ -204,13 +204,13 @@ private fun BillImpactHeader(income: Double, totalCosts: Double) {
 }
 
 @Composable
-private fun CategoryHeader(category: ExpenseCategory) {
+private fun CategoryHeader(categoryId: String) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface
     ) {
         Text(
-            text = category.name.lowercase().replaceFirstChar { it.uppercase() },
+            text = categoryId, // TODO: look up name from repository or map
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
@@ -223,11 +223,12 @@ private fun CategoryHeader(category: ExpenseCategory) {
 private fun BillItem(
     expense: RecurringExpense,
     onAmountChange: (Double) -> Unit,
-    onImportanceChange: (SpendingImportance) -> Unit,
+    onImportanceChange: (SpendingType) -> Unit,
     onDelete: () -> Unit
 ) {
-    var textValue by remember(expense.amount) { 
-        mutableStateOf(if (expense.amount == 0.0) "" else String.format(Locale.getDefault(), "%.2f", expense.amount)) 
+    var textValue by remember(expense.averageAmountCents) { 
+        val dollars = expense.averageAmountCents.toDouble() / 100.0
+        mutableStateOf(if (dollars == 0.0) "" else String.format(Locale.getDefault(), "%.2f", dollars)) 
     }
 
     Card(
@@ -243,10 +244,10 @@ private fun BillItem(
                     Text(expense.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.width(8.dp))
                     Icon(
-                        imageVector = if (expense.importance == SpendingImportance.REQUIRED) Icons.Default.Star else Icons.Default.StarOutline,
+                        imageVector = if (expense.defaultType == SpendingType.NEED) Icons.Default.Star else Icons.Default.StarOutline,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
-                        tint = if (expense.importance == SpendingImportance.REQUIRED) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                        tint = if (expense.defaultType == SpendingType.NEED) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                     )
                 }
                 Text(
@@ -258,12 +259,12 @@ private fun BillItem(
             
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = if (expense.importance == SpendingImportance.REQUIRED) "Required" else "Optional",
+                    text = if (expense.defaultType == SpendingType.NEED) "Required" else "Optional",
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (expense.importance == SpendingImportance.REQUIRED) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                    color = if (expense.defaultType == SpendingType.NEED) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                     modifier = Modifier.clickable { 
                         onImportanceChange(
-                            if (expense.importance == SpendingImportance.REQUIRED) SpendingImportance.OPTIONAL else SpendingImportance.REQUIRED
+                            if (expense.defaultType == SpendingType.NEED) SpendingType.WANT else SpendingType.NEED
                         )
                     }
                 )
@@ -305,7 +306,7 @@ private fun BillImpactHeaderPreview() {
 @Composable
 private fun CategoryHeaderPreview() {
     MaterialTheme {
-        CategoryHeader(category = ExpenseCategory.HOUSING)
+        CategoryHeader(categoryId = "housing_id")
     }
 }
 
@@ -314,7 +315,7 @@ private fun CategoryHeaderPreview() {
 private fun BillItemPreview() {
     MaterialTheme {
         BillItem(
-            expense = RecurringExpense("1", "Rent", 1200.0, ExpenseFrequency.MONTHLY, ExpenseCategory.HOUSING),
+            expense = RecurringExpense("1", "Rent", 120000L, ExpenseFrequency.MONTHLY, "housing_id"),
             onAmountChange = {},
             onImportanceChange = {},
             onDelete = {}
@@ -329,7 +330,7 @@ private fun BillsUiRoutePreview() {
         BillsUiRoute(
             uiState = BillsUiState.Success(
                 expenses = listOf(
-                    RecurringExpense("1", "Rent", 1200.0, ExpenseFrequency.MONTHLY, ExpenseCategory.HOUSING)
+                    RecurringExpense("1", "Rent", 120000L, ExpenseFrequency.MONTHLY, "housing_id")
                 ),
                 monthlyIncome = 5000.0,
                 totalFixedCosts = 1200.0
@@ -347,8 +348,8 @@ private fun BillsScreenPreview() {
         BillsScreen(
             uiState = BillsUiState.Success(
                 expenses = listOf(
-                    RecurringExpense("1", "Rent", 1200.0, ExpenseFrequency.MONTHLY, ExpenseCategory.HOUSING),
-                    RecurringExpense("2", "Internet", 60.0, ExpenseFrequency.MONTHLY, ExpenseCategory.UTILITIES)
+                    RecurringExpense("1", "Rent", 120000L, ExpenseFrequency.MONTHLY, "housing_id"),
+                    RecurringExpense("2", "Internet", 6000L, ExpenseFrequency.MONTHLY, "utilities_id")
                 ),
                 monthlyIncome = 5000.0,
                 totalFixedCosts = 1260.0
