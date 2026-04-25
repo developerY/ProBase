@@ -4,13 +4,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FinancialProfile(
-    val monthlyIncome: Double,
-    val totalFixedCosts: Double,
-    val realStartingBalance: Double,
-    val monthlyVariableSpending: Double,
-    val flexibleMoneyRemaining: Double,
-    val totalBudgetedAmount: Double,
-    val unallocatedMoney: Double,
+    val monthlyIncomeCents: Long,
+    val totalFixedCostsCents: Long,
+    val realStartingBalanceCents: Long,
+    val monthlyVariableSpendingCents: Long,
+    val flexibleMoneyRemainingCents: Long,
+    val totalBudgetedAmountCents: Long,
+    val unallocatedMoneyCents: Long,
     val categoryOverviews: List<CategoryOverview>,
     val monthProgress: Float
 )

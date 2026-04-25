@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BudgetTarget(
     val categoryName: String,
-    val limitAmount: Double
+    val limitAmountCents: Long
 )

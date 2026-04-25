@@ -24,18 +24,18 @@ enum class ExpenseCategory {
 data class RecurringExpense(
     val id: String,
     val name: String,
-    val amount: Double,
+    val averageAmountCents: Long,
     val frequency: ExpenseFrequency,
-    val category: ExpenseCategory,
+    val categoryId: String,
     val isDefault: Boolean = false,
     val nextBillingDate: Long? = null,
-    val importance: SpendingImportance = SpendingImportance.REQUIRED
+    val defaultType: SpendingType = SpendingType.NEED
 ) {
-    val monthlyImpact: Double
+    val monthlyImpactCents: Long
         get() = when (frequency) {
-            ExpenseFrequency.WEEKLY -> (amount * 52) / 12
-            ExpenseFrequency.BI_WEEKLY -> (amount * 26) / 12
-            ExpenseFrequency.MONTHLY -> amount
-            ExpenseFrequency.YEARLY -> amount / 12
+            ExpenseFrequency.WEEKLY -> (averageAmountCents * 52) / 12
+            ExpenseFrequency.BI_WEEKLY -> (averageAmountCents * 26) / 12
+            ExpenseFrequency.MONTHLY -> averageAmountCents
+            ExpenseFrequency.YEARLY -> averageAmountCents / 12
         }
 }
