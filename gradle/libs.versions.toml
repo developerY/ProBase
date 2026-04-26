@@ -95,6 +95,8 @@ mlkitTextRecognition = "16.0.1"
 googleAiEdgeAicore = "0.0.1-exp02"
 googleGenerativeAi = "0.9.0"
 playServicesCodeScanner = "16.1.0"
+playServicesWallet = "20.0.0"
+composePayButton = "1.2.0"
 firebaseBom = "34.10.0"
 googleGmsGoogleServices = "4.4.4"
 googleFirebaseCrashlytics = "3.0.6"
@@ -216,6 +218,8 @@ androidx-camera-compose = { group = "androidx.camera", name = "camera-compose", 
 
 # -- Maps & Location --
 google-play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+google-play-services-wallet = { group = "com.google.android.gms", name = "play-services-wallet", version.ref = "playServicesWallet" }
+google-pay-button-compose = { group = "com.google.pay.button", name = "compose-pay-button", version.ref = "composePayButton" }
 google-play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 google-maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
 

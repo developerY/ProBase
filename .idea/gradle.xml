@@ -143,6 +143,8 @@
             <option value="$PROJECT_DIR$/features/health/core" />
             <option value="$PROJECT_DIR$/features/nav3" />
             <option value="$PROJECT_DIR$/features/nfc" />
+            <option value="$PROJECT_DIR$/features/payment" />
+            <option value="$PROJECT_DIR$/features/payment/googlepay" />
             <option value="$PROJECT_DIR$/features/places" />
             <option value="$PROJECT_DIR$/features/qrscanner" />
             <option value="$PROJECT_DIR$/features/weather" />

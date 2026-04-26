@@ -44,6 +44,7 @@ include(":features:health:core")
 include(":features:health:cgm")
 include(":features:camera")
 include(":features:calendar")
+include(":features:payment:googlepay")
 
 // --- AshBike Product Line ---
 include(":applications:ashbike:database")
