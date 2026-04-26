@@ -3,8 +3,10 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.seaweed.data.BudgetTargetRepository
+import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.model.BudgetTarget
+import com.zoewave.probase.seaweed.model.Category
 import com.zoewave.probase.seaweed.model.HabitInsight
 import com.zoewave.probase.seaweed.model.SpendingPeriod
 import com.zoewave.probase.seaweed.model.Transaction
@@ -27,8 +29,9 @@ data class AnalyticsUiState(
     val isLoading: Boolean = true,
     val spendingTrends: Map<SpendingPeriod, List<TrendPoint>> = emptyMap(),
     val habitInsights: List<HabitInsight> = emptyList(),
-    val heatmapData: Map<LocalDate, Double> = emptyMap(),
+    val heatmapData: Map<LocalDate, Long> = emptyMap(),
     val allTransactions: List<Transaction> = emptyList(),
+    val categoriesMap: Map<String, Category> = emptyMap()
 )
 
 sealed interface AnalyticsUiEvent {
@@ -38,19 +41,24 @@ sealed interface AnalyticsUiEvent {
 @HiltViewModel
 class AnalyticsViewModel @Inject constructor(
     private val repository: TransactionRepository,
-    private val budgetRepository: BudgetTargetRepository
+    private val budgetRepository: BudgetTargetRepository,
+    private val categoryRepository: CategoryRepository
 ) : ViewModel() {
 
     val uiState: StateFlow<AnalyticsUiState> = combine(
         repository.getAllTransactions(),
-        budgetRepository.getAllBudgets()
-    ) { transactions, budgets ->
+        budgetRepository.getAllBudgets(),
+        categoryRepository.getAllCategories()
+    ) { txs, budgets, categories ->
+        val categoriesMap = categories.associateBy { it.id }
+        
         AnalyticsUiState(
             isLoading = false,
-            spendingTrends = calculateTrends(transactions),
-            habitInsights = calculateHabitInsights(transactions, budgets),
-            heatmapData = calculateHeatmapData(transactions),
-            allTransactions = transactions
+            spendingTrends = calculateTrends(txs, categoriesMap),
+            habitInsights = calculateHabitInsights(txs, budgets, categoriesMap),
+            heatmapData = calculateHeatmapData(txs),
+            allTransactions = txs,
+            categoriesMap = categoriesMap
         )
     }.stateIn(
         scope = viewModelScope,
@@ -58,58 +66,67 @@ class AnalyticsViewModel @Inject constructor(
         initialValue = AnalyticsUiState()
     )
 
-    fun calculateTrendsForTransactions(transactions: List<Transaction>): Map<SpendingPeriod, List<TrendPoint>> {
-        return calculateTrends(transactions)
+    fun calculateTrendsForTransactions(
+        transactions: List<Transaction>,
+        categoriesMap: Map<String, Category>
+    ): Map<SpendingPeriod, List<TrendPoint>> {
+        return calculateTrends(transactions, categoriesMap)
     }
 
-    fun calculateHeatmapDataForTransactions(transactions: List<Transaction>): Map<LocalDate, Double> {
+    fun calculateHeatmapDataForTransactions(transactions: List<Transaction>): Map<LocalDate, Long> {
         return calculateHeatmapData(transactions)
     }
 
-    private fun calculateTrends(transactions: List<Transaction>): Map<SpendingPeriod, List<TrendPoint>> {
+    private fun calculateTrends(
+        transactions: List<Transaction>,
+        categoriesMap: Map<String, Category>
+    ): Map<SpendingPeriod, List<TrendPoint>> {
         val zoneId = ZoneId.systemDefault()
-        val expenses = transactions.filter { it.amount < 0 }
+        val expenses = transactions.filter { it.amountCents < 0 }
         
         // Daily Trends (last 7 days)
         val daily = expenses
-            .map { it to Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() }
+            .map { it to Instant.ofEpochMilli(it.timestamp).atZone(zoneId).toLocalDate() }
             .groupBy { it.second }
             .map { (date, dailyTransactions) ->
+                val topCatId = dailyTransactions.groupBy { it.first.categoryId }.maxByOrNull { it.value.size }?.key
                 TrendPoint(
                     label = date.format(DateTimeFormatter.ofPattern("MMM dd")),
-                    value = dailyTransactions.sumOf { it.first.amount }.absoluteValue,
-                    timestamp = dailyTransactions.first().first.date,
+                    value = dailyTransactions.sumOf { it.first.amountCents }.absoluteValue.toDouble() / 100.0,
+                    timestamp = dailyTransactions.first().first.timestamp,
                     transactionCount = dailyTransactions.size,
-                    topCategory = dailyTransactions.groupBy { it.first.category }.maxByOrNull { it.value.size }?.key
+                    topCategory = categoriesMap[topCatId]?.name ?: topCatId
                 )
             }.sortedBy { it.timestamp }.takeLast(7)
 
         // Weekly Trends (last 4 weeks)
         val weekFields = WeekFields.of(Locale.getDefault())
         val weekly = expenses
-            .map { it to Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() }
+            .map { it to Instant.ofEpochMilli(it.timestamp).atZone(zoneId).toLocalDate() }
             .groupBy { it.second.get(weekFields.weekOfWeekBasedYear()) }
             .map { (week, weeklyTransactions) ->
+                val topCatId = weeklyTransactions.groupBy { it.first.categoryId }.maxByOrNull { it.value.size }?.key
                 TrendPoint(
                     label = "Week $week",
-                    value = weeklyTransactions.sumOf { it.first.amount }.absoluteValue,
-                    timestamp = weeklyTransactions.minOf { it.first.date },
+                    value = weeklyTransactions.sumOf { it.first.amountCents }.absoluteValue.toDouble() / 100.0,
+                    timestamp = weeklyTransactions.minOf { it.first.timestamp },
                     transactionCount = weeklyTransactions.size,
-                    topCategory = weeklyTransactions.groupBy { it.first.category }.maxByOrNull { it.value.size }?.key
+                    topCategory = categoriesMap[topCatId]?.name ?: topCatId
                 )
             }.sortedBy { it.timestamp }.takeLast(4)
 
         // Monthly Trends (last 6 months)
         val monthly = expenses
-            .map { it to Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() }
+            .map { it to Instant.ofEpochMilli(it.timestamp).atZone(zoneId).toLocalDate() }
             .groupBy { it.second.month }
             .map { (month, monthlyTransactions) ->
+                val topCatId = monthlyTransactions.groupBy { it.first.categoryId }.maxByOrNull { it.value.size }?.key
                 TrendPoint(
                     label = month.name.lowercase(Locale.ROOT).replaceFirstChar { it.uppercase() }.take(3),
-                    value = monthlyTransactions.sumOf { it.first.amount }.absoluteValue,
-                    timestamp = monthlyTransactions.minOf { it.first.date },
+                    value = monthlyTransactions.sumOf { it.first.amountCents }.absoluteValue.toDouble() / 100.0,
+                    timestamp = monthlyTransactions.minOf { it.first.timestamp },
                     transactionCount = monthlyTransactions.size,
-                    topCategory = monthlyTransactions.groupBy { it.first.category }.maxByOrNull { it.value.size }?.key
+                    topCategory = categoriesMap[topCatId]?.name ?: topCatId
                 )
             }.sortedBy { it.timestamp }.takeLast(6)
 
@@ -122,52 +139,54 @@ class AnalyticsViewModel @Inject constructor(
 
     private fun calculateHabitInsights(
         transactions: List<Transaction>,
-        budgets: List<BudgetTarget>
+        budgets: List<BudgetTarget>,
+        categoriesMap: Map<String, Category>
     ): List<HabitInsight> {
-        val expenses = transactions.filter { it.amount < 0 }
+        val expenses = transactions.filter { it.amountCents < 0 }
         val zoneId = ZoneId.systemDefault()
         val now = LocalDate.now(zoneId)
         val thirtyDaysAgo = now.minusDays(30)
         
         val recentTransactions = expenses.filter {
-            Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate().isAfter(thirtyDaysAgo)
+            Instant.ofEpochMilli(it.timestamp).atZone(zoneId).toLocalDate().isAfter(thirtyDaysAgo)
         }
 
-        val transactionCategories = recentTransactions.groupBy { it.category }
-        val budgetCategories = budgets.associateBy { it.categoryName }
-        val allCategoryNames = (transactionCategories.keys + budgetCategories.keys).distinct()
+        val transactionCategories = recentTransactions.groupBy { it.categoryId }
+        val budgetCategories = budgets.associateBy { it.categoryId }
+        val allCategoryIds = (transactionCategories.keys + budgetCategories.keys).distinct()
 
-        return allCategoryNames.map { category ->
-            val categoryTransactions = transactionCategories[category] ?: emptyList()
+        return allCategoryIds.map { categoryId ->
+            val categoryTransactions = transactionCategories[categoryId] ?: emptyList()
             val frequency = categoryTransactions.size
-            val totalAmount = categoryTransactions.sumOf { it.amount }.absoluteValue
-            val dailyAverage = totalAmount / 30.0
+            val totalAmountCents = categoryTransactions.sumOf { it.amountCents }.absoluteValue
+            val dailyAverageCents = totalAmountCents / 30.0
+            val categoryName = categoriesMap[categoryId]?.name ?: categoryId
             
             val trendMessage = when {
                 frequency == 0 -> "No spending in the last 30 days."
-                dailyAverage > 10.0 -> "This habit costs you over $${String.format(Locale.getDefault(), "%.0f", dailyAverage * 365 / 12)} per month!"
+                dailyAverageCents > 1000.0 -> "This habit costs you over $${String.format(Locale.getDefault(), "%.0f", (dailyAverageCents * 365 / 12) / 100.0)} per month!"
                 frequency > 15 -> "You're doing this almost every other day."
                 else -> "Frequent spending in this category."
             }
 
             HabitInsight(
-                category = category,
+                category = categoryName,
                 frequency = frequency,
-                totalAmount = totalAmount,
-                dailyAverage = dailyAverage,
+                totalAmount = totalAmountCents.toDouble() / 100.0,
+                dailyAverage = dailyAverageCents / 100.0,
                 trendMessage = trendMessage,
-                budgetLimit = budgetCategories[category]?.limitAmount
+                budgetLimit = budgetCategories[categoryId]?.limitAmountCents?.toDouble()?.let { it / 100.0 }
             )
         }.sortedByDescending { it.totalAmount }
     }
 
-    private fun calculateHeatmapData(transactions: List<Transaction>): Map<LocalDate, Double> {
+    private fun calculateHeatmapData(transactions: List<Transaction>): Map<LocalDate, Long> {
         val zoneId = ZoneId.systemDefault()
-        return transactions.filter { it.amount < 0 }
-            .map { it to Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate() }
+        return transactions.filter { it.amountCents < 0 }
+            .map { it to Instant.ofEpochMilli(it.timestamp).atZone(zoneId).toLocalDate() }
             .groupBy { it.second }
             .mapValues { (_, dailyTransactions) ->
-                dailyTransactions.sumOf { it.first.amount }.absoluteValue
+                dailyTransactions.sumOf { it.first.amountCents }.absoluteValue
             }
     }
 }

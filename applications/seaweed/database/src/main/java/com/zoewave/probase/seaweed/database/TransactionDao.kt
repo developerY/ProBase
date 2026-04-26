@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransactionDao {
-    @Query("SELECT * FROM transactions ORDER BY date DESC")
+    @Query("SELECT * FROM transactions ORDER BY timestamp DESC")
     fun getAllTransactions(): Flow<List<TransactionEntity>>
 
     @Query("SELECT * FROM transactions WHERE id = :id")
@@ -20,9 +20,9 @@ interface TransactionDao {
     @Query("DELETE FROM transactions WHERE id = :id")
     suspend fun deleteTransaction(id: String)
 
-    @Query("DELETE FROM transactions WHERE category = :category")
-    suspend fun deleteTransactionsByCategory(category: String)
+    @Query("DELETE FROM transactions WHERE categoryId = :categoryId")
+    suspend fun deleteTransactionsByCategory(categoryId: String)
 
-    @Query("UPDATE transactions SET category = :toCategory WHERE category = :fromCategory")
+    @Query("UPDATE transactions SET categoryId = :toCategory WHERE categoryId = :fromCategory")
     suspend fun updateTransactionsCategory(fromCategory: String, toCategory: String)
 }

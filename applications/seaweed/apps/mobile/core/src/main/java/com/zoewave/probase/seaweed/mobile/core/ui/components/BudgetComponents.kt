@@ -18,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.model.CategoryOverview
-import java.util.Locale
 
 @Composable
 fun CategoryBudgetProgressBar(
@@ -37,20 +37,23 @@ fun CategoryBudgetProgressBar(
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold
             )
-            val budgetText = if (category.limitAmount != null) {
-                "$${String.format(Locale.getDefault(), "%.0f", category.totalAmount)} / $${String.format(Locale.getDefault(), "%.0f", category.limitAmount)}"
+            val spentText = CurrencyUtils.formatCents(category.totalAmountCents)
+            val limitText = category.limitAmountCents?.let { CurrencyUtils.formatCents(it) }
+            val budgetText = if (limitText != null) {
+                "$spentText / $limitText"
             } else {
-                "$${String.format(Locale.getDefault(), "%.0f", category.totalAmount)}"
+                spentText
             }
+            val limit = category.limitAmountCents
             Text(
                 text = budgetText,
                 style = MaterialTheme.typography.labelSmall,
-                color = if (category.limitAmount != null && category.totalAmount > category.limitAmount!!) 
+                color = if (limit != null && category.totalAmountCents > limit)
                         MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         
-        if (category.limitAmount != null) {
+        if (category.limitAmountCents != null) {
             Spacer(modifier = Modifier.height(4.dp))
             LinearProgressIndicator(
                 progress = { category.progressPercentage.coerceIn(0f, 1f) },
@@ -64,7 +67,7 @@ fun CategoryBudgetProgressBar(
 
 @Composable
 fun UnallocatedMoneyCard(
-    unallocatedAmount: Double,
+    unallocatedAmountCents: Long,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -82,7 +85,7 @@ fun UnallocatedMoneyCard(
             Column {
                 Text("Unallocated Money", style = MaterialTheme.typography.labelSmall)
                 Text(
-                    text = "$${String.format(Locale.getDefault(), "%.2f", unallocatedAmount)}",
+                    text = "$${CurrencyUtils.formatCents(unallocatedAmountCents)}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -102,10 +105,10 @@ private fun CategoryBudgetProgressBarPreview() {
     MaterialTheme {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             CategoryBudgetProgressBar(
-                category = CategoryOverview("Food", 42.0, 1, 100.0)
+                category = CategoryOverview("food_id", "Food", 4200L, 1, 10000L, 5800L, 0.42f)
             )
             CategoryBudgetProgressBar(
-                category = CategoryOverview("Entertainment", 120.0, 1, 100.0)
+                category = CategoryOverview("entertainment_id", "Entertainment", 12000L, 1, 10000L, -2000L, 1.2f)
             )
         }
     }
@@ -115,6 +118,6 @@ private fun CategoryBudgetProgressBarPreview() {
 @Composable
 private fun UnallocatedMoneyCardPreview() {
     MaterialTheme {
-        UnallocatedMoneyCard(unallocatedAmount = 123.45, modifier = Modifier.padding(16.dp))
+        UnallocatedMoneyCard(unallocatedAmountCents = 12345L, modifier = Modifier.padding(16.dp))
     }
 }

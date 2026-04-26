@@ -10,9 +10,10 @@ import com.zoewave.probase.seaweed.database.converter.ExpenseConverters
         TransactionEntity::class,
         RecurringExpenseEntity::class,
         UserSettingsEntity::class,
-        BudgetTargetEntity::class
+        BudgetTargetEntity::class,
+        CategoryEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(ExpenseConverters::class)
@@ -22,6 +23,7 @@ abstract class SeaweedDatabase : RoomDatabase() {
     abstract val recurringExpenseDao: RecurringExpenseDao
     abstract val userSettingsDao: UserSettingsDao
     abstract val budgetTargetDao: BudgetTargetDao
+    abstract val categoryDao: CategoryDao
 
     companion object {
         const val DATABASE_NAME = "seaweed_db"

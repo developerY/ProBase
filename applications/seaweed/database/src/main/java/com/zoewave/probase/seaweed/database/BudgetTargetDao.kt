@@ -11,12 +11,12 @@ interface BudgetTargetDao {
     @Query("SELECT * FROM budget_targets")
     fun getAllBudgets(): Flow<List<BudgetTargetEntity>>
 
-    @Query("SELECT * FROM budget_targets WHERE categoryName = :categoryName")
-    fun getBudget(categoryName: String): Flow<BudgetTargetEntity?>
+    @Query("SELECT * FROM budget_targets WHERE categoryId = :categoryId")
+    fun getBudget(categoryId: String): Flow<BudgetTargetEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveBudget(budget: BudgetTargetEntity)
 
-    @Query("DELETE FROM budget_targets WHERE categoryName = :categoryName")
-    suspend fun deleteBudget(categoryName: String)
+    @Query("DELETE FROM budget_targets WHERE categoryId = :categoryId")
+    suspend fun deleteBudget(categoryId: String)
 }

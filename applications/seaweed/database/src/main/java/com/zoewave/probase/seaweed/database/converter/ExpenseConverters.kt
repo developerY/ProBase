@@ -4,6 +4,7 @@ import androidx.room3.TypeConverter
 import com.zoewave.probase.seaweed.model.ExpenseCategory
 import com.zoewave.probase.seaweed.model.ExpenseFrequency
 import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
+import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.ThemeMode
 
 class ExpenseConverters {
@@ -30,4 +31,10 @@ class ExpenseConverters {
 
     @TypeConverter
     fun toThemeMode(value: String): ThemeMode = ThemeMode.valueOf(value)
+
+    @TypeConverter
+    fun fromImportance(type: SpendingType): String = type.name
+
+    @TypeConverter
+    fun toImportance(value: String): SpendingType = SpendingType.valueOf(value)
 }

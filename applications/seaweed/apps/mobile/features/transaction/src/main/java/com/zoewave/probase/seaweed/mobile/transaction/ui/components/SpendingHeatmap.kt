@@ -39,7 +39,7 @@ import java.util.Locale
 
 @Composable
 fun SpendingHeatmap(
-    heatmapData: Map<LocalDate, Double>,
+    heatmapData: Map<LocalDate, Long>,
     modifier: Modifier = Modifier,
     monthsToDisplay: Int = 3,
     selectedDate: LocalDate? = null,
@@ -75,7 +75,7 @@ fun SpendingHeatmap(
 @Composable
 private fun MonthHeatmap(
     month: YearMonth,
-    heatmapData: Map<LocalDate, Double>,
+    heatmapData: Map<LocalDate, Long>,
     selectedDate: LocalDate?,
     onDayClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier
@@ -84,7 +84,7 @@ private fun MonthHeatmap(
     val firstDayOfMonth = month.atDay(1)
     val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value % 7 // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
     
-    val maxSpending = heatmapData.values.maxOrNull() ?: 1.0
+    val maxSpending = (heatmapData.values.maxOrNull() ?: 1L).toFloat()
 
     Column(modifier = modifier) {
         Text(
@@ -121,10 +121,10 @@ private fun MonthHeatmap(
                     val isDayInMonth = (week > 0 || dayOfWeek >= firstDayOfWeek) && currentDay <= daysInMonth
                     if (isDayInMonth) {
                         val date = month.atDay(currentDay)
-                        val spending = heatmapData[date] ?: 0.0
+                        val spending = heatmapData[date] ?: 0L
                         DayBox(
                             day = currentDay,
-                            intensity = (spending / maxSpending).toFloat(),
+                            intensity = (spending.toFloat() / maxSpending).coerceIn(0f, 1f),
                             isSelected = date == selectedDate,
                             onClick = { onDayClick(date) },
                             modifier = Modifier.weight(1f)

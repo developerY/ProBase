@@ -17,5 +17,6 @@ dependencies {
     implementation(project(":applications:seaweed:database"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":core:data"))
+    implementation(project(":core:util"))
     implementation(libs.androidx.core.ktx)
 }

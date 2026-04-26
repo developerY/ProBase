@@ -2,23 +2,23 @@ package com.zoewave.probase.seaweed.mobile.home.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.data.TestDataGenerator
-import com.zoewave.probase.seaweed.model.BudgetTarget
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: TransactionRepository,
+    private val categoryRepository: CategoryRepository,
     private val budgetRepository: BudgetTargetRepository,
     private val financialRepository: FinancialRepository,
     private val testDataGenerator: TestDataGenerator
@@ -29,13 +29,8 @@ class HomeViewModel @Inject constructor(
         repository.getAllTransactions()
     ) { profile, transactions ->
         HomeUiState.Success(
-            transactions = transactions.sortedByDescending { it.date }.take(10),
-            categoriesSummary = profile.categoryOverviews,
-            monthlyIncome = profile.monthlyIncome,
-            totalFixedCosts = profile.totalFixedCosts,
-            flexibleMoneyRemaining = profile.flexibleMoneyRemaining,
-            unallocatedMoney = profile.unallocatedMoney,
-            monthProgress = profile.monthProgress
+            profile = profile,
+            transactions = transactions.sortedByDescending { it.timestamp }.take(10)
         )
     }.stateIn(
             scope = viewModelScope,
@@ -44,35 +39,26 @@ class HomeViewModel @Inject constructor(
         )
 
     fun onEvent(event: HomeUiEvent) {
-        when (event) {
-            is HomeUiEvent.DeleteTransaction -> {
-                viewModelScope.launch {
+        viewModelScope.launch {
+            when (event) {
+                is HomeUiEvent.DeleteTransaction -> {
                     repository.deleteTransaction(event.id)
                 }
-            }
-            HomeUiEvent.AddRandomTransaction -> {
-                viewModelScope.launch {
+                HomeUiEvent.AddRandomTransaction -> {
                     testDataGenerator.generateSingleRandomTransaction()
                 }
-            }
-            is HomeUiEvent.DeleteCategory -> {
-                viewModelScope.launch {
+                is HomeUiEvent.DeleteCategory -> {
                     repository.deleteTransactionsByCategory(event.category)
                     budgetRepository.deleteBudget(event.category)
+                    // TODO: handle category entity deletion if needed
                 }
-            }
-            is HomeUiEvent.AddCategory -> {
-                viewModelScope.launch {
-                    budgetRepository.saveBudget(BudgetTarget(event.name, 0.0))
-                }
-            }
-            is HomeUiEvent.CombineCategories -> {
-                viewModelScope.launch {
+                is HomeUiEvent.CombineCategories -> {
                     repository.updateTransactionsCategory(event.from, event.to)
                     budgetRepository.deleteBudget(event.from)
                 }
+                is HomeUiEvent.AddCategory -> { /* Handle */ }
+                HomeUiEvent.OnBackClicked -> { /* Handled in Route */ }
             }
-            HomeUiEvent.OnBackClicked -> { /* Handled in Route */ }
         }
     }
 }

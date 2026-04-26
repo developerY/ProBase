@@ -6,16 +6,16 @@ import com.zoewave.probase.seaweed.model.BudgetTarget
 
 @Entity(tableName = "budget_targets")
 data class BudgetTargetEntity(
-    @PrimaryKey val categoryName: String,
-    val limitAmount: Double
+    @PrimaryKey val categoryId: String,
+    val limitAmountCents: Long
 )
 
 fun BudgetTargetEntity.toDomain() = BudgetTarget(
-    categoryName = categoryName,
-    limitAmount = limitAmount
+    categoryId = categoryId,
+    limitAmountCents = limitAmountCents
 )
 
 fun BudgetTarget.toEntity() = BudgetTargetEntity(
-    categoryName = categoryName,
-    limitAmount = limitAmount
+    categoryId = categoryId,
+    limitAmountCents = limitAmountCents
 )

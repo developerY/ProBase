@@ -6,7 +6,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,8 +34,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.model.CategoryOverview
-import java.util.Locale
 import kotlin.math.absoluteValue
 
 @Composable
@@ -96,7 +95,7 @@ fun CategoryQuickJumpCard(
 
             Column {
                 Text(
-                    text = "$${String.format(Locale.getDefault(), "%.0f", category.totalAmount)}",
+                    text = "$${CurrencyUtils.formatCents(category.totalAmountCents)}",
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -119,9 +118,9 @@ fun DonutChart(
     spendingByCategory: Map<String, Double>,
     modifier: Modifier = Modifier
 ) {
-    val totalSpending = spendingByCategory.values.sum()
-    if (totalSpending == 0.0) return
-
+    // Use absolute value sum to prevent issues with negative data if it ever slips in
+    val totalSpending = spendingByCategory.values.sumOf { it.absoluteValue }
+    
     val animationProgress = remember { Animatable(0f) }
     LaunchedEffect(spendingByCategory) {
         animationProgress.animateTo(
@@ -134,30 +133,32 @@ fun DonutChart(
         val strokeWidth = 32f
         val gapDegree = 2f // Degree for segment gaps
         
-        // Background ring
+        // Background ring - Always draw this
         drawCircle(
-            color = Color.LightGray.copy(alpha = 0.1f),
+            color = Color.LightGray.copy(alpha = 0.15f),
             style = Stroke(width = strokeWidth)
         )
         
-        var startAngle = -90f
-        spendingByCategory.keys.forEachIndexed { index, category ->
-            val amount = spendingByCategory[category] ?: 0.0
-            val fullSweepAngle = (amount / totalSpending).toFloat() * 360f
-            
-            // Apply animation and leave a small gap for segments
-            val sweepAngle = (fullSweepAngle * animationProgress.value)
-            
-            if (sweepAngle > gapDegree) {
-                drawArc(
-                    color = categoryColors[index % categoryColors.size],
-                    startAngle = startAngle + (gapDegree / 2f),
-                    sweepAngle = sweepAngle - gapDegree,
-                    useCenter = false,
-                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                )
+        if (totalSpending > 0.01) {
+            var startAngle = -90f
+            spendingByCategory.keys.forEachIndexed { index, category ->
+                val amount = (spendingByCategory[category] ?: 0.0).absoluteValue
+                val fullSweepAngle = (amount / totalSpending).toFloat() * 360f
+                
+                // Apply animation and leave a small gap for segments
+                val sweepAngle = (fullSweepAngle * animationProgress.value)
+                
+                if (sweepAngle > gapDegree) {
+                    drawArc(
+                        color = categoryColors[index % categoryColors.size],
+                        startAngle = startAngle + (gapDegree / 2f),
+                        sweepAngle = sweepAngle - gapDegree,
+                        useCenter = false,
+                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                    )
+                }
+                startAngle += fullSweepAngle
             }
-            startAngle += fullSweepAngle
         }
     }
 }
@@ -181,7 +182,7 @@ private val String.absoluteValue: Int
 private fun CategoryQuickJumpCardPreview() {
     MaterialTheme {
         CategoryQuickJumpCard(
-            category = CategoryOverview("Shopping", 250.0, 5, 500.0),
+            category = CategoryOverview("shopping_id", "Shopping", 25000L, 5, 50000L, 25000L, 0.5f),
             onClick = {},
             onDelete = {},
             modifier = Modifier.padding(16.dp)

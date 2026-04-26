@@ -14,12 +14,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
 
 @Composable
 fun RealMoneyHeroCard(
-    flexibleRemaining: Double,
+    flexibleRemainingCents: Long,
     monthProgress: Float,
     modifier: Modifier = Modifier,
     trailingContent: @Composable (BoxScope.() -> Unit)? = null
@@ -40,7 +41,7 @@ fun RealMoneyHeroCard(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "$${String.format(Locale.getDefault(), "%.2f", flexibleRemaining)}",
+                    text = "$${CurrencyUtils.formatCents(flexibleRemainingCents)}",
                     style = MaterialTheme.typography.displayMedium,
                     fontWeight = FontWeight.Black
                 )
@@ -72,8 +73,8 @@ fun RealMoneyHeroCard(
 
 @Composable
 fun FixedCostsSummaryCard(
-    totalFixedCosts: Double,
-    income: Double,
+    totalFixedCostsCents: Long,
+    incomeCents: Long,
     navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -106,24 +107,24 @@ fun FixedCostsSummaryCard(
             ) {
                 Column {
                     Text("Total Income", style = MaterialTheme.typography.labelSmall)
-                    Text("$${String.format(Locale.getDefault(), "%.0f", income)}", style = MaterialTheme.typography.titleLarge)
+                    Text("$${CurrencyUtils.formatCents(incomeCents)}", style = MaterialTheme.typography.titleLarge)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text("Total Bills", style = MaterialTheme.typography.labelSmall)
-                    Text("-$${String.format(Locale.getDefault(), "%.0f", totalFixedCosts)}", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
+                    Text("-$${CurrencyUtils.formatCents(totalFixedCostsCents)}", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
                 }
             }
             
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.1f))
             
-            val startingBalance = income - totalFixedCosts
+            val startingBalanceCents = incomeCents - totalFixedCostsCents
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Real Starting Balance", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                Text("$${String.format(Locale.getDefault(), "%.2f", startingBalance)}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black)
+                Text("$${CurrencyUtils.formatCents(startingBalanceCents)}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black)
             }
         }
     }

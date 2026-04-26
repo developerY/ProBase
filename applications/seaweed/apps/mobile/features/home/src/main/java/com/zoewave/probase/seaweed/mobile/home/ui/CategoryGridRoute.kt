@@ -149,7 +149,7 @@ fun CategoryGridScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(uiState.categoriesSummary) { category ->
+                    items(uiState.profile.categoryOverviews) { category ->
                         CategoryQuickJumpCard(
                             category = category,
                             onClick = { navTo(SeaweedDestination.Transactions(category.name)) },
@@ -189,7 +189,7 @@ fun CategoryGridScreen(
 
                 if (showCombineSheet) {
                     CombineCategoriesBottomSheet(
-                        categories = uiState.categoriesSummary.map { it.name },
+                        categories = uiState.profile.categoryOverviews.map { it.name },
                         onDismiss = { showCombineSheet = false },
                         onCombine = { from, to ->
                             onEvent(HomeUiEvent.CombineCategories(from, to))
@@ -337,9 +337,19 @@ private fun CategoryGridScreenPreview() {
     MaterialTheme {
         CategoryGridScreen(
             uiState = HomeUiState.Success(
-                categoriesSummary = listOf(
-                    CategoryOverview("Food", 42.0, 1, 100.0),
-                    CategoryOverview("Coffee", 15.0, 1, 50.0)
+                profile = com.zoewave.probase.seaweed.model.FinancialProfile(
+                    monthlyIncomeCents = 500000L,
+                    totalFixedCostsCents = 150000L,
+                    realStartingBalanceCents = 350000L,
+                    monthlyVariableSpendingCents = 100000L,
+                    flexibleMoneyRemainingCents = 250000L,
+                    totalBudgetedAmountCents = 200000L,
+                    unallocatedMoneyCents = 150000L,
+                    categoryOverviews = listOf(
+                        CategoryOverview("food_id", "Food", 4200L, 1, 10000L, 5800L, 0.42f),
+                        CategoryOverview("coffee_id", "Coffee", 1500L, 1, 5000L, 3500L, 0.3f)
+                    ),
+                    monthProgress = 0.5f
                 )
             ),
             onEvent = {},

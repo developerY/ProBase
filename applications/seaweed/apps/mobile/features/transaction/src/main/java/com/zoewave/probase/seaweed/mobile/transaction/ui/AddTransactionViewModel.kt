@@ -1,14 +1,16 @@
 package com.zoewave.probase.seaweed.mobile.transaction.ui
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.features.ai.capture.data.ImageLoader
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptOrchestrator
 import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
+import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +30,7 @@ data class AddTransactionUiState(
     val amount: String = "",
     val category: String = "",
     val description: String = "",
+    val importance: SpendingType = SpendingType.NEED,
     val receiptUri: String? = null,
     val isSuccess: Boolean = false,
     val isLoading: Boolean = false,
@@ -55,6 +58,7 @@ data class AiDebugInfo(
 sealed interface AddTransactionUiEvent {
     data class AmountChanged(val value: String) : AddTransactionUiEvent
     data class CategoryChanged(val value: String) : AddTransactionUiEvent
+    data class ImportanceChanged(val value: SpendingType) : AddTransactionUiEvent
     data class DescriptionChanged(val value: String) : AddTransactionUiEvent
     data class ReceiptAttached(val uri: String) : AddTransactionUiEvent
     object SaveTransaction : AddTransactionUiEvent
@@ -91,8 +95,8 @@ class AddTransactionViewModel @Inject constructor(
         repository.getAllTransactions(),
         budgetRepository.getAllBudgets()
     ) { state, transactions, budgets ->
-        val transactionCategories = transactions.map { it.category }.distinct()
-        val budgetCategories = budgets.map { it.categoryName }
+        val transactionCategories = transactions.map { it.categoryId }.distinct()
+        val budgetCategories = budgets.map { it.categoryId }
         val allCategories = (transactionCategories + budgetCategories).distinct().sorted()
         state.copy(recentCategories = allCategories)
     }.stateIn(
@@ -105,6 +109,7 @@ class AddTransactionViewModel @Inject constructor(
         when (event) {
             is AddTransactionUiEvent.AmountChanged -> _uiState.update { it.copy(amount = event.value, errorMessage = null) }
             is AddTransactionUiEvent.CategoryChanged -> _uiState.update { it.copy(category = event.value, errorMessage = null) }
+            is AddTransactionUiEvent.ImportanceChanged -> _uiState.update { it.copy(importance = event.value) }
             is AddTransactionUiEvent.DescriptionChanged -> _uiState.update { it.copy(description = event.value, errorMessage = null) }
             is AddTransactionUiEvent.ReceiptAttached -> {
                 _uiState.update { it.copy(receiptUri = event.uri, showCaptureTypeSelection = true, errorMessage = null) }
@@ -222,11 +227,12 @@ class AddTransactionViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             val transaction = Transaction(
                 id = UUID.randomUUID().toString(),
-                amount = totalAmount,
-                category = _uiState.value.category,
+                amountCents = CurrencyUtils.toCents(totalAmount),
+                categoryId = _uiState.value.category, // Assuming category is the ID here for now
                 description = _uiState.value.description,
-                date = System.currentTimeMillis(),
-                receiptUri = _uiState.value.receiptUri
+                timestamp = System.currentTimeMillis(),
+                receiptUri = _uiState.value.receiptUri,
+                defaultType = _uiState.value.importance
             )
             try {
                 repository.addTransaction(transaction)
