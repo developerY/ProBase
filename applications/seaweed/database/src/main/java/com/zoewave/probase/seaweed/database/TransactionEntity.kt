@@ -15,7 +15,9 @@ data class TransactionEntity(
     val receiptUri: String? = null,
     val defaultType: SpendingType,
     val userOverrideType: SpendingType? = null,
-    val recurringId: String? = null
+    val recurringId: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )
 
 fun TransactionEntity.toDomain() = Transaction(
@@ -27,7 +29,9 @@ fun TransactionEntity.toDomain() = Transaction(
     receiptUri = receiptUri,
     defaultType = defaultType,
     userOverrideType = userOverrideType,
-    recurringId = recurringId
+    recurringId = recurringId,
+    latitude = latitude,
+    longitude = longitude
 )
 
 fun Transaction.toEntity() = TransactionEntity(
@@ -39,5 +43,7 @@ fun Transaction.toEntity() = TransactionEntity(
     receiptUri = receiptUri,
     defaultType = defaultType,
     userOverrideType = userOverrideType,
-    recurringId = recurringId
+    recurringId = recurringId,
+    latitude = latitude,
+    longitude = longitude
 )

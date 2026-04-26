@@ -16,7 +16,7 @@ android {
 dependencies {
     implementation(project(":core:util"))
     implementation(project(":core:ui"))
-    implementation(project(":core:util"))
+    implementation(project(":core:data"))
     implementation(project(":applications:seaweed:model"))
     implementation(project(":applications:seaweed:data"))
     implementation(project(":applications:seaweed:features:main"))
@@ -37,4 +37,6 @@ dependencies {
     implementation(libs.androidx.compose.material3.adaptive.navigation)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.google.play.services.location)
+    implementation(libs.google.maps.compose)
 }

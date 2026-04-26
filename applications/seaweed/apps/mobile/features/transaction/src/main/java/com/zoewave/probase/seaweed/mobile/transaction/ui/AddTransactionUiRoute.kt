@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalHospital
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.AssistChip
@@ -225,6 +226,19 @@ fun AddTransactionScreen(
                         onClick = { onEvent(AddTransactionUiEvent.ImportanceChanged(SpendingType.WANT)) },
                         label = { Text("Optional") }
                     )
+                    
+                    Spacer(Modifier.weight(1f))
+
+                    IconButton(
+                        onClick = { onEvent(AddTransactionUiEvent.CaptureLocation) },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MyLocation,
+                            contentDescription = "Capture Location",
+                            tint = if (uiState.latitude != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
