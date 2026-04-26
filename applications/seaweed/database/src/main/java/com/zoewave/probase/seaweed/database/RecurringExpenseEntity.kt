@@ -15,7 +15,8 @@ data class RecurringExpenseEntity(
     val categoryId: String,
     val isDefault: Boolean,
     val nextBillingDate: Long?,
-    val defaultType: SpendingType = SpendingType.NEED
+    val defaultType: SpendingType = SpendingType.NEED,
+    val cardId: String? = null
 )
 
 fun RecurringExpenseEntity.toDomain() = RecurringExpense(
@@ -26,7 +27,8 @@ fun RecurringExpenseEntity.toDomain() = RecurringExpense(
     categoryId = categoryId,
     isDefault = isDefault,
     nextBillingDate = nextBillingDate,
-    defaultType = defaultType
+    defaultType = defaultType,
+    cardId = cardId
 )
 
 fun RecurringExpense.toEntity() = RecurringExpenseEntity(
@@ -37,5 +39,6 @@ fun RecurringExpense.toEntity() = RecurringExpenseEntity(
     categoryId = categoryId,
     isDefault = isDefault,
     nextBillingDate = nextBillingDate,
-    defaultType = defaultType
+    defaultType = defaultType,
+    cardId = cardId
 )

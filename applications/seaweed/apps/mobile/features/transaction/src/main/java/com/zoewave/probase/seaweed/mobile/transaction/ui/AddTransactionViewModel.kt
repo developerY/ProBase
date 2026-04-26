@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.data.repository.travel.LocationRepository
 import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.features.ai.capture.data.ImageLoader
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
@@ -44,7 +45,10 @@ data class AddTransactionUiState(
     val isCategorySuggestionsVisible: Boolean = false,
     val showCaptureTypeSelection: Boolean = false,
     val userContextComment: String = "",
-    val lastAiDebugInfo: AiDebugInfo? = null
+    val lastAiDebugInfo: AiDebugInfo? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val isCapturingLocation: Boolean = false
 )
 
 @Serializable
@@ -77,12 +81,14 @@ sealed interface AddTransactionUiEvent {
     data class UserCommentChanged(val comment: String) : AddTransactionUiEvent
     object CancelCaptureSelection : AddTransactionUiEvent
     object DebugAiClicked : AddTransactionUiEvent
+    object CaptureLocation : AddTransactionUiEvent
 }
 
 @HiltViewModel
 class AddTransactionViewModel @Inject constructor(
     private val repository: TransactionRepository,
     private val budgetRepository: BudgetTargetRepository,
+    private val locationRepository: LocationRepository,
     private val imageLoader: ImageLoader,
     private val orchestrator: ReceiptOrchestrator,
     private val aiSettings: AiConfigurationSettings
@@ -129,6 +135,18 @@ class AddTransactionViewModel @Inject constructor(
             }
             AddTransactionUiEvent.CancelCaptureSelection -> {
                 _uiState.update { it.copy(showCaptureTypeSelection = false, receiptUri = null) }
+            }
+            AddTransactionUiEvent.CaptureLocation -> {
+                viewModelScope.launch {
+                    _uiState.update { it.copy(isCapturingLocation = true) }
+                    locationRepository.updateLocation()
+                    val location = locationRepository.currentLocation.firstOrNull()
+                    _uiState.update { it.copy(
+                        latitude = location?.latitude,
+                        longitude = location?.longitude,
+                        isCapturingLocation = false
+                    ) }
+                }
             }
             AddTransactionUiEvent.DebugAiClicked -> { /* Handled in Route */ }
             AddTransactionUiEvent.SaveTransaction -> saveTransaction()
@@ -232,7 +250,9 @@ class AddTransactionViewModel @Inject constructor(
                 description = _uiState.value.description,
                 timestamp = System.currentTimeMillis(),
                 receiptUri = _uiState.value.receiptUri,
-                defaultType = _uiState.value.importance
+                defaultType = _uiState.value.importance,
+                latitude = _uiState.value.latitude,
+                longitude = _uiState.value.longitude
             )
             try {
                 repository.addTransaction(transaction)

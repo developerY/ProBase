@@ -16,7 +16,14 @@ data class Transaction(
     val userOverrideType: SpendingType? = null,
     
     // Recurring detection / grouping
-    val recurringId: String? = null
+    val recurringId: String? = null,
+
+    // Location data
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    
+    // Future-proofing for Credit Card Linkage
+    val cardId: String? = null
 ) {
     val effectiveType: SpendingType
         get() = userOverrideType ?: defaultType
