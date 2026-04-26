@@ -237,7 +237,8 @@ fun TransactionsListPane(
                                 uiState = billsUiState,
                                 onEvent = { /* Map to bills event if needed */ },
                                 navTo = navTo,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxSize(),
+                                isEmbedded = true
                             )
                         }
                     }
