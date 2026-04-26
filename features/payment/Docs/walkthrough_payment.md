@@ -17,6 +17,7 @@ The initial implementation focuses on a high-polish Google Pay proof-of-concept.
 ### Infrastructure & Config
 - **Play Services Wallet**: Integrated the official `play-services-wallet` library for API handshakes.
 - **Manifest Orchestration**: Configured the global `AndroidManifest.xml` to enable the Google Pay API at the application level.
+- **Secrets Management**: Integrated the `secrets-gradle-plugin` in the Stripe module to securely manage publishable keys via `secrets.defaults.properties`, preventing sensitive keys from being committed in plain text to GitHub.
 - **JSON Security**: Encapsulated the complex `allowedPaymentMethods` JSON configurations within the feature module to prevent leakages into app-level code.
 
 ### Reusable UI Components

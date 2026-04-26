@@ -71,8 +71,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.features.payment.googlepay.ui.SeaweedGooglePayButton
+import com.zoewave.probase.features.payment.stripe.ui.LocalStripeLauncher
 import com.zoewave.probase.features.payment.stripe.ui.presentSeaweedPayment
-import com.zoewave.probase.features.payment.stripe.ui.rememberSeaweedStripeLauncher
 import com.zoewave.probase.seaweed.mobile.transaction.R
 import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
@@ -141,10 +141,7 @@ fun AddTransactionScreen(
     navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val stripeLauncher = rememberSeaweedStripeLauncher { result ->
-        // Handle result (POC: just save transaction on success)
-        onEvent(AddTransactionUiEvent.SaveTransaction)
-    }
+    val stripeLauncher = LocalStripeLauncher.current
 
     Scaffold(
         topBar = {
@@ -337,9 +334,10 @@ fun AddTransactionScreen(
                     Button(
                         onClick = { 
                             // POC: In a real app, we'd fetch this from the backend first
-                            stripeLauncher.presentSeaweedPayment("pi_test_123_secret_abc")
+                            stripeLauncher?.presentSeaweedPayment("pi_test_123_secret_abc")
                         },
                         modifier = Modifier.fillMaxWidth().height(48.dp),
+                        enabled = stripeLauncher != null,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF635BFF), // Stripe Purple
                             contentColor = Color.White

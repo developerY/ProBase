@@ -2,6 +2,7 @@ plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.library.compose")
     id("composetemplate.android.hilt")
+    alias(libs.plugins.mapsplatform.secrets)
 }
 
 android {
@@ -10,6 +11,13 @@ android {
     defaultConfig {
         consumerProguardFiles("consumer-rules.pro")
     }
+    buildFeatures {
+        buildConfig = true
+    }
+}
+
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
 dependencies {

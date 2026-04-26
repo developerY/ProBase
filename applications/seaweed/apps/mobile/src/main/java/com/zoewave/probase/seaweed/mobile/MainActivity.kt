@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
+import com.zoewave.probase.features.payment.stripe.ui.StripePaymentProvider
 import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.data.UserSettingsRepository
@@ -54,11 +55,15 @@ class MainActivity : ComponentActivity() {
                 themeConfig = userSettings?.themeConfig ?: SeaweedThemeConfig.DEFAULT,
                 themeMode = userSettings?.themeMode ?: ThemeMode.SYSTEM
             ) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                StripePaymentProvider(
+                    onResult = { /* Global handler if needed */ }
                 ) {
-                    SeaweedMainScreen(windowSizeClass = windowSizeClass)
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        SeaweedMainScreen(windowSizeClass = windowSizeClass)
+                    }
                 }
             }
         }
