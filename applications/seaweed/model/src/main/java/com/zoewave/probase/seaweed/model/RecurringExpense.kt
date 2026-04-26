@@ -29,7 +29,8 @@ data class RecurringExpense(
     val categoryId: String,
     val isDefault: Boolean = false,
     val nextBillingDate: Long? = null,
-    val defaultType: SpendingType = SpendingType.NEED
+    val defaultType: SpendingType = SpendingType.NEED,
+    val cardId: String? = null
 ) {
     val monthlyImpactCents: Long
         get() = when (frequency) {

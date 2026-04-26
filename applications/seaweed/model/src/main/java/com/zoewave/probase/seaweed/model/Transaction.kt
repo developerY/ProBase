@@ -20,7 +20,10 @@ data class Transaction(
 
     // Location data
     val latitude: Double? = null,
-    val longitude: Double? = null
+    val longitude: Double? = null,
+    
+    // Future-proofing for Credit Card Linkage
+    val cardId: String? = null
 ) {
     val effectiveType: SpendingType
         get() = userOverrideType ?: defaultType

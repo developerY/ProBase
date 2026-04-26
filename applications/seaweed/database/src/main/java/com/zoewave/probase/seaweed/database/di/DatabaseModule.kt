@@ -44,4 +44,8 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideCategoryDao(db: SeaweedDatabase) = db.categoryDao
+
+    @Provides
+    @Singleton
+    fun provideCreditCardDao(db: SeaweedDatabase) = db.creditCardDao
 }
