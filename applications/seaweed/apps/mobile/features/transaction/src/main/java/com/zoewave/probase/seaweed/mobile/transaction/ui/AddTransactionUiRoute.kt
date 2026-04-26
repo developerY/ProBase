@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -50,7 +49,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -58,9 +56,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -71,12 +66,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.features.payment.googlepay.ui.SeaweedGooglePayButton
+import com.zoewave.probase.features.payment.stripe.ui.presentSeaweedPayment
+import com.zoewave.probase.features.payment.stripe.ui.rememberSeaweedStripeLauncher
 import com.zoewave.probase.seaweed.mobile.transaction.R
 import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
@@ -145,6 +141,11 @@ fun AddTransactionScreen(
     navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val stripeLauncher = rememberSeaweedStripeLauncher { result ->
+        // Handle result (POC: just save transaction on success)
+        onEvent(AddTransactionUiEvent.SaveTransaction)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -332,6 +333,21 @@ fun AddTransactionScreen(
                     SeaweedGooglePayButton(
                         onClick = { onEvent(AddTransactionUiEvent.SaveTransaction) }
                     )
+
+                    Button(
+                        onClick = { 
+                            // POC: In a real app, we'd fetch this from the backend first
+                            stripeLauncher.presentSeaweedPayment("pi_test_123_secret_abc")
+                        },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF635BFF), // Stripe Purple
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Pay with Stripe", fontWeight = FontWeight.Bold)
+                    }
                     
                     Text(
                         text = "AI will automatically verify this purchase against your budget and rewards.",

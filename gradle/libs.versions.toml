@@ -96,6 +96,7 @@ googleAiEdgeAicore = "0.0.1-exp02"
 googleGenerativeAi = "0.9.0"
 playServicesCodeScanner = "16.1.0"
 playServicesWallet = "20.0.0"
+stripe = "23.5.0"
 composePayButton = "1.2.0"
 firebaseBom = "34.10.0"
 googleGmsGoogleServices = "4.4.4"
@@ -221,6 +222,7 @@ google-play-services-location = { group = "com.google.android.gms", name = "play
 google-play-services-wallet = { group = "com.google.android.gms", name = "play-services-wallet", version.ref = "playServicesWallet" }
 google-pay-button-compose = { group = "com.google.pay.button", name = "compose-pay-button", version.ref = "composePayButton" }
 google-play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
+stripe-android = { group = "com.stripe", name = "stripe-android", version.ref = "stripe" }
 google-maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
 
 # -- Health & Wear --
