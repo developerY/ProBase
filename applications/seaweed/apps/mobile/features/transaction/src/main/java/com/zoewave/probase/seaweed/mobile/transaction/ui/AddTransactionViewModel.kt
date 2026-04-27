@@ -12,6 +12,8 @@ import com.zoewave.probase.features.ai.vision.receipt.ReceiptOrchestrator
 import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
+import com.zoewave.probase.seaweed.features.spendingcontrol.domain.InterventionFlowOrchestrator
+import com.zoewave.probase.seaweed.features.spendingcontrol.domain.TransactionStatus
 import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -95,6 +97,7 @@ class AddTransactionViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     private val imageLoader: ImageLoader,
     private val orchestrator: ReceiptOrchestrator,
+    val spendingControlOrchestrator: InterventionFlowOrchestrator,
     private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
@@ -279,6 +282,19 @@ class AddTransactionViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            // --- Spending Control Intervention Step ---
+            val authStatus = spendingControlOrchestrator.interceptTransaction(
+                merchantName = _uiState.value.description.ifBlank { "New Purchase" },
+                amountCents = CurrencyUtils.toCents(totalAmount)
+            )
+
+            if (authStatus is TransactionStatus.Declined) {
+                _uiState.update { it.copy(isLoading = false) }
+                return@launch
+            }
+            // ------------------------------------------
+
             val transaction = Transaction(
                 id = UUID.randomUUID().toString(),
                 amountCents = CurrencyUtils.toCents(totalAmount),
