@@ -369,7 +369,8 @@ fun AddTransactionScreen(
                     // Reusable Google Pay Component (Disabled for Release)
                     if (GooglePayConfig.IS_ENABLED) {
                         SeaweedGooglePayButton(
-                            onClick = { onEvent(AddTransactionUiEvent.SaveTransaction) }
+                            onClick = { onEvent(AddTransactionUiEvent.SaveTransaction) },
+                            enabled = false
                         )
                     }
 

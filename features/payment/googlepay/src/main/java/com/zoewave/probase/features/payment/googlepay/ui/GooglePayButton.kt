@@ -12,13 +12,15 @@ import com.google.pay.button.ButtonTheme
 @Composable
 fun SeaweedGooglePayButton(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     PayButton(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp),
         onClick = onClick,
+        enabled = enabled,
         allowedPaymentMethods = """[{"type":"CARD","parameters":{"allowedAuthMethods":["PAN_ONLY","CRYPTOGRAM_3DS"],"allowedCardNetworks":["AMEX","DISCOVER","INTERAC","JCB","MASTERCARD","VISA"]}}]""",
         theme = ButtonTheme.Dark,
         type = ButtonType.Buy
