@@ -1,5 +1,6 @@
 package com.zoewave.probase.seaweed.features.spendingcontrol.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -8,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -19,12 +21,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.features.spendingcontrol.domain.Envelope
+import com.zoewave.probase.seaweed.model.Category
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 
 @Composable
@@ -34,11 +38,28 @@ fun EnvelopeManagementUiRoute(
     modifier: Modifier = Modifier,
     viewModel: EnvelopeViewModel = hiltViewModel()
 ) {
-    val envelopes by viewModel.envelopes.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
+    EnvelopeManagementUiRoute(
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        navTo = navTo,
+        onBack = onBack,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun EnvelopeManagementUiRoute(
+    uiState: EnvelopeUiState,
+    onEvent: (EnvelopeUiEvent) -> Unit,
+    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     EnvelopeManagementScreen(
-        uiState = envelopes,
-        onEvent = { /* Handle events if any added to ViewModel later */ },
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo,
         onBack = onBack,
         modifier = modifier
@@ -48,12 +69,16 @@ fun EnvelopeManagementUiRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EnvelopeManagementScreen(
-    uiState: List<Envelope>,
-    @Suppress("UnusedParameter") onEvent: (Unit) -> Unit,
+    uiState: EnvelopeUiState,
+    onEvent: (EnvelopeUiEvent) -> Unit,
     @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showAddDialog by remember { mutableStateOf(false) }
+    var isExplainerExpanded by remember { mutableStateOf(false) }
+    var showPhilosophyDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -69,6 +94,15 @@ fun EnvelopeManagementScreen(
                 )
             )
         },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAddDialog = true },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = Color.White
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Envelope")
+            }
+        },
         modifier = modifier.fillMaxSize()
     ) { padding ->
         LazyColumn(
@@ -80,7 +114,11 @@ fun EnvelopeManagementScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             item {
-                EnvelopeExplainerHeader()
+                EnvelopeExplainerHeader(
+                    isExpanded = isExplainerExpanded,
+                    onToggle = { isExplainerExpanded = !isExplainerExpanded },
+                    onHelpClick = { showPhilosophyDialog = true }
+                )
             }
 
             item {
@@ -92,29 +130,124 @@ fun EnvelopeManagementScreen(
                 )
             }
 
-            if (uiState.isEmpty()) {
+            if (uiState.envelopes.isEmpty()) {
                 item {
                     EmptyEnvelopesPlaceholder()
                 }
             } else {
-                items(uiState, key = { it.id }) { envelope ->
+                items(uiState.envelopes, key = { it.id }) { envelope ->
                     EnvelopeCard(envelope = envelope)
                 }
-            }
-
-            item {
-                PhilosophySection()
             }
             
             item {
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
+
+        if (showAddDialog) {
+            AddEnvelopeDialog(
+                availableCategories = uiState.availableCategories,
+                onDismiss = { showAddDialog = false },
+                onConfirm = { name, limit, categories ->
+                    onEvent(EnvelopeUiEvent.AddEnvelope(name, limit, categories))
+                    showAddDialog = false
+                }
+            )
+        }
+
+        if (showPhilosophyDialog) {
+            PhilosophyDialog(onDismiss = { showPhilosophyDialog = false })
+        }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EnvelopeExplainerHeader() {
+private fun AddEnvelopeDialog(
+    availableCategories: List<Category>,
+    onDismiss: () -> Unit,
+    onConfirm: (String, Long, List<String>) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var limit by remember { mutableStateOf("") }
+    val selectedCategoryIds = remember { mutableStateListOf<String>() }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add Spending Envelope") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Envelope Name") },
+                    placeholder = { Text("e.g. Dining, Fun...") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                OutlinedTextField(
+                    value = limit,
+                    onValueChange = { limit = it },
+                    label = { Text("Monthly Limit ($)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Text(
+                    text = "Link Categories",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    availableCategories.forEach { category ->
+                        val isSelected = selectedCategoryIds.contains(category.id)
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = {
+                                if (isSelected) selectedCategoryIds.remove(category.id)
+                                else selectedCategoryIds.add(category.id)
+                            },
+                            label = { Text(category.name) }
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val limitCents = ((limit.toDoubleOrNull() ?: 0.0) * 100).toLong()
+                    if (name.isNotBlank() && limitCents > 0) {
+                        onConfirm(name, limitCents, selectedCategoryIds.toList())
+                    }
+                },
+                enabled = name.isNotBlank() && limit.toDoubleOrNull() != null
+            ) {
+                Text("Create")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun EnvelopeExplainerHeader(
+    isExpanded: Boolean,
+    onToggle: () -> Unit,
+    onHelpClick: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
@@ -135,20 +268,75 @@ private fun EnvelopeExplainerHeader() {
                     }
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "Real-Time Enforcement",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.ExtraBold
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Real-Time Enforcement",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
+                IconButton(onClick = onHelpClick) {
+                    Icon(Icons.Default.HelpOutline, contentDescription = "Seaweed Philosophy")
+                }
+                IconButton(onClick = onToggle) {
+                    Icon(
+                        imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand"
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Envelopes are not just tracking. They are boundaries. Every transaction is checked before it is saved. If you exceed your limit, we intervene.",
-                style = MaterialTheme.typography.bodyMedium,
-                lineHeight = 22.sp
-            )
+            AnimatedVisibility(visible = isExpanded) {
+                Column {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Envelopes are not just tracking. They are boundaries. Every transaction is checked before it is saved. If you exceed your limit, we intervene.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        lineHeight = 22.sp
+                    )
+                }
+            }
         }
     }
+}
+
+@Composable
+private fun PhilosophyDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { 
+            Text(
+                text = "Seaweed Philosophy",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                PhilosophyItem(
+                    icon = Icons.Default.Speed,
+                    title = "Zero-Latency Decision",
+                    description = "We use local rules and cached models to decide instantly. Your payment flow is never blocked by network calls."
+                )
+                
+                PhilosophyItem(
+                    icon = Icons.Default.Info,
+                    title = "Transparent Friction",
+                    description = "We don't just say 'no'. We show you why and offer you the override path immediately."
+                )
+                
+                PhilosophyItem(
+                    icon = Icons.Default.AutoGraph,
+                    title = "Adaptive Boundaries",
+                    description = "The system learns from your overrides and suggests adjustments that actually fit your life."
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Got it")
+            }
+        }
+    )
 }
 
 @Composable
@@ -222,37 +410,6 @@ private fun EnvelopeCard(envelope: Envelope) {
 }
 
 @Composable
-private fun PhilosophySection() {
-    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(
-            text = "Seaweed Philosophy",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(top = 16.dp)
-        )
-        
-        PhilosophyItem(
-            icon = Icons.Default.Speed,
-            title = "Zero-Latency Decision",
-            description = "We use local rules and cached models to decide instantly. Your payment flow is never blocked by network calls."
-        )
-        
-        PhilosophyItem(
-            icon = Icons.Default.Info,
-            title = "Transparent Friction",
-            description = "We don't just say 'no'. We show you why and offer you the override path immediately."
-        )
-        
-        PhilosophyItem(
-            icon = Icons.Default.AutoGraph,
-            title = "Adaptive Boundaries",
-            description = "The system learns from your overrides and suggests adjustments that actually fit your life."
-        )
-    }
-}
-
-@Composable
 private fun PhilosophyItem(
     icon: ImageVector,
     title: String,
@@ -295,9 +452,11 @@ private fun EmptyEnvelopesPlaceholder() {
 private fun EnvelopeManagementScreenSuccessPreview() {
     MaterialTheme {
         EnvelopeManagementScreen(
-            uiState = listOf(
-                Envelope("1", "Dining", 5000L, 2000L, listOf("dining_id")),
-                Envelope("2", "Shopping", 10000L, 9500L, listOf("shopping_id"))
+            uiState = EnvelopeUiState(
+                envelopes = listOf(
+                    Envelope("1", "Dining", 5000L, 2000L, listOf("dining_id")),
+                    Envelope("2", "Shopping", 10000L, 9500L, listOf("shopping_id"))
+                )
             ),
             onEvent = {},
             navTo = {},
@@ -311,7 +470,7 @@ private fun EnvelopeManagementScreenSuccessPreview() {
 private fun EnvelopeManagementScreenEmptyPreview() {
     MaterialTheme {
         EnvelopeManagementScreen(
-            uiState = emptyList(),
+            uiState = EnvelopeUiState(envelopes = emptyList()),
             onEvent = {},
             navTo = {},
             onBack = {}
