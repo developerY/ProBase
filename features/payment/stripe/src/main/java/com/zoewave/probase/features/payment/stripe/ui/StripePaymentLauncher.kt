@@ -1,10 +1,9 @@
 package com.zoewave.probase.features.payment.stripe.ui
 
-import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.PaymentConfiguration
@@ -18,28 +17,48 @@ import com.zoewave.probase.features.payment.stripe.BuildConfig
  */
 val LocalStripeLauncher = staticCompositionLocalOf<PaymentSheet?> { null }
 
+/**
+ * A thread-safe proxy to route payment results from the Activity back to the active Composable.
+ */
+object StripeResultProxy {
+    private var activeCallback: ((PaymentSheetResult) -> Unit)? = null
+
+    fun register(callback: (PaymentSheetResult) -> Unit) {
+        activeCallback = callback
+    }
+
+    fun unregister() {
+        activeCallback = null
+    }
+
+    fun onResult(result: PaymentSheetResult) {
+        activeCallback?.invoke(result)
+    }
+}
+
 @Composable
 fun StripePaymentProvider(
+    launcher: PaymentSheet?,
     publishableKey: String = BuildConfig.STRIPE_PUBLISHABLE_KEY,
     onResult: (PaymentSheetResult) -> Unit,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    val activity = context as? ComponentActivity
     
-    // 1. Initialize Stripe Configuration (Required by Docs)
+    // 1. Initialize Stripe Configuration
     LaunchedEffect(publishableKey) {
         if (publishableKey.isNotBlank()) {
             PaymentConfiguration.init(context, publishableKey)
         }
     }
 
-    // 2. Register the launcher during early composition
-    val launcher = if (activity != null) {
-        remember {
-            PaymentSheet.Builder(onResult).build(activity)
+    // 2. Register the callback proxy
+    DisposableEffect(onResult) {
+        StripeResultProxy.register(onResult)
+        onDispose {
+            StripeResultProxy.unregister()
         }
-    } else null
+    }
 
     CompositionLocalProvider(LocalStripeLauncher provides launcher) {
         content()

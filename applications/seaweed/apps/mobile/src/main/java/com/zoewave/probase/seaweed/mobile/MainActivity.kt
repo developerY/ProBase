@@ -14,7 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.zoewave.probase.features.payment.stripe.ui.StripePaymentProvider
+import com.zoewave.probase.features.payment.stripe.ui.StripeResultProxy
 import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.data.UserSettingsRepository
@@ -28,6 +30,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private lateinit var stripeLauncher: PaymentSheet
 
     @Inject
     lateinit var userSettingsRepository: UserSettingsRepository
@@ -47,6 +51,11 @@ class MainActivity : ComponentActivity() {
             categoryRepository.initializeDefaultCategories()
         }
 
+        // Register Stripe EARLY in onCreate to avoid lifecycle crashes
+        stripeLauncher = PaymentSheet.Builder { result ->
+            StripeResultProxy.onResult(result)
+        }.build(this)
+
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
             val userSettings by userSettingsRepository.getUserSettings().collectAsStateWithLifecycle(null)
@@ -56,7 +65,8 @@ class MainActivity : ComponentActivity() {
                 themeMode = userSettings?.themeMode ?: ThemeMode.SYSTEM
             ) {
                 StripePaymentProvider(
-                    onResult = { /* Global handler if needed */ }
+                    launcher = stripeLauncher,
+                    onResult = { /* Handled by screens via LocalStripeLauncher */ }
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
