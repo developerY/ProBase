@@ -21,6 +21,9 @@ import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.data.RecurringExpenseRepository
 import com.zoewave.probase.seaweed.data.UserSettingsRepository
+import com.zoewave.probase.seaweed.features.spendingcontrol.domain.Envelope
+import com.zoewave.probase.seaweed.features.spendingcontrol.domain.EnvelopePriority
+import com.zoewave.probase.seaweed.features.spendingcontrol.domain.EnvelopeRepository
 import com.zoewave.probase.seaweed.mobile.core.ui.theme.v1.SeaweedTheme
 import com.zoewave.probase.seaweed.mobile.ui.components.SeaweedMainScreen
 import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
@@ -43,6 +46,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var recurringExpenseRepository: RecurringExpenseRepository
 
+    @Inject
+    lateinit var envelopeRepository: EnvelopeRepository
+
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +60,18 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             categoryRepository.initializeDefaultCategories()
             recurringExpenseRepository.initializeDefaultExpenses()
+            
+            // Initialize POC Envelopes
+            envelopeRepository.saveEnvelope(
+                Envelope(
+                    id = "dining_env",
+                    name = "Dining",
+                    monthlyLimitCents = 5000, // Very low for testing
+                    currentSpentCents = 0,
+                    categoryIds = listOf("dining_id"),
+                    priority = EnvelopePriority.NORMAL
+                )
+            )
         }
 
         // Register Stripe EARLY in onCreate to avoid lifecycle crashes
