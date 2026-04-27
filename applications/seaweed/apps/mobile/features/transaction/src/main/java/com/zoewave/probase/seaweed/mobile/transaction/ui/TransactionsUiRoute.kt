@@ -93,6 +93,11 @@ fun TransactionsUiRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val billsUiState by billsViewModel.uiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(initialCategory, initialTransactionId, initialTab) {
+        viewModel.setInitialCategory(initialCategory)
+        viewModel.setInitialTab(initialTab)
+    }
+
     TransactionsUiRoute(
         uiState = uiState,
         billsUiState = billsUiState,
@@ -328,7 +333,7 @@ fun TransactionsListPane(
                         TransactionTab.CYCLIC -> {
                             BillsScreen(
                                 uiState = billsUiState,
-                                onEvent = { /* Map to bills event if needed */ },
+                                onEvent = billsOnEvent,
                                 navTo = navTo,
                                 modifier = Modifier.fillMaxSize(),
                                 isEmbedded = true

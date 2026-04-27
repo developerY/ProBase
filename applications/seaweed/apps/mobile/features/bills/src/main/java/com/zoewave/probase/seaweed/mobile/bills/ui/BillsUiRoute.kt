@@ -116,7 +116,7 @@ fun BillsScreen(
     isEmbedded: Boolean = false
 ) {
     if (isEmbedded) {
-        BillsContent(uiState, onEvent, PaddingValues(0.dp))
+        BillsContent(uiState, onEvent, PaddingValues(0.dp), modifier)
     } else {
         Scaffold(
             topBar = {
@@ -152,9 +152,10 @@ fun BillsScreen(
 private fun BillsContent(
     uiState: BillsUiState,
     onEvent: (BillsUiEvent) -> Unit,
-    padding: PaddingValues
+    padding: PaddingValues,
+    modifier: Modifier = Modifier
 ) {
-    Box(modifier = Modifier.padding(padding)) {
+    Box(modifier = modifier.padding(padding)) {
         when (uiState) {
             BillsUiState.Loading -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

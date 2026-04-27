@@ -19,6 +19,7 @@ import com.zoewave.probase.features.payment.stripe.ui.StripePaymentProvider
 import com.zoewave.probase.features.payment.stripe.ui.StripeResultProxy
 import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.FinancialRepository
+import com.zoewave.probase.seaweed.data.RecurringExpenseRepository
 import com.zoewave.probase.seaweed.data.UserSettingsRepository
 import com.zoewave.probase.seaweed.mobile.core.ui.theme.v1.SeaweedTheme
 import com.zoewave.probase.seaweed.mobile.ui.components.SeaweedMainScreen
@@ -39,6 +40,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var categoryRepository: CategoryRepository
 
+    @Inject
+    lateinit var recurringExpenseRepository: RecurringExpenseRepository
+
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +53,7 @@ class MainActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             categoryRepository.initializeDefaultCategories()
+            recurringExpenseRepository.initializeDefaultExpenses()
         }
 
         // Register Stripe EARLY in onCreate to avoid lifecycle crashes
