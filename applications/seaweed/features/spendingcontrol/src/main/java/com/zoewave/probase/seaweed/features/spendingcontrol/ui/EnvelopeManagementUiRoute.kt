@@ -19,21 +19,41 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.features.spendingcontrol.domain.Envelope
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EnvelopeManagementScreen(
+fun EnvelopeManagementUiRoute(
     onBack: () -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: EnvelopeViewModel = hiltViewModel()
 ) {
     val envelopes by viewModel.envelopes.collectAsState()
 
+    EnvelopeManagementScreen(
+        uiState = envelopes,
+        onEvent = { /* Handle events if any added to ViewModel later */ },
+        navTo = navTo,
+        onBack = onBack,
+        modifier = modifier
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EnvelopeManagementScreen(
+    uiState: List<Envelope>,
+    @Suppress("UnusedParameter") onEvent: (Unit) -> Unit,
+    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -48,7 +68,8 @@ fun EnvelopeManagementScreen(
                     titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
-        }
+        },
+        modifier = modifier.fillMaxSize()
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -71,12 +92,12 @@ fun EnvelopeManagementScreen(
                 )
             }
 
-            if (envelopes.isEmpty()) {
+            if (uiState.isEmpty()) {
                 item {
                     EmptyEnvelopesPlaceholder()
                 }
             } else {
-                items(envelopes, key = { it.id }) { envelope ->
+                items(uiState, key = { it.id }) { envelope ->
                     EnvelopeCard(envelope = envelope)
                 }
             }
@@ -266,5 +287,34 @@ private fun EmptyEnvelopesPlaceholder() {
         contentAlignment = Alignment.Center
     ) {
         Text("Initializing secure boundaries...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EnvelopeManagementScreenSuccessPreview() {
+    MaterialTheme {
+        EnvelopeManagementScreen(
+            uiState = listOf(
+                Envelope("1", "Dining", 5000L, 2000L, listOf("dining_id")),
+                Envelope("2", "Shopping", 10000L, 9500L, listOf("shopping_id"))
+            ),
+            onEvent = {},
+            navTo = {},
+            onBack = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EnvelopeManagementScreenEmptyPreview() {
+    MaterialTheme {
+        EnvelopeManagementScreen(
+            uiState = emptyList(),
+            onEvent = {},
+            navTo = {},
+            onBack = {}
+        )
     }
 }

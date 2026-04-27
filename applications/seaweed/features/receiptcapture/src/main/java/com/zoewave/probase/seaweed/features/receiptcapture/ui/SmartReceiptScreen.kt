@@ -3,36 +3,10 @@ package com.zoewave.probase.seaweed.features.receiptcapture.ui
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.SdStorage
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,20 +14,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.zoewave.probase.seaweed.features.receiptcapture.domain.SmartReceiptDraft
 import com.zoewave.probase.seaweed.features.receiptcapture.ui.components.ReceiptSaveForm
 import com.zoewave.probase.seaweed.features.receiptcapture.ui.state.SmartReceiptUiState
+import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 
 @Composable
 fun SmartReceiptUiRoute(
-    viewModel: SmartReceiptViewModel = hiltViewModel(),
-    initialPhotoUri: String? = null,
     onComplete: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: SmartReceiptViewModel = hiltViewModel(),
+    initialPhotoUri: String? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -71,47 +49,52 @@ fun SmartReceiptUiRoute(
 
     SmartReceiptScreen(
         uiState = uiState,
-        onUploadClick = {
-            launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        onEvent = { event ->
+            when (event) {
+                SmartReceiptUiEvent.UploadPhoto -> launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                is SmartReceiptUiEvent.CommentChanged -> viewModel.onUserCommentChanged(event.comment)
+                is SmartReceiptUiEvent.AnalyzeReceipt -> viewModel.analyzeReceipt(event.uri, event.comment.ifBlank { null })
+                is SmartReceiptUiEvent.ConfirmDraft -> {
+                    viewModel.saveTransaction(event.draft)
+                    onComplete()
+                }
+                SmartReceiptUiEvent.Reset -> viewModel.reset()
+                SmartReceiptUiEvent.Dismiss -> onDismiss()
+            }
         },
-        onCommentChanged = viewModel::onUserCommentChanged,
-        onAnalyzeClick = { uri, comment ->
-            viewModel.analyzeReceipt(uri, comment.ifBlank { null })
-        },
-        onConfirmDraft = {
-            viewModel.saveTransaction(it)
-            onComplete()
-        },
-        onReset = viewModel::reset,
-        onDismiss = onDismiss
+        navTo = {},
+        modifier = modifier
     )
 }
 
+sealed interface SmartReceiptUiEvent {
+    object UploadPhoto : SmartReceiptUiEvent
+    data class CommentChanged(val comment: String) : SmartReceiptUiEvent
+    data class AnalyzeReceipt(val uri: String, val comment: String) : SmartReceiptUiEvent
+    data class ConfirmDraft(val draft: SmartReceiptDraft) : SmartReceiptUiEvent
+    object Reset : SmartReceiptUiEvent
+    object Dismiss : SmartReceiptUiEvent
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun SmartReceiptScreen(
+fun SmartReceiptScreen(
     uiState: SmartReceiptUiState,
-    onUploadClick: () -> Unit,
-    onCommentChanged: (String) -> Unit,
-    onAnalyzeClick: (String, String) -> Unit,
-    onConfirmDraft: (SmartReceiptDraft) -> Unit,
-    onReset: () -> Unit,
-    onDismiss: () -> Unit
+    onEvent: (SmartReceiptUiEvent) -> Unit,
+    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Receipt Capture", style = MaterialTheme.typography.headlineSmall)
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "Close")
+            TopAppBar(
+                title = { Text("Receipt Capture", fontWeight = FontWeight.Bold) },
+                actions = {
+                    IconButton(onClick = { onEvent(SmartReceiptUiEvent.Dismiss) }) {
+                        Icon(Icons.Default.Close, contentDescription = "Close")
+                    }
                 }
-            }
+            )
         }
     ) { padding ->
         Box(
@@ -122,84 +105,32 @@ internal fun SmartReceiptScreen(
             when (uiState) {
                 is SmartReceiptUiState.Idle -> {
                     if (uiState.capturedUri == null) {
-                        EmptyState(onUploadClick = onUploadClick)
+                        EmptyState(onUploadClick = { onEvent(SmartReceiptUiEvent.UploadPhoto) })
                     } else {
                         ContextInputState(
                             uri = uiState.capturedUri,
                             comment = uiState.userComment,
-                            onCommentChanged = onCommentChanged,
-                            onAnalyzeClick = { onAnalyzeClick(uiState.capturedUri, uiState.userComment) },
-                            onRetake = onReset
+                            onCommentChanged = { onEvent(SmartReceiptUiEvent.CommentChanged(it)) },
+                            onAnalyzeClick = { onEvent(SmartReceiptUiEvent.AnalyzeReceipt(uiState.capturedUri, uiState.userComment)) },
+                            onRetake = { onEvent(SmartReceiptUiEvent.Reset) }
                         )
                     }
                 }
 
                 is SmartReceiptUiState.Loading -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("AI is parsing your receipt...", style = MaterialTheme.typography.bodyMedium)
-                        
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Card(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = if (uiState.isUsingCloud) Icons.Default.Cloud else Icons.Default.SdStorage,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = if (uiState.isUsingCloud) "Cloud AI (Gemini)" else "Local AI (Vision)",
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
-                                
-                                Spacer(modifier = Modifier.height(8.dp))
-                                uiState.logs.takeLast(3).forEach { log ->
-                                    Text(
-                                        text = "> $log",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    LoadingState(uiState = uiState)
                 }
 
                 is SmartReceiptUiState.Success -> {
                     ReceiptSaveForm(
                         draft = uiState.draft,
-                        onConfirm = onConfirmDraft,
-                        onRetake = onReset
+                        onConfirm = { onEvent(SmartReceiptUiEvent.ConfirmDraft(it)) },
+                        onRetake = { onEvent(SmartReceiptUiEvent.Reset) }
                     )
                 }
 
                 is SmartReceiptUiState.Error -> {
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = uiState.message,
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center
-                        )
-                        Button(onClick = onReset, modifier = Modifier.padding(top = 16.dp)) {
-                            Text("Try Again")
-                        }
-                    }
+                    ErrorState(message = uiState.message, onRetry = { onEvent(SmartReceiptUiEvent.Reset) })
                 }
             }
         }
@@ -308,5 +239,93 @@ private fun EmptyState(onUploadClick: () -> Unit) {
             Icon(Icons.Default.CloudUpload, contentDescription = null)
             Text("Upload Photo", modifier = Modifier.padding(start = 8.dp))
         }
+    }
+}
+
+@Composable
+private fun LoadingState(uiState: SmartReceiptUiState.Loading) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("AI is parsing your receipt...", style = MaterialTheme.typography.bodyMedium)
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = if (uiState.isUsingCloud) Icons.Default.Cloud else Icons.Default.SdStorage,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (uiState.isUsingCloud) "Cloud AI (Gemini)" else "Local AI (Vision)",
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                uiState.logs.takeLast(3).forEach { log ->
+                    Text(
+                        text = "> $log",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ErrorState(message: String, onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = message,
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center
+        )
+        Button(onClick = onRetry, modifier = Modifier.padding(top = 16.dp)) {
+            Text("Try Again")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SmartReceiptScreenIdlePreview() {
+    MaterialTheme {
+        SmartReceiptScreen(
+            uiState = SmartReceiptUiState.Idle(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SmartReceiptScreenLoadingPreview() {
+    MaterialTheme {
+        SmartReceiptScreen(
+            uiState = SmartReceiptUiState.Loading(isUsingCloud = true, logs = listOf("Connecting to cloud...")),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }

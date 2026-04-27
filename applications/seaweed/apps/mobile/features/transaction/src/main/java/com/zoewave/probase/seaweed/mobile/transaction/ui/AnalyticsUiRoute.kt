@@ -4,18 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -24,27 +13,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -73,19 +43,20 @@ import com.zoewave.probase.core.ui.R as CoreUiR
 @Composable
 fun AnalyticsUiRoute(
     onBack: () -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AnalyticsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    AnalyticsUiRoute(
+    AnalyticsScreen(
         uiState = uiState,
         onEvent = { event ->
             when (event) {
                 AnalyticsUiEvent.OnBackClicked -> onBack()
             }
         },
-        navTo = {}, // Placeholder if navigation from here is needed
+        navTo = navTo,
         modifier = modifier
     )
 }
@@ -148,8 +119,8 @@ fun AnalyticsScreen(
 @Composable
 private fun AnalyticsContent(
     uiState: AnalyticsUiState,
-    @Suppress("UnusedParameter") onEvent: (AnalyticsUiEvent) -> Unit,
-    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
+    onEvent: (AnalyticsUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AnalyticsViewModel = hiltViewModel()
 ) {
@@ -159,11 +130,6 @@ private fun AnalyticsContent(
     var isHabitsExpanded by remember { mutableStateOf(true) }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-
-    val maxSpending = remember(uiState.heatmapData) {
-        val maxVal = if (uiState.heatmapData.isEmpty()) 0L else uiState.heatmapData.values.max()
-        maxVal.toDouble()
-    }
 
     val filteredTransactions = remember(selectedCategory, uiState.allTransactions) {
         if (selectedCategory == null) uiState.allTransactions
@@ -188,35 +154,11 @@ private fun AnalyticsContent(
     ) {
         if (uiState.habitInsights.isNotEmpty()) {
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_spending_habits),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        if (selectedCategory != null) {
-                            Text(
-                                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_filtering_by, selectedCategory!!),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                    IconButton(onClick = { isHabitsExpanded = !isHabitsExpanded }) {
-                        Icon(
-                            imageVector = if (isHabitsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = if (isHabitsExpanded) 
-                                stringResource(CoreUiR.string.action_collapse) 
-                            else 
-                                stringResource(CoreUiR.string.action_expand)
-                        )
-                    }
-                }
+                AnalyticsHabitsHeader(
+                    isExpanded = isHabitsExpanded,
+                    onToggle = { isHabitsExpanded = !isHabitsExpanded },
+                    selectedCategory = selectedCategory
+                )
             }
             
             if (isHabitsExpanded) {
@@ -235,135 +177,30 @@ private fun AnalyticsContent(
         }
 
         item {
-            TabRow(
+            AnalyticsTabRow(
                 selectedTabIndex = selectedTabIndex,
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.primary,
-                divider = { HorizontalDivider() }
-            ) {
-                Tab(
-                    selected = selectedTabIndex == 0,
-                    onClick = { selectedTabIndex = 0 },
-                    text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_trends)) }
-                )
-                Tab(
-                    selected = selectedTabIndex == 1,
-                    onClick = { selectedTabIndex = 1 },
-                    text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_heatmap)) }
-                )
-            }
+                onTabSelected = { selectedTabIndex = it }
+            )
         }
 
         if (selectedTabIndex == 0) {
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_summary), 
-                                style = MaterialTheme.typography.titleSmall, 
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            
-                            Row {
-                                SpendingPeriod.entries.forEach { period ->
-                                    FilterChip(
-                                        selected = selectedPeriod == period,
-                                        onClick = { 
-                                            selectedPeriod = period 
-                                            selectedTrendPoint = null
-                                        },
-                                        label = { Text(period.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                                        modifier = Modifier.padding(start = 4.dp)
-                                    )
-                                }
-                            }
-                        }
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        val trendData = trends[selectedPeriod] ?: emptyList()
-                        if (trendData.isNotEmpty()) {
-                            SimpleBarChart(
-                                data = trendData.map { BarData(it.label, it.value) },
-                                onBarClick = { barData ->
-                                    selectedTrendPoint = trendData.find { it.label == barData.label }
-                                },
-                                selectedBar = selectedTrendPoint?.let { BarData(it.label, it.value) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        } else {
-                            Box(Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                                Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_no_data_period))
-                            }
-                        }
-                    }
-                }
+                TrendsCard(
+                    trends = trends,
+                    selectedPeriod = selectedPeriod,
+                    onPeriodSelected = { 
+                        selectedPeriod = it
+                        selectedTrendPoint = null
+                    },
+                    selectedTrendPoint = selectedTrendPoint,
+                    onTrendPointSelected = { selectedTrendPoint = it }
+                )
             }
 
             item {
                 AnimatedVisibility(visible = selectedTrendPoint != null) {
                     selectedTrendPoint?.let { point ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_details_for, point.label),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Column {
-                                        Text(
-                                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_total_spent), 
-                                            style = MaterialTheme.typography.labelSmall
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_currency_format, String.format(Locale.getDefault(), "%.2f", point.value)),
-                                            style = MaterialTheme.typography.headlineSmall,
-                                            fontWeight = FontWeight.Black
-                                        )
-                                    }
-                                    Column(horizontalAlignment = Alignment.End) {
-                                        Text(
-                                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_transactions), 
-                                            style = MaterialTheme.typography.labelSmall
-                                        )
-                                        Text(
-                                            text = "${point.transactionCount}",
-                                            style = MaterialTheme.typography.headlineSmall,
-                                            fontWeight = FontWeight.Black
-                                        )
-                                    }
-                                }
-                                val topCategory = point.topCategory
-                                if (topCategory != null) {
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_top_category), 
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                    Text(
-                                        text = topCategory,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                        }
+                        TrendDetailCard(point = point)
                     }
                 }
             }
@@ -421,8 +258,182 @@ private fun AnalyticsContent(
                 }
             }
         }
+    }
+}
 
-        /* Spending Habits moved to the top */
+@Composable
+private fun AnalyticsHabitsHeader(
+    isExpanded: Boolean,
+    onToggle: () -> Unit,
+    selectedCategory: String?
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_spending_habits),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            if (selectedCategory != null) {
+                Text(
+                    text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_filtering_by, selectedCategory),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+        IconButton(onClick = onToggle) {
+            Icon(
+                imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                contentDescription = if (isExpanded) 
+                    stringResource(CoreUiR.string.action_collapse) 
+                else 
+                    stringResource(CoreUiR.string.action_expand)
+            )
+        }
+    }
+}
+
+@Composable
+private fun AnalyticsTabRow(
+    selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit
+) {
+    TabRow(
+        selectedTabIndex = selectedTabIndex,
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.primary,
+        divider = { HorizontalDivider() }
+    ) {
+        Tab(
+            selected = selectedTabIndex == 0,
+            onClick = { onTabSelected(0) },
+            text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_trends)) }
+        )
+        Tab(
+            selected = selectedTabIndex == 1,
+            onClick = { onTabSelected(1) },
+            text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_heatmap)) }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TrendsCard(
+    trends: Map<SpendingPeriod, List<TrendPoint>>,
+    selectedPeriod: SpendingPeriod,
+    onPeriodSelected: (SpendingPeriod) -> Unit,
+    selectedTrendPoint: TrendPoint?,
+    onTrendPointSelected: (TrendPoint?) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_summary), 
+                    style = MaterialTheme.typography.titleSmall, 
+                    fontWeight = FontWeight.SemiBold
+                )
+                
+                Row {
+                    SpendingPeriod.entries.forEach { period ->
+                        FilterChip(
+                            selected = selectedPeriod == period,
+                            onClick = { onPeriodSelected(period) },
+                            label = { Text(period.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            val trendData = trends[selectedPeriod] ?: emptyList()
+            if (trendData.isNotEmpty()) {
+                SimpleBarChart(
+                    data = trendData.map { BarData(it.label, it.value) },
+                    onBarClick = { barData ->
+                        onTrendPointSelected(trendData.find { it.label == barData.label })
+                    },
+                    selectedBar = selectedTrendPoint?.let { BarData(it.label, it.value) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                Box(Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_no_data_period))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TrendDetailCard(point: TrendPoint) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_details_for, point.label),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_total_spent), 
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    Text(
+                        text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_currency_format, String.format(Locale.getDefault(), "%.2f", point.value)),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_transactions), 
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    Text(
+                        text = "${point.transactionCount}",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+            }
+            val topCategory = point.topCategory
+            if (topCategory != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_top_category), 
+                    style = MaterialTheme.typography.labelSmall
+                )
+                Text(
+                    text = topCategory,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
     }
 }
 
@@ -522,29 +533,7 @@ private fun HabitInsightCardPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun AnalyticsUiRoutePreview() {
-    MaterialTheme {
-        AnalyticsUiRoute(
-            uiState = AnalyticsUiState(
-                isLoading = false,
-                spendingTrends = mapOf(
-                    SpendingPeriod.DAILY to listOf(
-                        TrendPoint("Oct 01", 42.0, 1000L, 2, "Food")
-                    )
-                ),
-                habitInsights = listOf(
-                    HabitInsight("Coffee", 20, 80.0, 2.6, "You're doing this almost every day!")
-                )
-            ),
-            onEvent = {},
-            navTo = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AnalyticsScreenPreview() {
+private fun AnalyticsScreenSuccessPreview() {
     MaterialTheme {
         AnalyticsScreen(
             uiState = AnalyticsUiState(

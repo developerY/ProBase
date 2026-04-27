@@ -1,13 +1,6 @@
 package com.zoewave.probase.seaweed.mobile.home.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -16,28 +9,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Merge
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -54,10 +27,10 @@ import com.zoewave.probase.core.ui.R as CoreUiR
 
 @Composable
 fun CategoryGridRoute(
-    modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel(),
     navTo: (SeaweedDestination) -> Unit,
     onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -103,35 +76,12 @@ fun CategoryGridScreen(
             )
         },
         floatingActionButton = {
-            Box {
-                FloatingActionButton(onClick = { showMenu = true }) {
-                    Icon(
-                        Icons.Default.Add, 
-                        contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_home_actions_cd)
-                    )
-                }
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(CoreUiR.string.core_ui_add_new_category)) },
-                        onClick = {
-                            showAddDialog = true
-                            showMenu = false
-                        },
-                        leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_combine_categories)) },
-                        onClick = {
-                            showCombineSheet = true
-                            showMenu = false
-                        },
-                        leadingIcon = { Icon(Icons.Default.Merge, contentDescription = null) }
-                    )
-                }
-            }
+            CategoryGridFab(
+                showMenu = showMenu,
+                onToggleMenu = { showMenu = it },
+                onAddClick = { showAddDialog = true },
+                onCombineClick = { showCombineSheet = true }
+            )
         },
         modifier = modifier.fillMaxSize()
     ) { padding ->
@@ -142,47 +92,19 @@ fun CategoryGridScreen(
                 }
             }
             is HomeUiState.Success -> {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 160.dp),
-                    modifier = Modifier.fillMaxSize().padding(padding),
-                    contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 80.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(uiState.profile.categoryOverviews) { category ->
-                        CategoryQuickJumpCard(
-                            category = category,
-                            onClick = { navTo(SeaweedDestination.Transactions(category.name)) },
-                            onDelete = { categoryToDelete = category.name }
-                        )
-                    }
-                }
+                CategoryGridContent(
+                    categories = uiState.profile.categoryOverviews,
+                    onCategoryClick = { navTo(SeaweedDestination.Transactions(it.name)) },
+                    onCategoryDelete = { categoryToDelete = it.name },
+                    modifier = Modifier.padding(padding)
+                )
 
                 if (showAddDialog) {
-                    var newCategoryName by remember { mutableStateOf("") }
-                    AlertDialog(
-                        onDismissRequest = { showAddDialog = false },
-                        title = { Text(stringResource(CoreUiR.string.core_ui_add_new_category)) },
-                        text = {
-                            OutlinedTextField(
-                                value = newCategoryName,
-                                onValueChange = { newCategoryName = it },
-                                label = { Text(stringResource(CoreUiR.string.core_ui_category_name)) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    if (newCategoryName.isNotBlank()) {
-                                        onEvent(HomeUiEvent.AddCategory(newCategoryName))
-                                        showAddDialog = false
-                                    }
-                                }
-                            ) { Text(stringResource(CoreUiR.string.core_ui_action_add)) }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showAddDialog = false }) { Text(stringResource(CoreUiR.string.action_cancel)) }
+                    AddCategoryDialog(
+                        onDismiss = { showAddDialog = false },
+                        onConfirm = { 
+                            onEvent(HomeUiEvent.AddCategory(it))
+                            showAddDialog = false
                         }
                     )
                 }
@@ -202,37 +124,142 @@ fun CategoryGridScreen(
     }
 
     if (categoryToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { categoryToDelete = null },
-            title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_delete_category)) },
-            text = { 
-                Text(
-                    stringResource(
-                        R.string.applications_seaweed_apps_mobile_features_home_delete_category_confirm, 
-                        categoryToDelete!!
-                    )
-                ) 
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onEvent(HomeUiEvent.DeleteCategory(categoryToDelete!!))
-                        categoryToDelete = null
-                    }
-                ) {
-                    Text(
-                        text = stringResource(CoreUiR.string.action_delete), 
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { categoryToDelete = null }) {
-                    Text(stringResource(CoreUiR.string.action_cancel))
-                }
+        DeleteCategoryConfirmDialog(
+            categoryName = categoryToDelete!!,
+            onDismiss = { categoryToDelete = null },
+            onConfirm = {
+                onEvent(HomeUiEvent.DeleteCategory(categoryToDelete!!))
+                categoryToDelete = null
             }
         )
     }
+}
+
+@Composable
+private fun CategoryGridContent(
+    categories: List<CategoryOverview>,
+    onCategoryClick: (CategoryOverview) -> Unit,
+    onCategoryDelete: (CategoryOverview) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 160.dp),
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 80.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(categories) { category ->
+            CategoryQuickJumpCard(
+                category = category,
+                onClick = { onCategoryClick(category) },
+                onDelete = { onCategoryDelete(category) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryGridFab(
+    showMenu: Boolean,
+    onToggleMenu: (Boolean) -> Unit,
+    onAddClick: () -> Unit,
+    onCombineClick: () -> Unit
+) {
+    Box {
+        FloatingActionButton(onClick = { onToggleMenu(true) }) {
+            Icon(
+                Icons.Default.Add, 
+                contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_home_actions_cd)
+            )
+        }
+        DropdownMenu(
+            expanded = showMenu,
+            onDismissRequest = { onToggleMenu(false) }
+        ) {
+            DropdownMenuItem(
+                text = { Text(stringResource(CoreUiR.string.core_ui_add_new_category)) },
+                onClick = {
+                    onAddClick()
+                    onToggleMenu(false)
+                },
+                leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_combine_categories)) },
+                onClick = {
+                    onCombineClick()
+                    onToggleMenu(false)
+                },
+                leadingIcon = { Icon(Icons.Default.Merge, contentDescription = null) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun AddCategoryDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var newCategoryName by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(CoreUiR.string.core_ui_add_new_category)) },
+        text = {
+            OutlinedTextField(
+                value = newCategoryName,
+                onValueChange = { newCategoryName = it },
+                label = { Text(stringResource(CoreUiR.string.core_ui_category_name)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (newCategoryName.isNotBlank()) {
+                        onConfirm(newCategoryName)
+                    }
+                }
+            ) { Text(stringResource(CoreUiR.string.core_ui_action_add)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.action_cancel)) }
+        }
+    )
+}
+
+@Composable
+private fun DeleteCategoryConfirmDialog(
+    categoryName: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_delete_category)) },
+        text = { 
+            Text(
+                stringResource(
+                    R.string.applications_seaweed_apps_mobile_features_home_delete_category_confirm, 
+                    categoryName
+                )
+            ) 
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(
+                    text = stringResource(CoreUiR.string.action_delete), 
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(CoreUiR.string.action_cancel))
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -333,7 +360,7 @@ private fun CategoryPicker(
 
 @Preview(showBackground = true)
 @Composable
-private fun CategoryGridScreenPreview() {
+private fun CategoryGridScreenSuccessPreview() {
     MaterialTheme {
         CategoryGridScreen(
             uiState = HomeUiState.Success(
@@ -352,6 +379,18 @@ private fun CategoryGridScreenPreview() {
                     monthProgress = 0.5f
                 )
             ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CategoryGridScreenLoadingPreview() {
+    MaterialTheme {
+        CategoryGridScreen(
+            uiState = HomeUiState.Loading,
             onEvent = {},
             navTo = {}
         )

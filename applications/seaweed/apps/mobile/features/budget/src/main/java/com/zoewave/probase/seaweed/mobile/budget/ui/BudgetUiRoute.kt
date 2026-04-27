@@ -1,16 +1,6 @@
 package com.zoewave.probase.seaweed.mobile.budget.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -18,26 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,12 +31,13 @@ import com.zoewave.probase.core.ui.R as CoreUiR
 @Composable
 fun BudgetUiRoute(
     onBack: () -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: BudgetViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    BudgetUiRoute(
+    BudgetScreen(
         uiState = uiState,
         onEvent = { event ->
             if (event is BudgetUiEvent.OnBackClicked) {
@@ -73,7 +46,7 @@ fun BudgetUiRoute(
                 viewModel.onEvent(event)
             }
         },
-        navTo = {},
+        navTo = navTo,
         modifier = modifier
     )
 }
@@ -124,52 +97,64 @@ fun BudgetScreen(
                 }
             }
             is BudgetUiState.Success -> {
-                val profile = uiState.profile
-                var editingCategory by remember { mutableStateOf<CategoryOverview?>(null) }
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(padding),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item {
-                        BudgetSummaryCard(profile = profile)
-                    }
-
-                    item {
-                        UnallocatedMoneyCard(unallocatedAmountCents = profile.unallocatedMoneyCents)
-                    }
-
-                    item {
-                        Text(
-                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_budget_category_budgets),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-
-                    items(profile.categoryOverviews) { category ->
-                        BudgetItem(
-                            category = category,
-                            onEdit = { editingCategory = it },
-                            onDelete = { onEvent(BudgetUiEvent.DeleteBudget(category.id)) }
-                        )
-                    }
-                }
-
-                if (editingCategory != null) {
-                    BudgetEditBottomSheet(
-                        category = editingCategory!!,
-                        onDismiss = { editingCategory = null },
-                        onSave = { limit ->
-                            onEvent(BudgetUiEvent.UpdateBudget(editingCategory!!.id, limit))
-                            editingCategory = null
-                        }
-                    )
-                }
+                BudgetContent(
+                    profile = uiState.profile,
+                    onEvent = onEvent,
+                    modifier = Modifier.padding(padding)
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun BudgetContent(
+    profile: FinancialProfile,
+    onEvent: (BudgetUiEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var editingCategory by remember { mutableStateOf<CategoryOverview?>(null) }
+
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            BudgetSummaryCard(profile = profile)
+        }
+
+        item {
+            UnallocatedMoneyCard(unallocatedAmountCents = profile.unallocatedMoneyCents)
+        }
+
+        item {
+            Text(
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_budget_category_budgets),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+
+        items(profile.categoryOverviews) { category ->
+            BudgetItem(
+                category = category,
+                onEdit = { editingCategory = it },
+                onDelete = { onEvent(BudgetUiEvent.DeleteBudget(category.id)) }
+            )
+        }
+    }
+
+    if (editingCategory != null) {
+        BudgetEditBottomSheet(
+            category = editingCategory!!,
+            onDismiss = { editingCategory = null },
+            onSave = { limit ->
+                onEvent(BudgetUiEvent.UpdateBudget(editingCategory!!.id, limit))
+                editingCategory = null
+            }
+        )
     }
 }
 
@@ -303,66 +288,7 @@ private fun BudgetEditBottomSheet(
 
 @Preview(showBackground = true)
 @Composable
-private fun BudgetSummaryCardPreview() {
-    MaterialTheme {
-        BudgetSummaryCard(
-            profile = FinancialProfile(
-                monthlyIncomeCents = 500000L,
-                totalFixedCostsCents = 150000L,
-                realStartingBalanceCents = 350000L,
-                monthlyVariableSpendingCents = 120000L,
-                flexibleMoneyRemainingCents = 230000L,
-                totalBudgetedAmountCents = 200000L,
-                unallocatedMoneyCents = 150000L,
-                categoryOverviews = emptyList(),
-                monthProgress = 0.5f
-            )
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun BudgetItemPreview() {
-    MaterialTheme {
-        BudgetItem(
-            category = CategoryOverview("food_id", "Food", 40000L, 15, 50000L, 10000L, 0.8f),
-            onEdit = {},
-            onDelete = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun BudgetUiRoutePreview() {
-    MaterialTheme {
-        BudgetUiRoute(
-            uiState = BudgetUiState.Success(
-                profile = FinancialProfile(
-                    monthlyIncomeCents = 500000L,
-                    totalFixedCostsCents = 150000L,
-                    realStartingBalanceCents = 350000L,
-                    monthlyVariableSpendingCents = 120000L,
-                    flexibleMoneyRemainingCents = 230000L,
-                    totalBudgetedAmountCents = 200000L,
-                    unallocatedMoneyCents = 150000L,
-                    categoryOverviews = listOf(
-                        CategoryOverview("food_id", "Food", 40000L, 15, 50000L, 10000L, 0.8f),
-                        CategoryOverview("coffee_id", "Coffee", 15000L, 20, 10000L, -5000L, 1.5f)
-                    ),
-                    monthProgress = 0.5f
-                )
-            ),
-            onEvent = {},
-            navTo = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun BudgetScreenPreview() {
+private fun BudgetScreenSuccessPreview() {
     MaterialTheme {
         BudgetScreen(
             uiState = BudgetUiState.Success(

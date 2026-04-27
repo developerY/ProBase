@@ -54,8 +54,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -68,7 +68,9 @@ import com.zoewave.probase.seaweed.mobile.core.ui.components.UnallocatedMoneyCar
 import com.zoewave.probase.seaweed.mobile.home.R
 import com.zoewave.probase.seaweed.mobile.transaction.ui.components.TransactionItem
 import com.zoewave.probase.seaweed.model.CategoryOverview
+import com.zoewave.probase.seaweed.model.FinancialProfile
 import com.zoewave.probase.seaweed.model.SpendingType
+import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import kotlin.math.absoluteValue
 
@@ -120,7 +122,10 @@ fun HomeScreen(
                 title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_summary_title)) },
                 actions = {
                     IconButton(onClick = { onEvent(HomeUiEvent.AddRandomTransaction) }) {
-                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_home_add_random_data))
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_home_add_random_data)
+                        )
                     }
                 }
             )
@@ -129,15 +134,13 @@ fun HomeScreen(
     ) { padding ->
         when (uiState) {
             HomeUiState.Loading -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+                HomeLoadingScreen(padding)
             }
             is HomeUiState.Success -> {
                 if (isExpanded) {
-                    HomeExpandedContent(uiState, onEvent, navTo, padding)
+                    HomeExpandedScreen(uiState, onEvent, navTo, padding)
                 } else {
-                    HomeCompactContent(uiState, onEvent, navTo, padding)
+                    HomeCompactScreen(uiState, onEvent, navTo, padding)
                 }
             }
         }
@@ -145,7 +148,19 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeExpandedContent(
+private fun HomeLoadingScreen(padding: PaddingValues) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun HomeExpandedScreen(
     uiState: HomeUiState.Success,
     onEvent: (HomeUiEvent) -> Unit,
     navTo: (SeaweedDestination) -> Unit,
@@ -243,7 +258,7 @@ private fun HomeExpandedContent(
 }
 
 @Composable
-private fun HomeCompactContent(
+private fun HomeCompactScreen(
     uiState: HomeUiState.Success,
     onEvent: (HomeUiEvent) -> Unit,
     navTo: (SeaweedDestination) -> Unit,
@@ -599,5 +614,54 @@ fun OverviewSummaryCard(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenSuccessPreview() {
+    MaterialTheme {
+        HomeScreen(
+            uiState = HomeUiState.Success(
+                profile = FinancialProfile(
+                    monthlyIncomeCents = 500000L,
+                    totalFixedCostsCents = 150000L,
+                    realStartingBalanceCents = 350000L,
+                    monthlyVariableSpendingCents = 120000L,
+                    flexibleMoneyRemainingCents = 230000L,
+                    totalBudgetedAmountCents = 200000L,
+                    unallocatedMoneyCents = 150000L,
+                    categoryOverviews = listOf(
+                        CategoryOverview("food_id", "Food", 40000L, 15, 50000L, 10000L, 0.8f),
+                        CategoryOverview("coffee_id", "Coffee", 15000L, 20, 10000L, -5000L, 1.5f)
+                    ),
+                    monthProgress = 0.5f
+                ),
+                transactions = listOf(
+                    Transaction(
+                        id = "1",
+                        amountCents = -4200L,
+                        categoryId = "food_id",
+                        description = "Lunch",
+                        timestamp = System.currentTimeMillis(),
+                        defaultType = SpendingType.NEED
+                    )
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenLoadingPreview() {
+    MaterialTheme {
+        HomeScreen(
+            uiState = HomeUiState.Loading,
+            onEvent = {},
+            navTo = {}
+        )
     }
 }

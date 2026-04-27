@@ -2,57 +2,30 @@ package com.zoewave.probase.seaweed.mobile.transaction.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -66,17 +39,9 @@ import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.model.navigation.TransactionTab
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
 import kotlinx.coroutines.launch
 import java.util.Locale
 import com.zoewave.probase.core.ui.R as CoreUiR
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
-import com.zoewave.probase.seaweed.model.ExpenseCategory
-import com.zoewave.probase.seaweed.model.ExpenseFrequency
 import com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiEvent
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
@@ -98,42 +63,28 @@ fun TransactionsUiRoute(
         viewModel.setInitialTab(initialTab)
     }
 
-    TransactionsUiRoute(
+    TransactionsScreen(
         uiState = uiState,
         billsUiState = billsUiState,
-        onEvent = { event ->
-            // Navigation handled in the caller or passed down
-            viewModel.onEvent(event)
-        },
-        billsOnEvent = { billsViewModel.onEvent(it) },
+        onEvent = viewModel::onEvent,
+        billsOnEvent = billsViewModel::onEvent,
         navTo = navTo,
-        modifier = modifier,
-        initialCategory = initialCategory,
-        initialTransactionId = initialTransactionId,
-        initialTab = initialTab
+        modifier = modifier
     )
 }
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
-internal fun TransactionsUiRoute(
+fun TransactionsScreen(
     uiState: TransactionsUiState,
     billsUiState: com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState,
     onEvent: (TransactionsUiEvent) -> Unit,
     billsOnEvent: (BillsUiEvent) -> Unit,
     navTo: (SeaweedDestination) -> Unit,
-    modifier: Modifier = Modifier,
-    initialCategory: String? = null,
-    initialTransactionId: String? = null,
-    initialTab: TransactionTab = TransactionTab.RECENT,
+    modifier: Modifier = Modifier
 ) {
     val navigator = rememberListDetailPaneScaffoldNavigator<String>()
     val scope = rememberCoroutineScope()
-
-    LaunchedEffect(initialCategory, initialTransactionId, initialTab) {
-        // These might need to be passed as events instead of being handled here
-        // But for now we keep the logic similar
-    }
 
     BackHandler(navigator.canNavigateBack()) {
         scope.launch {
@@ -151,7 +102,6 @@ internal fun TransactionsUiRoute(
                 onEvent = { event ->
                     when (event) {
                         is TransactionsUiEvent.NavigateTo -> navTo(event.destination)
-                        TransactionsUiEvent.OnBack -> { /* Handle back if needed */ }
                         is TransactionsUiEvent.SelectTransaction -> {
                             onEvent(event)
                             scope.launch {
@@ -175,13 +125,13 @@ internal fun TransactionsUiRoute(
                                 scope.launch {
                                     navigator.navigateBack()
                                 }
+                            } else {
+                                onEvent(event)
                             }
                         }
-                        is TransactionsUiEvent.NavigateTo -> navTo(event.destination)
                         else -> onEvent(event)
                     }
-                },
-                navTo = navTo
+                }
             )
         },
         modifier = modifier
@@ -190,7 +140,7 @@ internal fun TransactionsUiRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TransactionsListPane(
+private fun TransactionsListPane(
     uiState: TransactionsUiState,
     billsUiState: com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState,
     onEvent: (TransactionsUiEvent) -> Unit,
@@ -208,8 +158,8 @@ fun TransactionsListPane(
                     BillsUiEvent.AddExpense(
                         name = name,
                         amount = amount,
-                        frequency = ExpenseFrequency.MONTHLY,
-                        category = ExpenseCategory.HOUSING // Default for now
+                        frequency = com.zoewave.probase.seaweed.model.ExpenseFrequency.MONTHLY,
+                        category = com.zoewave.probase.seaweed.model.ExpenseCategory.OTHER
                     )
                 )
                 showAddBillDialog = false
@@ -222,7 +172,7 @@ fun TransactionsListPane(
             TopAppBar(
                 title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_transactions_title)) },
                 actions = {
-                    IconButton(onClick = { onEvent(TransactionsUiEvent.NavigateTo(SeaweedDestination.Analytics)) }) {
+                    IconButton(onClick = { navTo(SeaweedDestination.Analytics) }) {
                         Icon(
                             Icons.Default.Analytics, 
                             contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_analytics_title)
@@ -233,112 +183,74 @@ fun TransactionsListPane(
         },
         floatingActionButton = {
             if (uiState is TransactionsUiState.Success) {
-                Column(horizontalAlignment = Alignment.End) {
-                    AnimatedVisibility(visible = isFabMenuExpanded) {
-                        Column(
-                            modifier = Modifier.padding(bottom = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalAlignment = Alignment.End
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Card(
-                                    onClick = { 
-                                        isFabMenuExpanded = false
-                                        showAddBillDialog = true
-                                    },
-                                    shape = RoundedCornerShape(8.dp),
-                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                                ) {
-                                    Text("Add Bill", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
-                                }
-                                Spacer(Modifier.width(8.dp))
-                                FloatingActionButton(
-                                    onClick = { 
-                                        isFabMenuExpanded = false
-                                        showAddBillDialog = true
-                                    },
-                                    modifier = Modifier.size(40.dp),
-                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                                ) {
-                                    Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Add Bill", modifier = Modifier.size(20.dp))
-                                }
-                            }
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Card(
-                                    onClick = { 
-                                        isFabMenuExpanded = false
-                                        navTo(SeaweedDestination.AddTransaction) 
-                                    },
-                                    shape = RoundedCornerShape(8.dp),
-                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                                ) {
-                                    Text("Add Transaction", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
-                                }
-                                Spacer(Modifier.width(8.dp))
-                                FloatingActionButton(
-                                    onClick = { 
-                                        isFabMenuExpanded = false
-                                        navTo(SeaweedDestination.AddTransaction) 
-                                    },
-                                    modifier = Modifier.size(40.dp),
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                ) {
-                                    Icon(Icons.Default.Add, contentDescription = "Add Transaction", modifier = Modifier.size(20.dp))
-                                }
-                            }
-                        }
-                    }
-                    FloatingActionButton(onClick = { isFabMenuExpanded = !isFabMenuExpanded }) {
-                        Icon(
-                            if (isFabMenuExpanded) Icons.Default.Add else Icons.Default.Add, // You could toggle to Close icon
-                            contentDescription = "Add Menu",
-                            modifier = Modifier.rotate(if (isFabMenuExpanded) 45f else 0f)
-                        )
-                    }
-                }
+                TransactionsFabMenu(
+                    isExpanded = isFabMenuExpanded,
+                    onToggle = { isFabMenuExpanded = !isFabMenuExpanded },
+                    onAddBill = { showAddBillDialog = true; isFabMenuExpanded = false },
+                    onAddTransaction = { navTo(SeaweedDestination.AddTransaction); isFabMenuExpanded = false }
+                )
             }
         }
     ) { padding ->
-        when (uiState) {
-            TransactionsUiState.Loading -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+        TransactionsContent(
+            uiState = uiState,
+            billsUiState = billsUiState,
+            onEvent = onEvent,
+            billsOnEvent = billsOnEvent,
+            navTo = navTo,
+            modifier = Modifier.padding(padding)
+        )
+    }
+}
+
+@Composable
+private fun TransactionsContent(
+    uiState: TransactionsUiState,
+    billsUiState: com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState,
+    onEvent: (TransactionsUiEvent) -> Unit,
+    billsOnEvent: (BillsUiEvent) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    when (uiState) {
+        TransactionsUiState.Loading -> {
+            Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
-            is TransactionsUiState.Success -> {
-                Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-                    PrimaryTabRow(
-                        selectedTabIndex = uiState.selectedTab.ordinal,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Tab(
-                            selected = uiState.selectedTab == TransactionTab.RECENT,
-                            onClick = { onEvent(TransactionsUiEvent.SelectTab(TransactionTab.RECENT)) },
-                            text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_recent_tab)) }
-                        )
-                        Tab(
-                            selected = uiState.selectedTab == TransactionTab.CYCLIC,
-                            onClick = { onEvent(TransactionsUiEvent.SelectTab(TransactionTab.CYCLIC)) },
-                            text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_cyclic_tab)) }
+        }
+        is TransactionsUiState.Success -> {
+            Column(modifier = modifier.fillMaxSize()) {
+                PrimaryTabRow(
+                    selectedTabIndex = uiState.selectedTab.ordinal,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Tab(
+                        selected = uiState.selectedTab == TransactionTab.RECENT,
+                        onClick = { onEvent(TransactionsUiEvent.SelectTab(TransactionTab.RECENT)) },
+                        text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_recent_tab)) }
+                    )
+                    Tab(
+                        selected = uiState.selectedTab == TransactionTab.CYCLIC,
+                        onClick = { onEvent(TransactionsUiEvent.SelectTab(TransactionTab.CYCLIC)) },
+                        text = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_cyclic_tab)) }
+                    )
+                }
+
+                when (uiState.selectedTab) {
+                    TransactionTab.RECENT -> {
+                        RecentTransactionsContent(
+                            uiState = uiState,
+                            onEvent = onEvent
                         )
                     }
-
-                    when (uiState.selectedTab) {
-                        TransactionTab.RECENT -> {
-                            RecentTransactionsContent(
-                                uiState = uiState,
-                                onEvent = onEvent
-                            )
-                        }
-                        TransactionTab.CYCLIC -> {
-                            BillsScreen(
-                                uiState = billsUiState,
-                                onEvent = billsOnEvent,
-                                navTo = navTo,
-                                modifier = Modifier.fillMaxSize(),
-                                isEmbedded = true
-                            )
-                        }
+                    TransactionTab.CYCLIC -> {
+                        BillsScreen(
+                            uiState = billsUiState,
+                            onEvent = billsOnEvent,
+                            navTo = navTo,
+                            modifier = Modifier.fillMaxSize(),
+                            isEmbedded = true
+                        )
                     }
                 }
             }
@@ -384,10 +296,9 @@ private fun RecentTransactionsContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TransactionDetailPane(
+private fun TransactionDetailPane(
     uiState: TransactionsUiState,
-    onEvent: (TransactionsUiEvent) -> Unit,
-    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit
+    onEvent: (TransactionsUiEvent) -> Unit
 ) {
     val transaction = (uiState as? TransactionsUiState.Success)?.selectedTransaction
 
@@ -420,67 +331,11 @@ fun TransactionDetailPane(
         }
     ) { padding ->
         if (transaction != null) {
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(24.dp)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = transaction.description,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Black
-                )
-                
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_amount_label), 
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                        Text(
-                            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_currency_format, CurrencyUtils.formatCents(transaction.amountCents)),
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = if (transaction.amountCents < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Card(modifier = Modifier.weight(1f)) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_category), 
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                            val categoryName = (uiState as? TransactionsUiState.Success)?.categoryMap?.get(transaction.categoryId) ?: transaction.categoryId
-                            Text(categoryName, style = MaterialTheme.typography.titleMedium)
-                        }
-                    }
-                    Card(modifier = Modifier.weight(1f)) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_date), 
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                            val dateString = java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(transaction.timestamp)
-                            Text(
-                                text = dateString,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                    }
-                }
-            }
+            TransactionDetailContent(
+                transaction = transaction,
+                categoryName = (uiState as? TransactionsUiState.Success)?.categoryMap?.get(transaction.categoryId) ?: transaction.categoryId,
+                modifier = Modifier.padding(padding)
+            )
         } else {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_select_to_see_details))
@@ -489,9 +344,136 @@ fun TransactionDetailPane(
     }
 }
 
+@Composable
+private fun TransactionDetailContent(
+    transaction: Transaction,
+    categoryName: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .padding(24.dp)
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = transaction.description,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Black
+        )
+        
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            )
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_amount_label), 
+                    style = MaterialTheme.typography.labelSmall
+                )
+                Text(
+                    text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_currency_format, CurrencyUtils.formatCents(transaction.amountCents)),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = if (transaction.amountCents < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Card(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_category), 
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    Text(categoryName, style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            Card(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_date), 
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    val dateString = java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(transaction.timestamp)
+                    Text(
+                        text = dateString,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TransactionsFabMenu(
+    isExpanded: Boolean,
+    onToggle: () -> Unit,
+    onAddBill: () -> Unit,
+    onAddTransaction: () -> Unit
+) {
+    Column(horizontalAlignment = Alignment.End) {
+        AnimatedVisibility(visible = isExpanded) {
+            Column(
+                modifier = Modifier.padding(bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Card(
+                        onClick = onAddBill,
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Text("Add Bill", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    FloatingActionButton(
+                        onClick = onAddBill,
+                        modifier = Modifier.size(40.dp),
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Add Bill", modifier = Modifier.size(20.dp))
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Card(
+                        onClick = onAddTransaction,
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Text("Add Transaction", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    FloatingActionButton(
+                        onClick = onAddTransaction,
+                        modifier = Modifier.size(40.dp),
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Add Transaction", modifier = Modifier.size(20.dp))
+                    }
+                }
+            }
+        }
+        FloatingActionButton(onClick = onToggle) {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = "Add Menu",
+                modifier = Modifier.rotate(if (isExpanded) 45f else 0f)
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryFilterRow(
+private fun CategoryFilterRow(
     categories: List<String>,
     selectedCategory: String?,
     onSelect: (String?) -> Unit
@@ -518,76 +500,9 @@ fun CategoryFilterRow(
     }
 }
 
-@Preview(showBackground = true)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CategoryFilterRowPreview() {
-    MaterialTheme {
-        CategoryFilterRow(
-            categories = listOf("Food", "Coffee", "Transport"),
-            selectedCategory = "Food",
-            onSelect = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun TransactionsUiRoutePreview() {
-    MaterialTheme {
-        TransactionsUiRoute(
-            uiState = TransactionsUiState.Success(
-                transactions = listOf(
-                    Transaction("1", 4200L, "food_id", "Lunch", 1000L, defaultType = SpendingType.NEED)
-                ),
-                categories = listOf("Food"),
-                categoryMap = mapOf("food_id" to "Food")
-            ),
-            billsUiState = com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState.Success(),
-            onEvent = {},
-            billsOnEvent = {},
-            navTo = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun TransactionsListPanePreview() {
-    MaterialTheme {
-        TransactionsListPane(
-            uiState = TransactionsUiState.Success(
-                transactions = listOf(
-                    Transaction("1", 4200L, "food_id", "Lunch", 1000L, defaultType = SpendingType.NEED),
-                    Transaction("2", 1500L, "coffee_id", "Latte", 2000L, defaultType = SpendingType.WANT)
-                ),
-                categories = listOf("Food", "Coffee"),
-                categoryMap = mapOf("food_id" to "Food", "coffee_id" to "Coffee")
-            ),
-            billsUiState = com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState.Success(),
-            onEvent = {},
-            billsOnEvent = {},
-            navTo = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun TransactionDetailPanePreview() {
-    MaterialTheme {
-        TransactionDetailPane(
-            uiState = TransactionsUiState.Success(
-                selectedTransaction = Transaction("1", 4200L, "food_id", "Lunch with friends", 1000L, defaultType = SpendingType.NEED),
-                categoryMap = mapOf("food_id" to "Food")
-            ),
-            onEvent = {},
-            navTo = {}
-        )
-    }
-}
-
-@Composable
-fun AddBillDialog(
+private fun AddBillDialog(
     onDismiss: () -> Unit,
     onConfirm: (String, Double) -> Unit
 ) {
@@ -632,4 +547,51 @@ fun AddBillDialog(
             }
         }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TransactionsScreenSuccessPreview() {
+    MaterialTheme {
+        TransactionsScreen(
+            uiState = TransactionsUiState.Success(
+                transactions = listOf(
+                    Transaction("1", -4200L, "food_id", "Lunch", 1000L, defaultType = SpendingType.NEED)
+                ),
+                filteredTransactions = listOf(
+                    Transaction("1", -4200L, "food_id", "Lunch", 1000L, defaultType = SpendingType.NEED)
+                ),
+                categories = listOf("Food"),
+                categoryMap = mapOf("food_id" to "Food")
+            ),
+            billsUiState = com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState.Success(
+                expenses = listOf(
+                    com.zoewave.probase.seaweed.model.RecurringExpense(
+                        id = "1",
+                        name = "Rent",
+                        averageAmountCents = 120000L,
+                        frequency = com.zoewave.probase.seaweed.model.ExpenseFrequency.MONTHLY,
+                        categoryId = "housing_id"
+                    )
+                )
+            ),
+            onEvent = {},
+            billsOnEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TransactionsScreenLoadingPreview() {
+    MaterialTheme {
+        TransactionsScreen(
+            uiState = TransactionsUiState.Loading,
+            billsUiState = com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState.Loading,
+            onEvent = {},
+            billsOnEvent = {},
+            navTo = {}
+        )
+    }
 }

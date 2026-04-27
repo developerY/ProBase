@@ -7,6 +7,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.seaweed.features.receiptcapture.ui.SmartReceiptUiRoute
+import com.zoewave.probase.seaweed.features.spendingcontrol.ui.EnvelopeManagementUiRoute
 import com.zoewave.probase.seaweed.mobile.budget.ui.BudgetUiRoute
 import com.zoewave.probase.seaweed.mobile.home.ui.CategoryGridRoute
 import com.zoewave.probase.seaweed.mobile.home.ui.HomeUiRoute
@@ -18,7 +19,6 @@ import com.zoewave.probase.seaweed.mobile.transaction.ui.AiDebugScreen
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AnalyticsUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.TransactionsUiRoute
 import com.zoewave.probase.seaweed.mobile.ui.components.AdaptiveSeaweedScreen
-import com.zoewave.probase.seaweed.features.spendingcontrol.ui.EnvelopeManagementScreen
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 
 fun seaweedNavEntryProvider(
@@ -52,13 +52,16 @@ fun seaweedNavEntryProvider(
             }
             SeaweedDestination.Budget -> {
                 BudgetUiRoute(
-                    modifier = Modifier.fillMaxSize(),
-                    onBack = onBack
+                    navTo = navigateTo,
+                    onBack = onBack,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
             SeaweedDestination.Envelopes -> {
-                EnvelopeManagementScreen(
-                    onBack = onBack
+                EnvelopeManagementUiRoute(
+                    navTo = navigateTo,
+                    onBack = onBack,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
             is SeaweedDestination.Transactions -> {
@@ -96,8 +99,9 @@ fun seaweedNavEntryProvider(
             }
             SeaweedDestination.Analytics -> {
                 AnalyticsUiRoute(
-                    modifier = Modifier.fillMaxSize(),
-                    onBack = onBack
+                    navTo = navigateTo,
+                    onBack = onBack,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
             SeaweedDestination.Camera -> {
