@@ -1,19 +1,25 @@
 package com.zoewave.probase.seaweed.mobile.transaction.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Delete
@@ -38,9 +44,13 @@ import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -169,6 +179,8 @@ fun TransactionsListPane(
     onEvent: (TransactionsUiEvent) -> Unit,
     navTo: (SeaweedDestination) -> Unit
 ) {
+    var isFabMenuExpanded by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -184,19 +196,69 @@ fun TransactionsListPane(
             )
         },
         floatingActionButton = {
-            if (uiState is TransactionsUiState.Success && uiState.selectedTab == TransactionTab.RECENT) {
-                FloatingActionButton(onClick = { navTo(SeaweedDestination.AddTransaction) }) {
-                    Icon(
-                        Icons.Default.Add, 
-                        contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_add_title)
-                    )
-                }
-            } else if (uiState is TransactionsUiState.Success && uiState.selectedTab == TransactionTab.CYCLIC) {
-                FloatingActionButton(onClick = { /* TODO: Show Add Bill Dialog */ }) {
-                    Icon(
-                        Icons.Default.Add, 
-                        contentDescription = stringResource(com.zoewave.probase.seaweed.mobile.bills.R.string.applications_seaweed_apps_mobile_features_bills_add)
-                    )
+            if (uiState is TransactionsUiState.Success) {
+                Column(horizontalAlignment = Alignment.End) {
+                    AnimatedVisibility(visible = isFabMenuExpanded) {
+                        Column(
+                            modifier = Modifier.padding(bottom = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalAlignment = Alignment.End
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Card(
+                                    onClick = { 
+                                        isFabMenuExpanded = false
+                                        // TODO: Open Add Bill Dialog
+                                    },
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                ) {
+                                    Text("Add Bill", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
+                                }
+                                Spacer(Modifier.width(8.dp))
+                                FloatingActionButton(
+                                    onClick = { 
+                                        isFabMenuExpanded = false
+                                        // TODO: Open Add Bill Dialog
+                                    },
+                                    modifier = Modifier.size(40.dp),
+                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                                ) {
+                                    Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Add Bill", modifier = Modifier.size(20.dp))
+                                }
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Card(
+                                    onClick = { 
+                                        isFabMenuExpanded = false
+                                        navTo(SeaweedDestination.AddTransaction) 
+                                    },
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                ) {
+                                    Text("Add Transaction", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
+                                }
+                                Spacer(Modifier.width(8.dp))
+                                FloatingActionButton(
+                                    onClick = { 
+                                        isFabMenuExpanded = false
+                                        navTo(SeaweedDestination.AddTransaction) 
+                                    },
+                                    modifier = Modifier.size(40.dp),
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                ) {
+                                    Icon(Icons.Default.Add, contentDescription = "Add Transaction", modifier = Modifier.size(20.dp))
+                                }
+                            }
+                        }
+                    }
+                    FloatingActionButton(onClick = { isFabMenuExpanded = !isFabMenuExpanded }) {
+                        Icon(
+                            if (isFabMenuExpanded) Icons.Default.Add else Icons.Default.Add, // You could toggle to Close icon
+                            contentDescription = "Add Menu",
+                            modifier = Modifier.rotate(if (isFabMenuExpanded) 45f else 0f)
+                        )
+                    }
                 }
             }
         }
