@@ -4,6 +4,7 @@
     <excludeRoots>
       <file path="$PROJECT_DIR$/applications/kocolor/Docs" />
       <file path="$PROJECT_DIR$/features/health/docs" />
+      <file path="$PROJECT_DIR$/features/payment/Docs" />
     </excludeRoots>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />

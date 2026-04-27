@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -58,6 +59,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -68,6 +70,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
+import com.zoewave.probase.features.payment.googlepay.ui.SeaweedGooglePayButton
+import com.zoewave.probase.features.payment.stripe.ui.LocalStripeLauncher
+import com.zoewave.probase.features.payment.stripe.ui.presentSeaweedPayment
 import com.zoewave.probase.seaweed.mobile.transaction.R
 import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
@@ -136,6 +141,8 @@ fun AddTransactionScreen(
     navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val stripeLauncher = LocalStripeLauncher.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -309,6 +316,42 @@ fun AddTransactionScreen(
                             }
                         }
                     }
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Smart Purchase Guidance",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    // Reusable Google Pay Component
+                    SeaweedGooglePayButton(
+                        onClick = { onEvent(AddTransactionUiEvent.SaveTransaction) }
+                    )
+
+                    Button(
+                        onClick = { 
+                            // POC: In a real app, we'd fetch this from the backend first
+                            stripeLauncher?.presentSeaweedPayment("pi_test_123_secret_abc")
+                        },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        enabled = stripeLauncher != null,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF635BFF), // Stripe Purple
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Pay with Stripe", fontWeight = FontWeight.Bold)
+                    }
+                    
+                    Text(
+                        text = "AI will automatically verify this purchase against your budget and rewards.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
 
                 Button(
