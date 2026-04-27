@@ -17,6 +17,11 @@ dependencies {
     implementation(project(":applications:seaweed:model"))
     implementation(project(":applications:seaweed:data"))
 
+    // --- 4. Hilt ---
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    // Compiler (ksp) is handled automatically by the Hilt Convention Plugin
+
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.hilt.android)
