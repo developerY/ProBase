@@ -1,5 +1,6 @@
 package com.zoewave.probase.seaweed.mobile.settings.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -27,7 +28,7 @@ fun SettingsUiRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    SettingsUiRoute(
+    SettingsScreen(
         uiState = uiState,
         onEvent = { event ->
             if (event is SettingsUiEvent.NavigateTo) {
@@ -61,7 +62,7 @@ internal fun SettingsUiRoute(
 fun SettingsScreen(
     uiState: SettingsUiState,
     onEvent: (SettingsUiEvent) -> Unit,
-    @Suppress("UnusedParameter") navTo: (SeaweedDestination) -> Unit,
+    navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -77,55 +78,66 @@ fun SettingsScreen(
                 }
             }
             is SettingsUiState.Success -> {
-                val settings = uiState.settings
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_income), style = MaterialTheme.typography.titleLarge)
-                    OutlinedTextField(
-                        value = settings.monthlyIncome.toString(),
-                        onValueChange = { val income = it.toDoubleOrNull() ?: 0.0; onEvent(SettingsUiEvent.UpdateIncome(income)) },
-                        label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_monthly_income)) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_appearance), style = MaterialTheme.typography.titleLarge)
-                    ThemeConfigSelectionGroup(
-                        currentConfig = settings.themeConfig,
-                        onConfigSelected = { onEvent(SettingsUiEvent.UpdateTheme(it)) }
-                    )
-
-                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_mode), style = MaterialTheme.typography.titleLarge)
-                    ThemeModeSelectionGroup(
-                        currentMode = settings.themeMode,
-                        onModeSelected = { onEvent(SettingsUiEvent.UpdateThemeMode(it)) }
-                    )
-
-                    var isAiExpanded by remember { mutableStateOf(false) }
-                    AiConfigurationCard(
-                        expanded = isAiExpanded,
-                        onExpandToggle = { isAiExpanded = !isAiExpanded },
-                        title = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_title),
-                        description = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_desc)
-                    )
-
-                    HorizontalDivider()
-
-                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_developer_options), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
-                    Button(
-                        onClick = { onEvent(SettingsUiEvent.GenerateTestData) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
-                    ) {
-                        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_generate_test_data))
-                    }
-                }
+                SettingsContent(
+                    settings = uiState.settings,
+                    onEvent = onEvent,
+                    modifier = Modifier.padding(padding)
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun SettingsContent(
+    settings: UserSettings,
+    onEvent: (SettingsUiEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_income), style = MaterialTheme.typography.titleLarge)
+        OutlinedTextField(
+            value = settings.monthlyIncome.toString(),
+            onValueChange = { val income = it.toDoubleOrNull() ?: 0.0; onEvent(SettingsUiEvent.UpdateIncome(income)) },
+            label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_monthly_income)) },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_appearance), style = MaterialTheme.typography.titleLarge)
+        ThemeConfigSelectionGroup(
+            currentConfig = settings.themeConfig,
+            onConfigSelected = { onEvent(SettingsUiEvent.UpdateTheme(it)) }
+        )
+
+        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_mode), style = MaterialTheme.typography.titleLarge)
+        ThemeModeSelectionGroup(
+            currentMode = settings.themeMode,
+            onModeSelected = { onEvent(SettingsUiEvent.UpdateThemeMode(it)) }
+        )
+
+        var isAiExpanded by remember { mutableStateOf(false) }
+        AiConfigurationCard(
+            expanded = isAiExpanded,
+            onExpandToggle = { isAiExpanded = !isAiExpanded },
+            title = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_title),
+            description = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_desc)
+        )
+
+        HorizontalDivider()
+
+        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_developer_options), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
+        Button(
+            onClick = { onEvent(SettingsUiEvent.GenerateTestData) },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+        ) {
+            Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_generate_test_data))
         }
     }
 }
@@ -182,7 +194,8 @@ private fun ThemeOption(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(56.dp)
+            .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
@@ -201,33 +214,7 @@ private fun ThemeOption(
 
 @Preview(showBackground = true)
 @Composable
-private fun ThemeOptionPreview() {
-    MaterialTheme {
-        ThemeOption(label = "Light", isSelected = true, onClick = {})
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SettingsUiRoutePreview() {
-    MaterialTheme {
-        SettingsUiRoute(
-            uiState = SettingsUiState.Success(
-                settings = UserSettings(
-                    monthlyIncome = 5000.0,
-                    themeConfig = SeaweedThemeConfig.DEFAULT,
-                    themeMode = ThemeMode.SYSTEM
-                )
-            ),
-            onEvent = {},
-            navTo = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SettingsScreenPreview() {
+private fun SettingsScreenSuccessPreview() {
     MaterialTheme {
         SettingsScreen(
             uiState = SettingsUiState.Success(
