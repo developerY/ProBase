@@ -66,9 +66,18 @@ import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import com.zoewave.probase.seaweed.model.navigation.TransactionTab
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import kotlinx.coroutines.launch
 import java.util.Locale
 import com.zoewave.probase.core.ui.R as CoreUiR
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import com.zoewave.probase.seaweed.model.ExpenseCategory
+import com.zoewave.probase.seaweed.model.ExpenseFrequency
+import com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiEvent
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -91,6 +100,7 @@ fun TransactionsUiRoute(
             // Navigation handled in the caller or passed down
             viewModel.onEvent(event)
         },
+        billsOnEvent = { billsViewModel.onEvent(it) },
         navTo = navTo,
         modifier = modifier,
         initialCategory = initialCategory,
@@ -105,6 +115,7 @@ internal fun TransactionsUiRoute(
     uiState: TransactionsUiState,
     billsUiState: com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState,
     onEvent: (TransactionsUiEvent) -> Unit,
+    billsOnEvent: (BillsUiEvent) -> Unit,
     navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
     initialCategory: String? = null,
@@ -145,6 +156,7 @@ internal fun TransactionsUiRoute(
                         else -> onEvent(event)
                     }
                 },
+                billsOnEvent = billsOnEvent,
                 navTo = navTo
             )
         },
@@ -177,9 +189,28 @@ fun TransactionsListPane(
     uiState: TransactionsUiState,
     billsUiState: com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState,
     onEvent: (TransactionsUiEvent) -> Unit,
+    billsOnEvent: (BillsUiEvent) -> Unit,
     navTo: (SeaweedDestination) -> Unit
 ) {
     var isFabMenuExpanded by remember { mutableStateOf(false) }
+    var showAddBillDialog by remember { mutableStateOf(false) }
+
+    if (showAddBillDialog) {
+        AddBillDialog(
+            onDismiss = { showAddBillDialog = false },
+            onConfirm = { name, amount ->
+                billsOnEvent(
+                    BillsUiEvent.AddExpense(
+                        name = name,
+                        amount = amount,
+                        frequency = ExpenseFrequency.MONTHLY,
+                        category = ExpenseCategory.HOUSING // Default for now
+                    )
+                )
+                showAddBillDialog = false
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -208,7 +239,7 @@ fun TransactionsListPane(
                                 Card(
                                     onClick = { 
                                         isFabMenuExpanded = false
-                                        // TODO: Open Add Bill Dialog
+                                        showAddBillDialog = true
                                     },
                                     shape = RoundedCornerShape(8.dp),
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -219,7 +250,7 @@ fun TransactionsListPane(
                                 FloatingActionButton(
                                     onClick = { 
                                         isFabMenuExpanded = false
-                                        // TODO: Open Add Bill Dialog
+                                        showAddBillDialog = true
                                     },
                                     modifier = Modifier.size(40.dp),
                                     containerColor = MaterialTheme.colorScheme.tertiaryContainer
@@ -508,6 +539,7 @@ private fun TransactionsUiRoutePreview() {
             ),
             billsUiState = com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState.Success(),
             onEvent = {},
+            billsOnEvent = {},
             navTo = {}
         )
     }
@@ -528,6 +560,7 @@ private fun TransactionsListPanePreview() {
             ),
             billsUiState = com.zoewave.probase.seaweed.mobile.bills.ui.BillsUiState.Success(),
             onEvent = {},
+            billsOnEvent = {},
             navTo = {}
         )
     }
@@ -546,4 +579,52 @@ private fun TransactionDetailPanePreview() {
             navTo = {}
         )
     }
+}
+
+@Composable
+fun AddBillDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String, Double) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var amount by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add Recurring Bill") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("Amount") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { 
+                    val amountValue = amount.toDoubleOrNull() ?: 0.0
+                    if (name.isNotBlank() && amountValue > 0) {
+                        onConfirm(name, amountValue)
+                    }
+                }
+            ) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

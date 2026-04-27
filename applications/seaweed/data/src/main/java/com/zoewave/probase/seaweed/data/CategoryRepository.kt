@@ -8,5 +8,6 @@ interface CategoryRepository {
     suspend fun saveCategory(category: Category)
     suspend fun deleteCategory(id: String)
     suspend fun getCategoryById(id: String): Category?
+    suspend fun getCategoryByName(name: String): Category?
     suspend fun initializeDefaultCategories()
 }

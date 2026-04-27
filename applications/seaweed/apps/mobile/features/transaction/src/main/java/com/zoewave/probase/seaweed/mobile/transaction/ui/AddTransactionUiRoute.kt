@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Coffee
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.Home
@@ -70,6 +72,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
+import com.zoewave.probase.features.payment.googlepay.GooglePayConfig
 import com.zoewave.probase.features.payment.googlepay.ui.SeaweedGooglePayButton
 import com.zoewave.probase.features.payment.stripe.ui.LocalStripeLauncher
 import com.zoewave.probase.features.payment.stripe.ui.presentSeaweedPayment
@@ -209,6 +212,43 @@ fun AddTransactionScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                if (uiState.transactionDate != null) {
+                    val dateString = java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(uiState.transactionDate)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp))
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Event,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = "Date: $dateString",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.weight(1f))
+                        IconButton(
+                            onClick = { onEvent(AddTransactionUiEvent.ClearTransactionDate) },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Clear Date",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+
                 QuickExpenseBar(
                     onAdjustAmount = { delta -> onEvent(AddTransactionUiEvent.AdjustAmount(delta)) }
                 )
@@ -326,10 +366,12 @@ fun AddTransactionScreen(
                         fontWeight = FontWeight.Bold
                     )
                     
-                    // Reusable Google Pay Component
-                    SeaweedGooglePayButton(
-                        onClick = { onEvent(AddTransactionUiEvent.SaveTransaction) }
-                    )
+                    // Reusable Google Pay Component (Disabled for Release)
+                    if (GooglePayConfig.IS_ENABLED) {
+                        SeaweedGooglePayButton(
+                            onClick = { onEvent(AddTransactionUiEvent.SaveTransaction) }
+                        )
+                    }
 
                     Button(
                         onClick = { 

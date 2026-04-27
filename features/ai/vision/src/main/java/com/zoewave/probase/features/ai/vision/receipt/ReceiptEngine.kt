@@ -22,6 +22,7 @@ data class ReceiptDiagnosticResult(
     val total: Double? = null,
     val date: String? = null,
     val category: String? = null,
+    val importance: String? = null,
     val logs: List<String> = emptyList(),
     val engineUsed: String = "Unknown",
     val error: String? = null,

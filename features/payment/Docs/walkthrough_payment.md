@@ -6,7 +6,7 @@ This walkthrough details the construction of the `:features:payment` module, des
 
 Following the pattern of `:features:ai`, the payment feature is architected as a top-level feature container with specific provider sub-modules.
 
-- **`:features:payment:googlepay`**: specialised sub-module for Google Pay logic and UI.
+- **`:features:payment:googlepay`**: specialised sub-module for Google Pay logic and UI. (Note: Currently disabled for the initial release via `GooglePayConfig`).
 - **`:features:payment:stripe`**: specialized sub-module for Stripe integration using the modern `PaymentSheet` flow.
 - **Independence**: The module is completely decoupled from the Seaweed app logic, making it easily consumable by other products like AshBike or Photodo.
 

@@ -16,6 +16,7 @@ private data class GeminiReceiptDraft(
     val total: Double? = null,
     val date: String? = null,
     val category: String? = null,
+    val importance: String? = null,
     val whatIsThis: String? = null
 )
 
@@ -59,6 +60,7 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
                 - total: The final amount paid. Return strictly as a number (e.g. 15.50).
                 - date: The transaction date. Convert to MM/DD/YYYY format.
                 - category: Suggest a broad category (e.g. Food, Travel, Office, Shopping).
+                - importance: Decide if this purchase is a NEED (essential) or a WANT (discretionary).
                 - whatIsThis: A detailed description of what this is a picture of.
                 
                 Respond ONLY with valid JSON matching this schema:
@@ -67,6 +69,7 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
                   "total": number or null,
                   "date": string or null,
                   "category": string or null,
+                  "importance": "NEED" | "WANT" | null,
                   "whatIsThis": string or null
                 }
             """.trimIndent())
@@ -85,6 +88,7 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
                 total = draft.total,
                 date = draft.date,
                 category = draft.category,
+                importance = draft.importance,
                 logs = logs,
                 engineUsed = "Cloud AI (Gemini)",
                 rawResponse = jsonText,

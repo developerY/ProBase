@@ -29,6 +29,10 @@ class CategoryRepositoryImpl @Inject constructor(
         return dao.getCategoryById(id)?.toDomain()
     }
 
+    override suspend fun getCategoryByName(name: String): Category? {
+        return dao.getCategoryByName(name)?.toDomain()
+    }
+
     override suspend fun initializeDefaultCategories() {
         val existing = dao.getAllCategories().first()
         if (existing.isEmpty()) {

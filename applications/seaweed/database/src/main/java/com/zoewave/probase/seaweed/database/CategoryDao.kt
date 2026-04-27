@@ -19,4 +19,7 @@ interface CategoryDao {
     
     @Query("SELECT * FROM categories WHERE id = :id")
     suspend fun getCategoryById(id: String): CategoryEntity?
+
+    @Query("SELECT * FROM categories WHERE name = :name COLLATE NOCASE LIMIT 1")
+    suspend fun getCategoryByName(name: String): CategoryEntity?
 }

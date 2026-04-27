@@ -10,6 +10,7 @@ import com.zoewave.probase.features.ai.capture.data.ImageLoader
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptOrchestrator
 import com.zoewave.probase.seaweed.data.BudgetTargetRepository
+import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
@@ -48,7 +49,8 @@ data class AddTransactionUiState(
     val lastAiDebugInfo: AiDebugInfo? = null,
     val latitude: Double? = null,
     val longitude: Double? = null,
-    val isCapturingLocation: Boolean = false
+    val isCapturingLocation: Boolean = false,
+    val transactionDate: Long? = null
 )
 
 @Serializable
@@ -65,6 +67,7 @@ sealed interface AddTransactionUiEvent {
     data class ImportanceChanged(val value: SpendingType) : AddTransactionUiEvent
     data class DescriptionChanged(val value: String) : AddTransactionUiEvent
     data class ReceiptAttached(val uri: String) : AddTransactionUiEvent
+    object ClearTransactionDate : AddTransactionUiEvent
     object SaveTransaction : AddTransactionUiEvent
     object BackClicked : AddTransactionUiEvent
     object SuccessConsumed : AddTransactionUiEvent
@@ -88,6 +91,7 @@ sealed interface AddTransactionUiEvent {
 class AddTransactionViewModel @Inject constructor(
     private val repository: TransactionRepository,
     private val budgetRepository: BudgetTargetRepository,
+    private val categoryRepository: CategoryRepository,
     private val locationRepository: LocationRepository,
     private val imageLoader: ImageLoader,
     private val orchestrator: ReceiptOrchestrator,
@@ -119,6 +123,9 @@ class AddTransactionViewModel @Inject constructor(
             is AddTransactionUiEvent.DescriptionChanged -> _uiState.update { it.copy(description = event.value, errorMessage = null) }
             is AddTransactionUiEvent.ReceiptAttached -> {
                 _uiState.update { it.copy(receiptUri = event.uri, showCaptureTypeSelection = true, errorMessage = null) }
+            }
+            AddTransactionUiEvent.ClearTransactionDate -> {
+                _uiState.update { it.copy(transactionDate = null) }
             }
             AddTransactionUiEvent.SelectReceiptMode -> {
                 val uri = _uiState.value.receiptUri
@@ -195,11 +202,40 @@ class AddTransactionViewModel @Inject constructor(
                 val result = orchestrator.processReceipt(bitmap, apiKey, modelName, userComment)
                 
                 Log.d("AddTransactionVM", "AI Result: $result")
+
+                // Map category name to ID if possible
+                val categoryId = result.category?.let { name ->
+                    categoryRepository.getCategoryByName(name)?.id ?: name
+                }
+
+                // Map importance
+                val importance = when (result.importance?.uppercase()) {
+                    "NEED" -> SpendingType.NEED
+                    "WANT" -> SpendingType.WANT
+                    else -> null
+                }
+
+                // Parse date (MM/DD/YYYY)
+                val parsedDate = result.date?.let { dateStr ->
+                    try {
+                        val parts = dateStr.split("/")
+                        if (parts.size == 3) {
+                            val calendar = java.util.Calendar.getInstance()
+                            calendar.set(parts[2].toInt(), parts[0].toInt() - 1, parts[1].toInt())
+                            calendar.timeInMillis
+                        } else null
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
+
                 _uiState.update { 
                     val updated = it.copy(
                         amount = if ((result.total ?: 0.0) > 0) String.format(Locale.getDefault(), "%.2f", result.total) else it.amount,
-                        category = result.category ?: it.category,
+                        category = categoryId ?: it.category,
                         description = result.merchant ?: it.description,
+                        importance = importance ?: it.importance,
+                        transactionDate = parsedDate ?: it.transactionDate,
                         isLoading = false,
                         errorMessage = null,
                         lastAiDebugInfo = AiDebugInfo(
@@ -209,7 +245,7 @@ class AddTransactionViewModel @Inject constructor(
                             whatIsThis = result.whatIsThis
                         )
                     )
-                    Log.d("AddTransactionVM", "Updating UI State: description=${updated.description}, amount=${updated.amount}, category=${updated.category}")
+                    Log.d("AddTransactionVM", "Updating UI State: description=${updated.description}, amount=${updated.amount}, category=${updated.category}, importance=${updated.importance}")
                     updated
                 }
             } catch (e: Exception) {
@@ -248,7 +284,7 @@ class AddTransactionViewModel @Inject constructor(
                 amountCents = CurrencyUtils.toCents(totalAmount),
                 categoryId = _uiState.value.category, // Assuming category is the ID here for now
                 description = _uiState.value.description,
-                timestamp = System.currentTimeMillis(),
+                timestamp = _uiState.value.transactionDate ?: System.currentTimeMillis(),
                 receiptUri = _uiState.value.receiptUri,
                 defaultType = _uiState.value.importance,
                 latitude = _uiState.value.latitude,
