@@ -70,15 +70,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.rememberCoroutineScope
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.features.payment.googlepay.GooglePayConfig
 import com.zoewave.probase.features.payment.googlepay.ui.SeaweedGooglePayButton
 import com.zoewave.probase.features.payment.stripe.ui.LocalStripeLauncher
 import com.zoewave.probase.features.payment.stripe.ui.presentSeaweedPayment
+import com.zoewave.probase.seaweed.features.spendingcontrol.domain.InterventionAction
+import com.zoewave.probase.seaweed.features.spendingcontrol.ui.InterventionDialog
 import com.zoewave.probase.seaweed.mobile.transaction.R
 import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
+import kotlinx.coroutines.launch
 import java.util.Locale
 import com.zoewave.probase.core.ui.R as CoreUiR
 
@@ -90,6 +94,8 @@ fun AddTransactionUiRoute(
     viewModel: AddTransactionViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val interventionState by viewModel.spendingControlOrchestrator.interventionState.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
@@ -119,6 +125,25 @@ fun AddTransactionUiRoute(
         navTo = navTo,
         modifier = modifier
     )
+
+    interventionState?.let { state ->
+        InterventionDialog(
+            state = state,
+            onAction = { action ->
+                scope.launch {
+                    viewModel.spendingControlOrchestrator.resolveIntervention(action)
+                    if (action == InterventionAction.Override) {
+                        viewModel.onEvent(AddTransactionUiEvent.SaveTransaction)
+                    }
+                }
+            },
+            onDismiss = {
+                scope.launch {
+                    viewModel.spendingControlOrchestrator.resolveIntervention(InterventionAction.Cancel)
+                }
+            }
+        )
+    }
 }
 
 @Composable

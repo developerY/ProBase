@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":applications:seaweed:model"))
     implementation(project(":applications:seaweed:data"))
     implementation(project(":applications:seaweed:features:main"))
+    implementation(project(":applications:seaweed:features:spendingcontrol"))
     implementation(project(":applications:seaweed:apps:mobile:features:bills"))
     implementation(project(":features:payment:googlepay"))
     implementation(project(":features:payment:stripe"))

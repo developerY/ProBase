@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,9 +51,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -175,6 +178,9 @@ private fun HomeExpandedContent(
                     monthProgress = profile.monthProgress
                 )
             }
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 70 })) {
+                EnvelopePromotionCard(onClick = { navTo(SeaweedDestination.Envelopes) })
+            }
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 80 })) {
                 FixedCostsSummaryCard(
                     totalFixedCostsCents = profile.totalFixedCostsCents,
@@ -287,6 +293,14 @@ private fun HomeCompactContent(
         item {
             AnimatedVisibility(
                 visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 70 })
+            ) {
+                EnvelopePromotionCard(onClick = { navTo(SeaweedDestination.Envelopes) })
+            }
+        }
+        item {
+            AnimatedVisibility(
+                visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 80 })
             ) {
                 FixedCostsSummaryCard(
@@ -363,6 +377,43 @@ private fun HomeCompactContent(
                     onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun EnvelopePromotionCard(onClick: () -> Unit) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(24.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Decision-Time Control",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Assign transactions to envelopes and stay in control.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.8f)
+                )
+            }
+            Icon(
+                Icons.Default.Shield,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp)
+            )
         }
     }
 }

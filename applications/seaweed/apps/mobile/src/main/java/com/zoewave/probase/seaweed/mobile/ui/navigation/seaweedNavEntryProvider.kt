@@ -18,6 +18,7 @@ import com.zoewave.probase.seaweed.mobile.transaction.ui.AiDebugScreen
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AnalyticsUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.TransactionsUiRoute
 import com.zoewave.probase.seaweed.mobile.ui.components.AdaptiveSeaweedScreen
+import com.zoewave.probase.seaweed.features.spendingcontrol.ui.EnvelopeManagementScreen
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 
 fun seaweedNavEntryProvider(
@@ -52,6 +53,11 @@ fun seaweedNavEntryProvider(
             SeaweedDestination.Budget -> {
                 BudgetUiRoute(
                     modifier = Modifier.fillMaxSize(),
+                    onBack = onBack
+                )
+            }
+            SeaweedDestination.Envelopes -> {
+                EnvelopeManagementScreen(
                     onBack = onBack
                 )
             }
