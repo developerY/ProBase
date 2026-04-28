@@ -1,13 +1,11 @@
 package com.zoewave.probase.seaweed.features.spendingcontrol.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.features.spendingcontrol.domain.InterventionAction
@@ -24,9 +22,28 @@ fun InterventionDialog(
         title = { Text("Transaction Declined") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("${state.merchantName} - ${CurrencyUtils.formatCents(state.amountCents)}")
+                Text(
+                    text = "${state.merchantName} - ${CurrencyUtils.formatCents(state.amountCents)}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
                 Text("Reason: ${state.reason}", color = MaterialTheme.colorScheme.error)
-                Text("Your Dining budget is exceeded. How would you like to proceed?")
+                
+                state.impactMessage?.let { message ->
+                    Surface(
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = message,
+                            modifier = Modifier.padding(12.dp),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+
+                Text("How would you like to proceed?")
             }
         },
         confirmButton = {

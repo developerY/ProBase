@@ -20,7 +20,8 @@ class InterventionFlowOrchestrator @Inject constructor(
      */
     suspend fun interceptTransaction(
         merchantName: String,
-        amountCents: Long
+        amountCents: Long,
+        impactMessage: String? = null
     ): TransactionStatus {
         val authContext = AuthContext(merchantName, amountCents)
         val classification = classifier.classify(authContext)
@@ -39,7 +40,8 @@ class InterventionFlowOrchestrator @Inject constructor(
                     amountCents = amountCents,
                     categoryId = classification.categoryId,
                     envelopeId = decision.envelopeId,
-                    reason = decision.reason
+                    reason = decision.reason,
+                    impactMessage = impactMessage
                 )
                 _interventionState.value = state
                 TransactionStatus.Declined(decision.reason)
@@ -73,7 +75,8 @@ data class InterventionState(
     val amountCents: Long,
     val categoryId: String,
     val envelopeId: String,
-    val reason: String
+    val reason: String,
+    val impactMessage: String? = null
 )
 
 sealed interface InterventionAction {
