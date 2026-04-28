@@ -12,6 +12,7 @@ import com.zoewave.probase.features.ai.vision.receipt.ReceiptOrchestrator
 import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
+import com.zoewave.probase.seaweed.features.cashflow.domain.CashFlowRepository
 import com.zoewave.probase.seaweed.features.spendingcontrol.domain.InterventionFlowOrchestrator
 import com.zoewave.probase.seaweed.features.spendingcontrol.domain.TransactionStatus
 import com.zoewave.probase.seaweed.model.SpendingType
@@ -98,6 +99,7 @@ class AddTransactionViewModel @Inject constructor(
     private val imageLoader: ImageLoader,
     private val orchestrator: ReceiptOrchestrator,
     val spendingControlOrchestrator: InterventionFlowOrchestrator,
+    private val cashFlowRepository: CashFlowRepository,
     private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
@@ -283,10 +285,25 @@ class AddTransactionViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
+            // --- Real-Time Awareness Impact ---
+            val cashFlowSummary = cashFlowRepository.getCurrentMonthSummary().firstOrNull()
+            val impactMessage = cashFlowSummary?.let { summary ->
+                val amountCents = CurrencyUtils.toCents(totalAmount)
+                val newNet = summary.netBalanceCents - amountCents
+                val paceImpact = "At current pace, you'll reach your monthly target in ${30 - java.time.LocalDate.now().dayOfMonth} days."
+                val netImpact = if (newNet < 0) {
+                    "This purchase creates a ${CurrencyUtils.formatCents(-newNet)} deficit in your monthly cash flow."
+                } else {
+                    "This reduces your potential savings for the 'Vacation Fund' by ${CurrencyUtils.formatCents(amountCents)}."
+                }
+                "$paceImpact\n\n$netImpact"
+            }
+
             // --- Spending Control Intervention Step ---
             val authStatus = spendingControlOrchestrator.interceptTransaction(
                 merchantName = _uiState.value.description.ifBlank { "New Purchase" },
-                amountCents = CurrencyUtils.toCents(totalAmount)
+                amountCents = CurrencyUtils.toCents(totalAmount),
+                impactMessage = impactMessage
             )
 
             if (authStatus is TransactionStatus.Declined) {
