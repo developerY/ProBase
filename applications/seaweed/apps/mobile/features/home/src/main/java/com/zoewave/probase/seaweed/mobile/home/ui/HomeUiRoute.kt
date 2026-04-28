@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -193,6 +194,9 @@ private fun HomeExpandedScreen(
                     monthProgress = profile.monthProgress
                 )
             }
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 65 })) {
+                CashFlowAwarenessCard(onClick = { navTo(SeaweedDestination.CashFlow) })
+            }
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 70 })) {
                 EnvelopePromotionCard(onClick = { navTo(SeaweedDestination.Envelopes) })
             }
@@ -308,6 +312,14 @@ private fun HomeCompactScreen(
         item {
             AnimatedVisibility(
                 visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 65 })
+            ) {
+                CashFlowAwarenessCard(onClick = { navTo(SeaweedDestination.CashFlow) })
+            }
+        }
+        item {
+            AnimatedVisibility(
+                visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 70 })
             ) {
                 EnvelopePromotionCard(onClick = { navTo(SeaweedDestination.Envelopes) })
@@ -392,6 +404,43 @@ private fun HomeCompactScreen(
                     onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun CashFlowAwarenessCard(onClick: () -> Unit) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Cash Flow Awareness",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Monitor your Money In vs. Money Out pace.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                )
+            }
+            Icon(
+                Icons.Default.TrendingUp,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

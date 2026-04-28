@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -119,6 +120,12 @@ sealed class SeaweedDestination(
     data object DataDeletion : SeaweedDestination(
         title = "Data Deletion",
         icon = Icons.Default.Delete
+    )
+
+    @Serializable
+    data object CashFlow : SeaweedDestination(
+        title = "Cash Flow Awareness",
+        icon = Icons.Default.Payments
     )
 }
 

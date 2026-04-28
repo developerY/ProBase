@@ -7,6 +7,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.seaweed.features.receiptcapture.ui.SmartReceiptUiRoute
+import com.zoewave.probase.seaweed.features.cashflow.ui.CashFlowUiRoute
 import com.zoewave.probase.seaweed.features.spendingcontrol.ui.EnvelopeManagementUiRoute
 import com.zoewave.probase.seaweed.mobile.ui.legal.PrivacyPolicyScreen
 import com.zoewave.probase.seaweed.mobile.ui.legal.DataDeletionScreen
@@ -145,6 +146,12 @@ fun seaweedNavEntryProvider(
             SeaweedDestination.DataDeletion -> {
                 DataDeletionScreen(
                     onBack = onBack
+                )
+            }
+            SeaweedDestination.CashFlow -> {
+                CashFlowUiRoute(
+                    onBack = onBack,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
