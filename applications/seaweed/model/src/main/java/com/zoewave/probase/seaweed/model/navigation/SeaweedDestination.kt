@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.zoewave.probase.seaweed.model.R
@@ -105,6 +106,12 @@ sealed class SeaweedDestination(
     ) : SeaweedDestination(
         titleRes = R.string.applications_seaweed_model_route_debug_ai,
         icon = Icons.Default.Settings
+    )
+
+    @Serializable
+    data object PrivacyPolicy : SeaweedDestination(
+        title = "Privacy Policy",
+        icon = Icons.Default.PrivacyTip
     )
 }
 
