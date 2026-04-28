@@ -7,6 +7,7 @@ import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.PrivacyTip
@@ -112,6 +113,12 @@ sealed class SeaweedDestination(
     data object PrivacyPolicy : SeaweedDestination(
         title = "Privacy Policy",
         icon = Icons.Default.PrivacyTip
+    )
+
+    @Serializable
+    data object DataDeletion : SeaweedDestination(
+        title = "Data Deletion",
+        icon = Icons.Default.Delete
     )
 }
 

@@ -2,19 +2,17 @@ package com.zoewave.probase.seaweed.mobile.settings.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.installations.FirebaseInstallations
 import com.zoewave.probase.seaweed.data.TestDataGenerator
 import com.zoewave.probase.seaweed.data.UserSettingsRepository
-import com.zoewave.probase.seaweed.model.BudgetTarget
 import com.zoewave.probase.seaweed.model.SeaweedThemeConfig
 import com.zoewave.probase.seaweed.model.ThemeMode
-import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.UserSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.util.UUID
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -22,15 +20,35 @@ class SettingsViewModel @Inject constructor(
     private val testDataGenerator: TestDataGenerator,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
-    val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+    private val _firebaseDeviceId = MutableStateFlow<String>("Loading...")
+
+    val uiState: StateFlow<SettingsUiState> = combine(
+        userSettingsRepository.getUserSettings(),
+        _firebaseDeviceId
+    ) { settings, deviceId ->
+        SettingsUiState.Success(
+            settings = settings,
+            firebaseDeviceId = deviceId
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = SettingsUiState.Loading
+    )
 
     init {
-        userSettingsRepository.getUserSettings()
-            .onEach { settings ->
-                _uiState.value = SettingsUiState.Success(settings)
+        fetchFirebaseDeviceId()
+    }
+
+    private fun fetchFirebaseDeviceId() {
+        viewModelScope.launch {
+            try {
+                val id = FirebaseInstallations.getInstance().id.await()
+                _firebaseDeviceId.value = id
+            } catch (e: Exception) {
+                _firebaseDeviceId.value = "Unavailable"
             }
-            .launchIn(viewModelScope)
+        }
     }
 
     fun onEvent(event: SettingsUiEvent) {
@@ -57,7 +75,10 @@ class SettingsViewModel @Inject constructor(
 
 sealed interface SettingsUiState {
     object Loading : SettingsUiState
-    data class Success(val settings: UserSettings) : SettingsUiState
+    data class Success(
+        val settings: UserSettings,
+        val firebaseDeviceId: String = ""
+    ) : SettingsUiState
 }
 
 sealed interface SettingsUiEvent {

@@ -3,9 +3,11 @@ package com.zoewave.probase.seaweed.mobile.settings.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
@@ -82,7 +85,7 @@ fun SettingsScreen(
             }
             is SettingsUiState.Success -> {
                 SettingsContent(
-                    settings = uiState.settings,
+                    uiState = uiState,
                     onEvent = onEvent,
                     modifier = Modifier.padding(padding)
                 )
@@ -93,10 +96,11 @@ fun SettingsScreen(
 
 @Composable
 private fun SettingsContent(
-    settings: UserSettings,
+    uiState: SettingsUiState.Success,
     onEvent: (SettingsUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val settings = uiState.settings
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -140,6 +144,16 @@ private fun SettingsContent(
             onClick = { onEvent(SettingsUiEvent.NavigateTo(SeaweedDestination.PrivacyPolicy)) }
         )
 
+        SettingsLinkItem(
+            label = "Data Deletion",
+            icon = Icons.Default.Delete,
+            onClick = { onEvent(SettingsUiEvent.NavigateTo(SeaweedDestination.DataDeletion)) }
+        )
+
+        HorizontalDivider()
+
+        AboutSection(deviceId = uiState.firebaseDeviceId)
+
         HorizontalDivider()
 
         Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_developer_options), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
@@ -150,6 +164,37 @@ private fun SettingsContent(
         ) {
             Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_generate_test_data))
         }
+    }
+}
+
+@Composable
+private fun AboutSection(deviceId: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("About", style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = "App Instance ID:",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(
+                text = deviceId,
+                modifier = Modifier.padding(12.dp),
+                style = androidx.compose.ui.text.TextStyle(
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                    fontSize = 12.sp
+                )
+            )
+        }
+        Text(
+            text = "Use this ID to request data deletion via email.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -269,47 +314,12 @@ private fun SettingsScreenSuccessPreview() {
                     monthlyIncome = 5000.0,
                     themeConfig = SeaweedThemeConfig.DEFAULT,
                     themeMode = ThemeMode.SYSTEM
-                )
+                ),
+                firebaseDeviceId = "test-id-123"
             ),
             onEvent = {},
             navTo = {}
         )
-    }
-}
-
-@Composable
-private fun SettingsLinkItem(
-    label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        color = androidx.compose.ui.graphics.Color.Transparent
-    ) {
-        Row(
-            modifier = Modifier.padding(vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-            )
-        }
     }
 }
 
