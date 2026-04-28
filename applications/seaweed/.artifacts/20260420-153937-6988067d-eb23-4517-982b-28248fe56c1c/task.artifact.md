@@ -8,3 +8,5 @@
 - [x] Implement date parsing logic
 - [x] Implement Add Bill dialog and connection to BillsViewModel
 - [x] Verify AI population in Add Transaction form
+- [x] Implement Seaweed Privacy Policy screen and navigation
+- [ ] Verify Privacy Policy link in Settings

@@ -81,18 +81,28 @@ fun EnvelopeManagementScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Spending Control", fontWeight = FontWeight.Black) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
+            Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
+                TopAppBar(
+                    title = { Text("Spending Control", fontWeight = FontWeight.Black) },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface
+                    )
                 )
-            )
+                
+                Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+                    EnvelopeExplainerHeader(
+                        isExpanded = isExplainerExpanded,
+                        onToggle = { isExplainerExpanded = !isExplainerExpanded },
+                        onHelpClick = { showPhilosophyDialog = true }
+                    )
+                }
+            }
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -113,14 +123,6 @@ fun EnvelopeManagementScreen(
             contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            item {
-                EnvelopeExplainerHeader(
-                    isExpanded = isExplainerExpanded,
-                    onToggle = { isExplainerExpanded = !isExplainerExpanded },
-                    onHelpClick = { showPhilosophyDialog = true }
-                )
-            }
-
             item {
                 Text(
                     text = "Active Envelopes",

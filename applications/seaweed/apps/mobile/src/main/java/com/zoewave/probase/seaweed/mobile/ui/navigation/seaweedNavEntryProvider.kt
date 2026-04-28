@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.seaweed.features.receiptcapture.ui.SmartReceiptUiRoute
 import com.zoewave.probase.seaweed.features.spendingcontrol.ui.EnvelopeManagementUiRoute
+import com.zoewave.probase.seaweed.mobile.ui.legal.PrivacyPolicyScreen
 import com.zoewave.probase.seaweed.mobile.budget.ui.BudgetUiRoute
 import com.zoewave.probase.seaweed.mobile.home.ui.CategoryGridRoute
 import com.zoewave.probase.seaweed.mobile.home.ui.HomeUiRoute
@@ -132,6 +133,11 @@ fun seaweedNavEntryProvider(
                     logs = key.logs,
                     engineUsed = key.engineUsed,
                     whatIsThis = key.whatIsThis,
+                    onBack = onBack
+                )
+            }
+            SeaweedDestination.PrivacyPolicy -> {
+                PrivacyPolicyScreen(
                     onBack = onBack
                 )
             }
