@@ -19,7 +19,7 @@ class TransactionListViewModel @Inject constructor(
     val uiState: StateFlow<TransactionListUiState> = repository.getAllTransactions()
         .map { transactions ->
             TransactionListUiState.Success(
-                transactions = transactions.sortedByDescending { it.date }
+                transactions = transactions.sortedByDescending { it.timestamp }
             )
         }
         .stateIn(

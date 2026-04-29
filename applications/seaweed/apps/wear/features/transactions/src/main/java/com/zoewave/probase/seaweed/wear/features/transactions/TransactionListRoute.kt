@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -14,6 +15,8 @@ import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material3.*
+import com.zoewave.probase.seaweed.wear.features.transactions.R
+import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.text.SimpleDateFormat
@@ -65,7 +68,7 @@ fun TransactionListScreen(
                 ) {
                     item {
                         ListHeader {
-                            Text("Recent")
+                            Text(stringResource(R.string.applications_seaweed_apps_wear_features_transactions_recent))
                         }
                     }
                     items(uiState.transactions) { transaction ->
@@ -82,14 +85,14 @@ private fun TransactionItem(transaction: Transaction) {
     TitleCard(
         onClick = { /* Detail not implemented */ },
         title = { Text(transaction.description) },
-        subtitle = { Text(transaction.category) },
-        time = { Text(formatDate(transaction.date)) },
+        subtitle = { Text(transaction.categoryId) },
+        time = { Text(formatDate(transaction.timestamp)) },
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "$${String.format(Locale.getDefault(), "%.2f", transaction.amount)}",
+            text = "$${String.format(Locale.getDefault(), "%.2f", transaction.amountCents.toDouble() / 100.0)}",
             style = MaterialTheme.typography.titleLarge,
-            color = if (transaction.amount < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+            color = if (transaction.amountCents < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Black
         )
     }
@@ -107,8 +110,8 @@ private fun TransactionListScreenPreview() {
         TransactionListScreen(
             uiState = TransactionListUiState.Success(
                 transactions = listOf(
-                    Transaction("1", 42.0, "Food", "Lunch", 1000L),
-                    Transaction("2", -15.0, "Coffee", "Latte", 2000L)
+                    Transaction("1", 4200L, "food_id", "Lunch", 1000L, defaultType = SpendingType.NEED),
+                    Transaction("2", -1500L, "coffee_id", "Latte", 2000L, defaultType = SpendingType.WANT)
                 )
             ),
             onEvent = {},
