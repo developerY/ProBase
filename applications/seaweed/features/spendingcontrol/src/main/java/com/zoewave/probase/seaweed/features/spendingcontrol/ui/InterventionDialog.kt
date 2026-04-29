@@ -5,9 +5,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.util.CurrencyUtils
+import com.zoewave.probase.seaweed.features.spendingcontrol.R
 import com.zoewave.probase.seaweed.features.spendingcontrol.domain.InterventionAction
 import com.zoewave.probase.seaweed.features.spendingcontrol.domain.InterventionState
 
@@ -19,7 +21,7 @@ fun InterventionDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Transaction Declined") },
+        title = { Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_declined)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
@@ -27,7 +29,10 @@ fun InterventionDialog(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
-                Text("Reason: ${state.reason}", color = MaterialTheme.colorScheme.error)
+                Text(
+                    text = stringResource(R.string.applications_seaweed_features_spendingcontrol_reason, state.reason), 
+                    color = MaterialTheme.colorScheme.error
+                )
                 
                 state.impactMessage?.let { message ->
                     Surface(
@@ -43,17 +48,17 @@ fun InterventionDialog(
                     }
                 }
 
-                Text("How would you like to proceed?")
+                Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_how_to_proceed))
             }
         },
         confirmButton = {
             Button(onClick = { onAction(InterventionAction.Override) }) {
-                Text("Approve Anyway")
+                Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_approve_anyway))
             }
         },
         dismissButton = {
             TextButton(onClick = { onAction(InterventionAction.Cancel) }) {
-                Text("Cancel")
+                Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_cancel))
             }
         }
     )

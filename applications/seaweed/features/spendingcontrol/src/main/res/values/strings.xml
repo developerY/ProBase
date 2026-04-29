@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_seaweed_features_spendingcontrol_title">Spending Control</string>
+    <string name="applications_seaweed_features_spendingcontrol_back">Back</string>
+    <string name="applications_seaweed_features_spendingcontrol_add_envelope">Add Envelope</string>
+    <string name="applications_seaweed_features_spendingcontrol_active_envelopes">Active Envelopes</string>
+    <string name="applications_seaweed_features_spendingcontrol_initializing">Initializing secure boundaries...</string>
+    <string name="applications_seaweed_features_spendingcontrol_add_dialog_title">Add Spending Envelope</string>
+    <string name="applications_seaweed_features_spendingcontrol_envelope_name">Envelope Name</string>
+    <string name="applications_seaweed_features_spendingcontrol_name_placeholder">e.g. Dining, Fun...</string>
+    <string name="applications_seaweed_features_spendingcontrol_monthly_limit">Monthly Limit ($)</string>
+    <string name="applications_seaweed_features_spendingcontrol_link_categories">Link Categories</string>
+    <string name="applications_seaweed_features_spendingcontrol_create">Create</string>
+    <string name="applications_seaweed_features_spendingcontrol_cancel">Cancel</string>
+    <string name="applications_seaweed_features_spendingcontrol_real_time_enforcement">Real-Time Enforcement</string>
+    <string name="applications_seaweed_features_spendingcontrol_explainer">Envelopes are not just tracking. They are boundaries. Every transaction is checked before it is saved. If you exceed your limit, we intervene.</string>
+    <string name="applications_seaweed_features_spendingcontrol_collapse">Collapse</string>
+    <string name="applications_seaweed_features_spendingcontrol_expand">Expand</string>
+    <string name="applications_seaweed_features_spendingcontrol_philosophy">Seaweed Philosophy</string>
+    <string name="applications_seaweed_features_spendingcontrol_zero_latency">Zero-Latency Decision</string>
+    <string name="applications_seaweed_features_spendingcontrol_zero_latency_desc">We use local rules and cached models to decide instantly. Your payment flow is never blocked by network calls.</string>
+    <string name="applications_seaweed_features_spendingcontrol_transparent_friction">Transparent Friction</string>
+    <string name="applications_seaweed_features_spendingcontrol_transparent_friction_desc">We don\'t just say \'no\'. We show you why and offer you the override path immediately.</string>
+    <string name="applications_seaweed_features_spendingcontrol_adaptive_boundaries">Adaptive Boundaries</string>
+    <string name="applications_seaweed_features_spendingcontrol_adaptive_boundaries_desc">The system learns from your overrides and suggests adjustments that actually fit your life.</string>
+    <string name="applications_seaweed_features_spendingcontrol_got_it">Got it</string>
+    <string name="applications_seaweed_features_spendingcontrol_categories_count">%1$d Categories linked</string>
+    <string name="applications_seaweed_features_spendingcontrol_left">%1$s left</string>
+    <string name="applications_seaweed_features_spendingcontrol_spent">Spent: %1$s</string>
+    <string name="applications_seaweed_features_spendingcontrol_limit">Limit: %1$s</string>
+    <string name="applications_seaweed_features_spendingcontrol_declined">Transaction Declined</string>
+    <string name="applications_seaweed_features_spendingcontrol_reason">Reason: %1$s</string>
+    <string name="applications_seaweed_features_spendingcontrol_how_to_proceed">How would you like to proceed?</string>
+    <string name="applications_seaweed_features_spendingcontrol_approve_anyway">Approve Anyway</string>
+</resources>
