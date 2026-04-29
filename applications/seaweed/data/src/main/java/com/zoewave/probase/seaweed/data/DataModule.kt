@@ -1,5 +1,7 @@
 package com.zoewave.probase.seaweed.data
 
+import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
+import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -26,6 +28,18 @@ abstract class DataModule {
     abstract fun bindUserSettingsRepository(
         impl: UserSettingsRepositoryImpl
     ): UserSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAiConfigurationSettings(
+        impl: UserSettingsRepositoryImpl
+    ): AiConfigurationSettings
+
+    @Binds
+    @Singleton
+    abstract fun bindSmartCaptureSettings(
+        impl: UserSettingsRepositoryImpl
+    ): SmartCaptureSettings
 
     @Binds
     @Singleton

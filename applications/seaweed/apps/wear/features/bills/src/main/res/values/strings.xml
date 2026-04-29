@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_seaweed_apps_wear_features_bills_fixed_costs">Fixed Costs</string>
+    <string name="applications_seaweed_apps_wear_features_bills_monthly_format">$%1$s/mo</string>
+</resources>

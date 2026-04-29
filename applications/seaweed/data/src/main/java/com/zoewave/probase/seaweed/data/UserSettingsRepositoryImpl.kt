@@ -49,4 +49,9 @@ class UserSettingsRepositoryImpl @Inject constructor(
             secureApiKeyRepository.saveKey(apiKey)
         }
     }
+
+    // --- SmartCaptureSettings Implementation ---
+
+    override val userApiKeyFlow: Flow<String?> = isGeminiApiKeySetFlow.map { if (it) getGeminiApiKey() else null }
+    override val userAiModelFlow: Flow<String> = aiModelFlow
 }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -17,7 +18,7 @@ import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material3.*
-import com.zoewave.probase.seaweed.model.ExpenseCategory
+import com.zoewave.probase.seaweed.wear.features.bills.R
 import com.zoewave.probase.seaweed.model.ExpenseFrequency
 import com.zoewave.probase.seaweed.model.RecurringExpense
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
@@ -68,12 +69,12 @@ fun WearBillsScreen(
                 ) {
                     item {
                         ListHeader {
-                            Text("Fixed Costs")
+                            Text(stringResource(R.string.applications_seaweed_apps_wear_features_bills_fixed_costs))
                         }
                     }
                     item {
                         Text(
-                            text = "$${String.format(Locale.getDefault(), "%.0f", uiState.totalMonthlyFixedCosts)}/mo",
+                            text = stringResource(R.string.applications_seaweed_apps_wear_features_bills_monthly_format, String.format(Locale.getDefault(), "%.0f", uiState.totalMonthlyFixedCosts)),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.tertiary
                         )
@@ -92,11 +93,11 @@ private fun BillItem(expense: RecurringExpense) {
     TitleCard(
         onClick = { },
         title = { Text(expense.name) },
-        subtitle = { Text(expense.category.name.lowercase()) },
+        subtitle = { Text(expense.categoryId) },
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "$${String.format(Locale.getDefault(), "%.2f", expense.monthlyImpact)}",
+            text = "$${String.format(Locale.getDefault(), "%.2f", expense.averageAmountCents.toDouble() / 100.0)}",
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Black
         )
@@ -110,8 +111,8 @@ private fun WearBillsScreenPreview() {
         WearBillsScreen(
             uiState = WearBillsUiState.Success(
                 expenses = listOf(
-                    RecurringExpense("1", "Rent", 1200.0, ExpenseFrequency.MONTHLY, ExpenseCategory.HOUSING),
-                    RecurringExpense("2", "Internet", 60.0, ExpenseFrequency.MONTHLY, ExpenseCategory.UTILITIES)
+                    RecurringExpense("1", "Rent", 120000L, ExpenseFrequency.MONTHLY, "housing_id"),
+                    RecurringExpense("2", "Internet", 6000L, ExpenseFrequency.MONTHLY, "utilities_id")
                 ),
                 totalMonthlyFixedCosts = 1260.0
             ),

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_seaweed_apps_wear_features_home_real_money">Real Money</string>
+    <string name="applications_seaweed_apps_wear_features_home_currency_format">$%1$s</string>
+    <string name="applications_seaweed_apps_wear_features_home_left_format">%1$s: $%2$s left</string>
+    <string name="applications_seaweed_apps_wear_features_home_spend">Spend</string>
+    <string name="applications_seaweed_apps_wear_features_home_bills">Bills</string>
+    <string name="applications_seaweed_apps_wear_features_home_add_random">Add Random</string>
+</resources>
