@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":applications:gotmind:model"))
     implementation(project(":applications:gotmind:database"))
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.coroutines.core)
 }
