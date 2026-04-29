@@ -145,3 +145,15 @@ include(":applications:kocolor:apps:mobile")
 include(":applications:kocolor:apps:mobile:core")
 include(":applications:kocolor:apps:mobile:features:home")
 include(":applications:kocolor:apps:mobile:features:settings")
+
+// --- GotMind Product Line ---
+include(":applications:gotmind:model")
+include(":applications:gotmind:database")
+include(":applications:gotmind:data")
+include(":applications:gotmind:apps:mobile")
+
+// --- GigWork Product Line ---
+include(":applications:gigwork:model")
+include(":applications:gigwork:database")
+include(":applications:gigwork:data")
+include(":applications:gigwork:apps:mobile")
