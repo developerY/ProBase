@@ -101,9 +101,13 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
 
             AnimatedVisibility(visible = showAnalytics) {
                 Column(modifier = Modifier.padding(top = 8.dp)) {
-                    AnalyticsRow("Accuracy", "${(state.matchAccuracy * 100).toInt()}%")
-                    AnalyticsRow("Peak Combo", "${state.peakCombo}")
-                    AnalyticsRow("Total Clicks", "${state.totalClicks}")
+                    val loadPct = if (state.cols * state.rows > 0) (state.peakBoardBlocks * 100 / (state.cols * state.rows)) else 0
+                    val avgMatchSec = state.avgMatchTimeMs / 1000f
+                    
+                    AnalyticsRow("Hit Rate", "${(state.matchAccuracy * 100).toInt()}%")
+                    AnalyticsRow("Best Streak", "${state.bestMatchStreak}")
+                    AnalyticsRow("Avg Match Time", String.format(Locale.getDefault(), "%.1fs", avgMatchSec))
+                    AnalyticsRow("Peak Board Load", "$loadPct%")
                     AnalyticsRow("Efficiency", "${if (state.totalClicks > 0) String.format(Locale.getDefault(), "%.2f", state.score.toFloat() / state.totalClicks) else "0"} pts/click")
                 }
             }
@@ -181,8 +185,15 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
                         Spacer(modifier = Modifier.height(16.dp))
                         
                         Text("Final Score: ${state.score}", color = Color.White, style = MaterialTheme.typography.headlineMedium)
-                        Text("Peak Combo: ${state.peakCombo}", color = Color.LightGray)
-                        Text("Accuracy: ${(state.matchAccuracy * 100).toInt()}%", color = Color.LightGray)
+                        
+                        Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+                            EndGameStat("Hit Rate", "${(state.matchAccuracy * 100).toInt()}%")
+                            EndGameStat("Best Streak", "${state.bestMatchStreak}")
+                        }
+                        Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+                            EndGameStat("Avg Time", String.format(Locale.getDefault(), "%.1fs", state.avgMatchTimeMs / 1000f))
+                            EndGameStat("Peak Load", "${(state.peakBoardBlocks * 100 / (state.cols * state.rows))}%")
+                        }
                         
                         Spacer(modifier = Modifier.height(24.dp))
                         
@@ -204,6 +215,14 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun EndGameStat(label: String, value: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = label, color = Color.LightGray, style = MaterialTheme.typography.bodySmall)
+        Text(text = value, color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
     }
 }
 

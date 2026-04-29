@@ -42,7 +42,15 @@ data class MemBloxState(
     val matchAccuracy: Float = 0f,
     val powerUps: Map<PowerUpType, Int> = mapOf(PowerUpType.FREEZE to 2, PowerUpType.REVEAL to 1),
     val isFrozen: Boolean = false,
-    val isRevealed: Boolean = false
+    val isRevealed: Boolean = false,
+    
+    // Skill Tracking
+    val bestMatchStreak: Int = 0,
+    val currentMatchStreak: Int = 0,
+    val avgMatchTimeMs: Long = 0,
+    val totalMatchTimeMs: Long = 0,
+    val peakBoardBlocks: Int = 0,
+    val firstFlipTimestamp: Long = 0
 )
 
 class MemBloxEngine(
@@ -150,7 +158,12 @@ class MemBloxEngine(
             col = col,
             color = color
         )
-        _state.update { it.copy(grid = it.grid + newBlock) }
+        _state.update { 
+            it.copy(
+                grid = it.grid + newBlock,
+                peakBoardBlocks = maxOf(it.peakBoardBlocks, it.grid.size + 1)
+            ) 
+        }
         spawnCount++
     }
 
@@ -176,11 +189,19 @@ class MemBloxEngine(
         if (_state.value.isGameOver || _state.value.isVictory || _state.value.isRevealed) return
         if (block.isMatched || block.isFlipped || _state.value.flippedBlocks.size >= 2) return
 
+        val now = System.currentTimeMillis()
         _state.update { state ->
             val newGrid = state.grid.map { if (it.id == block.id) it.copy(isFlipped = true) else it }
             val newFlipped = state.flippedBlocks + block.copy(isFlipped = true)
             val newTotalClicks = state.totalClicks + 1
-            state.copy(grid = newGrid, flippedBlocks = newFlipped, totalClicks = newTotalClicks)
+            val newFirstFlipTimestamp = if (newFlipped.size == 1) now else state.firstFlipTimestamp
+            
+            state.copy(
+                grid = newGrid, 
+                flippedBlocks = newFlipped, 
+                totalClicks = newTotalClicks,
+                firstFlipTimestamp = newFirstFlipTimestamp
+            )
         }
 
         if (_state.value.flippedBlocks.size == 2) {
@@ -208,6 +229,13 @@ class MemBloxEngine(
                 val multiplier = 1.0f + (newCombo - 1) * 0.5f
                 val points = (10 * multiplier).toInt()
                 
+                // Streak and Timing
+                val newStreak = state.currentMatchStreak + 1
+                val newBestStreak = maxOf(state.bestMatchStreak, newStreak)
+                val matchTime = now - state.firstFlipTimestamp
+                val newTotalMatchTime = state.totalMatchTimeMs + matchTime
+                val newAvgMatchTime = newTotalMatchTime / (state.successfulMatches + 1)
+                
                 lastMatchTime = now
                 
                 val isVictory = newPairsMatched >= state.targetPairs && newGrid.isEmpty()
@@ -223,7 +251,11 @@ class MemBloxEngine(
                     multiplier = multiplier,
                     peakCombo = newPeakCombo,
                     successfulMatches = state.successfulMatches + 1,
-                    matchAccuracy = newAccuracy
+                    matchAccuracy = newAccuracy,
+                    currentMatchStreak = newStreak,
+                    bestMatchStreak = newBestStreak,
+                    totalMatchTimeMs = newTotalMatchTime,
+                    avgMatchTimeMs = newAvgMatchTime
                 ).also {
                     scope.launch { applyGravity() }
                     if (isVictory) onGameOver(it.score)
@@ -238,7 +270,8 @@ class MemBloxEngine(
                     combo = 0, 
                     multiplier = 1.0f,
                     missedMatches = state.missedMatches + 1,
-                    matchAccuracy = newAccuracy
+                    matchAccuracy = newAccuracy,
+                    currentMatchStreak = 0
                 )
             }
         }
