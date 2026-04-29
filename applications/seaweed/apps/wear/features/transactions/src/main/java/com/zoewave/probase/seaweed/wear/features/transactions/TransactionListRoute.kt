@@ -7,6 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -52,23 +53,30 @@ fun TransactionListScreen(
 ) {
     val listState = rememberScalingLazyListState()
 
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    ScreenScaffold(
+        scrollState = listState,
+        modifier = modifier
     ) {
-        when (uiState) {
-            TransactionListUiState.Loading -> {
-                CircularProgressIndicator()
-            }
-            is TransactionListUiState.Success -> {
-                ScalingLazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(top = 32.dp, bottom = 32.dp, start = 8.dp, end = 8.dp)
-                ) {
+        ScalingLazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(top = 32.dp, bottom = 32.dp, start = 8.dp, end = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            when (uiState) {
+                TransactionListUiState.Loading -> {
+                    item {
+                        CircularProgressIndicator()
+                    }
+                }
+                is TransactionListUiState.Success -> {
                     item {
                         ListHeader {
-                            Text(stringResource(R.string.applications_seaweed_apps_wear_features_transactions_recent))
+                            Text(
+                                text = stringResource(R.string.applications_seaweed_apps_wear_features_transactions_recent),
+                                style = MaterialTheme.typography.labelLarge
+                            )
                         }
                     }
                     items(uiState.transactions) { transaction ->
@@ -82,19 +90,39 @@ fun TransactionListScreen(
 
 @Composable
 private fun TransactionItem(transaction: Transaction) {
-    TitleCard(
+    val isExpense = transaction.amountCents < 0
+    
+    Card(
         onClick = { /* Detail not implemented */ },
-        title = { Text(transaction.description) },
-        subtitle = { Text(transaction.categoryId) },
-        time = { Text(formatDate(transaction.timestamp)) },
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = "$${String.format(Locale.getDefault(), "%.2f", transaction.amountCents.toDouble() / 100.0)}",
-            style = MaterialTheme.typography.titleLarge,
-            color = if (transaction.amountCents < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Black
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = transaction.description,
+                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "${transaction.categoryId} • ${formatDate(transaction.timestamp)}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Text(
+                text = "$${String.format(Locale.getDefault(), "%.2f", Math.abs(transaction.amountCents.toDouble() / 100.0))}",
+                style = MaterialTheme.typography.labelMedium,
+                color = if (isExpense) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Black
+            )
+        }
     }
 }
 
@@ -110,8 +138,9 @@ private fun TransactionListScreenPreview() {
         TransactionListScreen(
             uiState = TransactionListUiState.Success(
                 transactions = listOf(
-                    Transaction("1", 4200L, "food_id", "Lunch", 1000L, defaultType = SpendingType.NEED),
-                    Transaction("2", -1500L, "coffee_id", "Latte", 2000L, defaultType = SpendingType.WANT)
+                    Transaction("1", -4200L, "food_id", "Lunch at Cafe", 1000L, defaultType = SpendingType.NEED),
+                    Transaction("2", -1500L, "coffee_id", "Latte", 2000L, defaultType = SpendingType.WANT),
+                    Transaction("3", 500000L, "salary_id", "Monthly Salary", 3000L, defaultType = SpendingType.NEED)
                 )
             ),
             onEvent = {},

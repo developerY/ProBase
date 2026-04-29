@@ -1,15 +1,14 @@
 package com.zoewave.probase.seaweed.wear.features.bills
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,31 +52,43 @@ fun WearBillsScreen(
 ) {
     val listState = rememberScalingLazyListState()
 
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    ScreenScaffold(
+        scrollState = listState,
+        modifier = modifier
     ) {
-        when (uiState) {
-            WearBillsUiState.Loading -> {
-                CircularProgressIndicator()
-            }
-            is WearBillsUiState.Success -> {
-                ScalingLazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(top = 32.dp, bottom = 32.dp, start = 8.dp, end = 8.dp)
-                ) {
+        ScalingLazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(top = 32.dp, bottom = 32.dp, start = 8.dp, end = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            when (uiState) {
+                WearBillsUiState.Loading -> {
+                    item {
+                        CircularProgressIndicator()
+                    }
+                }
+                is WearBillsUiState.Success -> {
                     item {
                         ListHeader {
-                            Text(stringResource(R.string.applications_seaweed_apps_wear_features_bills_fixed_costs))
+                            Text(
+                                text = stringResource(R.string.applications_seaweed_apps_wear_features_bills_fixed_costs),
+                                style = MaterialTheme.typography.labelLarge
+                            )
                         }
                     }
                     item {
                         Text(
                             text = stringResource(R.string.applications_seaweed_apps_wear_features_bills_monthly_format, String.format(Locale.getDefault(), "%.0f", uiState.totalMonthlyFixedCosts)),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.tertiary
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
                         )
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                     items(uiState.expenses) { expense ->
                         BillItem(expense = expense)
@@ -90,17 +101,35 @@ fun WearBillsScreen(
 
 @Composable
 private fun BillItem(expense: RecurringExpense) {
-    TitleCard(
+    Card(
         onClick = { },
-        title = { Text(expense.name) },
-        subtitle = { Text(expense.categoryId) },
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = "$${String.format(Locale.getDefault(), "%.2f", expense.averageAmountCents.toDouble() / 100.0)}",
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Black
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = expense.name,
+                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = expense.categoryId,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text(
+                text = "$${String.format(Locale.getDefault(), "%.0f", expense.averageAmountCents.toDouble() / 100.0)}",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Black
+            )
+        }
     }
 }
 
@@ -111,8 +140,8 @@ private fun WearBillsScreenPreview() {
         WearBillsScreen(
             uiState = WearBillsUiState.Success(
                 expenses = listOf(
-                    RecurringExpense("1", "Rent", 120000L, ExpenseFrequency.MONTHLY, "housing_id"),
-                    RecurringExpense("2", "Internet", 6000L, ExpenseFrequency.MONTHLY, "utilities_id")
+                    RecurringExpense("1", "Monthly Rent", 120000L, ExpenseFrequency.MONTHLY, "housing"),
+                    RecurringExpense("2", "High-speed Internet", 6000L, ExpenseFrequency.MONTHLY, "utilities")
                 ),
                 totalMonthlyFixedCosts = 1260.0
             ),

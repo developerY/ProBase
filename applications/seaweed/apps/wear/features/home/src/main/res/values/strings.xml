@@ -6,4 +6,6 @@
     <string name="applications_seaweed_apps_wear_features_home_spend">Spend</string>
     <string name="applications_seaweed_apps_wear_features_home_bills">Bills</string>
     <string name="applications_seaweed_apps_wear_features_home_add_random">Add Random</string>
+    <string name="applications_seaweed_apps_wear_features_home_envelopes">Envelopes</string>
+    <string name="applications_seaweed_apps_wear_features_home_recent">Recent</string>
 </resources>
