@@ -44,6 +44,12 @@
             <option value="$PROJECT_DIR$/applications/ashbike/features/main" />
             <option value="$PROJECT_DIR$/applications/ashbike/features/places" />
             <option value="$PROJECT_DIR$/applications/ashbike/model" />
+            <option value="$PROJECT_DIR$/applications/gigwork" />
+            <option value="$PROJECT_DIR$/applications/gigwork/apps" />
+            <option value="$PROJECT_DIR$/applications/gigwork/apps/mobile" />
+            <option value="$PROJECT_DIR$/applications/gigwork/data" />
+            <option value="$PROJECT_DIR$/applications/gigwork/database" />
+            <option value="$PROJECT_DIR$/applications/gigwork/model" />
             <option value="$PROJECT_DIR$/applications/goswift" />
             <option value="$PROJECT_DIR$/applications/goswift/apps" />
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile" />
@@ -63,6 +69,12 @@
             <option value="$PROJECT_DIR$/applications/goswift/features" />
             <option value="$PROJECT_DIR$/applications/goswift/features/main" />
             <option value="$PROJECT_DIR$/applications/goswift/model" />
+            <option value="$PROJECT_DIR$/applications/gotmind" />
+            <option value="$PROJECT_DIR$/applications/gotmind/apps" />
+            <option value="$PROJECT_DIR$/applications/gotmind/apps/mobile" />
+            <option value="$PROJECT_DIR$/applications/gotmind/data" />
+            <option value="$PROJECT_DIR$/applications/gotmind/database" />
+            <option value="$PROJECT_DIR$/applications/gotmind/model" />
             <option value="$PROJECT_DIR$/applications/kocolor" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile" />

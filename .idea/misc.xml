@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CidrRootsConfiguration">
     <excludeRoots>
+      <file path="$PROJECT_DIR$/applications/gotmind/Docs" />
       <file path="$PROJECT_DIR$/applications/kocolor/Docs" />
       <file path="$PROJECT_DIR$/features/health/docs" />
       <file path="$PROJECT_DIR$/features/payment/Docs" />
