@@ -14,4 +14,9 @@
     <string name="applications_seaweed_apps_mobile_features_settings_mode_system">System Default</string>
     <string name="applications_seaweed_apps_mobile_features_settings_mode_light">Light</string>
     <string name="applications_seaweed_apps_mobile_features_settings_mode_dark">Dark</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_privacy_policy">Privacy Policy</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_data_deletion">Data Deletion</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_about">About</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_app_instance_id">App Instance ID:</string>
+    <string name="applications_seaweed_apps_mobile_features_settings_deletion_request_instruction">Use this ID to request data deletion via email.</string>
 </resources>

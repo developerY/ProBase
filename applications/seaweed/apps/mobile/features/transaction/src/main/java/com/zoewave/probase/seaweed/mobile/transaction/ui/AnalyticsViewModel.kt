@@ -1,10 +1,12 @@
 package com.zoewave.probase.seaweed.mobile.transaction.ui
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.seaweed.data.BudgetTargetRepository
 import com.zoewave.probase.seaweed.data.CategoryRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
+import com.zoewave.probase.seaweed.mobile.transaction.R
 import com.zoewave.probase.seaweed.model.BudgetTarget
 import com.zoewave.probase.seaweed.model.Category
 import com.zoewave.probase.seaweed.model.HabitInsight
@@ -12,6 +14,7 @@ import com.zoewave.probase.seaweed.model.SpendingPeriod
 import com.zoewave.probase.seaweed.model.Transaction
 import com.zoewave.probase.seaweed.model.TrendPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -42,7 +45,8 @@ sealed interface AnalyticsUiEvent {
 class AnalyticsViewModel @Inject constructor(
     private val repository: TransactionRepository,
     private val budgetRepository: BudgetTargetRepository,
-    private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     val uiState: StateFlow<AnalyticsUiState> = combine(
@@ -163,10 +167,13 @@ class AnalyticsViewModel @Inject constructor(
             val categoryName = categoriesMap[categoryId]?.name ?: categoryId
             
             val trendMessage = when {
-                frequency == 0 -> "No spending in the last 30 days."
-                dailyAverageCents > 1000.0 -> "This habit costs you over $${String.format(Locale.getDefault(), "%.0f", (dailyAverageCents * 365 / 12) / 100.0)} per month!"
-                frequency > 15 -> "You're doing this almost every other day."
-                else -> "Frequent spending in this category."
+                frequency == 0 -> context.getString(R.string.applications_seaweed_apps_mobile_features_transaction_habit_no_spending)
+                dailyAverageCents > 1000.0 -> context.getString(
+                    R.string.applications_seaweed_apps_mobile_features_transaction_habit_high_cost,
+                    String.format(Locale.getDefault(), "%.0f", (dailyAverageCents * 365 / 12) / 100.0)
+                )
+                frequency > 15 -> context.getString(R.string.applications_seaweed_apps_mobile_features_transaction_habit_frequent)
+                else -> context.getString(R.string.applications_seaweed_apps_mobile_features_transaction_habit_general)
             }
 
             HabitInsight(

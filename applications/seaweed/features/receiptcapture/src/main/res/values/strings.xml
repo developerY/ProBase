@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_seaweed_features_receiptcapture_title">Receipt Capture</string>
+    <string name="applications_seaweed_features_receiptcapture_close">Close</string>
+    <string name="applications_seaweed_features_receiptcapture_captured_receipt">Captured receipt</string>
+    <string name="applications_seaweed_features_receiptcapture_add_context">Add context (Optional)</string>
+    <string name="applications_seaweed_features_receiptcapture_context_placeholder">e.g. Lunch with clients...</string>
+    <string name="applications_seaweed_features_receiptcapture_retake">Retake</string>
+    <string name="applications_seaweed_features_receiptcapture_analyze">Analyze</string>
+    <string name="applications_seaweed_features_receiptcapture_scan_title">Scan Receipt with AI</string>
+    <string name="applications_seaweed_features_receiptcapture_scan_desc">Take a photo of a receipt to automatically extract merchant, amount, and date.</string>
+    <string name="applications_seaweed_features_receiptcapture_upload_photo">Upload Photo</string>
+    <string name="applications_seaweed_features_receiptcapture_parsing">AI is parsing your receipt...</string>
+    <string name="applications_seaweed_features_receiptcapture_cloud_ai">Cloud AI (Gemini)</string>
+    <string name="applications_seaweed_features_receiptcapture_local_ai">Local AI (Vision)</string>
+    <string name="applications_seaweed_features_receiptcapture_try_again">Try Again</string>
+</resources>

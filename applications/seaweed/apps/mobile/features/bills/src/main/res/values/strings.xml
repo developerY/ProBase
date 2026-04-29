@@ -6,4 +6,6 @@
     <string name="applications_seaweed_apps_mobile_features_bills_after_fixed">After -$%1$s in fixed monthly bills</string>
     <string name="applications_seaweed_apps_mobile_features_bills_currency_format">$%1$s</string>
     <string name="applications_seaweed_apps_mobile_features_bills_amount_label">Amount</string>
+    <string name="applications_seaweed_apps_mobile_features_bills_required">Required</string>
+    <string name="applications_seaweed_apps_mobile_features_bills_optional">Optional</string>
 </resources>

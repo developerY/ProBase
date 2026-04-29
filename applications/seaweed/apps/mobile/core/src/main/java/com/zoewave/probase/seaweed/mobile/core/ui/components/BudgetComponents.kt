@@ -15,10 +15,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.util.CurrencyUtils
+import com.zoewave.probase.seaweed.mobile.core.R
 import com.zoewave.probase.seaweed.model.CategoryOverview
 
 @Composable
@@ -83,7 +85,7 @@ fun UnallocatedMoneyCard(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                Text("Unallocated Money", style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(R.string.applications_seaweed_apps_mobile_core_unallocated_money), style = MaterialTheme.typography.labelSmall)
                 Text(
                     text = "$${CurrencyUtils.formatCents(unallocatedAmountCents)}",
                     style = MaterialTheme.typography.titleMedium,
@@ -91,7 +93,7 @@ fun UnallocatedMoneyCard(
                 )
             }
             Text(
-                "Buffer",
+                stringResource(R.string.applications_seaweed_apps_mobile_core_buffer),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary
             )

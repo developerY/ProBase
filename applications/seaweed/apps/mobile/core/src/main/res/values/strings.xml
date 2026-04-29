@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_seaweed_apps_mobile_core_flexible_money">Flexible Money Remaining</string>
+    <string name="applications_seaweed_apps_mobile_core_month_progress">Month Progress</string>
+    <string name="applications_seaweed_apps_mobile_core_fixed_bills">Fixed Monthly Bills</string>
+    <string name="applications_seaweed_apps_mobile_core_manage_bills">Manage Bills</string>
+    <string name="applications_seaweed_apps_mobile_core_total_income">Total Income</string>
+    <string name="applications_seaweed_apps_mobile_core_total_bills">Total Bills</string>
+    <string name="applications_seaweed_apps_mobile_core_starting_balance">Real Starting Balance</string>
+    <string name="applications_seaweed_apps_mobile_core_unallocated_money">Unallocated Money</string>
+    <string name="applications_seaweed_apps_mobile_core_buffer">Buffer</string>
+</resources>

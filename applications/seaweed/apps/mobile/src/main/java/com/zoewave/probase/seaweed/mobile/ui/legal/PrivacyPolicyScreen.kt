@@ -8,10 +8,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.seaweed.mobile.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,10 +24,10 @@ fun PrivacyPolicyScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Privacy Policy", fontWeight = FontWeight.Black) },
+                title = { Text(stringResource(R.string.applications_seaweed_mobile_legal_privacy_policy), fontWeight = FontWeight.Black) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_seaweed_mobile_legal_back))
                     }
                 }
             )
@@ -40,37 +42,37 @@ fun PrivacyPolicyScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Effective Date: April 21, 2026", style = MaterialTheme.typography.labelMedium)
+            Text(stringResource(R.string.applications_seaweed_mobile_legal_effective_date), style = MaterialTheme.typography.labelMedium)
             
             PolicySection(
-                title = "1. Zero-Footprint Mandate",
-                content = "Seaweed stores all data—transactions, budget envelopes, and images—exclusively in a secure local database on your device. We do not utilize central servers and have no access to your information."
+                title = stringResource(R.string.applications_seaweed_mobile_legal_zero_footprint_title),
+                content = stringResource(R.string.applications_seaweed_mobile_legal_zero_footprint_desc)
             )
 
             PolicySection(
-                title = "2. Generative AI (BYOK)",
-                content = "AI extraction is optional. If you provide a Gemini API Key, image data is transmitted directly to Google for processing. This data is handled ephemerally and is not retained or viewed by ZoeWave LLC."
+                title = stringResource(R.string.applications_seaweed_mobile_legal_gen_ai_title),
+                content = stringResource(R.string.applications_seaweed_mobile_legal_gen_ai_desc)
             )
 
             PolicySection(
-                title = "3. Device Permissions",
-                content = "Camera: Solely used to capture receipts for extraction.\nLocation: Optionally used to tag transactions spatially.\nStorage: Used for local persistence of your data."
+                title = stringResource(R.string.applications_seaweed_mobile_legal_permissions_title),
+                content = stringResource(R.string.applications_seaweed_mobile_legal_permissions_desc)
             )
 
             PolicySection(
-                title = "4. Third-Party Services",
-                content = "We use standard SDKs (Firebase/Google Play) for stability and anonymized analytics. Payment data for Stripe or Google Pay is handled directly by those providers under their own policies."
+                title = stringResource(R.string.applications_seaweed_mobile_legal_third_party_title),
+                content = stringResource(R.string.applications_seaweed_mobile_legal_third_party_desc)
             )
 
             PolicySection(
-                title = "5. Data Sovereignty",
-                content = "You maintain absolute control. Deleting the application permanently removes all data. We recommend using device-level biometrics to secure your local financial enclave."
+                title = stringResource(R.string.applications_seaweed_mobile_legal_sovereignty_title),
+                content = stringResource(R.string.applications_seaweed_mobile_legal_sovereignty_desc)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
             
             Text(
-                "Questions? Contact Developer@ZoeWave.com",
+                stringResource(R.string.applications_seaweed_mobile_legal_contact),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

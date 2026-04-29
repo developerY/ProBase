@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.zoewave.probase.core.util.CurrencyUtils
+import com.zoewave.probase.seaweed.features.spendingcontrol.R
 import com.zoewave.probase.seaweed.features.spendingcontrol.domain.Envelope
 import com.zoewave.probase.seaweed.model.Category
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
@@ -83,10 +86,10 @@ fun EnvelopeManagementScreen(
         topBar = {
             Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
                 TopAppBar(
-                    title = { Text("Spending Control", fontWeight = FontWeight.Black) },
+                    title = { Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_title), fontWeight = FontWeight.Black) },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_seaweed_features_spendingcontrol_back))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -110,7 +113,7 @@ fun EnvelopeManagementScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Envelope")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_seaweed_features_spendingcontrol_add_envelope))
             }
         },
         modifier = modifier.fillMaxSize()
@@ -125,7 +128,7 @@ fun EnvelopeManagementScreen(
         ) {
             item {
                 Text(
-                    text = "Active Envelopes",
+                    text = stringResource(R.string.applications_seaweed_features_spendingcontrol_active_envelopes),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -177,7 +180,7 @@ private fun AddEnvelopeDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Spending Envelope") },
+        title = { Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_add_dialog_title)) },
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -186,21 +189,21 @@ private fun AddEnvelopeDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Envelope Name") },
-                    placeholder = { Text("e.g. Dining, Fun...") },
+                    label = { Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_envelope_name)) },
+                    placeholder = { Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_name_placeholder)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
                 OutlinedTextField(
                     value = limit,
                     onValueChange = { limit = it },
-                    label = { Text("Monthly Limit ($)") },
+                    label = { Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_monthly_limit)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Text(
-                    text = "Link Categories",
+                    text = stringResource(R.string.applications_seaweed_features_spendingcontrol_link_categories),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -233,12 +236,12 @@ private fun AddEnvelopeDialog(
                 },
                 enabled = name.isNotBlank() && limit.toDoubleOrNull() != null
             ) {
-                Text("Create")
+                Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_create))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_cancel))
             }
         }
     )
@@ -272,18 +275,18 @@ private fun EnvelopeExplainerHeader(
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Real-Time Enforcement",
+                        text = stringResource(R.string.applications_seaweed_features_spendingcontrol_real_time_enforcement),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.ExtraBold
                     )
                 }
                 IconButton(onClick = onHelpClick) {
-                    Icon(Icons.Default.HelpOutline, contentDescription = "Seaweed Philosophy")
+                    Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = stringResource(R.string.applications_seaweed_features_spendingcontrol_philosophy))
                 }
                 IconButton(onClick = onToggle) {
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (isExpanded) "Collapse" else "Expand"
+                        contentDescription = if (isExpanded) stringResource(R.string.applications_seaweed_features_spendingcontrol_collapse) else stringResource(R.string.applications_seaweed_features_spendingcontrol_expand)
                     )
                 }
             }
@@ -291,7 +294,7 @@ private fun EnvelopeExplainerHeader(
                 Column {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Envelopes are not just tracking. They are boundaries. Every transaction is checked before it is saved. If you exceed your limit, we intervene.",
+                        text = stringResource(R.string.applications_seaweed_features_spendingcontrol_explainer),
                         style = MaterialTheme.typography.bodyMedium,
                         lineHeight = 22.sp
                     )
@@ -307,7 +310,7 @@ private fun PhilosophyDialog(onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         title = { 
             Text(
-                text = "Seaweed Philosophy",
+                text = stringResource(R.string.applications_seaweed_features_spendingcontrol_philosophy),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -316,26 +319,26 @@ private fun PhilosophyDialog(onDismiss: () -> Unit) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 PhilosophyItem(
                     icon = Icons.Default.Speed,
-                    title = "Zero-Latency Decision",
-                    description = "We use local rules and cached models to decide instantly. Your payment flow is never blocked by network calls."
+                    title = stringResource(R.string.applications_seaweed_features_spendingcontrol_zero_latency),
+                    description = stringResource(R.string.applications_seaweed_features_spendingcontrol_zero_latency_desc)
                 )
                 
                 PhilosophyItem(
                     icon = Icons.Default.Info,
-                    title = "Transparent Friction",
-                    description = "We don't just say 'no'. We show you why and offer you the override path immediately."
+                    title = stringResource(R.string.applications_seaweed_features_spendingcontrol_transparent_friction),
+                    description = stringResource(R.string.applications_seaweed_features_spendingcontrol_transparent_friction_desc)
                 )
                 
                 PhilosophyItem(
                     icon = Icons.Default.AutoGraph,
-                    title = "Adaptive Boundaries",
-                    description = "The system learns from your overrides and suggests adjustments that actually fit your life."
+                    title = stringResource(R.string.applications_seaweed_features_spendingcontrol_adaptive_boundaries),
+                    description = stringResource(R.string.applications_seaweed_features_spendingcontrol_adaptive_boundaries_desc)
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Got it")
+                Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_got_it))
             }
         }
     )
@@ -370,13 +373,13 @@ private fun EnvelopeCard(envelope: Envelope) {
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "${envelope.categoryIds.size} Categories linked",
+                        text = stringResource(R.string.applications_seaweed_features_spendingcontrol_categories_count, envelope.categoryIds.size),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Text(
-                    text = CurrencyUtils.formatCents(remaining) + " left",
+                    text = stringResource(R.string.applications_seaweed_features_spendingcontrol_left, CurrencyUtils.formatCents(remaining)),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Black,
                     color = if (isNearLimit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
@@ -399,11 +402,11 @@ private fun EnvelopeCard(envelope: Envelope) {
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = "Spent: ${CurrencyUtils.formatCents(envelope.currentSpentCents)}",
+                    text = stringResource(R.string.applications_seaweed_features_spendingcontrol_spent, CurrencyUtils.formatCents(envelope.currentSpentCents)),
                     style = MaterialTheme.typography.labelMedium
                 )
                 Text(
-                    text = "Limit: ${CurrencyUtils.formatCents(envelope.monthlyLimitCents)}",
+                    text = stringResource(R.string.applications_seaweed_features_spendingcontrol_limit, CurrencyUtils.formatCents(envelope.monthlyLimitCents)),
                     style = MaterialTheme.typography.labelMedium
                 )
             }
@@ -445,7 +448,7 @@ private fun EmptyEnvelopesPlaceholder() {
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
         contentAlignment = Alignment.Center
     ) {
-        Text("Initializing secure boundaries...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.applications_seaweed_features_spendingcontrol_initializing), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

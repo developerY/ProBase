@@ -9,10 +9,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.seaweed.mobile.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,10 +25,10 @@ fun DataDeletionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Data Deletion", fontWeight = FontWeight.Black) },
+                title = { Text(stringResource(R.string.applications_seaweed_mobile_legal_data_deletion), fontWeight = FontWeight.Black) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_seaweed_mobile_legal_back))
                     }
                 }
             )
@@ -42,29 +44,24 @@ fun DataDeletionScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             Text(
-                text = "At Seaweed, we take your privacy seriously. Because our app is designed to function locally without external accounts, we do not have a centralized database containing your personal information.",
+                text = stringResource(R.string.applications_seaweed_mobile_legal_deletion_intro),
                 style = MaterialTheme.typography.bodyLarge
             )
 
             DeletionSection(
-                title = "1. Personal Content (Local Data)",
-                content = "All of your transactions, bills, categories, budget envelopes, and receipt images are stored entirely on your device.\n\n" +
-                        "• In-App Deletion: Delete individual items directly in the app.\n" +
-                        "• Complete Removal: Uninstalling the app wipes the local database automatically."
+                title = stringResource(R.string.applications_seaweed_mobile_legal_personal_content_title),
+                content = stringResource(R.string.applications_seaweed_mobile_legal_personal_content_desc)
             )
 
             DeletionSection(
-                title = "2. Anonymized Analytics Deletion",
-                content = "We use anonymous IDs to distinguish devices for stability monitoring. To request deletion of this data:\n\n" +
-                        "1. Locate your App Instance ID in Settings > About.\n" +
-                        "2. Email Developer@ZoeWave.com with this ID.\n\n" +
-                        "We will then manually scrub all records associated with that ID from our analytics console."
+                title = stringResource(R.string.applications_seaweed_mobile_legal_analytics_deletion_title),
+                content = stringResource(R.string.applications_seaweed_mobile_legal_analytics_deletion_desc)
             )
 
             RetentionTable()
 
             Text(
-                "Questions? Reach out to Siamak Ashrafi at Developer@ZoeWave.com",
+                stringResource(R.string.applications_seaweed_mobile_legal_contact_alt),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -93,15 +90,15 @@ private fun RetentionTable() {
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Retention Policy", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.applications_seaweed_mobile_legal_retention_policy), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             
-            RetentionRow("Financial Data", "Deleted immediately on uninstall")
+            RetentionRow(stringResource(R.string.applications_seaweed_mobile_legal_financial_data), stringResource(R.string.applications_seaweed_mobile_legal_deleted_on_uninstall))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-            RetentionRow("Receipt Images", "Deleted immediately on uninstall")
+            RetentionRow(stringResource(R.string.applications_seaweed_mobile_legal_receipt_images), stringResource(R.string.applications_seaweed_mobile_legal_deleted_on_uninstall))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-            RetentionRow("Crash Logs", "Scrubbed within 90 days")
+            RetentionRow(stringResource(R.string.applications_seaweed_mobile_legal_crash_logs), stringResource(R.string.applications_seaweed_mobile_legal_scrubbed_90_days))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-            RetentionRow("Analytics IDs", "Kept 14 months unless requested")
+            RetentionRow(stringResource(R.string.applications_seaweed_mobile_legal_analytics_ids), stringResource(R.string.applications_seaweed_mobile_legal_kept_14_months))
         }
     }
 }

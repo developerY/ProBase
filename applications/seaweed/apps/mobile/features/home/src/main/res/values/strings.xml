@@ -19,4 +19,16 @@
     <string name="applications_seaweed_apps_mobile_features_home_transactions_count">%1$d transactions across %2$d categories</string>
     <string name="applications_seaweed_apps_mobile_features_home_currency_format">$%1$s</string>
     <string name="applications_seaweed_apps_mobile_features_home_view_all">View All</string>
+    <string name="applications_seaweed_apps_mobile_features_home_financial_status">Financial Status</string>
+    <string name="applications_seaweed_apps_mobile_features_home_needs_vs_wants">Needs vs. Wants</string>
+    <string name="applications_seaweed_apps_mobile_features_home_wants_explainer">Your Wants are where change happens.</string>
+    <string name="applications_seaweed_apps_mobile_features_home_required">Required</string>
+    <string name="applications_seaweed_apps_mobile_features_home_optional">Optional</string>
+    <string name="applications_seaweed_apps_mobile_features_home_savings_projection">Reducing Optional by 20%% would save you %1$s/year</string>
+    <string name="applications_seaweed_apps_mobile_features_home_analytics">Analytics</string>
+    <string name="applications_seaweed_apps_mobile_features_home_cash_flow_awareness">Cash Flow Awareness</string>
+    <string name="applications_seaweed_apps_mobile_features_home_cash_flow_desc">Monitor your Money In vs. Money Out pace.</string>
+    <string name="applications_seaweed_apps_mobile_features_home_decision_control">Decision-Time Control</string>
+    <string name="applications_seaweed_apps_mobile_features_home_decision_control_desc">Assign transactions to envelopes and stay in control.</string>
+    <string name="applications_seaweed_apps_mobile_features_home_spending_breakdown">Spending Breakdown</string>
 </resources>

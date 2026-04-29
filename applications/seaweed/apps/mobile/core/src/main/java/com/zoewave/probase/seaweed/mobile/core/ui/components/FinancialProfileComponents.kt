@@ -11,10 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.util.CurrencyUtils
+import com.zoewave.probase.seaweed.mobile.core.R
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
 
@@ -35,7 +37,7 @@ fun RealMoneyHeroCard(
         Box(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(24.dp)) {
                 Text(
-                    text = "Flexible Money Remaining",
+                    text = stringResource(R.string.applications_seaweed_apps_mobile_core_flexible_money),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -48,7 +50,7 @@ fun RealMoneyHeroCard(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text(
-                    text = "Month Progress",
+                    text = stringResource(R.string.applications_seaweed_apps_mobile_core_month_progress),
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
@@ -92,12 +94,12 @@ fun FixedCostsSummaryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Fixed Monthly Bills",
+                    text = stringResource(R.string.applications_seaweed_apps_mobile_core_fixed_bills),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = { navTo(SeaweedDestination.Bills) }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Manage Bills")
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_core_manage_bills))
                 }
             }
             
@@ -106,11 +108,11 @@ fun FixedCostsSummaryCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text("Total Income", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_core_total_income), style = MaterialTheme.typography.labelSmall)
                     Text("$${CurrencyUtils.formatCents(incomeCents)}", style = MaterialTheme.typography.titleLarge)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text("Total Bills", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_core_total_bills), style = MaterialTheme.typography.labelSmall)
                     Text("-$${CurrencyUtils.formatCents(totalFixedCostsCents)}", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
                 }
             }
@@ -123,7 +125,7 @@ fun FixedCostsSummaryCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Real Starting Balance", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.applications_seaweed_apps_mobile_core_starting_balance), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                 Text("$${CurrencyUtils.formatCents(startingBalanceCents)}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black)
             }
         }

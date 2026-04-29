@@ -139,13 +139,13 @@ private fun SettingsContent(
         HorizontalDivider()
 
         SettingsLinkItem(
-            label = "Privacy Policy",
+            label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_privacy_policy),
             icon = Icons.Default.PrivacyTip,
             onClick = { onEvent(SettingsUiEvent.NavigateTo(SeaweedDestination.PrivacyPolicy)) }
         )
 
         SettingsLinkItem(
-            label = "Data Deletion",
+            label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_data_deletion),
             icon = Icons.Default.Delete,
             onClick = { onEvent(SettingsUiEvent.NavigateTo(SeaweedDestination.DataDeletion)) }
         )
@@ -170,9 +170,9 @@ private fun SettingsContent(
 @Composable
 private fun AboutSection(deviceId: String) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("About", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_about), style = MaterialTheme.typography.titleLarge)
         Text(
-            text = "App Instance ID:",
+            text = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_app_instance_id),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary
         )
@@ -191,7 +191,7 @@ private fun AboutSection(deviceId: String) {
             )
         }
         Text(
-            text = "Use this ID to request data deletion via email.",
+            text = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_deletion_request_instruction),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

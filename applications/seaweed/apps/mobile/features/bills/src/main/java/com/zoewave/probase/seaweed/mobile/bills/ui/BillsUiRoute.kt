@@ -309,7 +309,7 @@ private fun BillItem(
                             tint = if (isRequired) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
                         )
                         Text(
-                            text = if (isRequired) "Required" else "Optional",
+                            text = if (isRequired) stringResource(R.string.applications_seaweed_apps_mobile_features_bills_required) else stringResource(R.string.applications_seaweed_apps_mobile_features_bills_optional),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             color = if (isRequired) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
@@ -324,7 +324,7 @@ private fun BillItem(
                         it.toDoubleOrNull()?.let { amount -> onAmountChange(amount) }
                     },
                     modifier = Modifier.width(120.dp),
-                    label = { Text("Amount") },
+                    label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_bills_amount_label)) },
                     prefix = { Text("$", style = MaterialTheme.typography.bodyMedium) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
