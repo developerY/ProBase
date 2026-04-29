@@ -14,12 +14,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.zoewave.probase.seaweed.features.receiptcapture.R
 import com.zoewave.probase.seaweed.features.receiptcapture.domain.SmartReceiptDraft
 import com.zoewave.probase.seaweed.features.receiptcapture.ui.components.ReceiptSaveForm
 import com.zoewave.probase.seaweed.features.receiptcapture.ui.state.SmartReceiptUiState
@@ -88,10 +90,10 @@ fun SmartReceiptScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Receipt Capture", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.applications_seaweed_features_receiptcapture_title), fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = { onEvent(SmartReceiptUiEvent.Dismiss) }) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_seaweed_features_receiptcapture_close))
                     }
                 }
             )
@@ -160,7 +162,7 @@ private fun ContextInputState(
         ) {
             AsyncImage(
                 model = uri,
-                contentDescription = "Captured receipt",
+                contentDescription = stringResource(R.string.applications_seaweed_features_receiptcapture_captured_receipt),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
@@ -168,14 +170,14 @@ private fun ContextInputState(
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                "Add context (Optional)",
+                stringResource(R.string.applications_seaweed_features_receiptcapture_add_context),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
             OutlinedTextField(
                 value = comment,
                 onValueChange = onCommentChanged,
-                placeholder = { Text("e.g. Lunch with clients...") },
+                placeholder = { Text(stringResource(R.string.applications_seaweed_features_receiptcapture_context_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = 3,
                 shape = MaterialTheme.shapes.medium
@@ -191,7 +193,7 @@ private fun ContextInputState(
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
             ) {
-                Text("Retake")
+                Text(stringResource(R.string.applications_seaweed_features_receiptcapture_retake))
             }
             Button(
                 onClick = onAnalyzeClick,
@@ -200,7 +202,7 @@ private fun ContextInputState(
             ) {
                 Icon(Icons.Default.AutoAwesome, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Analyze")
+                Text(stringResource(R.string.applications_seaweed_features_receiptcapture_analyze))
             }
         }
     }
@@ -222,12 +224,12 @@ private fun EmptyState(onUploadClick: () -> Unit) {
             tint = MaterialTheme.colorScheme.primary
         )
         Text(
-            "Scan Receipt with AI",
+            stringResource(R.string.applications_seaweed_features_receiptcapture_scan_title),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(top = 16.dp)
         )
         Text(
-            "Take a photo of a receipt to automatically extract merchant, amount, and date.",
+            stringResource(R.string.applications_seaweed_features_receiptcapture_scan_desc),
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(vertical = 8.dp),
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -237,7 +239,7 @@ private fun EmptyState(onUploadClick: () -> Unit) {
             modifier = Modifier.padding(top = 24.dp)
         ) {
             Icon(Icons.Default.CloudUpload, contentDescription = null)
-            Text("Upload Photo", modifier = Modifier.padding(start = 8.dp))
+            Text(stringResource(R.string.applications_seaweed_features_receiptcapture_upload_photo), modifier = Modifier.padding(start = 8.dp))
         }
     }
 }
@@ -251,7 +253,7 @@ private fun LoadingState(uiState: SmartReceiptUiState.Loading) {
     ) {
         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(16.dp))
-        Text("AI is parsing your receipt...", style = MaterialTheme.typography.bodyMedium)
+        Text(stringResource(R.string.applications_seaweed_features_receiptcapture_parsing), style = MaterialTheme.typography.bodyMedium)
         
         Spacer(modifier = Modifier.height(24.dp))
         Card(
@@ -268,7 +270,7 @@ private fun LoadingState(uiState: SmartReceiptUiState.Loading) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (uiState.isUsingCloud) "Cloud AI (Gemini)" else "Local AI (Vision)",
+                        text = if (uiState.isUsingCloud) stringResource(R.string.applications_seaweed_features_receiptcapture_cloud_ai) else stringResource(R.string.applications_seaweed_features_receiptcapture_local_ai),
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
@@ -301,7 +303,7 @@ private fun ErrorState(message: String, onRetry: () -> Unit) {
             textAlign = TextAlign.Center
         )
         Button(onClick = onRetry, modifier = Modifier.padding(top = 16.dp)) {
-            Text("Try Again")
+            Text(stringResource(R.string.applications_seaweed_features_receiptcapture_try_again))
         }
     }
 }
