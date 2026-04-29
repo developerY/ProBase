@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_seaweed_features_cashflow_title">Cash Flow Awareness</string>
+    <string name="applications_seaweed_features_cashflow_back">Back</string>
+    <string name="applications_seaweed_features_cashflow_money_in">Money In</string>
+    <string name="applications_seaweed_features_cashflow_money_out">Money Out</string>
+    <string name="applications_seaweed_features_cashflow_net_flow">Net Flow</string>
+    <string name="applications_seaweed_features_cashflow_savings_rate">Savings Rate</string>
+    <string name="applications_seaweed_features_cashflow_target_rate">Target: 20% (Traditional Rule)</string>
+    <string name="applications_seaweed_features_cashflow_vs_envelopes">Cash Flow vs. Envelopes</string>
+    <string name="applications_seaweed_features_cashflow_philosophy">While Envelopes control where your money goes, Cash Flow shows you the pace of your life. It\'s the difference between avoiding a specific hurdle and winning the race.</string>
+</resources>

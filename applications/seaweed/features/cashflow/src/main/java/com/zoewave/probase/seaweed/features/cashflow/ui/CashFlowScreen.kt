@@ -39,11 +39,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.zoewave.probase.core.util.CurrencyUtils
+import com.zoewave.probase.seaweed.features.cashflow.R
 import com.zoewave.probase.seaweed.features.cashflow.domain.CashFlowAwareness
 import com.zoewave.probase.seaweed.features.cashflow.domain.CashFlowSummary
 import kotlinx.datetime.LocalDate
@@ -73,10 +75,10 @@ fun CashFlowScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Cash Flow Awareness", fontWeight = FontWeight.Black) },
+                title = { Text(stringResource(R.string.applications_seaweed_features_cashflow_title), fontWeight = FontWeight.Black) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_seaweed_features_cashflow_back))
                     }
                 }
             )
@@ -167,18 +169,18 @@ private fun CashFlowMetricsCard(summary: CashFlowSummary) {
     ) {
         Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             MetricRow(
-                label = "Money In",
+                label = stringResource(R.string.applications_seaweed_features_cashflow_money_in),
                 value = CurrencyUtils.formatCents(summary.incomeCents),
                 color = MaterialTheme.colorScheme.primary
             )
             MetricRow(
-                label = "Money Out",
+                label = stringResource(R.string.applications_seaweed_features_cashflow_money_out),
                 value = CurrencyUtils.formatCents(summary.expensesCents),
                 color = MaterialTheme.colorScheme.error
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
             MetricRow(
-                label = "Net Flow",
+                label = stringResource(R.string.applications_seaweed_features_cashflow_net_flow),
                 value = CurrencyUtils.formatCents(summary.netBalanceCents),
                 color = if (summary.netBalanceCents >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                 isLarge = true
@@ -203,7 +205,7 @@ private fun MetricRow(label: String, value: String, color: Color, isLarge: Boole
 @Composable
 private fun NetBalanceVisualizer(summary: CashFlowSummary?) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Savings Rate", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+        Text(stringResource(R.string.applications_seaweed_features_cashflow_savings_rate), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
         LinearProgressIndicator(
             progress = { summary?.savingsRate ?: 0f },
             modifier = Modifier.fillMaxWidth().height(12.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
@@ -211,7 +213,7 @@ private fun NetBalanceVisualizer(summary: CashFlowSummary?) {
             trackColor = Color.Transparent
         )
         Text(
-            text = "Target: 20% (Traditional Rule)",
+            text = stringResource(R.string.applications_seaweed_features_cashflow_target_rate),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -221,9 +223,9 @@ private fun NetBalanceVisualizer(summary: CashFlowSummary?) {
 @Composable
 private fun CashFlowPhilosophy() {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text("Cash Flow vs. Envelopes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.applications_seaweed_features_cashflow_vs_envelopes), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Text(
-            text = "While Envelopes control *where* your money goes, Cash Flow shows you the *pace* of your life. It's the difference between avoiding a specific hurdle and winning the race.",
+            text = stringResource(R.string.applications_seaweed_features_cashflow_philosophy),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
