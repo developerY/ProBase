@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -183,7 +184,7 @@ private fun HomeExpandedScreen(
     ) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(24.dp)) {
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 40 })) {
-                SectionHeader(title = "Financial Status")
+                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_financial_status))
             }
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 50 })) {
                 RequiredVsOptionalChart(uiState = uiState)
@@ -209,7 +210,7 @@ private fun HomeExpandedScreen(
             }
 
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 100 })) {
-                SectionHeader(title = "Spending Breakdown", modifier = Modifier.padding(top = 8.dp))
+                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_spending_breakdown), modifier = Modifier.padding(top = 8.dp))
             }
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 120 })) {
                 OverviewSummaryCard(
@@ -287,7 +288,7 @@ private fun HomeCompactScreen(
                 visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 40 })
             ) {
-                SectionHeader(title = "Financial Status")
+                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_financial_status))
             }
         }
         item {
@@ -343,7 +344,7 @@ private fun HomeCompactScreen(
                 visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 100 })
             ) {
-                SectionHeader(title = "Spending Breakdown", modifier = Modifier.padding(top = 8.dp))
+                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_spending_breakdown), modifier = Modifier.padding(top = 8.dp))
             }
         }
         item {
@@ -388,7 +389,7 @@ private fun HomeCompactScreen(
                 visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 180 })
             ) {
-                SectionHeader(title = "Recent Transactions", modifier = Modifier.padding(top = 8.dp))
+                SectionHeader(title = stringResource(R.string.applications_seaweed_apps_mobile_features_home_recent_transactions), modifier = Modifier.padding(top = 8.dp))
             }
         }
         items(uiState.transactions.take(5), key = { it.id }) { transaction ->
@@ -425,18 +426,18 @@ fun CashFlowAwarenessCard(onClick: () -> Unit) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Cash Flow Awareness",
+                    stringResource(R.string.applications_seaweed_apps_mobile_features_home_cash_flow_awareness),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "Monitor your Money In vs. Money Out pace.",
+                    stringResource(R.string.applications_seaweed_apps_mobile_features_home_cash_flow_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
                 )
             }
             Icon(
-                Icons.Default.TrendingUp,
+                Icons.AutoMirrored.Filled.TrendingUp,
                 contentDescription = null,
                 modifier = Modifier.size(32.dp),
                 tint = MaterialTheme.colorScheme.primary
@@ -463,12 +464,12 @@ fun EnvelopePromotionCard(onClick: () -> Unit) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Decision-Time Control",
+                    stringResource(R.string.applications_seaweed_apps_mobile_features_home_decision_control),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "Assign transactions to envelopes and stay in control.",
+                    stringResource(R.string.applications_seaweed_apps_mobile_features_home_decision_control_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.8f)
                 )
@@ -511,8 +512,8 @@ private fun RequiredVsOptionalChart(uiState: HomeUiState.Success) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Needs vs. Wants", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text("Your Wants are where change happens.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_needs_vs_wants), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_wants_explainer), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
             
             Spacer(Modifier.height(16.dp))
             
@@ -526,11 +527,11 @@ private fun RequiredVsOptionalChart(uiState: HomeUiState.Success) {
             
             Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text("Required", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_required), style = MaterialTheme.typography.labelSmall)
                     Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_currency_format, CurrencyUtils.formatCents(requiredSpending)), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text("Optional", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_optional), style = MaterialTheme.typography.labelSmall)
                     Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_currency_format, CurrencyUtils.formatCents(optionalSpending)), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.tertiary)
                 }
             }
@@ -539,7 +540,7 @@ private fun RequiredVsOptionalChart(uiState: HomeUiState.Success) {
                 Spacer(Modifier.height(12.dp))
                 val annualSavings = optionalSpending * 0.2 * 12
                 Text(
-                    text = "Reducing Optional by 20% would save you ${stringResource(R.string.applications_seaweed_apps_mobile_features_home_currency_format, CurrencyUtils.formatCents(annualSavings.toLong()))}/year",
+                    text = stringResource(R.string.applications_seaweed_apps_mobile_features_home_savings_projection, CurrencyUtils.formatCents(annualSavings.toLong())),
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -568,11 +569,11 @@ fun AnalyticsPromotionCard(
         ) {
             Icon(
                 imageVector = Icons.Default.Analytics,
-                contentDescription = "Spending Insights",
+                contentDescription = stringResource(R.string.applications_seaweed_apps_mobile_features_home_analytics),
                 modifier = Modifier.size(24.dp)
             )
             Text(
-                text = "Analytics",
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_home_analytics),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
                 fontSize = 10.sp
