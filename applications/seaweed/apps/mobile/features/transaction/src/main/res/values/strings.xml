@@ -61,4 +61,18 @@
     <string name="applications_seaweed_apps_mobile_features_transaction_details_title">Transaction Details</string>
     <string name="applications_seaweed_apps_mobile_features_transaction_currency_format">$%1$s</string>
     <string name="applications_seaweed_apps_mobile_features_transaction_amount_label">Amount</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_importance">Importance:</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_required">Required</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_optional">Optional</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_smart_guidance">Smart Purchase Guidance</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_pay_with_stripe">Pay with Stripe</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_ai_guidance_desc">AI will automatically verify this purchase against your budget and rewards.</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_date_label">Date: %1$s</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_habit_no_spending">No spending in the last 30 days.</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_habit_high_cost">This habit costs you over $%1$s per month!</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_habit_frequent">You\'re doing this almost every other day.</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_habit_general">Frequent spending in this category.</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_impact_pace">At current pace, you\'ll reach your monthly target in %1$d days.</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_impact_deficit">This purchase creates a %1$s deficit in your monthly cash flow.</string>
+    <string name="applications_seaweed_apps_mobile_features_transaction_impact_savings">This reduces your potential savings for the \'Vacation Fund\' by %1$s.</string>
 </resources>

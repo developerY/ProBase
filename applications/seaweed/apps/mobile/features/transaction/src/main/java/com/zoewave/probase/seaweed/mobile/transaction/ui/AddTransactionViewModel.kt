@@ -1,5 +1,6 @@
 package com.zoewave.probase.seaweed.mobile.transaction.ui
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -15,9 +16,11 @@ import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.features.cashflow.domain.CashFlowRepository
 import com.zoewave.probase.seaweed.features.spendingcontrol.domain.InterventionFlowOrchestrator
 import com.zoewave.probase.seaweed.features.spendingcontrol.domain.TransactionStatus
+import com.zoewave.probase.seaweed.mobile.transaction.R
 import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -100,6 +103,7 @@ class AddTransactionViewModel @Inject constructor(
     private val orchestrator: ReceiptOrchestrator,
     val spendingControlOrchestrator: InterventionFlowOrchestrator,
     private val cashFlowRepository: CashFlowRepository,
+    @ApplicationContext private val context: Context,
     private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
@@ -290,11 +294,20 @@ class AddTransactionViewModel @Inject constructor(
             val impactMessage = cashFlowSummary?.let { summary ->
                 val amountCents = CurrencyUtils.toCents(totalAmount)
                 val newNet = summary.netBalanceCents - amountCents
-                val paceImpact = "At current pace, you'll reach your monthly target in ${30 - java.time.LocalDate.now().dayOfMonth} days."
+                val paceImpact = context.getString(
+                    R.string.applications_seaweed_apps_mobile_features_transaction_impact_pace, 
+                    30 - java.time.LocalDate.now().dayOfMonth
+                )
                 val netImpact = if (newNet < 0) {
-                    "This purchase creates a ${CurrencyUtils.formatCents(-newNet)} deficit in your monthly cash flow."
+                    context.getString(
+                        R.string.applications_seaweed_apps_mobile_features_transaction_impact_deficit, 
+                        CurrencyUtils.formatCents(-newNet)
+                    )
                 } else {
-                    "This reduces your potential savings for the 'Vacation Fund' by ${CurrencyUtils.formatCents(amountCents)}."
+                    context.getString(
+                        R.string.applications_seaweed_apps_mobile_features_transaction_impact_savings, 
+                        CurrencyUtils.formatCents(amountCents)
+                    )
                 }
                 "$paceImpact\n\n$netImpact"
             }

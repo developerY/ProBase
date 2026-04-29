@@ -268,19 +268,19 @@ private fun AddTransactionContent(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Importance:",
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_importance),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold
             )
             FilterChip(
                 selected = uiState.importance == SpendingType.NEED,
                 onClick = { onEvent(AddTransactionUiEvent.ImportanceChanged(SpendingType.NEED)) },
-                label = { Text("Required") }
+                label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_required)) }
             )
             FilterChip(
                 selected = uiState.importance == SpendingType.WANT,
                 onClick = { onEvent(AddTransactionUiEvent.ImportanceChanged(SpendingType.WANT)) },
-                label = { Text("Optional") }
+                label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_optional)) }
             )
             
             Spacer(Modifier.weight(1f))
@@ -396,7 +396,7 @@ private fun TransactionDateBadge(
             modifier = Modifier.size(20.dp)
         )
         Text(
-            text = "Date: $dateString",
+            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_date_label, dateString),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onPrimaryContainer,
             fontWeight = FontWeight.Bold
@@ -486,7 +486,7 @@ private fun SmartPurchaseGuidance(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = "Smart Purchase Guidance",
+            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_smart_guidance),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold
@@ -509,11 +509,11 @@ private fun SmartPurchaseGuidance(
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Pay with Stripe", fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_pay_with_stripe), fontWeight = FontWeight.Bold)
         }
         
         Text(
-            text = "AI will automatically verify this purchase against your budget and rewards.",
+            text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_ai_guidance_desc),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -744,12 +744,12 @@ fun CaptureTypeSelectionSheet(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Analyze Photo with AI",
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_analyze_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Choose how you want the AI to process this image.",
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_analyze_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -765,13 +765,13 @@ fun CaptureTypeSelectionSheet(
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
                 ) {
-                    Text("Receipt")
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_receipt))
                 }
                 Button(
                     onClick = onPurchaseSelected,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Purchase")
+                    Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_purchase))
                 }
             }
 
@@ -780,19 +780,19 @@ fun CaptureTypeSelectionSheet(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "Add context for Purchase (Optional)",
+                    text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_purchase_context),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
                 OutlinedTextField(
                     value = comment,
                     onValueChange = onCommentChanged,
-                    placeholder = { Text("e.g. Buying a new monitor for work...") },
+                    placeholder = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_purchase_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 3
                 )
                 Text(
-                    text = "Providing details helps the AI better categorize and describe the purchase.",
+                    text = stringResource(R.string.applications_seaweed_apps_mobile_features_transaction_purchase_hint),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
