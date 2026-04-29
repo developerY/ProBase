@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room3.Room
 import com.zoewave.probase.gotmind.database.GotMindDatabase
 import com.zoewave.probase.gotmind.database.dao.ScoreDao
+import com.zoewave.probase.gotmind.database.dao.MemBloxScoreDao
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dagger.Module
 import dagger.Provides
@@ -28,4 +29,9 @@ object DatabaseModule {
     @Singleton
     fun provideScoreDao(db: GotMindDatabase): ScoreDao =
         db.scoreDao()
+
+    @Provides
+    @Singleton
+    fun provideMemBloxScoreDao(db: GotMindDatabase): MemBloxScoreDao =
+        db.membloxScoreDao()
 }

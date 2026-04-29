@@ -150,6 +150,8 @@ include(":applications:kocolor:apps:mobile:features:settings")
 include(":applications:gotmind:model")
 include(":applications:gotmind:database")
 include(":applications:gotmind:data")
+include(":applications:gotmind:features:games")
+include(":applications:gotmind:features:memblox")
 include(":applications:gotmind:apps:mobile")
 
 // --- GigWork Product Line ---
