@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
+import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,8 +24,8 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = financialRepository.getFinancialProfile()
         .map { profile ->
             HomeUiState.Success(
-                totalBalance = profile.flexibleMoneyRemaining,
-                topBudgets = profile.categoryOverviews.filter { it.limitAmount != null }.take(3)
+                totalBalance = profile.flexibleMoneyRemainingCents.toDouble() / 100.0,
+                topBudgets = profile.categoryOverviews.filter { it.limitAmountCents != null }.take(3)
             )
         }
         .stateIn(
@@ -44,12 +45,14 @@ class HomeViewModel @Inject constructor(
     private fun addRandomTransaction() {
         viewModelScope.launch {
             val categories = listOf("Food", "Transport", "Rent", "Entertainment", "Salary", "Investment")
+            val amountCents = (10..10000).random().toLong() * (if ((0..1).random() == 0) -1 else 1)
             val randomTransaction = Transaction(
                 id = UUID.randomUUID().toString(),
-                amount = (10..10000).random().toDouble() / 100.0 * (if ((0..1).random() == 0) -1 else 1), // Mostly spending
-                category = categories.random(),
+                amountCents = amountCents,
+                categoryId = categories.random(),
                 description = "Watch transaction",
-                date = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis(),
+                defaultType = if (amountCents < 0) SpendingType.WANT else SpendingType.NEED
             )
             repository.addTransaction(randomTransaction)
         }

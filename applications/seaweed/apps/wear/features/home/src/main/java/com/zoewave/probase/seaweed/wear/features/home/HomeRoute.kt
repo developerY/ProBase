@@ -5,12 +5,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.material3.*
+import com.zoewave.probase.seaweed.wear.features.home.R
 import com.zoewave.probase.seaweed.model.CategoryOverview
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
 import java.util.Locale
@@ -60,11 +62,11 @@ fun HomeScreen(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "Real Money",
+                        text = stringResource(R.string.applications_seaweed_apps_wear_features_home_real_money),
                         style = MaterialTheme.typography.labelSmall
                     )
                     Text(
-                        text = "$${String.format(Locale.getDefault(), "%.0f", uiState.totalBalance)}",
+                        text = stringResource(R.string.applications_seaweed_apps_wear_features_home_currency_format, String.format(Locale.getDefault(), "%.0f", uiState.totalBalance)),
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Black
                     )
@@ -72,10 +74,11 @@ fun HomeScreen(
                     if (uiState.topBudgets.isNotEmpty()) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             uiState.topBudgets.forEach { budget ->
+                                val remainingDollars = (budget.remainingAmountCents ?: 0L).toDouble() / 100.0
                                 Text(
-                                    text = "${budget.name}: $${String.format(Locale.getDefault(), "%.0f", budget.remainingAmount ?: 0.0)} left",
+                                    text = stringResource(R.string.applications_seaweed_apps_wear_features_home_left_format, budget.name, String.format(Locale.getDefault(), "%.0f", remainingDollars)),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = if ((budget.remainingAmount ?: 0.0) < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                                    color = if ((budget.remainingAmountCents ?: 0L) < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }
@@ -91,14 +94,14 @@ fun HomeScreen(
                             onClick = { onEvent(HomeUiEvent.NavigateToTransactions) },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Spend")
+                            Text(stringResource(R.string.applications_seaweed_apps_wear_features_home_spend))
                         }
                         Button(
                             onClick = { onEvent(HomeUiEvent.NavigateToBills) },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
                         ) {
-                            Text("Bills")
+                            Text(stringResource(R.string.applications_seaweed_apps_wear_features_home_bills))
                         }
                     }
                     
@@ -107,7 +110,7 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                     ) {
-                        Text("Add Random")
+                        Text(stringResource(R.string.applications_seaweed_apps_wear_features_home_add_random))
                     }
                 }
             }
@@ -123,8 +126,8 @@ private fun HomeScreenPreview() {
             uiState = HomeUiState.Success(
                 totalBalance = 1234.0,
                 topBudgets = listOf(
-                    CategoryOverview("Food", 42.0, 1, 100.0),
-                    CategoryOverview("Coffee", 15.0, 1, 50.0)
+                    CategoryOverview("food_id", "Food", 4200L, 1, 10000L, 5800L, 0.42f),
+                    CategoryOverview("coffee_id", "Coffee", 1500L, 1, 5000L, 3500L, 0.3f)
                 )
             ),
             onEvent = {},
