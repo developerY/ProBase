@@ -74,6 +74,9 @@
             <option value="$PROJECT_DIR$/applications/gotmind/apps/mobile" />
             <option value="$PROJECT_DIR$/applications/gotmind/data" />
             <option value="$PROJECT_DIR$/applications/gotmind/database" />
+            <option value="$PROJECT_DIR$/applications/gotmind/features" />
+            <option value="$PROJECT_DIR$/applications/gotmind/features/games" />
+            <option value="$PROJECT_DIR$/applications/gotmind/features/memblox" />
             <option value="$PROJECT_DIR$/applications/gotmind/model" />
             <option value="$PROJECT_DIR$/applications/kocolor" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps" />
