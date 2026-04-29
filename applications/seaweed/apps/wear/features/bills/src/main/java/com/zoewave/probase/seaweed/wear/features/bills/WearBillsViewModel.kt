@@ -21,26 +21,18 @@ class WearBillsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            financialRepository.getFinancialProfile()
-                .onEach { profile ->
-                    _uiState.value = WearBillsUiState.Success(
-                        expenses = (uiState.value as? WearBillsUiState.Success)?.expenses ?: emptyList(),
-                        totalMonthlyFixedCosts = profile.totalFixedCosts
-                    )
-                }
-                .launchIn(viewModelScope)
-
-            repository.getAllExpenses()
-                .onEach { expenses ->
-                    val currentState = _uiState.value
-                    val filteredExpenses = expenses.filter { it.amount > 0 }.sortedByDescending { it.amount }
-                    if (currentState is WearBillsUiState.Success) {
-                        _uiState.value = currentState.copy(expenses = filteredExpenses)
-                    } else {
-                        _uiState.value = WearBillsUiState.Success(expenses = filteredExpenses)
-                    }
-                }
-                .launchIn(viewModelScope)
+            combine(
+                financialRepository.getFinancialProfile(),
+                repository.getAllExpenses()
+            ) { profile, expenses ->
+                val filteredExpenses = expenses.filter { it.averageAmountCents > 0 }.sortedByDescending { it.averageAmountCents }
+                WearBillsUiState.Success(
+                    expenses = filteredExpenses,
+                    totalMonthlyFixedCosts = profile.totalFixedCostsCents.toDouble() / 100.0
+                )
+            }.onEach { state ->
+                _uiState.value = state
+            }.launchIn(viewModelScope)
         }
     }
 
