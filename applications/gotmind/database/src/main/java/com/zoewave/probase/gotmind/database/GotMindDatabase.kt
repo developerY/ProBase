@@ -5,7 +5,7 @@ import androidx.room3.RoomDatabase
 import com.zoewave.probase.gotmind.database.dao.ScoreDao
 import com.zoewave.probase.gotmind.database.dao.MemBloxScoreDao
 
-@Database(entities = [ScoreEntity::class, MemBloxScoreEntity::class], version = 2)
+@Database(entities = [ScoreEntity::class, MemBloxScoreEntity::class], version = 4)
 abstract class GotMindDatabase : RoomDatabase() {
     abstract fun scoreDao(): ScoreDao
     abstract fun membloxScoreDao(): MemBloxScoreDao

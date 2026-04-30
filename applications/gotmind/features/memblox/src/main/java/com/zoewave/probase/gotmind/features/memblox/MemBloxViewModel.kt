@@ -20,12 +20,12 @@ class MemBloxViewModel @Inject constructor(
 
     private val engine = MemBloxEngine(
         scope = viewModelScope,
-        onGameOver = { score -> saveScore(score) }
+        onGameOver = { _ -> saveScore() }
     )
 
     val uiState: StateFlow<MemBloxState> = engine.state
 
-    val topScores = scoreDao.getTopScores()
+    val topScores = scoreDao.getAllTopScores()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun startGame(difficulty: MemBloxDifficulty) {
@@ -44,9 +44,21 @@ class MemBloxViewModel @Inject constructor(
         engine.reset()
     }
 
-    private fun saveScore(score: Int) {
+    fun onHapticConsumed() {
+        engine.onHapticConsumed()
+    }
+
+    private fun saveScore() {
+        val state = uiState.value
         viewModelScope.launch {
-            scoreDao.insertScore(MemBloxScoreEntity(score = score))
+            scoreDao.insertScore(
+                MemBloxScoreEntity(
+                    score = state.score,
+                    difficulty = state.difficulty.label,
+                    bestStreak = state.bestMatchStreak,
+                    accuracy = state.matchAccuracy
+                )
+            )
         }
     }
 }
