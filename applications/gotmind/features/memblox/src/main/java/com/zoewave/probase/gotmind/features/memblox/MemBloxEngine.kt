@@ -1,6 +1,7 @@
 package com.zoewave.probase.gotmind.features.memblox
 
 import android.graphics.Paint
+import android.graphics.Color as AndroidColor
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
 import kotlinx.coroutines.CoroutineScope
@@ -18,6 +19,12 @@ enum class PowerUpType(val label: String, val icon: String) {
     REVEAL("Reveal", "👁️"),
     NUKE("Nuke", "☢️")
 }
+
+data class ConfettiBurst(
+    val id: String = UUID.randomUUID().toString(),
+    val col: Int,
+    val row: Int
+)
 
 data class MemBloxState(
     val grid: List<MemBloxBlock> = emptyList(),
@@ -45,6 +52,8 @@ data class MemBloxState(
     val isFrozen: Boolean = false,
     val isRevealed: Boolean = false,
     val nukingBlockIds: Map<String, Int> = emptyMap(),
+    val initiallyRevealedBlockIds: Set<String> = emptySet(),
+    val confettiBursts: List<ConfettiBurst> = emptyList(),
     
     // Skill Tracking
     val bestMatchStreak: Int = 0,
@@ -148,10 +157,11 @@ class MemBloxEngine(
             pendingPairs.removeAt((0 until pendingPairs.size).random())
         }
 
-        val r = 255
-        val g = (160..210).random()
-        val b = (140..190).random()
-        val color = (0xFF shl 24) or (r shl 16) or (g shl 8) or b
+        // Generate random rainbow pastel color using HSV
+        val hue = (0..359).random().toFloat()
+        val saturation = 0.35f
+        val value = 0.95f
+        val color = AndroidColor.HSVToColor(floatArrayOf(hue, saturation, value))
 
         val newBlock = MemBloxBlock(
             id = UUID.randomUUID().toString(),
@@ -163,9 +173,16 @@ class MemBloxEngine(
         _state.update { 
             it.copy(
                 grid = it.grid + newBlock,
-                peakBoardBlocks = maxOf(it.peakBoardBlocks, it.grid.size + 1)
+                peakBoardBlocks = maxOf(it.peakBoardBlocks, it.grid.size + 1),
+                initiallyRevealedBlockIds = it.initiallyRevealedBlockIds + newBlock.id
             ) 
         }
+        
+        scope.launch {
+            delay(800)
+            _state.update { it.copy(initiallyRevealedBlockIds = it.initiallyRevealedBlockIds - newBlock.id) }
+        }
+
         spawnCount++
     }
 
@@ -221,6 +238,7 @@ class MemBloxEngine(
             if (flipped[0].emoji == flipped[1].emoji) {
                 // Match!
                 val matchedIds = flipped.map { it.id }.toSet()
+                val matchBursts = flipped.map { ConfettiBurst(col = it.col, row = it.row) }
                 val newGrid = state.grid.filterNot { it.id in matchedIds }
                 val newPairsMatched = state.pairsMatched + 1
                 
@@ -257,9 +275,17 @@ class MemBloxEngine(
                     currentMatchStreak = newStreak,
                     bestMatchStreak = newBestStreak,
                     totalMatchTimeMs = newTotalMatchTime,
-                    avgMatchTimeMs = newAvgMatchTime
+                    avgMatchTimeMs = newAvgMatchTime,
+                    confettiBursts = state.confettiBursts + matchBursts
                 ).also {
                     scope.launch { applyGravity() }
+                    scope.launch {
+                        delay(1500) // Duration of confetti animation
+                        val burstIds = matchBursts.map { it.id }.toSet()
+                        _state.update { s -> 
+                            s.copy(confettiBursts = s.confettiBursts.filterNot { burst -> burst.id in burstIds })
+                        }
+                    }
                     if (isVictory) onGameOver(it.score)
                 }
             } else {

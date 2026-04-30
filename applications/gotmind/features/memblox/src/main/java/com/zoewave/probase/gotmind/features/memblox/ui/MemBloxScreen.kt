@@ -1,12 +1,22 @@
 package com.zoewave.probase.gotmind.features.memblox.ui
 
+import androidx.compose.animation.Animatable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -42,6 +52,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -62,6 +73,7 @@ import com.zoewave.probase.gotmind.features.memblox.MemBloxViewModel
 import com.zoewave.probase.gotmind.features.memblox.PowerUpType
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 @Composable
@@ -237,15 +249,17 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
 
             // Render Blocks
             state.grid.forEach { block ->
-                val nukingColor = state.nukingBlockIds[block.id]
-                MemBloxBlockRender(
-                    block = block,
-                    blockSize = blockSize,
-                    blockHeight = blockHeight,
-                    isRevealed = state.isRevealed,
-                    nukingColor = nukingColor?.let { Color(it) },
-                    onClick = { viewModel.onBlockClick(block) }
-                )
+                key(block.id) {
+                    val nukingColor = state.nukingBlockIds[block.id]
+                    MemBloxBlockRender(
+                        block = block,
+                        blockSize = blockSize,
+                        blockHeight = blockHeight,
+                        isRevealed = state.isRevealed || state.initiallyRevealedBlockIds.contains(block.id),
+                        nukingColor = nukingColor?.let { Color(it) },
+                        onClick = { viewModel.onBlockClick(block) }
+                    )
+                }
             }
 
             // Freeze Overlay Effect
@@ -255,6 +269,16 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
                         .fillMaxSize()
                         .background(Color(0xFF03A9F4).copy(alpha = 0.1f))
                 )
+            }
+
+            // Confetti Bursts
+            state.confettiBursts.forEach { burst ->
+                key(burst.id) {
+                    ConfettiBurstRenderer(
+                        centerX = blockSize * burst.col + (blockSize / 2),
+                        centerY = blockHeight * burst.row + (blockHeight / 2)
+                    )
+                }
             }
 
             // End Game Overlays
@@ -270,6 +294,55 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
 }
 
 @Composable
+fun ConfettiBurstRenderer(centerX: Dp, centerY: Dp) {
+    val particles = remember {
+        List(45) {
+            ConfettiParticle(
+                velocityX = (Math.random().toFloat() - 0.5f) * 600f,
+                velocityY = (Math.random().toFloat() - 0.9f) * 900f,
+                color = Color(
+                    red = (150..255).random() / 255f,
+                    green = (150..255).random() / 255f,
+                    blue = (150..255).random() / 255f
+                ),
+                size = (4..8).random().toFloat()
+            )
+        }
+    }
+
+    val progress = remember { Animatable(0f) }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        progress.animateTo(1f, tween(1200, easing = LinearEasing))
+    }
+
+    val t = progress.value
+    androidx.compose.foundation.Canvas(
+        modifier = Modifier
+            .offset(x = centerX, y = centerY)
+            .size(1.dp) // Point of origin
+    ) {
+        particles.forEach { particle ->
+            // Physics: p = p0 + v0*t + 0.5*a*t^2
+            val x = particle.velocityX * t
+            val y = particle.velocityY * t + 0.5f * 800f * t * t
+            
+            drawCircle(
+                color = particle.color.copy(alpha = 1f - t),
+                radius = particle.size * (1f - t * 0.5f),
+                center = androidx.compose.ui.geometry.Offset(x, y)
+            )
+        }
+    }
+}
+
+data class ConfettiParticle(
+    val velocityX: Float,
+    val velocityY: Float,
+    val color: Color,
+    val size: Float
+)
+
+@Composable
 fun MemBloxBlockRender(
     block: MemBloxBlock,
     blockSize: Dp,
@@ -280,6 +353,31 @@ fun MemBloxBlockRender(
 ) {
     val isFlipped = block.isFlipped || isRevealed || nukingColor != null
     
+    // Entrance & Idle Animations
+    var startAnimation by remember { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(Unit) { startAnimation = true }
+    
+    val entranceScale by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0.5f,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessLow),
+        label = "Entrance"
+    )
+    
+    val infiniteTransition = rememberInfiniteTransition(label = "Shimmer")
+    val shimmerOffset by infiniteTransition.animateFloat(
+        initialValue = -2f,
+        targetValue = 4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "ShimmerOffset"
+    )
+
+    // Click Flash Animation
+    val flashAlpha = remember { Animatable(0f) }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+
     val baseColor = if (nukingColor != null) nukingColor else Color(block.color)
     val displayColor by animateColorAsState(
         targetValue = if (isFlipped && nukingColor == null) Color.White else baseColor,
@@ -290,6 +388,7 @@ fun MemBloxBlockRender(
         modifier = Modifier
             .size(blockSize, blockHeight)
             .offset(x = blockSize * block.col, y = blockHeight * block.row)
+            .scale(entranceScale)
             .padding(1.dp)
             .clip(RoundedCornerShape(4.dp))
             .background(
@@ -306,24 +405,36 @@ fun MemBloxBlockRender(
             )
             .drawWithContent {
                 drawContent()
-                // Gloss effect
-                drawRect(
-                    brush = Brush.linearGradient(
-                        0.0f to Color.White.copy(alpha = 0.2f),
-                        0.5f to Color.Transparent,
-                        1.0f to Color.Transparent
-                    )
+                // Gloss / Shimmer effect
+                val brush = Brush.linearGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0f),
+                        Color.White.copy(alpha = 0.15f),
+                        Color.White.copy(alpha = 0f)
+                    ),
+                    start = androidx.compose.ui.geometry.Offset(size.width * shimmerOffset, 0f),
+                    end = androidx.compose.ui.geometry.Offset(size.width * (shimmerOffset + 0.5f), size.height)
                 )
+                drawRect(brush = brush)
             }
             .border(0.5.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(4.dp))
-            .clickable { onClick() },
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { 
+                scope.launch {
+                    flashAlpha.snapTo(1f)
+                    flashAlpha.animateTo(0f, tween(400))
+                }
+                onClick() 
+            }
+            .border(4.dp, Color.White.copy(alpha = flashAlpha.value), RoundedCornerShape(4.dp)),
         contentAlignment = Alignment.Center
     ) {
         if (isFlipped) {
             Text(
                 text = block.emoji, 
-                fontSize = (blockSize.value * 0.65).sp,
-                modifier = Modifier.scale(animateFloatAsState(1f).value)
+                fontSize = (blockSize.value * 0.65).sp
             )
         }
     }
