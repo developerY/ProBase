@@ -7,6 +7,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
@@ -44,6 +45,9 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
@@ -84,6 +88,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.gotmind.database.MemBloxScoreEntity
 import com.zoewave.probase.gotmind.features.memblox.HapticSignal
+import com.zoewave.probase.gotmind.features.memblox.MatchGhost
 import com.zoewave.probase.gotmind.features.memblox.MemBloxState
 import com.zoewave.probase.gotmind.features.memblox.MemBloxViewModel
 import com.zoewave.probase.gotmind.features.memblox.PowerUpType
@@ -105,13 +110,12 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
 
     val haptic = LocalHapticFeedback.current
 
-    // Haptic Feedback Observer
     LaunchedEffect(state.lastHapticSignal) {
         state.lastHapticSignal?.let { signal ->
             when (signal) {
                 HapticSignal.LIGHT -> haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 HapticSignal.MEDIUM -> haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                HapticSignal.HEAVY -> haptic.performHapticFeedback(HapticFeedbackType.LongPress) // or similar heavy
+                HapticSignal.HEAVY -> haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             }
             viewModel.onHapticConsumed()
         }
@@ -130,14 +134,13 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
         return
     }
 
-    // Screenshake Offset
     val shakeX by animateFloatAsState(
-        targetValue = if (state.shakeIntensity > 0) (Random.nextFloat() - 0.5f) * state.shakeIntensity * 10 else 0f,
+        targetValue = if (state.shakeIntensity > 0 || state.isStressed) (Random.nextFloat() - 0.5f) * (state.shakeIntensity + 1f) * 10 else 0f,
         animationSpec = spring(stiffness = Spring.StiffnessHigh),
         label = "ShakeX"
     )
     val shakeY by animateFloatAsState(
-        targetValue = if (state.shakeIntensity > 0) (Random.nextFloat() - 0.5f) * state.shakeIntensity * 10 else 0f,
+        targetValue = if (state.shakeIntensity > 0 || state.isStressed) (Random.nextFloat() - 0.5f) * (state.shakeIntensity + 1f) * 10 else 0f,
         animationSpec = spring(stiffness = Spring.StiffnessHigh),
         label = "ShakeY"
     )
@@ -251,9 +254,30 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
                 }
             }
 
+            // Stress Vignette
+            if (state.isStressed) {
+                StressVignette()
+            }
+
             // Frost Overlay
             if (state.frostAlpha > 0) {
                 FrostOverlay(alpha = state.frostAlpha)
+            }
+
+            // Slow Motion Overlay
+            if (state.isSlowed) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFFFFD54F).copy(alpha = 0.1f)) // Subtle gold tint
+                )
+            }
+
+            // Match Ghosts
+            state.matchGhosts.forEach { ghost ->
+                key(ghost.id) {
+                    MatchGhostRenderer(ghost = ghost, blockSize = blockSize, blockHeight = blockHeight)
+                }
             }
 
             // Confetti Bursts
@@ -274,6 +298,32 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
                 EndGameOverlay(state = state, onRetry = { viewModel.startGame(state.difficulty) }, onChangeDifficulty = { viewModel.resetToDifficultySelection() })
             }
         }
+    }
+}
+
+@Composable
+fun StressVignette() {
+    val infiniteTransition = rememberInfiniteTransition(label = "Stress")
+    val alpha by infiniteTransition.animateFloat(initialValue = 0f, targetValue = 0.4f, animationSpec = infiniteRepeatable(animation = tween(1000), repeatMode = RepeatMode.Reverse), label = "StressAlpha")
+    Box(modifier = Modifier.fillMaxSize().border(4.dp, Color.Red.copy(alpha = alpha), RoundedCornerShape(16.dp)))
+}
+
+@Composable
+fun MatchGhostRenderer(ghost: MatchGhost, blockSize: Dp, blockHeight: Dp) {
+    val progress = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        progress.animateTo(1f, tween(1000, easing = LinearEasing))
+    }
+    val t = progress.value
+    Box(
+        modifier = Modifier
+            .size(blockSize, blockHeight)
+            .offset(x = blockSize * ghost.col, y = blockHeight * ghost.row)
+            .alpha((1f - t) * 0.5f)
+            .scale(1f + t * 0.5f),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = ghost.emoji, fontSize = (blockSize.value * 0.65).sp, color = Color.White)
     }
 }
 
@@ -304,7 +354,6 @@ fun FrostOverlay(alpha: Float) {
     Canvas(modifier = Modifier.fillMaxSize().alpha(alpha)) {
         val frostColor = Color(0xFFE1F5FE)
         drawRect(brush = Brush.radialGradient(colors = listOf(Color.Transparent, frostColor), center = center, radius = size.minDimension))
-        // Simple frost "cracks" or vignette
         clipRect {
             drawRect(color = frostColor.copy(alpha = 0.2f))
         }
@@ -349,6 +398,13 @@ fun MemBloxBlockRender(
 ) {
     val isFlipped = block.isFlipped || isRevealed || nukingColor != null
     
+    // Smooth Y Sliding
+    val animatedY by animateDpAsState(
+        targetValue = blockHeight * block.row,
+        animationSpec = spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow),
+        label = "GravitySlide"
+    )
+
     // 3D Flip Animation
     val animatedRotationY by animateFloatAsState(
         targetValue = if (isFlipped) 180f else 0f,
@@ -374,7 +430,7 @@ fun MemBloxBlockRender(
     Box(
         modifier = Modifier
             .size(blockSize, blockHeight)
-            .offset(x = blockSize * block.col, y = blockHeight * block.row)
+            .offset(x = blockSize * block.col, y = animatedY)
             .graphicsLayer {
                 this.rotationY = animatedRotationY
                 cameraDistance = 12f * density
@@ -398,11 +454,7 @@ fun MemBloxBlockRender(
         contentAlignment = Alignment.Center
     ) {
         if (animatedRotationY >= 90f) {
-            Text(
-                text = block.emoji, 
-                fontSize = (blockSize.value * 0.65).sp,
-                modifier = Modifier.graphicsLayer { this.rotationY = 180f } // Fix mirror effect
-            )
+            Text(text = block.emoji, fontSize = (blockSize.value * 0.65).sp, modifier = Modifier.graphicsLayer { this.rotationY = 180f })
         }
     }
 }
@@ -511,6 +563,10 @@ fun HallOfFameScreen(scores: List<MemBloxScoreEntity>, onBack: () -> Unit) {
 @Composable
 fun HallOfFameCard(score: MemBloxScoreEntity) {
     val date = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(Date(score.timestamp))
+    
+    // Medal Logic
+    val isSniper = score.accuracy > 0.9f
+    
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -522,6 +578,13 @@ fun HallOfFameCard(score: MemBloxScoreEntity) {
                     Text(score.difficulty, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                     Text(score.score.toString(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, color = Color.White)
                 }
+                
+                Row {
+                    if (isSniper) MedalBadge(Icons.Default.TrackChanges, "Sniper", Color(0xFFFFC107))
+                    if (score.bestStreak >= 8) MedalBadge(Icons.Default.Speed, "Streak", Color(0xFFE91E63))
+                    if (score.powerUpsUsed == 0) MedalBadge(Icons.Default.Shield, "Pro", Color(0xFF03A9F4))
+                }
+
                 Text(date, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
             }
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.White.copy(alpha = 0.1f))
@@ -536,6 +599,13 @@ fun HallOfFameCard(score: MemBloxScoreEntity) {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun MedalBadge(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, color: Color) {
+    Box(modifier = Modifier.padding(start = 4.dp).background(color.copy(alpha = 0.2f), CircleShape).padding(4.dp)) {
+        Icon(icon, contentDescription = label, tint = color, modifier = Modifier.size(16.dp))
     }
 }
 

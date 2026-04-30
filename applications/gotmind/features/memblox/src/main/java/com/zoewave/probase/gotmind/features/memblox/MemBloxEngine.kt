@@ -18,7 +18,12 @@ enum class PowerUpType(val label: String, val icon: String) {
     FREEZE("Freeze", "❄️"),
     REVEAL("Reveal", "👁️"),
     NUKE("Nuke", "☢️"),
-    HINT("Hint", "💡")
+    HINT("Hint", "💡"),
+    EQUALIZER("Equalizer", "💎"),
+    SLOW("Slow", "⏳"),
+    TIDY("Tidy", "🧹"),
+    AUTO_MATCH("Auto", "🤖"),
+    SCAN("Scan", "🔍")
 }
 
 enum class HapticSignal { LIGHT, MEDIUM, HEAVY }
@@ -35,6 +40,13 @@ data class FloatingTextEffect(
     val col: Int,
     val row: Int,
     val color: Int = 0xFFFFEB3B.toInt()
+)
+
+data class MatchGhost(
+    val id: String = UUID.randomUUID().toString(),
+    val emoji: String,
+    val col: Int,
+    val row: Int
 )
 
 data class MemBloxState(
@@ -59,19 +71,33 @@ data class MemBloxState(
     val successfulMatches: Int = 0,
     val missedMatches: Int = 0,
     val matchAccuracy: Float = 0f,
-    val powerUps: Map<PowerUpType, Int> = mapOf(PowerUpType.FREEZE to 2, PowerUpType.REVEAL to 1, PowerUpType.NUKE to 1, PowerUpType.HINT to 2),
+    val powerUps: Map<PowerUpType, Int> = mapOf(
+        PowerUpType.FREEZE to 2, 
+        PowerUpType.REVEAL to 1, 
+        PowerUpType.NUKE to 1, 
+        PowerUpType.HINT to 2,
+        PowerUpType.EQUALIZER to 0,
+        PowerUpType.SLOW to 2,
+        PowerUpType.TIDY to 1,
+        PowerUpType.AUTO_MATCH to 1,
+        PowerUpType.SCAN to 2
+    ),
+    val powerUpsUsed: Int = 0,
     val isFrozen: Boolean = false,
     val isRevealed: Boolean = false,
+    val isSlowed: Boolean = false,
     val nukingBlockIds: Map<String, Int> = emptyMap(),
     val initiallyRevealedBlockIds: Set<String> = emptySet(),
     val confettiBursts: List<ConfettiBurst> = emptyList(),
     
-    // 5-Star Polish VFX State
+    // 6-Star Polish VFX State
     val shakeIntensity: Float = 0f,
     val frostAlpha: Float = 0f,
     val hintedBlockIds: Set<String> = emptySet(),
     val floatingTexts: List<FloatingTextEffect> = emptyList(),
+    val matchGhosts: List<MatchGhost> = emptyList(),
     val lastHapticSignal: HapticSignal? = null,
+    val isStressed: Boolean = false,
     
     // Skill Tracking
     val bestMatchStreak: Int = 0,
@@ -123,7 +149,17 @@ class MemBloxEngine(
             targetPairs = difficulty.targetPairs,
             difficulty = difficulty,
             isStarted = true,
-            powerUps = mapOf(PowerUpType.FREEZE to 2, PowerUpType.REVEAL to 1, PowerUpType.NUKE to 1, PowerUpType.HINT to 2)
+            powerUps = mapOf(
+                PowerUpType.FREEZE to 2, 
+                PowerUpType.REVEAL to 1, 
+                PowerUpType.NUKE to 1, 
+                PowerUpType.HINT to 2,
+                PowerUpType.EQUALIZER to 0,
+                PowerUpType.SLOW to 2,
+                PowerUpType.TIDY to 1,
+                PowerUpType.AUTO_MATCH to 1,
+                PowerUpType.SCAN to 2
+            )
         )
         pendingPairs.clear()
         spawnCount = 0
@@ -132,7 +168,13 @@ class MemBloxEngine(
         gameJob = scope.launch {
             while (!_state.value.isGameOver && !_state.value.isVictory) {
                 val progress = _state.value.pairsMatched.toFloat() / _state.value.targetPairs
-                val speedFactor = 1.0f - (progress * 0.4f)
+                val progressFactor = 1.0f - (progress * 0.4f)
+                val slowFactor = if (_state.value.isSlowed) 2.0f else 1.0f
+                val speedFactor = progressFactor * slowFactor
+                
+                // Stress Check (Overheat)
+                val boardLoad = _state.value.grid.size.toFloat() / (difficulty.cols * difficulty.rows)
+                _state.update { it.copy(isStressed = boardLoad > 0.75f) }
                 
                 if (!_state.value.isFrozen) {
                     delay((difficulty.spawnDelayMillis * speedFactor).toLong())
@@ -254,21 +296,23 @@ class MemBloxEngine(
 
         if (_state.value.flippedBlocks.size == 2) {
             scope.launch {
-                delay(400)
+                delay(if (_state.value.isSlowed) 800 else 400)
                 checkMatch()
             }
         }
     }
 
-    private fun checkMatch() {
+    private fun checkMatch(forcedMatch: List<MemBloxBlock>? = null) {
         val now = System.currentTimeMillis()
         _state.update { state ->
-            val flipped = state.flippedBlocks
-            if (flipped[0].emoji == flipped[1].emoji) {
+            val flipped = forcedMatch ?: state.flippedBlocks
+            if (flipped.size == 2 && flipped[0].emoji == flipped[1].emoji) {
                 // Match!
                 triggerHaptic(HapticSignal.MEDIUM)
                 val matchedIds = flipped.map { it.id }.toSet()
                 val matchBursts = flipped.map { ConfettiBurst(col = it.col, row = it.row) }
+                val ghosts = flipped.map { MatchGhost(emoji = it.emoji, col = it.col, row = it.row) }
+                
                 val newGrid = state.grid.filterNot { it.id in matchedIds }
                 val newPairsMatched = state.pairsMatched + 1
                 
@@ -278,6 +322,11 @@ class MemBloxEngine(
                 val multiplier = 1.0f + (newCombo - 1) * 0.5f
                 val points = (10 * multiplier).toInt()
                 
+                // Award Equalizer on high combo
+                val updatedPowerUps = if (newCombo == 5) {
+                    state.powerUps + (PowerUpType.EQUALIZER to (state.powerUps[PowerUpType.EQUALIZER] ?: 0) + 1)
+                } else state.powerUps
+
                 // Floating Text Announcer
                 val announcerText = when {
                     newCombo == 3 -> "GREAT!"
@@ -317,7 +366,9 @@ class MemBloxEngine(
                     totalMatchTimeMs = newTotalMatchTime,
                     avgMatchTimeMs = newAvgMatchTime,
                     confettiBursts = state.confettiBursts + matchBursts,
-                    floatingTexts = newFloatingTexts
+                    floatingTexts = newFloatingTexts,
+                    matchGhosts = state.matchGhosts + ghosts,
+                    powerUps = updatedPowerUps
                 ).also {
                     scope.launch { applyGravity() }
                     scope.launch {
@@ -325,10 +376,15 @@ class MemBloxEngine(
                         val burstIds = matchBursts.map { it.id }.toSet()
                         _state.update { s -> s.copy(confettiBursts = s.confettiBursts.filterNot { burst -> burst.id in burstIds }) }
                     }
+                    scope.launch {
+                        delay(1000)
+                        val ghostIds = ghosts.map { it.id }.toSet()
+                        _state.update { s -> s.copy(matchGhosts = s.matchGhosts.filterNot { g -> g.id in ghostIds }) }
+                    }
                     if (announcerText != null) {
                         scope.launch {
                             delay(1500)
-                            _state.update { s -> s.copy(floatingTexts = s.floatingTexts.drop(1)) }
+                            _state.update { s -> s.copy(floatingTexts = s.floatingTexts.filter { f -> f.text != announcerText }) }
                         }
                     }
                     if (isVictory) {
@@ -357,7 +413,10 @@ class MemBloxEngine(
         val count = _state.value.powerUps[type] ?: 0
         if (count <= 0 || _state.value.isGameOver || _state.value.isVictory) return
 
-        _state.update { it.copy(powerUps = it.powerUps + (type to count - 1)) }
+        _state.update { it.copy(
+            powerUps = it.powerUps + (type to count - 1),
+            powerUpsUsed = it.powerUpsUsed + 1
+        ) }
 
         when (type) {
             PowerUpType.FREEZE -> {
@@ -428,6 +487,68 @@ class MemBloxEngine(
                 val match = grid.groupBy { it.emoji }.filter { it.value.size >= 2 }.values.firstOrNull()
                 if (match != null) {
                     _state.update { it.copy(hintedBlockIds = match.map { b -> b.id }.toSet()) }
+                }
+            }
+            PowerUpType.EQUALIZER -> {
+                val grid = _state.value.grid
+                if (grid.isEmpty()) return
+                val targetEmoji = grid.random().emoji
+                val targets = grid.filter { it.emoji == targetEmoji }
+                val targetIds = targets.map { it.id }.toSet()
+                
+                scope.launch {
+                    _state.update { it.copy(nukingBlockIds = targetIds.associateWith { 0xFF00BCD4.toInt() }, shakeIntensity = 3f) }
+                    triggerHaptic(HapticSignal.MEDIUM)
+                    delay(800)
+                    _state.update { state ->
+                        state.copy(
+                            grid = state.grid.filterNot { it.id in targetIds },
+                            nukingBlockIds = emptyMap(),
+                            shakeIntensity = 0f,
+                            score = state.score + (targets.size / 2) * 20
+                        )
+                    }
+                    applyGravity()
+                }
+            }
+            PowerUpType.SLOW -> {
+                scope.launch {
+                    _state.update { it.copy(isSlowed = true) }
+                    delay(10000)
+                    _state.update { it.copy(isSlowed = false) }
+                }
+            }
+            PowerUpType.TIDY -> {
+                _state.update { state ->
+                    if (state.grid.isEmpty()) return@update state
+                    val maxRow = state.grid.maxOf { it.row }
+                    val targetIds = state.grid.filter { it.row == maxRow }.map { it.id }.toSet()
+                    state.copy(
+                        grid = state.grid.filterNot { it.id in targetIds },
+                        score = state.score + (targetIds.size * 5)
+                    )
+                }
+                applyGravity()
+            }
+            PowerUpType.AUTO_MATCH -> {
+                val grid = _state.value.grid
+                val match = grid.groupBy { it.emoji }.filter { it.value.size >= 2 }.values.firstOrNull()
+                if (match != null) {
+                    checkMatch(match.take(2))
+                }
+            }
+            PowerUpType.SCAN -> {
+                scope.launch {
+                    val grid = _state.value.grid
+                    val matches = grid.groupBy { it.emoji }.filter { it.value.size >= 2 }
+                    
+                    matches.forEach { (_, blocks) ->
+                        val pairIds = blocks.take(2).map { it.id }.toSet()
+                        _state.update { it.copy(initiallyRevealedBlockIds = it.initiallyRevealedBlockIds + pairIds) }
+                        delay(600)
+                        _state.update { it.copy(initiallyRevealedBlockIds = it.initiallyRevealedBlockIds - pairIds) }
+                        delay(150)
+                    }
                 }
             }
         }
