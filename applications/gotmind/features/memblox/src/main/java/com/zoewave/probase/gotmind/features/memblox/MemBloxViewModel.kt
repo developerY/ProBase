@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.gotmind.database.MemBloxScoreEntity
 import com.zoewave.probase.gotmind.database.dao.MemBloxScoreDao
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
+import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,16 +28,20 @@ class MemBloxViewModel @Inject constructor(
     val topScores = scoreDao.getTopScores()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    init {
-        startGame()
-    }
-
-    fun startGame() {
-        engine.start()
+    fun startGame(difficulty: MemBloxDifficulty) {
+        engine.start(difficulty)
     }
 
     fun onBlockClick(block: MemBloxBlock) {
         engine.onBlockClick(block)
+    }
+
+    fun usePowerUp(type: PowerUpType) {
+        engine.usePowerUp(type)
+    }
+
+    fun resetToDifficultySelection() {
+        engine.reset()
     }
 
     private fun saveScore(score: Int) {
