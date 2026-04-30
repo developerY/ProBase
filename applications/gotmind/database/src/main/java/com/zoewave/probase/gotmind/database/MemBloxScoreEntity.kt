@@ -10,5 +10,6 @@ data class MemBloxScoreEntity(
     val difficulty: String = "EXPERT",
     val bestStreak: Int = 0,
     val accuracy: Float = 0f,
+    val powerUpsUsed: Int = 0,
     val timestamp: Long = System.currentTimeMillis()
 )
