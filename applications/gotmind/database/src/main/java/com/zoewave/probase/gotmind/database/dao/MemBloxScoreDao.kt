@@ -11,6 +11,9 @@ interface MemBloxScoreDao {
     @Query("SELECT * FROM memblox_scores ORDER BY score DESC LIMIT 10")
     fun getTopScores(): Flow<List<MemBloxScoreEntity>>
 
+    @Query("SELECT * FROM memblox_scores ORDER BY score DESC LIMIT 50")
+    fun getAllTopScores(): Flow<List<MemBloxScoreEntity>>
+
     @Insert
     suspend fun insertScore(score: MemBloxScoreEntity)
 }

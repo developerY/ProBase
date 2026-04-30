@@ -7,5 +7,8 @@ import androidx.room3.PrimaryKey
 data class MemBloxScoreEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val score: Int,
+    val difficulty: String = "EXPERT",
+    val bestStreak: Int = 0,
+    val accuracy: Float = 0f,
     val timestamp: Long = System.currentTimeMillis()
 )
