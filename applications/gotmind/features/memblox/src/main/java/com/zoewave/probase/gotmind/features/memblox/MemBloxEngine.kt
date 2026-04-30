@@ -15,7 +15,8 @@ import java.util.UUID
 
 enum class PowerUpType(val label: String, val icon: String) {
     FREEZE("Freeze", "❄️"),
-    REVEAL("Reveal", "👁️")
+    REVEAL("Reveal", "👁️"),
+    NUKE("Nuke", "☢️")
 }
 
 data class MemBloxState(
@@ -40,9 +41,10 @@ data class MemBloxState(
     val successfulMatches: Int = 0,
     val missedMatches: Int = 0,
     val matchAccuracy: Float = 0f,
-    val powerUps: Map<PowerUpType, Int> = mapOf(PowerUpType.FREEZE to 2, PowerUpType.REVEAL to 1),
+    val powerUps: Map<PowerUpType, Int> = mapOf(PowerUpType.FREEZE to 2, PowerUpType.REVEAL to 1, PowerUpType.NUKE to 1),
     val isFrozen: Boolean = false,
     val isRevealed: Boolean = false,
+    val nukingBlockIds: Map<String, Int> = emptyMap(),
     
     // Skill Tracking
     val bestMatchStreak: Int = 0,
@@ -94,7 +96,7 @@ class MemBloxEngine(
             targetPairs = difficulty.targetPairs,
             difficulty = difficulty,
             isStarted = true,
-            powerUps = mapOf(PowerUpType.FREEZE to 2, PowerUpType.REVEAL to 1)
+            powerUps = mapOf(PowerUpType.FREEZE to 2, PowerUpType.REVEAL to 1, PowerUpType.NUKE to 1)
         )
         pendingPairs.clear()
         spawnCount = 0
@@ -309,6 +311,51 @@ class MemBloxEngine(
                             }
                         )
                     }
+                }
+            }
+            PowerUpType.NUKE -> {
+                scope.launch {
+                    val grid = _state.value.grid
+                    if (grid.isEmpty()) return@launch
+
+                    // 1. Select 3 random blocks
+                    val randomBlocks = grid.shuffled().take(3)
+                    
+                    // 2. Select 2 from tallest column
+                    val tallestCol = (0 until currentDifficulty.cols)
+                        .maxByOrNull { col -> grid.count { it.col == col } } ?: 0
+                    val tallestColBlocks = grid.filter { it.col == tallestCol }
+                        .sortedByDescending { it.row } // Bottom-most first
+                        .take(2)
+                    
+                    val targets = (randomBlocks + tallestColBlocks).distinctBy { it.id }
+                    val targetIds = targets.map { it.id }.toSet()
+
+                    // Animation colors (ARGB)
+                    val green = 0xFF4CAF50.toInt()
+                    val yellow = 0xFFFFEB3B.toInt()
+                    val red = 0xFFF44336.toInt()
+
+                    // Green phase
+                    _state.update { it.copy(nukingBlockIds = targetIds.associateWith { green }) }
+                    delay(500)
+                    
+                    // Yellow phase
+                    _state.update { it.copy(nukingBlockIds = targetIds.associateWith { yellow }) }
+                    delay(500)
+                    
+                    // Red phase
+                    _state.update { it.copy(nukingBlockIds = targetIds.associateWith { red }) }
+                    delay(500)
+
+                    // Removal
+                    _state.update { state ->
+                        state.copy(
+                            grid = state.grid.filterNot { it.id in targetIds },
+                            nukingBlockIds = emptyMap()
+                        )
+                    }
+                    applyGravity()
                 }
             }
         }

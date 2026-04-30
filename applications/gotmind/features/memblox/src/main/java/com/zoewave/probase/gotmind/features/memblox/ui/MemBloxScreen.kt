@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -64,6 +65,7 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant)
+                .statusBarsPadding()
                 .padding(12.dp)
         ) {
             Row(
@@ -148,16 +150,23 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
             val blockHeight = maxHeight / state.rows
 
             state.grid.forEach { block ->
+                val nukingColor = state.nukingBlockIds[block.id]
                 Box(
                     modifier = Modifier
                         .size(blockSize, blockHeight)
                         .offset(x = blockSize * block.col, y = blockHeight * block.row)
-                        .background(if (block.isFlipped) Color.White else Color(block.color))
+                        .background(
+                            when {
+                                nukingColor != null -> Color(nukingColor)
+                                block.isFlipped -> Color.White
+                                else -> Color(block.color)
+                            }
+                        )
                         .border(1.dp, Color.Black.copy(alpha = 0.2f))
                         .clickable { viewModel.onBlockClick(block) },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (block.isFlipped || state.isRevealed) {
+                    if (block.isFlipped || state.isRevealed || nukingColor != null) {
                         Text(text = block.emoji, fontSize = (blockSize.value * 0.6).sp)
                     }
                 }
