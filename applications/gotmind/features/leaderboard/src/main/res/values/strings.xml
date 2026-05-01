@@ -1,0 +1,10 @@
+<resources>
+    <string name="applications_gotmind_features_leaderboard_title">Hall of Fame</string>
+    <string name="applications_gotmind_features_leaderboard_empty">No legendary feats yet. Go play!</string>
+    <string name="applications_gotmind_features_leaderboard_peak_streak">Peak Streak</string>
+    <string name="applications_gotmind_features_leaderboard_hit_rate">Hit Rate</string>
+    <string name="applications_gotmind_features_leaderboard_medal_sniper">Sniper</string>
+    <string name="applications_gotmind_features_leaderboard_medal_streak">Streak</string>
+    <string name="applications_gotmind_features_leaderboard_medal_pro">Pro</string>
+    <string name="applications_gotmind_features_leaderboard_percent_format">%1$d%%</string>
+</resources>
