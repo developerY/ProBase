@@ -14,16 +14,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-enum class PowerUpType(val label: String, val icon: String) {
-    FREEZE("Freeze", "❄️"),
-    REVEAL("Reveal", "👁️"),
-    NUKE("Nuke", "☢️"),
-    HINT("Hint", "💡"),
-    EQUALIZER("Equalizer", "💎"),
-    SLOW("Slow", "⏳"),
-    TIDY("Tidy", "🧹"),
-    AUTO_MATCH("Auto", "🤖"),
-    SCAN("Scan", "🔍")
+enum class PowerUpType(val labelResId: Int, val icon: String) {
+    FREEZE(R.string.applications_gotmind_features_memblox_pu_freeze, "❄️"),
+    REVEAL(R.string.applications_gotmind_features_memblox_pu_reveal, "👁️"),
+    NUKE(R.string.applications_gotmind_features_memblox_pu_nuke, "☢️"),
+    HINT(R.string.applications_gotmind_features_memblox_pu_hint, "💡"),
+    EQUALIZER(R.string.applications_gotmind_features_memblox_pu_equalizer, "💎"),
+    SLOW(R.string.applications_gotmind_features_memblox_pu_slow, "⏳"),
+    TIDY(R.string.applications_gotmind_features_memblox_pu_tidy, "🧹"),
+    AUTO_MATCH(R.string.applications_gotmind_features_memblox_pu_auto, "🤖"),
+    SCAN(R.string.applications_gotmind_features_memblox_pu_scan, "🔍")
 }
 
 enum class HapticSignal { LIGHT, MEDIUM, HEAVY }
@@ -36,7 +36,7 @@ data class ConfettiBurst(
 
 data class FloatingTextEffect(
     val id: String = UUID.randomUUID().toString(),
-    val text: String,
+    val textResId: Int,
     val col: Int,
     val row: Int,
     val color: Int = 0xFFFFEB3B.toInt()
@@ -356,15 +356,15 @@ class MemBloxEngine(
                 } else state.powerUps
 
                 // Floating Text Announcer
-                val announcerText = when {
-                    newCombo == 3 -> "GREAT!"
-                    newCombo == 5 -> "EXCELLENT!!"
-                    newCombo == 8 -> "UNSTOPPABLE!!!"
-                    newCombo >= 10 -> "GODLIKE!!!!"
+                val announcerResId = when {
+                    newCombo == 3 -> R.string.applications_gotmind_features_memblox_great
+                    newCombo == 5 -> R.string.applications_gotmind_features_memblox_excellent
+                    newCombo == 8 -> R.string.applications_gotmind_features_memblox_unstoppable
+                    newCombo >= 10 -> R.string.applications_gotmind_features_memblox_godlike
                     else -> null
                 }
-                val newFloatingTexts = announcerText?.let {
-                    state.floatingTexts + FloatingTextEffect(text = it, col = flipped[0].col, row = flipped[0].row)
+                val newFloatingTexts = announcerResId?.let {
+                    state.floatingTexts + FloatingTextEffect(textResId = it, col = flipped[0].col, row = flipped[0].row)
                 } ?: state.floatingTexts
 
                 val newStreak = state.currentMatchStreak + 1
@@ -417,10 +417,10 @@ class MemBloxEngine(
                         delay(1000)
                         _state.update { s -> s.copy(floatingScores = s.floatingScores.filter { f -> f.id != scorePopup.id }) }
                     }
-                    if (announcerText != null) {
+                    if (announcerResId != null) {
                         scope.launch {
                             delay(1500)
-                            _state.update { s -> s.copy(floatingTexts = s.floatingTexts.filter { f -> f.text != announcerText }) }
+                            _state.update { s -> s.copy(floatingTexts = s.floatingTexts.filter { f -> f.textResId != announcerResId }) }
                         }
                     }
                     if (isVictory) {
