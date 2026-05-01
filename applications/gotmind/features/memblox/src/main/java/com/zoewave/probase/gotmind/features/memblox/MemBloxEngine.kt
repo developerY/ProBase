@@ -303,7 +303,7 @@ class MemBloxEngine(
     }
 
     fun onBlockClick(block: MemBloxBlock) {
-        if (_state.value.isGameOver || _state.value.isVictory || _state.value.isRevealed) return
+        if (_state.value.isGameOver || _state.value.isVictory || _state.value.isRevealed || _state.value.isPaused) return
         if (block.isMatched || block.isFlipped || _state.value.flippedBlocks.size >= 2) return
 
         triggerHaptic(HapticSignal.LIGHT)
