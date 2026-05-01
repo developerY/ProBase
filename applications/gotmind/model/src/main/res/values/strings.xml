@@ -1,0 +1,5 @@
+<resources>
+    <string name="applications_gotmind_model_diff_easy">Easy</string>
+    <string name="applications_gotmind_model_diff_medium">Medium</string>
+    <string name="applications_gotmind_model_diff_expert">Expert</string>
+</resources>
