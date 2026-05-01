@@ -9,4 +9,6 @@ sealed interface MemBloxEvent {
     data class UsePowerUp(val type: PowerUpType) : MemBloxEvent
     data object ResetToSelection : MemBloxEvent
     data object HapticConsumed : MemBloxEvent
+    data object TogglePause : MemBloxEvent
+    data class UpdateSpeed(val multiplier: Float) : MemBloxEvent
 }

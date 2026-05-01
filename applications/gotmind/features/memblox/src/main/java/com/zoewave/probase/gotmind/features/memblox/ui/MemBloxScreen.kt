@@ -40,10 +40,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Speed
@@ -115,7 +115,6 @@ fun MemBloxScreen(
 
     val haptic = LocalHapticFeedback.current
 
-    // Haptic Feedback Observer
     LaunchedEffect(uiState.lastHapticSignal) {
         uiState.lastHapticSignal?.let { signal ->
             when (signal) {
@@ -140,7 +139,6 @@ fun MemBloxScreen(
         return
     }
 
-    // Screenshake Offset
     val shakeX by animateFloatAsState(
         targetValue = if (uiState.shakeIntensity > 0 || uiState.isStressed) (Random.nextFloat() - 0.5f) * (uiState.shakeIntensity + 1f) * 10 else 0f,
         animationSpec = spring(stiffness = Spring.StiffnessHigh),
@@ -155,122 +153,88 @@ fun MemBloxScreen(
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
         ParticleBackground(speedFactor = if (uiState.isFrenzy) 3f else 1f)
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .offset { IntOffset(shakeX.roundToInt(), shakeY.roundToInt()) }
-        ) {
-            ElevatedCard(
+        Column(modifier = Modifier.fillMaxSize()) {
+            // 1. Ultra-Slim Header (Top Fixed HUD)
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .statusBarsPadding()
-                    .padding(12.dp),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.elevatedCardColors(containerColor = Color(0xFF1E1E1E).copy(alpha = 0.9f))
+                    .padding(8.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFF1E1E1E).copy(alpha = 0.7f))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = { onNav("BACK") },
+                        modifier = Modifier.size(36.dp).background(Color.White.copy(alpha = 0.1f), CircleShape)
                     ) {
-                        Column {
-                            Text(
-                                text = stringResource(R.string.applications_gotmind_features_memblox_score),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                            Text(
-                                text = uiState.score.toString(),
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Black,
-                                color = if (uiState.isFrenzy) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(
-                                text = stringResource(R.string.applications_gotmind_features_memblox_pairs),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                            Text(
-                                text = stringResource(R.string.applications_gotmind_features_memblox_pairs_format, uiState.pairsMatched, uiState.targetPairs),
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        IconButton(
-                            onClick = { showAnalytics = !showAnalytics },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f), CircleShape)
-                        ) {
-                            Icon(
-                                imageVector = if (showAnalytics) Icons.Default.KeyboardArrowUp else Icons.Default.Analytics,
-                                contentDescription = stringResource(R.string.applications_gotmind_features_memblox_analytics),
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    val progress by animateFloatAsState(targetValue = uiState.pairsMatched.toFloat() / uiState.targetPairs, animationSpec = tween(500))
-                    LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape), color = if (uiState.isFrenzy) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary, trackColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f), strokeCap = StrokeCap.Round)
-                    
-                    if (uiState.combo > 1) {
-                        Text(
-                            text = if (uiState.isFrenzy) {
-                                stringResource(R.string.applications_gotmind_features_memblox_frenzy)
-                            } else {
-                                stringResource(R.string.applications_gotmind_features_memblox_combo, uiState.multiplier)
-                            } + " 🔥",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = if (uiState.isFrenzy) Color(0xFFE91E63) else Color(0xFFFF5722),
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_gotmind_features_memblox_back), modifier = Modifier.size(20.dp), tint = Color.White)
                     }
 
-                    AnimatedVisibility(visible = showAnalytics) {
-                        Column(modifier = Modifier.padding(top = 16.dp).fillMaxWidth()) {
-                            val loadPct = if (uiState.cols * uiState.rows > 0) (uiState.peakBoardBlocks * 100 / (uiState.cols * uiState.rows)) else 0
-                            AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_hit_rate), stringResource(R.string.applications_gotmind_features_memblox_percent_format, (uiState.matchAccuracy * 100).toInt()))
-                            AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_best_streak), "${uiState.bestMatchStreak}")
-                            AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_avg_match_time), String.format(Locale.getDefault(), "%.1fs", uiState.avgMatchTimeMs / 1000f))
-                            AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_peak_board_load), "$loadPct%")
-                            AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_solubility), "${(uiState.successfulMatches * 100 / (uiState.totalClicks.coerceAtLeast(1)))}%")
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = uiState.score.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = if (uiState.isFrenzy) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary)
+                            Text(text = stringResource(R.string.applications_gotmind_features_memblox_score), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                         }
+                        Spacer(modifier = Modifier.width(24.dp))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = stringResource(R.string.applications_gotmind_features_memblox_pairs_format, uiState.pairsMatched, uiState.targetPairs), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(text = stringResource(R.string.applications_gotmind_features_memblox_pairs), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                        }
+                    }
+
+                    IconButton(
+                        onClick = { showAnalytics = !showAnalytics },
+                        modifier = Modifier.size(36.dp).background(if (showAnalytics) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.1f), CircleShape)
+                    ) {
+                        Icon(imageVector = Icons.Default.Analytics, contentDescription = stringResource(R.string.applications_gotmind_features_memblox_analytics), modifier = Modifier.size(20.dp), tint = Color.White)
+                    }
+                }
+
+                // Analytics HUD Overlay (Still inside top column so it doesn't overlap board)
+                AnimatedVisibility(visible = showAnalytics) {
+                    Column(
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF1E1E1E).copy(alpha = 0.8f))
+                            .padding(12.dp)
+                    ) {
+                        val loadPct = if (uiState.cols * uiState.rows > 0) (uiState.peakBoardBlocks * 100 / (uiState.cols * uiState.rows)) else 0
+                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_hit_rate), stringResource(R.string.applications_gotmind_features_memblox_percent_format, (uiState.matchAccuracy * 100).toInt()))
+                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_best_streak), "${uiState.bestMatchStreak}")
+                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_avg_match_time), String.format(Locale.getDefault(), "%.1fs", uiState.avgMatchTimeMs / 1000f))
+                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_peak_board_load), "$loadPct%")
+                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_solubility), "${(uiState.successfulMatches * 100 / (uiState.totalClicks.coerceAtLeast(1)))}%")
                     }
                 }
             }
 
-            Row(
+            // 2. Ultra-Thin Progress Line (Between Header and Board)
+            val progress by animateFloatAsState(targetValue = uiState.pairsMatched.toFloat() / uiState.targetPairs, animationSpec = tween(500))
+            LinearProgressIndicator(
+                progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                PowerUpType.entries.forEach { type ->
-                    val count = uiState.powerUps[type] ?: 0
-                    val isAvailable = count > 0 && !uiState.isGameOver && !uiState.isVictory
-                    ElevatedAssistChip(
-                        onClick = { onEvent(MemBloxEvent.UsePowerUp(type)) },
-                        label = { Text("${stringResource(type.labelResId)} ($count)", style = MaterialTheme.typography.labelLarge) },
-                        leadingIcon = { Text(type.icon) },
-                        enabled = isAvailable,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = androidx.compose.material3.AssistChipDefaults.elevatedAssistChipColors(containerColor = if (isAvailable) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent, labelColor = if (isAvailable) MaterialTheme.colorScheme.onSecondaryContainer else Color.Gray)
-                    )
-                }
-            }
+                    .height(2.dp),
+                color = if (uiState.isFrenzy) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary,
+                trackColor = Color.Transparent,
+                strokeCap = StrokeCap.Butt
+            )
 
+            // 3. Interactive Board Area (Dedicated Space)
             BoxWithConstraints(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Brush.verticalGradient(colors = listOf(Color(0xFF1A1A1A).copy(alpha = 0.8f), Color(0xFF050505).copy(alpha = 0.9f))))
-                    .border(2.dp, if (uiState.isFrenzy) Color(0xFFE91E63) else if (uiState.isFrozen) Color(0xFF03A9F4) else Color(0xFF333333), RoundedCornerShape(16.dp))
+                    .offset { IntOffset(shakeX.roundToInt(), shakeY.roundToInt()) }
             ) {
                 val blockSize = maxWidth / uiState.cols
                 val blockHeight = maxHeight / uiState.rows
@@ -325,11 +289,54 @@ fun MemBloxScreen(
                     }
                 }
 
+                // Combo & Frenzy Announcer (Floating Center of Board)
+                if (uiState.combo > 1) {
+                    Box(modifier = Modifier.fillMaxSize().padding(top = 20.dp), contentAlignment = Alignment.TopCenter) {
+                        Text(
+                            text = if (uiState.isFrenzy) stringResource(R.string.applications_gotmind_features_memblox_frenzy) else stringResource(R.string.applications_gotmind_features_memblox_combo, uiState.multiplier),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Black,
+                            color = if (uiState.isFrenzy) Color(0xFFE91E63) else Color(0xFFFF5722),
+                            modifier = Modifier
+                                .background(Color.Black.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
                 if (uiState.isGameOver || uiState.isVictory) {
                     EndGameOverlay(
                         state = uiState, 
                         onRetry = { onEvent(MemBloxEvent.StartGame(uiState.difficulty)) }, 
                         onChangeDifficulty = { onEvent(MemBloxEvent.ResetToSelection) }
+                    )
+                }
+            }
+
+            // 4. Floating Power-Up Bar (Bottom Fixed HUD)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                PowerUpType.entries.forEach { type ->
+                    val count = uiState.powerUps[type] ?: 0
+                    val isAvailable = count > 0 && !uiState.isGameOver && !uiState.isVictory
+                    ElevatedAssistChip(
+                        onClick = { onEvent(MemBloxEvent.UsePowerUp(type)) },
+                        label = { Text("${stringResource(type.labelResId)} ($count)", style = MaterialTheme.typography.labelSmall, color = if (isAvailable) Color.White else Color.Gray) },
+                        leadingIcon = { Text(type.icon, fontSize = 14.sp) },
+                        enabled = isAvailable,
+                        shape = RoundedCornerShape(24.dp),
+                        colors = androidx.compose.material3.AssistChipDefaults.elevatedAssistChipColors(
+                            containerColor = if (isAvailable) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f) else Color.Transparent,
+                            disabledContainerColor = Color.Black.copy(alpha = 0.3f)
+                        ),
+                        border = androidx.compose.material3.AssistChipDefaults.assistChipBorder(enabled = isAvailable, borderColor = if (isAvailable) Color.White.copy(alpha = 0.2f) else Color.Gray.copy(alpha = 0.1f))
                     )
                 }
             }
@@ -914,12 +921,7 @@ fun HallOfFameCard(score: MemBloxScoreEntity) {
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(stringResource(R.string.applications_gotmind_features_memblox_hit_rate), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                    Text(
-                        text = stringResource(R.string.applications_gotmind_features_memblox_percent_format, (score.accuracy * 100).toInt()), 
-                        style = MaterialTheme.typography.bodyLarge, 
-                        fontWeight = FontWeight.Bold, 
-                        color = Color.White
-                    )
+                    Text("${(score.accuracy * 100).toInt()}%", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
         }

@@ -122,7 +122,9 @@ data class MemBloxState(
     val totalMatchTimeMs: Long = 0,
     val peakBoardBlocks: Int = 0,
     val firstFlipTimestamp: Long = 0,
-    val finalRank: String = ""
+    val finalRank: String = "",
+    val isPaused: Boolean = false,
+    val speedMultiplier: Float = 1.0f
 )
 
 class MemBloxEngine(
@@ -188,21 +190,30 @@ class MemBloxEngine(
                 val progressFactor = 1.0f - (progress * 0.4f)
                 val slowFactor = if (_state.value.isSlowed) 2.0f else 1.0f
                 val frenzyFactor = if (_state.value.isFrenzy) 0.66f else 1.0f
-                val speedFactor = progressFactor * slowFactor * frenzyFactor
+                val userSpeedFactor = 1.0f / _state.value.speedMultiplier
+                val speedFactor = progressFactor * slowFactor * frenzyFactor * userSpeedFactor
                 
                 // Stress Check (Overheat)
                 val boardLoad = _state.value.grid.size.toFloat() / (difficulty.cols * difficulty.rows)
                 _state.update { it.copy(isStressed = boardLoad > 0.75f) }
                 
-                if (!_state.value.isFrozen) {
+                if (!_state.value.isFrozen && !_state.value.isPaused) {
                     delay((difficulty.spawnDelayMillis * speedFactor).toLong())
                     spawnBlock()
                     applyGravity()
                 } else {
-                    delay(500)
+                    delay(200)
                 }
             }
         }
+    }
+
+    fun togglePause() {
+        _state.update { it.copy(isPaused = !it.isPaused) }
+    }
+
+    fun updateSpeed(multiplier: Float) {
+        _state.update { it.copy(speedMultiplier = multiplier) }
     }
 
     fun reset() {

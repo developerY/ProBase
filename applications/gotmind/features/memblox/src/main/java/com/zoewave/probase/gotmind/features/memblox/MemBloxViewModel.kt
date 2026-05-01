@@ -35,6 +35,8 @@ class MemBloxViewModel @Inject constructor(
             is MemBloxEvent.UsePowerUp -> engine.usePowerUp(event.type)
             MemBloxEvent.ResetToSelection -> engine.reset()
             MemBloxEvent.HapticConsumed -> engine.onHapticConsumed()
+            MemBloxEvent.TogglePause -> engine.togglePause()
+            is MemBloxEvent.UpdateSpeed -> engine.updateSpeed(event.multiplier)
         }
     }
 
