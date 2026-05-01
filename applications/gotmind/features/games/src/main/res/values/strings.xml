@@ -1,0 +1,5 @@
+<resources>
+    <string name="applications_gotmind_features_games_title">GotMind Games</string>
+    <string name="applications_gotmind_features_games_classic">GotMind Classic</string>
+    <string name="applications_gotmind_features_games_memblox">MemBlox</string>
+</resources>
