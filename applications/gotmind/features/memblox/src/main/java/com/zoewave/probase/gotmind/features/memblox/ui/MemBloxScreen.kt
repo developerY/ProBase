@@ -229,6 +229,39 @@ fun MemBloxScreen(
                             steps = 15,
                             colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary)
                         )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Button(
+                                onClick = { onNav("BACK") },
+                                modifier = Modifier.weight(1f).height(40.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.2f), contentColor = Color.Red),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
+                            ) {
+                                Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(stringResource(R.string.applications_gotmind_features_memblox_quit), style = MaterialTheme.typography.labelLarge)
+                            }
+                            
+                            Button(
+                                onClick = { onEvent(MemBloxEvent.TogglePause) },
+                                modifier = Modifier.weight(1f).height(40.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (uiState.isPaused) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.1f),
+                                    contentColor = if (uiState.isPaused) MaterialTheme.colorScheme.primary else Color.White
+                                ),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
+                            ) {
+                                Icon(if (uiState.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(if (uiState.isPaused) stringResource(R.string.applications_gotmind_features_memblox_resume) else stringResource(R.string.applications_gotmind_features_memblox_pause), style = MaterialTheme.typography.labelLarge)
+                            }
+                        }
                     }
                 }
             }
@@ -330,71 +363,30 @@ fun MemBloxScreen(
             }
 
             // 4. Floating Power-Up Bar (Bottom HUD Area)
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 12.dp)
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    PowerUpType.entries.forEach { type ->
-                        val count = uiState.powerUps[type] ?: 0
-                        val isAvailable = count > 0 && !uiState.isGameOver && !uiState.isVictory && !uiState.isPaused
-                        ElevatedAssistChip(
-                            onClick = { onEvent(MemBloxEvent.UsePowerUp(type)) },
-                            label = { Text("${stringResource(type.labelResId)} ($count)", style = MaterialTheme.typography.labelSmall, color = if (isAvailable) Color.White else Color.Gray) },
-                            leadingIcon = { Text(type.icon, fontSize = 14.sp) },
-                            enabled = isAvailable,
-                            shape = RoundedCornerShape(24.dp),
-                            colors = androidx.compose.material3.AssistChipDefaults.elevatedAssistChipColors(
-                                containerColor = if (isAvailable) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f) else Color.Transparent,
-                                disabledContainerColor = Color.Black.copy(alpha = 0.3f)
-                            ),
-                            border = androidx.compose.material3.AssistChipDefaults.assistChipBorder(enabled = isAvailable, borderColor = if (isAvailable) Color.White.copy(alpha = 0.2f) else Color.Gray.copy(alpha = 0.1f))
-                        )
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Button(
-                        onClick = { onNav("BACK") },
-                        modifier = Modifier.weight(1f).height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.2f), contentColor = Color.Red),
-                        shape = RoundedCornerShape(12.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.Red.copy(alpha = 0.5f))
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.applications_gotmind_features_memblox_quit), fontWeight = FontWeight.Bold)
-                    }
-                    
-                    Button(
-                        onClick = { onEvent(MemBloxEvent.TogglePause) },
-                        modifier = Modifier.weight(1f).height(48.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (uiState.isPaused) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.1f),
-                            contentColor = if (uiState.isPaused) MaterialTheme.colorScheme.primary else Color.White
+                PowerUpType.entries.forEach { type ->
+                    val count = uiState.powerUps[type] ?: 0
+                    val isAvailable = count > 0 && !uiState.isGameOver && !uiState.isVictory && !uiState.isPaused
+                    ElevatedAssistChip(
+                        onClick = { onEvent(MemBloxEvent.UsePowerUp(type)) },
+                        label = { Text("${stringResource(type.labelResId)} ($count)", style = MaterialTheme.typography.labelSmall, color = if (isAvailable) Color.White else Color.Gray) },
+                        leadingIcon = { Text(type.icon, fontSize = 14.sp) },
+                        enabled = isAvailable,
+                        shape = RoundedCornerShape(24.dp),
+                        colors = androidx.compose.material3.AssistChipDefaults.elevatedAssistChipColors(
+                            containerColor = if (isAvailable) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f) else Color.Transparent,
+                            disabledContainerColor = Color.Black.copy(alpha = 0.3f)
                         ),
-                        shape = RoundedCornerShape(12.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, if (uiState.isPaused) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.2f))
-                    ) {
-                        Icon(if (uiState.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(if (uiState.isPaused) stringResource(R.string.applications_gotmind_features_memblox_resume) else stringResource(R.string.applications_gotmind_features_memblox_pause), fontWeight = FontWeight.Bold)
-                    }
+                        border = androidx.compose.material3.AssistChipDefaults.assistChipBorder(enabled = isAvailable, borderColor = if (isAvailable) Color.White.copy(alpha = 0.2f) else Color.Gray.copy(alpha = 0.1f))
+                    )
                 }
             }
         }
