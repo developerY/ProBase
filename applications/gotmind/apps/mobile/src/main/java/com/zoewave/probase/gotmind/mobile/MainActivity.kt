@@ -73,16 +73,19 @@ class MainActivity : ComponentActivity() {
                 val backStack = remember { mutableStateListOf<GotMindRoute>(GotMindRoute.Games) }
                 val currentRoute = backStack.lastOrNull() ?: GotMindRoute.Games
                 
-                // Show bottom bar only for top-level destinations
-                val isTopLevel = currentRoute in topLevelDestinations.map { it.route }
+                // Keep tabs visible for games to maintain consistent app structure
+                val shouldShowBottomBar = currentRoute in topLevelDestinations.map { it.route } || 
+                                        currentRoute == GotMindRoute.MemBlox || 
+                                        currentRoute == GotMindRoute.GotMindClassic
 
                 Scaffold(
                     bottomBar = {
-                        if (isTopLevel) {
+                        if (shouldShowBottomBar) {
                             GotMindBottomBar(
                                 currentRoute = currentRoute,
                                 onNavigate = { route ->
                                     if (route != currentRoute) {
+                                        // Clear stack when switching main tabs to avoid state leaks
                                         backStack.clear()
                                         backStack.add(route)
                                     }
@@ -97,7 +100,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         NavDisplay(
                             backStack = backStack,
-                            modifier = Modifier.padding(if (isTopLevel) innerPadding else androidx.compose.foundation.layout.PaddingValues(0.dp)),
+                            modifier = Modifier.padding(if (shouldShowBottomBar) innerPadding else androidx.compose.foundation.layout.PaddingValues(0.dp)),
                             onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
                             entryProvider = { route ->
                                 NavEntry(route) {
@@ -148,13 +151,20 @@ fun GotMindBottomBar(
     currentRoute: GotMindRoute,
     onNavigate: (GotMindRoute) -> Unit
 ) {
+    // Map sub-routes back to their parent tabs for highlighting
+    val selectedRoute = when (currentRoute) {
+        GotMindRoute.MemBlox, GotMindRoute.GotMindClassic -> GotMindRoute.Games
+        else -> currentRoute
+    }
+
     NavigationBar(
-        containerColor = androidx.compose.ui.graphics.Color(0xFF1E1E1E),
-        contentColor = androidx.compose.ui.graphics.Color.White
+        containerColor = androidx.compose.ui.graphics.Color(0xFF1E1E1E).copy(alpha = 0.9f), // Glassmorphism look
+        contentColor = androidx.compose.ui.graphics.Color.White,
+        tonalElevation = 8.dp
     ) {
         topLevelDestinations.forEach { dest ->
             NavigationBarItem(
-                selected = currentRoute == dest.route,
+                selected = selectedRoute == dest.route,
                 onClick = { onNavigate(dest.route) },
                 icon = { Icon(dest.icon, contentDescription = stringResource(dest.labelResId)) },
                 label = { Text(stringResource(dest.labelResId)) }
