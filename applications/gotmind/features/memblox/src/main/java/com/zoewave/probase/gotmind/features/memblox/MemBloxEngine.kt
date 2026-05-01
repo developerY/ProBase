@@ -49,6 +49,19 @@ data class MatchGhost(
     val row: Int
 )
 
+data class Shockwave(
+    val id: String = UUID.randomUUID().toString(),
+    val col: Int,
+    val row: Int
+)
+
+data class ScorePopup(
+    val id: String = UUID.randomUUID().toString(),
+    val score: Int,
+    val col: Int,
+    val row: Int
+)
+
 data class MemBloxState(
     val grid: List<MemBloxBlock> = emptyList(),
     val score: Int = 0,
@@ -86,9 +99,12 @@ data class MemBloxState(
     val isFrozen: Boolean = false,
     val isRevealed: Boolean = false,
     val isSlowed: Boolean = false,
+    val isFrenzy: Boolean = false,
     val nukingBlockIds: Map<String, Int> = emptyMap(),
     val initiallyRevealedBlockIds: Set<String> = emptySet(),
     val confettiBursts: List<ConfettiBurst> = emptyList(),
+    val activeShockwaves: List<Shockwave> = emptyList(),
+    val floatingScores: List<ScorePopup> = emptyList(),
     
     // 6-Star Polish VFX State
     val shakeIntensity: Float = 0f,
@@ -105,7 +121,8 @@ data class MemBloxState(
     val avgMatchTimeMs: Long = 0,
     val totalMatchTimeMs: Long = 0,
     val peakBoardBlocks: Int = 0,
-    val firstFlipTimestamp: Long = 0
+    val firstFlipTimestamp: Long = 0,
+    val finalRank: String = ""
 )
 
 class MemBloxEngine(
@@ -170,7 +187,8 @@ class MemBloxEngine(
                 val progress = _state.value.pairsMatched.toFloat() / _state.value.targetPairs
                 val progressFactor = 1.0f - (progress * 0.4f)
                 val slowFactor = if (_state.value.isSlowed) 2.0f else 1.0f
-                val speedFactor = progressFactor * slowFactor
+                val frenzyFactor = if (_state.value.isFrenzy) 0.66f else 1.0f
+                val speedFactor = progressFactor * slowFactor * frenzyFactor
                 
                 // Stress Check (Overheat)
                 val boardLoad = _state.value.grid.size.toFloat() / (difficulty.cols * difficulty.rows)
@@ -203,7 +221,7 @@ class MemBloxEngine(
     private fun spawnBlock() {
         val col = (0 until currentDifficulty.cols).random()
         if (_state.value.grid.any { it.row == 0 && it.col == col }) {
-            _state.update { it.copy(isGameOver = true) }
+            _state.update { it.copy(isGameOver = true, finalRank = calculateRank(it)) }
             triggerHaptic(HapticSignal.HEAVY)
             onGameOver(_state.value.score)
             return
@@ -319,9 +337,19 @@ class MemBloxEngine(
                 val isCombo = lastMatchTime != 0L && (now - lastMatchTime) < 3000L
                 val newCombo = if (isCombo) state.combo + 1 else 1
                 val newPeakCombo = maxOf(state.peakCombo, newCombo)
-                val multiplier = 1.0f + (newCombo - 1) * 0.5f
-                val points = (10 * multiplier).toInt()
+                val baseMultiplier = 1.0f + (newCombo - 1) * 0.5f
+                val frenzyMultiplier = if (state.isFrenzy) 2.0f else 1.0f
+                val points = (10 * baseMultiplier * frenzyMultiplier).toInt()
                 
+                // Frenzy trigger: 10% chance after 5x combo
+                if (!state.isFrenzy && newCombo >= 5 && (1..10).random() == 1) {
+                    scope.launch {
+                        _state.update { it.copy(isFrenzy = true) }
+                        delay(10000)
+                        _state.update { it.copy(isFrenzy = false) }
+                    }
+                }
+
                 // Award Equalizer on high combo
                 val updatedPowerUps = if (newCombo == 5) {
                     state.powerUps + (PowerUpType.EQUALIZER to (state.powerUps[PowerUpType.EQUALIZER] ?: 0) + 1)
@@ -350,6 +378,8 @@ class MemBloxEngine(
                 val isVictory = newPairsMatched >= state.targetPairs && newGrid.isEmpty()
                 val newAccuracy = (state.successfulMatches + 1).toFloat() / (state.successfulMatches + state.missedMatches + 1)
                 
+                val scorePopup = ScorePopup(score = points, col = flipped[0].col, row = flipped[0].row)
+
                 state.copy(
                     grid = newGrid,
                     flippedBlocks = emptyList(),
@@ -357,7 +387,7 @@ class MemBloxEngine(
                     pairsMatched = newPairsMatched,
                     isVictory = isVictory,
                     combo = newCombo,
-                    multiplier = multiplier,
+                    multiplier = baseMultiplier * frenzyMultiplier,
                     peakCombo = newPeakCombo,
                     successfulMatches = state.successfulMatches + 1,
                     matchAccuracy = newAccuracy,
@@ -368,7 +398,9 @@ class MemBloxEngine(
                     confettiBursts = state.confettiBursts + matchBursts,
                     floatingTexts = newFloatingTexts,
                     matchGhosts = state.matchGhosts + ghosts,
-                    powerUps = updatedPowerUps
+                    powerUps = updatedPowerUps,
+                    floatingScores = state.floatingScores + scorePopup,
+                    finalRank = if (isVictory) calculateRank(state.copy(score = state.score + points, matchAccuracy = newAccuracy, bestMatchStreak = newBestStreak)) else ""
                 ).also {
                     scope.launch { applyGravity() }
                     scope.launch {
@@ -380,6 +412,10 @@ class MemBloxEngine(
                         delay(1000)
                         val ghostIds = ghosts.map { it.id }.toSet()
                         _state.update { s -> s.copy(matchGhosts = s.matchGhosts.filterNot { g -> g.id in ghostIds }) }
+                    }
+                    scope.launch {
+                        delay(1000)
+                        _state.update { s -> s.copy(floatingScores = s.floatingScores.filter { f -> f.id != scorePopup.id }) }
                     }
                     if (announcerText != null) {
                         scope.launch {
@@ -406,6 +442,20 @@ class MemBloxEngine(
                     currentMatchStreak = 0
                 )
             }
+        }
+    }
+
+    private fun calculateRank(state: MemBloxState): String {
+        val score = state.score
+        val accuracy = state.matchAccuracy
+        val streak = state.bestMatchStreak
+        
+        return when {
+            accuracy >= 0.9f && streak >= 10 -> "S"
+            accuracy >= 0.7f && score > 500 -> "A"
+            accuracy >= 0.5f && score > 250 -> "B"
+            score > 100 -> "C"
+            else -> "D"
         }
     }
 
@@ -457,6 +507,14 @@ class MemBloxEngine(
                     
                     val targets = (randomBlocks + tallestColBlocks).distinctBy { it.id }
                     val targetIds = targets.map { it.id }.toSet()
+                    
+                    // Trigger Shockwave
+                    val shock = Shockwave(col = tallestCol, row = tallestColBlocks.firstOrNull()?.row ?: 10)
+                    _state.update { it.copy(activeShockwaves = it.activeShockwaves + shock) }
+                    scope.launch {
+                        delay(1000)
+                        _state.update { s -> s.copy(activeShockwaves = s.activeShockwaves.filter { it.id != shock.id }) }
+                    }
 
                     val green = 0xFF4CAF50.toInt()
                     val yellow = 0xFFFFEB3B.toInt()
@@ -497,7 +555,8 @@ class MemBloxEngine(
                 val targetIds = targets.map { it.id }.toSet()
                 
                 scope.launch {
-                    _state.update { it.copy(nukingBlockIds = targetIds.associateWith { 0xFF00BCD4.toInt() }, shakeIntensity = 3f) }
+                    val shock = Shockwave(col = currentDifficulty.cols / 2, row = currentDifficulty.rows / 2)
+                    _state.update { it.copy(activeShockwaves = it.activeShockwaves + shock, nukingBlockIds = targetIds.associateWith { 0xFF00BCD4.toInt() }, shakeIntensity = 3f) }
                     triggerHaptic(HapticSignal.MEDIUM)
                     delay(800)
                     _state.update { state ->
@@ -505,7 +564,8 @@ class MemBloxEngine(
                             grid = state.grid.filterNot { it.id in targetIds },
                             nukingBlockIds = emptyMap(),
                             shakeIntensity = 0f,
-                            score = state.score + (targets.size / 2) * 20
+                            score = state.score + (targets.size / 2) * 20,
+                            activeShockwaves = state.activeShockwaves.filter { it.id != shock.id }
                         )
                     }
                     applyGravity()

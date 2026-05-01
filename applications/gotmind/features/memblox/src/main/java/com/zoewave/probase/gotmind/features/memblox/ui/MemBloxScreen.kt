@@ -92,8 +92,10 @@ import com.zoewave.probase.gotmind.features.memblox.MatchGhost
 import com.zoewave.probase.gotmind.features.memblox.MemBloxState
 import com.zoewave.probase.gotmind.features.memblox.MemBloxViewModel
 import com.zoewave.probase.gotmind.features.memblox.PowerUpType
+import com.zoewave.probase.gotmind.features.memblox.ScorePopup
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -145,159 +147,212 @@ fun MemBloxScreen(viewModel: MemBloxViewModel) {
         label = "ShakeY"
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0F0F0F))
-            .offset { IntOffset(shakeX.roundToInt(), shakeY.roundToInt()) }
-    ) {
-        // --- Sleek Header ---
-        ElevatedCard(
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
+        // --- 7-Star Particle Background ---
+        ParticleBackground(speedFactor = if (state.isFrenzy) 3f else 1f)
+
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(12.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.elevatedCardColors(containerColor = Color(0xFF1E1E1E))
+                .fillMaxSize()
+                .offset { IntOffset(shakeX.roundToInt(), shakeY.roundToInt()) }
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text("Score", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                        Text(state.score.toString(), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
-                    }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text("Pairs", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                        Text("${state.pairsMatched}/${state.targetPairs}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    }
-                    IconButton(
-                        onClick = { showAnalytics = !showAnalytics },
-                        modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f), CircleShape)
+            // --- Sleek Header ---
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(12.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.elevatedCardColors(containerColor = Color(0xFF1E1E1E).copy(alpha = 0.9f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(if (showAnalytics) Icons.Default.KeyboardArrowUp else Icons.Default.Analytics, contentDescription = "Analytics", tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                        Column {
+                            Text("Score", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                            Text(state.score.toString(), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black, color = if (state.isFrenzy) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary)
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text("Pairs", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                            Text("${state.pairsMatched}/${state.targetPairs}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        }
+                        IconButton(
+                            onClick = { showAnalytics = !showAnalytics },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f), CircleShape)
+                        ) {
+                            Icon(if (showAnalytics) Icons.Default.KeyboardArrowUp else Icons.Default.Analytics, contentDescription = "Analytics", tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                        }
                     }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                val progress by animateFloatAsState(targetValue = state.pairsMatched.toFloat() / state.targetPairs, animationSpec = tween(500))
-                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape), color = MaterialTheme.colorScheme.primary, trackColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f), strokeCap = StrokeCap.Round)
-                
-                if (state.combo > 1) {
-                    Text("COMBO X${String.format(Locale.getDefault(), "%.1f", state.multiplier)} 🔥", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold, color = Color(0xFFFF5722), modifier = Modifier.padding(top = 8.dp))
-                }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    val progress by animateFloatAsState(targetValue = state.pairsMatched.toFloat() / state.targetPairs, animationSpec = tween(500))
+                    LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape), color = if (state.isFrenzy) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary, trackColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f), strokeCap = StrokeCap.Round)
+                    
+                    if (state.combo > 1) {
+                        Text("${if (state.isFrenzy) "FRENZY X2" else "COMBO X" + String.format(Locale.getDefault(), "%.1f", state.multiplier)} 🔥", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold, color = if (state.isFrenzy) Color(0xFFE91E63) else Color(0xFFFF5722), modifier = Modifier.padding(top = 8.dp))
+                    }
 
-                AnimatedVisibility(visible = showAnalytics) {
-                    Column(modifier = Modifier.padding(top = 16.dp).fillMaxWidth()) {
-                        val loadPct = if (state.cols * state.rows > 0) (state.peakBoardBlocks * 100 / (state.cols * state.rows)) else 0
-                        AnalyticsRow("Hit Rate", "${(state.matchAccuracy * 100).toInt()}%")
-                        AnalyticsRow("Best Streak", "${state.bestMatchStreak}")
-                        AnalyticsRow("Avg Match Time", String.format(Locale.getDefault(), "%.1fs", state.avgMatchTimeMs / 1000f))
-                        AnalyticsRow("Peak Board Load", "$loadPct%")
-                        AnalyticsRow("Solubility", "${(state.successfulMatches * 100 / (state.totalClicks.coerceAtLeast(1)))}%")
+                    AnimatedVisibility(visible = showAnalytics) {
+                        Column(modifier = Modifier.padding(top = 16.dp).fillMaxWidth()) {
+                            val loadPct = if (state.cols * state.rows > 0) (state.peakBoardBlocks * 100 / (state.cols * state.rows)) else 0
+                            AnalyticsRow("Hit Rate", "${(state.matchAccuracy * 100).toInt()}%")
+                            AnalyticsRow("Best Streak", "${state.bestMatchStreak}")
+                            AnalyticsRow("Avg Match Time", String.format(Locale.getDefault(), "%.1fs", state.avgMatchTimeMs / 1000f))
+                            AnalyticsRow("Peak Board Load", "$loadPct%")
+                        }
                     }
                 }
             }
-        }
 
-        // --- Power-Up Chips ---
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 4.dp)
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            PowerUpType.entries.forEach { type ->
-                val count = state.powerUps[type] ?: 0
-                val isAvailable = count > 0 && !state.isGameOver && !state.isVictory
-                ElevatedAssistChip(
-                    onClick = { viewModel.usePowerUp(type) },
-                    label = { Text("${type.label} ($count)", style = MaterialTheme.typography.labelLarge) },
-                    leadingIcon = { Text(type.icon) },
-                    enabled = isAvailable,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = androidx.compose.material3.AssistChipDefaults.elevatedAssistChipColors(containerColor = if (isAvailable) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent, labelColor = if (isAvailable) MaterialTheme.colorScheme.onSecondaryContainer else Color.Gray)
-                )
-            }
-        }
-
-        // --- Main Game Board ---
-        BoxWithConstraints(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(8.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Brush.verticalGradient(colors = listOf(Color(0xFF1A1A1A), Color(0xFF050505))))
-                .border(2.dp, if (state.isFrozen) Color(0xFF03A9F4) else Color(0xFF333333), RoundedCornerShape(16.dp))
-        ) {
-            val blockSize = maxWidth / state.cols
-            val blockHeight = maxHeight / state.rows
-
-            state.grid.forEach { block ->
-                key(block.id) {
-                    val nukingColor = state.nukingBlockIds[block.id]
-                    val isHinted = state.hintedBlockIds.contains(block.id)
-                    MemBloxBlockRender(
-                        block = block,
-                        blockSize = blockSize,
-                        blockHeight = blockHeight,
-                        isRevealed = state.isRevealed || state.initiallyRevealedBlockIds.contains(block.id),
-                        nukingColor = nukingColor?.let { Color(it) },
-                        isHinted = isHinted,
-                        onClick = { viewModel.onBlockClick(block) }
+            // --- Power-Up Chips ---
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                PowerUpType.entries.forEach { type ->
+                    val count = state.powerUps[type] ?: 0
+                    val isAvailable = count > 0 && !state.isGameOver && !state.isVictory
+                    ElevatedAssistChip(
+                        onClick = { viewModel.usePowerUp(type) },
+                        label = { Text("${type.label} ($count)", style = MaterialTheme.typography.labelLarge) },
+                        leadingIcon = { Text(type.icon) },
+                        enabled = isAvailable,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = androidx.compose.material3.AssistChipDefaults.elevatedAssistChipColors(containerColor = if (isAvailable) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent, labelColor = if (isAvailable) MaterialTheme.colorScheme.onSecondaryContainer else Color.Gray)
                     )
                 }
             }
 
-            // Stress Vignette
-            if (state.isStressed) {
-                StressVignette()
-            }
+            // --- Main Game Board ---
+            BoxWithConstraints(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Brush.verticalGradient(colors = listOf(Color(0xFF1A1A1A).copy(alpha = 0.8f), Color(0xFF050505).copy(alpha = 0.9f))))
+                    .border(2.dp, if (state.isFrenzy) Color(0xFFE91E63) else if (state.isFrozen) Color(0xFF03A9F4) else Color(0xFF333333), RoundedCornerShape(16.dp))
+            ) {
+                val blockSize = maxWidth / state.cols
+                val blockHeight = maxHeight / state.rows
 
-            // Frost Overlay
-            if (state.frostAlpha > 0) {
-                FrostOverlay(alpha = state.frostAlpha)
-            }
-
-            // Slow Motion Overlay
-            if (state.isSlowed) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0xFFFFD54F).copy(alpha = 0.1f)) // Subtle gold tint
-                )
-            }
-
-            // Match Ghosts
-            state.matchGhosts.forEach { ghost ->
-                key(ghost.id) {
-                    MatchGhostRenderer(ghost = ghost, blockSize = blockSize, blockHeight = blockHeight)
+                state.grid.forEach { block ->
+                    key(block.id) {
+                        val nukingColor = state.nukingBlockIds[block.id]
+                        val isHinted = state.hintedBlockIds.contains(block.id)
+                        MemBloxBlockRender(
+                            block = block,
+                            blockSize = blockSize,
+                            blockHeight = blockHeight,
+                            isRevealed = state.isRevealed || state.initiallyRevealedBlockIds.contains(block.id),
+                            nukingColor = nukingColor?.let { Color(it) },
+                            isHinted = isHinted,
+                            onClick = { viewModel.onBlockClick(block) }
+                        )
+                    }
                 }
-            }
 
-            // Confetti Bursts
-            state.confettiBursts.forEach { burst ->
-                key(burst.id) {
-                    ConfettiBurstRenderer(centerX = blockSize * burst.col + (blockSize / 2), centerY = blockHeight * burst.row + (blockHeight / 2))
+                // Stress Vignette
+                if (state.isStressed) StressVignette()
+
+                // Frost Overlay
+                if (state.frostAlpha > 0) FrostOverlay(alpha = state.frostAlpha)
+
+                // Slow Motion Overlay
+                if (state.isSlowed) Box(modifier = Modifier.fillMaxSize().background(Color(0xFFFFD54F).copy(alpha = 0.1f)))
+
+                // Shockwaves
+                state.activeShockwaves.forEach { shock ->
+                    key(shock.id) {
+                        ShockwaveRenderer(centerX = blockSize * shock.col + (blockSize / 2), centerY = blockHeight * shock.row + (blockHeight / 2))
+                    }
                 }
-            }
 
-            // Floating Text Announcer
-            state.floatingTexts.forEach { effect ->
-                key(effect.id) {
-                    FloatingTextRenderer(effect = effect, blockSize = blockSize, blockHeight = blockHeight)
+                // Match Ghosts
+                state.matchGhosts.forEach { ghost ->
+                    key(ghost.id) {
+                        MatchGhostRenderer(ghost = ghost, blockSize = blockSize, blockHeight = blockHeight)
+                    }
                 }
-            }
 
-            if (state.isGameOver || state.isVictory) {
-                EndGameOverlay(state = state, onRetry = { viewModel.startGame(state.difficulty) }, onChangeDifficulty = { viewModel.resetToDifficultySelection() })
+                // Confetti Bursts
+                state.confettiBursts.forEach { burst ->
+                    key(burst.id) {
+                        ConfettiBurstRenderer(centerX = blockSize * burst.col + (blockSize / 2), centerY = blockHeight * burst.row + (blockHeight / 2))
+                    }
+                }
+
+                // Floating Text Announcer
+                state.floatingTexts.forEach { effect ->
+                    key(effect.id) {
+                        FloatingTextRenderer(effect = effect, blockSize = blockSize, blockHeight = blockHeight)
+                    }
+                }
+
+                // Floating Scores
+                state.floatingScores.forEach { popup ->
+                    key(popup.id) {
+                        ScorePopupRenderer(popup = popup, blockSize = blockSize, blockHeight = blockHeight)
+                    }
+                }
+
+                if (state.isGameOver || state.isVictory) {
+                    EndGameOverlay(state = state, onRetry = { viewModel.startGame(state.difficulty) }, onChangeDifficulty = { viewModel.resetToDifficultySelection() })
+                }
             }
         }
+    }
+}
+
+@Composable
+fun ParticleBackground(speedFactor: Float) {
+    val infiniteTransition = rememberInfiniteTransition(label = "Particles")
+    val particles = remember { List(30) { RandomParticle() } }
+
+    particles.forEach { p ->
+        val yOffset by infiniteTransition.animateFloat(
+            initialValue = p.startY,
+            targetValue = p.startY + 2000f,
+            animationSpec = infiniteRepeatable(animation = tween((p.duration / speedFactor).toInt(), easing = LinearEasing)),
+            label = "ParticleY"
+        )
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawCircle(color = p.color.copy(alpha = 0.2f), radius = p.size, center = androidx.compose.ui.geometry.Offset(p.startX, yOffset % size.height))
+        }
+    }
+}
+
+data class RandomParticle(
+    val startX: Float = Random.nextFloat() * 1000f,
+    val startY: Float = Random.nextFloat() * 2000f,
+    val size: Float = (2..6).random().toFloat(),
+    val duration: Int = (10000..20000).random(),
+    val color: Color = Color.White
+)
+
+@Composable
+fun ShockwaveRenderer(centerX: Dp, centerY: Dp) {
+    val progress = remember { Animatable(0f) }
+    LaunchedEffect(Unit) { progress.animateTo(1f, tween(1000, easing = FastOutSlowInEasing)) }
+    Canvas(modifier = Modifier.offset(x = centerX, y = centerY).size(1.dp)) {
+        val radius = progress.value * 1000f
+        drawCircle(color = Color.White.copy(alpha = (1f - progress.value) * 0.5f), radius = radius, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 8f))
+    }
+}
+
+@Composable
+fun ScorePopupRenderer(popup: ScorePopup, blockSize: Dp, blockHeight: Dp) {
+    val progress = remember { Animatable(0f) }
+    LaunchedEffect(Unit) { progress.animateTo(1f, tween(1000, easing = LinearEasing)) }
+    val t = progress.value
+    Box(modifier = Modifier.offset(x = blockSize * popup.col, y = blockHeight * popup.row - (t * 80).dp).alpha(1f - t)) {
+        Text("+${popup.score}", color = Color.Green, fontWeight = FontWeight.Bold, fontSize = 20.sp)
     }
 }
 
@@ -311,18 +366,9 @@ fun StressVignette() {
 @Composable
 fun MatchGhostRenderer(ghost: MatchGhost, blockSize: Dp, blockHeight: Dp) {
     val progress = remember { Animatable(0f) }
-    LaunchedEffect(Unit) {
-        progress.animateTo(1f, tween(1000, easing = LinearEasing))
-    }
+    LaunchedEffect(Unit) { progress.animateTo(1f, tween(1000, easing = LinearEasing)) }
     val t = progress.value
-    Box(
-        modifier = Modifier
-            .size(blockSize, blockHeight)
-            .offset(x = blockSize * ghost.col, y = blockHeight * ghost.row)
-            .alpha((1f - t) * 0.5f)
-            .scale(1f + t * 0.5f),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.size(blockSize, blockHeight).offset(x = blockSize * ghost.col, y = blockHeight * ghost.row).alpha((1f - t) * 0.5f).scale(1f + t * 0.5f), contentAlignment = Alignment.Center) {
         Text(text = ghost.emoji, fontSize = (blockSize.value * 0.65).sp, color = Color.White)
     }
 }
@@ -330,22 +376,10 @@ fun MatchGhostRenderer(ghost: MatchGhost, blockSize: Dp, blockHeight: Dp) {
 @Composable
 fun FloatingTextRenderer(effect: com.zoewave.probase.gotmind.features.memblox.FloatingTextEffect, blockSize: Dp, blockHeight: Dp) {
     val progress = remember { Animatable(0f) }
-    LaunchedEffect(Unit) {
-        progress.animateTo(1f, tween(1500, easing = LinearEasing))
-    }
+    LaunchedEffect(Unit) { progress.animateTo(1f, tween(1500, easing = LinearEasing)) }
     val t = progress.value
-    Box(
-        modifier = Modifier
-            .offset(x = blockSize * effect.col, y = blockHeight * effect.row - (t * 100).dp)
-            .alpha(1f - t)
-    ) {
-        Text(
-            text = effect.text,
-            color = Color(effect.color),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Black,
-            modifier = Modifier.scale(1f + t * 0.5f)
-        )
+    Box(modifier = Modifier.offset(x = blockSize * effect.col, y = blockHeight * effect.row - (t * 100).dp).alpha(1f - t)) {
+        Text(text = effect.text, color = Color(effect.color), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, modifier = Modifier.scale(1f + t * 0.5f))
     }
 }
 
@@ -354,24 +388,13 @@ fun FrostOverlay(alpha: Float) {
     Canvas(modifier = Modifier.fillMaxSize().alpha(alpha)) {
         val frostColor = Color(0xFFE1F5FE)
         drawRect(brush = Brush.radialGradient(colors = listOf(Color.Transparent, frostColor), center = center, radius = size.minDimension))
-        clipRect {
-            drawRect(color = frostColor.copy(alpha = 0.2f))
-        }
+        clipRect { drawRect(color = frostColor.copy(alpha = 0.2f)) }
     }
 }
 
 @Composable
 fun ConfettiBurstRenderer(centerX: Dp, centerY: Dp) {
-    val particles = remember {
-        List(45) {
-            ConfettiParticle(
-                velocityX = (Math.random().toFloat() - 0.5f) * 600f,
-                velocityY = (Math.random().toFloat() - 0.9f) * 900f,
-                color = Color((150..255).random() / 255f, (150..255).random() / 255f, (150..255).random() / 255f),
-                size = (4..8).random().toFloat()
-            )
-        }
-    }
+    val particles = remember { List(45) { ConfettiParticle(velocityX = (Math.random().toFloat() - 0.5f) * 600f, velocityY = (Math.random().toFloat() - 0.9f) * 900f, color = Color((150..255).random() / 255f, (150..255).random() / 255f, (150..255).random() / 255f), size = (4..8).random().toFloat()) } }
     val progress = remember { Animatable(0f) }
     LaunchedEffect(Unit) { progress.animateTo(1f, tween(1200, easing = LinearEasing)) }
     val t = progress.value
@@ -397,62 +420,20 @@ fun MemBloxBlockRender(
     onClick: () -> Unit
 ) {
     val isFlipped = block.isFlipped || isRevealed || nukingColor != null
-    
-    // Smooth Y Sliding
-    val animatedY by animateDpAsState(
-        targetValue = blockHeight * block.row,
-        animationSpec = spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow),
-        label = "GravitySlide"
-    )
-
-    // 3D Flip Animation
-    val animatedRotationY by animateFloatAsState(
-        targetValue = if (isFlipped) 180f else 0f,
-        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
-        label = "FlipRotation"
-    )
-
-    // Entrance & Idle Animations
+    val animatedY by animateDpAsState(targetValue = blockHeight * block.row, animationSpec = spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow), label = "GravitySlide")
+    val animatedRotationY by animateFloatAsState(targetValue = if (isFlipped) 180f else 0f, animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing), label = "FlipRotation")
     var startAnimation by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { startAnimation = true }
-    
     val entranceScale by animateFloatAsState(targetValue = if (startAnimation) 1f else 0.5f, animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessLow), label = "Entrance")
     val infiniteTransition = rememberInfiniteTransition(label = "Shimmer")
     val shimmerOffset by infiniteTransition.animateFloat(initialValue = -2f, targetValue = 4f, animationSpec = infiniteRepeatable(animation = tween(4000, easing = LinearEasing), repeatMode = RepeatMode.Restart), label = "ShimmerOffset")
     val flashAlpha = remember { Animatable(0f) }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
-
     val hintAlpha by infiniteTransition.animateFloat(initialValue = 0.2f, targetValue = 0.8f, animationSpec = infiniteRepeatable(animation = tween(500), repeatMode = RepeatMode.Reverse), label = "HintPulse")
-
     val baseColor = if (nukingColor != null) nukingColor else Color(block.color)
     val displayColor by animateColorAsState(targetValue = if (animatedRotationY >= 90f && nukingColor == null) Color.White else baseColor, animationSpec = tween(300))
 
-    Box(
-        modifier = Modifier
-            .size(blockSize, blockHeight)
-            .offset(x = blockSize * block.col, y = animatedY)
-            .graphicsLayer {
-                this.rotationY = animatedRotationY
-                cameraDistance = 12f * density
-            }
-            .scale(entranceScale)
-            .padding(1.dp)
-            .clip(RoundedCornerShape(4.dp))
-            .background(if (animatedRotationY >= 90f && nukingColor == null) Brush.linearGradient(listOf(Color.White, Color(0xFFF5F5F5))) else Brush.linearGradient(colors = listOf(displayColor.copy(alpha = 0.9f), displayColor.darken(0.2f))))
-            .drawWithContent {
-                drawContent()
-                val brush = Brush.linearGradient(colors = listOf(Color.White.copy(alpha = 0f), Color.White.copy(alpha = 0.15f), Color.White.copy(alpha = 0f)), start = androidx.compose.ui.geometry.Offset(size.width * shimmerOffset, 0f), end = androidx.compose.ui.geometry.Offset(size.width * (shimmerOffset + 0.5f), size.height))
-                drawRect(brush = brush)
-            }
-            .border(0.5.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(4.dp))
-            .let { if (isHinted) it.border(2.dp, Color.Yellow.copy(alpha = hintAlpha), RoundedCornerShape(4.dp)) else it }
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { 
-                scope.launch { flashAlpha.snapTo(1f); flashAlpha.animateTo(0f, tween(400)) }
-                onClick() 
-            }
-            .border(4.dp, Color.White.copy(alpha = flashAlpha.value), RoundedCornerShape(4.dp)),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.size(blockSize, blockHeight).offset(x = blockSize * block.col, y = animatedY).graphicsLayer { this.rotationY = animatedRotationY; cameraDistance = 12f * density }.scale(entranceScale).padding(1.dp).clip(RoundedCornerShape(4.dp)).background(if (animatedRotationY >= 90f && nukingColor == null) Brush.linearGradient(listOf(Color.White, Color(0xFFF5F5F5))) else Brush.linearGradient(colors = listOf(displayColor.copy(alpha = 0.9f), displayColor.darken(0.2f)))).drawWithContent { drawContent(); val brush = Brush.linearGradient(colors = listOf(Color.White.copy(alpha = 0f), Color.White.copy(alpha = 0.15f), Color.White.copy(alpha = 0f)), start = androidx.compose.ui.geometry.Offset(size.width * shimmerOffset, 0f), end = androidx.compose.ui.geometry.Offset(size.width * (shimmerOffset + 0.5f), size.height)); drawRect(brush = brush) }.border(0.5.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(4.dp)).let { if (isHinted) it.border(2.dp, Color.Yellow.copy(alpha = hintAlpha), RoundedCornerShape(4.dp)) else it }.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { scope.launch { flashAlpha.snapTo(1f); flashAlpha.animateTo(0f, tween(400)) }; onClick() }.border(4.dp, Color.White.copy(alpha = flashAlpha.value), RoundedCornerShape(4.dp)), contentAlignment = Alignment.Center) {
         if (animatedRotationY >= 90f) {
             Text(text = block.emoji, fontSize = (blockSize.value * 0.65).sp, modifier = Modifier.graphicsLayer { this.rotationY = 180f })
         }
@@ -463,9 +444,15 @@ fun MemBloxBlockRender(
 fun EndGameOverlay(state: MemBloxState, onRetry: () -> Unit, onChangeDifficulty: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.9f)), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
-            Surface(color = if (state.isVictory) Color(0xFF4CAF50) else Color(0xFFF44336), shape = CircleShape, modifier = Modifier.size(80.dp)) {
-                Box(contentAlignment = Alignment.Center) { Text(text = if (state.isVictory) "🏆" else "💀", fontSize = 40.sp) }
+            // Rank Badge
+            Box(contentAlignment = Alignment.Center) {
+                Surface(color = when(state.finalRank){ "S" -> Color(0xFFFFD700); "A" -> Color(0xFFC0C0C0); "B" -> Color(0xFFCD7F32); else -> Color.Gray }, shape = CircleShape, modifier = Modifier.size(100.dp)) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(state.finalRank, fontSize = 50.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    }
+                }
             }
+
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = if (state.isVictory) "VICTORY!" else "GAME OVER", color = if (state.isVictory) Color.Green else Color.Red, style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Black)
             Spacer(modifier = Modifier.height(24.dp))
