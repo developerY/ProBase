@@ -7,7 +7,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
@@ -202,7 +201,7 @@ fun MemBloxScreen(
                     }
                 }
 
-                // Analytics HUD Overlay (Still inside top column so it doesn't overlap board)
+                // Analytics HUD Overlay
                 AnimatedVisibility(visible = showAnalytics) {
                     Column(
                         modifier = Modifier
@@ -227,6 +226,26 @@ fun MemBloxScreen(
                             onValueChange = { onEvent(MemBloxEvent.UpdateSpeed(it)) },
                             valueRange = 0.5f..2.0f,
                             steps = 15,
+                            colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary)
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(text = stringResource(R.string.applications_gotmind_features_memblox_drop_height, uiState.dropHeight), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                        Slider(
+                            value = uiState.dropHeight.toFloat(),
+                            onValueChange = { onEvent(MemBloxEvent.UpdateDropHeight(it.toInt())) },
+                            valueRange = 1f..10f,
+                            steps = 9,
+                            colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary)
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(text = stringResource(R.string.applications_gotmind_features_memblox_drop_duration, uiState.dropDurationMillis / 1000f), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                        Slider(
+                            value = uiState.dropDurationMillis.toFloat(),
+                            onValueChange = { onEvent(MemBloxEvent.UpdateDropDuration(it.toInt())) },
+                            valueRange = 1000f..10000f,
+                            steps = 18,
                             colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary)
                         )
 
@@ -266,7 +285,7 @@ fun MemBloxScreen(
                 }
             }
 
-            // 2. Ultra-Thin Progress Line (Between Header and Board)
+            // 2. Progress Line
             val progress by animateFloatAsState(targetValue = uiState.pairsMatched.toFloat() / uiState.targetPairs, animationSpec = tween(500))
             LinearProgressIndicator(
                 progress = { progress },
@@ -278,7 +297,7 @@ fun MemBloxScreen(
                 strokeCap = StrokeCap.Butt
             )
 
-            // 3. Interactive Board Area (Dedicated Space)
+            // 3. Interactive Board Area
             BoxWithConstraints(
                 modifier = Modifier
                     .weight(1f)
@@ -289,19 +308,21 @@ fun MemBloxScreen(
                 val blockHeight = maxHeight / uiState.rows
 
                 uiState.grid.forEach { block ->
-                    key(block.id) {
-                        val nukingColor = uiState.nukingBlockIds[block.id]
-                        val isHinted = uiState.hintedBlockIds.contains(block.id)
-                        MemBloxBlockRender(
-                            block = block,
-                            blockSize = blockSize,
-                            blockHeight = blockHeight,
-                            isRevealed = uiState.isRevealed || uiState.initiallyRevealedBlockIds.contains(block.id),
-                            nukingColor = nukingColor?.let { Color(it) },
-                            isHinted = isHinted,
-                            onClick = { onEvent(MemBloxEvent.BlockClick(block)) }
-                        )
-                    }
+                        key(block.id) {
+                            val nukingColor = uiState.nukingBlockIds[block.id]
+                            val isHinted = uiState.hintedBlockIds.contains(block.id)
+                            MemBloxBlockRender(
+                                block = block,
+                                blockSize = blockSize,
+                                blockHeight = blockHeight,
+                                isRevealed = uiState.isRevealed,
+                                nukingColor = nukingColor?.let { Color(it) },
+                                isHinted = isHinted,
+                                dropHeight = uiState.dropHeight,
+                                dropDurationMillis = uiState.dropDurationMillis,
+                                onClick = { onEvent(MemBloxEvent.BlockClick(block)) }
+                            )
+                        }
                 }
 
                 if (uiState.isStressed) StressVignette()
@@ -338,7 +359,7 @@ fun MemBloxScreen(
                     }
                 }
 
-                // Combo & Frenzy Announcer (Floating Center of Board)
+                // Combo & Frenzy Announcer
                 if (uiState.combo > 1) {
                     Box(modifier = Modifier.fillMaxSize().padding(top = 20.dp), contentAlignment = Alignment.TopCenter) {
                         Text(
@@ -362,7 +383,7 @@ fun MemBloxScreen(
                 }
             }
 
-            // 4. Floating Power-Up Bar (Bottom HUD Area)
+            // 4. Power-Up Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -595,17 +616,27 @@ fun MemBloxBlockRender(
     isRevealed: Boolean,
     nukingColor: Color?,
     isHinted: Boolean = false,
+    dropHeight: Int,
+    dropDurationMillis: Int,
     onClick: () -> Unit
 ) {
-    val isFlipped = block.isFlipped || isRevealed || nukingColor != null
+    // Smooth Y Sliding with Animatable starting from above the board
+    val animatedY = remember { Animatable(blockHeight.value * -dropHeight.toFloat()) }
     
-    // Smooth Y Sliding
-    val animatedY by animateDpAsState(
-        targetValue = blockHeight * block.row,
-        animationSpec = spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow),
-        label = "GravitySlide"
-    )
+    LaunchedEffect(block.row, blockHeight) {
+        animatedY.animateTo(
+            targetValue = blockHeight.value * block.row,
+            animationSpec = tween(
+                durationMillis = dropDurationMillis,
+                easing = FastOutSlowInEasing
+            )
+        )
+    }
 
+    // A block is falling if it's visually significantly above its resting row
+    val isFalling = animatedY.value < (blockHeight.value * block.row) - 2f
+    val isFlipped = block.isFlipped || isRevealed || nukingColor != null || isFalling
+    
     // 3D Flip Animation
     val animatedRotationY by animateFloatAsState(
         targetValue = if (isFlipped) 180f else 0f,
@@ -657,7 +688,7 @@ fun MemBloxBlockRender(
     Box(
         modifier = Modifier
             .size(blockSize, blockHeight)
-            .offset(x = blockSize * block.col, y = animatedY)
+            .offset(x = blockSize * block.col, y = animatedY.value.dp)
             .graphicsLayer {
                 this.rotationY = animatedRotationY
                 cameraDistance = 12f * density

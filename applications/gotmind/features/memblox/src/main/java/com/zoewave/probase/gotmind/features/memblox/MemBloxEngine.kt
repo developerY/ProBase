@@ -124,7 +124,9 @@ data class MemBloxState(
     val firstFlipTimestamp: Long = 0,
     val finalRank: String = "",
     val isPaused: Boolean = false,
-    val speedMultiplier: Float = 1.0f
+    val speedMultiplier: Float = 1.0f,
+    val dropHeight: Int = 5,
+    val dropDurationMillis: Int = 5000
 )
 
 class MemBloxEngine(
@@ -216,6 +218,14 @@ class MemBloxEngine(
         _state.update { it.copy(speedMultiplier = multiplier) }
     }
 
+    fun updateDropHeight(height: Int) {
+        _state.update { it.copy(dropHeight = height) }
+    }
+
+    fun updateDropDuration(durationMillis: Int) {
+        _state.update { it.copy(dropDurationMillis = durationMillis) }
+    }
+
     fun reset() {
         gameJob?.cancel()
         _state.value = MemBloxState()
@@ -262,24 +272,18 @@ class MemBloxEngine(
         val newBlock = MemBloxBlock(
             id = UUID.randomUUID().toString(),
             emoji = emoji,
-            row = 0,
+            row = -_state.value.dropHeight,
             col = col,
             color = color
         )
         _state.update { 
             it.copy(
                 grid = it.grid + newBlock,
-                peakBoardBlocks = maxOf(it.peakBoardBlocks, it.grid.size + 1),
-                initiallyRevealedBlockIds = it.initiallyRevealedBlockIds + newBlock.id
+                peakBoardBlocks = maxOf(it.peakBoardBlocks, it.grid.size + 1)
             ) 
         }
         
         triggerHaptic(HapticSignal.LIGHT)
-
-        scope.launch {
-            delay(800)
-            _state.update { it.copy(initiallyRevealedBlockIds = it.initiallyRevealedBlockIds - newBlock.id) }
-        }
 
         spawnCount++
     }

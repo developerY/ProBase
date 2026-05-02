@@ -26,6 +26,8 @@
     <string name="applications_gotmind_features_memblox_resume">Resume</string>
     <string name="applications_gotmind_features_memblox_quit">Quit</string>
     <string name="applications_gotmind_features_memblox_speed">Game Speed</string>
+    <string name="applications_gotmind_features_memblox_drop_height">Drop Height: %1$d</string>
+    <string name="applications_gotmind_features_memblox_drop_duration">Drop Duration: %1$.1fs</string>
     <string name="applications_gotmind_features_memblox_pairs_format">%1$d/%2$d</string>
     <string name="applications_gotmind_features_memblox_percent_format">%1$d%%</string>
     <string name="applications_gotmind_features_memblox_points_plus_format">+%1$d</string>

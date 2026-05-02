@@ -37,6 +37,8 @@ class MemBloxViewModel @Inject constructor(
             MemBloxEvent.HapticConsumed -> engine.onHapticConsumed()
             MemBloxEvent.TogglePause -> engine.togglePause()
             is MemBloxEvent.UpdateSpeed -> engine.updateSpeed(event.multiplier)
+            is MemBloxEvent.UpdateDropHeight -> engine.updateDropHeight(event.height)
+            is MemBloxEvent.UpdateDropDuration -> engine.updateDropDuration(event.durationMillis)
         }
     }
 

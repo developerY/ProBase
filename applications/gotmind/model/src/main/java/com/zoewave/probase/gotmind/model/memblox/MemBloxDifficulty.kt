@@ -11,7 +11,7 @@ enum class MemBloxDifficulty(
     val spawnDelayMillis: Long,
     val labelResId: Int
 ) {
-    EASY(6, 10, 15, 2000L, R.string.applications_gotmind_model_diff_easy),
-    MEDIUM(9, 15, 30, 1500L, R.string.applications_gotmind_model_diff_medium),
-    EXPERT(12, 20, 50, 1000L, R.string.applications_gotmind_model_diff_expert)
+    EASY(6, 10, 15, 6000L, R.string.applications_gotmind_model_diff_easy),
+    MEDIUM(9, 15, 30, 4500L, R.string.applications_gotmind_model_diff_medium),
+    EXPERT(12, 20, 50, 3000L, R.string.applications_gotmind_model_diff_expert)
 }

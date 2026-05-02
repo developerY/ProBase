@@ -11,4 +11,6 @@ sealed interface MemBloxEvent {
     data object HapticConsumed : MemBloxEvent
     data object TogglePause : MemBloxEvent
     data class UpdateSpeed(val multiplier: Float) : MemBloxEvent
+    data class UpdateDropHeight(val height: Int) : MemBloxEvent
+    data class UpdateDropDuration(val durationMillis: Int) : MemBloxEvent
 }
