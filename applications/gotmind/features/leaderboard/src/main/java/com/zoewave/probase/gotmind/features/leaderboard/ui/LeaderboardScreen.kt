@@ -23,7 +23,12 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.TrackChanges
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
@@ -32,6 +37,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,8 +58,11 @@ import java.util.Locale
 @Composable
 fun LeaderboardScreen(
     scores: List<MemBloxScoreEntity>,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onClearAll: () -> Unit = {}
 ) {
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -73,8 +85,15 @@ fun LeaderboardScreen(
                 text = stringResource(R.string.applications_gotmind_features_leaderboard_title),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Black,
-                color = Color.White
+                color = Color.White,
+                modifier = Modifier.weight(1f)
             )
+            
+            if (scores.isNotEmpty()) {
+                IconButton(onClick = { showDeleteConfirm = true }) {
+                    Icon(Icons.Default.DeleteSweep, contentDescription = null, tint = Color.Gray)
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -93,6 +112,30 @@ fun LeaderboardScreen(
                 }
             }
         }
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            containerColor = Color(0xFF1E1E1E),
+            titleContentColor = Color.White,
+            textContentColor = Color.Gray,
+            title = { Text(stringResource(R.string.applications_gotmind_features_leaderboard_clear)) },
+            text = { Text(stringResource(R.string.applications_gotmind_features_leaderboard_clear_confirm)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    onClearAll()
+                    showDeleteConfirm = false
+                }) {
+                    Text("CLEAR ALL", color = Color.Red, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("CANCEL", color = Color.Gray)
+                }
+            }
+        )
     }
 }
 

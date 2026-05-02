@@ -87,6 +87,9 @@ class MemBloxViewModel @Inject constructor(
                 _engineType.value = event.type
                 _engine.value = createEngine(event.type)
             }
+            MemBloxEvent.ClearHallOfFame -> viewModelScope.launch {
+                scoreDao.clearAllScores()
+            }
         }
     }
 
