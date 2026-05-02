@@ -1,0 +1,14 @@
+<resources>
+    <string name="applications_gotmind_features_settings_title">Settings</string>
+    <string name="applications_gotmind_features_settings_game_section">Game Settings</string>
+    <string name="applications_gotmind_features_settings_haptic_title">Haptic Feedback</string>
+    <string name="applications_gotmind_features_settings_haptic_subtitle">Vibrate on matches and explosions</string>
+    <string name="applications_gotmind_features_settings_sound_title">Sound Effects</string>
+    <string name="applications_gotmind_features_settings_sound_subtitle">Enable game sounds</string>
+    <string name="applications_gotmind_features_settings_app_section">App Settings</string>
+    <string name="applications_gotmind_features_settings_dark_mode_title">Dark Mode</string>
+    <string name="applications_gotmind_features_settings_dark_mode_subtitle">Always stay on the dark side</string>
+    <string name="applications_gotmind_features_settings_about_section">About</string>
+    <string name="applications_gotmind_features_settings_about_version">MemBlox v1.0.0</string>
+    <string name="applications_gotmind_features_settings_about_desc">A legendary cross between Tetris and Concentration. Master your memory with gravity.</string>
+</resources>

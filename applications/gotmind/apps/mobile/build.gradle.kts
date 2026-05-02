@@ -33,6 +33,8 @@ dependencies {
     implementation(project(":applications:gotmind:database"))
     implementation(project(":applications:gotmind:data"))
     implementation(project(":applications:gotmind:features:games"))
+    implementation(project(":applications:gotmind:features:leaderboard"))
+    implementation(project(":applications:gotmind:features:settings"))
     implementation(project(":applications:gotmind:features:memblox"))
 
     implementation(libs.androidx.navigation3.runtime)

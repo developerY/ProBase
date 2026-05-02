@@ -1,0 +1,51 @@
+<resources>
+    <string name="applications_gotmind_features_memblox_score">Score</string>
+    <string name="applications_gotmind_features_memblox_pairs">Pairs</string>
+    <string name="applications_gotmind_features_memblox_analytics">Analytics</string>
+    <string name="applications_gotmind_features_memblox_hit_rate">Hit Rate</string>
+    <string name="applications_gotmind_features_memblox_best_streak">Best Streak</string>
+    <string name="applications_gotmind_features_memblox_avg_match_time">Avg Match Time</string>
+    <string name="applications_gotmind_features_memblox_peak_board_load">Peak Board Load</string>
+    <string name="applications_gotmind_features_memblox_solubility">Solubility</string>
+    <string name="applications_gotmind_features_memblox_frenzy">FRENZY X2</string>
+    <string name="applications_gotmind_features_memblox_combo">COMBO X%1$.1f</string>
+    <string name="applications_gotmind_features_memblox_game_title">MemBlox</string>
+    <string name="applications_gotmind_features_memblox_game_subtitle">Master your memory with gravity</string>
+    <string name="applications_gotmind_features_memblox_board_info">%1$dx%2$d Board • %3$d Pairs</string>
+    <string name="applications_gotmind_features_memblox_hall_of_fame">Hall of Fame</string>
+    <string name="applications_gotmind_features_memblox_no_scores">No scores yet. Play a game!</string>
+    <string name="applications_gotmind_features_memblox_streak">Streak</string>
+    <string name="applications_gotmind_features_memblox_victory">VICTORY!</string>
+    <string name="applications_gotmind_features_memblox_game_over">GAME OVER</string>
+    <string name="applications_gotmind_features_memblox_final_score">Final Score</string>
+    <string name="applications_gotmind_features_memblox_avg_time">Avg Time</string>
+    <string name="applications_gotmind_features_memblox_retry">Retry Level</string>
+    <string name="applications_gotmind_features_memblox_change_difficulty">Change Difficulty</string>
+    <string name="applications_gotmind_features_memblox_back">Back</string>
+    <string name="applications_gotmind_features_memblox_pause">Pause</string>
+    <string name="applications_gotmind_features_memblox_resume">Resume</string>
+    <string name="applications_gotmind_features_memblox_quit">Quit</string>
+    <string name="applications_gotmind_features_memblox_speed">Game Speed</string>
+    <string name="applications_gotmind_features_memblox_drop_height">Drop Height: %1$d</string>
+    <string name="applications_gotmind_features_memblox_drop_duration">Drop Duration: %1$.1fs</string>
+    <string name="applications_gotmind_features_memblox_pairs_format">%1$d/%2$d</string>
+    <string name="applications_gotmind_features_memblox_percent_format">%1$d%%</string>
+    <string name="applications_gotmind_features_memblox_points_plus_format">+%1$d</string>
+
+    <!-- Power Ups -->
+    <string name="applications_gotmind_features_memblox_pu_freeze">Freeze</string>
+    <string name="applications_gotmind_features_memblox_pu_reveal">Reveal</string>
+    <string name="applications_gotmind_features_memblox_pu_nuke">Nuke</string>
+    <string name="applications_gotmind_features_memblox_pu_hint">Hint</string>
+    <string name="applications_gotmind_features_memblox_pu_equalizer">Equalizer</string>
+    <string name="applications_gotmind_features_memblox_pu_slow">Slow</string>
+    <string name="applications_gotmind_features_memblox_pu_tidy">Tidy</string>
+    <string name="applications_gotmind_features_memblox_pu_auto">Auto</string>
+    <string name="applications_gotmind_features_memblox_pu_scan">Scan</string>
+
+    <!-- Announcements -->
+    <string name="applications_gotmind_features_memblox_great">GREAT!</string>
+    <string name="applications_gotmind_features_memblox_excellent">EXCELLENT!!</string>
+    <string name="applications_gotmind_features_memblox_unstoppable">UNSTOPPABLE!!!</string>
+    <string name="applications_gotmind_features_memblox_godlike">GODLIKE!!!!</string>
+</resources>

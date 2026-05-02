@@ -5,17 +5,34 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Games
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.zoewave.probase.gotmind.features.games.GamesScreen
+import com.zoewave.probase.gotmind.features.leaderboard.ui.LeaderboardScreen
 import com.zoewave.probase.gotmind.features.memblox.MemBloxViewModel
 import com.zoewave.probase.gotmind.features.memblox.ui.MemBloxScreen
+import com.zoewave.probase.gotmind.features.settings.ui.SettingsScreen
 import com.zoewave.probase.gotmind.mobile.ui.GameViewModel
 import com.zoewave.probase.gotmind.mobile.ui.components.GameScreen
 import com.zoewave.probase.gotmind.mobile.ui.theme.GotMindTheme
@@ -24,10 +41,27 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface GotMindRoute {
+    // Top Level Tabs
     @Serializable data object Games : GotMindRoute
+    @Serializable data object Leaderboard : GotMindRoute
+    @Serializable data object Settings : GotMindRoute
+
+    // Fullscreen Game Screens
     @Serializable data object GotMindClassic : GotMindRoute
     @Serializable data object MemBlox : GotMindRoute
 }
+
+data class TopLevelDestination(
+    val route: GotMindRoute,
+    val icon: ImageVector,
+    val labelResId: Int
+)
+
+val topLevelDestinations = listOf(
+    TopLevelDestination(GotMindRoute.Games, Icons.Default.Games, R.string.nav_games),
+    TopLevelDestination(GotMindRoute.Leaderboard, Icons.Default.EmojiEvents, R.string.nav_leaderboard),
+    TopLevelDestination(GotMindRoute.Settings, Icons.Default.Settings, R.string.nav_settings)
+)
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -37,34 +71,104 @@ class MainActivity : ComponentActivity() {
         setContent {
             GotMindTheme {
                 val backStack = remember { mutableStateListOf<GotMindRoute>(GotMindRoute.Games) }
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    NavDisplay(
-                        backStack = backStack,
-                        onBack = { backStack.removeLastOrNull() },
-                        entryProvider = { route ->
-                            NavEntry(route) {
-                                when (route) {
-                                    GotMindRoute.Games -> GamesScreen(
-                                        onLaunchGotMindClassic = { backStack.add(GotMindRoute.GotMindClassic) },
-                                        onLaunchMemBlox = { backStack.add(GotMindRoute.MemBlox) }
-                                    )
-                                    GotMindRoute.GotMindClassic -> {
-                                        val viewModel: GameViewModel = hiltViewModel()
-                                        GameScreen(viewModel = viewModel)
+                val currentRoute = backStack.lastOrNull() ?: GotMindRoute.Games
+                
+                // Keep tabs visible for games to maintain consistent app structure
+                val shouldShowBottomBar = currentRoute in topLevelDestinations.map { it.route } || 
+                                        currentRoute == GotMindRoute.MemBlox || 
+                                        currentRoute == GotMindRoute.GotMindClassic
+
+                Scaffold(
+                    bottomBar = {
+                        if (shouldShowBottomBar) {
+                            GotMindBottomBar(
+                                currentRoute = currentRoute,
+                                onNavigate = { route ->
+                                    if (route != currentRoute) {
+                                        // Clear stack when switching main tabs to avoid state leaks
+                                        backStack.clear()
+                                        backStack.add(route)
                                     }
-                                    GotMindRoute.MemBlox -> {
-                                        val viewModel: MemBloxViewModel = hiltViewModel()
-                                        MemBloxScreen(viewModel = viewModel)
+                                }
+                            )
+                        }
+                    }
+                ) { innerPadding ->
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = androidx.compose.ui.graphics.Color(0xFF0F0F0F)
+                    ) {
+                        NavDisplay(
+                            backStack = backStack,
+                            modifier = Modifier.padding(if (shouldShowBottomBar) innerPadding else androidx.compose.foundation.layout.PaddingValues(0.dp)),
+                            onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
+                            entryProvider = { route ->
+                                NavEntry(route) {
+                                    when (route) {
+                                        GotMindRoute.Games -> GamesScreen(
+                                            onNav = { dest -> 
+                                                when (dest) {
+                                                    "CLASSIC" -> backStack.add(GotMindRoute.GotMindClassic)
+                                                    "MEMBLOX" -> backStack.add(GotMindRoute.MemBlox)
+                                                }
+                                            }
+                                        )
+                                        GotMindRoute.Leaderboard -> {
+                                            val memBloxVm: MemBloxViewModel = hiltViewModel()
+                                            val scores by memBloxVm.topScores.collectAsState()
+                                            LeaderboardScreen(scores = scores)
+                                        }
+                                        GotMindRoute.Settings -> SettingsScreen()
+                                        
+                                        GotMindRoute.GotMindClassic -> {
+                                            val viewModel: GameViewModel = hiltViewModel()
+                                            GameScreen(viewModel = viewModel)
+                                        }
+                                        GotMindRoute.MemBlox -> {
+                                            val viewModel: MemBloxViewModel = hiltViewModel()
+                                            val state by viewModel.uiState.collectAsState()
+                                            val topScores by viewModel.topScores.collectAsState()
+                                            MemBloxScreen(
+                                                uiState = state,
+                                                topScores = topScores,
+                                                onNav = { if (it == "BACK") backStack.removeLastOrNull() },
+                                                onEvent = { event -> viewModel.handleEvent(event) }
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun GotMindBottomBar(
+    currentRoute: GotMindRoute,
+    onNavigate: (GotMindRoute) -> Unit
+) {
+    // Map sub-routes back to their parent tabs for highlighting
+    val selectedRoute = when (currentRoute) {
+        GotMindRoute.MemBlox, GotMindRoute.GotMindClassic -> GotMindRoute.Games
+        else -> currentRoute
+    }
+
+    NavigationBar(
+        containerColor = androidx.compose.ui.graphics.Color(0xFF1E1E1E).copy(alpha = 0.9f), // Glassmorphism look
+        contentColor = androidx.compose.ui.graphics.Color.White,
+        tonalElevation = 8.dp
+    ) {
+        topLevelDestinations.forEach { dest ->
+            NavigationBarItem(
+                selected = selectedRoute == dest.route,
+                onClick = { onNavigate(dest.route) },
+                icon = { Icon(dest.icon, contentDescription = stringResource(dest.labelResId)) },
+                label = { Text(stringResource(dest.labelResId)) }
+            )
         }
     }
 }

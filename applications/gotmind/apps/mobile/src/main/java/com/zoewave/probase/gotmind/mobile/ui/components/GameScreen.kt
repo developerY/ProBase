@@ -12,7 +12,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.gotmind.mobile.R
 import com.zoewave.probase.gotmind.mobile.ui.GameViewModel
 
 @Composable
@@ -28,24 +30,30 @@ fun GameScreen(viewModel: GameViewModel) {
         verticalArrangement = Arrangement.Center
     ) {
         if (gameState.isGameOver) {
-            Text(text = "Game Over!", style = MaterialTheme.typography.headlineLarge)
-            Text(text = "Score: ${gameState.currentScore}")
+            Text(
+                text = stringResource(R.string.classic_game_over), 
+                style = MaterialTheme.typography.headlineLarge
+            )
+            Text(text = stringResource(R.string.classic_score_label, gameState.currentScore))
             Button(onClick = { viewModel.resetGame() }) {
-                Text("Restart")
+                Text(stringResource(R.string.classic_restart))
             }
         } else {
-            Text(text = "GotMind Game", style = MaterialTheme.typography.headlineMedium)
-            Text(text = "Current Score: ${gameState.currentScore}")
+            Text(
+                text = stringResource(R.string.classic_title), 
+                style = MaterialTheme.typography.headlineMedium
+            )
+            Text(text = stringResource(R.string.classic_current_score, gameState.currentScore))
             Button(onClick = { viewModel.onScoreUpdate(10) }, modifier = Modifier.padding(top = 16.dp)) {
-                Text("Tap to Score!")
+                Text(stringResource(R.string.classic_tap_to_score))
             }
             Button(onClick = { viewModel.onGameOver() }, modifier = Modifier.padding(top = 8.dp)) {
-                Text("End Game")
+                Text(stringResource(R.string.classic_end_game))
             }
         }
 
         Text(
-            text = "High Scores:",
+            text = stringResource(R.string.classic_high_scores),
             modifier = Modifier.padding(top = 32.dp),
             style = MaterialTheme.typography.titleMedium
         )
