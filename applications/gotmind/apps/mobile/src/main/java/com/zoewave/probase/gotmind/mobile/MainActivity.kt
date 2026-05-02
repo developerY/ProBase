@@ -136,9 +136,11 @@ class MainActivity : ComponentActivity() {
                                             val viewModel: MemBloxViewModel = hiltViewModel()
                                             val state by viewModel.uiState.collectAsState()
                                             val topScores by viewModel.topScores.collectAsState()
+                                            val engineType by viewModel.engineType.collectAsState()
                                             MemBloxScreen(
                                                 uiState = state,
                                                 topScores = topScores,
+                                                engineType = engineType,
                                                 onNav = { if (it == "BACK") backStack.removeLastOrNull() },
                                                 onEvent = { event -> viewModel.handleEvent(event) }
                                             )

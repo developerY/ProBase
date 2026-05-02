@@ -111,6 +111,7 @@ import kotlin.random.Random
 fun MemBloxScreen(
     uiState: MemBloxState,
     topScores: List<MemBloxScoreEntity>,
+    engineType: com.zoewave.probase.gotmind.features.memblox.MemBloxEngineType,
     onNav: (String) -> Unit,
     onEvent: (MemBloxEvent) -> Unit
 ) {
@@ -317,6 +318,7 @@ fun MemBloxScreen(
                                 blockHeight = blockHeight,
                                 isRevealed = uiState.isRevealed,
                                 isInitiallyRevealed = uiState.initiallyRevealedBlockIds.contains(block.id),
+                                isFallingMode = engineType == com.zoewave.probase.gotmind.features.memblox.MemBloxEngineType.FALLING,
                                 nukingColor = nukingColor?.let { Color(it) },
                                 isHinted = isHinted,
                                 dropHeight = uiState.dropHeight,
@@ -616,27 +618,29 @@ fun MemBloxBlockRender(
     blockHeight: Dp,
     isRevealed: Boolean,
     isInitiallyRevealed: Boolean = false,
+    isFallingMode: Boolean = true,
     nukingColor: Color?,
     isHinted: Boolean = false,
     dropHeight: Int,
     dropDurationMillis: Int,
     onClick: () -> Unit
 ) {
-    // Smooth Y Sliding with Animatable starting from above the board
-    val animatedY = remember { Animatable(blockHeight.value * -dropHeight.toFloat()) }
+    // Smooth Y Sliding with Animatable starting from above the board (if falling mode)
+    val startY = if (isFallingMode) blockHeight.value * -dropHeight.toFloat() else blockHeight.value * block.row
+    val animatedY = remember { Animatable(startY) }
     
     LaunchedEffect(block.row, blockHeight) {
         animatedY.animateTo(
             targetValue = blockHeight.value * block.row,
             animationSpec = tween(
-                durationMillis = dropDurationMillis,
+                durationMillis = if (isFallingMode) dropDurationMillis else 0,
                 easing = FastOutSlowInEasing
             )
         )
     }
 
     // A block is falling if it's visually significantly above its resting row
-    val isFalling = animatedY.value < (blockHeight.value * block.row) - 2f
+    val isFalling = isFallingMode && animatedY.value < (blockHeight.value * block.row) - 2f
     val isFlipped = block.isFlipped || isRevealed || isInitiallyRevealed || nukingColor != null || isFalling
     
     // 3D Flip Animation
