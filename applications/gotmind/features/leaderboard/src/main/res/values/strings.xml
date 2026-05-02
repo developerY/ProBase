@@ -7,4 +7,6 @@
     <string name="applications_gotmind_features_leaderboard_medal_streak">Streak</string>
     <string name="applications_gotmind_features_leaderboard_medal_pro">Pro</string>
     <string name="applications_gotmind_features_leaderboard_percent_format">%1$d%%</string>
+    <string name="applications_gotmind_features_leaderboard_clear">Clear Hall of Fame</string>
+    <string name="applications_gotmind_features_leaderboard_clear_confirm">Are you sure you want to clear your legendary legacy? This cannot be undone.</string>
 </resources>

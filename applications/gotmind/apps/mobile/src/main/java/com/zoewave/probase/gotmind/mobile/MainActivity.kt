@@ -125,7 +125,10 @@ class MainActivity : ComponentActivity() {
                                         GotMindRoute.Leaderboard -> {
                                             val memBloxVm: MemBloxViewModel = hiltViewModel()
                                             val scores by memBloxVm.topScores.collectAsState()
-                                            LeaderboardScreen(scores = scores)
+                                            LeaderboardScreen(
+                                                scores = scores,
+                                                onClearAll = { memBloxVm.handleEvent(MemBloxEvent.ClearHallOfFame) }
+                                            )
                                         }
                                         GotMindRoute.Settings -> {
                                             val memBloxVm: MemBloxViewModel = hiltViewModel()
