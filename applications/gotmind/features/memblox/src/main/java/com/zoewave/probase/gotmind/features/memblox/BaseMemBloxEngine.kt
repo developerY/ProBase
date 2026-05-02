@@ -88,6 +88,7 @@ abstract class BaseMemBloxEngine(
                 if (!_state.value.isFrozen && !_state.value.isPaused) {
                     delay((difficulty.spawnDelayMillis * speedFactor).toLong())
                     spawnLogic()
+                    applyGravity()
                 } else {
                     delay(200)
                 }
