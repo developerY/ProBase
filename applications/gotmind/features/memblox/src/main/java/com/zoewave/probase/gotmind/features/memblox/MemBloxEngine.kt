@@ -132,7 +132,7 @@ data class MemBloxState(
 class MemBloxEngine(
     private val scope: CoroutineScope,
     private val onGameOver: (Int) -> Unit
-) {
+) : IMemBloxEngine {
     private var currentDifficulty = MemBloxDifficulty.EXPERT
     private val emojis = generateSupportedEmojiList()
     
@@ -158,11 +158,11 @@ class MemBloxEngine(
     }
 
     private val _state = MutableStateFlow(MemBloxState())
-    val state: StateFlow<MemBloxState> = _state.asStateFlow()
+    override val state: StateFlow<MemBloxState> = _state.asStateFlow()
 
     private var gameJob: Job? = null
 
-    fun start(difficulty: MemBloxDifficulty) {
+    override fun start(difficulty: MemBloxDifficulty) {
         currentDifficulty = difficulty
         _state.value = MemBloxState(
             cols = difficulty.cols,
@@ -210,28 +210,28 @@ class MemBloxEngine(
         }
     }
 
-    fun togglePause() {
+    override fun togglePause() {
         _state.update { it.copy(isPaused = !it.isPaused) }
     }
 
-    fun updateSpeed(multiplier: Float) {
+    override fun updateSpeed(multiplier: Float) {
         _state.update { it.copy(speedMultiplier = multiplier) }
     }
 
-    fun updateDropHeight(height: Int) {
+    override fun updateDropHeight(height: Int) {
         _state.update { it.copy(dropHeight = height) }
     }
 
-    fun updateDropDuration(durationMillis: Int) {
+    override fun updateDropDuration(durationMillis: Int) {
         _state.update { it.copy(dropDurationMillis = durationMillis) }
     }
 
-    fun reset() {
+    override fun reset() {
         gameJob?.cancel()
         _state.value = MemBloxState()
     }
 
-    fun onHapticConsumed() {
+    override fun onHapticConsumed() {
         _state.update { it.copy(lastHapticSignal = null) }
     }
 
@@ -306,7 +306,7 @@ class MemBloxEngine(
         }
     }
 
-    fun onBlockClick(block: MemBloxBlock) {
+    override fun onBlockClick(block: MemBloxBlock) {
         if (_state.value.isGameOver || _state.value.isVictory || _state.value.isRevealed || _state.value.isPaused) return
         if (block.isMatched || block.isFlipped || _state.value.flippedBlocks.size >= 2) return
 
@@ -474,7 +474,7 @@ class MemBloxEngine(
         }
     }
 
-    fun usePowerUp(type: PowerUpType) {
+    override fun usePowerUp(type: PowerUpType) {
         val count = _state.value.powerUps[type] ?: 0
         if (count <= 0 || _state.value.isGameOver || _state.value.isVictory) return
 
