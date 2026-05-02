@@ -34,6 +34,8 @@ import com.zoewave.probase.gotmind.features.memblox.MemBloxEvent
 import com.zoewave.probase.gotmind.features.memblox.MemBloxViewModel
 import com.zoewave.probase.gotmind.features.memblox.ui.MemBloxScreen
 import com.zoewave.probase.gotmind.features.settings.ui.SettingsScreen
+import com.zoewave.probase.gotmind.features.settings.ui.SettingsViewModel
+import com.zoewave.probase.gotmind.features.settings.ui.SettingsEvent
 import com.zoewave.probase.gotmind.mobile.ui.GameViewModel
 import com.zoewave.probase.gotmind.mobile.ui.components.GameScreen
 import com.zoewave.probase.gotmind.mobile.ui.theme.GotMindTheme
@@ -70,7 +72,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            GotMindTheme {
+            val settingsVm: SettingsViewModel = hiltViewModel()
+            val themeSettings by settingsVm.themeSettings.collectAsState()
+
+            GotMindTheme(
+                appTheme = themeSettings.theme,
+                palette = themeSettings.palette
+            ) {
                 val backStack = remember { mutableStateListOf<GotMindRoute>(GotMindRoute.Games) }
                 val currentRoute = backStack.lastOrNull() ?: GotMindRoute.Games
                 
@@ -126,7 +134,9 @@ class MainActivity : ComponentActivity() {
                                             SettingsScreen(
                                                 membloxState = uiState,
                                                 engineType = engineType,
+                                                themeSettings = themeSettings,
                                                 onMemBloxEvent = { memBloxVm.handleEvent(it) },
+                                                onSettingsEvent = { settingsVm.handleEvent(it) },
                                                 onBack = { if (backStack.size > 1) backStack.removeLastOrNull() }
                                             )
                                         }

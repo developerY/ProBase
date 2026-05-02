@@ -16,21 +16,32 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.BrightnessMedium
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +52,9 @@ import com.zoewave.probase.gotmind.features.memblox.MemBloxEngineType
 import com.zoewave.probase.gotmind.features.memblox.MemBloxEvent
 import com.zoewave.probase.gotmind.features.memblox.MemBloxState
 import com.zoewave.probase.gotmind.features.settings.R
+import com.zoewave.probase.gotmind.model.AppTheme
+import com.zoewave.probase.gotmind.model.ColorPalette
+import com.zoewave.probase.gotmind.model.ThemeSettings
 import java.util.Locale
 
 @Composable
@@ -50,8 +64,74 @@ fun SettingsSectionTitle(title: String) {
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(bottom = 16.dp)
+        modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
     )
+}
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun <T> SettingsDropdownItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    currentValue: T,
+    options: List<T>,
+    optionLabels: Map<T, String>,
+    onSelected: (T) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = Color(0xFF1E1E1E))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, contentDescription = null, tint = Color.Gray)
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(title, color = Color.White, fontWeight = FontWeight.Bold)
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = optionLabels[currentValue] ?: currentValue.toString(),
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(
+                        unfocusedTextColor = Color.White,
+                        focusedTextColor = Color.White,
+                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f),
+                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.background(Color(0xFF1E1E1E))
+                ) {
+                    options.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(optionLabels[option] ?: option.toString(), color = Color.White) },
+                            onClick = {
+                                onSelected(option)
+                                expanded = false
+                            },
+                            modifier = Modifier.background(Color(0xFF1E1E1E))
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -86,7 +166,9 @@ fun SettingItem(
 fun SettingsScreen(
     membloxState: MemBloxState = MemBloxState(),
     engineType: MemBloxEngineType = MemBloxEngineType.STATIC,
+    themeSettings: ThemeSettings = ThemeSettings(),
     onMemBloxEvent: (MemBloxEvent) -> Unit = {},
+    onSettingsEvent: (SettingsEvent) -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     Column(
@@ -117,6 +199,39 @@ fun SettingsScreen(
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+
+        // --- Themes & Colors ---
+        SettingsSectionTitle(stringResource(R.string.applications_gotmind_features_settings_theme_section))
+
+        SettingsDropdownItem(
+            icon = Icons.Default.BrightnessMedium,
+            title = stringResource(R.string.applications_gotmind_features_settings_theme_app),
+            currentValue = themeSettings.theme,
+            options = AppTheme.entries,
+            optionLabels = mapOf(
+                AppTheme.SYSTEM to stringResource(R.string.applications_gotmind_features_settings_theme_system),
+                AppTheme.LIGHT to stringResource(R.string.applications_gotmind_features_settings_theme_light),
+                AppTheme.DARK to stringResource(R.string.applications_gotmind_features_settings_theme_dark)
+            ),
+            onSelected = { onSettingsEvent(SettingsEvent.SetTheme(it)) }
+        )
+
+        SettingsDropdownItem(
+            icon = Icons.Default.Palette,
+            title = stringResource(R.string.applications_gotmind_features_settings_palette),
+            currentValue = themeSettings.palette,
+            options = ColorPalette.entries,
+            optionLabels = mapOf(
+                ColorPalette.DEFAULT to stringResource(R.string.applications_gotmind_features_settings_palette_default),
+                ColorPalette.CORAL to stringResource(R.string.applications_gotmind_features_settings_palette_coral),
+                ColorPalette.FOREST to stringResource(R.string.applications_gotmind_features_settings_palette_forest),
+                ColorPalette.OCEAN to stringResource(R.string.applications_gotmind_features_settings_palette_ocean),
+                ColorPalette.MATERIAL_EXPRESSIVE to stringResource(R.string.applications_gotmind_features_settings_palette_expressive)
+            ),
+            onSelected = { onSettingsEvent(SettingsEvent.SetPalette(it)) }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // --- MemBlox Settings ---
         SettingsSectionTitle("MemBlox Settings")
@@ -215,14 +330,6 @@ fun SettingsScreen(
         // --- App Settings ---
         SettingsSectionTitle(stringResource(R.string.applications_gotmind_features_settings_app_section))
         
-        SettingItem(
-            icon = Icons.Default.Settings,
-            title = stringResource(R.string.applications_gotmind_features_settings_dark_mode_title),
-            subtitle = stringResource(R.string.applications_gotmind_features_settings_dark_mode_subtitle),
-            checked = true,
-            onCheckedChange = {}
-        )
-
         Spacer(modifier = Modifier.height(32.dp))
 
         // --- About ---

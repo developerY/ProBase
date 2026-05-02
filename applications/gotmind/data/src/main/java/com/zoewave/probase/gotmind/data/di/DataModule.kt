@@ -2,6 +2,8 @@ package com.zoewave.probase.gotmind.data.di
 
 import com.zoewave.probase.gotmind.data.repository.GotMindRepository
 import com.zoewave.probase.gotmind.data.repository.GotMindRepositoryImpl
+import com.zoewave.probase.gotmind.data.repository.AppSettingsRepository
+import com.zoewave.probase.gotmind.data.repository.AppSettingsRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -16,4 +18,10 @@ abstract class DataModule {
     abstract fun bindGotMindRepository(
         impl: GotMindRepositoryImpl
     ): GotMindRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAppSettingsRepository(
+        impl: AppSettingsRepositoryImpl
+    ): AppSettingsRepository
 }

@@ -18,4 +18,5 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:util"))
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.datastore.preferences)
 }
