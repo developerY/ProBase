@@ -70,6 +70,7 @@
             <option value="$PROJECT_DIR$/applications/goswift/features/main" />
             <option value="$PROJECT_DIR$/applications/goswift/model" />
             <option value="$PROJECT_DIR$/applications/gotmind" />
+            <option value="$PROJECT_DIR$/applications/gotmind/analytics" />
             <option value="$PROJECT_DIR$/applications/gotmind/apps" />
             <option value="$PROJECT_DIR$/applications/gotmind/apps/mobile" />
             <option value="$PROJECT_DIR$/applications/gotmind/data" />

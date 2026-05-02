@@ -13,7 +13,7 @@ This Privacy Policy describes how your information is handled when you use our C
 ## 2. Information Collection and Use
 We do not collect, store, or have access to any of your personal information (such as your name, address, or contacts). The App is designed to function entirely without a central server.
 
-However, to ensure a stable and high-quality user experience, the App utilizes industry-standard third-party Service Providers that may collect information used to identify your device for stability and performance metrics:
+To ensure a stable and high-quality user experience, the app utilizes industry-standard third-party Service Providers that may collect information used to identify the device for stability and performance metrics:
 
 * **Google Play Services:** Used for app distribution and core functionality.
 * **Firebase Crashlytics:** Used to monitor app stability and report technical bugs/crashes.

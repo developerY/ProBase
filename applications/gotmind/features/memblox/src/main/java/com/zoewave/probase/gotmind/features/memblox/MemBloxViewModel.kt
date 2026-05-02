@@ -6,6 +6,9 @@ import com.zoewave.probase.gotmind.database.MemBloxScoreEntity
 import com.zoewave.probase.gotmind.database.dao.MemBloxScoreDao
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
+import com.zoewave.probase.gotmind.analytics.AnalyticsHelper
+import com.zoewave.probase.gotmind.analytics.AnalyticsEvent
+import com.zoewave.probase.gotmind.analytics.AnalyticsParam
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +23,8 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class MemBloxViewModel @Inject constructor(
-    private val scoreDao: MemBloxScoreDao
+    private val scoreDao: MemBloxScoreDao,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
     private val _engineType = MutableStateFlow(MemBloxEngineType.STATIC)
@@ -43,9 +47,28 @@ class MemBloxViewModel @Inject constructor(
     fun handleEvent(event: MemBloxEvent) {
         val currentEngine = _engine.value
         when (event) {
-            is MemBloxEvent.StartGame -> currentEngine.start(event.difficulty)
+            is MemBloxEvent.StartGame -> {
+                analyticsHelper.logEvent(
+                    AnalyticsEvent(
+                        type = "game_start",
+                        extras = listOf(
+                            AnalyticsParam("difficulty", event.difficulty.name),
+                            AnalyticsParam("engine_type", _engineType.value.name)
+                        )
+                    )
+                )
+                currentEngine.start(event.difficulty)
+            }
             is MemBloxEvent.BlockClick -> currentEngine.onBlockClick(event.block)
-            is MemBloxEvent.UsePowerUp -> currentEngine.usePowerUp(event.type)
+            is MemBloxEvent.UsePowerUp -> {
+                analyticsHelper.logEvent(
+                    AnalyticsEvent(
+                        type = "power_up_used",
+                        extras = listOf(AnalyticsParam("type", event.type.name))
+                    )
+                )
+                currentEngine.usePowerUp(event.type)
+            }
             MemBloxEvent.ResetToSelection -> currentEngine.reset()
             MemBloxEvent.HapticConsumed -> currentEngine.onHapticConsumed()
             MemBloxEvent.TogglePause -> currentEngine.togglePause()
@@ -54,6 +77,12 @@ class MemBloxViewModel @Inject constructor(
             is MemBloxEvent.UpdateDropDuration -> currentEngine.updateDropDuration(event.durationMillis)
             is MemBloxEvent.SetEngineType -> {
                 if (_engineType.value == event.type) return
+                analyticsHelper.logEvent(
+                    AnalyticsEvent(
+                        type = "engine_swapped",
+                        extras = listOf(AnalyticsParam("new_type", event.type.name))
+                    )
+                )
                 currentEngine.reset()
                 _engineType.value = event.type
                 _engine.value = createEngine(event.type)
@@ -63,6 +92,16 @@ class MemBloxViewModel @Inject constructor(
 
     private fun saveScore() {
         val state = uiState.value
+        analyticsHelper.logEvent(
+            AnalyticsEvent(
+                type = "game_over",
+                extras = listOf(
+                    AnalyticsParam("score", state.score.toString()),
+                    AnalyticsParam("difficulty", state.difficulty.name),
+                    AnalyticsParam("is_victory", state.isVictory.toString())
+                )
+            )
+        )
         viewModelScope.launch {
             scoreDao.insertScore(
                 MemBloxScoreEntity(

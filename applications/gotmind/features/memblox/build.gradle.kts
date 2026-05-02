@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":core:util"))
     implementation(project(":applications:gotmind:model"))
     implementation(project(":applications:gotmind:database"))
+    implementation(project(":applications:gotmind:analytics"))
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
