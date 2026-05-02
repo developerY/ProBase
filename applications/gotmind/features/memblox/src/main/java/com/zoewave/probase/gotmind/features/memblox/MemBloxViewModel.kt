@@ -18,7 +18,8 @@ class MemBloxViewModel @Inject constructor(
     private val scoreDao: MemBloxScoreDao
 ) : ViewModel() {
 
-    private val engine = MemBloxEngine(
+    // A/B Testing: Switch between FallingMemBloxEngine and StaticMemBloxEngine
+    private val engine: IMemBloxEngine = StaticMemBloxEngine(
         scope = viewModelScope,
         onGameOver = { _ -> saveScore() }
     )
