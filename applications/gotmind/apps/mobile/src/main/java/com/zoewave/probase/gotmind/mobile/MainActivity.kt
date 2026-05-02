@@ -30,6 +30,7 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.zoewave.probase.gotmind.features.games.GamesScreen
 import com.zoewave.probase.gotmind.features.leaderboard.ui.LeaderboardScreen
+import com.zoewave.probase.gotmind.features.memblox.MemBloxEvent
 import com.zoewave.probase.gotmind.features.memblox.MemBloxViewModel
 import com.zoewave.probase.gotmind.features.memblox.ui.MemBloxScreen
 import com.zoewave.probase.gotmind.features.settings.ui.SettingsScreen
@@ -118,7 +119,14 @@ class MainActivity : ComponentActivity() {
                                             val scores by memBloxVm.topScores.collectAsState()
                                             LeaderboardScreen(scores = scores)
                                         }
-                                        GotMindRoute.Settings -> SettingsScreen()
+                                        GotMindRoute.Settings -> {
+                                            val memBloxVm: MemBloxViewModel = hiltViewModel()
+                                            val engineType by memBloxVm.engineType.collectAsState()
+                                            SettingsScreen(
+                                                engineType = engineType,
+                                                onEngineTypeChange = { memBloxVm.handleEvent(MemBloxEvent.SetEngineType(it)) }
+                                            )
+                                        }
                                         
                                         GotMindRoute.GotMindClassic -> {
                                             val viewModel: GameViewModel = hiltViewModel()

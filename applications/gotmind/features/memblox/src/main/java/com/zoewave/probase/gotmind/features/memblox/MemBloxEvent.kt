@@ -13,4 +13,5 @@ sealed interface MemBloxEvent {
     data class UpdateSpeed(val multiplier: Float) : MemBloxEvent
     data class UpdateDropHeight(val height: Int) : MemBloxEvent
     data class UpdateDropDuration(val durationMillis: Int) : MemBloxEvent
+    data class SetEngineType(val type: MemBloxEngineType) : MemBloxEvent
 }

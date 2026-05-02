@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -33,9 +34,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.gotmind.features.settings.R
+import com.zoewave.probase.gotmind.features.memblox.MemBloxEngineType
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    engineType: MemBloxEngineType = MemBloxEngineType.STATIC,
+    onEngineTypeChange: (MemBloxEngineType) -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -59,6 +64,16 @@ fun SettingsScreen() {
 
         // --- Game Settings ---
         SettingsSectionTitle(stringResource(R.string.applications_gotmind_features_settings_game_section))
+
+        SettingItem(
+            icon = Icons.Default.Speed,
+            title = stringResource(com.zoewave.probase.gotmind.features.memblox.R.string.applications_gotmind_features_memblox_engine_mode),
+            subtitle = stringResource(com.zoewave.probase.gotmind.features.memblox.R.string.applications_gotmind_features_memblox_engine_mode_desc),
+            checked = engineType == MemBloxEngineType.FALLING,
+            onCheckedChange = { isFalling ->
+                onEngineTypeChange(if (isFalling) MemBloxEngineType.FALLING else MemBloxEngineType.STATIC)
+            }
+        )
         
         SettingItem(
             icon = Icons.Default.Vibration,

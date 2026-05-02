@@ -7,39 +7,57 @@ import com.zoewave.probase.gotmind.database.dao.MemBloxScoreDao
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class MemBloxViewModel @Inject constructor(
     private val scoreDao: MemBloxScoreDao
 ) : ViewModel() {
 
-    // A/B Testing: Switch between FallingMemBloxEngine and StaticMemBloxEngine
-    private val engine: IMemBloxEngine = StaticMemBloxEngine(
-        scope = viewModelScope,
-        onGameOver = { _ -> saveScore() }
-    )
+    private val _engineType = MutableStateFlow(MemBloxEngineType.STATIC)
+    val engineType: StateFlow<MemBloxEngineType> = _engineType.asStateFlow()
 
-    val uiState: StateFlow<MemBloxState> = engine.state
+    private val _engine = MutableStateFlow<IMemBloxEngine>(createEngine(_engineType.value))
+    val uiState: StateFlow<MemBloxState> = _engine.flatMapLatest { it.state }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MemBloxState())
 
     val topScores = scoreDao.getAllTopScores()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    private fun createEngine(type: MemBloxEngineType): IMemBloxEngine {
+        return when (type) {
+            MemBloxEngineType.FALLING -> FallingMemBloxEngine(viewModelScope) { saveScore() }
+            MemBloxEngineType.STATIC -> StaticMemBloxEngine(viewModelScope) { saveScore() }
+        }
+    }
+
     fun handleEvent(event: MemBloxEvent) {
+        val currentEngine = _engine.value
         when (event) {
-            is MemBloxEvent.StartGame -> engine.start(event.difficulty)
-            is MemBloxEvent.BlockClick -> engine.onBlockClick(event.block)
-            is MemBloxEvent.UsePowerUp -> engine.usePowerUp(event.type)
-            MemBloxEvent.ResetToSelection -> engine.reset()
-            MemBloxEvent.HapticConsumed -> engine.onHapticConsumed()
-            MemBloxEvent.TogglePause -> engine.togglePause()
-            is MemBloxEvent.UpdateSpeed -> engine.updateSpeed(event.multiplier)
-            is MemBloxEvent.UpdateDropHeight -> engine.updateDropHeight(event.height)
-            is MemBloxEvent.UpdateDropDuration -> engine.updateDropDuration(event.durationMillis)
+            is MemBloxEvent.StartGame -> currentEngine.start(event.difficulty)
+            is MemBloxEvent.BlockClick -> currentEngine.onBlockClick(event.block)
+            is MemBloxEvent.UsePowerUp -> currentEngine.usePowerUp(event.type)
+            MemBloxEvent.ResetToSelection -> currentEngine.reset()
+            MemBloxEvent.HapticConsumed -> currentEngine.onHapticConsumed()
+            MemBloxEvent.TogglePause -> currentEngine.togglePause()
+            is MemBloxEvent.UpdateSpeed -> currentEngine.updateSpeed(event.multiplier)
+            is MemBloxEvent.UpdateDropHeight -> currentEngine.updateDropHeight(event.height)
+            is MemBloxEvent.UpdateDropDuration -> currentEngine.updateDropDuration(event.durationMillis)
+            is MemBloxEvent.SetEngineType -> {
+                if (_engineType.value == event.type) return
+                currentEngine.reset()
+                _engineType.value = event.type
+                _engine.value = createEngine(event.type)
+            }
         }
     }
 
