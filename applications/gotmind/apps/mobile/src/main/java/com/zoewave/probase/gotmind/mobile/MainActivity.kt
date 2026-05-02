@@ -122,9 +122,12 @@ class MainActivity : ComponentActivity() {
                                         GotMindRoute.Settings -> {
                                             val memBloxVm: MemBloxViewModel = hiltViewModel()
                                             val engineType by memBloxVm.engineType.collectAsState()
+                                            val uiState by memBloxVm.uiState.collectAsState()
                                             SettingsScreen(
+                                                membloxState = uiState,
                                                 engineType = engineType,
-                                                onEngineTypeChange = { memBloxVm.handleEvent(MemBloxEvent.SetEngineType(it)) }
+                                                onMemBloxEvent = { memBloxVm.handleEvent(it) },
+                                                onBack = { if (backStack.size > 1) backStack.removeLastOrNull() }
                                             )
                                         }
                                         
