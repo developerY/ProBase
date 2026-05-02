@@ -2,6 +2,7 @@ plugins {
     id("composetemplate.android.application")
     id("composetemplate.android.application.compose")
     id("composetemplate.android.hilt")
+    id("composetemplate.android.application.firebase")
     alias(libs.plugins.ksp)
 }
 
@@ -32,6 +33,7 @@ dependencies {
     implementation(project(":applications:gotmind:model"))
     implementation(project(":applications:gotmind:database"))
     implementation(project(":applications:gotmind:data"))
+    implementation(project(":applications:gotmind:analytics"))
     implementation(project(":applications:gotmind:features:games"))
     implementation(project(":applications:gotmind:features:leaderboard"))
     implementation(project(":applications:gotmind:features:settings"))
