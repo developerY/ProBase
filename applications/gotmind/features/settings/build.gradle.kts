@@ -16,6 +16,7 @@ android {
 dependencies {
     implementation(project(":applications:gotmind:database"))
     implementation(project(":applications:gotmind:model"))
+    implementation(project(":applications:gotmind:data"))
     implementation(project(":applications:gotmind:features:memblox"))
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)

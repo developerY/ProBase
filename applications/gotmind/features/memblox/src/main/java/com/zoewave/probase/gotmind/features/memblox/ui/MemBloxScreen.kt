@@ -42,7 +42,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -60,8 +59,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -116,10 +113,10 @@ fun MemBloxScreen(
     onEvent: (MemBloxEvent) -> Unit
 ) {
     var showAnalytics by remember { mutableStateOf(false) }
-    var showHallOfFame by remember { mutableStateOf(false) }
 
     val haptic = LocalHapticFeedback.current
 
+    // Haptic Feedback Observer
     LaunchedEffect(uiState.lastHapticSignal) {
         uiState.lastHapticSignal?.let { signal ->
             when (signal) {
@@ -131,19 +128,14 @@ fun MemBloxScreen(
         }
     }
 
-    if (showHallOfFame) {
-        HallOfFameScreen(scores = topScores, onBack = { showHallOfFame = false })
-        return
-    }
-
     if (!uiState.isStarted) {
         DifficultySelectionScreen(
-            onDifficultySelected = { onEvent(MemBloxEvent.StartGame(it)) },
-            onShowHallOfFame = { showHallOfFame = true }
+            onDifficultySelected = { onEvent(MemBloxEvent.StartGame(it)) }
         )
         return
     }
 
+    // Screenshake Offset
     val shakeX by animateFloatAsState(
         targetValue = if (uiState.shakeIntensity > 0 || uiState.isStressed) (Random.nextFloat() - 0.5f) * (uiState.shakeIntensity + 1f) * 10 else 0f,
         animationSpec = spring(stiffness = Spring.StiffnessHigh),
@@ -202,7 +194,7 @@ fun MemBloxScreen(
                     }
                 }
 
-                // Analytics HUD Overlay
+                // Analytics HUD Overlay (Now strictly for statistics)
                 AnimatedVisibility(visible = showAnalytics) {
                     Column(
                         modifier = Modifier
@@ -219,36 +211,6 @@ fun MemBloxScreen(
                         AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_avg_match_time), String.format(Locale.getDefault(), "%.1fs", uiState.avgMatchTimeMs / 1000f))
                         AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_peak_board_load), "$loadPct%")
                         AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_solubility), "${(uiState.successfulMatches * 100 / (uiState.totalClicks.coerceAtLeast(1)))}%")
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = stringResource(R.string.applications_gotmind_features_memblox_speed) + ": ${String.format(Locale.getDefault(), "%.1f", uiState.speedMultiplier)}x", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                        Slider(
-                            value = uiState.speedMultiplier,
-                            onValueChange = { onEvent(MemBloxEvent.UpdateSpeed(it)) },
-                            valueRange = 0.5f..2.0f,
-                            steps = 15,
-                            colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary)
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = stringResource(R.string.applications_gotmind_features_memblox_drop_height, uiState.dropHeight), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                        Slider(
-                            value = uiState.dropHeight.toFloat(),
-                            onValueChange = { onEvent(MemBloxEvent.UpdateDropHeight(it.toInt())) },
-                            valueRange = 1f..10f,
-                            steps = 9,
-                            colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary)
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = stringResource(R.string.applications_gotmind_features_memblox_drop_duration, uiState.dropDurationMillis / 1000f), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                        Slider(
-                            value = uiState.dropDurationMillis.toFloat(),
-                            onValueChange = { onEvent(MemBloxEvent.UpdateDropDuration(it.toInt())) },
-                            valueRange = 1000f..10000f,
-                            steps = 18,
-                            colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary)
-                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(
@@ -256,7 +218,10 @@ fun MemBloxScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Button(
-                                onClick = { onNav("BACK") },
+                                onClick = { 
+                                    onEvent(MemBloxEvent.ResetToSelection)
+                                    onNav("BACK") 
+                                },
                                 modifier = Modifier.weight(1f).height(40.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.2f), contentColor = Color.Red),
                                 shape = RoundedCornerShape(8.dp),
@@ -309,23 +274,23 @@ fun MemBloxScreen(
                 val blockHeight = maxHeight / uiState.rows
 
                 uiState.grid.forEach { block ->
-                        key(block.id) {
-                            val nukingColor = uiState.nukingBlockIds[block.id]
-                            val isHinted = uiState.hintedBlockIds.contains(block.id)
-                            MemBloxBlockRender(
-                                block = block,
-                                blockSize = blockSize,
-                                blockHeight = blockHeight,
-                                isRevealed = uiState.isRevealed,
-                                isInitiallyRevealed = uiState.initiallyRevealedBlockIds.contains(block.id),
-                                isFallingMode = engineType == com.zoewave.probase.gotmind.features.memblox.MemBloxEngineType.FALLING,
-                                nukingColor = nukingColor?.let { Color(it) },
-                                isHinted = isHinted,
-                                dropHeight = uiState.dropHeight,
-                                dropDurationMillis = uiState.dropDurationMillis,
-                                onClick = { onEvent(MemBloxEvent.BlockClick(block)) }
-                            )
-                        }
+                    key(block.id) {
+                        val nukingColor = uiState.nukingBlockIds[block.id]
+                        val isHinted = uiState.hintedBlockIds.contains(block.id)
+                        MemBloxBlockRender(
+                            block = block,
+                            blockSize = blockSize,
+                            blockHeight = blockHeight,
+                            isRevealed = uiState.isRevealed,
+                            isInitiallyRevealed = uiState.initiallyRevealedBlockIds.contains(block.id),
+                            isFallingMode = engineType == com.zoewave.probase.gotmind.features.memblox.MemBloxEngineType.FALLING,
+                            nukingColor = nukingColor?.let { Color(it) },
+                            isHinted = isHinted,
+                            dropHeight = uiState.dropHeight,
+                            dropDurationMillis = uiState.dropDurationMillis,
+                            onClick = { onEvent(MemBloxEvent.BlockClick(block)) }
+                        )
+                    }
                 }
 
                 if (uiState.isStressed) StressVignette()
@@ -874,8 +839,7 @@ fun AnalyticsRow(label: String, value: String) {
 
 @Composable
 fun DifficultySelectionScreen(
-    onDifficultySelected: (MemBloxDifficulty) -> Unit,
-    onShowHallOfFame: () -> Unit
+    onDifficultySelected: (MemBloxDifficulty) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -902,24 +866,6 @@ fun DifficultySelectionScreen(
         MemBloxDifficulty.entries.forEach { difficulty ->
             DifficultyCard(difficulty, onDifficultySelected)
             Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        Button(
-            onClick = onShowHallOfFame,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            ),
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-        ) {
-            Icon(Icons.Default.EmojiEvents, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(stringResource(R.string.applications_gotmind_features_memblox_hall_of_fame), fontWeight = FontWeight.Bold)
         }
     }
 }

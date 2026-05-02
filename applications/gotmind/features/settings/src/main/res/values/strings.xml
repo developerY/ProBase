@@ -11,4 +11,18 @@
     <string name="applications_gotmind_features_settings_about_section">About</string>
     <string name="applications_gotmind_features_settings_about_version">MemBlox v1.0.0</string>
     <string name="applications_gotmind_features_settings_about_desc">A legendary cross between Tetris and Concentration. Master your memory with gravity.</string>
+
+    <!-- Themes & Colors -->
+    <string name="applications_gotmind_features_settings_theme_section">Themes &amp; Colors</string>
+    <string name="applications_gotmind_features_settings_theme_app">App Theme</string>
+    <string name="applications_gotmind_features_settings_theme_system">System Default</string>
+    <string name="applications_gotmind_features_settings_theme_light">Light Mode</string>
+    <string name="applications_gotmind_features_settings_theme_dark">Dark Mode</string>
+
+    <string name="applications_gotmind_features_settings_palette">Color Palette</string>
+    <string name="applications_gotmind_features_settings_palette_default">Default</string>
+    <string name="applications_gotmind_features_settings_palette_coral">Coral Theme</string>
+    <string name="applications_gotmind_features_settings_palette_forest">Forest Theme</string>
+    <string name="applications_gotmind_features_settings_palette_ocean">Ocean Theme</string>
+    <string name="applications_gotmind_features_settings_palette_expressive">Material 3 Expressive (Wallpaper)</string>
 </resources>

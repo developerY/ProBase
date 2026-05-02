@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Shield
@@ -27,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,7 +48,8 @@ import java.util.Locale
 
 @Composable
 fun LeaderboardScreen(
-    scores: List<MemBloxScoreEntity>
+    scores: List<MemBloxScoreEntity>,
+    onBack: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -56,6 +59,14 @@ fun LeaderboardScreen(
             .padding(24.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
+                    contentDescription = null, 
+                    tint = Color.White
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
             Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = Color(0xFFFFD700), modifier = Modifier.size(32.dp))
             Spacer(modifier = Modifier.width(12.dp))
             Text(
