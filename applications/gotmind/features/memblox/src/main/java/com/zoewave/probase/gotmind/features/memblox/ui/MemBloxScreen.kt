@@ -316,6 +316,7 @@ fun MemBloxScreen(
                                 blockSize = blockSize,
                                 blockHeight = blockHeight,
                                 isRevealed = uiState.isRevealed,
+                                isInitiallyRevealed = uiState.initiallyRevealedBlockIds.contains(block.id),
                                 nukingColor = nukingColor?.let { Color(it) },
                                 isHinted = isHinted,
                                 dropHeight = uiState.dropHeight,
@@ -614,6 +615,7 @@ fun MemBloxBlockRender(
     blockSize: Dp,
     blockHeight: Dp,
     isRevealed: Boolean,
+    isInitiallyRevealed: Boolean = false,
     nukingColor: Color?,
     isHinted: Boolean = false,
     dropHeight: Int,
@@ -635,7 +637,7 @@ fun MemBloxBlockRender(
 
     // A block is falling if it's visually significantly above its resting row
     val isFalling = animatedY.value < (blockHeight.value * block.row) - 2f
-    val isFlipped = block.isFlipped || isRevealed || nukingColor != null || isFalling
+    val isFlipped = block.isFlipped || isRevealed || isInitiallyRevealed || nukingColor != null || isFalling
     
     // 3D Flip Animation
     val animatedRotationY by animateFloatAsState(
