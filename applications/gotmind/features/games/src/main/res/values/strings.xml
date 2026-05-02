@@ -2,4 +2,8 @@
     <string name="applications_gotmind_features_games_title">GotMind Games</string>
     <string name="applications_gotmind_features_games_classic">GotMind Classic</string>
     <string name="applications_gotmind_features_games_memblox">MemBlox</string>
+    <string name="applications_gotmind_features_games_placeholder_1">MindWave</string>
+    <string name="applications_gotmind_features_games_placeholder_2">NeuroLogic</string>
+    <string name="applications_gotmind_features_games_placeholder_3">PulseCheck</string>
+    <string name="applications_gotmind_features_games_coming_soon">COMING SOON</string>
 </resources>
