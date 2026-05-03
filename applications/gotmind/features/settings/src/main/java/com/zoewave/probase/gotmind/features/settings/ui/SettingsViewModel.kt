@@ -3,12 +3,15 @@ package com.zoewave.probase.gotmind.features.settings.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.gotmind.data.repository.AppSettingsRepository
+import com.zoewave.probase.gotmind.analytics.AnalyticsHelper
 import com.zoewave.probase.gotmind.model.AppTheme
 import com.zoewave.probase.gotmind.model.ColorPalette
 import com.zoewave.probase.gotmind.model.ThemeSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,11 +23,21 @@ sealed interface SettingsEvent {
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val appSettingsRepository: AppSettingsRepository
+    private val appSettingsRepository: AppSettingsRepository,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
     val themeSettings: StateFlow<ThemeSettings> = appSettingsRepository.themeSettingsFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeSettings())
+
+    private val _firebaseId = MutableStateFlow("")
+    val firebaseId: StateFlow<String> = _firebaseId.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _firebaseId.value = analyticsHelper.getFirebaseId()
+        }
+    }
 
     fun handleEvent(event: SettingsEvent) {
         when (event) {

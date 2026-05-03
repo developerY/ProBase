@@ -10,7 +10,11 @@
     <string name="applications_gotmind_features_settings_dark_mode_subtitle">Always stay on the dark side</string>
     <string name="applications_gotmind_features_settings_about_section">About</string>
     <string name="applications_gotmind_features_settings_about_version">MemBlox v1.0.0</string>
-    <string name="applications_gotmind_features_settings_about_desc">A legendary cross between Tetris and Concentration. Master your memory with gravity.</string>
+    <string name="applications_gotmind_features_settings_about_desc">Blox Concentration. Master your memory with gravity.</string>
+    <!--string name="applications_gotmind_features_settings_about_finding_id">Finding your ID: You can find your unique Firebase Device ID within the app by navigating to Settings > About.</string-->
+    <string name="applications_gotmind_features_settings_about_finding_id">Finding your ID: You can find your unique Firebase Device ID below 👇🏾.</string>
+    <string name="applications_gotmind_features_settings_about_result">Result: Upon receiving your ID, we will initiate a deletion request through the Firebase console to remove all records associated with that identifier.</string>
+    <string name="applications_gotmind_features_settings_about_id_label">Firebase Device ID: %1$s</string>
 
     <!-- Themes & Colors -->
     <string name="applications_gotmind_features_settings_theme_section">Themes &amp; Colors</string>

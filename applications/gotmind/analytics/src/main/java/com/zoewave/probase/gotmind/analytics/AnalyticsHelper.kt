@@ -2,6 +2,7 @@ package com.zoewave.probase.gotmind.analytics
 
 interface AnalyticsHelper {
     fun logEvent(event: AnalyticsEvent)
+    suspend fun getFirebaseId(): String
 }
 
 data class AnalyticsEvent(
