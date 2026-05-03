@@ -52,7 +52,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.compose.material.icons.extended)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
 
     // Horologist
     implementation(libs.horologist.compose.layout)
