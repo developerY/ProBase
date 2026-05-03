@@ -28,6 +28,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -167,6 +168,7 @@ fun SettingsScreen(
     membloxState: MemBloxState = MemBloxState(),
     engineType: MemBloxEngineType = MemBloxEngineType.STATIC,
     themeSettings: ThemeSettings = ThemeSettings(),
+    firebaseId: String = "",
     onMemBloxEvent: (MemBloxEvent) -> Unit = {},
     onSettingsEvent: (SettingsEvent) -> Unit = {},
     onBack: () -> Unit = {}
@@ -356,7 +358,43 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = stringResource(R.string.applications_gotmind_features_settings_about_finding_id),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+                /*Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.applications_gotmind_features_settings_about_result),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+                */
+                if (firebaseId.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.applications_gotmind_features_settings_about_id_label, firebaseId),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
+}
+
+@Composable
+fun HorizontalDivider(modifier: Modifier = Modifier, color: Color = Color.Gray) {
+    androidx.compose.foundation.layout.Box(
+        modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(color)
+    )
 }

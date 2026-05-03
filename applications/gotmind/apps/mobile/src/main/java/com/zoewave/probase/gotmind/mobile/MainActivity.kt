@@ -74,6 +74,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settingsVm: SettingsViewModel = hiltViewModel()
             val themeSettings by settingsVm.themeSettings.collectAsState()
+            val firebaseId by settingsVm.firebaseId.collectAsState()
 
             GotMindTheme(
                 appTheme = themeSettings.theme,
@@ -138,6 +139,7 @@ class MainActivity : ComponentActivity() {
                                                 membloxState = uiState,
                                                 engineType = engineType,
                                                 themeSettings = themeSettings,
+                                                firebaseId = firebaseId,
                                                 onMemBloxEvent = { memBloxVm.handleEvent(it) },
                                                 onSettingsEvent = { settingsVm.handleEvent(it) },
                                                 onBack = { if (backStack.size > 1) backStack.removeLastOrNull() }
