@@ -54,7 +54,7 @@ dependencies {
     // --- Hilt ---
     // Note: Standard Hilt works fine. We don't need 'hilt-navigation-compose' (Nav2)
     // unless you are scoping ViewModels to backstack entries, which Nav3 handles differently.
-    // implementation(libs.hilt.navigation.compose)
+    //    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
 
     // Collections
     implementation(libs.kotlinx.collections.immutable)

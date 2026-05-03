@@ -54,7 +54,7 @@ dependencies {
     implementation(libs.kotlinx.collections.immutable)
 
     // Hilt Dependency Injection
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     // kapt(libs.hilt.compiler)

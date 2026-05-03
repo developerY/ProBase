@@ -43,7 +43,7 @@ dependencies {
 
     // --- 5. Hilt ---
     implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     // Compiler is handled by the Hilt Convention Plugin
 
     // --- 6. Maps & Location ---
