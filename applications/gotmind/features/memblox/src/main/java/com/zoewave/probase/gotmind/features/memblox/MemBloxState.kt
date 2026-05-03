@@ -116,5 +116,7 @@ data class MemBloxState(
     val isPaused: Boolean = false,
     val speedMultiplier: Float = 1.0f,
     val dropHeight: Int = 5,
-    val dropDurationMillis: Int = 5000
+    val dropDurationMillis: Int = 5000,
+    val hapticsEnabled: Boolean = true,
+    val soundEnabled: Boolean = true
 )

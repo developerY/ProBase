@@ -10,6 +10,7 @@ import com.zoewave.probase.gotmind.model.ThemeSettings
 import com.zoewave.probase.gotmind.model.MemBloxSettings
 import com.zoewave.probase.gotmind.model.MemBloxEngineType
 import com.zoewave.probase.gotmind.data.di.GotMindDataStore
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +29,8 @@ interface AppSettingsRepository {
     suspend fun saveMemBloxSpeed(speed: Float)
     suspend fun saveMemBloxDropHeight(height: Int)
     suspend fun saveMemBloxDropDuration(durationMillis: Int)
+    suspend fun saveHapticsEnabled(enabled: Boolean)
+    suspend fun saveSoundEnabled(enabled: Boolean)
 }
 
 @Singleton
@@ -42,6 +45,8 @@ class AppSettingsRepositoryImpl @Inject constructor(
     private val MB_SPEED_KEY = floatPreferencesKey("mb_game_speed")
     private val MB_HEIGHT_KEY = intPreferencesKey("mb_drop_height")
     private val MB_DURATION_KEY = intPreferencesKey("mb_drop_duration")
+    private val HAPTICS_KEY = booleanPreferencesKey("haptics_enabled")
+    private val SOUND_KEY = booleanPreferencesKey("sound_enabled")
 
     override val themeSettingsFlow: Flow<ThemeSettings> = dataStore.data.map { preferences ->
         ThemeSettings(
@@ -55,7 +60,9 @@ class AppSettingsRepositoryImpl @Inject constructor(
             engineType = MemBloxEngineType.valueOf(preferences[MB_ENGINE_KEY] ?: MemBloxEngineType.STATIC.name),
             gameSpeed = preferences[MB_SPEED_KEY] ?: 1.0f,
             dropHeight = preferences[MB_HEIGHT_KEY] ?: 5,
-            dropDurationMillis = preferences[MB_DURATION_KEY] ?: 3000
+            dropDurationMillis = preferences[MB_DURATION_KEY] ?: 3000,
+            hapticsEnabled = preferences[HAPTICS_KEY] ?: true,
+            soundEnabled = preferences[SOUND_KEY] ?: true
         )
     }
 
@@ -92,6 +99,18 @@ class AppSettingsRepositoryImpl @Inject constructor(
     override suspend fun saveMemBloxDropDuration(durationMillis: Int) {
         dataStore.edit { preferences ->
             preferences[MB_DURATION_KEY] = durationMillis
+        }
+    }
+
+    override suspend fun saveHapticsEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[HAPTICS_KEY] = enabled
+        }
+    }
+
+    override suspend fun saveSoundEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[SOUND_KEY] = enabled
         }
     }
 }

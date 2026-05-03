@@ -315,16 +315,16 @@ fun SettingsScreen(
             icon = Icons.Default.Vibration,
             title = stringResource(R.string.applications_gotmind_features_settings_haptic_title),
             subtitle = stringResource(R.string.applications_gotmind_features_settings_haptic_subtitle),
-            checked = true,
-            onCheckedChange = {}
+            checked = membloxState.hapticsEnabled,
+            onCheckedChange = { onMemBloxEvent(MemBloxEvent.SetHapticsEnabled(it)) }
         )
         
         SettingItem(
             icon = Icons.Default.VolumeUp,
             title = stringResource(R.string.applications_gotmind_features_settings_sound_title),
             subtitle = stringResource(R.string.applications_gotmind_features_settings_sound_subtitle),
-            checked = true,
-            onCheckedChange = {}
+            checked = membloxState.soundEnabled,
+            onCheckedChange = { onMemBloxEvent(MemBloxEvent.SetSoundEnabled(it)) }
         )
 
         Spacer(modifier = Modifier.height(24.dp))
