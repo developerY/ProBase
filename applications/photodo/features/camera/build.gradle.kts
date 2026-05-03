@@ -27,7 +27,7 @@ dependencies {
     // --- Third Party ---
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.collections.immutable)
