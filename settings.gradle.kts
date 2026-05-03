@@ -155,6 +155,7 @@ include(":applications:gotmind:features:games")
 include(":applications:gotmind:features:leaderboard")
 include(":applications:gotmind:features:settings")
 include(":applications:gotmind:features:memblox")
+include(":applications:gotmind:features:mindwave")
 include(":applications:gotmind:apps:mobile")
 
 // --- GigWork Product Line ---
