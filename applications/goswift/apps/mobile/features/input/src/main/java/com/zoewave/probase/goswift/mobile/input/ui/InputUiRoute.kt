@@ -16,7 +16,7 @@ import com.zoewave.probase.goswift.mobile.nutrition.ui.NutritionScreen
 import com.zoewave.probase.goswift.mobile.nutrition.ui.NutritionViewModel
 import com.zoewave.probase.goswift.mobile.shots.ui.ShotsScreen
 import com.zoewave.probase.goswift.mobile.shots.ui.ShotsViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable

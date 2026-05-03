@@ -47,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.zoewave.ashbike.mobile.home.ui.HomeViewModel
 import com.zoewave.ashbike.mobile.settings.ui.SettingsUiState
@@ -215,6 +217,10 @@ fun AshBikeMainScreen(
                 backStack = backStack,
                 modifier = Modifier.padding(innerPadding),
                 onBack = { backStack.removeLastOrNull() }, // Default back action
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator()
+                ),
                 entryProvider = { key ->
                     // ✅ DELEGATE: Call the provider function we wrote earlier.
                     // This keeps your MainScreen clean and logic-free.

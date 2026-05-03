@@ -66,7 +66,7 @@ dependencies {
 
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.androidx.compose.material.icons.extended)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

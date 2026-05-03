@@ -13,10 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 // TODO: Ensure these Content composables are correctly referenced or moved/redefined in LeanNav.kt
 // For now, these imports will cause errors until LeanNav is set up.
@@ -45,6 +47,10 @@ fun AdaptiveContactsApp(
         // The onBack lambda now respects the keysToRemove count from the strategy.
         onBack = { backStack.removeLastOrNull() },
         sceneStrategy = rememberListDetailSceneStrategy(),
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
         // entryDecorators = listOf(/*... */), // Assuming you have other decorators here
         entryProvider = entryProvider {
             // When a key is passed, the entry provider will select the correct composable.

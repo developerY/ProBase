@@ -39,7 +39,7 @@ dependencies {
 
     // --- 5. Hilt ---
     implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     // Note: The Hilt Convention Plugin handles 'ksp(libs.hilt.compiler)' automatically
 
     // --- Lifecycle ---

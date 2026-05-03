@@ -155,7 +155,7 @@ dependencies {
     // icons or navigation explicitly is fine for clarity.
     implementation(libs.androidx.compose.material.icons.extended)
     //implementation(libs.androidx.navigation.compose)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.serialization.json)
 
     // Testing

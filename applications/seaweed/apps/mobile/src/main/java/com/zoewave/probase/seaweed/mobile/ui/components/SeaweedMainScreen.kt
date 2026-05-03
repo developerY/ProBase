@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.zoewave.probase.seaweed.mobile.ui.navigation.seaweedNavEntryProvider
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
@@ -52,6 +54,10 @@ fun SeaweedMainScreen(
             backStack = backStack,
             modifier = Modifier.padding(innerPadding),
             onBack = { backStack.removeLastOrNull() },
+            entryDecorators = listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator()
+            ),
             entryProvider = { key ->
                 seaweedNavEntryProvider(
                     key = key,

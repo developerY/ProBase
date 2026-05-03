@@ -154,7 +154,7 @@ dependencies {
     implementation(libs.androidx.profileinstaller)
 
     // Hilt Navigation
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
 
     // Testing
     testImplementation(libs.junit)

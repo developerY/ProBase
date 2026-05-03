@@ -89,6 +89,7 @@ dependencies {
     // UI & Navigation
     implementation(libs.androidx.navigation3.runtime) // Core state/list logic
     implementation(libs.androidx.wear.compose.navigation3) // Wear-specific swipe-to-dismiss UI
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
     implementation(libs.androidx.wear.compose.material3)
     implementation(libs.androidx.wear.compose.foundation)
@@ -113,7 +114,7 @@ dependencies {
     // --- Standard Android Components ---
 
     // Hilt (Navigation Compose integration)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation3.ui)
 
     // Room (Local Database)

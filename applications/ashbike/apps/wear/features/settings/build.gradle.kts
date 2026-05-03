@@ -71,7 +71,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     // --- Hilt Dependency Injection ---
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.hilt.android)
     implementation(libs.androidx.compose.material)
     // Note: If your `composetemplate.android.hilt` plugin applies KSP automatically,

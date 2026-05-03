@@ -20,6 +20,7 @@ dependencies {
     // --- 2. Core Android ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     //implementation(libs.androidx.lifecycle.viewmodel.android)
 
@@ -33,7 +34,7 @@ dependencies {
 
     // --- 4. Hilt ---
     implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     // Compiler (ksp) is handled automatically by the Hilt Convention Plugin
 
     // --- 5. Health Connect ---

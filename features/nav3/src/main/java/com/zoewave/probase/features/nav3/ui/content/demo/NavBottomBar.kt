@@ -14,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 // NavBackStack is not directly used here anymore, TopLevelBackStack manages it.
 // import androidx.navigation3.runtime.NavBackStack
 // rememberNavBackStack is not directly used here.
@@ -65,6 +67,10 @@ fun NavBottomBar(modifier: Modifier = Modifier) {
             // NavDisplay observes the combined backStack from TopLevelBackStack
             backStack = topLevelBackStack.backStack,
             modifier = Modifier.padding(innerPadding),
+            entryDecorators = listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator()
+            ),
             entryProvider = appEntryProvider, // <<< SIMPLIFIED AND CORRECTED
             onBack = topLevelBackStack::removeLast // <<< SIMPLIFIED AND CORRECTED
         )

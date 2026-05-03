@@ -3,6 +3,8 @@ package com.zoewave.probase.photodo.wear.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.material3.AppScaffold
@@ -45,6 +47,10 @@ fun PhotoDoWearMainScreen() {
                     backStack = backStack,
                     sceneStrategy = SwipeDismissableSceneStrategy(),
                     onBack = { navigateBack() },
+                    entryDecorators = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator()
+                    ),
                     entryProvider = { dest: PhotoTodoRoute ->
                         photoDoWearNavEntryProvider(
                             key = dest,

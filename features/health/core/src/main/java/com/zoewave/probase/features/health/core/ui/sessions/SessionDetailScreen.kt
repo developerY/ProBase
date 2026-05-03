@@ -24,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.zoewave.probase.core.data.service.health.ExerciseSessionData
 import com.zoewave.probase.features.health.core.ui.HealthViewModel
 
@@ -32,7 +31,7 @@ import com.zoewave.probase.features.health.core.ui.HealthViewModel
 @Composable
 fun SessionDetailScreen(
     uid: String,
-    navController: NavHostController,
+    onBack: () -> Unit,
     healthVM: HealthViewModel = hiltViewModel(), // pulled in via Hilt
     modifier: Modifier = Modifier
 ) {
@@ -57,7 +56,7 @@ fun SessionDetailScreen(
             TopAppBar(
                 title = { Text("Ride Details") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
