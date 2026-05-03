@@ -1,0 +1,53 @@
+# Task Management
+
+- [x] Initial MemBlox Core Implementation
+- [x] Multi-Module Architecture & Persistence
+- [x] Advanced Mechanics & Difficulty Levels
+- [x] Full Power-Up Suite Implementation
+- [x] 6-Star "Hall of Fame" Polish
+- [x] 7-Star "Legendary" Upgrade
+- [x] Modern Architecture & Navigation
+- [x] Production Readiness & Localization
+- [x] Privacy Policy Update
+    - [x] Add third-party service provider details to `Privacy_Policy.md`
+- [x] Firebase & Google Play Services Integration
+    - [x] Create `:applications:gotmind:analytics` module
+    - [x] Implement `FirebaseAnalyticsHelper`
+    - [x] Configure Google Services and Crashlytics plugins
+    - [x] Add `consumer-rules.pro` and `proguard-rules.pro`
+    - [x] Log key game events (Start, Over, Power-ups)
+- [x] Immersive Vision UI Refactor
+- [x] Visual Branding & Roadmap
+- [x] Game Control Restoration
+- [x] Global Theme & Color System
+- [x] Hall of Fame Governance
+- [x] Privacy & Data Transparency
+    - [x] Update `AnalyticsHelper` to expose Firebase Installation ID
+    - [x] Add data deletion instructions to `strings.xml`
+    - [x] Integrate Firebase ID display into `SettingsScreen` "About" section
+    - [x] Verify ID retrieval and UI layout
+    - [x] Limit leaderboard to top 7 scores via SQL `LIMIT`
+    - [x] Add "Clear All" functionality with confirmation dialog
+    - [x] Implement score deletion logic in DAO and ViewModel
+    - [x] Verify leaderboard pruning and manual clearing
+    - [x] Define `AppTheme` and `ColorPalette` models
+    - [x] Implement persistent `AppSettingsRepository` with DataStore
+    - [x] Create `SettingsViewModel` for global configuration
+    - [x] Add "Themes & Colors" section to Settings UI
+    - [x] Update `GotMindTheme` for dynamic palettes and Material 3 Expressive support
+    - [x] Localize all new theme labels in `strings.xml`
+- [x] Zen Descent Pacing Update
+- [x] User-Controlled Drop Dynamics
+- [x] A/B Testing & Modular Engine
+- [x] Game Engine Interaction Fixes
+- [x] Persistent Gameplay Configuration
+- [x] Proguard/R8 Release Stabilization
+    - [x] Create `consumer-rules.pro` for all library modules
+    - [x] Create `proguard-rules.pro` for the mobile app module
+    - [x] Verify release build pipeline
+- [x] MindWave: The Second Memory Game
+    - [x] Create `MindWaveScoreEntity` and `MindWaveScoreDao`
+    - [x] Refine `MindWaveViewModel` with persistence and haptics
+    - [x] Add 7-star polish to `MindWaveScreen` (Nebula, VFX)
+    - [x] Integrate MindWave into `MainActivity` and `GamesScreen`
+    - [x] Verify functionality and high score saving

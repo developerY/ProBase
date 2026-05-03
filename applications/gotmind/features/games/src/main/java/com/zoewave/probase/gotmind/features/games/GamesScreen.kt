@@ -87,8 +87,22 @@ fun GamesScreen(
             }
         }
 
-        // --- Future Placeholder 1 ---
-        PlaceholderGameButton(stringResource(R.string.applications_gotmind_features_games_placeholder_1))
+        // --- MindWave (Active) ---
+        Button(
+            onClick = { onNav("MINDWAVE") },
+            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary
+            )
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stringResource(R.string.applications_gotmind_features_games_placeholder_1),
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+        }
 
         // --- Future Placeholder 2 ---
         PlaceholderGameButton(stringResource(R.string.applications_gotmind_features_games_placeholder_2))

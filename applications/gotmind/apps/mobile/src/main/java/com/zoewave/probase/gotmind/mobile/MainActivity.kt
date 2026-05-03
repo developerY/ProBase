@@ -26,17 +26,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.zoewave.probase.gotmind.features.games.GamesScreen
 import com.zoewave.probase.gotmind.features.leaderboard.ui.LeaderboardScreen
 import com.zoewave.probase.gotmind.features.memblox.MemBloxEvent
 import com.zoewave.probase.gotmind.features.memblox.MemBloxViewModel
 import com.zoewave.probase.gotmind.features.memblox.ui.MemBloxScreen
+import com.zoewave.probase.gotmind.features.mindwave.MindWaveEvent
+import com.zoewave.probase.gotmind.features.mindwave.MindWaveViewModel
+import com.zoewave.probase.gotmind.features.mindwave.ui.MindWaveScreen
 import com.zoewave.probase.gotmind.features.settings.ui.SettingsScreen
 import com.zoewave.probase.gotmind.features.settings.ui.SettingsViewModel
-import com.zoewave.probase.gotmind.features.settings.ui.SettingsEvent
-import com.zoewave.probase.gotmind.model.MemBloxEngineType
 import com.zoewave.probase.gotmind.mobile.ui.GameViewModel
 import com.zoewave.probase.gotmind.mobile.ui.components.GameScreen
 import com.zoewave.probase.gotmind.mobile.ui.theme.GotMindTheme
@@ -53,6 +56,7 @@ sealed interface GotMindRoute {
     // Fullscreen Game Screens
     @Serializable data object GotMindClassic : GotMindRoute
     @Serializable data object MemBlox : GotMindRoute
+    @Serializable data object MindWave : GotMindRoute
 }
 
 data class TopLevelDestination(
@@ -113,6 +117,10 @@ class MainActivity : ComponentActivity() {
                             backStack = backStack,
                             modifier = Modifier.padding(if (shouldShowBottomBar) innerPadding else androidx.compose.foundation.layout.PaddingValues(0.dp)),
                             onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
+                            entryDecorators = listOf(
+                                rememberSaveableStateHolderNavEntryDecorator(),
+                                rememberViewModelStoreNavEntryDecorator()
+                            ),
                             entryProvider = { route ->
                                 NavEntry(route) {
                                     when (route) {
@@ -121,15 +129,21 @@ class MainActivity : ComponentActivity() {
                                                 when (dest) {
                                                     "CLASSIC" -> backStack.add(GotMindRoute.GotMindClassic)
                                                     "MEMBLOX" -> backStack.add(GotMindRoute.MemBlox)
+                                                    "MINDWAVE" -> backStack.add(GotMindRoute.MindWave)
                                                 }
                                             }
                                         )
                                         GotMindRoute.Leaderboard -> {
                                             val memBloxVm: MemBloxViewModel = hiltViewModel()
-                                            val scores by memBloxVm.topScores.collectAsState()
+                                            val mindWaveVm: MindWaveViewModel = hiltViewModel()
+                                            val memBloxScores by memBloxVm.topScores.collectAsState()
+                                            val mindWaveScores by mindWaveVm.topScores.collectAsState()
+                                            
                                             LeaderboardScreen(
-                                                scores = scores,
-                                                onClearAll = { memBloxVm.handleEvent(MemBloxEvent.ClearHallOfFame) }
+                                                membloxScores = memBloxScores,
+                                                mindwaveScores = mindWaveScores,
+                                                onClearMemBlox = { memBloxVm.handleEvent(MemBloxEvent.ClearHallOfFame) },
+                                                onClearMindWave = { mindWaveVm.handleEvent(MindWaveEvent.ResetGame) } // Need a clear event for MindWave
                                             )
                                         }
                                         GotMindRoute.Settings -> {
@@ -160,6 +174,15 @@ class MainActivity : ComponentActivity() {
                                                 uiState = state,
                                                 topScores = topScores,
                                                 engineType = engineType,
+                                                onNav = { if (it == "BACK") backStack.removeLastOrNull() },
+                                                onEvent = { event -> viewModel.handleEvent(event) }
+                                            )
+                                        }
+                                        GotMindRoute.MindWave -> {
+                                            val viewModel: MindWaveViewModel = hiltViewModel()
+                                            val state by viewModel.uiState.collectAsState()
+                                            MindWaveScreen(
+                                                uiState = state,
                                                 onNav = { if (it == "BACK") backStack.removeLastOrNull() },
                                                 onEvent = { event -> viewModel.handleEvent(event) }
                                             )
