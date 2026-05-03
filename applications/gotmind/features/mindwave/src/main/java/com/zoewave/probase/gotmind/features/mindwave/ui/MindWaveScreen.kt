@@ -11,6 +11,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,6 +44,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,8 +58,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,6 +71,7 @@ import com.zoewave.probase.gotmind.features.mindwave.HapticSignal
 import com.zoewave.probase.gotmind.features.mindwave.MindWaveEvent
 import com.zoewave.probase.gotmind.features.mindwave.MindWaveState
 import com.zoewave.probase.gotmind.features.mindwave.Node
+import com.zoewave.probase.gotmind.model.MindWaveMode
 import kotlin.random.Random
 
 @Composable
@@ -183,14 +191,25 @@ fun MindWaveScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Text(
-                text = if (uiState.isPlayingSequence) "Watch the Wave..." else "Repeat the Pattern",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Black,
-                color = if (uiState.isPlayingSequence) MaterialTheme.colorScheme.secondary else Color.White
-            )
+            if (uiState.mode == MindWaveMode.SYMPHONY) {
+                MusicalStaff(activeNodeId = uiState.activeNodeId)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = if (uiState.isPlayingSequence) "Watch & Listen..." else "Repeat the Melody",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = if (uiState.isPlayingSequence) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.8f)
+                )
+            } else {
+                Text(
+                    text = if (uiState.isPlayingSequence) "Watch the Wave..." else "Repeat the Pattern",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Black,
+                    color = if (uiState.isPlayingSequence) MaterialTheme.colorScheme.secondary else Color.White
+                )
+            }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Game Grid (4x4)
             Column(
@@ -242,6 +261,111 @@ fun MindWaveScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(if (uiState.isGameOver) "TRY AGAIN" else "START GAME", fontWeight = FontWeight.Black)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MusicalStaff(activeNodeId: Int?) {
+    val lineSpacing = 10.dp
+    val staffHeight = lineSpacing * 8
+    
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(staffHeight + 20.dp)
+            .padding(horizontal = 48.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val width = size.width
+            val height = size.height
+            val centerY = height / 2f
+            val spacing = lineSpacing.toPx()
+            
+            // Draw Treble Clef Symbol (Stylized using text for precision)
+            drawContext.canvas.nativeCanvas.apply {
+                val paint = android.graphics.Paint().apply {
+                    color = Color.White.copy(alpha = 0.5f).toArgb()
+                    textSize = spacing * 5f
+                    typeface = android.graphics.Typeface.DEFAULT_BOLD
+                }
+                // Clef placement
+                drawText("𝄞", 0f, centerY + spacing * 1.5f, paint)
+            }
+
+            // Draw 5 staff lines
+            for (i in -2..2) {
+                val y = centerY + i * spacing
+                drawLine(
+                    color = Color.White.copy(alpha = 0.2f),
+                    start = androidx.compose.ui.geometry.Offset(60f, y),
+                    end = androidx.compose.ui.geometry.Offset(width, y),
+                    strokeWidth = 2f
+                )
+            }
+
+            // Note mapping (Treble Clef)
+            val noteOffsets = mapOf(
+                0 to -2.5f, // D#5
+                1 to -1.0f, // D5
+                2 to -0.5f, // C#5
+                3 to -0.5f, // C5
+                4 to 0.0f,  // B4
+                5 to 0.5f,  // A#4
+                6 to 0.5f,  // A4
+                7 to 1.0f,  // G#4
+                8 to 1.0f,  // G4
+                9 to 1.5f,  // F#4
+                10 to 1.5f, // F4
+                11 to 2.0f, // E4
+                12 to 2.5f, // D#4
+                13 to 2.5f, // D4
+                14 to 3.0f, // C#4
+                15 to 3.0f  // C4
+            )
+
+            activeNodeId?.let { id ->
+                val offsetMultiplier = noteOffsets[id] ?: 0f
+                val noteY = centerY + offsetMultiplier * spacing
+                
+                // Draw Ledger line for C4
+                if (offsetMultiplier >= 3.0f) {
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.6f),
+                        start = androidx.compose.ui.geometry.Offset(width/2f - 25f, centerY + 3f * spacing),
+                        end = androidx.compose.ui.geometry.Offset(width/2f + 25f, centerY + 3f * spacing),
+                        strokeWidth = 3f
+                    )
+                }
+
+                // Note Head Glow
+                drawCircle(
+                    color = Color(0xFF00E5FF).copy(alpha = 0.3f),
+                    radius = spacing * 0.6f,
+                    center = androidx.compose.ui.geometry.Offset(width / 2f, noteY)
+                )
+
+                // Main Note Head
+                drawCircle(
+                    color = Color.White,
+                    radius = spacing * 0.4f,
+                    center = androidx.compose.ui.geometry.Offset(width / 2f, noteY)
+                )
+                
+                // Sharp symbol (#) logic
+                val isSharp = id in listOf(0, 2, 5, 7, 9, 12, 14)
+                if (isSharp) {
+                    drawContext.canvas.nativeCanvas.apply {
+                        val p = android.graphics.Paint().apply {
+                            color = Color(0xFF00E5FF).toArgb()
+                            textSize = spacing * 1.5f
+                            typeface = android.graphics.Typeface.DEFAULT_BOLD
+                        }
+                        drawText("#", width/2f + spacing * 0.6f, noteY + spacing * 0.4f, p)
+                    }
                 }
             }
         }
@@ -316,7 +440,6 @@ fun MindWaveNode(
             )
         }
         
-        // Futuristic ripple inside
         if (node.isFlashing && node.color == null) {
             Box(
                 modifier = Modifier

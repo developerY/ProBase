@@ -49,9 +49,12 @@ abstract class BaseMindWaveEngine(
                 }
                 
                 _state.update { state ->
-                    state.copy(grid = state.grid.map { node ->
-                        if (node.id == nodeId) node.copy(isFlashing = true) else node
-                    })
+                    state.copy(
+                        grid = state.grid.map { node ->
+                            if (node.id == nodeId) node.copy(isFlashing = true) else node
+                        },
+                        activeNodeId = nodeId
+                    )
                 }
                 triggerHaptic(HapticSignal.LIGHT)
                 playNodeSound(nodeId)
@@ -60,9 +63,12 @@ abstract class BaseMindWaveEngine(
                 delay(flashDuration)
                 
                 _state.update { state ->
-                    state.copy(grid = state.grid.map { node ->
-                        if (node.id == nodeId) node.copy(isFlashing = false) else node
-                    })
+                    state.copy(
+                        grid = state.grid.map { node ->
+                            if (node.id == nodeId) node.copy(isFlashing = false) else node
+                        },
+                        activeNodeId = null
+                    )
                 }
                 delay(150)
             }
@@ -81,6 +87,12 @@ abstract class BaseMindWaveEngine(
             triggerHaptic(HapticSignal.LIGHT)
             playNodeSound(nodeId)
             val newUserInput = state.userInput + nodeId
+            _state.update { it.copy(activeNodeId = nodeId) }
+            scope.launch {
+                delay(400)
+                _state.update { it.copy(activeNodeId = null) }
+            }
+
             if (newUserInput.size == state.sequence.size) {
                 // Level Complete
                 _state.update { it.copy(

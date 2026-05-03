@@ -27,7 +27,8 @@ data class MindWaveState(
     val soundEnabled: Boolean = true,
     val lastHapticSignal: HapticSignal? = null,
     val isPaused: Boolean = false,
-    val mode: MindWaveMode = MindWaveMode.CLASSIC
+    val mode: MindWaveMode = MindWaveMode.CLASSIC,
+    val activeNodeId: Int? = null // For visual staff notation
 )
 
 enum class HapticSignal { LIGHT, MEDIUM, HEAVY }
