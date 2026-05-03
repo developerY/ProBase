@@ -50,7 +50,7 @@ dependencies {
     implementation(libs.androidx.compose.material3.adaptive.navigationsuite)
     implementation(libs.androidx.window.core)
     implementation(libs.androidx.compose.material3.window.size)
-    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
