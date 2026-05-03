@@ -6,6 +6,8 @@ import com.zoewave.probase.gotmind.database.MemBloxScoreEntity
 import com.zoewave.probase.gotmind.database.dao.MemBloxScoreDao
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
+import com.zoewave.probase.gotmind.model.MemBloxEngineType
+import com.zoewave.probase.gotmind.data.repository.AppSettingsRepository
 import com.zoewave.probase.gotmind.analytics.AnalyticsHelper
 import com.zoewave.probase.gotmind.analytics.AnalyticsEvent
 import com.zoewave.probase.gotmind.analytics.AnalyticsParam
@@ -15,7 +17,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,6 +29,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MemBloxViewModel @Inject constructor(
     private val scoreDao: MemBloxScoreDao,
+    private val appSettingsRepository: AppSettingsRepository,
     private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
@@ -33,6 +39,22 @@ class MemBloxViewModel @Inject constructor(
     private val _engine = MutableStateFlow<IMemBloxEngine>(createEngine(_engineType.value))
     val uiState: StateFlow<MemBloxState> = _engine.flatMapLatest { it.state }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MemBloxState())
+
+    init {
+        // Sync persistent settings to the engine
+        appSettingsRepository.memBloxSettingsFlow
+            .onEach { settings ->
+                if (_engineType.value != settings.engineType) {
+                    _engineType.value = settings.engineType
+                    _engine.value = createEngine(settings.engineType)
+                }
+                val engine = _engine.value
+                engine.updateSpeed(settings.gameSpeed)
+                engine.updateDropHeight(settings.dropHeight)
+                engine.updateDropDuration(settings.dropDurationMillis)
+            }
+            .launchIn(viewModelScope)
+    }
 
     val topScores = scoreDao.getAllTopScores()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -72,9 +94,15 @@ class MemBloxViewModel @Inject constructor(
             MemBloxEvent.ResetToSelection -> currentEngine.reset()
             MemBloxEvent.HapticConsumed -> currentEngine.onHapticConsumed()
             MemBloxEvent.TogglePause -> currentEngine.togglePause()
-            is MemBloxEvent.UpdateSpeed -> currentEngine.updateSpeed(event.multiplier)
-            is MemBloxEvent.UpdateDropHeight -> currentEngine.updateDropHeight(event.height)
-            is MemBloxEvent.UpdateDropDuration -> currentEngine.updateDropDuration(event.durationMillis)
+            is MemBloxEvent.UpdateSpeed -> viewModelScope.launch {
+                appSettingsRepository.saveMemBloxSpeed(event.multiplier)
+            }
+            is MemBloxEvent.UpdateDropHeight -> viewModelScope.launch {
+                appSettingsRepository.saveMemBloxDropHeight(event.height)
+            }
+            is MemBloxEvent.UpdateDropDuration -> viewModelScope.launch {
+                appSettingsRepository.saveMemBloxDropDuration(event.durationMillis)
+            }
             is MemBloxEvent.SetEngineType -> {
                 if (_engineType.value == event.type) return
                 analyticsHelper.logEvent(
@@ -83,9 +111,9 @@ class MemBloxViewModel @Inject constructor(
                         extras = listOf(AnalyticsParam("new_type", event.type.name))
                     )
                 )
-                currentEngine.reset()
-                _engineType.value = event.type
-                _engine.value = createEngine(event.type)
+                viewModelScope.launch {
+                    appSettingsRepository.saveMemBloxEngineType(event.type)
+                }
             }
             MemBloxEvent.ClearHallOfFame -> viewModelScope.launch {
                 scoreDao.clearAllScores()
