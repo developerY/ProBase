@@ -2,22 +2,19 @@ package com.zoewave.probase.gotmind.features.memblox
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.gotmind.analytics.AnalyticsEvent
+import com.zoewave.probase.gotmind.analytics.AnalyticsHelper
+import com.zoewave.probase.gotmind.analytics.AnalyticsParam
+import com.zoewave.probase.gotmind.data.repository.AppSettingsRepository
 import com.zoewave.probase.gotmind.database.MemBloxScoreEntity
 import com.zoewave.probase.gotmind.database.dao.MemBloxScoreDao
-import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
-import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
 import com.zoewave.probase.gotmind.model.MemBloxEngineType
-import com.zoewave.probase.gotmind.data.repository.AppSettingsRepository
-import com.zoewave.probase.gotmind.analytics.AnalyticsHelper
-import com.zoewave.probase.gotmind.analytics.AnalyticsEvent
-import com.zoewave.probase.gotmind.analytics.AnalyticsParam
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -42,7 +39,7 @@ class MemBloxViewModel @Inject constructor(
 
     init {
         // Sync persistent settings to the engine
-        appSettingsRepository.memBloxSettingsFlow
+        appSettingsRepository.gameSettingsFlow
             .onEach { settings ->
                 if (_engineType.value != settings.engineType) {
                     _engineType.value = settings.engineType
