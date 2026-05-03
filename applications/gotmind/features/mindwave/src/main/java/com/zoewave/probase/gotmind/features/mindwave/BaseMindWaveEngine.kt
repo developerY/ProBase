@@ -19,6 +19,11 @@ abstract class BaseMindWaveEngine(
     override val state: StateFlow<MindWaveState> = _state.asStateFlow()
 
     protected var gameJob: Job? = null
+    protected var synthesizer: com.zoewave.probase.core.util.audio.WaveSynthesizer? = null
+
+    override fun setAudioSynthesizer(synthesizer: com.zoewave.probase.core.util.audio.WaveSynthesizer?) {
+        this.synthesizer = synthesizer
+    }
 
     override fun start() {
         _state.update { it.copy(isStarted = true, score = 0, level = 1, isGameOver = false, feedbackMessage = null, grid = createInitialGrid()) }
@@ -49,6 +54,7 @@ abstract class BaseMindWaveEngine(
                     })
                 }
                 triggerHaptic(HapticSignal.LIGHT)
+                playNodeSound(nodeId)
                 
                 val flashDuration = (600L - (_state.value.level * 30L)).coerceAtLeast(200L)
                 delay(flashDuration)
@@ -73,6 +79,7 @@ abstract class BaseMindWaveEngine(
 
         if (nodeId == expectedNodeId) {
             triggerHaptic(HapticSignal.LIGHT)
+            playNodeSound(nodeId)
             val newUserInput = state.userInput + nodeId
             if (newUserInput.size == state.sequence.size) {
                 // Level Complete
@@ -92,6 +99,7 @@ abstract class BaseMindWaveEngine(
         } else {
             // Game Over
             triggerHaptic(HapticSignal.HEAVY)
+            playGameOverSound()
             val finalScore = state.score
             val finalLevel = state.level
             _state.update { it.copy(isGameOver = true, feedbackMessage = "Signal Lost") }
@@ -135,4 +143,40 @@ abstract class BaseMindWaveEngine(
             _state.update { it.copy(lastHapticSignal = signal) }
         }
     }
+
+    protected fun playNodeSound(nodeId: Int) {
+        if (!_state.value.soundEnabled) return
+        val synth = synthesizer ?: return
+        val frequency = nodeFrequencies[nodeId] ?: 440.0
+        scope.launch {
+            synth.playTone(frequency, 400)
+        }
+    }
+
+    protected fun playGameOverSound() {
+        if (!_state.value.soundEnabled) return
+        val synth = synthesizer ?: return
+        scope.launch {
+            synth.playTone(150.0, 600)
+        }
+    }
+
+    private val nodeFrequencies = mapOf(
+        0 to 523.25, // C5
+        1 to 554.37, // C#5
+        2 to 587.33, // D5
+        3 to 622.25, // D#5
+        4 to 392.00, // G4
+        5 to 415.30, // G#4
+        6 to 440.00, // A4
+        7 to 466.16, // A#4
+        8 to 493.88, // B4
+        9 to 329.63, // E4
+        10 to 349.23, // F4
+        11 to 369.99, // F#4
+        12 to 261.63, // C4
+        13 to 277.18, // C#4
+        14 to 293.66, // D4
+        15 to 311.13  // D#4
+    )
 }

@@ -9,6 +9,7 @@ import com.zoewave.probase.gotmind.data.repository.AppSettingsRepository
 import com.zoewave.probase.gotmind.database.MindWaveScoreEntity
 import com.zoewave.probase.gotmind.database.dao.MindWaveScoreDao
 import com.zoewave.probase.gotmind.model.MindWaveMode
+import com.zoewave.probase.core.util.audio.WaveSynthesizer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -30,7 +31,8 @@ import kotlin.random.Random
 class MindWaveViewModel @Inject constructor(
     private val scoreDao: MindWaveScoreDao,
     private val appSettingsRepository: AppSettingsRepository,
-    private val analyticsHelper: AnalyticsHelper
+    private val analyticsHelper: AnalyticsHelper,
+    private val waveSynthesizer: WaveSynthesizer
 ) : ViewModel() {
 
     private val _mode = MutableStateFlow(MindWaveMode.CLASSIC)
@@ -54,6 +56,7 @@ class MindWaveViewModel @Inject constructor(
                 val engine = _engine.value
                 engine.setHapticsEnabled(settings.hapticsEnabled)
                 engine.setSoundEnabled(settings.soundEnabled)
+                engine.setAudioSynthesizer(waveSynthesizer)
             }
             .launchIn(viewModelScope)
     }
