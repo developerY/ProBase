@@ -17,11 +17,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.core.model.yelp.BusinessInfo
 import com.zoewave.probase.feature.places.ui.components.CoffeeShopList
 import com.zoewave.probase.core.ui.R as CoreUiR
 
@@ -52,7 +50,7 @@ internal fun CoffeeShopUIRoute(
     when (uiState) {
         is CoffeeShopUIState.Loading -> LoadingScreen(modifier = modifier)
         is CoffeeShopUIState.Success -> CoffeeShopList(
-            coffeeShops = uiState.coffeeShops
+            coffeeShops = uiState.coffeeShops,
         )
         is CoffeeShopUIState.Error -> ErrorScreen(
             message = uiState.message,
@@ -91,19 +89,3 @@ fun ErrorScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun CoffeeShopUIRoutePreview() {
-    MaterialTheme {
-        CoffeeShopUIRoute(
-            uiState = CoffeeShopUIState.Success(
-                coffeeShops = listOf(
-                    BusinessInfo(id = "1", name = "Central Perk", rating = 4.5, price = "$$"),
-                    BusinessInfo(id = "2", name = "Starbucks", rating = 4.0, price = "$")
-                )
-            ),
-            onEvent = {},
-            navTo = {}
-        )
-    }
-}
