@@ -19,23 +19,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,18 +49,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.gotmind.database.MemBloxScoreEntity
+import com.zoewave.probase.gotmind.database.MindWaveScoreEntity
 import com.zoewave.probase.gotmind.features.leaderboard.R
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun LeaderboardScreen(
-    scores: List<MemBloxScoreEntity>,
+    membloxScores: List<MemBloxScoreEntity>,
+    mindwaveScores: List<MindWaveScoreEntity>,
     onBack: () -> Unit = {},
-    onClearAll: () -> Unit = {}
+    onClearMemBlox: () -> Unit = {},
+    onClearMindWave: () -> Unit = {}
 ) {
+    var selectedTab by remember { mutableStateOf(0) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
     Column(
@@ -68,7 +73,8 @@ fun LeaderboardScreen(
             .fillMaxSize()
             .background(Color(0xFF0F0F0F))
             .statusBarsPadding()
-            .padding(24.dp)
+            .padding(horizontal = 24.dp)
+            .padding(top = 24.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             IconButton(onClick = onBack) {
@@ -89,17 +95,39 @@ fun LeaderboardScreen(
                 modifier = Modifier.weight(1f)
             )
             
-            if (scores.isNotEmpty()) {
+            val currentScores = if (selectedTab == 0) membloxScores else mindwaveScores
+            if (currentScores.isNotEmpty()) {
                 IconButton(onClick = { showDeleteConfirm = true }) {
                     Icon(Icons.Default.DeleteSweep, contentDescription = null, tint = Color.Gray)
                 }
             }
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        SecondaryTabRow(
+            selectedTabIndex = selectedTab,
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.primary,
+            divider = {}
+        ) {
+            Tab(
+                selected = selectedTab == 0,
+                onClick = { selectedTab = 0 },
+                text = { Text("MEMBLOX", fontWeight = FontWeight.Bold) }
+            )
+            Tab(
+                selected = selectedTab == 1,
+                onClick = { selectedTab = 1 },
+                text = { Text("MINDWAVE", fontWeight = FontWeight.Bold) }
+            )
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (scores.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        val currentList = if (selectedTab == 0) membloxScores else mindwaveScores
+        if (currentList.isEmpty()) {
+            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
                     text = stringResource(R.string.applications_gotmind_features_leaderboard_empty),
                     color = Color.Gray
@@ -107,9 +135,14 @@ fun LeaderboardScreen(
             }
         } else {
             LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                items(scores) { score ->
-                    HallOfFameCard(score)
+                items(currentList) { score ->
+                    if (score is MemBloxScoreEntity) {
+                        HallOfFameCard(score)
+                    } else if (score is MindWaveScoreEntity) {
+                        MindWaveHallOfFameCard(score)
+                    }
                 }
+                item { Spacer(modifier = Modifier.height(24.dp)) }
             }
         }
     }
@@ -124,7 +157,7 @@ fun LeaderboardScreen(
             text = { Text(stringResource(R.string.applications_gotmind_features_leaderboard_clear_confirm)) },
             confirmButton = {
                 TextButton(onClick = {
-                    onClearAll()
+                    if (selectedTab == 0) onClearMemBlox() else onClearMindWave()
                     showDeleteConfirm = false
                 }) {
                     Text("CLEAR ALL", color = Color.Red, fontWeight = FontWeight.Bold)
@@ -144,7 +177,6 @@ fun HallOfFameCard(score: MemBloxScoreEntity) {
     val date = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(Date(score.timestamp))
     val isSniper = score.accuracy > 0.9f
 
-    // Map difficulty name to labelResId
     val difficultyResId = MemBloxDifficulty.entries.find { it.name == score.difficulty }?.labelResId
         ?: com.zoewave.probase.gotmind.model.R.string.applications_gotmind_model_diff_expert
 
@@ -176,26 +208,39 @@ fun HallOfFameCard(score: MemBloxScoreEntity) {
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.White.copy(alpha = 0.1f))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(R.string.applications_gotmind_features_leaderboard_peak_streak),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray
-                    )
+                    Text(text = stringResource(R.string.applications_gotmind_features_leaderboard_peak_streak), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                     Text(score.bestStreak.toString(), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = Color.White)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(R.string.applications_gotmind_features_leaderboard_hit_rate),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = stringResource(R.string.applications_gotmind_features_leaderboard_percent_format, (score.accuracy * 100).toInt()),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                    Text(text = stringResource(R.string.applications_gotmind_features_leaderboard_hit_rate), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text(text = stringResource(R.string.applications_gotmind_features_leaderboard_percent_format, (score.accuracy * 100).toInt()), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = Color.White)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun MindWaveHallOfFameCard(score: MindWaveScoreEntity) {
+    val date = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(Date(score.timestamp))
+    
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = Color(0xFF1E1E1E))
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Column {
+                    Text(
+                        text = "LEVEL ${score.level}", 
+                        style = MaterialTheme.typography.labelSmall, 
+                        color = MaterialTheme.colorScheme.secondary, 
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(score.score.toString(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, color = Color.White)
+                }
+                Text(date, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
             }
         }
     }
