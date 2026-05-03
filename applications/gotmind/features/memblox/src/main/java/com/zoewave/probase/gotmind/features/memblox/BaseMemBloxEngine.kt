@@ -50,12 +50,18 @@ abstract class BaseMemBloxEngine(
 
     override fun start(difficulty: MemBloxDifficulty) {
         currentDifficulty = difficulty
+        val currentConfig = _state.value
         _state.value = MemBloxState(
             cols = difficulty.cols,
             rows = difficulty.rows,
             targetPairs = difficulty.targetPairs,
             difficulty = difficulty,
             isStarted = true,
+            speedMultiplier = currentConfig.speedMultiplier,
+            dropHeight = currentConfig.dropHeight,
+            dropDurationMillis = currentConfig.dropDurationMillis,
+            hapticsEnabled = currentConfig.hapticsEnabled,
+            soundEnabled = currentConfig.soundEnabled,
             powerUps = mapOf(
                 PowerUpType.FREEZE to 2, 
                 PowerUpType.REVEAL to 1, 
@@ -114,9 +120,24 @@ abstract class BaseMemBloxEngine(
         _state.update { it.copy(dropDurationMillis = durationMillis) }
     }
 
+    override fun setHapticsEnabled(enabled: Boolean) {
+        _state.update { it.copy(hapticsEnabled = enabled) }
+    }
+
+    override fun setSoundEnabled(enabled: Boolean) {
+        _state.update { it.copy(soundEnabled = enabled) }
+    }
+
     override fun reset() {
         gameJob?.cancel()
-        _state.value = MemBloxState()
+        val currentConfig = _state.value
+        _state.value = MemBloxState(
+            speedMultiplier = currentConfig.speedMultiplier,
+            dropHeight = currentConfig.dropHeight,
+            dropDurationMillis = currentConfig.dropDurationMillis,
+            hapticsEnabled = currentConfig.hapticsEnabled,
+            soundEnabled = currentConfig.soundEnabled
+        )
     }
 
     override fun onHapticConsumed() {
@@ -124,7 +145,9 @@ abstract class BaseMemBloxEngine(
     }
 
     protected fun triggerHaptic(signal: HapticSignal) {
-        _state.update { it.copy(lastHapticSignal = signal) }
+        if (_state.value.hapticsEnabled) {
+            _state.update { it.copy(lastHapticSignal = signal) }
+        }
     }
 
     protected fun applyGravity() {

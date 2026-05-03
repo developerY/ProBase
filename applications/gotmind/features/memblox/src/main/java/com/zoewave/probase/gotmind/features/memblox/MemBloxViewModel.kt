@@ -52,6 +52,8 @@ class MemBloxViewModel @Inject constructor(
                 engine.updateSpeed(settings.gameSpeed)
                 engine.updateDropHeight(settings.dropHeight)
                 engine.updateDropDuration(settings.dropDurationMillis)
+                engine.setHapticsEnabled(settings.hapticsEnabled)
+                engine.setSoundEnabled(settings.soundEnabled)
             }
             .launchIn(viewModelScope)
     }
@@ -114,6 +116,12 @@ class MemBloxViewModel @Inject constructor(
                 viewModelScope.launch {
                     appSettingsRepository.saveMemBloxEngineType(event.type)
                 }
+            }
+            is MemBloxEvent.SetHapticsEnabled -> viewModelScope.launch {
+                appSettingsRepository.saveHapticsEnabled(event.enabled)
+            }
+            is MemBloxEvent.SetSoundEnabled -> viewModelScope.launch {
+                appSettingsRepository.saveSoundEnabled(event.enabled)
             }
             MemBloxEvent.ClearHallOfFame -> viewModelScope.launch {
                 scoreDao.clearAllScores()

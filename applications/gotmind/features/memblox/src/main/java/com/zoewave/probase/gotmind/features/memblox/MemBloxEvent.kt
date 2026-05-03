@@ -15,5 +15,7 @@ sealed interface MemBloxEvent {
     data class UpdateDropHeight(val height: Int) : MemBloxEvent
     data class UpdateDropDuration(val durationMillis: Int) : MemBloxEvent
     data class SetEngineType(val type: MemBloxEngineType) : MemBloxEvent
+    data class SetHapticsEnabled(val enabled: Boolean) : MemBloxEvent
+    data class SetSoundEnabled(val enabled: Boolean) : MemBloxEvent
     data object ClearHallOfFame : MemBloxEvent
 }
