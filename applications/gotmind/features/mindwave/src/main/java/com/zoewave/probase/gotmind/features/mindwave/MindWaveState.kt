@@ -1,11 +1,14 @@
 package com.zoewave.probase.gotmind.features.mindwave
 
+import com.zoewave.probase.gotmind.model.MindWaveMode
 import java.util.UUID
 
 data class Node(
     val id: Int, // 0..15 for a 4x4 grid
     val isFlashing: Boolean = false,
-    val isCorrect: Boolean? = null // true if correctly clicked, false if wrong, null otherwise
+    val isCorrect: Boolean? = null, // true if correctly clicked, false if wrong, null otherwise
+    val color: Long? = null, // Pastel color for Symphony mode
+    val note: String? = null // Musical note for Symphony mode
 )
 
 data class MindWaveState(
@@ -23,7 +26,8 @@ data class MindWaveState(
     val hapticsEnabled: Boolean = true,
     val soundEnabled: Boolean = true,
     val lastHapticSignal: HapticSignal? = null,
-    val isPaused: Boolean = false
+    val isPaused: Boolean = false,
+    val mode: MindWaveMode = MindWaveMode.CLASSIC
 )
 
 enum class HapticSignal { LIGHT, MEDIUM, HEAVY }

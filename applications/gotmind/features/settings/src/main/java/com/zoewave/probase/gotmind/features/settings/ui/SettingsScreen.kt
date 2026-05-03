@@ -1,5 +1,6 @@
 package com.zoewave.probase.gotmind.features.settings.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -56,6 +57,8 @@ import com.zoewave.probase.gotmind.model.AppTheme
 import com.zoewave.probase.gotmind.model.ColorPalette
 import com.zoewave.probase.gotmind.model.ThemeSettings
 import com.zoewave.probase.gotmind.model.MemBloxEngineType
+import com.zoewave.probase.gotmind.model.MindWaveMode
+import com.zoewave.probase.gotmind.model.GameSettings
 import java.util.Locale
 
 @Composable
@@ -165,8 +168,7 @@ fun SettingItem(
 
 @Composable
 fun SettingsScreen(
-    membloxState: MemBloxState = MemBloxState(),
-    engineType: MemBloxEngineType = MemBloxEngineType.STATIC,
+    gameSettings: GameSettings = GameSettings(),
     themeSettings: ThemeSettings = ThemeSettings(),
     firebaseId: String = "",
     onMemBloxEvent: (MemBloxEvent) -> Unit = {},
@@ -233,6 +235,23 @@ fun SettingsScreen(
             onSelected = { onSettingsEvent(SettingsEvent.SetPalette(it)) }
         )
 
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- MindWave Settings ---
+        SettingsSectionTitle(stringResource(R.string.applications_gotmind_features_settings_mindwave_section))
+
+        SettingsDropdownItem(
+            icon = Icons.Default.Info,
+            title = stringResource(R.string.applications_gotmind_features_settings_mindwave_version),
+            currentValue = gameSettings.mindWaveMode,
+            options = MindWaveMode.entries,
+            optionLabels = mapOf(
+                MindWaveMode.CLASSIC to stringResource(R.string.applications_gotmind_features_settings_mindwave_classic),
+                MindWaveMode.SYMPHONY to stringResource(R.string.applications_gotmind_features_settings_mindwave_symphony)
+            ),
+            onSelected = { onSettingsEvent(SettingsEvent.SetMindWaveMode(it)) }
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
         // --- MemBlox Settings ---
@@ -242,7 +261,7 @@ fun SettingsScreen(
             icon = Icons.Default.Speed,
             title = stringResource(com.zoewave.probase.gotmind.features.memblox.R.string.applications_gotmind_features_memblox_engine_mode),
             subtitle = stringResource(com.zoewave.probase.gotmind.features.memblox.R.string.applications_gotmind_features_memblox_engine_mode_desc),
-            checked = engineType == MemBloxEngineType.FALLING,
+            checked = gameSettings.engineType == MemBloxEngineType.FALLING,
             onCheckedChange = { isFalling: Boolean ->
                 onMemBloxEvent(MemBloxEvent.SetEngineType(if (isFalling) MemBloxEngineType.FALLING else MemBloxEngineType.STATIC))
             }
@@ -252,14 +271,14 @@ fun SettingsScreen(
 
         // Dynamic Speed
         val speedLabel = stringResource(com.zoewave.probase.gotmind.features.memblox.R.string.applications_gotmind_features_memblox_speed)
-        val speedValue = String.format(Locale.getDefault(), "%.1f", membloxState.speedMultiplier)
+        val speedValue = String.format(Locale.getDefault(), "%.1f", gameSettings.gameSpeed)
         Text(
             text = "$speedLabel: ${speedValue}x",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary
         )
         Slider(
-            value = membloxState.speedMultiplier,
+            value = gameSettings.gameSpeed,
             onValueChange = { onMemBloxEvent(MemBloxEvent.UpdateSpeed(it)) },
             valueRange = 0.5f..2.0f,
             steps = 15,
@@ -269,15 +288,15 @@ fun SettingsScreen(
             )
         )
 
-        if (engineType == MemBloxEngineType.FALLING) {
+        if (gameSettings.engineType == MemBloxEngineType.FALLING) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = stringResource(com.zoewave.probase.gotmind.features.memblox.R.string.applications_gotmind_features_memblox_drop_height, membloxState.dropHeight),
+                text = stringResource(com.zoewave.probase.gotmind.features.memblox.R.string.applications_gotmind_features_memblox_drop_height, gameSettings.dropHeight),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary
             )
             Slider(
-                value = membloxState.dropHeight.toFloat(),
+                value = gameSettings.dropHeight.toFloat(),
                 onValueChange = { onMemBloxEvent(MemBloxEvent.UpdateDropHeight(it.toInt())) },
                 valueRange = 1f..10f,
                 steps = 9,
@@ -288,14 +307,14 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            val dropDurationSec = membloxState.dropDurationMillis / 1000f
+            val dropDurationSec = gameSettings.dropDurationMillis / 1000f
             Text(
                 text = stringResource(com.zoewave.probase.gotmind.features.memblox.R.string.applications_gotmind_features_memblox_drop_duration, dropDurationSec),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary
             )
             Slider(
-                value = membloxState.dropDurationMillis.toFloat(),
+                value = gameSettings.dropDurationMillis.toFloat(),
                 onValueChange = { onMemBloxEvent(MemBloxEvent.UpdateDropDuration(it.toInt())) },
                 valueRange = 1000f..10000f,
                 steps = 18,
@@ -315,7 +334,7 @@ fun SettingsScreen(
             icon = Icons.Default.Vibration,
             title = stringResource(R.string.applications_gotmind_features_settings_haptic_title),
             subtitle = stringResource(R.string.applications_gotmind_features_settings_haptic_subtitle),
-            checked = membloxState.hapticsEnabled,
+            checked = gameSettings.hapticsEnabled,
             onCheckedChange = { onMemBloxEvent(MemBloxEvent.SetHapticsEnabled(it)) }
         )
         
@@ -323,7 +342,7 @@ fun SettingsScreen(
             icon = Icons.Default.VolumeUp,
             title = stringResource(R.string.applications_gotmind_features_settings_sound_title),
             subtitle = stringResource(R.string.applications_gotmind_features_settings_sound_subtitle),
-            checked = membloxState.soundEnabled,
+            checked = gameSettings.soundEnabled,
             onCheckedChange = { onMemBloxEvent(MemBloxEvent.SetSoundEnabled(it)) }
         )
 

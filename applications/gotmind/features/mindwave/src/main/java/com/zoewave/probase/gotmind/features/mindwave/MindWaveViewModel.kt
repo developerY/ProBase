@@ -8,6 +8,7 @@ import com.zoewave.probase.gotmind.analytics.AnalyticsParam
 import com.zoewave.probase.gotmind.data.repository.AppSettingsRepository
 import com.zoewave.probase.gotmind.database.MindWaveScoreEntity
 import com.zoewave.probase.gotmind.database.dao.MindWaveScoreDao
+import com.zoewave.probase.gotmind.model.MindWaveMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,15 +38,43 @@ class MindWaveViewModel @Inject constructor(
 
     init {
         // Sync persistent settings
-        appSettingsRepository.memBloxSettingsFlow // Reusing MemBloxSettings for global haptics/sound for now
+        appSettingsRepository.gameSettingsFlow
             .onEach { settings ->
                 _uiState.update { it.copy(
                     hapticsEnabled = settings.hapticsEnabled,
-                    soundEnabled = settings.soundEnabled
+                    soundEnabled = settings.soundEnabled,
+                    mode = settings.mindWaveMode,
+                    grid = createInitialGrid(settings.mindWaveMode)
                 ) }
             }
             .launchIn(viewModelScope)
     }
+
+    private fun createInitialGrid(mode: MindWaveMode): List<Node> {
+        return List(16) { i ->
+            if (mode == MindWaveMode.SYMPHONY) {
+                Node(
+                    id = i,
+                    color = pastelColors[i % pastelColors.size],
+                    note = musicNotes[i % musicNotes.size]
+                )
+            } else {
+                Node(id = i)
+            }
+        }
+    }
+
+    private val pastelColors = listOf(
+        0xFFFFB7B2L, 0xFFFFDAC1L, 0xFFE2F0CBL, 0xFFB5EAD7L,
+        0xFFC7CEEAL, 0xFFF3E5F5L, 0xFFE1F5FEL, 0xFFF1F8E9L,
+        0xFFFFF9C4L, 0xFFFFE0B2L, 0xFFFFCDD2L, 0xFFF8BBD0L,
+        0xFFE1BEE7L, 0xFFD1C4E9L, 0xFFC5CAE9L, 0xFFBBDEFBL
+    )
+
+    private val musicNotes = listOf(
+        "C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "G#4", "A4", "A#4", "B4",
+        "C5", "C#5", "D5", "D#5"
+    )
 
     fun handleEvent(event: MindWaveEvent) {
         when (event) {

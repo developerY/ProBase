@@ -286,10 +286,12 @@ fun MindWaveNode(
         label = "Pulse"
     )
 
+    val baseColor = if (node.color != null) Color(node.color) else Color.White.copy(alpha = 0.1f)
+    
     val color by animateColorAsState(
         targetValue = when {
-            node.isFlashing -> Color(0xFF00E5FF)
-            else -> Color.White.copy(alpha = 0.1f)
+            node.isFlashing -> if (node.color != null) Color.White else Color(0xFF00E5FF)
+            else -> baseColor
         },
         animationSpec = tween(if (node.isFlashing) 100 else 300),
         label = "Color"
@@ -301,12 +303,21 @@ fun MindWaveNode(
             .scale(scale)
             .clip(CircleShape)
             .background(color)
-            .border(2.dp, if (node.isFlashing) Color(0xFF00E5FF).copy(alpha = 0.5f) else Color.Transparent, CircleShape)
+            .border(2.dp, if (node.isFlashing) Color.White.copy(alpha = 0.5f) else Color.Transparent, CircleShape)
             .clickable(enabled = isClickable) { onClick() },
         contentAlignment = Alignment.Center
     ) {
+        if (node.note != null) {
+            Text(
+                text = node.note,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Black,
+                color = if (node.isFlashing) Color.Black else Color.White.copy(alpha = 0.6f)
+            )
+        }
+        
         // Futuristic ripple inside
-        if (node.isFlashing) {
+        if (node.isFlashing && node.color == null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()

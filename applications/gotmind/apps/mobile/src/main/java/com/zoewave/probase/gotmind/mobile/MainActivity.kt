@@ -79,6 +79,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settingsVm: SettingsViewModel = hiltViewModel()
             val themeSettings by settingsVm.themeSettings.collectAsState()
+            val gameSettings by settingsVm.gameSettings.collectAsState()
             val firebaseId by settingsVm.firebaseId.collectAsState()
 
             GotMindTheme(
@@ -148,11 +149,8 @@ class MainActivity : ComponentActivity() {
                                         }
                                         GotMindRoute.Settings -> {
                                             val memBloxVm: MemBloxViewModel = hiltViewModel()
-                                            val engineType by memBloxVm.engineType.collectAsState()
-                                            val uiState by memBloxVm.uiState.collectAsState()
                                             SettingsScreen(
-                                                membloxState = uiState,
-                                                engineType = engineType,
+                                                gameSettings = gameSettings,
                                                 themeSettings = themeSettings,
                                                 firebaseId = firebaseId,
                                                 onMemBloxEvent = { memBloxVm.handleEvent(it) },
