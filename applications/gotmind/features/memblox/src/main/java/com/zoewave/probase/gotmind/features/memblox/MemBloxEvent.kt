@@ -2,6 +2,7 @@ package com.zoewave.probase.gotmind.features.memblox
 
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
+import com.zoewave.probase.gotmind.model.MemBloxEngineType
 
 sealed interface MemBloxEvent {
     data class StartGame(val difficulty: MemBloxDifficulty) : MemBloxEvent

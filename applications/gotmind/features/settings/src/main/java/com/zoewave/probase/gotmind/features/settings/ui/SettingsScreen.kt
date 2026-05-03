@@ -49,13 +49,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.gotmind.features.memblox.MemBloxEngineType
 import com.zoewave.probase.gotmind.features.memblox.MemBloxEvent
 import com.zoewave.probase.gotmind.features.memblox.MemBloxState
 import com.zoewave.probase.gotmind.features.settings.R
 import com.zoewave.probase.gotmind.model.AppTheme
 import com.zoewave.probase.gotmind.model.ColorPalette
 import com.zoewave.probase.gotmind.model.ThemeSettings
+import com.zoewave.probase.gotmind.model.MemBloxEngineType
 import java.util.Locale
 
 @Composable
@@ -360,7 +360,7 @@ fun SettingsScreen(
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
+                HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.1f), thickness = 1.dp)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
@@ -368,13 +368,7 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
-                /*Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.applications_gotmind_features_settings_about_result),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
-                */
+                
                 if (firebaseId.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
@@ -387,14 +381,4 @@ fun SettingsScreen(
             }
         }
     }
-}
-
-@Composable
-fun HorizontalDivider(modifier: Modifier = Modifier, color: Color = Color.Gray) {
-    androidx.compose.foundation.layout.Box(
-        modifier
-            .fillMaxWidth()
-            .height(1.dp)
-            .background(color)
-    )
 }

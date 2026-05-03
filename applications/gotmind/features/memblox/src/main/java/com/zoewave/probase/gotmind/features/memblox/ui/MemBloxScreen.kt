@@ -54,7 +54,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -95,6 +94,7 @@ import com.zoewave.probase.gotmind.features.memblox.MemBloxState
 import com.zoewave.probase.gotmind.features.memblox.PowerUpType
 import com.zoewave.probase.gotmind.features.memblox.R
 import com.zoewave.probase.gotmind.features.memblox.ScorePopup
+import com.zoewave.probase.gotmind.model.MemBloxEngineType
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
 import kotlinx.coroutines.launch
@@ -108,7 +108,7 @@ import kotlin.random.Random
 fun MemBloxScreen(
     uiState: MemBloxState,
     topScores: List<MemBloxScoreEntity>,
-    engineType: com.zoewave.probase.gotmind.features.memblox.MemBloxEngineType,
+    engineType: MemBloxEngineType,
     onNav: (String) -> Unit,
     onEvent: (MemBloxEvent) -> Unit
 ) {
@@ -283,7 +283,7 @@ fun MemBloxScreen(
                             blockHeight = blockHeight,
                             isRevealed = uiState.isRevealed,
                             isInitiallyRevealed = uiState.initiallyRevealedBlockIds.contains(block.id),
-                            isFallingMode = engineType == com.zoewave.probase.gotmind.features.memblox.MemBloxEngineType.FALLING,
+                            isFallingMode = engineType == MemBloxEngineType.FALLING,
                             nukingColor = nukingColor?.let { Color(it) },
                             isHinted = isHinted,
                             dropHeight = uiState.dropHeight,
@@ -346,7 +346,7 @@ fun MemBloxScreen(
                     EndGameOverlay(
                         state = uiState, 
                         onRetry = { onEvent(MemBloxEvent.StartGame(uiState.difficulty)) }, 
-                        onChangeDifficulty = { onEvent(MemBloxEvent.ResetToSelection) }
+                        onRetrySelection = { onEvent(MemBloxEvent.ResetToSelection) }
                     )
                 }
             }
@@ -722,7 +722,7 @@ fun MemBloxBlockRender(
 fun EndGameOverlay(
     state: MemBloxState,
     onRetry: () -> Unit,
-    onChangeDifficulty: () -> Unit
+    onRetrySelection: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -803,7 +803,7 @@ fun EndGameOverlay(
             Spacer(modifier = Modifier.height(12.dp))
 
             Button(
-                onClick = onChangeDifficulty,
+                onClick = onRetrySelection,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -945,7 +945,7 @@ fun HallOfFameCard(score: MemBloxScoreEntity) {
 
                 Text(date, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
             }
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.White.copy(alpha = 0.1f))
+            androidx.compose.material3.HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.White.copy(alpha = 0.1f))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(stringResource(R.string.applications_gotmind_features_memblox_streak), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
