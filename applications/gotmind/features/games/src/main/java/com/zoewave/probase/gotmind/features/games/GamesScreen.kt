@@ -68,6 +68,23 @@ fun GamesScreen(
             )
         }
 
+        // --- SoundMind (Active) ---
+        Button(
+            onClick = { onNav("SOUNDMIND") },
+            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary
+            )
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stringResource(R.string.applications_gotmind_features_games_placeholder_1),
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+        }
+
         // --- GotMind Classic (Grayed Out) ---
         Button(
             onClick = { },
@@ -82,23 +99,6 @@ fun GamesScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = stringResource(R.string.applications_gotmind_features_games_classic),
-                    style = MaterialTheme.typography.titleLarge
-                )
-            }
-        }
-
-        // --- MindWave (Active) ---
-        Button(
-            onClick = { onNav("MINDWAVE") },
-            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary
-            )
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = stringResource(R.string.applications_gotmind_features_games_placeholder_1),
                     style = MaterialTheme.typography.titleLarge
                 )
             }

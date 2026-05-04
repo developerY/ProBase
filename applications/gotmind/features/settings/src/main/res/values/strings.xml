@@ -30,8 +30,8 @@
     <string name="applications_gotmind_features_settings_palette_ocean">Ocean Theme</string>
     <string name="applications_gotmind_features_settings_palette_expressive">Material 3 Expressive (Wallpaper)</string>
 
-    <!-- MindWave Settings -->
-    <string name="applications_gotmind_features_settings_mindwave_section">MindWave Settings</string>
+    <!-- SoundMind Settings -->
+    <string name="applications_gotmind_features_settings_mindwave_section">SoundMind Settings</string>
     <string name="applications_gotmind_features_settings_mindwave_version">Game Version</string>
     <string name="applications_gotmind_features_settings_mindwave_classic">Classic</string>
     <string name="applications_gotmind_features_settings_mindwave_symphony">Symphony (Colors + Notes)</string>

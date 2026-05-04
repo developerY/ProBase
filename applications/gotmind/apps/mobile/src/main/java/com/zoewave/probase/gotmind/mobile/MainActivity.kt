@@ -56,7 +56,7 @@ sealed interface GotMindRoute {
     // Fullscreen Game Screens
     @Serializable data object GotMindClassic : GotMindRoute
     @Serializable data object MemBlox : GotMindRoute
-    @Serializable data object MindWave : GotMindRoute
+    @Serializable data object SoundMind : GotMindRoute
 }
 
 data class TopLevelDestination(
@@ -92,7 +92,8 @@ class MainActivity : ComponentActivity() {
                 // Keep tabs visible for games to maintain consistent app structure
                 val shouldShowBottomBar = currentRoute in topLevelDestinations.map { it.route } || 
                                         currentRoute == GotMindRoute.MemBlox || 
-                                        currentRoute == GotMindRoute.GotMindClassic
+                                        currentRoute == GotMindRoute.GotMindClassic ||
+                                        currentRoute == GotMindRoute.SoundMind
 
                 Scaffold(
                     bottomBar = {
@@ -130,7 +131,7 @@ class MainActivity : ComponentActivity() {
                                                 when (dest) {
                                                     "CLASSIC" -> backStack.add(GotMindRoute.GotMindClassic)
                                                     "MEMBLOX" -> backStack.add(GotMindRoute.MemBlox)
-                                                    "MINDWAVE" -> backStack.add(GotMindRoute.MindWave)
+                                                    "SOUNDMIND" -> backStack.add(GotMindRoute.SoundMind)
                                                 }
                                             }
                                         )
@@ -176,7 +177,7 @@ class MainActivity : ComponentActivity() {
                                                 onEvent = { event -> viewModel.handleEvent(event) }
                                             )
                                         }
-                                        GotMindRoute.MindWave -> {
+                                        GotMindRoute.SoundMind -> {
                                             val viewModel: MindWaveViewModel = hiltViewModel()
                                             val state by viewModel.uiState.collectAsState()
                                             MindWaveScreen(
@@ -203,7 +204,7 @@ fun GotMindBottomBar(
 ) {
     // Map sub-routes back to their parent tabs for highlighting
     val selectedRoute = when (currentRoute) {
-        GotMindRoute.MemBlox, GotMindRoute.GotMindClassic -> GotMindRoute.Games
+        GotMindRoute.MemBlox, GotMindRoute.GotMindClassic, GotMindRoute.SoundMind -> GotMindRoute.Games
         else -> currentRoute
     }
 
