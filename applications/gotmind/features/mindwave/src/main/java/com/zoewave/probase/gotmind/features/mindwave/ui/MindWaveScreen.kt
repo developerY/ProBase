@@ -539,9 +539,9 @@ fun MindWaveNode(
         if (node.note != null) {
             Text(
                 text = node.note,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Black,
-                color = if (node.isFlashing) Color.Black else Color.White.copy(alpha = 0.6f)
+                style = MaterialTheme.typography.titleMedium, // Larger font
+                fontWeight = FontWeight.ExtraBold, // Bolder
+                color = Color.Black.copy(alpha = 0.8f) // Dark text for high contrast on pastels
             )
         }
         
