@@ -14,4 +14,5 @@ interface IMindWaveEngine {
     fun setHapticsEnabled(enabled: Boolean)
     fun setSoundEnabled(enabled: Boolean)
     fun setAudioSynthesizer(synthesizer: com.zoewave.probase.core.util.audio.WaveSynthesizer?)
+    fun updateSymphonySettings(waveform: com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform, songMaster: Boolean)
 }

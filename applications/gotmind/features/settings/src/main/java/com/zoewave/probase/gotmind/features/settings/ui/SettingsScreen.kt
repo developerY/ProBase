@@ -58,6 +58,7 @@ import com.zoewave.probase.gotmind.model.ColorPalette
 import com.zoewave.probase.gotmind.model.ThemeSettings
 import com.zoewave.probase.gotmind.model.MemBloxEngineType
 import com.zoewave.probase.gotmind.model.MindWaveMode
+import com.zoewave.probase.gotmind.model.InstrumentType
 import com.zoewave.probase.gotmind.model.GameSettings
 import java.util.Locale
 
@@ -250,6 +251,27 @@ fun SettingsScreen(
                 MindWaveMode.SYMPHONY to stringResource(R.string.applications_gotmind_features_settings_mindwave_symphony)
             ),
             onSelected = { onSettingsEvent(SettingsEvent.SetMindWaveMode(it)) }
+        )
+
+        SettingsDropdownItem(
+            icon = Icons.Default.VolumeUp,
+            title = stringResource(R.string.applications_gotmind_features_settings_mw_instrument),
+            currentValue = gameSettings.instrumentType,
+            options = InstrumentType.entries,
+            optionLabels = mapOf(
+                InstrumentType.CLEAN_SYNTH to stringResource(R.string.applications_gotmind_features_settings_mw_instrument_clean),
+                InstrumentType.RETRO_8BIT to stringResource(R.string.applications_gotmind_features_settings_mw_instrument_retro),
+                InstrumentType.ZEN_TRIANGLE to stringResource(R.string.applications_gotmind_features_settings_mw_instrument_zen)
+            ),
+            onSelected = { onSettingsEvent(SettingsEvent.SetInstrument(it)) }
+        )
+
+        SettingItem(
+            icon = Icons.Default.Info,
+            title = stringResource(R.string.applications_gotmind_features_settings_mw_song_master),
+            subtitle = stringResource(R.string.applications_gotmind_features_settings_mw_song_master_desc),
+            checked = gameSettings.songMasterEnabled,
+            onCheckedChange = { onSettingsEvent(SettingsEvent.SetSongMaster(it)) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))

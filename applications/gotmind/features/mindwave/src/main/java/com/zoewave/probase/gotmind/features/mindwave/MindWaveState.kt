@@ -28,7 +28,10 @@ data class MindWaveState(
     val lastHapticSignal: HapticSignal? = null,
     val isPaused: Boolean = false,
     val mode: MindWaveMode = MindWaveMode.CLASSIC,
-    val activeNodeId: Int? = null // For visual staff notation
+    val activeNodeId: Int? = null, // For visual staff notation
+    val sequencePath: List<Int> = emptyList(), // Path of the sequence for constellation drawing
+    val currentSongTitle: String? = null,
+    val activeWaveform: com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform = com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform.SINE
 )
 
 enum class HapticSignal { LIGHT, MEDIUM, HEAVY }
@@ -43,4 +46,6 @@ sealed interface MindWaveEvent {
     data class SetHapticsEnabled(val enabled: Boolean) : MindWaveEvent
     data class SetSoundEnabled(val enabled: Boolean) : MindWaveEvent
     data object ClearHallOfFame : MindWaveEvent
+    data class SetInstrument(val instrument: com.zoewave.probase.gotmind.model.InstrumentType) : MindWaveEvent
+    data class SetSongMaster(val enabled: Boolean) : MindWaveEvent
 }

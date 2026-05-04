@@ -35,4 +35,12 @@
     <string name="applications_gotmind_features_settings_mindwave_version">Game Version</string>
     <string name="applications_gotmind_features_settings_mindwave_classic">Classic</string>
     <string name="applications_gotmind_features_settings_mindwave_symphony">Symphony (Colors + Notes)</string>
+
+    <string name="applications_gotmind_features_settings_mw_instrument">Instrument Skin</string>
+    <string name="applications_gotmind_features_settings_mw_instrument_clean">Clean Synth (Sine)</string>
+    <string name="applications_gotmind_features_settings_mw_instrument_retro">Retro 8-Bit (Square)</string>
+    <string name="applications_gotmind_features_settings_mw_instrument_zen">Zen Flute (Triangle)</string>
+
+    <string name="applications_gotmind_features_settings_mw_song_master">Song Master Mode</string>
+    <string name="applications_gotmind_features_settings_mw_song_master_desc">Learn famous melodies through play</string>
 </resources>

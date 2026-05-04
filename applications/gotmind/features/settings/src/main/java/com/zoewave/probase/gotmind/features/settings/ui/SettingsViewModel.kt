@@ -7,6 +7,7 @@ import com.zoewave.probase.gotmind.analytics.AnalyticsHelper
 import com.zoewave.probase.gotmind.model.AppTheme
 import com.zoewave.probase.gotmind.model.ColorPalette
 import com.zoewave.probase.gotmind.model.MindWaveMode
+import com.zoewave.probase.gotmind.model.InstrumentType
 import com.zoewave.probase.gotmind.model.ThemeSettings
 import com.zoewave.probase.gotmind.model.GameSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +23,8 @@ sealed interface SettingsEvent {
     data class SetTheme(val theme: AppTheme) : SettingsEvent
     data class SetPalette(val palette: ColorPalette) : SettingsEvent
     data class SetMindWaveMode(val mode: MindWaveMode) : SettingsEvent
+    data class SetInstrument(val instrument: InstrumentType) : SettingsEvent
+    data class SetSongMaster(val enabled: Boolean) : SettingsEvent
 }
 
 @HiltViewModel
@@ -55,6 +58,12 @@ class SettingsViewModel @Inject constructor(
             }
             is SettingsEvent.SetMindWaveMode -> viewModelScope.launch {
                 appSettingsRepository.saveMindWaveMode(event.mode)
+            }
+            is SettingsEvent.SetInstrument -> viewModelScope.launch {
+                appSettingsRepository.saveInstrumentType(event.instrument)
+            }
+            is SettingsEvent.SetSongMaster -> viewModelScope.launch {
+                appSettingsRepository.saveSongMasterEnabled(event.enabled)
             }
         }
     }

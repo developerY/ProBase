@@ -58,12 +58,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -97,6 +97,10 @@ fun MindWaveScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
         MindWaveBackground()
+        
+        if (uiState.sequencePath.size >= 2) {
+            ConstellationPath(path = uiState.sequencePath)
+        }
 
         Column(
             modifier = Modifier
@@ -193,9 +197,18 @@ fun MindWaveScreen(
 
             if (uiState.mode == MindWaveMode.SYMPHONY) {
                 MusicalStaff(activeNodeId = uiState.activeNodeId)
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+                if (uiState.currentSongTitle != null) {
+                    Text(
+                        text = "Melody: ${uiState.currentSongTitle}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = if (uiState.isPlayingSequence) "Watch & Listen..." else "Repeat the Melody",
+                    text = if (uiState.isPlayingSequence) "Listen carefully..." else "Repeat the Melody",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = if (uiState.isPlayingSequence) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.8f)
@@ -265,17 +278,81 @@ fun MindWaveScreen(
             }
         }
     }
+
+    if (uiState.isGameOver) {
+        AlertDialog(
+            onDismissRequest = { /* No-op */ },
+            containerColor = Color(0xFF1E1E1E),
+            titleContentColor = Color.White,
+            textContentColor = Color.Gray,
+            title = { Text("Sequence Broken") },
+            text = { Text("The melody has drifted away. Keep training your sensory memory!") },
+            confirmButton = {
+                TextButton(onClick = { onEvent(MindWaveEvent.StartGame) }) {
+                    Text("RETRY WAVE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onNav("BACK") }) {
+                    Text("BACK TO HUB", color = Color.Gray)
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun ConstellationPath(path: List<Int>) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val width = size.width
+        val padding = 24.dp.toPx()
+        val topOffset = 360.dp.toPx() // Adjusted to match grid start below staff
+        val gridWidth = width - (padding * 2)
+        val nodeSize = gridWidth / 4f
+        
+        val points = path.map { index ->
+            val row = index / 4
+            val col = index % 4
+            androidx.compose.ui.geometry.Offset(
+                x = padding + (col * nodeSize) + (nodeSize / 2f),
+                y = topOffset + (row * nodeSize) + (nodeSize / 2f)
+            )
+        }
+
+        if (points.size >= 2) {
+            val drawPath = androidx.compose.ui.graphics.Path().apply {
+                moveTo(points[0].x, points[0].y)
+                for (i in 1 until points.size) {
+                    lineTo(points[i].x, points[i].y)
+                }
+            }
+            
+            // Outer Glow
+            drawPath(
+                path = drawPath,
+                color = Color(0xFF00E5FF).copy(alpha = 0.15f),
+                style = Stroke(width = 16f, cap = StrokeCap.Round)
+            )
+            
+            // Core Line
+            drawPath(
+                path = drawPath,
+                color = Color(0xFF00E5FF).copy(alpha = 0.5f),
+                style = Stroke(width = 4f, cap = StrokeCap.Round)
+            )
+        }
+    }
 }
 
 @Composable
 fun MusicalStaff(activeNodeId: Int?) {
-    val lineSpacing = 12.dp
+    val lineSpacing = 10.dp
     val staffHeight = lineSpacing * 8
     
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(staffHeight + 40.dp)
+            .height(staffHeight + 20.dp)
             .padding(horizontal = 48.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -285,14 +362,13 @@ fun MusicalStaff(activeNodeId: Int?) {
             val centerY = height / 2f
             val spacing = lineSpacing.toPx()
             
-            // Draw Treble Clef Symbol (Stylized using text for precision)
+            // Draw Treble Clef Symbol
             drawContext.canvas.nativeCanvas.apply {
                 val paint = android.graphics.Paint().apply {
-                    color = Color.White.copy(alpha = 0.8f).toArgb() // Increase alpha for visibility
-                    textSize = spacing * 6f
+                    color = Color.White.copy(alpha = 0.7f).toArgb()
+                    textSize = spacing * 5f
                     typeface = android.graphics.Typeface.DEFAULT_BOLD
                 }
-                // Clef placement
                 drawText("𝄞", 0f, centerY + spacing * 1.5f, paint)
             }
 
@@ -300,10 +376,10 @@ fun MusicalStaff(activeNodeId: Int?) {
             for (i in -2..2) {
                 val y = centerY + i * spacing
                 drawLine(
-                    color = Color.White.copy(alpha = 0.4f), // More visible lines
+                    color = Color.White.copy(alpha = 0.25f),
                     start = androidx.compose.ui.geometry.Offset(60f, y),
                     end = androidx.compose.ui.geometry.Offset(width, y),
-                    strokeWidth = 3f
+                    strokeWidth = 2f
                 )
             }
 
@@ -355,7 +431,7 @@ fun MusicalStaff(activeNodeId: Int?) {
                     center = androidx.compose.ui.geometry.Offset(width / 2f, noteY)
                 )
                 
-                // Sharp symbol (#) logic
+                // Sharp symbol (#)
                 val isSharp = id in listOf(0, 2, 5, 7, 9, 12, 14)
                 if (isSharp) {
                     drawContext.canvas.nativeCanvas.apply {

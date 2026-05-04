@@ -13,6 +13,7 @@ import com.zoewave.probase.gotmind.model.ThemeSettings
 import com.zoewave.probase.gotmind.model.GameSettings
 import com.zoewave.probase.gotmind.model.MemBloxEngineType
 import com.zoewave.probase.gotmind.model.MindWaveMode
+import com.zoewave.probase.gotmind.model.InstrumentType
 import com.zoewave.probase.gotmind.data.di.GotMindDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -33,6 +34,8 @@ interface AppSettingsRepository {
     suspend fun saveHapticsEnabled(enabled: Boolean)
     suspend fun saveSoundEnabled(enabled: Boolean)
     suspend fun saveMindWaveMode(mode: MindWaveMode)
+    suspend fun saveInstrumentType(type: InstrumentType)
+    suspend fun saveSongMasterEnabled(enabled: Boolean)
 }
 
 @Singleton
@@ -50,6 +53,8 @@ class AppSettingsRepositoryImpl @Inject constructor(
     private val HAPTICS_KEY = booleanPreferencesKey("haptics_enabled")
     private val SOUND_KEY = booleanPreferencesKey("sound_enabled")
     private val MW_MODE_KEY = stringPreferencesKey("mw_mode")
+    private val MW_INSTRUMENT_KEY = stringPreferencesKey("mw_instrument")
+    private val MW_SONG_MASTER_KEY = booleanPreferencesKey("mw_song_master")
 
     override val themeSettingsFlow: Flow<ThemeSettings> = dataStore.data.map { preferences ->
         ThemeSettings(
@@ -66,7 +71,9 @@ class AppSettingsRepositoryImpl @Inject constructor(
             dropDurationMillis = preferences[MB_DURATION_KEY] ?: 3000,
             hapticsEnabled = preferences[HAPTICS_KEY] ?: true,
             soundEnabled = preferences[SOUND_KEY] ?: true,
-            mindWaveMode = MindWaveMode.valueOf(preferences[MW_MODE_KEY] ?: MindWaveMode.CLASSIC.name)
+            mindWaveMode = MindWaveMode.valueOf(preferences[MW_MODE_KEY] ?: MindWaveMode.CLASSIC.name),
+            instrumentType = InstrumentType.valueOf(preferences[MW_INSTRUMENT_KEY] ?: InstrumentType.CLEAN_SYNTH.name),
+            songMasterEnabled = preferences[MW_SONG_MASTER_KEY] ?: false
         )
     }
 
@@ -121,6 +128,18 @@ class AppSettingsRepositoryImpl @Inject constructor(
     override suspend fun saveMindWaveMode(mode: MindWaveMode) {
         dataStore.edit { preferences ->
             preferences[MW_MODE_KEY] = mode.name
+        }
+    }
+
+    override suspend fun saveInstrumentType(type: InstrumentType) {
+        dataStore.edit { preferences ->
+            preferences[MW_INSTRUMENT_KEY] = type.name
+        }
+    }
+
+    override suspend fun saveSongMasterEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[MW_SONG_MASTER_KEY] = enabled
         }
     }
 }
