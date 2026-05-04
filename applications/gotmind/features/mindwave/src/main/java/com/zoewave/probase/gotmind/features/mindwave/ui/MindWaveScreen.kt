@@ -15,6 +15,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -83,6 +85,14 @@ fun MindWaveScreen(
 ) {
     var showControls by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
+    
+    val startButtonInteractionSource = remember { MutableInteractionSource() }
+    val startButtonPressed by startButtonInteractionSource.collectIsPressedAsState()
+    val startButtonScale by animateFloatAsState(
+        targetValue = if (startButtonPressed) 0.95f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.4f, stiffness = Spring.StiffnessMedium),
+        label = "StartPress"
+    )
 
     // Haptic Feedback Observer
     LaunchedEffect(uiState.lastHapticSignal) {
@@ -271,8 +281,12 @@ fun MindWaveScreen(
             if (!uiState.isStarted || uiState.isGameOver) {
                 Button(
                     onClick = { onEvent(MindWaveEvent.StartGame) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .scale(startButtonScale),
                     shape = RoundedCornerShape(16.dp),
+                    interactionSource = startButtonInteractionSource,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(if (uiState.isGameOver) "TRY AGAIN" else "START GAME", fontWeight = FontWeight.Black)
@@ -482,6 +496,15 @@ fun MindWaveNode(
     isClickable: Boolean,
     onClick: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    
+    val pressScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.92f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.4f, stiffness = Spring.StiffnessMedium),
+        label = "PressScale"
+    )
+
     val scale by animateFloatAsState(
         targetValue = if (node.isFlashing) 1.2f else 1.0f,
         animationSpec = spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessLow),
@@ -492,21 +515,25 @@ fun MindWaveNode(
     
     val color by animateColorAsState(
         targetValue = when {
-            node.isFlashing -> if (node.color != null) Color.White else Color(0xFF00E5FF)
+            node.isFlashing || isPressed -> if (node.color != null) Color.White else Color(0xFF00E5FF)
             else -> baseColor
         },
-        animationSpec = tween(if (node.isFlashing) 100 else 300),
+        animationSpec = tween(if (node.isFlashing || isPressed) 100 else 300),
         label = "Color"
     )
 
     Box(
         modifier = Modifier
             .size(64.dp)
-            .scale(scale)
+            .scale(scale * pressScale)
             .clip(CircleShape)
             .background(color)
-            .border(2.dp, if (node.isFlashing) Color.White.copy(alpha = 0.5f) else Color.Transparent, CircleShape)
-            .clickable(enabled = isClickable) { onClick() },
+            .border(2.dp, if (node.isFlashing || isPressed) Color.White.copy(alpha = 0.5f) else Color.Transparent, CircleShape)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = isClickable
+            ) { onClick() },
         contentAlignment = Alignment.Center
     ) {
         if (node.note != null) {
