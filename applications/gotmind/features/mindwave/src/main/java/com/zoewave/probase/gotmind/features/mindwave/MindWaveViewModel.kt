@@ -69,6 +69,7 @@ class MindWaveViewModel @Inject constructor(
         return when (mode) {
             MindWaveMode.CLASSIC -> ClassicMindWaveEngine(viewModelScope) { score, level -> saveScore(score, level) }
             MindWaveMode.SYMPHONY -> SymphonyMindWaveEngine(viewModelScope) { score, level -> saveScore(score, level) }
+            MindWaveMode.HARMONIC_ARC -> HarmonicArcMindWaveEngine(viewModelScope) { score, level -> saveScore(score, level) }
         }
     }
 

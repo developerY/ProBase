@@ -9,7 +9,7 @@ enum class MemBloxEngineType {
 
 @Serializable
 enum class MindWaveMode {
-    CLASSIC, SYMPHONY
+    CLASSIC, SYMPHONY, HARMONIC_ARC
 }
 
 @Serializable

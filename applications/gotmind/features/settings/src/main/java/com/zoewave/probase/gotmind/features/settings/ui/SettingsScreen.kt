@@ -248,7 +248,8 @@ fun SettingsScreen(
             options = MindWaveMode.entries,
             optionLabels = mapOf(
                 MindWaveMode.CLASSIC to stringResource(R.string.applications_gotmind_features_settings_mindwave_classic),
-                MindWaveMode.SYMPHONY to stringResource(R.string.applications_gotmind_features_settings_mindwave_symphony)
+                MindWaveMode.SYMPHONY to stringResource(R.string.applications_gotmind_features_settings_mindwave_symphony),
+                MindWaveMode.HARMONIC_ARC to stringResource(R.string.applications_gotmind_features_settings_mindwave_arc)
             ),
             onSelected = { onSettingsEvent(SettingsEvent.SetMindWaveMode(it)) }
         )

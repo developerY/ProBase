@@ -110,7 +110,7 @@ fun MindWaveScreen(
         MindWaveBackground()
         
         if (uiState.sequencePath.size >= 2) {
-            ConstellationPath(path = uiState.sequencePath)
+            ConstellationPath(path = uiState.sequencePath, mode = uiState.mode)
         }
 
         Column(
@@ -207,7 +207,7 @@ fun MindWaveScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (uiState.mode == MindWaveMode.SYMPHONY) {
+            if (uiState.mode == MindWaveMode.SYMPHONY || uiState.mode == MindWaveMode.HARMONIC_ARC) {
                 MusicalStaff(activeNodeId = uiState.activeNodeId)
                 Spacer(modifier = Modifier.height(12.dp))
                 if (uiState.currentSongTitle != null) {
@@ -236,29 +236,58 @@ fun MindWaveScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Game Grid (4x4)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Color.White.copy(alpha = 0.05f))
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                for (row in 0..3) {
-                    Row(
-                        modifier = Modifier.weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        for (col in 0..3) {
-                            val index = row * 4 + col
-                            val node = uiState.grid[index]
+            // Game Grid or Arc
+            if (uiState.mode == MindWaveMode.HARMONIC_ARC) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp) // Fixed height for arc
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    val radius = 240.dp
+                    uiState.grid.forEachIndexed { index, node ->
+                        // Spread 16 nodes across a 180-degree arc (half circle)
+                        // Angle from 180 to 0 (Left to Right)
+                        val angle = 180f - (index.toFloat() / (uiState.grid.size - 1) * 180f)
+                        val angleRad = Math.toRadians(angle.toDouble())
+                        val x = (Math.cos(angleRad) * 150).dp // Scale for width
+                        val y = (Math.sin(angleRad) * -150).dp // Scale for height (negative for Up)
+                        
+                        Box(modifier = Modifier.offset(x = x, y = y)) {
                             MindWaveNode(
                                 node = node,
                                 isClickable = !uiState.isPlayingSequence && !uiState.isGameOver && uiState.isStarted && !uiState.isPaused,
                                 onClick = { onEvent(MindWaveEvent.NodeClick(index)) }
                             )
+                        }
+                    }
+                }
+            } else {
+                // Standard Grid
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    for (row in 0..3) {
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            for (col in 0..3) {
+                                val index = row * 4 + col
+                                val node = uiState.grid[index]
+                                MindWaveNode(
+                                    node = node,
+                                    isClickable = !uiState.isPlayingSequence && !uiState.isGameOver && uiState.isStarted && !uiState.isPaused,
+                                    onClick = { onEvent(MindWaveEvent.NodeClick(index)) }
+                                )
+                            }
                         }
                     }
                 }
@@ -318,21 +347,34 @@ fun MindWaveScreen(
 }
 
 @Composable
-fun ConstellationPath(path: List<Int>) {
+fun ConstellationPath(path: List<Int>, mode: MindWaveMode) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         val width = size.width
         val padding = 24.dp.toPx()
-        val topOffset = 360.dp.toPx() // Adjusted to match grid start below staff
         val gridWidth = width - (padding * 2)
         val nodeSize = gridWidth / 4f
         
+        // Grid top offset
+        val gridTopOffset = 360.dp.toPx()
+        
+        // Arc top offset (matched to Box height and padding)
+        val arcBaseY = 560.dp.toPx() // BottomCenter of the 300dp arc box + header/staff
+
         val points = path.map { index ->
-            val row = index / 4
-            val col = index % 4
-            androidx.compose.ui.geometry.Offset(
-                x = padding + (col * nodeSize) + (nodeSize / 2f),
-                y = topOffset + (row * nodeSize) + (nodeSize / 2f)
-            )
+            if (mode == MindWaveMode.HARMONIC_ARC) {
+                val angle = 180f - (index.toFloat() / 15f * 180f)
+                val angleRad = Math.toRadians(angle.toDouble())
+                val x = (Math.cos(angleRad) * 150.dp.toPx()) + (width / 2f)
+                val y = arcBaseY + (Math.sin(angleRad) * -150.dp.toPx())
+                androidx.compose.ui.geometry.Offset(x.toFloat(), y.toFloat())
+            } else {
+                val row = index / 4
+                val col = index % 4
+                androidx.compose.ui.geometry.Offset(
+                    x = padding + (col * nodeSize) + (nodeSize / 2f),
+                    y = gridTopOffset + (row * nodeSize) + (nodeSize / 2f)
+                )
+            }
         }
 
         if (points.size >= 2) {

@@ -33,8 +33,9 @@
     <!-- SoundMind Settings -->
     <string name="applications_gotmind_features_settings_mindwave_section">SoundMind Settings</string>
     <string name="applications_gotmind_features_settings_mindwave_version">Game Version</string>
-    <string name="applications_gotmind_features_settings_mindwave_classic">Classic</string>
-    <string name="applications_gotmind_features_settings_mindwave_symphony">Symphony (Colors + Notes)</string>
+    <string name="applications_gotmind_features_settings_mindwave_classic">Classic Grid</string>
+    <string name="applications_gotmind_features_settings_mindwave_symphony">Symphony Grid</string>
+    <string name="applications_gotmind_features_settings_mindwave_arc">Harmonic Arc (Half Ring)</string>
 
     <string name="applications_gotmind_features_settings_mw_instrument">Instrument Skin</string>
     <string name="applications_gotmind_features_settings_mw_instrument_clean">Clean Synth (Sine)</string>
