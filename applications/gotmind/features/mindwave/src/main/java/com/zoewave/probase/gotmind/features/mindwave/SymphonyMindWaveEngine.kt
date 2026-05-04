@@ -5,7 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 class SymphonyMindWaveEngine(
     scope: CoroutineScope,
     onGameOver: (Int, Int) -> Unit
-) : BaseMindWaveEngine(scope, onGameOver) {
+) : BaseMindWaveEngine(com.zoewave.probase.gotmind.model.MindWaveMode.SYMPHONY, scope, onGameOver) {
 
     private val pastelColors = listOf(
         // Row 0: High Notes (Red/Orange Pastels)

@@ -269,13 +269,13 @@ fun MindWaveScreen(
 
 @Composable
 fun MusicalStaff(activeNodeId: Int?) {
-    val lineSpacing = 10.dp
+    val lineSpacing = 12.dp
     val staffHeight = lineSpacing * 8
     
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(staffHeight + 20.dp)
+            .height(staffHeight + 40.dp)
             .padding(horizontal = 48.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -288,8 +288,8 @@ fun MusicalStaff(activeNodeId: Int?) {
             // Draw Treble Clef Symbol (Stylized using text for precision)
             drawContext.canvas.nativeCanvas.apply {
                 val paint = android.graphics.Paint().apply {
-                    color = Color.White.copy(alpha = 0.5f).toArgb()
-                    textSize = spacing * 5f
+                    color = Color.White.copy(alpha = 0.8f).toArgb() // Increase alpha for visibility
+                    textSize = spacing * 6f
                     typeface = android.graphics.Typeface.DEFAULT_BOLD
                 }
                 // Clef placement
@@ -300,10 +300,10 @@ fun MusicalStaff(activeNodeId: Int?) {
             for (i in -2..2) {
                 val y = centerY + i * spacing
                 drawLine(
-                    color = Color.White.copy(alpha = 0.2f),
+                    color = Color.White.copy(alpha = 0.4f), // More visible lines
                     start = androidx.compose.ui.geometry.Offset(60f, y),
                     end = androidx.compose.ui.geometry.Offset(width, y),
-                    strokeWidth = 2f
+                    strokeWidth = 3f
                 )
             }
 

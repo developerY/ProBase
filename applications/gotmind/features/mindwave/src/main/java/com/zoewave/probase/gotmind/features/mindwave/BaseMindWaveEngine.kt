@@ -11,11 +11,12 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 abstract class BaseMindWaveEngine(
+    protected val mode: com.zoewave.probase.gotmind.model.MindWaveMode,
     protected val scope: CoroutineScope,
     protected val onGameOver: (Int, Int) -> Unit
 ) : IMindWaveEngine {
 
-    protected val _state = MutableStateFlow(MindWaveState())
+    protected val _state = MutableStateFlow(MindWaveState(mode = mode))
     override val state: StateFlow<MindWaveState> = _state.asStateFlow()
 
     protected var gameJob: Job? = null
@@ -26,7 +27,15 @@ abstract class BaseMindWaveEngine(
     }
 
     override fun start() {
-        _state.update { it.copy(isStarted = true, score = 0, level = 1, isGameOver = false, feedbackMessage = null, grid = createInitialGrid()) }
+        _state.update { it.copy(
+            isStarted = true, 
+            score = 0, 
+            level = 1, 
+            isGameOver = false, 
+            feedbackMessage = null, 
+            grid = createInitialGrid(),
+            mode = mode // Ensure mode is preserved
+        ) }
         generateNewSequence(1)
     }
 
