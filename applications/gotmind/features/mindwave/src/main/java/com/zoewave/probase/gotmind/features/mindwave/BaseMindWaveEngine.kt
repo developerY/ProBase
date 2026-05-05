@@ -11,11 +11,12 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 abstract class BaseMindWaveEngine(
+    protected val mode: com.zoewave.probase.gotmind.model.MindWaveMode,
     protected val scope: CoroutineScope,
     protected val onGameOver: (Int, Int) -> Unit
 ) : IMindWaveEngine {
 
-    protected val _state = MutableStateFlow(MindWaveState())
+    protected val _state = MutableStateFlow(MindWaveState(mode = mode))
     override val state: StateFlow<MindWaveState> = _state.asStateFlow()
 
     protected var gameJob: Job? = null
@@ -26,16 +27,34 @@ abstract class BaseMindWaveEngine(
     }
 
     override fun start() {
-        _state.update { it.copy(isStarted = true, score = 0, level = 1, isGameOver = false, feedbackMessage = null, grid = createInitialGrid()) }
+        _state.update { it.copy(
+            isStarted = true, 
+            score = 0, 
+            level = 1, 
+            isGameOver = false, 
+            feedbackMessage = null, 
+            grid = createInitialGrid(),
+            mode = mode,
+            sequencePath = emptyList() // Reset path on start
+        ) }
         generateNewSequence(1)
     }
 
     protected abstract fun createInitialGrid(): List<Node>
 
     protected fun generateNewSequence(level: Int) {
-        val sequenceLength = 1 + level // Start with 2 nodes
-        val newSequence = List(sequenceLength) { Random.nextInt(0, 16) }
-        _state.update { it.copy(sequence = newSequence, userInput = emptyList(), isPlayingSequence = true) }
+        val isSongMaster = _state.value.currentSongTitle != null // We'll set this based on settings
+        
+        val newSequence = if (isSongMaster) {
+            val melody = MelodyLibrary.getForLevel(level)
+            _state.update { it.copy(currentSongTitle = melody.title) }
+            melody.sequence
+        } else {
+            val sequenceLength = 1 + level // Start with 2 nodes
+            List(sequenceLength) { Random.nextInt(0, 16) }
+        }
+
+        _state.update { it.copy(sequence = newSequence, userInput = emptyList(), isPlayingSequence = true, sequencePath = emptyList()) }
         playSequence(newSequence)
     }
 
@@ -43,15 +62,21 @@ abstract class BaseMindWaveEngine(
         gameJob?.cancel()
         gameJob = scope.launch {
             delay(1000)
+            val path = mutableListOf<Int>()
             sequence.forEach { nodeId ->
                 if (_state.value.isPaused) {
                     while (_state.value.isPaused) { delay(100) }
                 }
                 
+                path.add(nodeId)
                 _state.update { state ->
-                    state.copy(grid = state.grid.map { node ->
-                        if (node.id == nodeId) node.copy(isFlashing = true) else node
-                    })
+                    state.copy(
+                        grid = state.grid.map { node ->
+                            if (node.id == nodeId) node.copy(isFlashing = true) else node
+                        },
+                        activeNodeId = nodeId,
+                        sequencePath = path.toList()
+                    )
                 }
                 triggerHaptic(HapticSignal.LIGHT)
                 playNodeSound(nodeId)
@@ -60,9 +85,12 @@ abstract class BaseMindWaveEngine(
                 delay(flashDuration)
                 
                 _state.update { state ->
-                    state.copy(grid = state.grid.map { node ->
-                        if (node.id == nodeId) node.copy(isFlashing = false) else node
-                    })
+                    state.copy(
+                        grid = state.grid.map { node ->
+                            if (node.id == nodeId) node.copy(isFlashing = false) else node
+                        },
+                        activeNodeId = null
+                    )
                 }
                 delay(150)
             }
@@ -81,6 +109,12 @@ abstract class BaseMindWaveEngine(
             triggerHaptic(HapticSignal.LIGHT)
             playNodeSound(nodeId)
             val newUserInput = state.userInput + nodeId
+            _state.update { it.copy(activeNodeId = nodeId) }
+            scope.launch {
+                delay(400)
+                _state.update { it.copy(activeNodeId = null) }
+            }
+
             if (newUserInput.size == state.sequence.size) {
                 // Level Complete
                 _state.update { it.copy(
@@ -138,6 +172,18 @@ abstract class BaseMindWaveEngine(
         _state.update { it.copy(soundEnabled = enabled) }
     }
 
+    override fun updateSymphonySettings(
+        waveform: com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform, 
+        songMaster: Boolean,
+        nodeShape: com.zoewave.probase.gotmind.model.NodeShape
+    ) {
+        _state.update { it.copy(
+            activeWaveform = waveform,
+            currentSongTitle = if (songMaster) "Ready for Melody" else null,
+            nodeShape = nodeShape
+        ) }
+    }
+
     protected fun triggerHaptic(signal: HapticSignal) {
         if (_state.value.hapticsEnabled) {
             _state.update { it.copy(lastHapticSignal = signal) }
@@ -149,7 +195,7 @@ abstract class BaseMindWaveEngine(
         val synth = synthesizer ?: return
         val frequency = nodeFrequencies[nodeId] ?: 440.0
         scope.launch {
-            synth.playTone(frequency, 400)
+            synth.playTone(frequency, 400, _state.value.activeWaveform)
         }
     }
 

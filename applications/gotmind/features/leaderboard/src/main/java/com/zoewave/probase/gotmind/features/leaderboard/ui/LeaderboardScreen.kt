@@ -119,7 +119,7 @@ fun LeaderboardScreen(
             Tab(
                 selected = selectedTab == 1,
                 onClick = { selectedTab = 1 },
-                text = { Text("MINDWAVE", fontWeight = FontWeight.Bold) }
+                text = { Text("SOUNDMIND", fontWeight = FontWeight.Bold) }
             )
         }
 

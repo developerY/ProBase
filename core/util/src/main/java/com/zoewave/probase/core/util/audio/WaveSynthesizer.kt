@@ -41,20 +41,41 @@ class WaveSynthesizer @Inject constructor() {
         audioTrack.play()
     }
 
-    suspend fun playTone(frequency: Double, durationMillis: Long) = withContext(Dispatchers.Default) {
+    enum class Waveform { SINE, SQUARE, TRIANGLE }
+
+    suspend fun playTone(
+        frequency: Double, 
+        durationMillis: Long, 
+        waveform: Waveform = Waveform.SINE
+    ) = withContext(Dispatchers.Default) {
         val numSamples = (durationMillis * sampleRate / 1000).toInt()
         val samples = ShortArray(numSamples)
         
         for (i in 0 until numSamples) {
-            // Sine wave generation
-            val angle = 2.0 * PI * i / (sampleRate / frequency)
+            val t = i.toDouble() / sampleRate
+            val angle = 2.0 * PI * frequency * t
+            
+            // Generate raw waveform
+            val rawValue = when (waveform) {
+                Waveform.SINE -> sin(angle)
+                Waveform.SQUARE -> if (sin(angle) >= 0) 1.0 else -1.0
+                Waveform.TRIANGLE -> {
+                    val period = 1.0 / frequency
+                    val relativeT = t % period
+                    val fraction = relativeT / period
+                    if (fraction < 0.25) 4.0 * fraction
+                    else if (fraction < 0.75) 2.0 - 4.0 * fraction
+                    else 4.0 * fraction - 4.0
+                }
+            }
+
             // Apply a slight fade-in/out to avoid clicking
             val envelope = when {
                 i < 441 -> i / 441.0 // 10ms fade in
                 i > numSamples - 441 -> (numSamples - i) / 441.0 // 10ms fade out
                 else -> 1.0
             }
-            samples[i] = (sin(angle) * Short.MAX_VALUE * 0.5 * envelope).toInt().toShort()
+            samples[i] = (rawValue * Short.MAX_VALUE * 0.4 * envelope).toInt().toShort()
         }
         
         audioTrack.write(samples, 0, numSamples, AudioTrack.WRITE_BLOCKING)

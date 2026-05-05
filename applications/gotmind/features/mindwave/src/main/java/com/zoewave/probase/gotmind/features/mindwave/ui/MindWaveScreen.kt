@@ -11,9 +11,12 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +33,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Analytics
@@ -43,6 +48,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,6 +62,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +75,7 @@ import com.zoewave.probase.gotmind.features.mindwave.HapticSignal
 import com.zoewave.probase.gotmind.features.mindwave.MindWaveEvent
 import com.zoewave.probase.gotmind.features.mindwave.MindWaveState
 import com.zoewave.probase.gotmind.features.mindwave.Node
+import com.zoewave.probase.gotmind.model.MindWaveMode
 import kotlin.random.Random
 
 @Composable
@@ -74,6 +86,14 @@ fun MindWaveScreen(
 ) {
     var showControls by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
+    
+    val startButtonInteractionSource = remember { MutableInteractionSource() }
+    val startButtonPressed by startButtonInteractionSource.collectIsPressedAsState()
+    val startButtonScale by animateFloatAsState(
+        targetValue = if (startButtonPressed) 0.95f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.4f, stiffness = Spring.StiffnessMedium),
+        label = "StartPress"
+    )
 
     // Haptic Feedback Observer
     LaunchedEffect(uiState.lastHapticSignal) {
@@ -89,12 +109,13 @@ fun MindWaveScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
         MindWaveBackground()
-
+        
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .padding(24.dp),
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Header
@@ -183,38 +204,120 @@ fun MindWaveScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Text(
-                text = if (uiState.isPlayingSequence) "Watch the Wave..." else "Repeat the Pattern",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Black,
-                color = if (uiState.isPlayingSequence) MaterialTheme.colorScheme.secondary else Color.White
-            )
+            if (uiState.mode == MindWaveMode.SYMPHONY || uiState.mode == MindWaveMode.HARMONIC_ARC) {
+                MusicalStaff(activeNodeId = uiState.activeNodeId)
+                Spacer(modifier = Modifier.height(12.dp))
+                if (uiState.currentSongTitle != null) {
+                    Text(
+                        text = "Melody: ${uiState.currentSongTitle}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = if (uiState.isPlayingSequence) "Listen carefully..." else "Repeat the Melody",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = if (uiState.isPlayingSequence) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.8f)
+                )
+            } else {
+                Text(
+                    text = if (uiState.isPlayingSequence) "Watch the Wave..." else "Repeat the Pattern",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Black,
+                    color = if (uiState.isPlayingSequence) MaterialTheme.colorScheme.secondary else Color.White
+                )
+            }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // Game Grid (4x4)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Color.White.copy(alpha = 0.05f))
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                for (row in 0..3) {
-                    Row(
-                        modifier = Modifier.weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        for (col in 0..3) {
-                            val index = row * 4 + col
-                            val node = uiState.grid[index]
-                            MindWaveNode(
-                                node = node,
-                                isClickable = !uiState.isPlayingSequence && !uiState.isGameOver && uiState.isStarted && !uiState.isPaused,
-                                onClick = { onEvent(MindWaveEvent.NodeClick(index)) }
-                            )
+            // Game Grid or Arc or Ring
+            if (uiState.mode == MindWaveMode.HARMONIC_ARC || uiState.mode == MindWaveMode.HARMONIC_RING) {
+                val isFullCircle = uiState.mode == MindWaveMode.HARMONIC_RING
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(if (isFullCircle) 450.dp else 300.dp) 
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isFullCircle) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            MusicalStaff(activeNodeId = uiState.activeNodeId)
+                            if (uiState.currentSongTitle != null) {
+                                Text(
+                                    text = uiState.currentSongTitle,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+
+                    val sweepAngle = if (isFullCircle) 360f else 180f
+                    val startAngle = if (isFullCircle) 270f else 180f // Start from top for circle
+                    
+                    uiState.grid.forEachIndexed { index, node ->
+                        val angle = startAngle - (index.toFloat() / uiState.grid.size * sweepAngle)
+                        val angleRad = Math.toRadians(angle.toDouble())
+                        
+                        val radiusPx = if (uiState.nodeShape == com.zoewave.probase.gotmind.model.NodeShape.PIANO_KEY) 180 else 140
+                        val x = (Math.cos(angleRad) * radiusPx).dp
+                        val y = (Math.sin(angleRad) * -radiusPx).dp
+                        
+                        Box(
+                            modifier = Modifier
+                                .offset(x = x, y = if (isFullCircle) y else y + 150.dp) // Align arc relative to center
+                                .graphicsLayer {
+                                    if (uiState.nodeShape == com.zoewave.probase.gotmind.model.NodeShape.PIANO_KEY) {
+                                        rotationZ = angle + 90f // Rotate key to face center
+                                    }
+                                }
+                        ) {
+                            if (uiState.nodeShape == com.zoewave.probase.gotmind.model.NodeShape.PIANO_KEY) {
+                                PianoKeyNode(
+                                    node = node,
+                                    isClickable = !uiState.isPlayingSequence && !uiState.isGameOver && uiState.isStarted && !uiState.isPaused,
+                                    onClick = { onEvent(MindWaveEvent.NodeClick(index)) }
+                                )
+                            } else {
+                                MindWaveNode(
+                                    node = node,
+                                    isClickable = !uiState.isPlayingSequence && !uiState.isGameOver && uiState.isStarted && !uiState.isPaused,
+                                    onClick = { onEvent(MindWaveEvent.NodeClick(index)) }
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Standard Grid
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    for (row in 0..3) {
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            for (col in 0..3) {
+                                val index = row * 4 + col
+                                val node = uiState.grid[index]
+                                MindWaveNode(
+                                    node = node,
+                                    isClickable = !uiState.isPlayingSequence && !uiState.isGameOver && uiState.isStarted && !uiState.isPaused,
+                                    onClick = { onEvent(MindWaveEvent.NodeClick(index)) }
+                                )
+                            }
                         }
                     }
                 }
@@ -237,11 +340,140 @@ fun MindWaveScreen(
             if (!uiState.isStarted || uiState.isGameOver) {
                 Button(
                     onClick = { onEvent(MindWaveEvent.StartGame) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .scale(startButtonScale),
                     shape = RoundedCornerShape(16.dp),
+                    interactionSource = startButtonInteractionSource,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(if (uiState.isGameOver) "TRY AGAIN" else "START GAME", fontWeight = FontWeight.Black)
+                }
+            }
+        }
+    }
+
+    if (uiState.isGameOver) {
+        AlertDialog(
+            onDismissRequest = { /* No-op */ },
+            containerColor = Color(0xFF1E1E1E),
+            titleContentColor = Color.White,
+            textContentColor = Color.Gray,
+            title = { Text("Sequence Broken") },
+            text = { Text("The melody has drifted away. Keep training your sensory memory!") },
+            confirmButton = {
+                TextButton(onClick = { onEvent(MindWaveEvent.StartGame) }) {
+                    Text("RETRY WAVE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onNav("BACK") }) {
+                    Text("BACK TO HUB", color = Color.Gray)
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun MusicalStaff(activeNodeId: Int?) {
+    val lineSpacing = 10.dp
+    val staffHeight = lineSpacing * 8
+    
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(staffHeight + 20.dp)
+            .padding(horizontal = 48.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val width = size.width
+            val height = size.height
+            val centerY = height / 2f
+            val spacing = lineSpacing.toPx()
+            
+            // Draw Treble Clef Symbol
+            drawContext.canvas.nativeCanvas.apply {
+                val paint = android.graphics.Paint().apply {
+                    color = Color.White.copy(alpha = 0.7f).toArgb()
+                    textSize = spacing * 5f
+                    typeface = android.graphics.Typeface.DEFAULT_BOLD
+                }
+                drawText("𝄞", 0f, centerY + spacing * 1.5f, paint)
+            }
+
+            // Draw 5 staff lines
+            for (i in -2..2) {
+                val y = centerY + i * spacing
+                drawLine(
+                    color = Color.White.copy(alpha = 0.25f),
+                    start = androidx.compose.ui.geometry.Offset(60f, y),
+                    end = androidx.compose.ui.geometry.Offset(width, y),
+                    strokeWidth = 2f
+                )
+            }
+
+            // Note mapping (Treble Clef)
+            val noteOffsets = mapOf(
+                0 to -2.5f, // D#5
+                1 to -1.0f, // D5
+                2 to -0.5f, // C#5
+                3 to -0.5f, // C5
+                4 to 0.0f,  // B4
+                5 to 0.5f,  // A#4
+                6 to 0.5f,  // A4
+                7 to 1.0f,  // G#4
+                8 to 1.0f,  // G4
+                9 to 1.5f,  // F#4
+                10 to 1.5f, // F4
+                11 to 2.0f, // E4
+                12 to 2.5f, // D#4
+                13 to 2.5f, // D4
+                14 to 3.0f, // C#4
+                15 to 3.0f  // C4
+            )
+
+            activeNodeId?.let { id ->
+                val offsetMultiplier = noteOffsets[id] ?: 0f
+                val noteY = centerY + offsetMultiplier * spacing
+                
+                // Draw Ledger line for C4
+                if (offsetMultiplier >= 3.0f) {
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.6f),
+                        start = androidx.compose.ui.geometry.Offset(width/2f - 25f, centerY + 3f * spacing),
+                        end = androidx.compose.ui.geometry.Offset(width/2f + 25f, centerY + 3f * spacing),
+                        strokeWidth = 3f
+                    )
+                }
+
+                // Note Head Glow
+                drawCircle(
+                    color = Color(0xFF00E5FF).copy(alpha = 0.3f),
+                    radius = spacing * 0.6f,
+                    center = androidx.compose.ui.geometry.Offset(width / 2f, noteY)
+                )
+
+                // Main Note Head
+                drawCircle(
+                    color = Color.White,
+                    radius = spacing * 0.4f,
+                    center = androidx.compose.ui.geometry.Offset(width / 2f, noteY)
+                )
+                
+                // Sharp symbol (#)
+                val isSharp = id in listOf(0, 2, 5, 7, 9, 12, 14)
+                if (isSharp) {
+                    drawContext.canvas.nativeCanvas.apply {
+                        val p = android.graphics.Paint().apply {
+                            color = Color(0xFF00E5FF).toArgb()
+                            textSize = spacing * 1.5f
+                            typeface = android.graphics.Typeface.DEFAULT_BOLD
+                        }
+                        drawText("#", width/2f + spacing * 0.6f, noteY + spacing * 0.4f, p)
+                    }
                 }
             }
         }
@@ -275,11 +507,90 @@ fun MindWaveBackground() {
 }
 
 @Composable
+fun PianoKeyNode(
+    node: Node,
+    isClickable: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    
+    val pressScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.4f, stiffness = Spring.StiffnessMedium),
+        label = "PressScale"
+    )
+
+    val scale by animateFloatAsState(
+        targetValue = if (node.isFlashing) 1.1f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessLow),
+        label = "Pulse"
+    )
+
+    val baseColor = if (node.color != null) Color(node.color) else Color.White.copy(alpha = 0.1f)
+    val color by animateColorAsState(
+        targetValue = when {
+            node.isFlashing || isPressed -> if (node.color != null) Color.White else Color(0xFF00E5FF)
+            else -> baseColor
+        },
+        animationSpec = tween(if (node.isFlashing || isPressed) 100 else 300),
+        label = "Color"
+    )
+
+    // Tapered "Long Triangle" shape
+    val keyShape = remember {
+        GenericShape { size, _ ->
+            moveTo(size.width * 0.35f, 0f) // Inner top (narrow)
+            lineTo(size.width * 0.65f, 0f) 
+            lineTo(size.width, size.height) // Outer bottom (wide)
+            lineTo(0f, size.height)
+            close()
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .size(width = 50.dp, height = 100.dp) // Taller for the "long" look
+            .scale(scale * pressScale)
+            .clip(keyShape)
+            .background(color)
+            .border(1.dp, if (node.isFlashing || isPressed) Color.White else Color.Black.copy(alpha = 0.3f), keyShape)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = isClickable
+            ) { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        if (node.note != null) {
+            Text(
+                text = node.note,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Black.copy(alpha = 0.7f),
+                modifier = Modifier
+                    .offset(y = 20.dp) // Position text towards the wider end
+                    .graphicsLayer { rotationZ = -90f }
+            )
+        }
+    }
+}
+
+@Composable
 fun MindWaveNode(
     node: Node,
     isClickable: Boolean,
     onClick: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    
+    val pressScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.92f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.4f, stiffness = Spring.StiffnessMedium),
+        label = "PressScale"
+    )
+
     val scale by animateFloatAsState(
         targetValue = if (node.isFlashing) 1.2f else 1.0f,
         animationSpec = spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessLow),
@@ -290,33 +601,36 @@ fun MindWaveNode(
     
     val color by animateColorAsState(
         targetValue = when {
-            node.isFlashing -> if (node.color != null) Color.White else Color(0xFF00E5FF)
+            node.isFlashing || isPressed -> if (node.color != null) Color.White else Color(0xFF00E5FF)
             else -> baseColor
         },
-        animationSpec = tween(if (node.isFlashing) 100 else 300),
+        animationSpec = tween(if (node.isFlashing || isPressed) 100 else 300),
         label = "Color"
     )
 
     Box(
         modifier = Modifier
             .size(64.dp)
-            .scale(scale)
+            .scale(scale * pressScale)
             .clip(CircleShape)
             .background(color)
-            .border(2.dp, if (node.isFlashing) Color.White.copy(alpha = 0.5f) else Color.Transparent, CircleShape)
-            .clickable(enabled = isClickable) { onClick() },
+            .border(2.dp, if (node.isFlashing || isPressed) Color.White.copy(alpha = 0.5f) else Color.Transparent, CircleShape)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = isClickable
+            ) { onClick() },
         contentAlignment = Alignment.Center
     ) {
         if (node.note != null) {
             Text(
                 text = node.note,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Black,
-                color = if (node.isFlashing) Color.Black else Color.White.copy(alpha = 0.6f)
+                style = MaterialTheme.typography.titleMedium, // Larger font
+                fontWeight = FontWeight.ExtraBold, // Bolder
+                color = Color.Black.copy(alpha = 0.8f) // Dark text for high contrast on pastels
             )
         }
         
-        // Futuristic ripple inside
         if (node.isFlashing && node.color == null) {
             Box(
                 modifier = Modifier
