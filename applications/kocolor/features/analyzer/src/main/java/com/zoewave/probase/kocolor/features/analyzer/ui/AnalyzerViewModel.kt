@@ -26,11 +26,13 @@ sealed class AnalyzerUiState {
 
 data class AnalyzerScreenUiState(
     val analyzerState: AnalyzerUiState = AnalyzerUiState.Idle,
-    val capturedUri: String? = null
+    val faceUri: String? = null,
+    val clothesUri: String? = null
 )
 
 sealed class AnalyzerEvent {
-    data class OnPhotoCaptured(val uri: String) : AnalyzerEvent()
+    data class OnFaceCaptured(val uri: String) : AnalyzerEvent()
+    data class OnClothesCaptured(val uri: String) : AnalyzerEvent()
     data object OnAnalyzeClicked : AnalyzerEvent()
     data class OnSaveClicked(val advice: FashionAdvice) : AnalyzerEvent()
     data object OnResetClicked : AnalyzerEvent()
@@ -45,15 +47,18 @@ class AnalyzerViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _analyzerState = MutableStateFlow<AnalyzerUiState>(AnalyzerUiState.Idle)
-    private val _capturedUri = MutableStateFlow<String?>(null)
+    private val _faceUri = MutableStateFlow<String?>(null)
+    private val _clothesUri = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<AnalyzerScreenUiState> = combine(
         _analyzerState,
-        _capturedUri
-    ) { analyzerState, capturedUri ->
+        _faceUri,
+        _clothesUri
+    ) { analyzerState, faceUri, clothesUri ->
         AnalyzerScreenUiState(
             analyzerState = analyzerState,
-            capturedUri = capturedUri
+            faceUri = faceUri,
+            clothesUri = clothesUri
         )
     }.stateIn(
         scope = viewModelScope,
@@ -63,14 +68,17 @@ class AnalyzerViewModel @Inject constructor(
 
     fun onEvent(event: AnalyzerEvent) {
         when (event) {
-            is AnalyzerEvent.OnPhotoCaptured -> {
-                _capturedUri.value = event.uri
-                _analyzerState.value = AnalyzerUiState.Idle
+            is AnalyzerEvent.OnFaceCaptured -> {
+                _faceUri.value = event.uri
+            }
+            is AnalyzerEvent.OnClothesCaptured -> {
+                _clothesUri.value = event.uri
             }
             is AnalyzerEvent.OnAnalyzeClicked -> {
-                val uri = _capturedUri.value
-                if (uri != null) {
-                    analyzePhoto(uri)
+                val fUri = _faceUri.value
+                val cUri = _clothesUri.value
+                if (fUri != null && cUri != null) {
+                    analyzePhotos(fUri, cUri)
                 }
             }
             is AnalyzerEvent.OnSaveClicked -> {
@@ -78,12 +86,13 @@ class AnalyzerViewModel @Inject constructor(
             }
             is AnalyzerEvent.OnResetClicked -> {
                 _analyzerState.value = AnalyzerUiState.Idle
-                _capturedUri.value = null
+                _faceUri.value = null
+                _clothesUri.value = null
             }
         }
     }
 
-    private fun analyzePhoto(uri: String) {
+    private fun analyzePhotos(faceUri: String, clothesUri: String) {
         viewModelScope.launch {
             _analyzerState.value = AnalyzerUiState.Loading(listOf("Initializing analysis..."))
             
@@ -99,13 +108,15 @@ class AnalyzerViewModel @Inject constructor(
             val modelName = aiSettings.aiModelFlow.first()
 
             try {
-                val bitmap = loadBitmapFromUri(Uri.parse(uri))
-                if (bitmap == null) {
-                    _analyzerState.value = AnalyzerUiState.Error("Failed to load image.")
+                val faceBitmap = loadBitmapFromUri(Uri.parse(faceUri))
+                val clothesBitmap = loadBitmapFromUri(Uri.parse(clothesUri))
+                
+                if (faceBitmap == null || clothesBitmap == null) {
+                    _analyzerState.value = AnalyzerUiState.Error("Failed to load images.")
                     return@launch
                 }
 
-                val result = analyzerEngine.analyzeSelfie(bitmap, apiKey, modelName)
+                val result = analyzerEngine.analyzeFaceAndClothes(faceBitmap, clothesBitmap, apiKey, modelName)
                 _analyzerState.value = AnalyzerUiState.Success(result)
             } catch (e: Exception) {
                 _analyzerState.value = AnalyzerUiState.Error("Analysis failed: ${e.localizedMessage}")

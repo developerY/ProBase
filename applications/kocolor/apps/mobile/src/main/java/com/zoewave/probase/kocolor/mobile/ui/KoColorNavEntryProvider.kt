@@ -31,7 +31,7 @@ fun koColorNavEntryProvider(
         is KoColorRoute.Analyzer -> NavEntry(route) {
             AnalyzerUiRoute(
                 onBack = onBack,
-                onNavigateToCamera = { onNavigateTo(KoColorRoute.Camera("analyzer")) },
+                onNavigateToCamera = { target -> onNavigateTo(KoColorRoute.Camera(target)) },
                 onAnalysisSaved = onBack
             )
         }
