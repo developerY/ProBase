@@ -1,6 +1,7 @@
 package com.zoewave.probase.gotmind.features.mindwave
 
 import com.zoewave.probase.gotmind.model.MindWaveMode
+import com.zoewave.probase.gotmind.model.NodeShape
 import java.util.UUID
 
 data class Node(
@@ -28,6 +29,7 @@ data class MindWaveState(
     val lastHapticSignal: HapticSignal? = null,
     val isPaused: Boolean = false,
     val mode: MindWaveMode = MindWaveMode.CLASSIC,
+    val nodeShape: NodeShape = NodeShape.CIRCLE,
     val activeNodeId: Int? = null, // For visual staff notation
     val sequencePath: List<Int> = emptyList(), // Path of the sequence for constellation drawing
     val currentSongTitle: String? = null,

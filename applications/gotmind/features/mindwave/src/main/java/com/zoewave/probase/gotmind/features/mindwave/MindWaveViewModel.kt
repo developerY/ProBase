@@ -55,12 +55,18 @@ class MindWaveViewModel @Inject constructor(
                 engine.setSoundEnabled(settings.soundEnabled)
                 engine.setAudioSynthesizer(waveSynthesizer)
                 
-                val waveform = when (settings.instrumentType) {
-                    com.zoewave.probase.gotmind.model.InstrumentType.CLEAN_SYNTH -> com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform.SINE
-                    com.zoewave.probase.gotmind.model.InstrumentType.RETRO_8BIT -> com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform.SQUARE
-                    com.zoewave.probase.gotmind.model.InstrumentType.ZEN_TRIANGLE -> com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform.TRIANGLE
+                // New: Sync node shape
+                _engine.value.state.value.let { 
+                    engine.updateSymphonySettings(
+                        waveform = when (settings.instrumentType) {
+                            com.zoewave.probase.gotmind.model.InstrumentType.CLEAN_SYNTH -> com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform.SINE
+                            com.zoewave.probase.gotmind.model.InstrumentType.RETRO_8BIT -> com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform.SQUARE
+                            com.zoewave.probase.gotmind.model.InstrumentType.ZEN_TRIANGLE -> com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform.TRIANGLE
+                        },
+                        songMaster = settings.songMasterEnabled,
+                        nodeShape = settings.mindWaveNodeShape
+                    )
                 }
-                engine.updateSymphonySettings(waveform, settings.songMasterEnabled)
             }
             .launchIn(viewModelScope)
     }
@@ -70,6 +76,7 @@ class MindWaveViewModel @Inject constructor(
             MindWaveMode.CLASSIC -> ClassicMindWaveEngine(viewModelScope) { score, level -> saveScore(score, level) }
             MindWaveMode.SYMPHONY -> SymphonyMindWaveEngine(viewModelScope) { score, level -> saveScore(score, level) }
             MindWaveMode.HARMONIC_ARC -> HarmonicArcMindWaveEngine(viewModelScope) { score, level -> saveScore(score, level) }
+            MindWaveMode.HARMONIC_RING -> HarmonicRingMindWaveEngine(viewModelScope) { score, level -> saveScore(score, level) }
         }
     }
 

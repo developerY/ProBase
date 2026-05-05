@@ -63,6 +63,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -207,7 +208,7 @@ fun MindWaveScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (uiState.mode == MindWaveMode.SYMPHONY || uiState.mode == MindWaveMode.HARMONIC_ARC) {
+            if (uiState.mode == MindWaveMode.SYMPHONY || uiState.mode == MindWaveMode.HARMONIC_ARC || uiState.mode == MindWaveMode.HARMONIC_RING) {
                 MusicalStaff(activeNodeId = uiState.activeNodeId)
                 Spacer(modifier = Modifier.height(12.dp))
                 if (uiState.currentSongTitle != null) {
@@ -236,30 +237,49 @@ fun MindWaveScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Game Grid or Arc
-            if (uiState.mode == MindWaveMode.HARMONIC_ARC) {
+            // Game Grid or Arc or Ring
+            if (uiState.mode == MindWaveMode.HARMONIC_ARC || uiState.mode == MindWaveMode.HARMONIC_RING) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp) // Fixed height for arc
+                        .height(300.dp) 
                         .padding(horizontal = 16.dp),
                     contentAlignment = Alignment.BottomCenter
                 ) {
-                    val radius = 240.dp
+                    val isFullCircle = uiState.mode == MindWaveMode.HARMONIC_RING
+                    val sweepAngle = if (isFullCircle) 360f else 180f
+                    val startAngle = if (isFullCircle) 270f else 180f // Start from top for circle
+                    
                     uiState.grid.forEachIndexed { index, node ->
-                        // Spread 16 nodes across a 180-degree arc (half circle)
-                        // Angle from 180 to 0 (Left to Right)
-                        val angle = 180f - (index.toFloat() / (uiState.grid.size - 1) * 180f)
+                        val angle = startAngle - (index.toFloat() / uiState.grid.size * sweepAngle)
                         val angleRad = Math.toRadians(angle.toDouble())
-                        val x = (Math.cos(angleRad) * 150).dp // Scale for width
-                        val y = (Math.sin(angleRad) * -150).dp // Scale for height (negative for Up)
                         
-                        Box(modifier = Modifier.offset(x = x, y = y)) {
-                            MindWaveNode(
-                                node = node,
-                                isClickable = !uiState.isPlayingSequence && !uiState.isGameOver && uiState.isStarted && !uiState.isPaused,
-                                onClick = { onEvent(MindWaveEvent.NodeClick(index)) }
-                            )
+                        val radiusPx = if (uiState.nodeShape == com.zoewave.probase.gotmind.model.NodeShape.PIANO_KEY) 180 else 150
+                        val x = (Math.cos(angleRad) * radiusPx).dp
+                        val y = (Math.sin(angleRad) * -radiusPx).dp
+                        
+                        Box(
+                            modifier = Modifier
+                                .offset(x = x, y = if (isFullCircle) y - 150.dp else y) // Shift circle up
+                                .graphicsLayer {
+                                    if (uiState.nodeShape == com.zoewave.probase.gotmind.model.NodeShape.PIANO_KEY) {
+                                        rotationZ = angle + 90f // Rotate key to face center
+                                    }
+                                }
+                        ) {
+                            if (uiState.nodeShape == com.zoewave.probase.gotmind.model.NodeShape.PIANO_KEY) {
+                                PianoKeyNode(
+                                    node = node,
+                                    isClickable = !uiState.isPlayingSequence && !uiState.isGameOver && uiState.isStarted && !uiState.isPaused,
+                                    onClick = { onEvent(MindWaveEvent.NodeClick(index)) }
+                                )
+                            } else {
+                                MindWaveNode(
+                                    node = node,
+                                    isClickable = !uiState.isPlayingSequence && !uiState.isGameOver && uiState.isStarted && !uiState.isPaused,
+                                    onClick = { onEvent(MindWaveEvent.NodeClick(index)) }
+                                )
+                            }
                         }
                     }
                 }
@@ -357,15 +377,20 @@ fun ConstellationPath(path: List<Int>, mode: MindWaveMode) {
         // Grid top offset
         val gridTopOffset = 360.dp.toPx()
         
-        // Arc top offset (matched to Box height and padding)
-        val arcBaseY = 560.dp.toPx() // BottomCenter of the 300dp arc box + header/staff
+        // Arc/Ring top offset
+        val arcBaseY = if (mode == MindWaveMode.HARMONIC_RING) 500.dp.toPx() else 560.dp.toPx()
 
         val points = path.map { index ->
-            if (mode == MindWaveMode.HARMONIC_ARC) {
-                val angle = 180f - (index.toFloat() / 15f * 180f)
+            if (mode == MindWaveMode.HARMONIC_ARC || mode == MindWaveMode.HARMONIC_RING) {
+                val isFullCircle = mode == MindWaveMode.HARMONIC_RING
+                val sweepAngle = if (isFullCircle) 360f else 180f
+                val startAngle = if (isFullCircle) 270f else 180f
+                
+                val angle = startAngle - (index.toFloat() / 16f * sweepAngle)
                 val angleRad = Math.toRadians(angle.toDouble())
-                val x = (Math.cos(angleRad) * 150.dp.toPx()) + (width / 2f)
-                val y = arcBaseY + (Math.sin(angleRad) * -150.dp.toPx())
+                val radiusPx = 150.dp.toPx()
+                val x = (Math.cos(angleRad) * radiusPx) + (width / 2f)
+                val y = arcBaseY + (Math.sin(angleRad) * -radiusPx) - (if (isFullCircle) 150.dp.toPx() else 0f)
                 androidx.compose.ui.geometry.Offset(x.toFloat(), y.toFloat())
             } else {
                 val row = index / 4
@@ -529,6 +554,63 @@ fun MindWaveBackground() {
                 .alpha(alpha)
                 .background(p.color, CircleShape)
         )
+    }
+}
+
+@Composable
+fun PianoKeyNode(
+    node: Node,
+    isClickable: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    
+    val pressScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.4f, stiffness = Spring.StiffnessMedium),
+        label = "PressScale"
+    )
+
+    val scale by animateFloatAsState(
+        targetValue = if (node.isFlashing) 1.1f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessLow),
+        label = "Pulse"
+    )
+
+    val baseColor = if (node.color != null) Color(node.color) else Color.White.copy(alpha = 0.1f)
+    val color by animateColorAsState(
+        targetValue = when {
+            node.isFlashing || isPressed -> if (node.color != null) Color.White else Color(0xFF00E5FF)
+            else -> baseColor
+        },
+        animationSpec = tween(if (node.isFlashing || isPressed) 100 else 300),
+        label = "Color"
+    )
+
+    Box(
+        modifier = Modifier
+            .size(width = 40.dp, height = 80.dp) // Piano key shape
+            .scale(scale * pressScale)
+            .clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp, topStart = 2.dp, topEnd = 2.dp))
+            .background(color)
+            .border(1.dp, if (node.isFlashing || isPressed) Color.White else Color.Black.copy(alpha = 0.2f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = isClickable
+            ) { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        if (node.note != null) {
+            Text(
+                text = node.note,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Black.copy(alpha = 0.7f),
+                modifier = Modifier.graphicsLayer { rotationZ = -90f } // Counter-rotate text to stay upright
+            )
+        }
     }
 }
 

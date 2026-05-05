@@ -7,6 +7,7 @@ import com.zoewave.probase.gotmind.analytics.AnalyticsHelper
 import com.zoewave.probase.gotmind.model.AppTheme
 import com.zoewave.probase.gotmind.model.ColorPalette
 import com.zoewave.probase.gotmind.model.MindWaveMode
+import com.zoewave.probase.gotmind.model.NodeShape
 import com.zoewave.probase.gotmind.model.InstrumentType
 import com.zoewave.probase.gotmind.model.ThemeSettings
 import com.zoewave.probase.gotmind.model.GameSettings
@@ -23,6 +24,7 @@ sealed interface SettingsEvent {
     data class SetTheme(val theme: AppTheme) : SettingsEvent
     data class SetPalette(val palette: ColorPalette) : SettingsEvent
     data class SetMindWaveMode(val mode: MindWaveMode) : SettingsEvent
+    data class SetMindWaveNodeShape(val shape: NodeShape) : SettingsEvent
     data class SetInstrument(val instrument: InstrumentType) : SettingsEvent
     data class SetSongMaster(val enabled: Boolean) : SettingsEvent
 }
@@ -58,6 +60,9 @@ class SettingsViewModel @Inject constructor(
             }
             is SettingsEvent.SetMindWaveMode -> viewModelScope.launch {
                 appSettingsRepository.saveMindWaveMode(event.mode)
+            }
+            is SettingsEvent.SetMindWaveNodeShape -> viewModelScope.launch {
+                appSettingsRepository.saveMindWaveNodeShape(event.shape)
             }
             is SettingsEvent.SetInstrument -> viewModelScope.launch {
                 appSettingsRepository.saveInstrumentType(event.instrument)

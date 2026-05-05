@@ -9,7 +9,12 @@ enum class MemBloxEngineType {
 
 @Serializable
 enum class MindWaveMode {
-    CLASSIC, SYMPHONY, HARMONIC_ARC
+    CLASSIC, SYMPHONY, HARMONIC_ARC, HARMONIC_RING
+}
+
+@Serializable
+enum class NodeShape {
+    CIRCLE, PIANO_KEY
 }
 
 @Serializable
@@ -25,6 +30,7 @@ data class GameSettings(
     val hapticsEnabled: Boolean = true,
     val soundEnabled: Boolean = true,
     val mindWaveMode: MindWaveMode = MindWaveMode.CLASSIC,
+    val mindWaveNodeShape: NodeShape = NodeShape.CIRCLE,
     val instrumentType: InstrumentType = InstrumentType.CLEAN_SYNTH,
     val songMasterEnabled: Boolean = false
 )

@@ -36,6 +36,11 @@
     <string name="applications_gotmind_features_settings_mindwave_classic">Classic Grid</string>
     <string name="applications_gotmind_features_settings_mindwave_symphony">Symphony Grid</string>
     <string name="applications_gotmind_features_settings_mindwave_arc">Harmonic Arc (Half Ring)</string>
+    <string name="applications_gotmind_features_settings_mindwave_ring">Harmonic Ring (Full Circle)</string>
+
+    <string name="applications_gotmind_features_settings_mw_node_shape">Memory Key Style</string>
+    <string name="applications_gotmind_features_settings_mw_node_shape_circle">Orbital Spheres (Original)</string>
+    <string name="applications_gotmind_features_settings_mw_node_shape_piano">Rainbow Piano Keys</string>
 
     <string name="applications_gotmind_features_settings_mw_instrument">Instrument Skin</string>
     <string name="applications_gotmind_features_settings_mw_instrument_clean">Clean Synth (Sine)</string>

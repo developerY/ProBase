@@ -13,6 +13,7 @@ import com.zoewave.probase.gotmind.model.ThemeSettings
 import com.zoewave.probase.gotmind.model.GameSettings
 import com.zoewave.probase.gotmind.model.MemBloxEngineType
 import com.zoewave.probase.gotmind.model.MindWaveMode
+import com.zoewave.probase.gotmind.model.NodeShape
 import com.zoewave.probase.gotmind.model.InstrumentType
 import com.zoewave.probase.gotmind.data.di.GotMindDataStore
 import kotlinx.coroutines.flow.Flow
@@ -34,6 +35,7 @@ interface AppSettingsRepository {
     suspend fun saveHapticsEnabled(enabled: Boolean)
     suspend fun saveSoundEnabled(enabled: Boolean)
     suspend fun saveMindWaveMode(mode: MindWaveMode)
+    suspend fun saveMindWaveNodeShape(shape: NodeShape)
     suspend fun saveInstrumentType(type: InstrumentType)
     suspend fun saveSongMasterEnabled(enabled: Boolean)
 }
@@ -53,6 +55,7 @@ class AppSettingsRepositoryImpl @Inject constructor(
     private val HAPTICS_KEY = booleanPreferencesKey("haptics_enabled")
     private val SOUND_KEY = booleanPreferencesKey("sound_enabled")
     private val MW_MODE_KEY = stringPreferencesKey("mw_mode")
+    private val MW_SHAPE_KEY = stringPreferencesKey("mw_node_shape")
     private val MW_INSTRUMENT_KEY = stringPreferencesKey("mw_instrument")
     private val MW_SONG_MASTER_KEY = booleanPreferencesKey("mw_song_master")
 
@@ -72,6 +75,7 @@ class AppSettingsRepositoryImpl @Inject constructor(
             hapticsEnabled = preferences[HAPTICS_KEY] ?: true,
             soundEnabled = preferences[SOUND_KEY] ?: true,
             mindWaveMode = MindWaveMode.valueOf(preferences[MW_MODE_KEY] ?: MindWaveMode.CLASSIC.name),
+            mindWaveNodeShape = NodeShape.valueOf(preferences[MW_SHAPE_KEY] ?: NodeShape.CIRCLE.name),
             instrumentType = InstrumentType.valueOf(preferences[MW_INSTRUMENT_KEY] ?: InstrumentType.CLEAN_SYNTH.name),
             songMasterEnabled = preferences[MW_SONG_MASTER_KEY] ?: false
         )
@@ -128,6 +132,12 @@ class AppSettingsRepositoryImpl @Inject constructor(
     override suspend fun saveMindWaveMode(mode: MindWaveMode) {
         dataStore.edit { preferences ->
             preferences[MW_MODE_KEY] = mode.name
+        }
+    }
+
+    override suspend fun saveMindWaveNodeShape(shape: NodeShape) {
+        dataStore.edit { preferences ->
+            preferences[MW_SHAPE_KEY] = shape.name
         }
     }
 

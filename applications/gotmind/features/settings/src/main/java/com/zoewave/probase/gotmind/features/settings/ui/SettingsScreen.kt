@@ -58,6 +58,7 @@ import com.zoewave.probase.gotmind.model.ColorPalette
 import com.zoewave.probase.gotmind.model.ThemeSettings
 import com.zoewave.probase.gotmind.model.MemBloxEngineType
 import com.zoewave.probase.gotmind.model.MindWaveMode
+import com.zoewave.probase.gotmind.model.NodeShape
 import com.zoewave.probase.gotmind.model.InstrumentType
 import com.zoewave.probase.gotmind.model.GameSettings
 import java.util.Locale
@@ -249,9 +250,22 @@ fun SettingsScreen(
             optionLabels = mapOf(
                 MindWaveMode.CLASSIC to stringResource(R.string.applications_gotmind_features_settings_mindwave_classic),
                 MindWaveMode.SYMPHONY to stringResource(R.string.applications_gotmind_features_settings_mindwave_symphony),
-                MindWaveMode.HARMONIC_ARC to stringResource(R.string.applications_gotmind_features_settings_mindwave_arc)
+                MindWaveMode.HARMONIC_ARC to stringResource(R.string.applications_gotmind_features_settings_mindwave_arc),
+                MindWaveMode.HARMONIC_RING to stringResource(R.string.applications_gotmind_features_settings_mindwave_ring)
             ),
             onSelected = { onSettingsEvent(SettingsEvent.SetMindWaveMode(it)) }
+        )
+
+        SettingsDropdownItem(
+            icon = Icons.Default.Palette,
+            title = stringResource(R.string.applications_gotmind_features_settings_mw_node_shape),
+            currentValue = gameSettings.mindWaveNodeShape,
+            options = NodeShape.entries,
+            optionLabels = mapOf(
+                NodeShape.CIRCLE to stringResource(R.string.applications_gotmind_features_settings_mw_node_shape_circle),
+                NodeShape.PIANO_KEY to stringResource(R.string.applications_gotmind_features_settings_mw_node_shape_piano)
+            ),
+            onSelected = { onSettingsEvent(SettingsEvent.SetMindWaveNodeShape(it)) }
         )
 
         SettingsDropdownItem(

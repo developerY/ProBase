@@ -172,10 +172,15 @@ abstract class BaseMindWaveEngine(
         _state.update { it.copy(soundEnabled = enabled) }
     }
 
-    override fun updateSymphonySettings(waveform: com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform, songMaster: Boolean) {
+    override fun updateSymphonySettings(
+        waveform: com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform, 
+        songMaster: Boolean,
+        nodeShape: com.zoewave.probase.gotmind.model.NodeShape
+    ) {
         _state.update { it.copy(
             activeWaveform = waveform,
-            currentSongTitle = if (songMaster) "Ready for Melody" else null
+            currentSongTitle = if (songMaster) "Ready for Melody" else null,
+            nodeShape = nodeShape
         ) }
     }
 
