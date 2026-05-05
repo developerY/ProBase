@@ -62,7 +62,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
@@ -111,10 +110,6 @@ fun MindWaveScreen(
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
         MindWaveBackground()
         
-        if (uiState.sequencePath.size >= 2) {
-            ConstellationPath(path = uiState.sequencePath, mode = uiState.mode)
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -378,67 +373,6 @@ fun MindWaveScreen(
                 }
             }
         )
-    }
-}
-
-@Composable
-fun ConstellationPath(path: List<Int>, mode: MindWaveMode) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val width = size.width
-        val padding = 24.dp.toPx()
-        val gridWidth = width - (padding * 2)
-        val nodeSize = gridWidth / 4f
-        
-        // Grid top offset
-        val gridTopOffset = 360.dp.toPx()
-        
-        // Arc/Ring center offset
-        val centerY = 560.dp.toPx() // Estimated center for Arc/Ring
-
-        val points = path.map { index ->
-            if (mode == MindWaveMode.HARMONIC_ARC || mode == MindWaveMode.HARMONIC_RING) {
-                val isFullCircle = mode == MindWaveMode.HARMONIC_RING
-                val sweepAngle = if (isFullCircle) 360f else 180f
-                val startAngle = if (isFullCircle) 270f else 180f
-                
-                val angle = startAngle - (index.toFloat() / 16f * sweepAngle)
-                val angleRad = Math.toRadians(angle.toDouble())
-                val radiusPx = 150.dp.toPx()
-                val x = (Math.cos(angleRad) * radiusPx) + (width / 2f)
-                val y = centerY + (Math.sin(angleRad) * -radiusPx)
-                androidx.compose.ui.geometry.Offset(x.toFloat(), y.toFloat())
-            } else {
-                val row = index / 4
-                val col = index % 4
-                androidx.compose.ui.geometry.Offset(
-                    x = padding + (col * nodeSize) + (nodeSize / 2f),
-                    y = gridTopOffset + (row * nodeSize) + (nodeSize / 2f)
-                )
-            }
-        }
-
-        if (points.size >= 2) {
-            val drawPath = androidx.compose.ui.graphics.Path().apply {
-                moveTo(points[0].x, points[0].y)
-                for (i in 1 until points.size) {
-                    lineTo(points[i].x, points[i].y)
-                }
-            }
-            
-            // Outer Glow
-            drawPath(
-                path = drawPath,
-                color = Color(0xFF00E5FF).copy(alpha = 0.15f),
-                style = Stroke(width = 16f, cap = StrokeCap.Round)
-            )
-            
-            // Core Line
-            drawPath(
-                path = drawPath,
-                color = Color(0xFF00E5FF).copy(alpha = 0.5f),
-                style = Stroke(width = 4f, cap = StrokeCap.Round)
-            )
-        }
     }
 }
 
