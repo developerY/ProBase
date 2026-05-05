@@ -239,7 +239,7 @@ fun MindWaveScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(if (isFullCircle) 450.dp else 300.dp) 
+                        .height(if (isFullCircle) 500.dp else 300.dp) 
                         .padding(horizontal = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -258,22 +258,23 @@ fun MindWaveScreen(
                     }
 
                     val sweepAngle = if (isFullCircle) 360f else 180f
-                    val startAngle = if (isFullCircle) 270f else 180f // Start from top for circle
+                    val startAngle = if (isFullCircle) 270f else 180f 
                     
                     uiState.grid.forEachIndexed { index, node ->
                         val angle = startAngle - (index.toFloat() / uiState.grid.size * sweepAngle)
                         val angleRad = Math.toRadians(angle.toDouble())
                         
-                        val radiusPx = if (uiState.nodeShape == com.zoewave.probase.gotmind.model.NodeShape.PIANO_KEY) 180 else 140
+                        val radiusPx = if (uiState.nodeShape == com.zoewave.probase.gotmind.model.NodeShape.PIANO_KEY) 175 else 140
                         val x = (Math.cos(angleRad) * radiusPx).dp
                         val y = (Math.sin(angleRad) * -radiusPx).dp
                         
                         Box(
                             modifier = Modifier
-                                .offset(x = x, y = if (isFullCircle) y else y + 150.dp) // Align arc relative to center
+                                .offset(x = x, y = if (isFullCircle) y else y + 150.dp)
                                 .graphicsLayer {
                                     if (uiState.nodeShape == com.zoewave.probase.gotmind.model.NodeShape.PIANO_KEY) {
-                                        rotationZ = angle + 90f // Rotate key to face center
+                                        // Corrected rotation: ensure narrow end points to absolute center
+                                        rotationZ = angle + 180f
                                     }
                                 }
                         ) {
@@ -537,16 +538,16 @@ fun PianoKeyNode(
         label = "Color"
     )
 
-    // Tapered "Long Triangle" shape - mathematically optimized for a seamless ring
+    // Tapered "Long Triangle" shape - mathematically perfected for a seamless 16-key donut
     val keyShape = remember {
         GenericShape { size, _ ->
-            // For 16 keys, each occupies 22.5 degrees.
-            // Ratio of inner arc to outer arc determines the taper.
-            val topWidthFactor = 0.55f 
+            // Calculated for 16 keys (22.5 deg each)
+            // The top (short section) should be exactly (Inner Radius / Outer Radius) wide
+            val topWidthFactor = 0.44f 
             val xOffset = (1f - topWidthFactor) / 2f
-            moveTo(size.width * xOffset, 0f)
+            moveTo(size.width * xOffset, 0f) // Short front section (narrow)
             lineTo(size.width * (1f - xOffset), 0f) 
-            lineTo(size.width, size.height)
+            lineTo(size.width, size.height) // Wide back section
             lineTo(0f, size.height)
             close()
         }
@@ -554,11 +555,11 @@ fun PianoKeyNode(
 
     Box(
         modifier = Modifier
-            .size(width = 85.dp, height = 120.dp) // Optimized width for flush fitting
+            .size(width = 92.dp, height = 130.dp) // Optimized dimensions for perfect fit
             .scale(scale * pressScale)
             .clip(keyShape)
             .background(color)
-            .border(1.dp, if (node.isFlashing || isPressed) Color.White else Color.Black.copy(alpha = 0.15f), keyShape)
+            .border(0.5.dp, if (node.isFlashing || isPressed) Color.White else Color.Black.copy(alpha = 0.1f), keyShape)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -569,12 +570,9 @@ fun PianoKeyNode(
         if (node.note != null) {
             Text(
                 text = node.note,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.Black.copy(alpha = 0.7f),
-                modifier = Modifier
-                    .offset(y = 30.dp) // Positioned for maximum visibility on the wedge
-                    .graphicsLayer { rotationZ = -90f }
+                color = Color.Black.copy(alpha = 0.6f)
             )
         }
     }
