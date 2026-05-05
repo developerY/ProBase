@@ -537,12 +537,16 @@ fun PianoKeyNode(
         label = "Color"
     )
 
-    // Tapered "Long Triangle" shape
+    // Tapered "Long Triangle" shape - mathematically optimized for a seamless ring
     val keyShape = remember {
         GenericShape { size, _ ->
-            moveTo(size.width * 0.35f, 0f) // Inner top (narrow)
-            lineTo(size.width * 0.65f, 0f) 
-            lineTo(size.width, size.height) // Outer bottom (wide)
+            // For 16 keys, each occupies 22.5 degrees.
+            // Ratio of inner arc to outer arc determines the taper.
+            val topWidthFactor = 0.55f 
+            val xOffset = (1f - topWidthFactor) / 2f
+            moveTo(size.width * xOffset, 0f)
+            lineTo(size.width * (1f - xOffset), 0f) 
+            lineTo(size.width, size.height)
             lineTo(0f, size.height)
             close()
         }
@@ -550,11 +554,11 @@ fun PianoKeyNode(
 
     Box(
         modifier = Modifier
-            .size(width = 50.dp, height = 100.dp) // Taller for the "long" look
+            .size(width = 85.dp, height = 120.dp) // Optimized width for flush fitting
             .scale(scale * pressScale)
             .clip(keyShape)
             .background(color)
-            .border(1.dp, if (node.isFlashing || isPressed) Color.White else Color.Black.copy(alpha = 0.3f), keyShape)
+            .border(1.dp, if (node.isFlashing || isPressed) Color.White else Color.Black.copy(alpha = 0.15f), keyShape)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -565,11 +569,11 @@ fun PianoKeyNode(
         if (node.note != null) {
             Text(
                 text = node.note,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.Black.copy(alpha = 0.7f),
                 modifier = Modifier
-                    .offset(y = 20.dp) // Position text towards the wider end
+                    .offset(y = 30.dp) // Positioned for maximum visibility on the wedge
                     .graphicsLayer { rotationZ = -90f }
             )
         }
