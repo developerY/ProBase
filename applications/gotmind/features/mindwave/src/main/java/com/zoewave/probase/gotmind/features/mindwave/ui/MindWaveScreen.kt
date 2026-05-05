@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -208,7 +209,7 @@ fun MindWaveScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (uiState.mode == MindWaveMode.SYMPHONY || uiState.mode == MindWaveMode.HARMONIC_ARC || uiState.mode == MindWaveMode.HARMONIC_RING) {
+            if (uiState.mode == MindWaveMode.SYMPHONY || uiState.mode == MindWaveMode.HARMONIC_ARC) {
                 MusicalStaff(activeNodeId = uiState.activeNodeId)
                 Spacer(modifier = Modifier.height(12.dp))
                 if (uiState.currentSongTitle != null) {
@@ -239,14 +240,28 @@ fun MindWaveScreen(
 
             // Game Grid or Arc or Ring
             if (uiState.mode == MindWaveMode.HARMONIC_ARC || uiState.mode == MindWaveMode.HARMONIC_RING) {
+                val isFullCircle = uiState.mode == MindWaveMode.HARMONIC_RING
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp) 
+                        .height(if (isFullCircle) 450.dp else 300.dp) 
                         .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.BottomCenter
+                    contentAlignment = Alignment.Center
                 ) {
-                    val isFullCircle = uiState.mode == MindWaveMode.HARMONIC_RING
+                    if (isFullCircle) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            MusicalStaff(activeNodeId = uiState.activeNodeId)
+                            if (uiState.currentSongTitle != null) {
+                                Text(
+                                    text = uiState.currentSongTitle,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+
                     val sweepAngle = if (isFullCircle) 360f else 180f
                     val startAngle = if (isFullCircle) 270f else 180f // Start from top for circle
                     
@@ -254,13 +269,13 @@ fun MindWaveScreen(
                         val angle = startAngle - (index.toFloat() / uiState.grid.size * sweepAngle)
                         val angleRad = Math.toRadians(angle.toDouble())
                         
-                        val radiusPx = if (uiState.nodeShape == com.zoewave.probase.gotmind.model.NodeShape.PIANO_KEY) 180 else 150
+                        val radiusPx = if (uiState.nodeShape == com.zoewave.probase.gotmind.model.NodeShape.PIANO_KEY) 180 else 140
                         val x = (Math.cos(angleRad) * radiusPx).dp
                         val y = (Math.sin(angleRad) * -radiusPx).dp
                         
                         Box(
                             modifier = Modifier
-                                .offset(x = x, y = if (isFullCircle) y - 150.dp else y) // Shift circle up
+                                .offset(x = x, y = if (isFullCircle) y else y + 150.dp) // Align arc relative to center
                                 .graphicsLayer {
                                     if (uiState.nodeShape == com.zoewave.probase.gotmind.model.NodeShape.PIANO_KEY) {
                                         rotationZ = angle + 90f // Rotate key to face center
@@ -377,8 +392,8 @@ fun ConstellationPath(path: List<Int>, mode: MindWaveMode) {
         // Grid top offset
         val gridTopOffset = 360.dp.toPx()
         
-        // Arc/Ring top offset
-        val arcBaseY = if (mode == MindWaveMode.HARMONIC_RING) 500.dp.toPx() else 560.dp.toPx()
+        // Arc/Ring center offset
+        val centerY = 560.dp.toPx() // Estimated center for Arc/Ring
 
         val points = path.map { index ->
             if (mode == MindWaveMode.HARMONIC_ARC || mode == MindWaveMode.HARMONIC_RING) {
@@ -390,7 +405,7 @@ fun ConstellationPath(path: List<Int>, mode: MindWaveMode) {
                 val angleRad = Math.toRadians(angle.toDouble())
                 val radiusPx = 150.dp.toPx()
                 val x = (Math.cos(angleRad) * radiusPx) + (width / 2f)
-                val y = arcBaseY + (Math.sin(angleRad) * -radiusPx) - (if (isFullCircle) 150.dp.toPx() else 0f)
+                val y = centerY + (Math.sin(angleRad) * -radiusPx)
                 androidx.compose.ui.geometry.Offset(x.toFloat(), y.toFloat())
             } else {
                 val row = index / 4
@@ -588,13 +603,24 @@ fun PianoKeyNode(
         label = "Color"
     )
 
+    // Tapered "Long Triangle" shape
+    val keyShape = remember {
+        GenericShape { size, _ ->
+            moveTo(size.width * 0.35f, 0f) // Inner top (narrow)
+            lineTo(size.width * 0.65f, 0f) 
+            lineTo(size.width, size.height) // Outer bottom (wide)
+            lineTo(0f, size.height)
+            close()
+        }
+    }
+
     Box(
         modifier = Modifier
-            .size(width = 40.dp, height = 80.dp) // Piano key shape
+            .size(width = 50.dp, height = 100.dp) // Taller for the "long" look
             .scale(scale * pressScale)
-            .clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp, topStart = 2.dp, topEnd = 2.dp))
+            .clip(keyShape)
             .background(color)
-            .border(1.dp, if (node.isFlashing || isPressed) Color.White else Color.Black.copy(alpha = 0.2f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+            .border(1.dp, if (node.isFlashing || isPressed) Color.White else Color.Black.copy(alpha = 0.3f), keyShape)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -608,7 +634,9 @@ fun PianoKeyNode(
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.Black.copy(alpha = 0.7f),
-                modifier = Modifier.graphicsLayer { rotationZ = -90f } // Counter-rotate text to stay upright
+                modifier = Modifier
+                    .offset(y = 20.dp) // Position text towards the wider end
+                    .graphicsLayer { rotationZ = -90f }
             )
         }
     }
