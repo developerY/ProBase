@@ -6,6 +6,7 @@ import com.zoewave.probase.kocolor.db.entity.FashionProfileEntity
 import com.zoewave.probase.kocolor.db.entity.SavedSuggestionEntity
 import com.zoewave.probase.kocolor.model.FashionAdvice
 import com.zoewave.probase.kocolor.model.FashionProfile
+import com.zoewave.probase.kocolor.model.SavedAnalysis
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -46,9 +47,25 @@ class FashionRepository @Inject constructor(
         )
     }
 
-    fun getSavedSuggestions(): Flow<List<FashionAdvice>> {
+    fun getSavedSuggestions(): Flow<List<SavedAnalysis>> {
         return savedSuggestionDao.getAllSuggestions().map { list ->
-            list.map { it.advice }
+            list.map { 
+                SavedAnalysis(
+                    id = it.id,
+                    timestamp = it.timestamp,
+                    advice = it.advice
+                )
+            }
+        }
+    }
+
+    suspend fun getSuggestionById(id: Long): SavedAnalysis? {
+        return savedSuggestionDao.getSuggestionById(id)?.let {
+            SavedAnalysis(
+                id = it.id,
+                timestamp = it.timestamp,
+                advice = it.advice
+            )
         }
     }
 
