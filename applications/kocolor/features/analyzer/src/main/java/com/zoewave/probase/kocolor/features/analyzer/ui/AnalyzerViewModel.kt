@@ -125,13 +125,22 @@ class AnalyzerViewModel @Inject constructor(
 
     private fun saveAnalysis(advice: FashionAdvice) {
         viewModelScope.launch {
+            val faceUri = sessionRepository.faceUri.value
+            val clothesUri = sessionRepository.clothesUri.value
+            
+            val updatedAdvice = advice.copy(
+                faceUri = faceUri,
+                clothesUri = clothesUri
+            )
+
             val profile = FashionProfile(
-                seasonalType = advice.seasonalType,
-                undertone = advice.undertone,
-                notes = advice.summary,
-                recommendedPalette = advice.recommendedPalette
+                seasonalType = updatedAdvice.seasonalType,
+                undertone = updatedAdvice.undertone,
+                notes = updatedAdvice.summary,
+                recommendedPalette = updatedAdvice.recommendedPalette
             )
             fashionRepository.saveProfile(profile)
+            fashionRepository.saveSuggestion(updatedAdvice)
         }
     }
 
