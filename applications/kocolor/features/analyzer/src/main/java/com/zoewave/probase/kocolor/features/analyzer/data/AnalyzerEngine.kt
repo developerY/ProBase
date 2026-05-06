@@ -20,7 +20,7 @@ class AnalyzerEngine @Inject constructor() {
     suspend fun analyzeStyle(
         face: Bitmap?,
         hair: Bitmap?,
-        nail: Bitmap?,
+        shoes: Bitmap?,
         clothes: Bitmap?,
         apiKey: String,
         modelName: String = "gemini-1.5-flash"
@@ -36,27 +36,28 @@ class AnalyzerEngine @Inject constructor() {
         val prompt = content {
             face?.let { image(it) }
             hair?.let { image(it) }
-            nail?.let { image(it) }
+            shoes?.let { image(it) }
             clothes?.let { image(it) }
             
             text("""
-                You are a professional personal color analyst, hair stylist, and makeup artist. 
+                You are a professional personal color analyst and style consultant. 
                 I have provided up to 4 images:
                 1. Face selfie
                 2. Hair photo
-                3. Nail photo
+                3. Shoes photo
                 4. Clothing/Outfit photo
                 
                 GOAL:
-                Analyze the provided physical attributes (skin, hair, nails) and coordinate them with the clothing to recommend a complete, high-fidelity fashion and makeup plan.
+                Analyze the provided physical attributes (face, hair) and coordinate them with the outfit (clothes, shoes) to recommend a perfect makeup and nail polish palette.
                 
                 TASKS:
-                1. Identify the Seasonal Type (SPRING, SUMMER, AUTUMN, WINTER).
-                2. Identify the Undertone (WARM, COOL, NEUTRAL).
-                3. Analyze how the hair and nail colors (if provided) interact with the skin tone and outfit.
-                4. Provide a cohesive summary of the look and how to achieve perfect harmony.
+                1. Identify the Seasonal Type (SPRING, SUMMER, AUTUMN, WINTER) of the face.
+                2. Identify the Undertone (WARM, COOL, NEUTRAL) of the face.
+                3. Analyze how the hair and shoe colors (if provided) interact with the skin tone and clothing.
+                4. Provide a cohesive summary explaining the coordination strategy.
                 5. Give specific makeup suggestions (Foundation, Lip, Eye, Blush).
-                6. Recommend a makeup color palette (HEX codes) that ties everything together.
+                6. Give a specific recommendation for NAIL POLISH color and finish that ties the whole look together.
+                7. Recommend a makeup color palette (HEX codes).
                 
                 Respond ONLY with a valid JSON object matching this exact schema:
                 {

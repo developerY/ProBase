@@ -90,7 +90,7 @@ fun AnalyzerScreen(
                             when (target) {
                                 "face" -> onEvent(AnalyzerEvent.OnFaceCaptured(uri))
                                 "hair" -> onEvent(AnalyzerEvent.OnHairCaptured(uri))
-                                "nail" -> onEvent(AnalyzerEvent.OnNailCaptured(uri))
+                                "shoes" -> onEvent(AnalyzerEvent.OnShoesCaptured(uri))
                                 "clothes" -> onEvent(AnalyzerEvent.OnClothesCaptured(uri))
                             }
                         },
@@ -177,10 +177,10 @@ fun StyleCaptureState(
             }
             Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 StyleCaptureSlot(
-                    title = "Your Nails",
-                    uri = uiState.nailUri,
-                    onCamera = { onCaptureCamera("nail") },
-                    onGallery = { uri -> onPhotoPicked("nail", uri) },
+                    title = "Your Shoes",
+                    uri = uiState.shoesUri,
+                    onCamera = { onCaptureCamera("shoes") },
+                    onGallery = { uri -> onPhotoPicked("shoes", uri) },
                     modifier = Modifier.weight(1f)
                 )
                 StyleCaptureSlot(
@@ -195,7 +195,7 @@ fun StyleCaptureState(
 
         Button(
             onClick = onAnalyze,
-            enabled = uiState.faceUri != null || uiState.hairUri != null || uiState.nailUri != null || uiState.clothesUri != null,
+            enabled = uiState.faceUri != null || uiState.hairUri != null || uiState.shoesUri != null || uiState.clothesUri != null,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
@@ -319,7 +319,7 @@ fun AnalysisResultScreen(advice: FashionAdvice, onSave: () -> Unit, onReset: () 
             }
         }
         item {
-            Text("Recommended Makeup Palette", style = MaterialTheme.typography.titleMedium)
+            Text("Recommended Makeup & Nail Palette", style = MaterialTheme.typography.titleMedium)
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -335,7 +335,7 @@ fun AnalysisResultScreen(advice: FashionAdvice, onSave: () -> Unit, onReset: () 
             }
         }
         item {
-            Text("Makeup Suggestions", style = MaterialTheme.typography.titleMedium)
+            Text("Makeup & Nail Suggestions", style = MaterialTheme.typography.titleMedium)
         }
         items(advice.makeupSuggestions) { suggestion ->
             Card(modifier = Modifier.fillMaxWidth()) {
@@ -405,12 +405,12 @@ private fun AnalyzerScreenPreview_Success() {
             uiState = AnalyzerScreenUiState(
                 analyzerState = AnalyzerUiState.Success(
                     FashionAdvice(
-                        summary = "Holistic coordination with your outfit.",
+                        summary = "Holistic coordination with your outfit and shoes.",
                         seasonalType = SeasonalType.WINTER,
                         undertone = Undertone.COOL,
                         makeupSuggestions = listOf(
                             com.zoewave.probase.kocolor.model.MakeupSuggestion("Lip", "Berry red", listOf("#800020")),
-                            com.zoewave.probase.kocolor.model.MakeupSuggestion("Eye", "Silver shimmer", listOf("#C0C0C0"))
+                            com.zoewave.probase.kocolor.model.MakeupSuggestion("Nails", "Deep plum gloss", listOf("#4B0082"))
                         ),
                         outfitSuggestions = emptyList(),
                         recommendedPalette = listOf("#800020", "#C0C0C0", "#000080")

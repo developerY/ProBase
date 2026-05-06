@@ -29,14 +29,14 @@ data class AnalyzerScreenUiState(
     val analyzerState: AnalyzerUiState = AnalyzerUiState.Idle,
     val faceUri: String? = null,
     val hairUri: String? = null,
-    val nailUri: String? = null,
+    val shoesUri: String? = null,
     val clothesUri: String? = null
 )
 
 sealed class AnalyzerEvent {
     data class OnFaceCaptured(val uri: String) : AnalyzerEvent()
     data class OnHairCaptured(val uri: String) : AnalyzerEvent()
-    data class OnNailCaptured(val uri: String) : AnalyzerEvent()
+    data class OnShoesCaptured(val uri: String) : AnalyzerEvent()
     data class OnClothesCaptured(val uri: String) : AnalyzerEvent()
     data object OnAnalyzeClicked : AnalyzerEvent()
     data class OnSaveClicked(val advice: FashionAdvice) : AnalyzerEvent()
@@ -58,14 +58,14 @@ class AnalyzerViewModel @Inject constructor(
         _analyzerState,
         sessionRepository.faceUri,
         sessionRepository.hairUri,
-        sessionRepository.nailUri,
+        sessionRepository.shoesUri,
         sessionRepository.clothesUri
-    ) { analyzerState, faceUri, hairUri, nailUri, clothesUri ->
+    ) { analyzerState, faceUri, hairUri, shoesUri, clothesUri ->
         AnalyzerScreenUiState(
             analyzerState = analyzerState,
             faceUri = faceUri,
             hairUri = hairUri,
-            nailUri = nailUri,
+            shoesUri = shoesUri,
             clothesUri = clothesUri
         )
     }.stateIn(
@@ -82,8 +82,8 @@ class AnalyzerViewModel @Inject constructor(
             is AnalyzerEvent.OnHairCaptured -> {
                 sessionRepository.setHairUri(event.uri)
             }
-            is AnalyzerEvent.OnNailCaptured -> {
-                sessionRepository.setNailUri(event.uri)
+            is AnalyzerEvent.OnShoesCaptured -> {
+                sessionRepository.setShoesUri(event.uri)
             }
             is AnalyzerEvent.OnClothesCaptured -> {
                 sessionRepository.setClothesUri(event.uri)
@@ -105,15 +105,15 @@ class AnalyzerViewModel @Inject constructor(
         viewModelScope.launch {
             val fUri = uiState.value.faceUri
             val hUri = uiState.value.hairUri
-            val nUri = uiState.value.nailUri
+            val sUri = uiState.value.shoesUri
             val cUri = uiState.value.clothesUri
 
-            if (fUri == null && hUri == null && nUri == null && cUri == null) {
+            if (fUri == null && hUri == null && sUri == null && cUri == null) {
                 _analyzerState.value = AnalyzerUiState.Error("Please capture at least one image.")
                 return@launch
             }
 
-            _analyzerState.value = AnalyzerUiState.Loading(listOf("Initializing analysis..."))
+            _analyzerState.value = AnalyzerUiState.Loading(listOf("Initializing style analysis..."))
             
             val apiKey = aiSettings.isGeminiApiKeySetFlow.first().let { isSet ->
                 if (isSet) aiSettings.getGeminiApiKey() ?: "" else ""
@@ -129,13 +129,13 @@ class AnalyzerViewModel @Inject constructor(
             try {
                 val faceBitmap = fUri?.let { loadBitmapFromUri(Uri.parse(it)) }
                 val hairBitmap = hUri?.let { loadBitmapFromUri(Uri.parse(it)) }
-                val nailBitmap = nUri?.let { loadBitmapFromUri(Uri.parse(it)) }
+                val shoesBitmap = sUri?.let { loadBitmapFromUri(Uri.parse(it)) }
                 val clothesBitmap = cUri?.let { loadBitmapFromUri(Uri.parse(it)) }
 
                 val result = analyzerEngine.analyzeStyle(
                     face = faceBitmap,
                     hair = hairBitmap,
-                    nail = nailBitmap,
+                    shoes = shoesBitmap,
                     clothes = clothesBitmap,
                     apiKey = apiKey,
                     modelName = modelName
@@ -152,7 +152,7 @@ class AnalyzerViewModel @Inject constructor(
             val updatedAdvice = advice.copy(
                 faceUri = sessionRepository.faceUri.value,
                 hairUri = sessionRepository.hairUri.value,
-                nailUri = sessionRepository.nailUri.value,
+                shoesUri = sessionRepository.shoesUri.value,
                 clothesUri = sessionRepository.clothesUri.value
             )
 
