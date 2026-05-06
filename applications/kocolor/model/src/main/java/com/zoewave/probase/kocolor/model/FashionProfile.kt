@@ -18,7 +18,8 @@ data class FashionProfile(
     val skinToneHex: String? = null,
     val eyeColor: String? = null,
     val hairColor: String? = null,
-    val notes: String? = null
+    val notes: String? = null,
+    val recommendedPalette: List<String> = emptyList()
 )
 
 @Serializable
