@@ -9,6 +9,9 @@ interface SavedSuggestionDao {
     @Query("SELECT * FROM saved_suggestions ORDER BY timestamp DESC")
     fun getAllSuggestions(): Flow<List<SavedSuggestionEntity>>
 
+    @Query("SELECT * FROM saved_suggestions WHERE id = :id")
+    suspend fun getSuggestionById(id: Long): SavedSuggestionEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveSuggestion(suggestion: SavedSuggestionEntity)
 
