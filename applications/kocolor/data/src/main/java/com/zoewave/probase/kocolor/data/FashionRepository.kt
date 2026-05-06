@@ -24,7 +24,8 @@ class FashionRepository @Inject constructor(
                     skinToneHex = it.skinToneHex,
                     eyeColor = it.eyeColor,
                     hairColor = it.hairColor,
-                    notes = it.notes
+                    notes = it.notes,
+                    recommendedPalette = it.recommendedPalette
                 )
             }
         }
@@ -39,7 +40,8 @@ class FashionRepository @Inject constructor(
                 skinToneHex = profile.skinToneHex,
                 eyeColor = profile.eyeColor,
                 hairColor = profile.hairColor,
-                notes = profile.notes
+                notes = profile.notes,
+                recommendedPalette = profile.recommendedPalette
             )
         )
     }

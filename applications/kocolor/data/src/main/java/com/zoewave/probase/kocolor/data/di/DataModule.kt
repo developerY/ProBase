@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.data.di
 
 import com.zoewave.probase.kocolor.data.FashionRepository
+import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
 import com.zoewave.probase.kocolor.db.dao.SavedSuggestionDao
 import dagger.Module
@@ -20,5 +21,11 @@ object DataModule {
         savedSuggestionDao: SavedSuggestionDao
     ): FashionRepository {
         return FashionRepository(fashionProfileDao, savedSuggestionDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFashionSessionRepository(): FashionSessionRepository {
+        return FashionSessionRepository()
     }
 }
