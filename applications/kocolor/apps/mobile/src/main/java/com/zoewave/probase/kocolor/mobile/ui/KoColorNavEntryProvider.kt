@@ -24,6 +24,8 @@ fun koColorNavEntryProvider(
     onNavigateTo: (KoColorRoute) -> Unit,
     onBack: () -> Unit,
     onFaceCaptured: (String) -> Unit,
+    onHairCaptured: (String) -> Unit,
+    onNailCaptured: (String) -> Unit,
     onClothesCaptured: (String) -> Unit
 ): NavEntry<KoColorRoute> {
     return when (route) {
@@ -74,6 +76,8 @@ fun koColorNavEntryProvider(
                         val uri = result.substringAfter("result_ok:")
                         when (route.target) {
                             "face" -> onFaceCaptured(uri)
+                            "hair" -> onHairCaptured(uri)
+                            "nail" -> onNailCaptured(uri)
                             "clothes" -> onClothesCaptured(uri)
                         }
                         onBack()

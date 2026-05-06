@@ -55,6 +55,8 @@ data class FashionAdvice(
     val outfitSuggestions: List<OutfitSuggestion>,
     val recommendedPalette: List<String>,
     val faceUri: String? = null,
+    val hairUri: String? = null,
+    val nailUri: String? = null,
     val clothesUri: String? = null
 )
 

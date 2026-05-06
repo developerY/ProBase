@@ -28,11 +28,15 @@ sealed class AnalyzerUiState {
 data class AnalyzerScreenUiState(
     val analyzerState: AnalyzerUiState = AnalyzerUiState.Idle,
     val faceUri: String? = null,
+    val hairUri: String? = null,
+    val nailUri: String? = null,
     val clothesUri: String? = null
 )
 
 sealed class AnalyzerEvent {
     data class OnFaceCaptured(val uri: String) : AnalyzerEvent()
+    data class OnHairCaptured(val uri: String) : AnalyzerEvent()
+    data class OnNailCaptured(val uri: String) : AnalyzerEvent()
     data class OnClothesCaptured(val uri: String) : AnalyzerEvent()
     data object OnAnalyzeClicked : AnalyzerEvent()
     data class OnSaveClicked(val advice: FashionAdvice) : AnalyzerEvent()
@@ -53,11 +57,15 @@ class AnalyzerViewModel @Inject constructor(
     val uiState: StateFlow<AnalyzerScreenUiState> = combine(
         _analyzerState,
         sessionRepository.faceUri,
+        sessionRepository.hairUri,
+        sessionRepository.nailUri,
         sessionRepository.clothesUri
-    ) { analyzerState, faceUri, clothesUri ->
+    ) { analyzerState, faceUri, hairUri, nailUri, clothesUri ->
         AnalyzerScreenUiState(
             analyzerState = analyzerState,
             faceUri = faceUri,
+            hairUri = hairUri,
+            nailUri = nailUri,
             clothesUri = clothesUri
         )
     }.stateIn(
@@ -71,15 +79,17 @@ class AnalyzerViewModel @Inject constructor(
             is AnalyzerEvent.OnFaceCaptured -> {
                 sessionRepository.setFaceUri(event.uri)
             }
+            is AnalyzerEvent.OnHairCaptured -> {
+                sessionRepository.setHairUri(event.uri)
+            }
+            is AnalyzerEvent.OnNailCaptured -> {
+                sessionRepository.setNailUri(event.uri)
+            }
             is AnalyzerEvent.OnClothesCaptured -> {
                 sessionRepository.setClothesUri(event.uri)
             }
             is AnalyzerEvent.OnAnalyzeClicked -> {
-                val fUri = uiState.value.faceUri
-                val cUri = uiState.value.clothesUri
-                if (fUri != null && cUri != null) {
-                    analyzePhotos(fUri, cUri)
-                }
+                analyzePhotos()
             }
             is AnalyzerEvent.OnSaveClicked -> {
                 saveAnalysis(event.advice)
@@ -91,8 +101,18 @@ class AnalyzerViewModel @Inject constructor(
         }
     }
 
-    private fun analyzePhotos(faceUri: String, clothesUri: String) {
+    private fun analyzePhotos() {
         viewModelScope.launch {
+            val fUri = uiState.value.faceUri
+            val hUri = uiState.value.hairUri
+            val nUri = uiState.value.nailUri
+            val cUri = uiState.value.clothesUri
+
+            if (fUri == null && hUri == null && nUri == null && cUri == null) {
+                _analyzerState.value = AnalyzerUiState.Error("Please capture at least one image.")
+                return@launch
+            }
+
             _analyzerState.value = AnalyzerUiState.Loading(listOf("Initializing analysis..."))
             
             val apiKey = aiSettings.isGeminiApiKeySetFlow.first().let { isSet ->
@@ -107,15 +127,19 @@ class AnalyzerViewModel @Inject constructor(
             val modelName = aiSettings.aiModelFlow.first()
 
             try {
-                val faceBitmap = loadBitmapFromUri(Uri.parse(faceUri))
-                val clothesBitmap = loadBitmapFromUri(Uri.parse(clothesUri))
-                
-                if (faceBitmap == null || clothesBitmap == null) {
-                    _analyzerState.value = AnalyzerUiState.Error("Failed to load images.")
-                    return@launch
-                }
+                val faceBitmap = fUri?.let { loadBitmapFromUri(Uri.parse(it)) }
+                val hairBitmap = hUri?.let { loadBitmapFromUri(Uri.parse(it)) }
+                val nailBitmap = nUri?.let { loadBitmapFromUri(Uri.parse(it)) }
+                val clothesBitmap = cUri?.let { loadBitmapFromUri(Uri.parse(it)) }
 
-                val result = analyzerEngine.analyzeFaceAndClothes(faceBitmap, clothesBitmap, apiKey, modelName)
+                val result = analyzerEngine.analyzeStyle(
+                    face = faceBitmap,
+                    hair = hairBitmap,
+                    nail = nailBitmap,
+                    clothes = clothesBitmap,
+                    apiKey = apiKey,
+                    modelName = modelName
+                )
                 _analyzerState.value = AnalyzerUiState.Success(result)
             } catch (e: Exception) {
                 _analyzerState.value = AnalyzerUiState.Error("Analysis failed: ${e.localizedMessage}")
@@ -125,12 +149,11 @@ class AnalyzerViewModel @Inject constructor(
 
     private fun saveAnalysis(advice: FashionAdvice) {
         viewModelScope.launch {
-            val faceUri = sessionRepository.faceUri.value
-            val clothesUri = sessionRepository.clothesUri.value
-            
             val updatedAdvice = advice.copy(
-                faceUri = faceUri,
-                clothesUri = clothesUri
+                faceUri = sessionRepository.faceUri.value,
+                hairUri = sessionRepository.hairUri.value,
+                nailUri = sessionRepository.nailUri.value,
+                clothesUri = sessionRepository.clothesUri.value
             )
 
             val profile = FashionProfile(
