@@ -15,8 +15,8 @@ class FashionSessionRepository @Inject constructor() {
     private val _hairUri = MutableStateFlow<String?>(null)
     val hairUri: StateFlow<String?> = _hairUri.asStateFlow()
 
-    private val _nailUri = MutableStateFlow<String?>(null)
-    val nailUri: StateFlow<String?> = _nailUri.asStateFlow()
+    private val _shoesUri = MutableStateFlow<String?>(null)
+    val shoesUri: StateFlow<String?> = _shoesUri.asStateFlow()
 
     private val _clothesUri = MutableStateFlow<String?>(null)
     val clothesUri: StateFlow<String?> = _clothesUri.asStateFlow()
@@ -31,9 +31,9 @@ class FashionSessionRepository @Inject constructor() {
         _hairUri.value = uri
     }
 
-    fun setNailUri(uri: String?) {
-        Log.d("KoColorSession", "Setting Nail URI: $uri")
-        _nailUri.value = uri
+    fun setShoesUri(uri: String?) {
+        Log.d("KoColorSession", "Setting Shoes URI: $uri")
+        _shoesUri.value = uri
     }
 
     fun setClothesUri(uri: String?) {
@@ -45,7 +45,7 @@ class FashionSessionRepository @Inject constructor() {
         Log.d("KoColorSession", "Resetting session")
         _faceUri.value = null
         _hairUri.value = null
-        _nailUri.value = null
+        _shoesUri.value = null
         _clothesUri.value = null
     }
 }
