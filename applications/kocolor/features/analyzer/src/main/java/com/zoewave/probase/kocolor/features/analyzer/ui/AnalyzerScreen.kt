@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.features.analyzer.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -31,7 +32,7 @@ import com.zoewave.probase.kocolor.model.Undertone
 @Composable
 fun AnalyzerUiRoute(
     onBack: () -> Unit,
-    onNavigateToCamera: () -> Unit,
+    onNavigateToCamera: (target: String) -> Unit,
     onAnalysisSaved: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AnalyzerViewModel = hiltViewModel()
@@ -44,7 +45,7 @@ fun AnalyzerUiRoute(
         navTo = { route ->
             when (route) {
                 null -> onBack()
-                is KoColorRoute.Camera -> onNavigateToCamera()
+                is KoColorRoute.Camera -> onNavigateToCamera(route.target)
                 else -> { /* Handle other routes if needed */ }
             }
         },
@@ -78,15 +79,13 @@ fun AnalyzerScreen(
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (val state = uiState.analyzerState) {
                 is AnalyzerUiState.Idle -> {
-                    if (uiState.capturedUri == null) {
-                        EmptyAnalyzerState(onStartCamera = { navTo(KoColorRoute.Camera("analyzer")) })
-                    } else {
-                        ReadyToAnalyzeState(
-                            uri = uiState.capturedUri,
-                            onAnalyze = { onEvent(AnalyzerEvent.OnAnalyzeClicked) },
-                            onRetake = { navTo(KoColorRoute.Camera("analyzer")) }
-                        )
-                    }
+                    DualCaptureState(
+                        faceUri = uiState.faceUri,
+                        clothesUri = uiState.clothesUri,
+                        onCaptureFace = { navTo(KoColorRoute.Camera("face")) },
+                        onCaptureClothes = { navTo(KoColorRoute.Camera("clothes")) },
+                        onAnalyze = { onEvent(AnalyzerEvent.OnAnalyzeClicked) }
+                    )
                 }
                 is AnalyzerUiState.Loading -> {
                     Column(
@@ -127,54 +126,105 @@ fun AnalyzerScreen(
 }
 
 @Composable
-fun EmptyAnalyzerState(onStartCamera: () -> Unit) {
+fun DualCaptureState(
+    faceUri: String?,
+    clothesUri: String?,
+    onCaptureFace: () -> Unit,
+    onCaptureClothes: () -> Unit,
+    onAnalyze: () -> Unit
+) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Icon(
-            imageVector = Icons.Default.CameraAlt,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
         Text(
-            "Take a selfie to find your seasonal color",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 16.dp)
+            "Capture your face and outfit for a coordinated palette",
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
-        Button(onClick = onStartCamera, modifier = Modifier.padding(top = 24.dp)) {
-            Text("Open Camera")
+
+        Row(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            CaptureSlot(
+                title = "Your Face",
+                uri = faceUri,
+                onClick = onCaptureFace,
+                modifier = Modifier.weight(1f)
+            )
+            CaptureSlot(
+                title = "Your Clothes",
+                uri = clothesUri,
+                onClick = onCaptureClothes,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Button(
+            onClick = onAnalyze,
+            enabled = faceUri != null && clothesUri != null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            Icon(Icons.Default.AutoAwesome, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Analyze Coordination")
         }
     }
 }
 
 @Composable
-fun ReadyToAnalyzeState(uri: String, onAnalyze: () -> Unit, onRetake: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+fun CaptureSlot(
+    title: String,
+    uri: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxHeight()
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = if (uri == null) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
+        )
     ) {
-        Card(modifier = Modifier.weight(1f).fillMaxWidth()) {
-            AsyncImage(
-                model = uri,
-                contentDescription = "Captured Selfie",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            OutlinedButton(onClick = onRetake, modifier = Modifier.weight(1f)) {
-                Text("Retake")
-            }
-            Button(onClick = onAnalyze, modifier = Modifier.weight(1f)) {
-                Icon(Icons.Default.AutoAwesome, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Analyze")
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            if (uri != null) {
+                AsyncImage(
+                    model = uri,
+                    contentDescription = title,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                // Overlay title
+                Surface(
+                    color = Color.Black.copy(alpha = 0.5f),
+                    modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                ) {
+                    Text(
+                        text = title,
+                        color = Color.White,
+                        modifier = Modifier.padding(4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
+            } else {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        imageVector = Icons.Default.CameraAlt,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(title, style = MaterialTheme.typography.labelLarge)
+                }
             }
         }
     }
@@ -188,7 +238,7 @@ fun AnalysisResultScreen(advice: FashionAdvice, onSave: () -> Unit, onReset: () 
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text("Analysis Result", style = MaterialTheme.typography.headlineSmall)
+            Text("Coordination Result", style = MaterialTheme.typography.headlineSmall)
         }
         item {
             Card(
@@ -204,7 +254,7 @@ fun AnalysisResultScreen(advice: FashionAdvice, onSave: () -> Unit, onReset: () 
             }
         }
         item {
-            Text("Recommended Palette", style = MaterialTheme.typography.titleMedium)
+            Text("Recommended Makeup Palette", style = MaterialTheme.typography.titleMedium)
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -271,10 +321,10 @@ private fun AnalyzerScreenPreview_Idle() {
 
 @Preview(showBackground = true)
 @Composable
-private fun AnalyzerScreenPreview_Loading() {
+private fun AnalyzerScreenPreview_Partial() {
     MaterialTheme {
         AnalyzerScreen(
-            uiState = AnalyzerScreenUiState(analyzerState = AnalyzerUiState.Loading()),
+            uiState = AnalyzerScreenUiState(faceUri = "content://dummy"),
             onEvent = {},
             navTo = {},
             onAnalysisSaved = {}
@@ -290,12 +340,15 @@ private fun AnalyzerScreenPreview_Success() {
             uiState = AnalyzerScreenUiState(
                 analyzerState = AnalyzerUiState.Success(
                     FashionAdvice(
-                        summary = "You have a vibrant winter look.",
+                        summary = "This deep burgundy top coordinates perfectly with a winter palette. Use a cool-toned foundation and a bold berry lip.",
                         seasonalType = SeasonalType.WINTER,
                         undertone = Undertone.COOL,
-                        makeupSuggestions = emptyList(),
+                        makeupSuggestions = listOf(
+                            com.zoewave.probase.kocolor.model.MakeupSuggestion("Lip", "Berry red", listOf("#800020")),
+                            com.zoewave.probase.kocolor.model.MakeupSuggestion("Eye", "Silver shimmer", listOf("#C0C0C0"))
+                        ),
                         outfitSuggestions = emptyList(),
-                        recommendedPalette = listOf("#FF0000", "#00FF00", "#0000FF")
+                        recommendedPalette = listOf("#800020", "#C0C0C0", "#000080")
                     )
                 )
             ),

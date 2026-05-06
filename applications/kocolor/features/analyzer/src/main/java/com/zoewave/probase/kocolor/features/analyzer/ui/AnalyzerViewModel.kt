@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import com.zoewave.probase.kocolor.data.FashionRepository
+import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.kocolor.model.FashionAdvice
 import com.zoewave.probase.kocolor.model.FashionProfile
@@ -43,17 +44,16 @@ class AnalyzerViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val analyzerEngine: AnalyzerEngine,
     private val fashionRepository: FashionRepository,
-    private val aiSettings: AiConfigurationSettings
+    private val aiSettings: AiConfigurationSettings,
+    private val sessionRepository: FashionSessionRepository
 ) : ViewModel() {
 
     private val _analyzerState = MutableStateFlow<AnalyzerUiState>(AnalyzerUiState.Idle)
-    private val _faceUri = MutableStateFlow<String?>(null)
-    private val _clothesUri = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<AnalyzerScreenUiState> = combine(
         _analyzerState,
-        _faceUri,
-        _clothesUri
+        sessionRepository.faceUri,
+        sessionRepository.clothesUri
     ) { analyzerState, faceUri, clothesUri ->
         AnalyzerScreenUiState(
             analyzerState = analyzerState,
@@ -69,14 +69,14 @@ class AnalyzerViewModel @Inject constructor(
     fun onEvent(event: AnalyzerEvent) {
         when (event) {
             is AnalyzerEvent.OnFaceCaptured -> {
-                _faceUri.value = event.uri
+                sessionRepository.setFaceUri(event.uri)
             }
             is AnalyzerEvent.OnClothesCaptured -> {
-                _clothesUri.value = event.uri
+                sessionRepository.setClothesUri(event.uri)
             }
             is AnalyzerEvent.OnAnalyzeClicked -> {
-                val fUri = _faceUri.value
-                val cUri = _clothesUri.value
+                val fUri = uiState.value.faceUri
+                val cUri = uiState.value.clothesUri
                 if (fUri != null && cUri != null) {
                     analyzePhotos(fUri, cUri)
                 }
@@ -86,8 +86,7 @@ class AnalyzerViewModel @Inject constructor(
             }
             is AnalyzerEvent.OnResetClicked -> {
                 _analyzerState.value = AnalyzerUiState.Idle
-                _faceUri.value = null
-                _clothesUri.value = null
+                sessionRepository.reset()
             }
         }
     }
@@ -129,7 +128,8 @@ class AnalyzerViewModel @Inject constructor(
             val profile = FashionProfile(
                 seasonalType = advice.seasonalType,
                 undertone = advice.undertone,
-                notes = advice.summary
+                notes = advice.summary,
+                recommendedPalette = advice.recommendedPalette
             )
             fashionRepository.saveProfile(profile)
         }
