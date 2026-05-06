@@ -18,7 +18,8 @@ data class FashionProfile(
     val skinToneHex: String? = null,
     val eyeColor: String? = null,
     val hairColor: String? = null,
-    val notes: String? = null
+    val notes: String? = null,
+    val recommendedPalette: List<String> = emptyList()
 )
 
 @Serializable
@@ -52,5 +53,14 @@ data class FashionAdvice(
     val undertone: Undertone,
     val makeupSuggestions: List<MakeupSuggestion>,
     val outfitSuggestions: List<OutfitSuggestion>,
-    val recommendedPalette: List<String>
+    val recommendedPalette: List<String>,
+    val faceUri: String? = null,
+    val clothesUri: String? = null
+)
+
+@Serializable
+data class SavedAnalysis(
+    val id: Long,
+    val timestamp: Long,
+    val advice: FashionAdvice
 )

@@ -17,8 +17,9 @@ class AnalyzerEngine @Inject constructor() {
         coerceInputValues = true
     }
 
-    suspend fun analyzeSelfie(
-        bitmap: Bitmap,
+    suspend fun analyzeFaceAndClothes(
+        faceBitmap: Bitmap,
+        clothesBitmap: Bitmap,
         apiKey: String,
         modelName: String = "gemini-1.5-flash"
     ): FashionAdvice {
@@ -31,18 +32,22 @@ class AnalyzerEngine @Inject constructor() {
         )
 
         val prompt = content {
-            image(bitmap)
+            image(faceBitmap)
+            image(clothesBitmap)
             text("""
-                You are a professional personal color analyst and fashion consultant. 
-                Analyze this photo of a person's face to determine their seasonal color type and skin undertone.
+                You are a professional personal color analyst and makeup artist. 
+                I have provided two images:
+                1. A photo of a person's face.
+                2. A photo of an outfit or clothing item they plan to wear.
                 
                 GOAL:
-                1. Identify the Seasonal Type (SPRING, SUMMER, AUTUMN, WINTER).
-                2. Identify the Undertone (WARM, COOL, NEUTRAL).
-                3. Provide a summary of the analysis.
-                4. Give specific makeup suggestions (Foundation, Lip, Eye).
-                5. Give outfit suggestions for different occasions.
-                6. Recommend a color palette (HEX codes).
+                Analyze the skin undertone and seasonal color of the face, and coordinate it with the colors in the clothing to recommend the PERFECT makeup color palette for this specific look.
+                
+                1. Identify the Seasonal Type (SPRING, SUMMER, AUTUMN, WINTER) of the face.
+                2. Identify the Undertone (WARM, COOL, NEUTRAL) of the face.
+                3. Provide a summary explaining how the recommended makeup coordinates the face with the clothes.
+                4. Give specific makeup suggestions (Foundation, Lip, Eye, Blush).
+                5. Recommend a color palette (HEX codes) for the makeup and overall coordination.
                 
                 Respond ONLY with a valid JSON object matching this exact schema:
                 {
@@ -53,7 +58,7 @@ class AnalyzerEngine @Inject constructor() {
                     { "category": "string", "advice": "string", "recommendedColors": ["string"] }
                   ],
                   "outfitSuggestions": [
-                    { "occasion": "string", "advice": "string", "keyPieces": ["string"], "colorCombinations": ["string"] }
+                    { "occasion": "Coordinated Look", "advice": "string", "keyPieces": ["string"], "colorCombinations": ["string"] }
                   ],
                   "recommendedPalette": ["#HEX", "#HEX", ...]
                 }

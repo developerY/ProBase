@@ -13,5 +13,6 @@ data class FashionProfileEntity(
     val skinToneHex: String?,
     val eyeColor: String?,
     val hairColor: String?,
-    val notes: String?
+    val notes: String?,
+    val recommendedPalette: List<String>
 )

@@ -2,24 +2,29 @@ package com.zoewave.probase.kocolor.mobile.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
-import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerEvent
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
-import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerViewModel
+import com.zoewave.probase.kocolor.features.color.ui.ColorDetailScreen
 import com.zoewave.probase.kocolor.features.color.ui.ColorUiRoute
+import com.zoewave.probase.kocolor.features.color.ui.ColorViewModel
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.components.SettingsUiRoute
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import com.zoewave.probase.kocolor.model.SavedAnalysis
 
 fun koColorNavEntryProvider(
     route: KoColorRoute,
     windowSizeClass: WindowSizeClass,
     onNavigateTo: (KoColorRoute) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onFaceCaptured: (String) -> Unit,
+    onClothesCaptured: (String) -> Unit
 ): NavEntry<KoColorRoute> {
     return when (route) {
         is KoColorRoute.Home -> NavEntry(route) {
@@ -31,14 +36,26 @@ fun koColorNavEntryProvider(
         is KoColorRoute.Analyzer -> NavEntry(route) {
             AnalyzerUiRoute(
                 onBack = onBack,
-                onNavigateToCamera = { onNavigateTo(KoColorRoute.Camera("analyzer")) },
+                onNavigateToCamera = { target -> onNavigateTo(KoColorRoute.Camera(target)) },
                 onAnalysisSaved = onBack
             )
         }
         is KoColorRoute.Color -> NavEntry(route) {
             ColorUiRoute(
-                windowSizeClass = windowSizeClass
+                windowSizeClass = windowSizeClass,
+                navTo = onNavigateTo
             )
+        }
+        is KoColorRoute.ColorDetail -> NavEntry(route) {
+            val colorViewModel: ColorViewModel = hiltViewModel()
+            val uiState by colorViewModel.uiState.collectAsStateWithLifecycle()
+            val analysis = uiState.savedSuggestions.find { it.id == route.suggestionId }
+            if (analysis != null) {
+                ColorDetailScreen(
+                    analysis = analysis,
+                    onBack = onBack
+                )
+            }
         }
         is KoColorRoute.Suggestions -> NavEntry(route) {
             SuggestionsUiRoute(
@@ -51,12 +68,14 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.Camera -> NavEntry(route) {
-            val analyzerViewModel: AnalyzerViewModel = hiltViewModel()
             CameraUIRoute(
                 navTo = { result ->
                     if (result.startsWith("result_ok:")) {
                         val uri = result.substringAfter("result_ok:")
-                        analyzerViewModel.onEvent(AnalyzerEvent.OnPhotoCaptured(uri))
+                        when (route.target) {
+                            "face" -> onFaceCaptured(uri)
+                            "clothes" -> onClothesCaptured(uri)
+                        }
                         onBack()
                     } else {
                         onBack()

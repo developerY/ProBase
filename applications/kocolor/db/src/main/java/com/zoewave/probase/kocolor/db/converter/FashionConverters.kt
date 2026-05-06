@@ -28,4 +28,10 @@ class FashionConverters {
 
     @TypeConverter
     fun toUndertone(value: String): Undertone = try { Undertone.valueOf(value) } catch (e: Exception) { Undertone.UNKNOWN }
+
+    @TypeConverter
+    fun fromStringList(value: List<String>): String = json.encodeToString(value)
+
+    @TypeConverter
+    fun toStringList(value: String): List<String> = try { json.decodeFromString<List<String>>(value) } catch (e: Exception) { emptyList() }
 }
