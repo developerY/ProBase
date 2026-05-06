@@ -53,5 +53,14 @@ data class FashionAdvice(
     val undertone: Undertone,
     val makeupSuggestions: List<MakeupSuggestion>,
     val outfitSuggestions: List<OutfitSuggestion>,
-    val recommendedPalette: List<String>
+    val recommendedPalette: List<String>,
+    val faceUri: String? = null,
+    val clothesUri: String? = null
+)
+
+@Serializable
+data class SavedAnalysis(
+    val id: Long,
+    val timestamp: Long,
+    val advice: FashionAdvice
 )
