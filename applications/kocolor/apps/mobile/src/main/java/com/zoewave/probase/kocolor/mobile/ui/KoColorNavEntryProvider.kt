@@ -3,12 +3,9 @@ package com.zoewave.probase.kocolor.mobile.ui
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
-import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerEvent
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
-import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerViewModel
 import com.zoewave.probase.kocolor.features.color.ui.ColorUiRoute
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
@@ -19,7 +16,9 @@ fun koColorNavEntryProvider(
     route: KoColorRoute,
     windowSizeClass: WindowSizeClass,
     onNavigateTo: (KoColorRoute) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onFaceCaptured: (String) -> Unit,
+    onClothesCaptured: (String) -> Unit
 ): NavEntry<KoColorRoute> {
     return when (route) {
         is KoColorRoute.Home -> NavEntry(route) {
@@ -51,12 +50,14 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.Camera -> NavEntry(route) {
-            val analyzerViewModel: AnalyzerViewModel = hiltViewModel()
             CameraUIRoute(
                 navTo = { result ->
                     if (result.startsWith("result_ok:")) {
                         val uri = result.substringAfter("result_ok:")
-                        analyzerViewModel.onEvent(AnalyzerEvent.OnPhotoCaptured(uri))
+                        when (route.target) {
+                            "face" -> onFaceCaptured(uri)
+                            "clothes" -> onClothesCaptured(uri)
+                        }
                         onBack()
                     } else {
                         onBack()

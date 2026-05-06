@@ -72,7 +72,9 @@ fun KoColorMainScreen(
                         },
                         onBack = {
                             viewModel.navigateBack()
-                        }
+                        },
+                        onFaceCaptured = viewModel::onFaceCaptured,
+                        onClothesCaptured = viewModel::onClothesCaptured
                     )
                 }
             )

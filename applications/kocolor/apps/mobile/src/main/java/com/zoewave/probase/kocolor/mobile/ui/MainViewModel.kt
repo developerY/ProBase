@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.mobile.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.topLevelRoutes
@@ -20,7 +21,8 @@ data class MainUiState(
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val settings: KoColorSettings
+    private val settings: KoColorSettings,
+    private val sessionRepository: FashionSessionRepository
 ) : ViewModel() {
 
     private val _backStack = MutableStateFlow<PersistentList<KoColorRoute>>(persistentListOf(KoColorRoute.Home))
@@ -59,5 +61,13 @@ class MainViewModel @Inject constructor(
         if (_backStack.value.size > 1) {
             _backStack.value = _backStack.value.removeAt(_backStack.value.size - 1)
         }
+    }
+
+    fun onFaceCaptured(uri: String) {
+        sessionRepository.setFaceUri(uri)
+    }
+
+    fun onClothesCaptured(uri: String) {
+        sessionRepository.setClothesUri(uri)
     }
 }
