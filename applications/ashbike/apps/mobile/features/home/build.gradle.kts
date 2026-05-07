@@ -44,7 +44,6 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.material3) // If using M3 components alongside Glimmer
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
 
     // --- 5. Hilt ---
     implementation(libs.hilt.android)
@@ -60,9 +59,6 @@ dependencies {
     // Permissions
     implementation(libs.google.accompanist.permissions)
 
-    // --- UI Components ---
-    // ✅ Icons for the dashboard
-    implementation(libs.androidx.compose.material.icons.extended)
 
     // --- Collections ---
     implementation(libs.kotlinx.collections.immutable)
