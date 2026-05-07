@@ -10,6 +10,10 @@ enum class Undertone {
     WARM, COOL, NEUTRAL, UNKNOWN
 }
 
+enum class InventoryItemType {
+    FACE, HAIR, SHOES, CLOTHES
+}
+
 @Serializable
 data class FashionProfile(
     val id: String = "default",
@@ -55,6 +59,8 @@ data class FashionAdvice(
     val outfitSuggestions: List<OutfitSuggestion>,
     val recommendedPalette: List<String>,
     val faceUri: String? = null,
+    val hairUri: String? = null,
+    val shoesUri: String? = null,
     val clothesUri: String? = null
 )
 
@@ -63,4 +69,35 @@ data class SavedAnalysis(
     val id: Long,
     val timestamp: Long,
     val advice: FashionAdvice
+)
+
+@Serializable
+data class InventoryItem(
+    val id: Long = 0,
+    val type: InventoryItemType,
+    val uri: String,
+    val clippedUri: String? = null,
+    val timestamp: Long,
+    val metadata: InventoryMetadata? = null
+)
+
+@Serializable
+data class InventoryMetadata(
+    // Common
+    val colorHex: String? = null,
+    val material: String? = null,
+    val style: String? = null,
+    
+    // Face specific
+    val skinToneHex: String? = null,
+    val eyeColor: String? = null,
+    val hairColor: String? = null,
+    
+    // Garment specific
+    val silhouette: String? = null,
+    val category: String? = null,
+    
+    // Footwear specific
+    val heelHeight: String? = null,
+    val toeShape: String? = null
 )

@@ -1,10 +1,11 @@
 package com.zoewave.probase.kocolor.db.converter
 
 import androidx.room3.TypeConverter
+import com.zoewave.probase.kocolor.db.entity.InventoryType
 import com.zoewave.probase.kocolor.model.FashionAdvice
+import com.zoewave.probase.kocolor.model.InventoryMetadata
 import com.zoewave.probase.kocolor.model.SeasonalType
 import com.zoewave.probase.kocolor.model.Undertone
-import kotlinx.datetime.Instant
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -18,6 +19,12 @@ class FashionConverters {
     fun toFashionAdvice(value: String): FashionAdvice = json.decodeFromString<FashionAdvice>(value)
 
     @TypeConverter
+    fun fromInventoryMetadata(value: InventoryMetadata?): String? = value?.let { json.encodeToString(it) }
+
+    @TypeConverter
+    fun toInventoryMetadata(value: String?): InventoryMetadata? = value?.let { json.decodeFromString<InventoryMetadata>(it) }
+
+    @TypeConverter
     fun fromSeasonalType(value: SeasonalType): String = value.name
 
     @TypeConverter
@@ -28,6 +35,12 @@ class FashionConverters {
 
     @TypeConverter
     fun toUndertone(value: String): Undertone = try { Undertone.valueOf(value) } catch (e: Exception) { Undertone.UNKNOWN }
+
+    @TypeConverter
+    fun fromInventoryType(value: InventoryType): String = value.name
+
+    @TypeConverter
+    fun toInventoryType(value: String): InventoryType = try { InventoryType.valueOf(value) } catch (e: Exception) { InventoryType.CLOTHES }
 
     @TypeConverter
     fun fromStringList(value: List<String>): String = json.encodeToString(value)

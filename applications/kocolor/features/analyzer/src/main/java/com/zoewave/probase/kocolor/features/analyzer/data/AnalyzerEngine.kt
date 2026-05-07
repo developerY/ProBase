@@ -17,9 +17,12 @@ class AnalyzerEngine @Inject constructor() {
         coerceInputValues = true
     }
 
-    suspend fun analyzeFaceAndClothes(
-        faceBitmap: Bitmap,
-        clothesBitmap: Bitmap,
+    suspend fun analyzeStyle(
+        face: Bitmap?,
+        hair: Bitmap?,
+        shoes: Bitmap?,
+        clothes: Bitmap?,
+        occasion: String,
         apiKey: String,
         modelName: String = "gemini-1.5-flash"
     ): FashionAdvice {
@@ -32,22 +35,38 @@ class AnalyzerEngine @Inject constructor() {
         )
 
         val prompt = content {
-            image(faceBitmap)
-            image(clothesBitmap)
+            face?.let { image(it) }
+            hair?.let { image(it) }
+            shoes?.let { image(it) }
+            clothes?.let { image(it) }
+            
             text("""
-                You are a professional personal color analyst and makeup artist. 
-                I have provided two images:
-                1. A photo of a person's face.
-                2. A photo of an outfit or clothing item they plan to wear.
+                You are a professional personal color analyst and style consultant. 
+                The user is preparing for a specific occasion: $occasion.
+                
+                I have provided up to 4 images:
+                1. Face selfie
+                2. Hair photo
+                3. Shoes photo
+                4. Clothing/Outfit photo
                 
                 GOAL:
-                Analyze the skin undertone and seasonal color of the face, and coordinate it with the colors in the clothing to recommend the PERFECT makeup color palette for this specific look.
+                Analyze the provided physical attributes (face, hair) and coordinate them with the outfit (clothes, shoes) to recommend a perfect makeup and nail polish palette TAILORED for the occasion: $occasion.
                 
+                OCCASION GUIDANCE:
+                - If "Work": Lean toward sophisticated, professional neutrals and polished finishes.
+                - If "Date Night": Tilt toward romantic, bold, or glamorous shades with alluring finishes.
+                - If "Outdoor/Sport": Focus on fresh, natural, and durable looks.
+                - If "Formal": Aim for high-fidelity elegance, classic harmonies, and refined palettes.
+                
+                TASKS:
                 1. Identify the Seasonal Type (SPRING, SUMMER, AUTUMN, WINTER) of the face.
                 2. Identify the Undertone (WARM, COOL, NEUTRAL) of the face.
-                3. Provide a summary explaining how the recommended makeup coordinates the face with the clothes.
-                4. Give specific makeup suggestions (Foundation, Lip, Eye, Blush).
-                5. Recommend a color palette (HEX codes) for the makeup and overall coordination.
+                3. Analyze how the hair and shoe colors (if provided) interact with the skin tone and clothing.
+                4. Provide a cohesive summary explaining the coordination strategy for the $occasion.
+                5. Give specific makeup suggestions (Foundation, Lip, Eye, Blush) appropriate for $occasion.
+                6. Give a specific recommendation for NAIL POLISH color and finish that ties the whole look together for $occasion.
+                7. Recommend a makeup color palette (HEX codes).
                 
                 Respond ONLY with a valid JSON object matching this exact schema:
                 {
@@ -58,7 +77,7 @@ class AnalyzerEngine @Inject constructor() {
                     { "category": "string", "advice": "string", "recommendedColors": ["string"] }
                   ],
                   "outfitSuggestions": [
-                    { "occasion": "Coordinated Look", "advice": "string", "keyPieces": ["string"], "colorCombinations": ["string"] }
+                    { "occasion": "$occasion", "advice": "string", "keyPieces": ["string"], "colorCombinations": ["string"] }
                   ],
                   "recommendedPalette": ["#HEX", "#HEX", ...]
                 }

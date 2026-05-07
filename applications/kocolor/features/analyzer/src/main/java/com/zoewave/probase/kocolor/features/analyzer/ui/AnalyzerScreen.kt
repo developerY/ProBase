@@ -1,19 +1,25 @@
 package com.zoewave.probase.kocolor.features.analyzer.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,11 +85,18 @@ fun AnalyzerScreen(
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (val state = uiState.analyzerState) {
                 is AnalyzerUiState.Idle -> {
-                    DualCaptureState(
-                        faceUri = uiState.faceUri,
-                        clothesUri = uiState.clothesUri,
-                        onCaptureFace = { navTo(KoColorRoute.Camera("face")) },
-                        onCaptureClothes = { navTo(KoColorRoute.Camera("clothes")) },
+                    StyleCaptureState(
+                        uiState = uiState,
+                        onEvent = onEvent,
+                        onCaptureCamera = { target -> navTo(KoColorRoute.Camera(target)) },
+                        onPhotoPicked = { target, uri ->
+                            when (target) {
+                                "face" -> onEvent(AnalyzerEvent.OnFaceCaptured(uri))
+                                "hair" -> onEvent(AnalyzerEvent.OnHairCaptured(uri))
+                                "shoes" -> onEvent(AnalyzerEvent.OnShoesCaptured(uri))
+                                "clothes" -> onEvent(AnalyzerEvent.OnClothesCaptured(uri))
+                            }
+                        },
                         onAnalyze = { onEvent(AnalyzerEvent.OnAnalyzeClicked) }
                     )
                 }
@@ -105,7 +118,8 @@ fun AnalyzerScreen(
                             onEvent(AnalyzerEvent.OnSaveClicked(state.advice))
                             onAnalysisSaved()
                         },
-                        onReset = { onEvent(AnalyzerEvent.OnResetClicked) }
+                        onReset = { onEvent(AnalyzerEvent.OnResetClicked) },
+                        navTo = navTo
                     )
                 }
                 is AnalyzerUiState.Error -> {
@@ -126,69 +140,130 @@ fun AnalyzerScreen(
 }
 
 @Composable
-fun DualCaptureState(
-    faceUri: String?,
-    clothesUri: String?,
-    onCaptureFace: () -> Unit,
-    onCaptureClothes: () -> Unit,
+fun StyleCaptureState(
+    uiState: AnalyzerScreenUiState,
+    onEvent: (AnalyzerEvent) -> Unit,
+    onCaptureCamera: (String) -> Unit,
+    onPhotoPicked: (String, String) -> Unit,
     onAnalyze: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            "Capture your face and outfit for a coordinated palette",
+            "Capture up to 4 images for a holistic style analysis",
             style = MaterialTheme.typography.titleMedium,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
 
-        Row(
-            modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        Column(
+            modifier = Modifier.height(400.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            CaptureSlot(
-                title = "Your Face",
-                uri = faceUri,
-                onClick = onCaptureFace,
-                modifier = Modifier.weight(1f)
-            )
-            CaptureSlot(
-                title = "Your Clothes",
-                uri = clothesUri,
-                onClick = onCaptureClothes,
-                modifier = Modifier.weight(1f)
-            )
+            Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                StyleCaptureSlot(
+                    title = "Your Face",
+                    uri = uiState.faceUri,
+                    onCamera = { onCaptureCamera("face") },
+                    onGallery = { uri -> onPhotoPicked("face", uri) },
+                    modifier = Modifier.weight(1f)
+                )
+                StyleCaptureSlot(
+                    title = "Your Hair",
+                    uri = uiState.hairUri,
+                    onCamera = { onCaptureCamera("hair") },
+                    onGallery = { uri -> onPhotoPicked("hair", uri) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                StyleCaptureSlot(
+                    title = "Your Shoes",
+                    uri = uiState.shoesUri,
+                    onCamera = { onCaptureCamera("shoes") },
+                    onGallery = { uri -> onPhotoPicked("shoes", uri) },
+                    modifier = Modifier.weight(1f)
+                )
+                StyleCaptureSlot(
+                    title = "Your Clothes",
+                    uri = uiState.clothesUri,
+                    onCamera = { onCaptureCamera("clothes") },
+                    onGallery = { uri -> onPhotoPicked("clothes", uri) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
+
+        OccasionFilter(
+            selectedOccasion = uiState.selectedOccasion,
+            onOccasionSelected = { onEvent(AnalyzerEvent.OnOccasionSelected(it)) }
+        )
 
         Button(
             onClick = onAnalyze,
-            enabled = faceUri != null && clothesUri != null,
+            enabled = uiState.faceUri != null || uiState.hairUri != null || uiState.shoesUri != null || uiState.clothesUri != null,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
             Icon(Icons.Default.AutoAwesome, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Analyze Coordination")
+            Text("Analyze My Look")
         }
     }
 }
 
 @Composable
-fun CaptureSlot(
+fun OccasionFilter(
+    selectedOccasion: String,
+    onOccasionSelected: (String) -> Unit
+) {
+    val occasions = listOf("Work", "Date Night", "Outdoor/Sport", "Formal")
+    
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text("Select Occasion", style = MaterialTheme.typography.labelMedium)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            occasions.forEach { occasion ->
+                FilterChip(
+                    selected = selectedOccasion == occasion,
+                    onClick = { onOccasionSelected(occasion) },
+                    label = { Text(occasion) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun StyleCaptureSlot(
     title: String,
     uri: String?,
-    onClick: () -> Unit,
+    onCamera: () -> Unit,
+    onGallery: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { pickedUri ->
+        pickedUri?.let { onGallery(it.toString()) }
+    }
+
+    var showOptions by remember { mutableStateOf(false) }
+
     Card(
         modifier = modifier
             .fillMaxHeight()
-            .clickable { onClick() },
+            .clickable { showOptions = true },
         colors = CardDefaults.cardColors(
             containerColor = if (uri == null) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
         )
@@ -201,7 +276,6 @@ fun CaptureSlot(
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-                // Overlay title
                 Surface(
                     color = Color.Black.copy(alpha = 0.5f),
                     modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
@@ -219,26 +293,59 @@ fun CaptureSlot(
                     Icon(
                         imageVector = Icons.Default.CameraAlt,
                         contentDescription = null,
-                        modifier = Modifier.size(48.dp),
+                        modifier = Modifier.size(32.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(title, style = MaterialTheme.typography.labelLarge)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(title, style = MaterialTheme.typography.labelMedium)
                 }
             }
         }
     }
+
+    if (showOptions) {
+        AlertDialog(
+            onDismissRequest = { showOptions = false },
+            title = { Text("Capture $title") },
+            text = { Text("Choose a photo source") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showOptions = false
+                    onCamera()
+                }) {
+                    Icon(Icons.Default.CameraAlt, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Camera")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showOptions = false
+                    launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                }) {
+                    Icon(Icons.Default.PhotoLibrary, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Gallery")
+                }
+            }
+        )
+    }
 }
 
 @Composable
-fun AnalysisResultScreen(advice: FashionAdvice, onSave: () -> Unit, onReset: () -> Unit) {
+fun AnalysisResultScreen(
+    advice: FashionAdvice,
+    onSave: () -> Unit,
+    onReset: () -> Unit,
+    navTo: (KoColorRoute?) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text("Coordination Result", style = MaterialTheme.typography.headlineSmall)
+            Text("Style Analysis Result", style = MaterialTheme.typography.headlineSmall)
         }
         item {
             Card(
@@ -254,7 +361,7 @@ fun AnalysisResultScreen(advice: FashionAdvice, onSave: () -> Unit, onReset: () 
             }
         }
         item {
-            Text("Recommended Makeup Palette", style = MaterialTheme.typography.titleMedium)
+            Text("Recommended Makeup & Nail Palette", style = MaterialTheme.typography.titleMedium)
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -270,13 +377,35 @@ fun AnalysisResultScreen(advice: FashionAdvice, onSave: () -> Unit, onReset: () 
             }
         }
         item {
-            Text("Makeup Suggestions", style = MaterialTheme.typography.titleMedium)
+            Text("Makeup & Nail Suggestions", style = MaterialTheme.typography.titleMedium)
         }
         items(advice.makeupSuggestions) { suggestion ->
             Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text(suggestion.category, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                    Text(suggestion.advice)
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(suggestion.category, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                        Text(suggestion.advice)
+                    }
+                    if (suggestion.category.contains("Nails", ignoreCase = true)) {
+                        Button(
+                            onClick = {
+                                val color = suggestion.recommendedColors.firstOrNull() ?: "#FF0000"
+                                val finish = if (suggestion.advice.contains("Matte", ignoreCase = true)) "MATTE"
+                                             else if (suggestion.advice.contains("Metallic", ignoreCase = true)) "METALLIC"
+                                             else "GLOSSY"
+                                navTo(KoColorRoute.NailLab(color, finish))
+                            },
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Experience", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
                 }
             }
         }
@@ -291,7 +420,7 @@ fun AnalysisResultScreen(advice: FashionAdvice, onSave: () -> Unit, onReset: () 
                 Button(onClick = onSave, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Default.Check, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Save Profile")
+                    Text("Save Analysis")
                 }
             }
         }
@@ -340,12 +469,12 @@ private fun AnalyzerScreenPreview_Success() {
             uiState = AnalyzerScreenUiState(
                 analyzerState = AnalyzerUiState.Success(
                     FashionAdvice(
-                        summary = "This deep burgundy top coordinates perfectly with a winter palette. Use a cool-toned foundation and a bold berry lip.",
+                        summary = "Holistic coordination with your outfit and shoes.",
                         seasonalType = SeasonalType.WINTER,
                         undertone = Undertone.COOL,
                         makeupSuggestions = listOf(
                             com.zoewave.probase.kocolor.model.MakeupSuggestion("Lip", "Berry red", listOf("#800020")),
-                            com.zoewave.probase.kocolor.model.MakeupSuggestion("Eye", "Silver shimmer", listOf("#C0C0C0"))
+                            com.zoewave.probase.kocolor.model.MakeupSuggestion("Nails", "Deep plum gloss", listOf("#4B0082"))
                         ),
                         outfitSuggestions = emptyList(),
                         recommendedPalette = listOf("#800020", "#C0C0C0", "#000080")

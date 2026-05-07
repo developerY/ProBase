@@ -74,6 +74,8 @@ fun KoColorMainScreen(
                             viewModel.navigateBack()
                         },
                         onFaceCaptured = viewModel::onFaceCaptured,
+                        onHairCaptured = viewModel::onHairCaptured,
+                        onShoesCaptured = viewModel::onShoesCaptured,
                         onClothesCaptured = viewModel::onClothesCaptured
                     )
                 }

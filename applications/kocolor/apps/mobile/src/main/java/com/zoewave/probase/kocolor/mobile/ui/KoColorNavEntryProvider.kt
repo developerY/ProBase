@@ -13,6 +13,7 @@ import com.zoewave.probase.kocolor.features.color.ui.ColorDetailScreen
 import com.zoewave.probase.kocolor.features.color.ui.ColorUiRoute
 import com.zoewave.probase.kocolor.features.color.ui.ColorViewModel
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
+import com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.components.SettingsUiRoute
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -24,6 +25,8 @@ fun koColorNavEntryProvider(
     onNavigateTo: (KoColorRoute) -> Unit,
     onBack: () -> Unit,
     onFaceCaptured: (String) -> Unit,
+    onHairCaptured: (String) -> Unit,
+    onShoesCaptured: (String) -> Unit,
     onClothesCaptured: (String) -> Unit
 ): NavEntry<KoColorRoute> {
     return when (route) {
@@ -67,6 +70,13 @@ fun koColorNavEntryProvider(
                 onBack = onBack
             )
         }
+        is KoColorRoute.NailLab -> NavEntry(route) {
+            NailLabUiRoute(
+                colorHex = route.colorHex,
+                finish = route.finish,
+                onBack = onBack
+            )
+        }
         is KoColorRoute.Camera -> NavEntry(route) {
             CameraUIRoute(
                 navTo = { result ->
@@ -74,6 +84,8 @@ fun koColorNavEntryProvider(
                         val uri = result.substringAfter("result_ok:")
                         when (route.target) {
                             "face" -> onFaceCaptured(uri)
+                            "hair" -> onHairCaptured(uri)
+                            "shoes" -> onShoesCaptured(uri)
                             "clothes" -> onClothesCaptured(uri)
                         }
                         onBack()

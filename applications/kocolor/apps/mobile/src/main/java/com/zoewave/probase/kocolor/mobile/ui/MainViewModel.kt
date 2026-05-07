@@ -70,4 +70,12 @@ class MainViewModel @Inject constructor(
     fun onClothesCaptured(uri: String) {
         sessionRepository.setClothesUri(uri)
     }
+
+    fun onHairCaptured(uri: String) {
+        sessionRepository.setHairUri(uri)
+    }
+
+    fun onShoesCaptured(uri: String) {
+        sessionRepository.setShoesUri(uri)
+    }
 }

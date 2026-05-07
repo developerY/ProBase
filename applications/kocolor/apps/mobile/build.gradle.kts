@@ -29,6 +29,12 @@ android {
     buildFeatures {
         buildConfig = true
     }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 dependencies {
@@ -49,6 +55,8 @@ dependencies {
     implementation(project(":applications:kocolor:features:analyzer"))
     implementation(project(":applications:kocolor:features:suggestions"))
     implementation(project(":applications:kocolor:features:color"))
+    implementation(project(":applications:kocolor:features:inventory"))
+    implementation(project(":features:ar:naillab"))
     
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:ai:capture"))

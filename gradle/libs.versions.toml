@@ -94,6 +94,7 @@ playServicesCoroutines = "1.10.2"
 mlkitTextRecognition = "16.0.1"
 googleAiEdgeAicore = "0.0.1-exp02"
 googleGenerativeAi = "0.9.0"
+mediaPipe = "0.10.14"
 playServicesCodeScanner = "16.1.0"
 playServicesWallet = "20.0.0"
 stripe = "23.5.0"
@@ -265,6 +266,7 @@ firebase-installations = { group = "com.google.firebase", name = "firebase-insta
 mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitTextRecognition" }
 google-ai-edge-aicore = { group = "com.google.ai.edge.aicore", name = "aicore", version.ref = "googleAiEdgeAicore" }
 google-generative-ai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "googleGenerativeAi" }
+mediapipe-vision = { group = "com.google.mediapipe", name = "tasks-vision", version.ref = "mediaPipe" }
 gms-play-services-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "playServicesCodeScanner" }
 
 # -- Serialization --

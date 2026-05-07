@@ -106,7 +106,7 @@
       </SelectionState>
       <SelectionState runConfigName="applications.kocolor.apps.mobile">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-04-24T01:32:35.208382Z">
+        <DropdownSelection timestamp="2026-05-07T00:39:38.173281Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Pixel_10_Pro.avd" />
