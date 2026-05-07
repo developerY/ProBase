@@ -94,6 +94,7 @@
             <option value="$PROJECT_DIR$/applications/kocolor/features" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/analyzer" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/color" />
+            <option value="$PROJECT_DIR$/applications/kocolor/features/inventory" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/suggestions" />
             <option value="$PROJECT_DIR$/applications/kocolor/model" />
             <option value="$PROJECT_DIR$/applications/photodo" />
@@ -155,6 +156,8 @@
             <option value="$PROJECT_DIR$/features/ai/configuration" />
             <option value="$PROJECT_DIR$/features/ai/firebase" />
             <option value="$PROJECT_DIR$/features/ai/vision" />
+            <option value="$PROJECT_DIR$/features/ar" />
+            <option value="$PROJECT_DIR$/features/ar/naillab" />
             <option value="$PROJECT_DIR$/features/ble" />
             <option value="$PROJECT_DIR$/features/calendar" />
             <option value="$PROJECT_DIR$/features/camera" />
