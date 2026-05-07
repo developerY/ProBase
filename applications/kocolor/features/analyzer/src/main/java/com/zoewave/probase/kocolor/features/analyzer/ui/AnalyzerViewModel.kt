@@ -30,7 +30,8 @@ data class AnalyzerScreenUiState(
     val faceUri: String? = null,
     val hairUri: String? = null,
     val shoesUri: String? = null,
-    val clothesUri: String? = null
+    val clothesUri: String? = null,
+    val selectedOccasion: String = "Work"
 )
 
 sealed class AnalyzerEvent {
@@ -38,6 +39,7 @@ sealed class AnalyzerEvent {
     data class OnHairCaptured(val uri: String) : AnalyzerEvent()
     data class OnShoesCaptured(val uri: String) : AnalyzerEvent()
     data class OnClothesCaptured(val uri: String) : AnalyzerEvent()
+    data class OnOccasionSelected(val occasion: String) : AnalyzerEvent()
     data object OnAnalyzeClicked : AnalyzerEvent()
     data class OnSaveClicked(val advice: FashionAdvice) : AnalyzerEvent()
     data object OnResetClicked : AnalyzerEvent()
@@ -53,20 +55,30 @@ class AnalyzerViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _analyzerState = MutableStateFlow<AnalyzerUiState>(AnalyzerUiState.Idle)
+    private val _selectedOccasion = MutableStateFlow("Work")
 
     val uiState: StateFlow<AnalyzerScreenUiState> = combine(
         _analyzerState,
+        _selectedOccasion,
         sessionRepository.faceUri,
         sessionRepository.hairUri,
         sessionRepository.shoesUri,
         sessionRepository.clothesUri
-    ) { analyzerState, faceUri, hairUri, shoesUri, clothesUri ->
+    ) { params ->
+        val analyzerState = params[0] as AnalyzerUiState
+        val occasion = params[1] as String
+        val faceUri = params[2] as String?
+        val hairUri = params[3] as String?
+        val shoesUri = params[4] as String?
+        val clothesUri = params[5] as String?
+
         AnalyzerScreenUiState(
             analyzerState = analyzerState,
             faceUri = faceUri,
             hairUri = hairUri,
             shoesUri = shoesUri,
-            clothesUri = clothesUri
+            clothesUri = clothesUri,
+            selectedOccasion = occasion
         )
     }.stateIn(
         scope = viewModelScope,
@@ -88,6 +100,9 @@ class AnalyzerViewModel @Inject constructor(
             is AnalyzerEvent.OnClothesCaptured -> {
                 sessionRepository.setClothesUri(event.uri)
             }
+            is AnalyzerEvent.OnOccasionSelected -> {
+                _selectedOccasion.value = event.occasion
+            }
             is AnalyzerEvent.OnAnalyzeClicked -> {
                 analyzePhotos()
             }
@@ -96,6 +111,7 @@ class AnalyzerViewModel @Inject constructor(
             }
             is AnalyzerEvent.OnResetClicked -> {
                 _analyzerState.value = AnalyzerUiState.Idle
+                _selectedOccasion.value = "Work"
                 sessionRepository.reset()
             }
         }
@@ -107,6 +123,7 @@ class AnalyzerViewModel @Inject constructor(
             val hUri = uiState.value.hairUri
             val sUri = uiState.value.shoesUri
             val cUri = uiState.value.clothesUri
+            val occasion = uiState.value.selectedOccasion
 
             if (fUri == null && hUri == null && sUri == null && cUri == null) {
                 _analyzerState.value = AnalyzerUiState.Error("Please capture at least one image.")
@@ -137,6 +154,7 @@ class AnalyzerViewModel @Inject constructor(
                     hair = hairBitmap,
                     shoes = shoesBitmap,
                     clothes = clothesBitmap,
+                    occasion = occasion,
                     apiKey = apiKey,
                     modelName = modelName
                 )

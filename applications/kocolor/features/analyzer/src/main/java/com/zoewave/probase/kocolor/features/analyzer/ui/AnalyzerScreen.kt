@@ -8,8 +8,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -85,6 +87,7 @@ fun AnalyzerScreen(
                 is AnalyzerUiState.Idle -> {
                     StyleCaptureState(
                         uiState = uiState,
+                        onEvent = onEvent,
                         onCaptureCamera = { target -> navTo(KoColorRoute.Camera(target)) },
                         onPhotoPicked = { target, uri ->
                             when (target) {
@@ -138,6 +141,7 @@ fun AnalyzerScreen(
 @Composable
 fun StyleCaptureState(
     uiState: AnalyzerScreenUiState,
+    onEvent: (AnalyzerEvent) -> Unit,
     onCaptureCamera: (String) -> Unit,
     onPhotoPicked: (String, String) -> Unit,
     onAnalyze: () -> Unit
@@ -145,6 +149,7 @@ fun StyleCaptureState(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -156,7 +161,7 @@ fun StyleCaptureState(
         )
 
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.height(400.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -193,6 +198,11 @@ fun StyleCaptureState(
             }
         }
 
+        OccasionFilter(
+            selectedOccasion = uiState.selectedOccasion,
+            onOccasionSelected = { onEvent(AnalyzerEvent.OnOccasionSelected(it)) }
+        )
+
         Button(
             onClick = onAnalyze,
             enabled = uiState.faceUri != null || uiState.hairUri != null || uiState.shoesUri != null || uiState.clothesUri != null,
@@ -203,6 +213,32 @@ fun StyleCaptureState(
             Icon(Icons.Default.AutoAwesome, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Analyze My Look")
+        }
+    }
+}
+
+@Composable
+fun OccasionFilter(
+    selectedOccasion: String,
+    onOccasionSelected: (String) -> Unit
+) {
+    val occasions = listOf("Work", "Date Night", "Outdoor/Sport", "Formal")
+    
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text("Select Occasion", style = MaterialTheme.typography.labelMedium)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            occasions.forEach { occasion ->
+                FilterChip(
+                    selected = selectedOccasion == occasion,
+                    onClick = { onOccasionSelected(occasion) },
+                    label = { Text(occasion) }
+                )
+            }
         }
     }
 }
