@@ -118,7 +118,8 @@ fun AnalyzerScreen(
                             onEvent(AnalyzerEvent.OnSaveClicked(state.advice))
                             onAnalysisSaved()
                         },
-                        onReset = { onEvent(AnalyzerEvent.OnResetClicked) }
+                        onReset = { onEvent(AnalyzerEvent.OnResetClicked) },
+                        navTo = navTo
                     )
                 }
                 is AnalyzerUiState.Error -> {
@@ -332,7 +333,12 @@ fun StyleCaptureSlot(
 }
 
 @Composable
-fun AnalysisResultScreen(advice: FashionAdvice, onSave: () -> Unit, onReset: () -> Unit) {
+fun AnalysisResultScreen(
+    advice: FashionAdvice,
+    onSave: () -> Unit,
+    onReset: () -> Unit,
+    navTo: (KoColorRoute?) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -375,9 +381,31 @@ fun AnalysisResultScreen(advice: FashionAdvice, onSave: () -> Unit, onReset: () 
         }
         items(advice.makeupSuggestions) { suggestion ->
             Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text(suggestion.category, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                    Text(suggestion.advice)
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(suggestion.category, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                        Text(suggestion.advice)
+                    }
+                    if (suggestion.category.contains("Nails", ignoreCase = true)) {
+                        Button(
+                            onClick = {
+                                val color = suggestion.recommendedColors.firstOrNull() ?: "#FF0000"
+                                val finish = if (suggestion.advice.contains("Matte", ignoreCase = true)) "MATTE"
+                                             else if (suggestion.advice.contains("Metallic", ignoreCase = true)) "METALLIC"
+                                             else "GLOSSY"
+                                navTo(KoColorRoute.NailLab(color, finish))
+                            },
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Experience", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
                 }
             }
         }
