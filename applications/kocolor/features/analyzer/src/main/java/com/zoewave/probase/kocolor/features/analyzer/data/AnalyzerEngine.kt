@@ -22,6 +22,7 @@ class AnalyzerEngine @Inject constructor() {
         hair: Bitmap?,
         shoes: Bitmap?,
         clothes: Bitmap?,
+        occasion: String,
         apiKey: String,
         modelName: String = "gemini-1.5-flash"
     ): FashionAdvice {
@@ -41,6 +42,8 @@ class AnalyzerEngine @Inject constructor() {
             
             text("""
                 You are a professional personal color analyst and style consultant. 
+                The user is preparing for a specific occasion: $occasion.
+                
                 I have provided up to 4 images:
                 1. Face selfie
                 2. Hair photo
@@ -48,15 +51,21 @@ class AnalyzerEngine @Inject constructor() {
                 4. Clothing/Outfit photo
                 
                 GOAL:
-                Analyze the provided physical attributes (face, hair) and coordinate them with the outfit (clothes, shoes) to recommend a perfect makeup and nail polish palette.
+                Analyze the provided physical attributes (face, hair) and coordinate them with the outfit (clothes, shoes) to recommend a perfect makeup and nail polish palette TAILORED for the occasion: $occasion.
+                
+                OCCASION GUIDANCE:
+                - If "Work": Lean toward sophisticated, professional neutrals and polished finishes.
+                - If "Date Night": Tilt toward romantic, bold, or glamorous shades with alluring finishes.
+                - If "Outdoor/Sport": Focus on fresh, natural, and durable looks.
+                - If "Formal": Aim for high-fidelity elegance, classic harmonies, and refined palettes.
                 
                 TASKS:
                 1. Identify the Seasonal Type (SPRING, SUMMER, AUTUMN, WINTER) of the face.
                 2. Identify the Undertone (WARM, COOL, NEUTRAL) of the face.
                 3. Analyze how the hair and shoe colors (if provided) interact with the skin tone and clothing.
-                4. Provide a cohesive summary explaining the coordination strategy.
-                5. Give specific makeup suggestions (Foundation, Lip, Eye, Blush).
-                6. Give a specific recommendation for NAIL POLISH color and finish that ties the whole look together.
+                4. Provide a cohesive summary explaining the coordination strategy for the $occasion.
+                5. Give specific makeup suggestions (Foundation, Lip, Eye, Blush) appropriate for $occasion.
+                6. Give a specific recommendation for NAIL POLISH color and finish that ties the whole look together for $occasion.
                 7. Recommend a makeup color palette (HEX codes).
                 
                 Respond ONLY with a valid JSON object matching this exact schema:
@@ -68,7 +77,7 @@ class AnalyzerEngine @Inject constructor() {
                     { "category": "string", "advice": "string", "recommendedColors": ["string"] }
                   ],
                   "outfitSuggestions": [
-                    { "occasion": "Coordinated Look", "advice": "string", "keyPieces": ["string"], "colorCombinations": ["string"] }
+                    { "occasion": "$occasion", "advice": "string", "keyPieces": ["string"], "colorCombinations": ["string"] }
                   ],
                   "recommendedPalette": ["#HEX", "#HEX", ...]
                 }
