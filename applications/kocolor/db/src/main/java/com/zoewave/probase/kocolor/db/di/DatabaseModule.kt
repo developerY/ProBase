@@ -7,6 +7,7 @@ import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSetti
 import com.zoewave.probase.kocolor.db.KoColorDatabase
 import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
+import com.zoewave.probase.kocolor.db.dao.InventoryDao
 import com.zoewave.probase.kocolor.db.dao.SavedSuggestionDao
 import dagger.Binds
 import dagger.Module
@@ -36,7 +37,9 @@ abstract class DatabaseModule {
                 context,
                 KoColorDatabase::class.java,
                 "kocolor_database"
-            ).build()
+            )
+            .fallbackToDestructiveMigration() // Added for version bump
+            .build()
         }
 
         @Provides
@@ -44,5 +47,8 @@ abstract class DatabaseModule {
 
         @Provides
         fun provideSavedSuggestionDao(db: KoColorDatabase): SavedSuggestionDao = db.savedSuggestionDao
+
+        @Provides
+        fun provideInventoryDao(db: KoColorDatabase): InventoryDao = db.inventoryDao
     }
 }
