@@ -32,13 +32,13 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindAiConfigurationSettings(
-        impl: UserSettingsRepositoryImpl
+        impl: UserSettingsRepository
     ): AiConfigurationSettings
 
     @Binds
     @Singleton
     abstract fun bindSmartCaptureSettings(
-        impl: UserSettingsRepositoryImpl
+        impl: UserSettingsRepository
     ): SmartCaptureSettings
 
     @Binds

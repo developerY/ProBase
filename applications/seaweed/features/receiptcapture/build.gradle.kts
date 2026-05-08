@@ -27,6 +27,9 @@ dependencies {
     implementation(libs.mlkit.text.recognition)
     implementation(libs.google.generative.ai)
 
+    implementation(libs.androidx.activity.compose)
+
+
     // --- Third Party ---
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

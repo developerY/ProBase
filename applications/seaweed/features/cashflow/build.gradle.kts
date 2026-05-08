@@ -16,7 +16,6 @@ dependencies {
 
     implementation(project(":applications:seaweed:model"))
     implementation(project(":applications:seaweed:data"))
-    implementation(project(":features:ai:configuration"))
 
     // --- 4. Hilt ---
     implementation(libs.hilt.android)

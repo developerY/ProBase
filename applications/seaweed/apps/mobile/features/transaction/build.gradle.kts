@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.androidx.compose.material3.adaptive.navigation)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.google.play.services.location)
     implementation(libs.google.maps.compose)
 }
