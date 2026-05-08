@@ -33,6 +33,9 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
                 // Standard packaging exclusions for clean release builds
                 packaging.resources.excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+                
+                // Enable 16 KB page size support
+                packaging.jniLibs.useLegacyPackaging = false
             }
         }
     }
