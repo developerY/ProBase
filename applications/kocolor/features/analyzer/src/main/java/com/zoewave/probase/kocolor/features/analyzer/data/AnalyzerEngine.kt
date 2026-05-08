@@ -65,7 +65,7 @@ class AnalyzerEngine @Inject constructor() {
                 3. Analyze how the hair and shoe colors (if provided) interact with the skin tone and clothing.
                 4. Provide a cohesive summary explaining the coordination strategy for the $occasion.
                 5. Give specific makeup suggestions (Foundation, Lip, Eye, Blush) appropriate for $occasion.
-                6. Give a specific recommendation for NAIL POLISH color and finish that ties the whole look together for $occasion.
+                6. Give a specific recommendation for NAIL POLISH color and finish that ties the whole look together for $occasion. Ensure this is categorized as "Nail Polish" in your response.
                 7. Recommend a makeup color palette (HEX codes).
                 
                 Respond ONLY with a valid JSON object matching this exact schema:

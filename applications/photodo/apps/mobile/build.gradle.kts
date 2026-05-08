@@ -71,6 +71,7 @@ android {
     buildFeatures {
         buildConfig = true
     }
+
     testOptions {
         suites {
             create("journeysTest") {

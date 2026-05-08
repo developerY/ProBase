@@ -389,7 +389,7 @@ fun AnalysisResultScreen(
                         Text(suggestion.category, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                         Text(suggestion.advice)
                     }
-                    if (suggestion.category.contains("Nails", ignoreCase = true)) {
+                    if (suggestion.category.contains("Nail", ignoreCase = true)) {
                         Button(
                             onClick = {
                                 val color = suggestion.recommendedColors.firstOrNull() ?: "#FF0000"

@@ -56,7 +56,8 @@ fun koColorNavEntryProvider(
             if (analysis != null) {
                 ColorDetailScreen(
                     analysis = analysis,
-                    onBack = onBack
+                    onBack = onBack,
+                    navTo = onNavigateTo
                 )
             }
         }

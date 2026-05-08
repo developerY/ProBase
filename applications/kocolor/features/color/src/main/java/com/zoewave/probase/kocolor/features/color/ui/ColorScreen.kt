@@ -29,7 +29,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.Badge
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -218,6 +220,7 @@ fun FashionAnalysisCard(
 fun ColorDetailScreen(
     analysis: SavedAnalysis,
     onBack: () -> Unit,
+    navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -303,6 +306,50 @@ fun ColorDetailScreen(
             
             MakeupPaletteGraphic(analysis.advice.recommendedPalette)
             
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                text = "Makeup & Nail Suggestions",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.align(Alignment.Start)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            analysis.advice.makeupSuggestions.forEach { suggestion ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(suggestion.category, fontWeight = FontWeight.Bold)
+                            Text(suggestion.advice)
+                        }
+                        if (suggestion.category.contains("Nail", ignoreCase = true)) {
+                            Button(
+                                onClick = {
+                                    val color = suggestion.recommendedColors.firstOrNull() ?: "#FF0000"
+                                    val finish = if (suggestion.advice.contains("Matte", ignoreCase = true)) "MATTE"
+                                                 else if (suggestion.advice.contains("Metallic", ignoreCase = true)) "METALLIC"
+                                                 else "GLOSSY"
+                                    navTo(KoColorRoute.NailLab(color, finish))
+                                },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                modifier = Modifier.height(32.dp)
+                            ) {
+                                Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Experience", style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
             Text(
                 text = "AI Coordination Notes",
@@ -436,7 +483,8 @@ private fun ColorDetailScreenPreview() {
                     recommendedPalette = listOf("#1A1A1A", "#FFFFFF", "#C0C0C0", "#FF007F", "#4B0082", "#000080")
                 )
             ),
-            onBack = {}
+            onBack = {},
+            navTo = {}
         )
     }
 }
