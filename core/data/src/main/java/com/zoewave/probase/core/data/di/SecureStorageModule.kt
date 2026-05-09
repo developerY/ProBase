@@ -2,6 +2,7 @@ package com.zoewave.probase.core.data.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import dagger.Module
@@ -16,6 +17,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object SecureStorageModule {
 
+    private const val SECURE_PREFS_NAME = "photodo_secure_secrets"
+
     @Provides
     @Singleton
     @Named("SecureStorage")
@@ -24,9 +27,19 @@ object SecureStorageModule {
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
 
+        return try {
+            createEncryptedSharedPreferences(context, masterKey)
+        } catch (e: Exception) {
+            Log.e("SecureStorageModule", "Error creating EncryptedSharedPreferences, recreating...", e)
+            context.deleteSharedPreferences(SECURE_PREFS_NAME)
+            createEncryptedSharedPreferences(context, masterKey)
+        }
+    }
+
+    private fun createEncryptedSharedPreferences(context: Context, masterKey: MasterKey): SharedPreferences {
         return EncryptedSharedPreferences.create(
             context,
-            "photodo_secure_secrets",
+            SECURE_PREFS_NAME,
             masterKey,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM

@@ -30,7 +30,8 @@ class NailRenderingEngine {
         colorHex: String,
         finish: String,
         width: Int,
-        height: Int
+        height: Int,
+        isMirrored: Boolean = false
     ) {
         val baseColor = try {
             Color.parseColor(colorHex)
@@ -43,8 +44,12 @@ class NailRenderingEngine {
                 val tip = handLandmarks[tipIndex]
                 val prev = handLandmarks[tipIndex - 1] // Joint below tip
 
-                val cx = tip.x() * width
+                var cx = tip.x() * width
                 val cy = tip.y() * height
+                
+                if (isMirrored) {
+                    cx = width - cx
+                }
                 
                 // Calculate orientation/size based on bone segment
                 val dx = (tip.x() - prev.x()) * width

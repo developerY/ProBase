@@ -11,12 +11,14 @@ import javax.inject.Inject
 data class NailLabUiState(
     val colorHex: String = "#FF0000",
     val finish: String = "MATTE",
+    val isFrontCamera: Boolean = true,
     val latestResult: HandLandmarkerResult? = null
 )
 
 sealed class NailLabEvent {
     data class OnColorChanged(val hex: String) : NailLabEvent()
     data class OnFinishChanged(val finish: String) : NailLabEvent()
+    data object OnToggleCamera : NailLabEvent()
     data class OnTrackingResult(val result: HandLandmarkerResult) : NailLabEvent()
 }
 
@@ -33,6 +35,9 @@ class NailLabViewModel @Inject constructor() : ViewModel() {
             }
             is NailLabEvent.OnFinishChanged -> {
                 _uiState.value = _uiState.value.copy(finish = event.finish)
+            }
+            is NailLabEvent.OnToggleCamera -> {
+                _uiState.value = _uiState.value.copy(isFrontCamera = !_uiState.value.isFrontCamera)
             }
             is NailLabEvent.OnTrackingResult -> {
                 _uiState.value = _uiState.value.copy(latestResult = event.result)
