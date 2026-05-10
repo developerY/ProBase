@@ -45,6 +45,7 @@ include(":features:health:cgm")
 include(":features:camera")
 include(":features:calendar")
 include(":features:ar:naillab")
+include(":features:ar:facelab")
 include(":features:payment:googlepay")
 include(":features:payment:stripe")
 

@@ -157,6 +157,7 @@
             <option value="$PROJECT_DIR$/features/ai/firebase" />
             <option value="$PROJECT_DIR$/features/ai/vision" />
             <option value="$PROJECT_DIR$/features/ar" />
+            <option value="$PROJECT_DIR$/features/ar/facelab" />
             <option value="$PROJECT_DIR$/features/ar/naillab" />
             <option value="$PROJECT_DIR$/features/ble" />
             <option value="$PROJECT_DIR$/features/calendar" />
