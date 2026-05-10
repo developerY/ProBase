@@ -18,7 +18,7 @@ class HandLandmarkerHelper(
     val minHandTrackingConfidence: Float = 0.5f,
     val minHandPresenceConfidence: Float = 0.5f,
     val maxNumHands: Int = 1,
-    var currentDelegate: Int = DELEGATE_GPU,
+    var currentDelegate: Int = DELEGATE_CPU,
     var runningMode: RunningMode = RunningMode.LIVE_STREAM,
     val handLandmarkerHelperListener: LandmarkerListener? = null
 ) {
@@ -78,7 +78,8 @@ class HandLandmarkerHelper(
 
     fun detectLiveStream(
         bitmap: Bitmap,
-        isFrontCamera: Boolean
+        isFrontCamera: Boolean,
+        rotationDegrees: Int
     ) {
         if (runningMode != RunningMode.LIVE_STREAM) {
             throw IllegalArgumentException(
@@ -88,15 +89,15 @@ class HandLandmarkerHelper(
         val frameTime = SystemClock.uptimeMillis()
 
         val matrix = Matrix().apply {
-            postRotate(0f)
             if (isFrontCamera) {
-                postScale(
+                preScale(
                     -1f,
                     1f,
-                    bitmap.width.toFloat(),
-                    bitmap.height.toFloat()
+                    bitmap.width / 2f,
+                    bitmap.height / 2f
                 )
             }
+            postRotate(rotationDegrees.toFloat())
         }
         val rotatedBitmap = Bitmap.createBitmap(
             bitmap, 0, 0, bitmap.width, bitmap.height,
