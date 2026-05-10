@@ -12,14 +12,20 @@ data class NailLabUiState(
     val colorHex: String = "#FF0000",
     val finish: String = "MATTE",
     val isFrontCamera: Boolean = true,
-    val latestResult: HandLandmarkerResult? = null
+    val latestResult: HandLandmarkerResult? = null,
+    val inputImageWidth: Int = 1,
+    val inputImageHeight: Int = 1
 )
 
 sealed class NailLabEvent {
     data class OnColorChanged(val hex: String) : NailLabEvent()
     data class OnFinishChanged(val finish: String) : NailLabEvent()
     data object OnToggleCamera : NailLabEvent()
-    data class OnTrackingResult(val result: HandLandmarkerResult) : NailLabEvent()
+    data class OnTrackingResult(
+        val result: HandLandmarkerResult,
+        val inputWidth: Int,
+        val inputHeight: Int
+    ) : NailLabEvent()
 }
 
 @HiltViewModel
@@ -40,7 +46,11 @@ class NailLabViewModel @Inject constructor() : ViewModel() {
                 _uiState.value = _uiState.value.copy(isFrontCamera = !_uiState.value.isFrontCamera)
             }
             is NailLabEvent.OnTrackingResult -> {
-                _uiState.value = _uiState.value.copy(latestResult = event.result)
+                _uiState.value = _uiState.value.copy(
+                    latestResult = event.result,
+                    inputImageWidth = event.inputWidth,
+                    inputImageHeight = event.inputHeight
+                )
             }
         }
     }

@@ -81,7 +81,13 @@ fun NailLabScreen(
                 }
                 override fun onResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
                     if (resultBundle.results.isNotEmpty()) {
-                        onEvent(NailLabEvent.OnTrackingResult(resultBundle.results.first()))
+                        onEvent(
+                            NailLabEvent.OnTrackingResult(
+                                result = resultBundle.results.first(),
+                                inputWidth = resultBundle.inputImageWidth,
+                                inputHeight = resultBundle.inputImageHeight
+                            )
+                        )
                     }
                 }
             }
@@ -197,7 +203,8 @@ fun NailLabScreen(
                                 finish = uiState.finish,
                                 width = size.width.toInt(),
                                 height = size.height.toInt(),
-                                isMirrored = uiState.isFrontCamera
+                                inputWidth = uiState.inputImageWidth,
+                                inputHeight = uiState.inputImageHeight
                             )
                         }
                     }
