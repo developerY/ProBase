@@ -89,15 +89,15 @@ class HandLandmarkerHelper(
         val frameTime = SystemClock.uptimeMillis()
 
         val matrix = Matrix().apply {
-            postRotate(rotationDegrees.toFloat())
             if (isFrontCamera) {
-                postScale(
+                preScale(
                     -1f,
                     1f,
                     bitmap.width / 2f,
                     bitmap.height / 2f
                 )
             }
+            postRotate(rotationDegrees.toFloat())
         }
         val rotatedBitmap = Bitmap.createBitmap(
             bitmap, 0, 0, bitmap.width, bitmap.height,
