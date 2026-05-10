@@ -389,14 +389,20 @@ fun AnalysisResultScreen(
                         Text(suggestion.category, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                         Text(suggestion.advice)
                     }
-                    if (suggestion.category.contains("Nail", ignoreCase = true)) {
+                    if (suggestion.category.contains("Nail", ignoreCase = true) || 
+                        suggestion.category.contains("Lip", ignoreCase = true) || 
+                        suggestion.category.contains("Blush", ignoreCase = true)) {
                         Button(
                             onClick = {
                                 val color = suggestion.recommendedColors.firstOrNull() ?: "#FF0000"
-                                val finish = if (suggestion.advice.contains("Matte", ignoreCase = true)) "MATTE"
-                                             else if (suggestion.advice.contains("Metallic", ignoreCase = true)) "METALLIC"
-                                             else "GLOSSY"
-                                navTo(KoColorRoute.NailLab(color, finish))
+                                if (suggestion.category.contains("Nail", ignoreCase = true)) {
+                                    val finish = if (suggestion.advice.contains("Matte", ignoreCase = true)) "MATTE"
+                                                 else if (suggestion.advice.contains("Metallic", ignoreCase = true)) "METALLIC"
+                                                 else "GLOSSY"
+                                    navTo(KoColorRoute.NailLab(color, finish))
+                                } else {
+                                    navTo(KoColorRoute.FaceLab(color, suggestion.category))
+                                }
                             },
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                             modifier = Modifier.height(32.dp)
