@@ -14,6 +14,7 @@ import com.zoewave.probase.kocolor.features.color.ui.ColorUiRoute
 import com.zoewave.probase.kocolor.features.color.ui.ColorViewModel
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
 import com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute
+import com.zoewave.probase.features.ar.facelab.ui.FaceLabUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.components.SettingsUiRoute
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -75,6 +76,13 @@ fun koColorNavEntryProvider(
             NailLabUiRoute(
                 colorHex = route.colorHex,
                 finish = route.finish,
+                onBack = onBack
+            )
+        }
+        is KoColorRoute.FaceLab -> NavEntry(route) {
+            FaceLabUiRoute(
+                colorHex = route.colorHex,
+                category = route.category,
                 onBack = onBack
             )
         }

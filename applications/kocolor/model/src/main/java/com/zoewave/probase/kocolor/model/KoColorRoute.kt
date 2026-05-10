@@ -31,6 +31,9 @@ sealed class KoColorRoute {
     data class NailLab(val colorHex: String, val finish: String) : KoColorRoute()
 
     @Serializable
+    data class FaceLab(val colorHex: String, val category: String) : KoColorRoute()
+
+    @Serializable
     data class Camera(val target: String) : KoColorRoute()
 
     val icon: ImageVector?
