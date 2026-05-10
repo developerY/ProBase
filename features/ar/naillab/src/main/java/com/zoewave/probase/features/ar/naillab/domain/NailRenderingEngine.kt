@@ -31,7 +31,8 @@ class NailRenderingEngine {
         finish: String,
         width: Int,
         height: Int,
-        isMirrored: Boolean = false
+        inputWidth: Int = 1,
+        inputHeight: Int = 1
     ) {
         val baseColor = try {
             Color.parseColor(colorHex)
@@ -39,21 +40,26 @@ class NailRenderingEngine {
             Color.RED
         }
 
+        // Calculate scaling and offsets for FILL_CENTER
+        val scale = Math.max(width.toFloat() / inputWidth, height.toFloat() / inputHeight)
+        val displayWidth = inputWidth * scale
+        val displayHeight = inputHeight * scale
+        val offsetX = (width - displayWidth) / 2f
+        val offsetY = (height - displayHeight) / 2f
+
         result.landmarks().forEach { handLandmarks ->
             fingertipIndices.forEach { tipIndex ->
                 val tip = handLandmarks[tipIndex]
                 val prev = handLandmarks[tipIndex - 1] // Joint below tip
 
-                var cx = tip.x() * width
-                val cy = tip.y() * height
+                // Map normalized coordinates to the scaled and cropped display area
+                val cx = tip.x() * displayWidth + offsetX
+                val cy = tip.y() * displayHeight + offsetY
                 
-                if (isMirrored) {
-                    cx = width - cx
-                }
-                
+                // Note: isMirrored flip is already handled by HandLandmarkerHelper preprocessing
                 // Calculate orientation/size based on bone segment
-                val dx = (tip.x() - prev.x()) * width
-                val dy = (tip.y() - prev.y()) * height
+                val dx = (tip.x() - prev.x()) * displayWidth
+                val dy = (tip.y() - prev.y()) * displayHeight
                 val distance = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
                 
                 val nailWidth = distance * 0.4f
