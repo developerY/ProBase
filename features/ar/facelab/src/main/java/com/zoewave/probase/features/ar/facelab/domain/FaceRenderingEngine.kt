@@ -10,8 +10,9 @@ class FaceRenderingEngine {
         style = Paint.Style.FILL
     }
 
-    // Lip landmarks (outer)
-    private val lipLandmarks = listOf(61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291, 409, 270, 269, 267, 0, 37, 39, 40, 185)
+    // Lip landmarks outer and inner for "hollow" fill
+    private val outerLipIndices = listOf(61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146)
+    private val innerLipIndices = listOf(78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95)
 
     fun drawMakeup(
         canvas: Canvas,
@@ -29,8 +30,8 @@ class FaceRenderingEngine {
             Color.RED
         }
 
-        // Apply some transparency for natural look
-        makeupPaint.color = (baseColor and 0x00FFFFFF) or (0x99 shl 24)
+        // Apply some transparency for natural look (Alpha: 0x88 = ~136/255)
+        makeupPaint.color = (baseColor and 0x00FFFFFF) or (0x88 shl 24)
 
         // Calculate scaling and offsets for FILL_CENTER
         val scale = Math.max(width.toFloat() / inputWidth, height.toFloat() / inputHeight)
@@ -42,7 +43,7 @@ class FaceRenderingEngine {
         result.faceLandmarks().forEach { faceLandmarks ->
             if (category.contains("Lip", ignoreCase = true)) {
                 drawLips(canvas, faceLandmarks, displayWidth, displayHeight, offsetX, offsetY)
-            } else if (category.contains("Blush", ignoreCase = true)) {
+            } else if (category.contains("Blush", ignoreCase = true) || category.contains("Cheek", ignoreCase = true)) {
                 drawBlush(canvas, faceLandmarks, displayWidth, displayHeight, offsetX, offsetY)
             }
         }
@@ -56,14 +57,28 @@ class FaceRenderingEngine {
         offsetX: Float,
         offsetY: Float
     ) {
-        val path = Path()
-        lipLandmarks.forEachIndexed { index, landmarkIndex ->
+        val path = Path().apply {
+            fillType = Path.FillType.EVEN_ODD
+        }
+        
+        // Outer loop
+        outerLipIndices.forEachIndexed { index, landmarkIndex ->
             val landmark = landmarks[landmarkIndex]
             val x = landmark.x() * displayWidth + offsetX
             val y = landmark.y() * displayHeight + offsetY
             if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
         }
         path.close()
+        
+        // Inner loop (will be "hollowed out" due to EVEN_ODD if mouth is open)
+        innerLipIndices.forEachIndexed { index, landmarkIndex ->
+            val landmark = landmarks[landmarkIndex]
+            val x = landmark.x() * displayWidth + offsetX
+            val y = landmark.y() * displayHeight + offsetY
+            if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+        path.close()
+        
         canvas.drawPath(path, makeupPaint)
     }
 
@@ -75,27 +90,34 @@ class FaceRenderingEngine {
         offsetX: Float,
         offsetY: Float
     ) {
-        // Simple blush on cheeks
-        // Left cheek: around 234, Right cheek: around 454
+        // Cheeks: Left 234, Right 454
         val leftCheek = landmarks[234]
         val rightCheek = landmarks[454]
         
-        val radius = displayWidth * 0.05f
+        val radius = displayWidth * 0.08f // Slightly larger blush
         
-        // Left blush
+        // Use a radial gradient for a more natural blush look
+        val blushAlpha = 0x44 // Subtle alpha for blush
+        val blushColor = (makeupPaint.color and 0x00FFFFFF) or (blushAlpha shl 24)
+        
+        val blushPaint = Paint(makeupPaint).apply {
+            color = blushColor
+        }
+        
+        // Left
         canvas.drawCircle(
             leftCheek.x() * displayWidth + offsetX,
             leftCheek.y() * displayHeight + offsetY,
             radius,
-            makeupPaint
+            blushPaint
         )
         
-        // Right blush
+        // Right
         canvas.drawCircle(
             rightCheek.x() * displayWidth + offsetX,
             rightCheek.y() * displayHeight + offsetY,
             radius,
-            makeupPaint
+            blushPaint
         )
     }
 }

@@ -8,6 +8,28 @@ android {
     namespace = "com.zoewave.probase.features.ar.facelab"
 }
 
+val downloadFaceLandmarkerTask = tasks.register("downloadFaceLandmarker") {
+    val modelUrl = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task"
+    val outputDir = file("src/main/assets")
+    val outputFile = file("${outputDir}/face_landmarker.task")
+
+    outputs.file(outputFile)
+
+    doLast {
+        if (!outputFile.exists()) {
+            println("Downloading face_landmarker.task...")
+            outputDir.mkdirs()
+            ant.invokeMethod("get", mapOf("src" to modelUrl, "dest" to outputFile))
+        } else {
+            println("face_landmarker.task already exists, skipping download.")
+        }
+    }
+}
+
+tasks.named("preBuild") {
+    dependsOn(downloadFaceLandmarkerTask)
+}
+
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
