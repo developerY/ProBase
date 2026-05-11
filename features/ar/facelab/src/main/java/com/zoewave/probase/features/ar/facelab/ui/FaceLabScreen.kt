@@ -3,6 +3,7 @@ package com.zoewave.probase.features.ar.facelab.ui
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -77,6 +78,7 @@ fun FaceLabScreen(
             faceLandmarkerHelperListener = object : FaceLandmarkerHelper.LandmarkerListener {
                 override fun onError(error: String, errorCode: Int) {
                     errorMessage = error
+                    Log.e("FaceLabScreen", "Landmarker Error: $error")
                 }
                 override fun onResults(resultBundle: FaceLandmarkerHelper.ResultBundle) {
                     if (resultBundle.results.isNotEmpty()) {
