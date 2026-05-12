@@ -50,4 +50,15 @@
     <string name="applications_gotmind_features_memblox_excellent">EXCELLENT!!</string>
     <string name="applications_gotmind_features_memblox_unstoppable">UNSTOPPABLE!!!</string>
     <string name="applications_gotmind_features_memblox_godlike">GODLIKE!!!!</string>
+
+    <string name="applications_gotmind_features_memblox_medal_sniper">Sniper</string>
+    <string name="applications_gotmind_features_memblox_medal_streak">Streak</string>
+    <string name="applications_gotmind_features_memblox_medal_pro">Pro</string>
+
+    <!-- Ranks -->
+    <string name="applications_gotmind_features_memblox_rank_s">S</string>
+    <string name="applications_gotmind_features_memblox_rank_a">A</string>
+    <string name="applications_gotmind_features_memblox_rank_b">B</string>
+    <string name="applications_gotmind_features_memblox_rank_c">C</string>
+    <string name="applications_gotmind_features_memblox_rank_d">D</string>
 </resources>

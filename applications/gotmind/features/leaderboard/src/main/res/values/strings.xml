@@ -9,4 +9,10 @@
     <string name="applications_gotmind_features_leaderboard_percent_format">%1$d%%</string>
     <string name="applications_gotmind_features_leaderboard_clear">Clear Hall of Fame</string>
     <string name="applications_gotmind_features_leaderboard_clear_confirm">Are you sure you want to clear your legendary legacy? This cannot be undone.</string>
+
+    <string name="applications_gotmind_features_leaderboard_tab_memblox">MEMBLOX</string>
+    <string name="applications_gotmind_features_leaderboard_tab_soundmind">SOUNDMIND</string>
+    <string name="applications_gotmind_features_leaderboard_clear_all">CLEAR ALL</string>
+    <string name="applications_gotmind_features_leaderboard_cancel">CANCEL</string>
+    <string name="applications_gotmind_features_leaderboard_level_prefix">LEVEL %1$d</string>
 </resources>

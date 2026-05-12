@@ -112,7 +112,7 @@ data class MemBloxState(
     val totalMatchTimeMs: Long = 0,
     val peakBoardBlocks: Int = 0,
     val firstFlipTimestamp: Long = 0,
-    val finalRank: String = "",
+    val finalRankResId: Int? = null,
     val isPaused: Boolean = false,
     val speedMultiplier: Float = 1.0f,
     val dropHeight: Int = 5,

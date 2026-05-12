@@ -737,22 +737,24 @@ fun EndGameOverlay(
             // Rank Badge
             Box(contentAlignment = Alignment.Center) {
                 Surface(
-                    color = when(state.finalRank) {
-                        "S" -> Color(0xFFFFD700)
-                        "A" -> Color(0xFFC0C0C0)
-                        "B" -> Color(0xFFCD7F32)
+                    color = when(state.finalRankResId) {
+                        R.string.applications_gotmind_features_memblox_rank_s -> Color(0xFFFFD700)
+                        R.string.applications_gotmind_features_memblox_rank_a -> Color(0xFFC0C0C0)
+                        R.string.applications_gotmind_features_memblox_rank_b -> Color(0xFFCD7F32)
                         else -> Color.Gray
                     },
                     shape = CircleShape,
                     modifier = Modifier.size(100.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = state.finalRank,
-                            fontSize = 50.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color.White
-                        )
+                        state.finalRankResId?.let {
+                            Text(
+                                text = stringResource(it),
+                                fontSize = 50.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }
@@ -938,9 +940,9 @@ fun HallOfFameCard(score: MemBloxScoreEntity) {
                 }
                 
                 Row {
-                    if (isSniper) MedalBadge(Icons.Default.TrackChanges, "Sniper", Color(0xFFFFC107))
-                    if (score.bestStreak >= 8) MedalBadge(Icons.Default.Speed, "Streak", Color(0xFFE91E63))
-                    if (score.powerUpsUsed == 0) MedalBadge(Icons.Default.Shield, "Pro", Color(0xFF03A9F4))
+                    if (isSniper) MedalBadge(Icons.Default.TrackChanges, stringResource(R.string.applications_gotmind_features_memblox_medal_sniper), Color(0xFFFFC107))
+                    if (score.bestStreak >= 8) MedalBadge(Icons.Default.Speed, stringResource(R.string.applications_gotmind_features_memblox_medal_streak), Color(0xFFE91E63))
+                    if (score.powerUpsUsed == 0) MedalBadge(Icons.Default.Shield, stringResource(R.string.applications_gotmind_features_memblox_medal_pro), Color(0xFF03A9F4))
                 }
 
                 Text(date, style = MaterialTheme.typography.labelSmall, color = Color.Gray)

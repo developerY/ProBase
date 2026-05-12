@@ -2,6 +2,7 @@ package com.zoewave.probase.gotmind.features.memblox
 
 import android.graphics.Paint
 import android.graphics.Color as AndroidColor
+import com.zoewave.probase.core.util.audio.WaveSynthesizer
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +31,11 @@ abstract class BaseMemBloxEngine(
     override val state: StateFlow<MemBloxState> = _state.asStateFlow()
 
     protected var gameJob: Job? = null
+    protected var synthesizer: com.zoewave.probase.core.util.audio.WaveSynthesizer? = null
+
+    override fun setAudioSynthesizer(synthesizer: com.zoewave.probase.core.util.audio.WaveSynthesizer?) {
+        this.synthesizer = synthesizer
+    }
 
     private fun generateSupportedEmojiList(): List<String> {
         val paint = Paint()
@@ -144,6 +150,17 @@ abstract class BaseMemBloxEngine(
         _state.update { it.copy(lastHapticSignal = null) }
     }
 
+    protected fun playMatchSound() {
+        if (!_state.value.soundEnabled) return
+        val synth = synthesizer ?: return
+        scope.launch {
+            // Cool retro arcade "match" sound
+            synth.playTone(523.25, 80, WaveSynthesizer.Waveform.SQUARE) // C5
+            synth.playTone(659.25, 80, WaveSynthesizer.Waveform.SQUARE) // E5
+            synth.playTone(783.99, 120, WaveSynthesizer.Waveform.SQUARE) // G5
+        }
+    }
+
     protected fun triggerHaptic(signal: HapticSignal) {
         if (_state.value.hapticsEnabled) {
             _state.update { it.copy(lastHapticSignal = signal) }
@@ -204,6 +221,7 @@ abstract class BaseMemBloxEngine(
             if (flipped.size == 2 && flipped[0].emoji == flipped[1].emoji) {
                 // Match!
                 triggerHaptic(HapticSignal.MEDIUM)
+                playMatchSound()
                 val matchedIds = flipped.map { it.id }.toSet()
                 val matchBursts = flipped.map { ConfettiBurst(col = it.col, row = it.row) }
                 val ghosts = flipped.map { MatchGhost(emoji = it.emoji, col = it.col, row = it.row) }
@@ -277,7 +295,7 @@ abstract class BaseMemBloxEngine(
                     matchGhosts = state.matchGhosts + ghosts,
                     powerUps = updatedPowerUps,
                     floatingScores = state.floatingScores + scorePopup,
-                    finalRank = if (isVictory) calculateRank(state.copy(score = state.score + points, matchAccuracy = newAccuracy, bestMatchStreak = newBestStreak)) else ""
+                    finalRankResId = if (isVictory) calculateRankResId(state.copy(score = state.score + points, matchAccuracy = newAccuracy, bestMatchStreak = newBestStreak)) else null
                 ).also {
                     scope.launch { applyGravity() }
                     scope.launch {
@@ -322,17 +340,17 @@ abstract class BaseMemBloxEngine(
         }
     }
 
-    protected fun calculateRank(state: MemBloxState): String {
+    protected fun calculateRankResId(state: MemBloxState): Int {
         val score = state.score
         val accuracy = state.matchAccuracy
         val streak = state.bestMatchStreak
         
         return when {
-            accuracy >= 0.9f && streak >= 10 -> "S"
-            accuracy >= 0.7f && score > 500 -> "A"
-            accuracy >= 0.5f && score > 250 -> "B"
-            score > 100 -> "C"
-            else -> "D"
+            accuracy >= 0.9f && streak >= 10 -> R.string.applications_gotmind_features_memblox_rank_s
+            accuracy >= 0.7f && score > 500 -> R.string.applications_gotmind_features_memblox_rank_a
+            accuracy >= 0.5f && score > 250 -> R.string.applications_gotmind_features_memblox_rank_b
+            score > 100 -> R.string.applications_gotmind_features_memblox_rank_c
+            else -> R.string.applications_gotmind_features_memblox_rank_d
         }
     }
 

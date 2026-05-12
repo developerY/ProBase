@@ -32,7 +32,7 @@ abstract class BaseMindWaveEngine(
             score = 0, 
             level = 1, 
             isGameOver = false, 
-            feedbackMessage = null, 
+            feedbackMessageResId = null,
             grid = createInitialGrid(),
             mode = mode,
             sequencePath = emptyList() // Reset path on start
@@ -43,11 +43,11 @@ abstract class BaseMindWaveEngine(
     protected abstract fun createInitialGrid(): List<Node>
 
     protected fun generateNewSequence(level: Int) {
-        val isSongMaster = _state.value.currentSongTitle != null // We'll set this based on settings
+        val isSongMaster = _state.value.currentSongTitleResId != null // We'll set this based on settings
         
         val newSequence = if (isSongMaster) {
             val melody = MelodyLibrary.getForLevel(level)
-            _state.update { it.copy(currentSongTitle = melody.title) }
+            _state.update { it.copy(currentSongTitleResId = melody.titleResId) }
             melody.sequence
         } else {
             val sequenceLength = 1 + level // Start with 2 nodes
@@ -120,7 +120,7 @@ abstract class BaseMindWaveEngine(
                 _state.update { it.copy(
                     userInput = newUserInput,
                     score = it.score + (it.level * 10),
-                    feedbackMessage = "Wave Synced!"
+                    feedbackMessageResId = R.string.applications_gotmind_features_mindwave_perfect
                 ) }
                 triggerHaptic(HapticSignal.MEDIUM)
                 scope.launch {
@@ -136,14 +136,14 @@ abstract class BaseMindWaveEngine(
             playGameOverSound()
             val finalScore = state.score
             val finalLevel = state.level
-            _state.update { it.copy(isGameOver = true, feedbackMessage = "Signal Lost") }
+            _state.update { it.copy(isGameOver = true, feedbackMessageResId = R.string.applications_gotmind_features_mindwave_broken) }
             onGameOver(finalScore, finalLevel)
         }
     }
 
     protected fun startNextLevel() {
         val nextLevel = _state.value.level + 1
-        _state.update { it.copy(level = nextLevel, feedbackMessage = null) }
+        _state.update { it.copy(level = nextLevel, feedbackMessageResId = null) }
         generateNewSequence(nextLevel)
     }
 
@@ -179,7 +179,7 @@ abstract class BaseMindWaveEngine(
     ) {
         _state.update { it.copy(
             activeWaveform = waveform,
-            currentSongTitle = if (songMaster) "Ready for Melody" else null,
+            currentSongTitleResId = if (songMaster) R.string.applications_gotmind_features_mindwave_melody_ready else null,
             nodeShape = nodeShape
         ) }
     }
