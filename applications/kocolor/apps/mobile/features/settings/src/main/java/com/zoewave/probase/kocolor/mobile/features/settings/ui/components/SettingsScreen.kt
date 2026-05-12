@@ -8,12 +8,16 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
+import com.zoewave.probase.kocolor.mobile.core.R
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsEvent
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsUiState
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsViewModel
@@ -43,6 +47,9 @@ fun SettingsScreen(
     navTo: (KoColorRoute?) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val uriHandler = LocalUriHandler.current
+    val privacyPolicyUrl = stringResource(R.string.applications_kocolor_apps_mobile_core_privacy_policy_url)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -91,6 +98,20 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("KoColor Fashion App v0.1.0")
                     Text("Powered by Gemini AI")
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    TextButton(
+                        onClick = { uriHandler.openUri(privacyPolicyUrl) },
+                        modifier = Modifier.align(Alignment.Start),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.applications_kocolor_apps_mobile_core_settings_about_privacy_policy),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
                 }
             }
         }
