@@ -114,12 +114,12 @@ fun LeaderboardScreen(
             Tab(
                 selected = selectedTab == 0,
                 onClick = { selectedTab = 0 },
-                text = { Text("MEMBLOX", fontWeight = FontWeight.Bold) }
+                text = { Text(stringResource(R.string.applications_gotmind_features_leaderboard_tab_memblox), fontWeight = FontWeight.Bold) }
             )
             Tab(
                 selected = selectedTab == 1,
                 onClick = { selectedTab = 1 },
-                text = { Text("SOUNDMIND", fontWeight = FontWeight.Bold) }
+                text = { Text(stringResource(R.string.applications_gotmind_features_leaderboard_tab_soundmind), fontWeight = FontWeight.Bold) }
             )
         }
 
@@ -160,12 +160,12 @@ fun LeaderboardScreen(
                     if (selectedTab == 0) onClearMemBlox() else onClearMindWave()
                     showDeleteConfirm = false
                 }) {
-                    Text("CLEAR ALL", color = Color.Red, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.applications_gotmind_features_leaderboard_clear_all), color = Color.Red, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("CANCEL", color = Color.Gray)
+                    Text(stringResource(R.string.applications_gotmind_features_leaderboard_cancel), color = Color.Gray)
                 }
             }
         )
@@ -233,7 +233,7 @@ fun MindWaveHallOfFameCard(score: MindWaveScoreEntity) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Column {
                     Text(
-                        text = "LEVEL ${score.level}", 
+                        text = stringResource(R.string.applications_gotmind_features_leaderboard_level_prefix, score.level),
                         style = MaterialTheme.typography.labelSmall, 
                         color = MaterialTheme.colorScheme.secondary, 
                         fontWeight = FontWeight.Bold
