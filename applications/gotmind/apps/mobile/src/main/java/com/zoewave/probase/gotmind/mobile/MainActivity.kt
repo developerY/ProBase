@@ -145,7 +145,7 @@ class MainActivity : ComponentActivity() {
                                                 membloxScores = memBloxScores,
                                                 mindwaveScores = mindWaveScores,
                                                 onClearMemBlox = { memBloxVm.handleEvent(MemBloxEvent.ClearHallOfFame) },
-                                                onClearMindWave = { mindWaveVm.handleEvent(MindWaveEvent.ResetGame) } // Need a clear event for MindWave
+                                                onClearMindWave = { mindWaveVm.handleEvent(MindWaveEvent.ClearHallOfFame) }
                                             )
                                         }
                                         GotMindRoute.Settings -> {
