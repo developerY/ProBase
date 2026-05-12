@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.travel.LocationRepository
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
@@ -31,7 +32,9 @@ data class AnalyzerScreenUiState(
     val hairUri: String? = null,
     val shoesUri: String? = null,
     val clothesUri: String? = null,
-    val selectedOccasion: String = "Work"
+    val selectedOccasion: String = "Work",
+    val locationName: String? = null,
+    val isLocating: Boolean = false
 )
 
 sealed class AnalyzerEvent {
@@ -40,6 +43,8 @@ sealed class AnalyzerEvent {
     data class OnShoesCaptured(val uri: String) : AnalyzerEvent()
     data class OnClothesCaptured(val uri: String) : AnalyzerEvent()
     data class OnOccasionSelected(val occasion: String) : AnalyzerEvent()
+    data class OnLocationChanged(val location: String?) : AnalyzerEvent()
+    data object OnDetectLocationClicked : AnalyzerEvent()
     data object OnAnalyzeClicked : AnalyzerEvent()
     data class OnSaveClicked(val advice: FashionAdvice) : AnalyzerEvent()
     data object OnResetClicked : AnalyzerEvent()
@@ -51,15 +56,20 @@ class AnalyzerViewModel @Inject constructor(
     private val analyzerEngine: AnalyzerEngine,
     private val fashionRepository: FashionRepository,
     private val aiSettings: AiConfigurationSettings,
-    private val sessionRepository: FashionSessionRepository
+    private val sessionRepository: FashionSessionRepository,
+    private val locationRepository: LocationRepository
 ) : ViewModel() {
 
     private val _analyzerState = MutableStateFlow<AnalyzerUiState>(AnalyzerUiState.Idle)
     private val _selectedOccasion = MutableStateFlow("Work")
+    private val _manualLocation = MutableStateFlow<String?>(null)
+    private val _isLocating = MutableStateFlow(false)
 
     val uiState: StateFlow<AnalyzerScreenUiState> = combine(
         _analyzerState,
         _selectedOccasion,
+        _manualLocation,
+        _isLocating,
         sessionRepository.faceUri,
         sessionRepository.hairUri,
         sessionRepository.shoesUri,
@@ -67,10 +77,12 @@ class AnalyzerViewModel @Inject constructor(
     ) { params ->
         val analyzerState = params[0] as AnalyzerUiState
         val occasion = params[1] as String
-        val faceUri = params[2] as String?
-        val hairUri = params[3] as String?
-        val shoesUri = params[4] as String?
-        val clothesUri = params[5] as String?
+        val manualLoc = params[2] as String?
+        val isLocating = params[3] as Boolean
+        val faceUri = params[4] as String?
+        val hairUri = params[5] as String?
+        val shoesUri = params[6] as String?
+        val clothesUri = params[7] as String?
 
         AnalyzerScreenUiState(
             analyzerState = analyzerState,
@@ -78,7 +90,9 @@ class AnalyzerViewModel @Inject constructor(
             hairUri = hairUri,
             shoesUri = shoesUri,
             clothesUri = clothesUri,
-            selectedOccasion = occasion
+            selectedOccasion = occasion,
+            locationName = manualLoc,
+            isLocating = isLocating
         )
     }.stateIn(
         scope = viewModelScope,
@@ -103,6 +117,12 @@ class AnalyzerViewModel @Inject constructor(
             is AnalyzerEvent.OnOccasionSelected -> {
                 _selectedOccasion.value = event.occasion
             }
+            is AnalyzerEvent.OnLocationChanged -> {
+                _manualLocation.value = event.location
+            }
+            is AnalyzerEvent.OnDetectLocationClicked -> {
+                detectLocation()
+            }
             is AnalyzerEvent.OnAnalyzeClicked -> {
                 analyzePhotos()
             }
@@ -112,8 +132,21 @@ class AnalyzerViewModel @Inject constructor(
             is AnalyzerEvent.OnResetClicked -> {
                 _analyzerState.value = AnalyzerUiState.Idle
                 _selectedOccasion.value = "Work"
+                _manualLocation.value = null
                 sessionRepository.reset()
             }
+        }
+    }
+
+    private fun detectLocation() {
+        viewModelScope.launch {
+            _isLocating.value = true
+            locationRepository.updateLocation()
+            val latLng = locationRepository.currentLocation.first()
+            if (latLng != null) {
+                _manualLocation.value = "GPS: ${latLng.latitude}, ${latLng.longitude}"
+            }
+            _isLocating.value = false
         }
     }
 
@@ -124,6 +157,7 @@ class AnalyzerViewModel @Inject constructor(
             val sUri = uiState.value.shoesUri
             val cUri = uiState.value.clothesUri
             val occasion = uiState.value.selectedOccasion
+            val location = uiState.value.locationName
 
             if (fUri == null && hUri == null && sUri == null && cUri == null) {
                 _analyzerState.value = AnalyzerUiState.Error("Please capture at least one image.")
@@ -155,6 +189,7 @@ class AnalyzerViewModel @Inject constructor(
                     shoes = shoesBitmap,
                     clothes = clothesBitmap,
                     occasion = occasion,
+                    location = location,
                     apiKey = apiKey,
                     modelName = modelName
                 )

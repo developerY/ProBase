@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -204,6 +205,13 @@ fun StyleCaptureState(
             onOccasionSelected = { onEvent(AnalyzerEvent.OnOccasionSelected(it)) }
         )
 
+        LocationInput(
+            locationName = uiState.locationName,
+            isLocating = uiState.isLocating,
+            onLocationChanged = { onEvent(AnalyzerEvent.OnLocationChanged(it)) },
+            onDetectLocation = { onEvent(AnalyzerEvent.OnDetectLocationClicked) }
+        )
+
         Button(
             onClick = onAnalyze,
             enabled = uiState.faceUri != null || uiState.hairUri != null || uiState.shoesUri != null || uiState.clothesUri != null,
@@ -241,6 +249,48 @@ fun OccasionFilter(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun LocationInput(
+    locationName: String?,
+    isLocating: Boolean,
+    onLocationChanged: (String?) -> Unit,
+    onDetectLocation: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text("Style Location", style = MaterialTheme.typography.labelMedium)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = locationName ?: "",
+                onValueChange = { onLocationChanged(it.takeIf { it.isNotBlank() }) },
+                modifier = Modifier.weight(1f),
+                placeholder = { Text("City, Style Capital...") },
+                label = { Text("Local Context") },
+                singleLine = true,
+                trailingIcon = {
+                    if (isLocating) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    } else {
+                        IconButton(onClick = onDetectLocation) {
+                            Icon(Icons.Default.MyLocation, contentDescription = "Detect Location")
+                        }
+                    }
+                }
+            )
+        }
+        Text(
+            "AI will tailor your palette to local fashion trends.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
