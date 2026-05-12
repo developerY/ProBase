@@ -68,6 +68,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -75,6 +76,7 @@ import com.zoewave.probase.gotmind.features.mindwave.HapticSignal
 import com.zoewave.probase.gotmind.features.mindwave.MindWaveEvent
 import com.zoewave.probase.gotmind.features.mindwave.MindWaveState
 import com.zoewave.probase.gotmind.features.mindwave.Node
+import com.zoewave.probase.gotmind.features.mindwave.R
 import com.zoewave.probase.gotmind.model.MindWaveMode
 import kotlin.random.Random
 
@@ -138,12 +140,12 @@ fun MindWaveScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(text = uiState.score.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
-                        Text(text = "SCORE", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                        Text(text = stringResource(R.string.applications_gotmind_features_mindwave_score), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                     }
                     Spacer(modifier = Modifier.width(24.dp))
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(text = uiState.level.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
-                        Text(text = "LEVEL", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                        Text(text = stringResource(R.string.applications_gotmind_features_mindwave_level), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                     }
                 }
 
@@ -181,7 +183,7 @@ fun MindWaveScreen(
                         ) {
                             Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("QUIT", style = MaterialTheme.typography.labelLarge)
+                            Text(stringResource(R.string.applications_gotmind_features_mindwave_quit), style = MaterialTheme.typography.labelLarge)
                         }
                         
                         Button(
@@ -196,7 +198,7 @@ fun MindWaveScreen(
                         ) {
                             Icon(if (uiState.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(if (uiState.isPaused) "RESUME" else "PAUSE", style = MaterialTheme.typography.labelLarge)
+                            Text(if (uiState.isPaused) stringResource(R.string.applications_gotmind_features_mindwave_resume) else stringResource(R.string.applications_gotmind_features_mindwave_pause), style = MaterialTheme.typography.labelLarge)
                         }
                     }
                 }
@@ -207,9 +209,9 @@ fun MindWaveScreen(
             if (uiState.mode == MindWaveMode.SYMPHONY || uiState.mode == MindWaveMode.HARMONIC_ARC) {
                 MusicalStaff(activeNodeId = uiState.activeNodeId)
                 Spacer(modifier = Modifier.height(12.dp))
-                if (uiState.currentSongTitle != null) {
+                if (uiState.currentSongTitleResId != null) {
                     Text(
-                        text = "Melody: ${uiState.currentSongTitle}",
+                        text = stringResource(R.string.applications_gotmind_features_mindwave_melody_prefix, stringResource(uiState.currentSongTitleResId)),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.secondary,
                         fontWeight = FontWeight.Bold
@@ -217,14 +219,14 @@ fun MindWaveScreen(
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = if (uiState.isPlayingSequence) "Listen carefully..." else "Repeat the Melody",
+                    text = if (uiState.isPlayingSequence) stringResource(R.string.applications_gotmind_features_mindwave_listen_carefully) else stringResource(R.string.applications_gotmind_features_mindwave_repeat_melody),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = if (uiState.isPlayingSequence) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.8f)
                 )
             } else {
                 Text(
-                    text = if (uiState.isPlayingSequence) "Watch the Wave..." else "Repeat the Pattern",
+                    text = if (uiState.isPlayingSequence) stringResource(R.string.applications_gotmind_features_mindwave_watch) else stringResource(R.string.applications_gotmind_features_mindwave_repeat),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Black,
                     color = if (uiState.isPlayingSequence) MaterialTheme.colorScheme.secondary else Color.White
@@ -246,9 +248,9 @@ fun MindWaveScreen(
                     if (isFullCircle) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             MusicalStaff(activeNodeId = uiState.activeNodeId)
-                            if (uiState.currentSongTitle != null) {
+                            if (uiState.currentSongTitleResId != null) {
                                 Text(
-                                    text = uiState.currentSongTitle,
+                                    text = stringResource(uiState.currentSongTitleResId),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.secondary,
                                     fontWeight = FontWeight.Bold
@@ -349,7 +351,7 @@ fun MindWaveScreen(
                     interactionSource = startButtonInteractionSource,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text(if (uiState.isGameOver) "TRY AGAIN" else "START GAME", fontWeight = FontWeight.Black)
+                    Text(if (uiState.isGameOver) stringResource(R.string.applications_gotmind_features_mindwave_retry) else stringResource(R.string.applications_gotmind_features_mindwave_start), fontWeight = FontWeight.Black)
                 }
             }
         }
@@ -361,16 +363,16 @@ fun MindWaveScreen(
             containerColor = Color(0xFF1E1E1E),
             titleContentColor = Color.White,
             textContentColor = Color.Gray,
-            title = { Text("Sequence Broken") },
-            text = { Text("The melody has drifted away. Keep training your sensory memory!") },
+            title = { Text(stringResource(R.string.applications_gotmind_features_mindwave_game_over_title)) },
+            text = { Text(stringResource(R.string.applications_gotmind_features_mindwave_game_over_desc)) },
             confirmButton = {
                 TextButton(onClick = { onEvent(MindWaveEvent.StartGame) }) {
-                    Text("RETRY WAVE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.applications_gotmind_features_mindwave_retry_wave), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onNav("BACK") }) {
-                    Text("BACK TO HUB", color = Color.Gray)
+                    Text(stringResource(R.string.applications_gotmind_features_mindwave_back_hub), color = Color.Gray)
                 }
             }
         )

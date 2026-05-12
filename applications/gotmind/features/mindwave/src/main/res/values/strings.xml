@@ -9,4 +9,25 @@
     <string name="applications_gotmind_features_mindwave_score_format">SIGNAL %1$d</string>
     <string name="applications_gotmind_features_mindwave_perfect">Perfect Sync!</string>
     <string name="applications_gotmind_features_mindwave_broken">Signal Lost</string>
+
+    <string name="applications_gotmind_features_mindwave_score">SCORE</string>
+    <string name="applications_gotmind_features_mindwave_level">LEVEL</string>
+    <string name="applications_gotmind_features_mindwave_quit">QUIT</string>
+    <string name="applications_gotmind_features_mindwave_resume">RESUME</string>
+    <string name="applications_gotmind_features_mindwave_pause">PAUSE</string>
+    <string name="applications_gotmind_features_mindwave_melody_prefix">Melody: %1$s</string>
+    <string name="applications_gotmind_features_mindwave_listen_carefully">Listen carefully…</string>
+    <string name="applications_gotmind_features_mindwave_repeat_melody">Repeat the Melody</string>
+    <string name="applications_gotmind_features_mindwave_game_over_title">Sequence Broken</string>
+    <string name="applications_gotmind_features_mindwave_game_over_desc">The melody has drifted away. Keep training your sensory memory!</string>
+    <string name="applications_gotmind_features_mindwave_retry_wave">RETRY WAVE</string>
+    <string name="applications_gotmind_features_mindwave_back_hub">BACK TO HUB</string>
+
+    <string name="applications_gotmind_features_mindwave_melody_ode_to_joy">Ode to Joy (Snippet)</string>
+    <string name="applications_gotmind_features_mindwave_melody_major_arpeggio">Major Arpeggio</string>
+    <string name="applications_gotmind_features_mindwave_melody_star_path">Star Path</string>
+    <string name="applications_gotmind_features_mindwave_melody_chromatic_wave">Chromatic Wave</string>
+    <string name="applications_gotmind_features_mindwave_melody_midnight_call">Midnight Call</string>
+    <string name="applications_gotmind_features_mindwave_melody_high_peak">High Peak</string>
+    <string name="applications_gotmind_features_mindwave_melody_ready">Ready for Melody</string>
 </resources>

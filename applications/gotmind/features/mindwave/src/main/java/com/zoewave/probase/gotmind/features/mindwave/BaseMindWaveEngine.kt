@@ -43,11 +43,11 @@ abstract class BaseMindWaveEngine(
     protected abstract fun createInitialGrid(): List<Node>
 
     protected fun generateNewSequence(level: Int) {
-        val isSongMaster = _state.value.currentSongTitle != null // We'll set this based on settings
+        val isSongMaster = _state.value.currentSongTitleResId != null // We'll set this based on settings
         
         val newSequence = if (isSongMaster) {
             val melody = MelodyLibrary.getForLevel(level)
-            _state.update { it.copy(currentSongTitle = melody.title) }
+            _state.update { it.copy(currentSongTitleResId = melody.titleResId) }
             melody.sequence
         } else {
             val sequenceLength = 1 + level // Start with 2 nodes
@@ -179,7 +179,7 @@ abstract class BaseMindWaveEngine(
     ) {
         _state.update { it.copy(
             activeWaveform = waveform,
-            currentSongTitle = if (songMaster) "Ready for Melody" else null,
+            currentSongTitleResId = if (songMaster) R.string.applications_gotmind_features_mindwave_melody_ready else null,
             nodeShape = nodeShape
         ) }
     }

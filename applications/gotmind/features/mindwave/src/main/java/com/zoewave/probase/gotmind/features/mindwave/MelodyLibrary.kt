@@ -1,7 +1,9 @@
 package com.zoewave.probase.gotmind.features.mindwave
 
+import androidx.annotation.StringRes
+
 data class Melody(
-    val title: String,
+    @StringRes val titleResId: Int,
     val sequence: List<Int> // Node IDs 0..15
 )
 
@@ -14,27 +16,27 @@ object MelodyLibrary {
 
     val melodies = listOf(
         Melody(
-            title = "Ode to Joy (Snippet)",
+            titleResId = R.string.applications_gotmind_features_mindwave_melody_ode_to_joy,
             sequence = listOf(11, 11, 10, 8, 8, 10, 11, 12)
         ),
         Melody(
-            title = "Major Arpeggio",
+            titleResId = R.string.applications_gotmind_features_mindwave_melody_major_arpeggio,
             sequence = listOf(15, 11, 8, 3)
         ),
         Melody(
-            title = "Star Path",
+            titleResId = R.string.applications_gotmind_features_mindwave_melody_star_path,
             sequence = listOf(15, 15, 8, 8, 6, 6, 8)
         ),
         Melody(
-            title = "Chromatic Wave",
+            titleResId = R.string.applications_gotmind_features_mindwave_melody_chromatic_wave,
             sequence = listOf(15, 14, 13, 12, 11, 10, 9, 8)
         ),
         Melody(
-            title = "Midnight Call",
+            titleResId = R.string.applications_gotmind_features_mindwave_melody_midnight_call,
             sequence = listOf(4, 6, 4, 11, 15)
         ),
         Melody(
-            title = "High Peak",
+            titleResId = R.string.applications_gotmind_features_mindwave_melody_high_peak,
             sequence = listOf(15, 12, 8, 4, 1, 0)
         )
     )

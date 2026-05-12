@@ -32,7 +32,7 @@ data class MindWaveState(
     val nodeShape: NodeShape = NodeShape.CIRCLE,
     val activeNodeId: Int? = null, // For visual staff notation
     val sequencePath: List<Int> = emptyList(), // Path of the sequence for constellation drawing
-    val currentSongTitle: String? = null,
+    val currentSongTitleResId: Int? = null,
     val activeWaveform: com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform = com.zoewave.probase.core.util.audio.WaveSynthesizer.Waveform.SINE
 )
 
