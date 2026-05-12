@@ -938,9 +938,9 @@ fun HallOfFameCard(score: MemBloxScoreEntity) {
                 }
                 
                 Row {
-                    if (isSniper) MedalBadge(Icons.Default.TrackChanges, "Sniper", Color(0xFFFFC107))
-                    if (score.bestStreak >= 8) MedalBadge(Icons.Default.Speed, "Streak", Color(0xFFE91E63))
-                    if (score.powerUpsUsed == 0) MedalBadge(Icons.Default.Shield, "Pro", Color(0xFF03A9F4))
+                    if (isSniper) MedalBadge(Icons.Default.TrackChanges, stringResource(R.string.applications_gotmind_features_memblox_medal_sniper), Color(0xFFFFC107))
+                    if (score.bestStreak >= 8) MedalBadge(Icons.Default.Speed, stringResource(R.string.applications_gotmind_features_memblox_medal_streak), Color(0xFFE91E63))
+                    if (score.powerUpsUsed == 0) MedalBadge(Icons.Default.Shield, stringResource(R.string.applications_gotmind_features_memblox_medal_pro), Color(0xFF03A9F4))
                 }
 
                 Text(date, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
