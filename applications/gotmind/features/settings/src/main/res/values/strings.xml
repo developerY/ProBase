@@ -49,4 +49,10 @@
 
     <string name="applications_gotmind_features_settings_mw_song_master">Song Master Mode</string>
     <string name="applications_gotmind_features_settings_mw_song_master_desc">Learn famous melodies through play</string>
+
+    <string name="applications_gotmind_features_settings_section_system">System Prefs</string>
+    <string name="applications_gotmind_features_settings_section_arcade">Arcade Modules</string>
+    <string name="applications_gotmind_features_settings_module_soundmind">SoundMind</string>
+    <string name="applications_gotmind_features_settings_module_memblox">MemBlox</string>
+    <string name="applications_gotmind_features_settings_section_support">Support</string>
 </resources>
