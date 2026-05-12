@@ -15,6 +15,7 @@ interface IMemBloxEngine {
     fun updateDropDuration(durationMillis: Int)
     fun setHapticsEnabled(enabled: Boolean)
     fun setSoundEnabled(enabled: Boolean)
+    fun setAudioSynthesizer(synthesizer: com.zoewave.probase.core.util.audio.WaveSynthesizer?)
     fun onBlockClick(block: MemBloxBlock)
     fun usePowerUp(type: PowerUpType)
     fun onHapticConsumed()

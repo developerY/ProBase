@@ -2,6 +2,7 @@ package com.zoewave.probase.gotmind.features.memblox
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.util.audio.WaveSynthesizer
 import com.zoewave.probase.gotmind.analytics.AnalyticsEvent
 import com.zoewave.probase.gotmind.analytics.AnalyticsHelper
 import com.zoewave.probase.gotmind.analytics.AnalyticsParam
@@ -27,7 +28,8 @@ import javax.inject.Inject
 class MemBloxViewModel @Inject constructor(
     private val scoreDao: MemBloxScoreDao,
     private val appSettingsRepository: AppSettingsRepository,
-    private val analyticsHelper: AnalyticsHelper
+    private val analyticsHelper: AnalyticsHelper,
+    private val waveSynthesizer: WaveSynthesizer
 ) : ViewModel() {
 
     private val _engineType = MutableStateFlow(MemBloxEngineType.STATIC)
@@ -51,6 +53,7 @@ class MemBloxViewModel @Inject constructor(
                 engine.updateDropDuration(settings.dropDurationMillis)
                 engine.setHapticsEnabled(settings.hapticsEnabled)
                 engine.setSoundEnabled(settings.soundEnabled)
+                engine.setAudioSynthesizer(waveSynthesizer)
             }
             .launchIn(viewModelScope)
     }

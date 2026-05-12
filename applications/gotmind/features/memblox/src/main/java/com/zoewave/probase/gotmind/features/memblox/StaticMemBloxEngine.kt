@@ -22,7 +22,7 @@ class StaticMemBloxEngine(
         } ?: -1
 
         if (restingRow == -1) {
-            _state.update { it.copy(isGameOver = true, finalRank = calculateRank(it)) }
+            _state.update { it.copy(isGameOver = true, finalRankResId = calculateRankResId(it)) }
             triggerHaptic(HapticSignal.HEAVY)
             onGameOver(_state.value.score)
             return

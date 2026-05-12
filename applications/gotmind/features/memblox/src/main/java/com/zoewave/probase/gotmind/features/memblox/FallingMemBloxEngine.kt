@@ -14,7 +14,7 @@ class FallingMemBloxEngine(
     override suspend fun spawnLogic() {
         val col = (0 until currentDifficulty.cols).random()
         if (_state.value.grid.any { it.row == 0 && it.col == col }) {
-            _state.update { it.copy(isGameOver = true, finalRank = calculateRank(it)) }
+            _state.update { it.copy(isGameOver = true, finalRankResId = calculateRankResId(it)) }
             triggerHaptic(HapticSignal.HEAVY)
             onGameOver(_state.value.score)
             return

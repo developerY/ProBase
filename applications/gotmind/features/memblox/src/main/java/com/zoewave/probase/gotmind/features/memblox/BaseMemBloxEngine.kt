@@ -2,6 +2,7 @@ package com.zoewave.probase.gotmind.features.memblox
 
 import android.graphics.Paint
 import android.graphics.Color as AndroidColor
+import com.zoewave.probase.core.util.audio.WaveSynthesizer
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +31,11 @@ abstract class BaseMemBloxEngine(
     override val state: StateFlow<MemBloxState> = _state.asStateFlow()
 
     protected var gameJob: Job? = null
+    protected var synthesizer: com.zoewave.probase.core.util.audio.WaveSynthesizer? = null
+
+    override fun setAudioSynthesizer(synthesizer: com.zoewave.probase.core.util.audio.WaveSynthesizer?) {
+        this.synthesizer = synthesizer
+    }
 
     private fun generateSupportedEmojiList(): List<String> {
         val paint = Paint()
@@ -144,6 +150,17 @@ abstract class BaseMemBloxEngine(
         _state.update { it.copy(lastHapticSignal = null) }
     }
 
+    protected fun playMatchSound() {
+        if (!_state.value.soundEnabled) return
+        val synth = synthesizer ?: return
+        scope.launch {
+            // Cool retro arcade "match" sound
+            synth.playTone(523.25, 80, WaveSynthesizer.Waveform.SQUARE) // C5
+            synth.playTone(659.25, 80, WaveSynthesizer.Waveform.SQUARE) // E5
+            synth.playTone(783.99, 120, WaveSynthesizer.Waveform.SQUARE) // G5
+        }
+    }
+
     protected fun triggerHaptic(signal: HapticSignal) {
         if (_state.value.hapticsEnabled) {
             _state.update { it.copy(lastHapticSignal = signal) }
@@ -204,6 +221,7 @@ abstract class BaseMemBloxEngine(
             if (flipped.size == 2 && flipped[0].emoji == flipped[1].emoji) {
                 // Match!
                 triggerHaptic(HapticSignal.MEDIUM)
+                playMatchSound()
                 val matchedIds = flipped.map { it.id }.toSet()
                 val matchBursts = flipped.map { ConfettiBurst(col = it.col, row = it.row) }
                 val ghosts = flipped.map { MatchGhost(emoji = it.emoji, col = it.col, row = it.row) }
