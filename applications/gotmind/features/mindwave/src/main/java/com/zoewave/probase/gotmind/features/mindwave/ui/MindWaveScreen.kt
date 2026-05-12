@@ -329,9 +329,9 @@ fun MindWaveScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // Feedback Message
-            uiState.feedbackMessage?.let {
+            uiState.feedbackMessageResId?.let {
                 Text(
-                    text = it,
+                    text = stringResource(it),
                     color = if (uiState.isGameOver) Color.Red else Color.Green,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp

@@ -277,7 +277,7 @@ abstract class BaseMemBloxEngine(
                     matchGhosts = state.matchGhosts + ghosts,
                     powerUps = updatedPowerUps,
                     floatingScores = state.floatingScores + scorePopup,
-                    finalRank = if (isVictory) calculateRank(state.copy(score = state.score + points, matchAccuracy = newAccuracy, bestMatchStreak = newBestStreak)) else ""
+                    finalRankResId = if (isVictory) calculateRankResId(state.copy(score = state.score + points, matchAccuracy = newAccuracy, bestMatchStreak = newBestStreak)) else null
                 ).also {
                     scope.launch { applyGravity() }
                     scope.launch {
@@ -322,17 +322,17 @@ abstract class BaseMemBloxEngine(
         }
     }
 
-    protected fun calculateRank(state: MemBloxState): String {
+    protected fun calculateRankResId(state: MemBloxState): Int {
         val score = state.score
         val accuracy = state.matchAccuracy
         val streak = state.bestMatchStreak
         
         return when {
-            accuracy >= 0.9f && streak >= 10 -> "S"
-            accuracy >= 0.7f && score > 500 -> "A"
-            accuracy >= 0.5f && score > 250 -> "B"
-            score > 100 -> "C"
-            else -> "D"
+            accuracy >= 0.9f && streak >= 10 -> R.string.applications_gotmind_features_memblox_rank_s
+            accuracy >= 0.7f && score > 500 -> R.string.applications_gotmind_features_memblox_rank_a
+            accuracy >= 0.5f && score > 250 -> R.string.applications_gotmind_features_memblox_rank_b
+            score > 100 -> R.string.applications_gotmind_features_memblox_rank_c
+            else -> R.string.applications_gotmind_features_memblox_rank_d
         }
     }
 

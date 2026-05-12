@@ -23,7 +23,7 @@ data class MindWaveState(
     val score: Int = 0,
     val highScore: Int = 0,
     val isStarted: Boolean = false,
-    val feedbackMessage: String? = null,
+    val feedbackMessageResId: Int? = null,
     val hapticsEnabled: Boolean = true,
     val soundEnabled: Boolean = true,
     val lastHapticSignal: HapticSignal? = null,
