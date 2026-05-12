@@ -23,6 +23,7 @@ class AnalyzerEngine @Inject constructor() {
         shoes: Bitmap?,
         clothes: Bitmap?,
         occasion: String,
+        location: String?,
         apiKey: String,
         modelName: String = "gemini-1.5-flash"
     ): FashionAdvice {
@@ -43,6 +44,7 @@ class AnalyzerEngine @Inject constructor() {
             text("""
                 You are a professional personal color analyst and style consultant. 
                 The user is preparing for a specific occasion: $occasion.
+                ${if (location != null) "Current Location Context: $location. Take local climate and fashion trends for this area into account." else ""}
                 
                 I have provided up to 4 images:
                 1. Face selfie
@@ -63,7 +65,7 @@ class AnalyzerEngine @Inject constructor() {
                 1. Identify the Seasonal Type (SPRING, SUMMER, AUTUMN, WINTER) of the face.
                 2. Identify the Undertone (WARM, COOL, NEUTRAL) of the face.
                 3. Analyze how the hair and shoe colors (if provided) interact with the skin tone and clothing.
-                4. Provide a cohesive summary explaining the coordination strategy for the $occasion.
+                4. Provide a cohesive summary explaining the coordination strategy for the $occasion ${if (location != null) "in $location" else ""}.
                 5. Give specific makeup suggestions (Foundation, Lip, Eye, Blush) appropriate for $occasion.
                 6. Give a specific recommendation for NAIL POLISH color and finish that ties the whole look together for $occasion. Ensure this is categorized as "Nail Polish" in your response.
                 7. Recommend a makeup color palette (HEX codes).

@@ -11,6 +11,7 @@ android {
 
 dependencies {
     implementation(project(":core:model"))
+    implementation(project(":core:data"))
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
     implementation(project(":applications:kocolor:model"))
@@ -19,6 +20,7 @@ dependencies {
     implementation(project(":features:camera"))
 
     implementation(libs.google.generative.ai)
+    implementation(libs.google.play.services.maps)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
