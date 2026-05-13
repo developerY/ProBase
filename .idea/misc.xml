@@ -5,6 +5,7 @@
       <file path="$PROJECT_DIR$/applications/gotmind/Docs" />
       <file path="$PROJECT_DIR$/applications/gotmind/features/memblox/docs" />
       <file path="$PROJECT_DIR$/applications/kocolor/Docs" />
+      <file path="$PROJECT_DIR$/applications/rxlogic/docs" />
       <file path="$PROJECT_DIR$/features/health/docs" />
       <file path="$PROJECT_DIR$/features/payment/Docs" />
     </excludeRoots>

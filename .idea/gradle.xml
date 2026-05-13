@@ -118,6 +118,16 @@
             <option value="$PROJECT_DIR$/applications/photodo/features/smartadvice" />
             <option value="$PROJECT_DIR$/applications/photodo/features/timebudgeting" />
             <option value="$PROJECT_DIR$/applications/photodo/model" />
+            <option value="$PROJECT_DIR$/applications/rxlogic" />
+            <option value="$PROJECT_DIR$/applications/rxlogic/apps" />
+            <option value="$PROJECT_DIR$/applications/rxlogic/apps/mobile" />
+            <option value="$PROJECT_DIR$/applications/rxlogic/data" />
+            <option value="$PROJECT_DIR$/applications/rxlogic/db" />
+            <option value="$PROJECT_DIR$/applications/rxlogic/features" />
+            <option value="$PROJECT_DIR$/applications/rxlogic/features/daily" />
+            <option value="$PROJECT_DIR$/applications/rxlogic/features/medications" />
+            <option value="$PROJECT_DIR$/applications/rxlogic/features/settings" />
+            <option value="$PROJECT_DIR$/applications/rxlogic/model" />
             <option value="$PROJECT_DIR$/applications/seaweed" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile" />
