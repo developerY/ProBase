@@ -165,7 +165,9 @@ include(":applications:gotmind:apps:mobile")
 include(":applications:rxlogic:model")
 include(":applications:rxlogic:db")
 include(":applications:rxlogic:data")
-include(":applications:rxlogic:features:reminders")
+include(":applications:rxlogic:features:daily")
+include(":applications:rxlogic:features:medications")
+include(":applications:rxlogic:features:settings")
 include(":applications:rxlogic:apps:mobile")
 
 // --- GigWork Product Line ---
