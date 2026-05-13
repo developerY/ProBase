@@ -161,6 +161,13 @@ include(":applications:gotmind:features:memblox")
 include(":applications:gotmind:features:mindwave")
 include(":applications:gotmind:apps:mobile")
 
+// --- RxLogic Product Line ---
+include(":applications:rxlogic:model")
+include(":applications:rxlogic:db")
+include(":applications:rxlogic:data")
+include(":applications:rxlogic:features:reminders")
+include(":applications:rxlogic:apps:mobile")
+
 // --- GigWork Product Line ---
 include(":applications:gigwork:model")
 include(":applications:gigwork:database")
