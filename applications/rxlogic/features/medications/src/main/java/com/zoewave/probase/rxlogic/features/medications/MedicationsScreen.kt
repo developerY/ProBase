@@ -1,4 +1,4 @@
-package com.zoewave.probase.rxlogic.features.reminders
+package com.zoewave.probase.rxlogic.features.medications
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,29 +28,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.rxlogic.model.LogStatus
+import com.zoewave.probase.rxlogic.model.Frequency
 import com.zoewave.probase.rxlogic.model.Medication
+import com.zoewave.probase.rxlogic.model.navigation.RxLogicRoute
+import kotlinx.datetime.LocalTime
 
 @Composable
-fun RemindersScreen(
-    viewModel: RemindersViewModel,
+fun MedicationsScreen(
+    uiState: MedicationsUiState,
+    onEvent: (MedicationsEvent) -> Unit,
+    navTo: (RxLogicRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    var showAddDialog by remember { mutableStateOf(false) }
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             Text(
-                text = "RxLogic Reminders",
+                text = "Medications",
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(16.dp)
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
+            FloatingActionButton(onClick = { onEvent(MedicationsEvent.OnShowAddDialog(true)) }) {
                 Icon(Icons.Default.Add, contentDescription = "Add Medication")
             }
         }
@@ -59,16 +61,18 @@ fun RemindersScreen(
             CircularProgressIndicator(modifier = Modifier.fillMaxSize())
         } else {
             MedicationList(
-                medications = uiState.medications,
-                onTakenClick = viewModel::markAsTaken,
+                uiState = uiState.medications,
+                onEvent = onEvent,
+                navTo = navTo,
                 modifier = Modifier.padding(innerPadding)
             )
         }
 
-        if (showAddDialog) {
+        if (uiState.showAddDialog) {
             AddMedicationDialog(
-                onDismiss = { showAddDialog = false },
-                onConfirm = viewModel::addMedication
+                uiState = Unit,
+                onEvent = onEvent,
+                navTo = navTo
             )
         }
     }
@@ -76,11 +80,12 @@ fun RemindersScreen(
 
 @Composable
 fun MedicationList(
-    medications: List<Medication>,
-    onTakenClick: (String) -> Unit,
+    uiState: List<Medication>,
+    onEvent: (MedicationsEvent) -> Unit,
+    navTo: (RxLogicRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (medications.isEmpty()) {
+    if (uiState.isEmpty()) {
         Text(
             text = "No medications added yet.",
             modifier = modifier.padding(16.dp)
@@ -91,10 +96,11 @@ fun MedicationList(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(medications, key = { it.id }) { medication ->
+            items(uiState, key = { it.id }) { medication ->
                 MedicationItem(
-                    medication = medication,
-                    onTakenClick = { onTakenClick(medication.id) }
+                    uiState = medication,
+                    onEvent = onEvent,
+                    navTo = navTo
                 )
             }
         }
@@ -103,8 +109,9 @@ fun MedicationList(
 
 @Composable
 fun MedicationItem(
-    medication: Medication,
-    onTakenClick: () -> Unit,
+    uiState: Medication,
+    onEvent: (MedicationsEvent) -> Unit,
+    navTo: (RxLogicRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -118,16 +125,52 @@ fun MedicationItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(text = medication.name, style = MaterialTheme.typography.titleLarge)
-                Text(text = medication.dosage, style = MaterialTheme.typography.bodyMedium)
+                Text(text = uiState.name, style = MaterialTheme.typography.titleLarge)
+                Text(text = uiState.dosage, style = MaterialTheme.typography.bodyMedium)
                 Text(
-                    text = medication.reminderTimes.joinToString(", "),
+                    text = uiState.reminderTimes.joinToString(", "),
                     style = MaterialTheme.typography.labelSmall
                 )
             }
-            IconButton(onClick = onTakenClick) {
+            IconButton(onClick = { onEvent(MedicationsEvent.OnMarkAsTaken(uiState.id)) }) {
                 Icon(Icons.Default.Check, contentDescription = "Mark as taken")
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MedicationsScreenPreview() {
+    MedicationsScreen(
+        uiState = MedicationsUiState(
+            medications = listOf(
+                Medication(
+                    id = "1",
+                    name = "Aspirin",
+                    dosage = "100mg",
+                    frequency = Frequency.DAILY,
+                    reminderTimes = listOf(LocalTime(8, 0))
+                )
+            )
+        ),
+        onEvent = {},
+        navTo = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MedicationItemPreview() {
+    MedicationItem(
+        uiState = Medication(
+            id = "1",
+            name = "Aspirin",
+            dosage = "100mg",
+            frequency = Frequency.DAILY,
+            reminderTimes = listOf(LocalTime(8, 0))
+        ),
+        onEvent = {},
+        navTo = {}
+    )
 }

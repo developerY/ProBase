@@ -1,4 +1,4 @@
-package com.zoewave.probase.rxlogic.features.reminders
+package com.zoewave.probase.rxlogic.features.medications
 
 import android.content.Context
 import androidx.hilt.work.HiltWorker
@@ -15,11 +15,7 @@ class ReminderWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         val medicationName = inputData.getString("medication_name") ?: "Medication"
-        
-        // In a real app, we would show a notification here.
-        // For this task, we'll just log it.
         println("Reminder for $medicationName")
-        
         return Result.success()
     }
 }

@@ -1,4 +1,4 @@
-package com.zoewave.probase.rxlogic.features.reminders
+package com.zoewave.probase.rxlogic.features.medications
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,39 +11,58 @@ import com.zoewave.probase.rxlogic.model.LogStatus
 import com.zoewave.probase.rxlogic.model.Medication
 import com.zoewave.probase.rxlogic.model.MedicationLog
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalTime
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
-class RemindersViewModel @Inject constructor(
+class MedicationsViewModel @Inject constructor(
     private val medicationRepository: MedicationRepository,
     private val workManager: WorkManager
 ) : ViewModel() {
 
-    val uiState: StateFlow<RemindersUiState> = combine(
+    private val _showAddDialog = MutableStateFlow(false)
+
+    val uiState: StateFlow<MedicationsUiState> = combine(
         medicationRepository.getMedications(),
-        medicationRepository.getLogs()
-    ) { medications, logs ->
-        RemindersUiState(
+        medicationRepository.getLogs(),
+        _showAddDialog
+    ) { medications, logs, showAddDialog ->
+        MedicationsUiState(
             medications = medications,
             logs = logs,
-            isLoading = false
+            isLoading = false,
+            showAddDialog = showAddDialog
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = RemindersUiState(isLoading = true)
+        initialValue = MedicationsUiState(isLoading = true)
     )
 
-    fun addMedication(name: String, dosage: String, frequency: Frequency, time: LocalTime) {
+    fun onEvent(event: MedicationsEvent) {
+        when (event) {
+            is MedicationsEvent.OnAddMedication -> {
+                addMedication(event.name, event.dosage, event.frequency, event.time)
+            }
+            is MedicationsEvent.OnMarkAsTaken -> {
+                markAsTaken(event.medicationId)
+            }
+            is MedicationsEvent.OnShowAddDialog -> {
+                _showAddDialog.update { event.show }
+            }
+        }
+    }
+
+    private fun addMedication(name: String, dosage: String, frequency: Frequency, time: LocalTime) {
         viewModelScope.launch {
             val medication = Medication(
                 id = UUID.randomUUID().toString(),
@@ -64,7 +83,7 @@ class RemindersViewModel @Inject constructor(
 
         val workRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
             .setInputData(data)
-            .setInitialDelay(1, TimeUnit.MINUTES) // Example delay
+            .setInitialDelay(1, TimeUnit.MINUTES)
             .build()
 
         workManager.enqueue(workRequest)

@@ -1,4 +1,4 @@
-package com.zoewave.probase.rxlogic.features.reminders
+package com.zoewave.probase.rxlogic.features.medications
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,19 +12,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.rxlogic.model.Frequency
+import com.zoewave.probase.rxlogic.model.navigation.RxLogicRoute
 import kotlinx.datetime.LocalTime
 
 @Composable
 fun AddMedicationDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (String, String, Frequency, LocalTime) -> Unit
+    uiState: Unit,
+    onEvent: (MedicationsEvent) -> Unit,
+    navTo: (RxLogicRoute) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var dosage by remember { mutableStateOf("") }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { onEvent(MedicationsEvent.OnShowAddDialog(false)) },
         title = { Text("Add Medication") },
         text = {
             Column {
@@ -44,16 +47,26 @@ fun AddMedicationDialog(
         },
         confirmButton = {
             Button(onClick = {
-                onConfirm(name, dosage, Frequency.DAILY, LocalTime(8, 0))
-                onDismiss()
+                onEvent(MedicationsEvent.OnAddMedication(name, dosage, Frequency.DAILY, LocalTime(8, 0)))
+                onEvent(MedicationsEvent.OnShowAddDialog(false))
             }) {
                 Text("Add")
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
+            Button(onClick = { onEvent(MedicationsEvent.OnShowAddDialog(false)) }) {
                 Text("Cancel")
             }
         }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddMedicationDialogPreview() {
+    AddMedicationDialog(
+        uiState = Unit,
+        onEvent = {},
+        navTo = {}
     )
 }

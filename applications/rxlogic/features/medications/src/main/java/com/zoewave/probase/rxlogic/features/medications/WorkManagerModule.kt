@@ -1,4 +1,4 @@
-package com.zoewave.probase.rxlogic.features.reminders
+package com.zoewave.probase.rxlogic.features.medications
 
 import android.content.Context
 import androidx.work.WorkManager
