@@ -56,7 +56,7 @@ class RoutinesViewModel @Inject constructor(
     private fun initializeDay(date: Long) {
         viewModelScope.launch {
             routineDao.insertRoutine(RoutineEntity(
-                title = "Morning Routine",
+                title = "morning beautiful routine",
                 time = RoutineTime.MORNING,
                 steps = RoutineDefaults.getMorningRoutine(),
                 date = date

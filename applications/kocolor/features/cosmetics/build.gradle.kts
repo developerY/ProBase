@@ -6,28 +6,21 @@ plugins {
 }
 
 android {
-    namespace = "com.zoewave.probase.kocolor.features.inventory"
+    namespace = "com.zoewave.probase.kocolor.features.cosmetics"
 }
 
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
-    implementation(project(":core:model"))
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:db"))
     implementation(project(":applications:kocolor:data"))
 
-    // MediaPipe
-    implementation(libs.mediapipe.vision)
-
-    // Security
-    implementation(libs.androidx.security.crypto)
-
-    // Compose
-    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.collections.immutable)
 }
