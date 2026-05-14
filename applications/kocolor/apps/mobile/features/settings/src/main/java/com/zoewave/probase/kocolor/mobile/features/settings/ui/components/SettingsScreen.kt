@@ -49,6 +49,7 @@ fun SettingsScreen(
 ) {
     val uriHandler = LocalUriHandler.current
     val privacyPolicyUrl = stringResource(R.string.applications_kocolor_apps_mobile_core_privacy_policy_url)
+    val dataDeletionUrl = stringResource(R.string.applications_kocolor_apps_mobile_core_data_deletion_url)
 
     Scaffold(
         topBar = {
@@ -108,6 +109,18 @@ fun SettingsScreen(
                     ) {
                         Text(
                             text = stringResource(R.string.applications_kocolor_apps_mobile_core_settings_about_privacy_policy),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+
+                    TextButton(
+                        onClick = { uriHandler.openUri(dataDeletionUrl) },
+                        modifier = Modifier.align(Alignment.Start),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.applications_kocolor_apps_mobile_core_settings_about_data_deletion),
                             color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.labelLarge
                         )

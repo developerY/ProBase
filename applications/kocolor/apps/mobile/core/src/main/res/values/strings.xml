@@ -12,5 +12,7 @@
     <string name="applications_kocolor_apps_mobile_core_settings_theme_title">App Theme</string>
     <string name="applications_kocolor_apps_mobile_core_settings_palette_title">Color Palette</string>
     <string name="applications_kocolor_apps_mobile_core_settings_about_privacy_policy">Privacy Policy</string>
+    <string name="applications_kocolor_apps_mobile_core_settings_about_data_deletion">Data Deletion Instructions</string>
     <string name="applications_kocolor_apps_mobile_core_privacy_policy_url">https://github.com/your-org/probase/blob/main/applications/kocolor/Docs/PrivacyPolicy.md</string>
+    <string name="applications_kocolor_apps_mobile_core_data_deletion_url">https://github.com/your-org/probase/blob/main/applications/kocolor/Docs/Data_Deletion_Instructions.md</string>
 </resources>
