@@ -9,8 +9,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.annotation.OptIn
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import kotlin.OptIn
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
 import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
