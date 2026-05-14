@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.model
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -14,6 +15,9 @@ sealed class KoColorRoute {
     
     @Serializable
     data object Color : KoColorRoute()
+
+    @Serializable
+    data object Routines : KoColorRoute()
     
     @Serializable
     data class Analyzer(val uri: String? = null) : KoColorRoute()
@@ -40,6 +44,7 @@ sealed class KoColorRoute {
         get() = when (this) {
             Home -> Icons.Default.Home
             Color -> Icons.Default.ColorLens
+            Routines -> Icons.Default.Face
             Settings -> Icons.Default.Settings
             else -> null
         }
@@ -48,6 +53,7 @@ sealed class KoColorRoute {
         get() = when (this) {
             Home -> "Main"
             Color -> "Color"
+            Routines -> "Routines"
             Settings -> "Settings"
             else -> null
         }
@@ -55,6 +61,7 @@ sealed class KoColorRoute {
 
 val topLevelRoutes = listOf(
     KoColorRoute.Home,
+    KoColorRoute.Routines,
     KoColorRoute.Color,
     KoColorRoute.Settings
 )
