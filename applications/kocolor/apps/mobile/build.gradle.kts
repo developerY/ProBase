@@ -50,6 +50,7 @@ dependencies {
     implementation(project(":applications:kocolor:features:suggestions"))
     implementation(project(":applications:kocolor:features:color"))
     implementation(project(":applications:kocolor:features:inventory"))
+    implementation(project(":applications:kocolor:features:routines"))
     implementation(project(":features:ar:naillab"))
     implementation(project(":features:ar:facelab"))
     

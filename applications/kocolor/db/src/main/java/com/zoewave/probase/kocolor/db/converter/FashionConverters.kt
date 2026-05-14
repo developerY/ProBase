@@ -4,6 +4,8 @@ import androidx.room3.TypeConverter
 import com.zoewave.probase.kocolor.db.entity.InventoryType
 import com.zoewave.probase.kocolor.model.FashionAdvice
 import com.zoewave.probase.kocolor.model.InventoryMetadata
+import com.zoewave.probase.kocolor.model.RoutineStep
+import com.zoewave.probase.kocolor.model.RoutineTime
 import com.zoewave.probase.kocolor.model.SeasonalType
 import com.zoewave.probase.kocolor.model.Undertone
 import kotlinx.serialization.encodeToString
@@ -47,4 +49,16 @@ class FashionConverters {
 
     @TypeConverter
     fun toStringList(value: String): List<String> = try { json.decodeFromString<List<String>>(value) } catch (e: Exception) { emptyList() }
+
+    @TypeConverter
+    fun fromRoutineStepList(value: List<RoutineStep>): String = json.encodeToString(value)
+
+    @TypeConverter
+    fun toRoutineStepList(value: String): List<RoutineStep> = try { json.decodeFromString<List<RoutineStep>>(value) } catch (e: Exception) { emptyList() }
+
+    @TypeConverter
+    fun fromRoutineTime(value: RoutineTime): String = value.name
+
+    @TypeConverter
+    fun toRoutineTime(value: String): RoutineTime = try { RoutineTime.valueOf(value) } catch (e: Exception) { RoutineTime.OTHER }
 }

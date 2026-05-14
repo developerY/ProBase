@@ -6,18 +6,21 @@ import androidx.room3.TypeConverters
 import com.zoewave.probase.kocolor.db.converter.FashionConverters
 import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
 import com.zoewave.probase.kocolor.db.dao.InventoryDao
+import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.db.dao.SavedSuggestionDao
 import com.zoewave.probase.kocolor.db.entity.FashionProfileEntity
 import com.zoewave.probase.kocolor.db.entity.InventoryItemEntity
+import com.zoewave.probase.kocolor.db.entity.RoutineEntity
 import com.zoewave.probase.kocolor.db.entity.SavedSuggestionEntity
 
 @Database(
     entities = [
         FashionProfileEntity::class,
         SavedSuggestionEntity::class,
-        InventoryItemEntity::class
+        InventoryItemEntity::class,
+        RoutineEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(FashionConverters::class)
@@ -26,4 +29,5 @@ abstract class KoColorDatabase : RoomDatabase() {
     abstract val fashionProfileDao: FashionProfileDao
     abstract val savedSuggestionDao: SavedSuggestionDao
     abstract val inventoryDao: InventoryDao
+    abstract val routineDao: RoutineDao
 }

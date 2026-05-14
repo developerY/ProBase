@@ -8,6 +8,7 @@ import com.zoewave.probase.kocolor.db.KoColorDatabase
 import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
 import com.zoewave.probase.kocolor.db.dao.InventoryDao
+import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.db.dao.SavedSuggestionDao
 import dagger.Binds
 import dagger.Module
@@ -50,5 +51,8 @@ abstract class DatabaseModule {
 
         @Provides
         fun provideInventoryDao(db: KoColorDatabase): InventoryDao = db.inventoryDao
+
+        @Provides
+        fun provideRoutineDao(db: KoColorDatabase): RoutineDao = db.routineDao
     }
 }
