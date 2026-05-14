@@ -18,6 +18,12 @@ sealed class KoColorRoute {
 
     @Serializable
     data object Routines : KoColorRoute()
+
+    @Serializable
+    data object Cosmetics : KoColorRoute()
+
+    @Serializable
+    data object Wardrobe : KoColorRoute()
     
     @Serializable
     data class Analyzer(val uri: String? = null) : KoColorRoute()
@@ -61,7 +67,6 @@ sealed class KoColorRoute {
 
 val topLevelRoutes = listOf(
     KoColorRoute.Home,
-    KoColorRoute.Routines,
     KoColorRoute.Color,
     KoColorRoute.Settings
 )
