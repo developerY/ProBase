@@ -2,6 +2,8 @@ package com.zoewave.probase.kocolor.db.converter
 
 import androidx.room3.TypeConverter
 import com.zoewave.probase.kocolor.db.entity.InventoryType
+import com.zoewave.probase.kocolor.model.ClothingCategory
+import com.zoewave.probase.kocolor.model.CosmeticCategory
 import com.zoewave.probase.kocolor.model.FashionAdvice
 import com.zoewave.probase.kocolor.model.InventoryMetadata
 import com.zoewave.probase.kocolor.model.RoutineStep
@@ -61,4 +63,16 @@ class FashionConverters {
 
     @TypeConverter
     fun toRoutineTime(value: String): RoutineTime = try { RoutineTime.valueOf(value) } catch (e: Exception) { RoutineTime.OTHER }
+
+    @TypeConverter
+    fun fromCosmeticCategory(value: CosmeticCategory): String = value.name
+
+    @TypeConverter
+    fun toCosmeticCategory(value: String): CosmeticCategory = try { CosmeticCategory.valueOf(value) } catch (e: Exception) { CosmeticCategory.OTHER }
+
+    @TypeConverter
+    fun fromClothingCategory(value: ClothingCategory): String = value.name
+
+    @TypeConverter
+    fun toClothingCategory(value: String): ClothingCategory = try { ClothingCategory.valueOf(value) } catch (e: Exception) { ClothingCategory.OTHER }
 }

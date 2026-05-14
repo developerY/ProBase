@@ -13,9 +13,11 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":applications:kocolor:data"))
     implementation(project(":applications:kocolor:model"))
+    implementation(project(":applications:kocolor:db"))
     implementation(project(":applications:kocolor:apps:mobile:core"))
     implementation(project(":applications:kocolor:features:analyzer"))
     implementation(project(":applications:kocolor:features:suggestions"))
+    implementation(project(":applications:kocolor:features:routines"))
     implementation(project(":features:ai:configuration"))
 
     implementation(libs.androidx.navigation3.runtime)

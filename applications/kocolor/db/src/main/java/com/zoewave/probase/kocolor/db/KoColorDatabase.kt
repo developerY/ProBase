@@ -4,10 +4,14 @@ import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import androidx.room3.TypeConverters
 import com.zoewave.probase.kocolor.db.converter.FashionConverters
+import com.zoewave.probase.kocolor.db.dao.ClothingDao
+import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
 import com.zoewave.probase.kocolor.db.dao.InventoryDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.db.dao.SavedSuggestionDao
+import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
+import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.db.entity.FashionProfileEntity
 import com.zoewave.probase.kocolor.db.entity.InventoryItemEntity
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
@@ -18,9 +22,11 @@ import com.zoewave.probase.kocolor.db.entity.SavedSuggestionEntity
         FashionProfileEntity::class,
         SavedSuggestionEntity::class,
         InventoryItemEntity::class,
-        RoutineEntity::class
+        RoutineEntity::class,
+        CosmeticItemEntity::class,
+        ClothingItemEntity::class
     ],
-    version = 3,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(FashionConverters::class)
@@ -30,4 +36,6 @@ abstract class KoColorDatabase : RoomDatabase() {
     abstract val savedSuggestionDao: SavedSuggestionDao
     abstract val inventoryDao: InventoryDao
     abstract val routineDao: RoutineDao
+    abstract val cosmeticDao: CosmeticDao
+    abstract val clothingDao: ClothingDao
 }

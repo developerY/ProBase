@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
 import com.zoewave.probase.kocolor.model.BeautyRoutine
 import com.zoewave.probase.kocolor.model.RoutineStep
 import com.zoewave.probase.kocolor.model.RoutineTime
@@ -110,13 +111,7 @@ private fun RoutinesContent(
 
 @Composable
 private fun BeautyAdviceCard() {
-    val tips = listOf(
-        "Consistency is key: Perform your routine daily for best results.",
-        "Hydration from within: Drink at least 8 glasses of water a day.",
-        "Pat, don't rub: Gently pat skin products to aid absorption.",
-        "The 10-Step Rule: Korean skincare emphasizes layering for deep nourishment.",
-        "Sunscreen always: Even on cloudy days, UV rays can damage skin."
-    )
+    val advice = remember { RoutineDefaults.dailyBeautyAdvice.random() }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -126,15 +121,14 @@ private fun BeautyAdviceCard() {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Lightbulb, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Daily Beauty Advice", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("Beauty Tip of the Day", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.height(8.dp))
-            tips.forEach { tip ->
-                Row(modifier = Modifier.padding(vertical = 4.dp)) {
-                    Text("•", modifier = Modifier.padding(end = 8.dp))
-                    Text(tip, style = MaterialTheme.typography.bodySmall)
-                }
-            }
+            Text(
+                text = advice,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
         }
     }
 }

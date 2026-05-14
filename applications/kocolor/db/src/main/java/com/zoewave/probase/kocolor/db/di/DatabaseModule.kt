@@ -6,6 +6,8 @@ import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import com.zoewave.probase.kocolor.db.KoColorDatabase
 import com.zoewave.probase.kocolor.db.KoColorSettings
+import com.zoewave.probase.kocolor.db.dao.ClothingDao
+import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
 import com.zoewave.probase.kocolor.db.dao.InventoryDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
@@ -54,5 +56,11 @@ abstract class DatabaseModule {
 
         @Provides
         fun provideRoutineDao(db: KoColorDatabase): RoutineDao = db.routineDao
+
+        @Provides
+        fun provideCosmeticDao(db: KoColorDatabase): CosmeticDao = db.cosmeticDao
+
+        @Provides
+        fun provideClothingDao(db: KoColorDatabase): ClothingDao = db.clothingDao
     }
 }

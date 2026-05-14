@@ -3,36 +3,174 @@ package com.zoewave.probase.kocolor.mobile.features.home.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.data.FashionRepository
-import com.zoewave.probase.kocolor.model.FashionProfile
+import com.zoewave.probase.kocolor.db.dao.ClothingDao
+import com.zoewave.probase.kocolor.db.dao.CosmeticDao
+import com.zoewave.probase.kocolor.db.dao.RoutineDao
+import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
+import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
+import com.zoewave.probase.kocolor.db.entity.RoutineEntity
+import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
+import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
+import com.zoewave.probase.kocolor.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
 
 data class HomeUiState(
-    val fashionProfile: FashionProfile? = null
+    val fashionProfile: FashionProfile? = null,
+    val morningRoutine: BeautyRoutine? = null,
+    val eveningRoutine: BeautyRoutine? = null,
+    val popularCosmetics: List<CosmeticItem> = emptyList(),
+    val popularClothing: List<ClothingItem> = emptyList(),
+    val isDaytime: Boolean = true,
+    val isLoadingRoutines: Boolean = true,
+    val beautyTip: String = ""
 )
 
 sealed class HomeEvent {
-    // Events can be added here as needed
+    data class ToggleStep(val routine: BeautyRoutine, val stepId: String) : HomeEvent()
+    data object RefreshTip : HomeEvent()
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val fashionRepository: FashionRepository
+    private val fashionRepository: FashionRepository,
+    private val routineDao: RoutineDao,
+    private val cosmeticDao: CosmeticDao,
+    private val clothingDao: ClothingDao
 ) : ViewModel() {
 
-    val uiState: StateFlow<HomeUiState> = fashionRepository.getProfile()
-        .map { profile -> HomeUiState(fashionProfile = profile) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = HomeUiState()
+    private val _currentDate = MutableStateFlow(Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.timeInMillis)
+
+    private val _beautyTip = MutableStateFlow(RoutineDefaults.dailyBeautyAdvice.random())
+
+    init {
+        viewModelScope.launch {
+            cosmeticDao.getAllCosmetics().first().let {
+                if (it.isEmpty()) {
+                    initializeDefaultCosmetics()
+                }
+            }
+        }
+    }
+
+    private suspend fun initializeDefaultCosmetics() {
+        for (item in CosmeticDefaults.getDefaultCosmetics()) {
+            cosmeticDao.insertCosmetic(item)
+        }
+    }
+
+    private val _routines = _currentDate.flatMapLatest { date ->
+        val startOfDay = date
+        val endOfDay = date + 24 * 60 * 60 * 1000
+        routineDao.getRoutinesForDay(startOfDay, endOfDay).onEach { entities ->
+            if (entities.isEmpty()) initializeDay(date)
+        }
+    }
+
+    val uiState: StateFlow<HomeUiState> = combine(
+        fashionRepository.getProfile(),
+        _routines,
+        cosmeticDao.getAllCosmetics(),
+        clothingDao.getAllClothing(),
+        _beautyTip
+    ) { profile, routines, cosmetics, clothing, tip ->
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        HomeUiState(
+            fashionProfile = profile,
+            morningRoutine = routines.find { it.time == RoutineTime.MORNING }?.toModel(),
+            eveningRoutine = routines.find { it.time == RoutineTime.EVENING }?.toModel(),
+            popularCosmetics = cosmetics.take(3).map { it.toModel() },
+            popularClothing = clothing.take(3).map { it.toModel() },
+            isDaytime = hour in 6..17,
+            isLoadingRoutines = routines.isEmpty(),
+            beautyTip = tip
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = HomeUiState()
+    )
+
+    private fun initializeDay(date: Long) {
+        viewModelScope.launch {
+            routineDao.insertRoutine(RoutineEntity(
+                title = "morning beautiful routine",
+                time = RoutineTime.MORNING,
+                steps = RoutineDefaults.getMorningRoutine(),
+                date = date
+            ))
+            routineDao.insertRoutine(RoutineEntity(
+                title = "Evening Routine",
+                time = RoutineTime.EVENING,
+                steps = RoutineDefaults.getEveningRoutine(),
+                date = date
+            ))
+        }
+    }
 
     fun onEvent(event: HomeEvent) {
-        // Handle events
+        when (event) {
+            is HomeEvent.ToggleStep -> toggleStep(event.routine, event.stepId)
+            HomeEvent.RefreshTip -> {
+                _beautyTip.value = RoutineDefaults.dailyBeautyAdvice.random()
+            }
+        }
     }
+
+    private fun toggleStep(routine: BeautyRoutine, stepId: String) {
+        viewModelScope.launch {
+            val updatedSteps = routine.steps.map {
+                if (it.id == stepId) it.copy(isCompleted = !it.isCompleted) else it
+            }
+            routineDao.updateRoutine(RoutineEntity(
+                id = routine.id,
+                title = routine.title,
+                time = routine.time,
+                steps = updatedSteps,
+                date = routine.date
+            ))
+        }
+    }
+
+    private fun RoutineEntity.toModel() = BeautyRoutine(
+        id = this.id,
+        title = this.title,
+        time = this.time,
+        steps = this.steps,
+        date = this.date
+    )
+
+    private fun CosmeticItemEntity.toModel() = CosmeticItem(
+        id = id,
+        name = name,
+        brand = brand,
+        category = category,
+        colorHex = colorHex,
+        shadeName = shadeName,
+        notes = notes,
+        timestamp = timestamp
+    )
+
+    private fun ClothingItemEntity.toModel() = ClothingItem(
+        id = id,
+        name = name,
+        brand = brand,
+        category = category,
+        colorHex = colorHex,
+        size = size,
+        material = material,
+        imageUrl = imageUrl,
+        notes = notes,
+        timestamp = timestamp
+    )
 }
