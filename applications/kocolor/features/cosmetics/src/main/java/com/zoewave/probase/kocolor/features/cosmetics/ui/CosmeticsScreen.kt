@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -105,14 +107,35 @@ fun CosmeticsScreen(
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
             } else {
+                val groupedItems = remember(uiState.items) {
+                    uiState.items.groupBy { it.category }
+                }
+
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(uiState.items) { item ->
-                        CosmeticCard(item = item, onDelete = { onEvent(CosmeticsEvent.DeleteItem(item.id)) })
+                    groupedItems.forEach { (category, items) ->
+                        item {
+                            Column {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = category.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
+                        items(items) { item ->
+                            CosmeticCard(item = item, onDelete = { onEvent(CosmeticsEvent.DeleteItem(item.id)) })
+                        }
                     }
+                    item { Spacer(modifier = Modifier.height(80.dp)) }
                 }
             }
         }
