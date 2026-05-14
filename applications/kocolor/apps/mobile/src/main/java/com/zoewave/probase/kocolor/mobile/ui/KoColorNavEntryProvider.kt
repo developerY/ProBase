@@ -12,6 +12,8 @@ import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
 import com.zoewave.probase.kocolor.features.color.ui.ColorDetailScreen
 import com.zoewave.probase.kocolor.features.color.ui.ColorUiRoute
 import com.zoewave.probase.kocolor.features.color.ui.ColorViewModel
+import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsUiRoute
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
 import com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute
@@ -53,6 +55,16 @@ fun koColorNavEntryProvider(
         }
         is KoColorRoute.Routines -> NavEntry(route) {
             RoutinesUiRoute(
+                onBack = onBack
+            )
+        }
+        is KoColorRoute.Cosmetics -> NavEntry(route) {
+            CosmeticsUiRoute(
+                onBack = onBack
+            )
+        }
+        is KoColorRoute.Wardrobe -> NavEntry(route) {
+            WardrobeRoute(
                 onBack = onBack
             )
         }

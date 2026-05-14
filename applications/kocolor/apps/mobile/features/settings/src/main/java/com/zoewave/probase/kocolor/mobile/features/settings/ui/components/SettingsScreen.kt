@@ -92,6 +92,23 @@ fun SettingsScreen(
                 title = "AI Configuration",
                 description = "Configure your Gemini API Key for style analysis and personal suggestions."
             )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Developer Options", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = { onEvent(SettingsEvent.OnGenerateSampleCosmetics) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Add 50 Sample Cosmetics")
+                    }
+                }
+            }
             
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
