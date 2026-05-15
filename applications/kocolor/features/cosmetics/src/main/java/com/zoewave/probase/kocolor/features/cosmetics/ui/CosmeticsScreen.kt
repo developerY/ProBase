@@ -138,7 +138,7 @@ fun CosmeticsScreen(
 
                 val expandedGroups = remember { 
                     mutableStateMapOf<String, Boolean>().apply {
-                        allGroups.forEach { put(it, true) }
+                        allGroups.forEach { put(it, false) }
                     }
                 }
 
