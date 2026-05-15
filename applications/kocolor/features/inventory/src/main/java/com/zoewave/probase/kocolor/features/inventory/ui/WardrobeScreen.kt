@@ -84,18 +84,39 @@ fun WardrobeScreen(
                 Text("Your wardrobe is empty.")
             }
         } else {
+            val groupedItems = remember(uiState.items) {
+                uiState.items.groupBy { it.category }
+            }
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(uiState.items) { item ->
-                    WardrobeCard(
-                        uiState = item,
-                        onEvent = { onEvent(WardrobeEvent.DeleteItem(item.id)) },
-                        navTo = navTo
-                    )
+                groupedItems.forEach { (category, items) ->
+                    item {
+                        Column {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = category.name.lowercase().replaceFirstChar { it.uppercase() },
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                    items(items) { item ->
+                        WardrobeCard(
+                            uiState = item,
+                            onEvent = { onEvent(WardrobeEvent.DeleteItem(item.id)) },
+                            navTo = navTo
+                        )
+                    }
                 }
+                item { Spacer(modifier = Modifier.height(80.dp)) }
             }
         }
     }

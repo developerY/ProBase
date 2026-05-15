@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.features.inventory.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
+import com.zoewave.probase.kocolor.db.data.ClothingDefaults
 import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.kocolor.model.ClothingCategory
 import com.zoewave.probase.kocolor.model.ClothingItem
@@ -25,6 +26,22 @@ sealed class WardrobeEvent {
 class WardrobeViewModel @Inject constructor(
     private val clothingDao: ClothingDao
 ) : ViewModel() {
+
+    init {
+        viewModelScope.launch {
+            clothingDao.getAllClothing().first().let {
+                if (it.isEmpty()) {
+                    initializeDefaultClothing()
+                }
+            }
+        }
+    }
+
+    private suspend fun initializeDefaultClothing() {
+        for (item in ClothingDefaults.getDefaultClothing()) {
+            clothingDao.insertClothing(item)
+        }
+    }
 
     val uiState: StateFlow<WardrobeUiState> = clothingDao.getAllClothing()
         .map { entities ->
