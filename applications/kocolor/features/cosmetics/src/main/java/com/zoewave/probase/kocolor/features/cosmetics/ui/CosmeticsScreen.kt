@@ -133,13 +133,6 @@ fun CosmeticsScreen(
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (uiState.items.isEmpty()) {
-                Text(
-                    "Your inventory is empty. Add your first beauty item!",
-                    modifier = Modifier.align(Alignment.Center).padding(32.dp),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
             } else {
                 val allGroups = listOf(
                     "Face (Base & Coverage)",
