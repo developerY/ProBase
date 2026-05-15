@@ -14,5 +14,19 @@ data class CosmeticItemEntity(
     val shadeName: String? = null,
     val imageUrl: String? = null,
     val notes: String? = null,
-    val timestamp: Long
+    val timestamp: Long,
+    
+    // --- Professional Inventory ---
+    val batchCode: String? = null,
+    val openedDate: Long? = null,
+    val paoMonths: Int? = null,
+    val expiryDate: Long? = null,
+    val price: Double? = null,
+    val volume: String? = null,
+
+    // --- Usage & State ---
+    val isOpened: Boolean = false,
+    val isFinished: Boolean = false,
+    val isArchived: Boolean = false,
+    val usageCount: Int = 0
 )

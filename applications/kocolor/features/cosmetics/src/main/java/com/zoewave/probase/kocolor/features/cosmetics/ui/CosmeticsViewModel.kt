@@ -23,15 +23,18 @@ data class CosmeticsUiState(
     val isLoading: Boolean = true,
     val capturedImageUri: String? = null,
     val isAnalyzing: Boolean = false,
-    val aiResult: CosmeticItem? = null
+    val aiResult: CosmeticItem? = null,
+    val draftItem: CosmeticItem = CosmeticItem(name = "", brand = "", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION)
 )
 
 sealed class CosmeticsEvent {
     data class AddItem(val item: CosmeticItem) : CosmeticsEvent()
     data class UpdateItem(val item: CosmeticItem) : CosmeticsEvent()
     data class DeleteItem(val id: Long) : CosmeticsEvent()
+    data class UpdateDraft(val item: CosmeticItem) : CosmeticsEvent()
     data object ScanWithGemini : CosmeticsEvent()
     data object ClearCapturedImage : CosmeticsEvent()
+    data class StartEditing(val item: CosmeticItem) : CosmeticsEvent()
 }
 
 @HiltViewModel
@@ -45,6 +48,7 @@ class CosmeticsViewModel @Inject constructor(
 
     private val _isAnalyzing = MutableStateFlow(false)
     private val _aiResult = MutableStateFlow<CosmeticItem?>(null)
+    private val _draftItem = MutableStateFlow(CosmeticItem(name = "", brand = "", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION))
 
     init {
         viewModelScope.launch {
@@ -66,22 +70,29 @@ class CosmeticsViewModel @Inject constructor(
         cosmeticDao.getAllCosmetics(),
         sessionRepository.capturedItemUri,
         _isAnalyzing,
-        _aiResult
-    ) { entities, capturedUri, analyzing, aiResult ->
+        _aiResult,
+        _draftItem
+    ) { entities, capturedUri, analyzing, aiResult, draft ->
         CosmeticsUiState(
             items = entities.map { it.toModel() },
             isLoading = false,
             capturedImageUri = capturedUri,
             isAnalyzing = analyzing,
-            aiResult = aiResult
+            aiResult = aiResult,
+            draftItem = draft.copy(imageUrl = capturedUri ?: draft.imageUrl)
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CosmeticsUiState())
 
     fun onEvent(event: CosmeticsEvent) {
         when (event) {
-            is CosmeticsEvent.AddItem -> addItem(event.item)
+            is CosmeticsEvent.AddItem -> {
+                addItem(event.item)
+                _draftItem.value = CosmeticItem(name = "", brand = "", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION)
+            }
             is CosmeticsEvent.UpdateItem -> updateItem(event.item)
             is CosmeticsEvent.DeleteItem -> deleteItem(event.id)
+            is CosmeticsEvent.UpdateDraft -> _draftItem.value = event.item
+            is CosmeticsEvent.StartEditing -> _draftItem.value = event.item
             CosmeticsEvent.ScanWithGemini -> scanWithGemini()
             CosmeticsEvent.ClearCapturedImage -> sessionRepository.setCapturedItemUri(null)
         }
@@ -109,6 +120,16 @@ class CosmeticsViewModel @Inject constructor(
                         apiKey = apiKey
                     )
                     _aiResult.value = result
+                    // Auto-fill draft with AI results
+                    result?.let {
+                        _draftItem.value = _draftItem.value.copy(
+                            name = it.name,
+                            brand = it.brand,
+                            category = it.category,
+                            colorHex = it.colorHex ?: _draftItem.value.colorHex,
+                            shadeName = it.shadeName ?: _draftItem.value.shadeName
+                        )
+                    }
                 }
             }
             _isAnalyzing.value = false
@@ -145,7 +166,17 @@ class CosmeticsViewModel @Inject constructor(
         shadeName = shadeName,
         imageUrl = imageUrl,
         notes = notes,
-        timestamp = timestamp
+        timestamp = timestamp,
+        batchCode = batchCode,
+        openedDate = openedDate,
+        paoMonths = paoMonths,
+        expiryDate = expiryDate,
+        price = price,
+        volume = volume,
+        isOpened = isOpened,
+        isFinished = isFinished,
+        isArchived = isArchived,
+        usageCount = usageCount
     )
 
     private fun CosmeticItem.toEntity() = CosmeticItemEntity(
@@ -157,6 +188,16 @@ class CosmeticsViewModel @Inject constructor(
         shadeName = shadeName,
         imageUrl = imageUrl,
         notes = notes,
-        timestamp = timestamp
+        timestamp = timestamp,
+        batchCode = batchCode,
+        openedDate = openedDate,
+        paoMonths = paoMonths,
+        expiryDate = expiryDate,
+        price = price,
+        volume = volume,
+        isOpened = isOpened,
+        isFinished = isFinished,
+        isArchived = isArchived,
+        usageCount = usageCount
     )
 }

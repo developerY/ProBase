@@ -228,7 +228,10 @@ fun CosmeticsScreen(
                                                 onEvent = { event ->
                                                     when (event) {
                                                         "delete" -> onEvent(CosmeticsEvent.DeleteItem(item.id))
-                                                        "edit" -> selectedItemForEdit = item
+                                                        "edit" -> {
+                                                            onEvent(CosmeticsEvent.StartEditing(item))
+                                                            selectedItemForEdit = item
+                                                        }
                                                     }
                                                 },
                                                 navTo = navTo,
@@ -269,10 +272,10 @@ fun CosmeticsScreen(
         )
     }
 
-    selectedItemForEdit?.let { item ->
+    selectedItemForEdit?.let { _ ->
         EditCosmeticDialog(
-            uiState = item,
-            onEvent = { onEvent(CosmeticsEvent.UpdateItem(it)) },
+            uiState = uiState,
+            onEvent = onEvent,
             navTo = { route ->
                 if (route == KoColorRoute.Back) {
                     selectedItemForEdit = null
@@ -579,23 +582,19 @@ fun CosmeticProductCard(
 
 @Composable
 fun EditCosmeticDialog(
-    uiState: CosmeticItem,
-    onEvent: (CosmeticItem) -> Unit,
+    uiState: CosmeticsUiState,
+    onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    var name by remember { mutableStateOf(uiState.name) }
-    var brand by remember { mutableStateOf(uiState.brand) }
-    var category by remember { mutableStateOf(uiState.category) }
-    var colorHex by remember { mutableStateOf(uiState.colorHex ?: "") }
-    var shadeName by remember { mutableStateOf(uiState.shadeName ?: "") }
-    var notes by remember { mutableStateOf(uiState.notes ?: "") }
+    val draft = uiState.draftItem
     var showCategoryMenu by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
 
     if (showColorPicker) {
+        val colorHex = draft.colorHex ?: ""
         ColorPickerDialog(
             initialColor = parseColor(colorHex),
-            onColorSelected = { colorHex = it.toHex() },
+            onColorSelected = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it.toHex()))) },
             onDismissRequest = { showColorPicker = false },
             title = "Pick Product Color"
         )
@@ -609,7 +608,7 @@ fun EditCosmeticDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Image Capture / Preview (Reusing existing imageUrl or capturing new one)
+                // Image Capture / Preview
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -620,7 +619,7 @@ fun EditCosmeticDialog(
                     )
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        val imageUrl = uiState.imageUrl
+                        val imageUrl = draft.imageUrl
                         if (imageUrl != null) {
                             AsyncImage(
                                 model = imageUrl,
@@ -638,15 +637,15 @@ fun EditCosmeticDialog(
                 }
 
                 OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
+                    value = draft.name,
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(name = it))) },
                     label = { Text("Product Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
                 OutlinedTextField(
-                    value = brand,
-                    onValueChange = { brand = it },
+                    value = draft.brand,
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(brand = it))) },
                     label = { Text("Brand") },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -659,7 +658,7 @@ fun EditCosmeticDialog(
                             onClick = { showCategoryMenu = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(category.displayName)
+                            Text(draft.category.displayName)
                         }
                         DropdownMenu(
                             expanded = showCategoryMenu,
@@ -677,7 +676,7 @@ fun EditCosmeticDialog(
                                     DropdownMenuItem(
                                         text = { Text(cat.displayName) },
                                         onClick = {
-                                            category = cat
+                                            onEvent(CosmeticsEvent.UpdateDraft(draft.copy(category = cat)))
                                             showCategoryMenu = false
                                         }
                                     )
@@ -693,9 +692,10 @@ fun EditCosmeticDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    val colorHex = draft.colorHex ?: ""
                     OutlinedTextField(
                         value = colorHex,
-                        onValueChange = { colorHex = it },
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it))) },
                         label = { Text("Color Hex") },
                         modifier = Modifier.weight(1f)
                     )
@@ -727,15 +727,15 @@ fun EditCosmeticDialog(
                 }
                 
                 OutlinedTextField(
-                    value = shadeName,
-                    onValueChange = { shadeName = it },
+                    value = draft.shadeName ?: "",
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(shadeName = it))) },
                     label = { Text("Shade Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
-                    value = notes,
-                    onValueChange = { notes = it },
+                    value = draft.notes ?: "",
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(notes = it))) },
                     label = { Text("Notes / Description") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3
@@ -745,17 +745,10 @@ fun EditCosmeticDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    onEvent(uiState.copy(
-                        name = name,
-                        brand = brand,
-                        category = category,
-                        colorHex = colorHex.takeIf { it.isNotBlank() },
-                        shadeName = shadeName.takeIf { it.isNotBlank() },
-                        notes = notes.takeIf { it.isNotBlank() }
-                    ))
+                    onEvent(CosmeticsEvent.UpdateItem(draft))
                     navTo(KoColorRoute.Back)
                 },
-                enabled = name.isNotBlank() && brand.isNotBlank()
+                enabled = draft.name.isNotBlank() && draft.brand.isNotBlank()
             ) {
                 Text("Update Item")
             }
@@ -846,29 +839,15 @@ fun AddCosmeticDialog(
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var brand by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf(CosmeticCategory.FOUNDATION) }
-    var colorHex by remember { mutableStateOf("") }
-    var shadeName by remember { mutableStateOf("") }
+    val draft = uiState.draftItem
     var showCategoryMenu by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
 
-    // Auto-fill from AI result
-    LaunchedEffect(uiState.aiResult) {
-        uiState.aiResult?.let { result ->
-            name = result.name
-            brand = result.brand
-            category = result.category
-            colorHex = result.colorHex ?: ""
-            shadeName = result.shadeName ?: ""
-        }
-    }
-
     if (showColorPicker) {
+        val colorHex = draft.colorHex ?: ""
         ColorPickerDialog(
             initialColor = parseColor(colorHex),
-            onColorSelected = { colorHex = it.toHex() },
+            onColorSelected = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it.toHex()))) },
             onDismissRequest = { showColorPicker = false },
             title = "Pick Product Color"
         )
@@ -893,9 +872,10 @@ fun AddCosmeticDialog(
                     )
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        if (uiState.capturedImageUri != null) {
+                        val imageUrl = draft.imageUrl
+                        if (imageUrl != null) {
                             AsyncImage(
-                                model = uiState.capturedImageUri,
+                                model = imageUrl,
                                 contentDescription = "Captured Product",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
@@ -926,15 +906,15 @@ fun AddCosmeticDialog(
                 }
 
                 OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
+                    value = draft.name,
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(name = it))) },
                     label = { Text("Product Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
                 OutlinedTextField(
-                    value = brand,
-                    onValueChange = { brand = it },
+                    value = draft.brand,
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(brand = it))) },
                     label = { Text("Brand") },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -947,7 +927,7 @@ fun AddCosmeticDialog(
                             onClick = { showCategoryMenu = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(category.displayName)
+                            Text(draft.category.displayName)
                         }
                         DropdownMenu(
                             expanded = showCategoryMenu,
@@ -965,7 +945,7 @@ fun AddCosmeticDialog(
                                     DropdownMenuItem(
                                         text = { Text(cat.displayName) },
                                         onClick = {
-                                            category = cat
+                                            onEvent(CosmeticsEvent.UpdateDraft(draft.copy(category = cat)))
                                             showCategoryMenu = false
                                         }
                                     )
@@ -981,9 +961,10 @@ fun AddCosmeticDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    val colorHex = draft.colorHex ?: ""
                     OutlinedTextField(
                         value = colorHex,
-                        onValueChange = { colorHex = it },
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it))) },
                         label = { Text("Color Hex") },
                         modifier = Modifier.weight(1f)
                     )
@@ -1000,7 +981,7 @@ fun AddCosmeticDialog(
                                 shape = RoundedCornerShape(8.dp)
                             ),
                         color = try { 
-                            if (colorHex.isNotEmpty()) parseColor(colorHex) else Color.Transparent
+                            if (colorHex.isNotEmpty()) parseColor(colorHex) else Color.Transparent 
                         } catch (e: Exception) { Color.Transparent }
                     ) {
                         if (colorHex.isEmpty()) {
@@ -1015,8 +996,8 @@ fun AddCosmeticDialog(
                 }
                 
                 OutlinedTextField(
-                    value = shadeName,
-                    onValueChange = { shadeName = it },
+                    value = draft.shadeName ?: "",
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(shadeName = it))) },
                     label = { Text("Shade Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -1025,19 +1006,10 @@ fun AddCosmeticDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    onEvent(CosmeticsEvent.AddItem(
-                        CosmeticItem(
-                            name = name, 
-                            brand = brand, 
-                            category = category, 
-                            colorHex = colorHex.takeIf { it.isNotBlank() }, 
-                            shadeName = shadeName.takeIf { it.isNotBlank() },
-                            imageUrl = uiState.capturedImageUri
-                        )
-                    ))
+                    onEvent(CosmeticsEvent.AddItem(draft))
                     navTo(KoColorRoute.Back)
                 },
-                enabled = name.isNotBlank() && brand.isNotBlank()
+                enabled = draft.name.isNotBlank() && draft.brand.isNotBlank()
             ) {
                 Text("Add to Inventory")
             }
@@ -1101,13 +1073,15 @@ private fun CategoryGuideDialogPreview() {
 private fun EditCosmeticDialogPreview() {
     MaterialTheme {
         EditCosmeticDialog(
-            uiState = CosmeticItem(
-                name = "Velvet Matte",
-                brand = "Sample Brand",
-                category = CosmeticCategory.LIPSTICK,
-                colorHex = "#FF0000",
-                shadeName = "True Red",
-                notes = "Long-lasting finish."
+            uiState = CosmeticsUiState(
+                draftItem = CosmeticItem(
+                    name = "Velvet Matte",
+                    brand = "Sample Brand",
+                    category = CosmeticCategory.LIPSTICK,
+                    colorHex = "#FF0000",
+                    shadeName = "True Red",
+                    notes = "Long-lasting finish."
+                )
             ),
             onEvent = {},
             navTo = {}

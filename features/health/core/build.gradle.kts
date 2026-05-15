@@ -3,6 +3,7 @@ plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.library.compose")
     id("composetemplate.android.hilt")
+    id("composetemplate.kotlin.serialization")
 }
 
 android {

@@ -180,7 +180,17 @@ class HomeViewModel @Inject constructor(
         colorHex = colorHex,
         shadeName = shadeName,
         notes = notes,
-        timestamp = timestamp
+        timestamp = timestamp,
+        batchCode = batchCode,
+        openedDate = openedDate,
+        paoMonths = paoMonths,
+        expiryDate = expiryDate,
+        price = price,
+        volume = volume,
+        isOpened = isOpened,
+        isFinished = isFinished,
+        isArchived = isArchived,
+        usageCount = usageCount
     )
 
     private fun ClothingItemEntity.toModel() = ClothingItem(

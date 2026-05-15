@@ -159,5 +159,50 @@ data class CosmeticItem(
     val shadeName: String? = null,
     val imageUrl: String? = null,
     val notes: String? = null,
-    val timestamp: Long = System.currentTimeMillis()
-)
+    val timestamp: Long = System.currentTimeMillis(),
+
+    // --- Professional Inventory & Logistics ---
+    /** Batch or lot code for recall readiness and production tracking. */
+    val batchCode: String? = null,
+    /** When the product was first opened. Used for PAO calculation. */
+    val openedDate: Long? = null,
+    /** Period After Opening (in months) as specified by the manufacturer. */
+    val paoMonths: Int? = null,
+    /** Hard expiration date from the manufacturer. */
+    val expiryDate: Long? = null,
+    /** Purchase price for Cost-Per-Use (CPU) calculation. */
+    val price: Double? = null,
+    /** Product volume/weight (e.g., 30ml, 15g). */
+    val volume: String? = null,
+
+    // --- Usage & State ---
+    val isOpened: Boolean = false,
+    val isFinished: Boolean = false,
+    val isArchived: Boolean = false,
+    /** Total number of times this product has been used. */
+    val usageCount: Int = 0
+) {
+    /** 
+     * Calculated estimated expiration based on PAO and opened date. 
+     * Prefers hard expiryDate if PAO is not set or further in future.
+     */
+    val estimatedExpiry: Long?
+        get() {
+            val paoExpiry = if (openedDate != null && paoMonths != null) {
+                val calendar = java.util.Calendar.getInstance()
+                calendar.timeInMillis = openedDate
+                calendar.add(java.util.Calendar.MONTH, paoMonths)
+                calendar.timeInMillis
+            } else null
+
+            return when {
+                paoExpiry != null && expiryDate != null -> kotlin.math.min(paoExpiry, expiryDate)
+                paoExpiry != null -> paoExpiry
+                else -> expiryDate
+            }
+        }
+
+    /** Cost per single usage event. */
+    val costPerUse: Double?
+        get() = if (price != null && usageCount > 0) price / usageCount else null
+}
