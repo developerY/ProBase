@@ -1,7 +1,10 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +34,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
@@ -49,6 +53,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -56,6 +62,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,7 +70,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -482,11 +494,22 @@ fun CosmeticProductCard(
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val cardColor = uiState.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surface
+    val contentColor = if (uiState.colorHex != null) {
+        if (isColorDark(cardColor)) Color.White else Color.Black
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onEvent("edit") },
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = cardColor,
+            contentColor = contentColor
+        )
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -497,12 +520,10 @@ fun CosmeticProductCard(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                    .background(contentColor.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 val imageUrl = uiState.imageUrl
-                val colorHex = uiState.colorHex
-
                 if (imageUrl != null) {
                     AsyncImage(
                         model = imageUrl,
@@ -510,17 +531,11 @@ fun CosmeticProductCard(
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
-                } else if (colorHex != null) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(parseColor(colorHex))
-                    )
                 } else {
                     Icon(
                         Icons.Default.AutoAwesome,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                        tint = contentColor.copy(alpha = 0.5f)
                     )
                 }
             }
@@ -532,16 +547,17 @@ fun CosmeticProductCard(
                     text = uiState.name,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 1
+                    maxLines = 1,
+                    color = contentColor
                 )
                 Text(
                     text = uiState.brand,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = contentColor.copy(alpha = 0.7f)
                 )
                 uiState.shadeName?.let { shade ->
                     Surface(
-                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                        color = contentColor.copy(alpha = 0.15f),
                         shape = CircleShape,
                         modifier = Modifier.padding(top = 4.dp)
                     ) {
@@ -549,7 +565,7 @@ fun CosmeticProductCard(
                             text = shade,
                             style = MaterialTheme.typography.labelSmall,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            color = MaterialTheme.colorScheme.secondary
+                            color = contentColor
                         )
                     }
                 }
@@ -559,11 +575,215 @@ fun CosmeticProductCard(
                 Icon(
                     Icons.Default.Delete,
                     contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
+                    tint = if (uiState.colorHex != null) contentColor.copy(alpha = 0.8f) else MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
                 )
             }
         }
     }
+}
+
+fun isColorDark(color: Color): Boolean {
+    val luminance = 0.299 * color.red + 0.587 * color.green + 0.114 * color.blue
+    return luminance < 0.5
+}
+
+@Composable
+fun FullColorPicker(
+    uiState: String,
+    onEvent: (String) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    val controller = rememberColorPickerController(initialColor = parseColor(uiState))
+
+    AlertDialog(
+        onDismissRequest = { navTo(KoColorRoute.Back) },
+        title = { Text("Pick Custom Color", fontWeight = FontWeight.Bold) },
+        text = {
+            Column(
+                modifier = Modifier.padding(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Top Preview Tile
+                AlphaTile(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)),
+                    controller = controller
+                )
+
+                // The Main HSV Color Wheel/Picker
+                HsvColorPicker(
+                    modifier = Modifier
+                        .size(240.dp)
+                        .padding(10.dp),
+                    controller = controller
+                )
+
+                // Brightness Slider
+                Column {
+                    Text("Brightness", style = MaterialTheme.typography.labelSmall)
+                    BrightnessSlider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(35.dp),
+                        controller = controller
+                    )
+                }
+
+                Text(
+                    text = String.format("#%06X", (0xFFFFFF and controller.selectedColor.value.toArgb())),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = { 
+                val hex = String.format("#%06X", (0xFFFFFF and controller.selectedColor.value.toArgb()))
+                onEvent(hex)
+                navTo(KoColorRoute.Back)
+            }) {
+                Text("Select Color")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { navTo(KoColorRoute.Back) }) { Text("Cancel") }
+        }
+    )
+}
+
+class ColorPickerController(initialColor: Color) {
+    var selectedColor = mutableStateOf(initialColor)
+    
+    // Internal HSV state for the picker logic
+    var hue = mutableFloatStateOf(0f)
+    var saturation = mutableFloatStateOf(0f)
+    var value = mutableFloatStateOf(1f)
+
+    init {
+        val hsv = FloatArray(3)
+        android.graphics.Color.colorToHSV(
+            android.graphics.Color.rgb(
+                (initialColor.red * 255).toInt(),
+                (initialColor.green * 255).toInt(),
+                (initialColor.blue * 255).toInt()
+            ),
+            hsv
+        )
+        hue.floatValue = hsv[0]
+        saturation.floatValue = hsv[1]
+        value.floatValue = hsv[2]
+    }
+
+    fun updateFromHsv() {
+        val argb = android.graphics.Color.HSVToColor(floatArrayOf(hue.floatValue, saturation.floatValue, value.floatValue))
+        selectedColor.value = Color(argb)
+    }
+}
+
+@Composable
+fun rememberColorPickerController(initialColor: Color): ColorPickerController {
+    return remember(initialColor) { ColorPickerController(initialColor) }
+}
+
+@Composable
+fun AlphaTile(
+    modifier: Modifier,
+    controller: ColorPickerController
+) {
+    Box(
+        modifier = modifier.background(controller.selectedColor.value)
+    )
+}
+
+@Composable
+fun HsvColorPicker(
+    modifier: Modifier,
+    controller: ColorPickerController
+) {
+    Canvas(
+        modifier = modifier
+            .pointerInput(Unit) {
+                detectDragGestures { change, _ ->
+                    val w = size.width.toFloat()
+                    val h = size.height.toFloat()
+                    val center = Offset(w / 2f, h / 2f)
+                    val pos = change.position
+                    
+                    val dx = pos.x - center.x
+                    val dy = pos.y - center.y
+                    val radius = w / 2f
+                    
+                    val dist = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+                    val angle = Math.toDegrees(Math.atan2(dy.toDouble(), dx.toDouble())).toFloat()
+                    
+                    controller.hue.floatValue = (if (angle < 0) angle + 360 else angle)
+                    controller.saturation.floatValue = (dist / radius).coerceIn(0f, 1f)
+                    controller.updateFromHsv()
+                }
+            }
+    ) {
+        val w = size.width
+        val h = size.height
+        val radius = w / 2f
+        val center = Offset(w / 2f, h / 2f)
+        
+        // Draw the color wheel background (simple radial sweep)
+        for (i in 0 until 360) {
+            val angle = Math.toRadians(i.toDouble()).toFloat()
+            val start = center
+            val end = Offset(
+                center.x + Math.cos(angle.toDouble()).toFloat() * radius,
+                center.y + Math.sin(angle.toDouble()).toFloat() * radius
+            )
+            val hsvColor = Color(android.graphics.Color.HSVToColor(floatArrayOf(i.toFloat(), 1f, 1f)))
+            
+            drawLine(
+                brush = Brush.linearGradient(listOf(Color.White, hsvColor), start, end),
+                start = start,
+                end = end,
+                strokeWidth = 2f
+            )
+        }
+        
+        // Draw the indicator
+        val indicatorAngle = Math.toRadians(controller.hue.floatValue.toDouble()).toFloat()
+        val indicatorRadius = controller.saturation.floatValue * radius
+        val indicatorOffset = Offset(
+            center.x + Math.cos(indicatorAngle.toDouble()).toFloat() * indicatorRadius,
+            center.y + Math.sin(indicatorAngle.toDouble()).toFloat() * indicatorRadius
+        )
+        
+        drawCircle(
+            color = if (controller.value.floatValue > 0.5f) Color.Black else Color.White,
+            radius = 8.dp.toPx(),
+            center = indicatorOffset,
+            style = Stroke(width = 2.dp.toPx())
+        )
+    }
+}
+
+@Composable
+fun BrightnessSlider(
+    modifier: Modifier,
+    controller: ColorPickerController
+) {
+    Slider(
+        value = controller.value.floatValue,
+        onValueChange = { 
+            controller.value.floatValue = it
+            controller.updateFromHsv()
+        },
+        valueRange = 0f..1f,
+        modifier = modifier,
+        colors = SliderDefaults.colors(
+            thumbColor = controller.selectedColor.value,
+            activeTrackColor = controller.selectedColor.value.copy(alpha = 0.5f)
+        )
+    )
 }
 
 @Composable
@@ -579,6 +799,15 @@ fun EditCosmeticDialog(
     var shadeName by remember { mutableStateOf(uiState.shadeName ?: "") }
     var notes by remember { mutableStateOf(uiState.notes ?: "") }
     var showCategoryMenu by remember { mutableStateOf(false) }
+    var showColorPicker by remember { mutableStateOf(false) }
+
+    if (showColorPicker) {
+        FullColorPicker(
+            uiState = colorHex,
+            onEvent = { colorHex = it },
+            navTo = { showColorPicker = false }
+        )
+    }
 
     AlertDialog(
         onDismissRequest = { navTo(KoColorRoute.Back) },
@@ -599,9 +828,10 @@ fun EditCosmeticDialog(
                     )
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        if (uiState.imageUrl != null) {
+                        val imageUrl = uiState.imageUrl
+                        if (imageUrl != null) {
                             AsyncImage(
-                                model = uiState.imageUrl,
+                                model = imageUrl,
                                 contentDescription = "Captured Product",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
@@ -666,12 +896,43 @@ fun EditCosmeticDialog(
                     }
                 }
 
-                OutlinedTextField(
-                    value = colorHex,
-                    onValueChange = { colorHex = it },
-                    label = { Text("Color Hex") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = colorHex,
+                        onValueChange = { colorHex = it },
+                        label = { Text("Color Hex") },
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    Surface(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .padding(top = 8.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { showColorPicker = true }
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(8.dp)
+                            ),
+                        color = try { 
+                            if (colorHex.isNotEmpty()) Color(android.graphics.Color.parseColor(colorHex)) else Color.Transparent 
+                        } catch (e: Exception) { Color.Transparent }
+                    ) {
+                        if (colorHex.isEmpty()) {
+                            Icon(
+                                Icons.Default.Palette,
+                                contentDescription = "Pick Color",
+                                modifier = Modifier.padding(12.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
                 
                 OutlinedTextField(
                     value = shadeName,
@@ -799,6 +1060,7 @@ fun AddCosmeticDialog(
     var colorHex by remember { mutableStateOf("") }
     var shadeName by remember { mutableStateOf("") }
     var showCategoryMenu by remember { mutableStateOf(false) }
+    var showColorPicker by remember { mutableStateOf(false) }
 
     // Auto-fill from AI result
     LaunchedEffect(uiState.aiResult) {
@@ -809,6 +1071,14 @@ fun AddCosmeticDialog(
             colorHex = result.colorHex ?: ""
             shadeName = result.shadeName ?: ""
         }
+    }
+
+    if (showColorPicker) {
+        FullColorPicker(
+            uiState = colorHex,
+            onEvent = { colorHex = it },
+            navTo = { showColorPicker = false }
+        )
     }
 
     AlertDialog(
@@ -913,12 +1183,43 @@ fun AddCosmeticDialog(
                     }
                 }
 
-                OutlinedTextField(
-                    value = colorHex,
-                    onValueChange = { colorHex = it },
-                    label = { Text("Color Hex (e.g., #FF0000)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = colorHex,
+                        onValueChange = { colorHex = it },
+                        label = { Text("Color Hex") },
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    Surface(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .padding(top = 8.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { showColorPicker = true }
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(8.dp)
+                            ),
+                        color = try { 
+                            if (colorHex.isNotEmpty()) Color(android.graphics.Color.parseColor(colorHex)) else Color.Transparent 
+                        } catch (e: Exception) { Color.Transparent }
+                    ) {
+                        if (colorHex.isEmpty()) {
+                            Icon(
+                                Icons.Default.Palette,
+                                contentDescription = "Pick Color",
+                                modifier = Modifier.padding(12.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
                 
                 OutlinedTextField(
                     value = shadeName,
@@ -1065,6 +1366,18 @@ private fun SubCategoryCardPreview() {
     MaterialTheme {
         SubCategoryCard(
             uiState = Triple(CosmeticCategory.FOUNDATION, 3, false),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FullColorPickerPreview() {
+    MaterialTheme {
+        FullColorPicker(
+            uiState = "#FF0000",
             onEvent = {},
             navTo = {}
         )
