@@ -28,6 +28,7 @@ data class CosmeticsUiState(
 
 sealed class CosmeticsEvent {
     data class AddItem(val item: CosmeticItem) : CosmeticsEvent()
+    data class UpdateItem(val item: CosmeticItem) : CosmeticsEvent()
     data class DeleteItem(val id: Long) : CosmeticsEvent()
     data object ScanWithGemini : CosmeticsEvent()
     data object ClearCapturedImage : CosmeticsEvent()
@@ -79,9 +80,16 @@ class CosmeticsViewModel @Inject constructor(
     fun onEvent(event: CosmeticsEvent) {
         when (event) {
             is CosmeticsEvent.AddItem -> addItem(event.item)
+            is CosmeticsEvent.UpdateItem -> updateItem(event.item)
             is CosmeticsEvent.DeleteItem -> deleteItem(event.id)
             CosmeticsEvent.ScanWithGemini -> scanWithGemini()
             CosmeticsEvent.ClearCapturedImage -> sessionRepository.setCapturedItemUri(null)
+        }
+    }
+
+    private fun updateItem(item: CosmeticItem) {
+        viewModelScope.launch {
+            cosmeticDao.updateCosmetic(item.toEntity())
         }
     }
 

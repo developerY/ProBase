@@ -100,6 +100,7 @@ fun CosmeticsScreen(
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     var showOrderDialog by remember { mutableStateOf(false) }
+    var selectedItemForEdit by remember { mutableStateOf<CosmeticItem?>(null) }
 
     // Re-open dialog if coming back from camera
     LaunchedEffect(uiState.capturedImageUri) {
@@ -211,7 +212,12 @@ fun CosmeticsScreen(
                                         items(itemsInCategory) { item ->
                                             CosmeticProductCard(
                                                 uiState = item,
-                                                onEvent = { onEvent(CosmeticsEvent.DeleteItem(item.id)) },
+                                                onEvent = { event ->
+                                                    when (event) {
+                                                        "delete" -> onEvent(CosmeticsEvent.DeleteItem(item.id))
+                                                        "edit" -> selectedItemForEdit = item
+                                                    }
+                                                },
                                                 navTo = navTo,
                                                 modifier = Modifier.padding(start = 32.dp)
                                             )
@@ -247,6 +253,20 @@ fun CosmeticsScreen(
             uiState = Unit,
             onEvent = {},
             navTo = { showOrderDialog = false }
+        )
+    }
+
+    selectedItemForEdit?.let { item ->
+        EditCosmeticDialog(
+            uiState = item,
+            onEvent = { onEvent(CosmeticsEvent.UpdateItem(it)) },
+            navTo = { route ->
+                if (route == KoColorRoute.Back) {
+                    selectedItemForEdit = null
+                } else {
+                    navTo(route)
+                }
+            }
         )
     }
 }
@@ -358,12 +378,14 @@ fun SubCategoryCard(
 @Composable
 fun CosmeticProductCard(
     uiState: CosmeticItem,
-    onEvent: (Unit) -> Unit,
+    onEvent: (String) -> Unit,
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
     ElevatedCard(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onEvent("edit") },
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
@@ -433,7 +455,7 @@ fun CosmeticProductCard(
                 }
             }
             
-            IconButton(onClick = { onEvent(Unit) }) {
+            IconButton(onClick = { onEvent("delete") }) {
                 Icon(
                     Icons.Default.Delete,
                     contentDescription = "Delete",
@@ -442,6 +464,153 @@ fun CosmeticProductCard(
             }
         }
     }
+}
+
+@Composable
+fun EditCosmeticDialog(
+    uiState: CosmeticItem,
+    onEvent: (CosmeticItem) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    var name by remember { mutableStateOf(uiState.name) }
+    var brand by remember { mutableStateOf(uiState.brand) }
+    var category by remember { mutableStateOf(uiState.category) }
+    var colorHex by remember { mutableStateOf(uiState.colorHex ?: "") }
+    var shadeName by remember { mutableStateOf(uiState.shadeName ?: "") }
+    var notes by remember { mutableStateOf(uiState.notes ?: "") }
+    var showCategoryMenu by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = { navTo(KoColorRoute.Back) },
+        title = { Text("Product Details", fontWeight = FontWeight.Bold) },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Image Capture / Preview (Reusing existing imageUrl or capturing new one)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(160.dp)
+                        .clickable { navTo(KoColorRoute.Camera("inventory_item")) },
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        if (uiState.imageUrl != null) {
+                            AsyncImage(
+                                model = uiState.imageUrl,
+                                contentDescription = "Captured Product",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(32.dp))
+                                Text("Update Product Photo", style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                    }
+                }
+
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Product Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                OutlinedTextField(
+                    value = brand,
+                    onValueChange = { brand = it },
+                    label = { Text("Brand") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Column {
+                    Text("Category", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(
+                            onClick = { showCategoryMenu = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(category.displayName)
+                        }
+                        DropdownMenu(
+                            expanded = showCategoryMenu,
+                            onDismissRequest = { showCategoryMenu = false },
+                            modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 400.dp)
+                        ) {
+                            CosmeticCategory.entries.filter { it != CosmeticCategory.AI_PENDING }.groupBy { it.groupName }.forEach { (group, items) ->
+                                Text(
+                                    text = group,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                items.forEach { cat ->
+                                    DropdownMenuItem(
+                                        text = { Text(cat.displayName) },
+                                        onClick = {
+                                            category = cat
+                                            showCategoryMenu = false
+                                        }
+                                    )
+                                }
+                                HorizontalDivider()
+                            }
+                        }
+                    }
+                }
+
+                OutlinedTextField(
+                    value = colorHex,
+                    onValueChange = { colorHex = it },
+                    label = { Text("Color Hex") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                OutlinedTextField(
+                    value = shadeName,
+                    onValueChange = { shadeName = it },
+                    label = { Text("Shade Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = notes,
+                    onValueChange = { notes = it },
+                    label = { Text("Notes / Description") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onEvent(uiState.copy(
+                        name = name,
+                        brand = brand,
+                        category = category,
+                        colorHex = colorHex.takeIf { it.isNotBlank() },
+                        shadeName = shadeName.takeIf { it.isNotBlank() },
+                        notes = notes.takeIf { it.isNotBlank() }
+                    ))
+                    navTo(KoColorRoute.Back)
+                },
+                enabled = name.isNotBlank() && brand.isNotBlank()
+            ) {
+                Text("Update Item")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { navTo(KoColorRoute.Back) }) { Text("Cancel") }
+        }
+    )
 }
 
 @Composable
@@ -723,6 +892,25 @@ private fun AddCosmeticDialogPreview() {
     MaterialTheme {
         AddCosmeticDialog(
             uiState = CosmeticsUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EditCosmeticDialogPreview() {
+    MaterialTheme {
+        EditCosmeticDialog(
+            uiState = CosmeticItem(
+                name = "Velvet Matte",
+                brand = "Sample Brand",
+                category = CosmeticCategory.LIPSTICK,
+                colorHex = "#FF0000",
+                shadeName = "True Red",
+                notes = "Long-lasting finish."
+            ),
             onEvent = {},
             navTo = {}
         )
