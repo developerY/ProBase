@@ -5,12 +5,23 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -19,8 +30,28 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,26 +69,17 @@ import com.zoewave.probase.kocolor.model.Undertone
 
 @Composable
 fun AnalyzerUiRoute(
-    onBack: () -> Unit,
-    onNavigateToCamera: (target: String) -> Unit,
-    onAnalysisSaved: () -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: AnalyzerViewModel = hiltViewModel()
+    uiState: Unit = Unit,
+    onEvent: (Unit) -> Unit = {},
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val viewModel: AnalyzerViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     AnalyzerScreen(
-        uiState = uiState,
+        uiState = state,
         onEvent = viewModel::onEvent,
-        navTo = { route ->
-            when (route) {
-                null -> onBack()
-                is KoColorRoute.Camera -> onNavigateToCamera(route.target)
-                else -> { /* Handle other routes if needed */ }
-            }
-        },
-        onAnalysisSaved = onAnalysisSaved,
-        modifier = modifier
+        navTo = navTo
     )
 }
 
@@ -66,22 +88,19 @@ fun AnalyzerUiRoute(
 fun AnalyzerScreen(
     uiState: AnalyzerScreenUiState,
     onEvent: (AnalyzerEvent) -> Unit,
-    navTo: (KoColorRoute?) -> Unit,
-    onAnalysisSaved: () -> Unit,
-    modifier: Modifier = Modifier
+    navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Fashion Analyzer") },
                 navigationIcon = {
-                    IconButton(onClick = { navTo(null) }) {
+                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
-        },
-        modifier = modifier
+        }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (val state = uiState.analyzerState) {
@@ -89,16 +108,7 @@ fun AnalyzerScreen(
                     StyleCaptureState(
                         uiState = uiState,
                         onEvent = onEvent,
-                        onCaptureCamera = { target -> navTo(KoColorRoute.Camera(target)) },
-                        onPhotoPicked = { target, uri ->
-                            when (target) {
-                                "face" -> onEvent(AnalyzerEvent.OnFaceCaptured(uri))
-                                "hair" -> onEvent(AnalyzerEvent.OnHairCaptured(uri))
-                                "shoes" -> onEvent(AnalyzerEvent.OnShoesCaptured(uri))
-                                "clothes" -> onEvent(AnalyzerEvent.OnClothesCaptured(uri))
-                            }
-                        },
-                        onAnalyze = { onEvent(AnalyzerEvent.OnAnalyzeClicked) }
+                        navTo = navTo
                     )
                 }
                 is AnalyzerUiState.Loading -> {
@@ -114,12 +124,15 @@ fun AnalyzerScreen(
                 }
                 is AnalyzerUiState.Success -> {
                     AnalysisResultScreen(
-                        advice = state.advice,
-                        onSave = {
-                            onEvent(AnalyzerEvent.OnSaveClicked(state.advice))
-                            onAnalysisSaved()
+                        uiState = state.advice,
+                        onEvent = { event ->
+                            if (event is AnalyzerEvent.OnSaveClicked) {
+                                onEvent(event)
+                                navTo(KoColorRoute.Back)
+                            } else {
+                                onEvent(event)
+                            }
                         },
-                        onReset = { onEvent(AnalyzerEvent.OnResetClicked) },
                         navTo = navTo
                     )
                 }
@@ -144,9 +157,7 @@ fun AnalyzerScreen(
 fun StyleCaptureState(
     uiState: AnalyzerScreenUiState,
     onEvent: (AnalyzerEvent) -> Unit,
-    onCaptureCamera: (String) -> Unit,
-    onPhotoPicked: (String, String) -> Unit,
-    onAnalyze: () -> Unit
+    navTo: (KoColorRoute) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -168,52 +179,49 @@ fun StyleCaptureState(
         ) {
             Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 StyleCaptureSlot(
-                    title = "Your Face",
-                    uri = uiState.faceUri,
-                    onCamera = { onCaptureCamera("face") },
-                    onGallery = { uri -> onPhotoPicked("face", uri) },
-                    modifier = Modifier.weight(1f)
+                    uiState = "Your Face" to uiState.faceUri,
+                    onEvent = { uri -> onEvent(AnalyzerEvent.OnFaceCaptured(uri)) },
+                    navTo = { navTo(KoColorRoute.Camera("face")) }
                 )
                 StyleCaptureSlot(
-                    title = "Your Hair",
-                    uri = uiState.hairUri,
-                    onCamera = { onCaptureCamera("hair") },
-                    onGallery = { uri -> onPhotoPicked("hair", uri) },
-                    modifier = Modifier.weight(1f)
+                    uiState = "Your Hair" to uiState.hairUri,
+                    onEvent = { uri -> onEvent(AnalyzerEvent.OnHairCaptured(uri)) },
+                    navTo = { navTo(KoColorRoute.Camera("hair")) }
                 )
             }
             Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 StyleCaptureSlot(
-                    title = "Your Shoes",
-                    uri = uiState.shoesUri,
-                    onCamera = { onCaptureCamera("shoes") },
-                    onGallery = { uri -> onPhotoPicked("shoes", uri) },
-                    modifier = Modifier.weight(1f)
+                    uiState = "Your Shoes" to uiState.shoesUri,
+                    onEvent = { uri -> onEvent(AnalyzerEvent.OnShoesCaptured(uri)) },
+                    navTo = { navTo(KoColorRoute.Camera("shoes")) }
                 )
                 StyleCaptureSlot(
-                    title = "Your Clothes",
-                    uri = uiState.clothesUri,
-                    onCamera = { onCaptureCamera("clothes") },
-                    onGallery = { uri -> onPhotoPicked("clothes", uri) },
-                    modifier = Modifier.weight(1f)
+                    uiState = "Your Clothes" to uiState.clothesUri,
+                    onEvent = { uri -> onEvent(AnalyzerEvent.OnClothesCaptured(uri)) },
+                    navTo = { navTo(KoColorRoute.Camera("clothes")) }
                 )
             }
         }
 
         OccasionFilter(
-            selectedOccasion = uiState.selectedOccasion,
-            onOccasionSelected = { onEvent(AnalyzerEvent.OnOccasionSelected(it)) }
+            uiState = uiState.selectedOccasion,
+            onEvent = { onEvent(AnalyzerEvent.OnOccasionSelected(it)) },
+            navTo = {}
         )
 
         LocationInput(
-            locationName = uiState.locationName,
-            isLocating = uiState.isLocating,
-            onLocationChanged = { onEvent(AnalyzerEvent.OnLocationChanged(it)) },
-            onDetectLocation = { onEvent(AnalyzerEvent.OnDetectLocationClicked) }
+            uiState = uiState.locationName to uiState.isLocating,
+            onEvent = { event ->
+                when (event) {
+                    is String? -> onEvent(AnalyzerEvent.OnLocationChanged(event))
+                    else -> onEvent(AnalyzerEvent.OnDetectLocationClicked)
+                }
+            },
+            navTo = {}
         )
 
         Button(
-            onClick = onAnalyze,
+            onClick = { onEvent(AnalyzerEvent.OnAnalyzeClicked) },
             enabled = uiState.faceUri != null || uiState.hairUri != null || uiState.shoesUri != null || uiState.clothesUri != null,
             modifier = Modifier
                 .fillMaxWidth()
@@ -228,8 +236,9 @@ fun StyleCaptureState(
 
 @Composable
 fun OccasionFilter(
-    selectedOccasion: String,
-    onOccasionSelected: (String) -> Unit
+    uiState: String,
+    onEvent: (String) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     val occasions = listOf("Work", "Date Night", "Outdoor/Sport", "Formal")
     
@@ -243,8 +252,8 @@ fun OccasionFilter(
         ) {
             occasions.forEach { occasion ->
                 FilterChip(
-                    selected = selectedOccasion == occasion,
-                    onClick = { onOccasionSelected(occasion) },
+                    selected = uiState == occasion,
+                    onClick = { onEvent(occasion) },
                     label = { Text(occasion) }
                 )
             }
@@ -254,11 +263,13 @@ fun OccasionFilter(
 
 @Composable
 fun LocationInput(
-    locationName: String?,
-    isLocating: Boolean,
-    onLocationChanged: (String?) -> Unit,
-    onDetectLocation: () -> Unit
+    uiState: Pair<String?, Boolean>,
+    onEvent: (Any?) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val locationName = uiState.first
+    val isLocating = uiState.second
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text("Style Location", style = MaterialTheme.typography.labelMedium)
         Row(
@@ -270,7 +281,7 @@ fun LocationInput(
         ) {
             OutlinedTextField(
                 value = locationName ?: "",
-                onValueChange = { onLocationChanged(it.takeIf { it.isNotBlank() }) },
+                onValueChange = { onEvent(it.takeIf { it.isNotBlank() }) },
                 modifier = Modifier.weight(1f),
                 placeholder = { Text("City, Style Capital...") },
                 label = { Text("Local Context") },
@@ -279,7 +290,7 @@ fun LocationInput(
                     if (isLocating) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                     } else {
-                        IconButton(onClick = onDetectLocation) {
+                        IconButton(onClick = { onEvent(Unit) }) {
                             Icon(Icons.Default.MyLocation, contentDescription = "Detect Location")
                         }
                     }
@@ -296,23 +307,25 @@ fun LocationInput(
 
 @Composable
 fun StyleCaptureSlot(
-    title: String,
-    uri: String?,
-    onCamera: () -> Unit,
-    onGallery: (String) -> Unit,
-    modifier: Modifier = Modifier
+    uiState: Pair<String, String?>,
+    onEvent: (String) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val title = uiState.first
+    val uri = uiState.second
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { pickedUri ->
-        pickedUri?.let { onGallery(it.toString()) }
+        pickedUri?.let { onEvent(it.toString()) }
     }
 
     var showOptions by remember { mutableStateOf(false) }
 
     Card(
-        modifier = modifier
-            .fillMaxHeight()
+        modifier = Modifier
+            .height(200.dp)
+            .fillMaxWidth()
             .clickable { showOptions = true },
         colors = CardDefaults.cardColors(
             containerColor = if (uri == null) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
@@ -361,7 +374,7 @@ fun StyleCaptureSlot(
             confirmButton = {
                 TextButton(onClick = {
                     showOptions = false
-                    onCamera()
+                    navTo(KoColorRoute.Camera(title.lowercase().substringAfter("your ")))
                 }) {
                     Icon(Icons.Default.CameraAlt, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
@@ -382,12 +395,23 @@ fun StyleCaptureSlot(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun StyleCaptureSlotPreview() {
+    MaterialTheme {
+        StyleCaptureSlot(
+            uiState = "Your Face" to null,
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun AnalysisResultScreen(
-    advice: FashionAdvice,
-    onSave: () -> Unit,
-    onReset: () -> Unit,
-    navTo: (KoColorRoute?) -> Unit
+    uiState: FashionAdvice,
+    onEvent: (AnalyzerEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -403,10 +427,10 @@ fun AnalysisResultScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Seasonal Type: ${advice.seasonalType}", style = MaterialTheme.typography.titleMedium)
-                    Text("Undertone: ${advice.undertone}", style = MaterialTheme.typography.titleMedium)
+                    Text("Seasonal Type: ${uiState.seasonalType}", style = MaterialTheme.typography.titleMedium)
+                    Text("Undertone: ${uiState.undertone}", style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(advice.summary)
+                    Text(uiState.summary)
                 }
             }
         }
@@ -416,7 +440,7 @@ fun AnalysisResultScreen(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                advice.recommendedPalette.forEach { hex ->
+                uiState.recommendedPalette.forEach { hex ->
                     Box(
                         modifier = Modifier
                             .size(40.dp)
@@ -429,7 +453,7 @@ fun AnalysisResultScreen(
         item {
             Text("Makeup & Nail Suggestions", style = MaterialTheme.typography.titleMedium)
         }
-        items(advice.makeupSuggestions) { suggestion ->
+        items(uiState.makeupSuggestions) { suggestion ->
             Card(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.padding(12.dp),
@@ -470,10 +494,10 @@ fun AnalysisResultScreen(
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f)) {
+                OutlinedButton(onClick = { onEvent(AnalyzerEvent.OnResetClicked) }, modifier = Modifier.weight(1f)) {
                     Text("Discard")
                 }
-                Button(onClick = onSave, modifier = Modifier.weight(1f)) {
+                Button(onClick = { onEvent(AnalyzerEvent.OnSaveClicked(uiState)) }, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Default.Check, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Save Analysis")
@@ -498,8 +522,7 @@ private fun AnalyzerScreenPreview_Idle() {
         AnalyzerScreen(
             uiState = AnalyzerScreenUiState(),
             onEvent = {},
-            navTo = {},
-            onAnalysisSaved = {}
+            navTo = {}
         )
     }
 }
@@ -511,8 +534,7 @@ private fun AnalyzerScreenPreview_Partial() {
         AnalyzerScreen(
             uiState = AnalyzerScreenUiState(faceUri = "content://dummy"),
             onEvent = {},
-            navTo = {},
-            onAnalysisSaved = {}
+            navTo = {}
         )
     }
 }
@@ -538,8 +560,7 @@ private fun AnalyzerScreenPreview_Success() {
                 )
             ),
             onEvent = {},
-            navTo = {},
-            onAnalysisSaved = {}
+            navTo = {}
         )
     }
 }

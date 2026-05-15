@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
+import com.zoewave.probase.features.ar.facelab.ui.FaceLabUiRoute
+import com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
 import com.zoewave.probase.kocolor.features.color.ui.ColorDetailScreen
@@ -16,12 +18,9 @@ import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsUiRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
-import com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute
-import com.zoewave.probase.features.ar.facelab.ui.FaceLabUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.components.SettingsUiRoute
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.kocolor.model.SavedAnalysis
 
 fun koColorNavEntryProvider(
     route: KoColorRoute,
@@ -36,36 +35,50 @@ fun koColorNavEntryProvider(
     return when (route) {
         is KoColorRoute.Home -> NavEntry(route) {
             HomeUiRoute(
-                onNavigateTo = onNavigateTo,
-                windowSizeClass = windowSizeClass
+                uiState = windowSizeClass,
+                onEvent = {},
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.Analyzer -> NavEntry(route) {
             AnalyzerUiRoute(
-                onBack = onBack,
-                onNavigateToCamera = { target -> onNavigateTo(KoColorRoute.Camera(target)) },
-                onAnalysisSaved = onBack
+                uiState = Unit,
+                onEvent = {},
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.Color -> NavEntry(route) {
             ColorUiRoute(
-                windowSizeClass = windowSizeClass,
+                uiState = windowSizeClass,
+                onEvent = {},
                 navTo = onNavigateTo
             )
         }
         is KoColorRoute.Routines -> NavEntry(route) {
             RoutinesUiRoute(
-                onBack = onBack
+                uiState = Unit,
+                onEvent = {},
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.Cosmetics -> NavEntry(route) {
             CosmeticsUiRoute(
-                onBack = onBack
+                uiState = Unit,
+                onEvent = {},
+                navTo = onNavigateTo
             )
+        }
+        is KoColorRoute.Back -> NavEntry(route) {
+            // This route should be handled by onNavigateTo before reaching here, 
+            // but we provide a placeholder just in case.
+            onBack()
+            androidx.compose.runtime.LaunchedEffect(Unit) { onBack() }
         }
         is KoColorRoute.Wardrobe -> NavEntry(route) {
             WardrobeRoute(
-                onBack = onBack
+                uiState = Unit,
+                onEvent = {},
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.ColorDetail -> NavEntry(route) {
@@ -74,34 +87,38 @@ fun koColorNavEntryProvider(
             val analysis = uiState.savedSuggestions.find { it.id == route.suggestionId }
             if (analysis != null) {
                 ColorDetailScreen(
-                    analysis = analysis,
-                    onBack = onBack,
+                    uiState = analysis,
+                    onEvent = colorViewModel::onEvent,
                     navTo = onNavigateTo
                 )
             }
         }
         is KoColorRoute.Suggestions -> NavEntry(route) {
             SuggestionsUiRoute(
-                onBack = onBack
+                uiState = Unit,
+                onEvent = {},
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.Settings -> NavEntry(route) {
             SettingsUiRoute(
-                onBack = onBack
+                uiState = Unit,
+                onEvent = {},
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.NailLab -> NavEntry(route) {
             NailLabUiRoute(
-                colorHex = route.colorHex,
-                finish = route.finish,
-                onBack = onBack
+                uiState = route.colorHex to route.finish,
+                onEvent = {},
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.FaceLab -> NavEntry(route) {
             FaceLabUiRoute(
-                colorHex = route.colorHex,
-                category = route.category,
-                onBack = onBack
+                uiState = route.colorHex to route.category,
+                onEvent = {},
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.Camera -> NavEntry(route) {

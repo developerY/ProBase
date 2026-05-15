@@ -17,23 +17,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.kocolor.model.ClothingCategory
 import com.zoewave.probase.kocolor.model.ClothingItem
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
 fun WardrobeRoute(
-    onBack: () -> Unit,
-    viewModel: WardrobeViewModel = hiltViewModel()
+    uiState: Unit = Unit,
+    onEvent: (Unit) -> Unit = {},
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val viewModel: WardrobeViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     WardrobeScreen(
-        uiState = uiState,
+        uiState = state,
         onEvent = viewModel::onEvent,
-        onBack = onBack
+        navTo = navTo
     )
 }
 
@@ -42,14 +46,14 @@ fun WardrobeRoute(
 fun WardrobeScreen(
     uiState: WardrobeUiState,
     onEvent: (WardrobeEvent) -> Unit,
-    onBack: () -> Unit
+    navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Wardrobe Inventory") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -86,7 +90,11 @@ fun WardrobeScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(uiState.items) { item ->
-                    WardrobeCard(item = item, onDelete = { onEvent(WardrobeEvent.DeleteItem(item.id)) })
+                    WardrobeCard(
+                        uiState = item,
+                        onEvent = { onEvent(WardrobeEvent.DeleteItem(item.id)) },
+                        navTo = navTo
+                    )
                 }
             }
         }
@@ -94,7 +102,11 @@ fun WardrobeScreen(
 }
 
 @Composable
-fun WardrobeCard(item: ClothingItem, onDelete: () -> Unit) {
+fun WardrobeCard(
+    uiState: ClothingItem,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
@@ -103,7 +115,7 @@ fun WardrobeCard(item: ClothingItem, onDelete: () -> Unit) {
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val colorHex = item.colorHex
+            val colorHex = uiState.colorHex
             if (colorHex != null) {
                 Box(
                     modifier = Modifier
@@ -115,14 +127,14 @@ fun WardrobeCard(item: ClothingItem, onDelete: () -> Unit) {
             }
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = item.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(text = "${item.category.name} • ${item.brand ?: "Unknown Brand"}", style = MaterialTheme.typography.bodyMedium)
-                if (!item.size.isNullOrEmpty()) {
-                    Text(text = "Size: ${item.size}", style = MaterialTheme.typography.bodySmall)
+                Text(text = uiState.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(text = "${uiState.category.name} • ${uiState.brand ?: "Unknown Brand"}", style = MaterialTheme.typography.bodyMedium)
+                if (!uiState.size.isNullOrEmpty()) {
+                    Text(text = "Size: ${uiState.size}", style = MaterialTheme.typography.bodySmall)
                 }
             }
 
-            IconButton(onClick = onDelete) {
+            IconButton(onClick = { onEvent(Unit) }) {
                 Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
             }
         }
@@ -134,5 +146,32 @@ private fun parseColor(hex: String): Color {
         Color(android.graphics.Color.parseColor(hex))
     } catch (e: Exception) {
         Color.Gray
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WardrobeCardPreview() {
+    MaterialTheme {
+        WardrobeCard(
+            uiState = ClothingItem(name = "T-Shirt", brand = "Sample", category = ClothingCategory.TOPS, colorHex = "#FF0000"),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WardrobeScreenPreview() {
+    MaterialTheme {
+        WardrobeScreen(
+            uiState = WardrobeUiState(
+                items = listOf(ClothingItem(name = "T-Shirt", category = ClothingCategory.TOPS)),
+                isLoading = false
+            ),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.mobile.core.R
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 object PaletteIdentifiers {
     const val CLASSIC = "CLASSIC"
@@ -34,18 +35,20 @@ private val paletteOptions = listOf(
 
 @Composable
 fun PaletteSettingsCard(
-    expanded: Boolean,
-    onExpandToggle: () -> Unit,
-    currentPalette: String,
-    onPaletteSelected: (String) -> Unit
+    uiState: Pair<Boolean, String>,
+    onEvent: (Any) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val expanded = uiState.first
+    val currentPalette = uiState.second
+
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column {
             Row(
                 modifier = Modifier
-                    .clickable { onExpandToggle() }
+                    .clickable { onEvent(!expanded) }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -77,14 +80,14 @@ fun PaletteSettingsCard(
                                 .fillMaxWidth()
                                 .selectable(
                                     selected = currentPalette == id,
-                                    onClick = { onPaletteSelected(id) }
+                                    onClick = { onEvent(id) }
                                 )
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
                                 selected = currentPalette == id,
-                                onClick = { onPaletteSelected(id) }
+                                onClick = { onEvent(id) }
                             )
                             Text(
                                 text = stringResource(labelRes),
@@ -104,10 +107,9 @@ fun PaletteSettingsCard(
 private fun PaletteSettingsCardPreview() {
     MaterialTheme {
         PaletteSettingsCard(
-            expanded = true,
-            onExpandToggle = {},
-            currentPalette = PaletteIdentifiers.CLASSIC,
-            onPaletteSelected = {}
+            uiState = true to PaletteIdentifiers.CLASSIC,
+            onEvent = {},
+            navTo = {}
         )
     }
 }

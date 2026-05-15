@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -22,23 +23,23 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
 import com.zoewave.probase.kocolor.model.BeautyRoutine
+import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.RoutineStep
 import com.zoewave.probase.kocolor.model.RoutineTime
 
 @Composable
 fun RoutinesUiRoute(
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: RoutinesViewModel = hiltViewModel()
+    uiState: Unit = Unit,
+    onEvent: (Unit) -> Unit = {},
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val viewModel: RoutinesViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     RoutinesScreen(
-        uiState = uiState,
+        uiState = state,
         onEvent = viewModel::onEvent,
-        navTo = { /* Handle navigation if any */ },
-        onBack = onBack,
-        modifier = modifier
+        navTo = navTo
     )
 }
 
@@ -47,15 +48,19 @@ fun RoutinesUiRoute(
 fun RoutinesScreen(
     uiState: RoutinesUiState,
     onEvent: (RoutinesEvent) -> Unit,
-    navTo: (String) -> Unit,
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Beauty Routines") })
-        },
-        modifier = modifier
+            TopAppBar(
+                title = { Text("Beauty Routines") },
+                navigationIcon = {
+                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (uiState) {
@@ -64,9 +69,9 @@ fun RoutinesScreen(
                 }
                 is RoutinesUiState.Success -> {
                     RoutinesContent(
-                        morningRoutine = uiState.morningRoutine,
-                        eveningRoutine = uiState.eveningRoutine,
-                        onEvent = onEvent
+                        uiState = uiState.morningRoutine to uiState.eveningRoutine,
+                        onEvent = onEvent,
+                        navTo = navTo
                     )
                 }
             }
@@ -75,25 +80,32 @@ fun RoutinesScreen(
 }
 
 @Composable
-private fun RoutinesContent(
-    morningRoutine: BeautyRoutine?,
-    eveningRoutine: BeautyRoutine?,
-    onEvent: (RoutinesEvent) -> Unit
+fun RoutinesContent(
+    uiState: Pair<BeautyRoutine?, BeautyRoutine?>,
+    onEvent: (RoutinesEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val morningRoutine = uiState.first
+    val eveningRoutine = uiState.second
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            BeautyAdviceCard()
+            BeautyAdviceCard(
+                uiState = Unit,
+                onEvent = {},
+                navTo = {}
+            )
         }
 
         if (morningRoutine != null) {
             item {
                 RoutineCard(
-                    routine = morningRoutine,
-                    onToggleStep = { stepId -> onEvent(RoutinesEvent.ToggleStep(morningRoutine, stepId)) }
+                    uiState = morningRoutine,
+                    onEvent = { stepId -> onEvent(RoutinesEvent.ToggleStep(morningRoutine, stepId)) },
+                    navTo = navTo
                 )
             }
         }
@@ -101,8 +113,9 @@ private fun RoutinesContent(
         if (eveningRoutine != null) {
             item {
                 RoutineCard(
-                    routine = eveningRoutine,
-                    onToggleStep = { stepId -> onEvent(RoutinesEvent.ToggleStep(eveningRoutine, stepId)) }
+                    uiState = eveningRoutine,
+                    onEvent = { stepId -> onEvent(RoutinesEvent.ToggleStep(eveningRoutine, stepId)) },
+                    navTo = navTo
                 )
             }
         }
@@ -110,7 +123,11 @@ private fun RoutinesContent(
 }
 
 @Composable
-private fun BeautyAdviceCard() {
+fun BeautyAdviceCard(
+    uiState: Unit,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     val advice = remember { RoutineDefaults.dailyBeautyAdvice.random() }
 
     Card(
@@ -134,9 +151,10 @@ private fun BeautyAdviceCard() {
 }
 
 @Composable
-private fun RoutineCard(
-    routine: BeautyRoutine,
-    onToggleStep: (String) -> Unit
+fun RoutineCard(
+    uiState: BeautyRoutine,
+    onEvent: (String) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     var expanded by remember { mutableStateOf(true) }
 
@@ -149,7 +167,7 @@ private fun RoutineCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = routine.title,
+                    text = uiState.title,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
@@ -165,10 +183,11 @@ private fun RoutineCard(
             AnimatedVisibility(visible = expanded) {
                 Column {
                     Spacer(modifier = Modifier.height(8.dp))
-                    routine.steps.forEach { step ->
+                    uiState.steps.forEach { step ->
                         StepItem(
-                            step = step,
-                            onToggle = { onToggleStep(step.id) }
+                            uiState = step,
+                            onEvent = { onEvent(step.id) },
+                            navTo = navTo
                         )
                     }
                 }
@@ -178,12 +197,13 @@ private fun RoutineCard(
 }
 
 @Composable
-private fun StepItem(
-    step: RoutineStep,
-    onToggle: () -> Unit
+fun StepItem(
+    uiState: RoutineStep,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     Surface(
-        onClick = onToggle,
+        onClick = { onEvent(Unit) },
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -191,27 +211,47 @@ private fun StepItem(
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
             Icon(
-                imageVector = if (step.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                imageVector = if (uiState.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
                 contentDescription = null,
-                tint = if (step.isCompleted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.outline
+                tint = if (uiState.isCompleted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.outline
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
-                    text = step.title,
+                    text = uiState.title,
                     style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = if (step.isRecommended) FontWeight.SemiBold else FontWeight.Normal,
-                    color = if (step.isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface
+                    fontWeight = if (uiState.isRecommended) FontWeight.SemiBold else FontWeight.Normal,
+                    color = if (uiState.isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface
                 )
-                if (step.description.isNotEmpty()) {
+                if (uiState.description.isNotEmpty()) {
                     Text(
-                        text = step.description,
+                        text = uiState.description,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BeautyAdviceCardPreview() {
+    MaterialTheme {
+        BeautyAdviceCard(uiState = Unit, onEvent = {}, navTo = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun StepItemPreview() {
+    MaterialTheme {
+        StepItem(
+            uiState = RoutineStep("1", "Step Title", "Description"),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 
@@ -240,8 +280,7 @@ private fun RoutinesScreenPreview() {
                 )
             ),
             onEvent = {},
-            navTo = {},
-            onBack = {}
+            navTo = {}
         )
     }
 }

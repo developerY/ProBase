@@ -1,12 +1,28 @@
 package com.zoewave.probase.kocolor.features.suggestions.ui
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,23 +34,23 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
 fun SuggestionsUiRoute(
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: SuggestionsViewModel = hiltViewModel()
+    uiState: Unit = Unit,
+    onEvent: (Unit) -> Unit = {},
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val viewModel: SuggestionsViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(uiState.fashionProfile) {
-        if (uiState.fashionProfile != null && uiState.loadingState is SuggestionsLoadingState.Idle) {
+    LaunchedEffect(state.fashionProfile) {
+        if (state.fashionProfile != null && state.loadingState is SuggestionsLoadingState.Idle) {
             viewModel.getSuggestions()
         }
     }
 
     SuggestionsScreen(
-        uiState = uiState,
+        uiState = state,
         onEvent = viewModel::onEvent,
-        navTo = { route -> if (route == null) onBack() },
-        modifier = modifier
+        navTo = navTo
     )
 }
 
@@ -43,32 +59,38 @@ fun SuggestionsUiRoute(
 fun SuggestionsScreen(
     uiState: SuggestionsScreenUiState,
     onEvent: (SuggestionsEvent) -> Unit,
-    navTo: (KoColorRoute?) -> Unit,
-    modifier: Modifier = Modifier
+    navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Personal Suggestions") },
                 navigationIcon = {
-                    IconButton(onClick = { navTo(null) }) {
+                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
-        },
-        modifier = modifier
+        }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             if (uiState.fashionProfile == null) {
-                NoProfileState()
+                NoProfileState(
+                    uiState = Unit,
+                    onEvent = {},
+                    navTo = navTo
+                )
             } else {
                 when (val state = uiState.loadingState) {
                     is SuggestionsLoadingState.Idle, is SuggestionsLoadingState.Loading -> {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
                     is SuggestionsLoadingState.Success -> {
-                        SuggestionsList(state.advice)
+                        SuggestionsList(
+                            uiState = state.advice,
+                            onEvent = {},
+                            navTo = navTo
+                        )
                     }
                     is SuggestionsLoadingState.Error -> {
                         Text(state.message, color = MaterialTheme.colorScheme.error, modifier = Modifier.align(Alignment.Center))
@@ -80,7 +102,11 @@ fun SuggestionsScreen(
 }
 
 @Composable
-fun NoProfileState() {
+fun NoProfileState(
+    uiState: Unit,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize().padding(32.dp),
         verticalArrangement = Arrangement.Center,
@@ -91,7 +117,11 @@ fun NoProfileState() {
 }
 
 @Composable
-fun SuggestionsList(advice: FashionAdvice) {
+fun SuggestionsList(
+    uiState: FashionAdvice,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -99,12 +129,12 @@ fun SuggestionsList(advice: FashionAdvice) {
     ) {
         item {
             Text("Summary", style = MaterialTheme.typography.titleMedium)
-            Text(advice.summary, style = MaterialTheme.typography.bodyMedium)
+            Text(uiState.summary, style = MaterialTheme.typography.bodyMedium)
         }
         item {
             Text("Outfit Suggestions", style = MaterialTheme.typography.titleMedium)
         }
-        items(advice.outfitSuggestions) { outfit ->
+        items(uiState.outfitSuggestions) { outfit ->
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(outfit.occasion, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
@@ -118,7 +148,7 @@ fun SuggestionsList(advice: FashionAdvice) {
         item {
             Text("Makeup Suggestions", style = MaterialTheme.typography.titleMedium)
         }
-        items(advice.makeupSuggestions) { makeup ->
+        items(uiState.makeupSuggestions) { makeup ->
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(makeup.category, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
@@ -126,6 +156,33 @@ fun SuggestionsList(advice: FashionAdvice) {
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NoProfileStatePreview() {
+    MaterialTheme {
+        NoProfileState(uiState = Unit, onEvent = {}, navTo = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SuggestionsListPreview() {
+    MaterialTheme {
+        SuggestionsList(
+            uiState = FashionAdvice(
+                summary = "Advice summary",
+                seasonalType = com.zoewave.probase.kocolor.model.SeasonalType.WINTER,
+                undertone = com.zoewave.probase.kocolor.model.Undertone.COOL,
+                makeupSuggestions = emptyList(),
+                outfitSuggestions = emptyList(),
+                recommendedPalette = emptyList()
+            ),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 
@@ -147,7 +204,10 @@ private fun SuggestionsScreenPreview_Loading() {
     MaterialTheme {
         SuggestionsScreen(
             uiState = SuggestionsScreenUiState(
-                fashionProfile = com.zoewave.probase.kocolor.model.FashionProfile(),
+                fashionProfile = com.zoewave.probase.kocolor.model.FashionProfile(
+                    seasonalType = com.zoewave.probase.kocolor.model.SeasonalType.WINTER,
+                    undertone = com.zoewave.probase.kocolor.model.Undertone.COOL
+                ),
                 loadingState = SuggestionsLoadingState.Loading
             ),
             onEvent = {},

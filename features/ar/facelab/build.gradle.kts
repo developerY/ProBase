@@ -34,6 +34,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
     implementation(project(":core:model"))
+    implementation(project(":applications:kocolor:model"))
 
     // MediaPipe
     implementation(libs.mediapipe.vision)

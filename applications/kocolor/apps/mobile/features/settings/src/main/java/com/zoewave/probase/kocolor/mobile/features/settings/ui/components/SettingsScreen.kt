@@ -25,17 +25,17 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
 fun SettingsUiRoute(
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = hiltViewModel()
+    uiState: Unit = Unit,
+    onEvent: (Unit) -> Unit = {},
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val viewModel: SettingsViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     SettingsScreen(
-        uiState = uiState,
+        uiState = state,
         onEvent = viewModel::onEvent,
-        navTo = { route -> if (route == null) onBack() },
-        modifier = modifier
+        navTo = navTo
     )
 }
 
@@ -44,8 +44,7 @@ fun SettingsUiRoute(
 fun SettingsScreen(
     uiState: SettingsUiState,
     onEvent: (SettingsEvent) -> Unit,
-    navTo: (KoColorRoute?) -> Unit,
-    modifier: Modifier = Modifier
+    navTo: (KoColorRoute) -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
     val privacyPolicyUrl = stringResource(R.string.applications_kocolor_apps_mobile_core_privacy_policy_url)
@@ -56,13 +55,12 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text("Settings") },
                 navigationIcon = {
-                    IconButton(onClick = { navTo(null) }) {
+                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
-        },
-        modifier = modifier
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -73,17 +71,25 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ThemeSettingsCard(
-                expanded = uiState.isThemeExpanded,
-                onExpandToggle = { onEvent(SettingsEvent.OnThemeExpandedToggled(!uiState.isThemeExpanded)) },
-                currentTheme = uiState.currentTheme,
-                onThemeSelected = { onEvent(SettingsEvent.OnThemeSelected(it)) }
+                uiState = uiState.isThemeExpanded to uiState.currentTheme,
+                onEvent = { event ->
+                    when (event) {
+                        is Boolean -> onEvent(SettingsEvent.OnThemeExpandedToggled(event))
+                        is String -> onEvent(SettingsEvent.OnThemeSelected(event))
+                    }
+                },
+                navTo = {}
             )
 
             PaletteSettingsCard(
-                expanded = uiState.isPaletteExpanded,
-                onExpandToggle = { onEvent(SettingsEvent.OnPaletteExpandedToggled(!uiState.isPaletteExpanded)) },
-                currentPalette = uiState.currentPalette,
-                onPaletteSelected = { onEvent(SettingsEvent.OnPaletteSelected(it)) }
+                uiState = uiState.isPaletteExpanded to uiState.currentPalette,
+                onEvent = { event ->
+                    when (event) {
+                        is Boolean -> onEvent(SettingsEvent.OnPaletteExpandedToggled(event))
+                        is String -> onEvent(SettingsEvent.OnPaletteSelected(event))
+                    }
+                },
+                navTo = {}
             )
 
             AiConfigurationCard(

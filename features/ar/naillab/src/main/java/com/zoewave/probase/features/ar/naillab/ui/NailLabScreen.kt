@@ -26,22 +26,26 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.zoewave.probase.features.ar.naillab.data.HandLandmarkerHelper
 import com.zoewave.probase.features.ar.naillab.domain.NailRenderingEngine
+import androidx.compose.ui.tooling.preview.Preview
 import java.util.concurrent.Executors
 
 @Composable
 fun NailLabUiRoute(
-    colorHex: String,
-    finish: String,
-    onBack: () -> Unit,
-    viewModel: NailLabViewModel = hiltViewModel()
+    uiState: Pair<String, String>,
+    onEvent: (Unit) -> Unit = {},
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val colorHex = uiState.first
+    val finish = uiState.second
+    val viewModel: NailLabViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(colorHex, finish) {
         viewModel.onEvent(NailLabEvent.OnColorChanged(colorHex))
@@ -49,9 +53,9 @@ fun NailLabUiRoute(
     }
 
     NailLabScreen(
-        uiState = uiState,
+        uiState = state,
         onEvent = viewModel::onEvent,
-        onBack = onBack
+        navTo = navTo
     )
 }
 
@@ -60,7 +64,7 @@ fun NailLabUiRoute(
 fun NailLabScreen(
     uiState: NailLabUiState,
     onEvent: (NailLabEvent) -> Unit,
-    onBack: () -> Unit
+    navTo: (KoColorRoute) -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -122,7 +126,7 @@ fun NailLabScreen(
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
             
-            val preview = Preview.Builder().build().also {
+            val preview = androidx.camera.core.Preview.Builder().build().also {
                 it.setSurfaceProvider(previewView.surfaceProvider)
             }
 
@@ -172,7 +176,7 @@ fun NailLabScreen(
             TopAppBar(
                 title = { Text("AR Nail Lab") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -273,5 +277,17 @@ fun NailLabScreen(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NailLabScreenPreview() {
+    MaterialTheme {
+        NailLabScreen(
+            uiState = NailLabUiState(colorHex = "#FF0000", finish = "GLOSSY"),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
