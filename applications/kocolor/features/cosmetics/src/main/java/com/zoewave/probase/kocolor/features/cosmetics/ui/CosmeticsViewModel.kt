@@ -135,6 +135,7 @@ class CosmeticsViewModel @Inject constructor(
         category = category,
         colorHex = colorHex,
         shadeName = shadeName,
+        imageUrl = imageUrl,
         notes = notes,
         timestamp = timestamp
     )
@@ -146,6 +147,7 @@ class CosmeticsViewModel @Inject constructor(
         category = category,
         colorHex = colorHex,
         shadeName = shadeName,
+        imageUrl = imageUrl,
         notes = notes,
         timestamp = timestamp
     )

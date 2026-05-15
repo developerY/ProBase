@@ -11,31 +11,31 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.LaunchedEffect
-import coil.compose.AsyncImage
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -54,6 +54,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,14 +64,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.kocolor.model.KoColorRoute
+import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.model.CosmeticCategory
 import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
 fun CosmeticsUiRoute(
@@ -165,118 +168,67 @@ fun CosmeticsScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     allGroups.forEach { groupName ->
                         val itemsInGroup = groupedBySection[groupName] ?: emptyList()
+                        val isGroupExpanded = expandedGroups[groupName] == true
                         
                         item {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { expandedGroups[groupName] = !(expandedGroups[groupName] ?: true) }
-                                    .padding(vertical = 8.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(
-                                        text = groupName,
-                                        style = MaterialTheme.typography.titleLarge,
-                                        fontWeight = FontWeight.Black,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Icon(
-                                        imageVector = if (expandedGroups[groupName] == true) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                        contentDescription = if (expandedGroups[groupName] == true) "Collapse" else "Expand",
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                                HorizontalDivider(
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                    thickness = 2.dp
-                                )
-                            }
+                            GroupSectionCard(
+                                uiState = Triple(groupName, itemsInGroup.size, isGroupExpanded),
+                                onEvent = { expandedGroups[groupName] = it },
+                                navTo = {}
+                            )
                         }
 
-                        if (expandedGroups[groupName] == true) {
+                        if (isGroupExpanded) {
                             val categoriesInGroup = CosmeticCategory.entries.filter { it.groupName == groupName }
                             
-                            if (categoriesInGroup.isEmpty()) {
+                            categoriesInGroup.forEach { category ->
+                                val itemsInCategory = itemsInGroup.filter { it.category == category }
+                                val isSubExpanded = expandedSubgroups[category] == true
+
                                 item {
-                                    Text(
-                                        text = "No items in this section yet.",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(16.dp)
+                                    SubCategoryCard(
+                                        uiState = Triple(category, itemsInCategory.size, isSubExpanded),
+                                        onEvent = { expandedSubgroups[category] = it },
+                                        navTo = {},
+                                        modifier = Modifier.padding(start = 16.dp)
                                     )
                                 }
-                            } else {
-                                categoriesInGroup.forEach { category ->
-                                    val itemsInCategory = itemsInGroup.filter { it.category == category }
-                                    val isSubExpanded = expandedSubgroups[category] == true
 
-                                    item {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable { expandedSubgroups[category] = !isSubExpanded }
-                                                .padding(top = 12.dp, start = 8.dp)
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                modifier = Modifier.fillMaxWidth()
+                                if (isSubExpanded) {
+                                    if (itemsInCategory.isEmpty()) {
+                                        item {
+                                            Surface(
+                                                modifier = Modifier.padding(start = 32.dp, top = 4.dp),
+                                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                                                shape = RoundedCornerShape(12.dp)
                                             ) {
                                                 Text(
-                                                    text = category.displayName,
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = MaterialTheme.colorScheme.secondary
-                                                )
-                                                Icon(
-                                                    imageVector = if (isSubExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                                    contentDescription = if (isSubExpanded) "Collapse" else "Expand",
-                                                    modifier = Modifier.size(20.dp),
-                                                    tint = MaterialTheme.colorScheme.secondary
-                                                )
-                                            }
-                                            Text(
-                                                text = category.description,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                                            )
-                                        }
-                                    }
-
-                                    if (isSubExpanded) {
-                                        if (itemsInCategory.isEmpty()) {
-                                            item {
-                                                Text(
-                                                    text = "No items added to this category yet.",
+                                                    text = "No items added yet. Tap + to start your collection!",
                                                     style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                                    modifier = Modifier.padding(start = 16.dp, bottom = 4.dp, top = 8.dp)
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.padding(12.dp)
                                                 )
                                             }
-                                        } else {
-                                            items(itemsInCategory) { item ->
-                                                CosmeticCard(
-                                                    uiState = item,
-                                                    onEvent = { onEvent(CosmeticsEvent.DeleteItem(item.id)) },
-                                                    navTo = navTo
-                                                )
-                                            }
+                                        }
+                                    } else {
+                                        items(itemsInCategory) { item ->
+                                            CosmeticProductCard(
+                                                uiState = item,
+                                                onEvent = { onEvent(CosmeticsEvent.DeleteItem(item.id)) },
+                                                navTo = navTo,
+                                                modifier = Modifier.padding(start = 32.dp)
+                                            )
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    item { Spacer(modifier = Modifier.height(80.dp)) }
+                    item { Spacer(modifier = Modifier.height(100.dp)) }
                 }
             }
         }
@@ -303,6 +255,199 @@ fun CosmeticsScreen(
             onEvent = {},
             navTo = { showOrderDialog = false }
         )
+    }
+}
+
+@Composable
+fun GroupSectionCard(
+    uiState: Triple<String, Int, Boolean>,
+    onEvent: (Boolean) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    val (title, itemCount, isExpanded) = uiState
+    
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = if (isExpanded) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+        ),
+        onClick = { onEvent(!isExpanded) }
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Category,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    text = "$itemCount items total",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Icon(
+                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+fun SubCategoryCard(
+    uiState: Triple<CosmeticCategory, Int, Boolean>,
+    onEvent: (Boolean) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val (category, itemCount, isExpanded) = uiState
+    
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isExpanded) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+        onClick = { onEvent(!isExpanded) }
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = category.displayName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Badge(containerColor = MaterialTheme.colorScheme.secondary) {
+                    Text(text = itemCount.toString(), modifier = Modifier.padding(horizontal = 4.dp))
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            Text(
+                text = category.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+            )
+        }
+    }
+}
+
+@Composable
+fun CosmeticProductCard(
+    uiState: CosmeticItem,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    ElevatedCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Product Image or Swatch
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                val imageUrl = uiState.imageUrl
+                val colorHex = uiState.colorHex
+
+                if (imageUrl != null) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = uiState.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else if (colorHex != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(parseColor(colorHex))
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = uiState.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+                Text(
+                    text = uiState.brand,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                uiState.shadeName?.let { shade ->
+                    Surface(
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                        shape = CircleShape,
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Text(
+                            text = shade,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+            }
+            
+            IconButton(onClick = { onEvent(Unit) }) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
+                )
+            }
+        }
     }
 }
 
@@ -377,43 +522,6 @@ fun OrderSection(
             text = uiState.second,
             style = MaterialTheme.typography.bodyMedium
         )
-    }
-}
-
-@Composable
-fun CosmeticCard(
-    uiState: CosmeticItem,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val colorHex = uiState.colorHex
-            if (colorHex != null) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(parseColor(colorHex))
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(uiState.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text("${uiState.brand} • ${uiState.category.name}", style = MaterialTheme.typography.bodySmall)
-                if (!uiState.shadeName.isNullOrEmpty()) {
-                    Text("Shade: ${uiState.shadeName}", style = MaterialTheme.typography.bodySmall)
-                }
-            }
-            IconButton(onClick = { onEvent(Unit) }) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
-            }
-        }
     }
 }
 
@@ -630,9 +738,9 @@ private fun AddCosmeticDialogPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun CosmeticCardPreview() {
+private fun CosmeticProductCardPreview() {
     MaterialTheme {
-        CosmeticCard(
+        CosmeticProductCard(
             uiState = CosmeticItem(
                 name = "Velvet Matte",
                 brand = "Sample Brand",
@@ -640,6 +748,30 @@ private fun CosmeticCardPreview() {
                 colorHex = "#FF0000",
                 shadeName = "True Red"
             ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun GroupSectionCardPreview() {
+    MaterialTheme {
+        GroupSectionCard(
+            uiState = Triple("Face", 12, true),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SubCategoryCardPreview() {
+    MaterialTheme {
+        SubCategoryCard(
+            uiState = Triple(CosmeticCategory.FOUNDATION, 3, false),
             onEvent = {},
             navTo = {}
         )
