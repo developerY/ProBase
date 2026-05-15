@@ -1,29 +1,40 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
+import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.model.*
 
 @Composable
@@ -124,24 +135,24 @@ fun HomeScreen(
                 }
             }
 
-            if (uiState.popularCosmetics.isNotEmpty()) {
+            if (uiState.totalCosmetics > 0) {
                 item {
                     SectionTitle(
-                        uiState = "Cosmetics" to Icons.Default.Brush,
+                        uiState = "Cosmetic Collection" to Icons.Default.Brush,
                         onEvent = {},
                         navTo = {}
                     )
                 }
                 item {
-                    InventoryCard(
-                        uiState = uiState.popularCosmetics.map { InventoryPreviewItem(it.name, it.colorHex) },
+                    InventoryDashboard(
+                        uiState = uiState,
                         onEvent = {},
                         navTo = { navTo(KoColorRoute.Cosmetics) }
                     )
                 }
             }
 
-            if (uiState.popularClothing.isNotEmpty()) {
+            if (uiState.totalClothing > 0) {
                 item {
                     SectionTitle(
                         uiState = "Wardrobe" to Icons.Default.Checkroom,
@@ -150,8 +161,8 @@ fun HomeScreen(
                     )
                 }
                 item {
-                    InventoryCard(
-                        uiState = uiState.popularClothing.map { InventoryPreviewItem(it.name, it.colorHex) },
+                    WardrobeDashboard(
+                        uiState = uiState,
                         onEvent = {},
                         navTo = { navTo(KoColorRoute.Wardrobe) }
                     )
@@ -317,90 +328,282 @@ fun RoutineSummaryCard(
     }
 }
 
-data class InventoryPreviewItem(
-    val name: String,
-    val colorHex: String?
-)
-
 @Composable
-fun InventoryCard(
-    uiState: List<InventoryPreviewItem>,
+fun InventoryDashboard(
+    uiState: HomeUiState,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        onClick = { navTo(KoColorRoute.Back) } // Using Back as a generic onClick trigger for now if needed, or specific route
+        shape = RoundedCornerShape(28.dp),
+        onClick = { navTo(KoColorRoute.Cosmetics) },
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(24.dp)) {
+            // Header with Total Count
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                uiState.forEach { item ->
-                    InventoryMiniItem(
+                Column {
+                    Text(
+                        text = "Cosmetics",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "${uiState.totalCosmetics} Total Items",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+                
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                        modifier = Modifier.padding(8.dp).size(12.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(20.dp))
+            
+            // Category Breakdown Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val groups = listOf(
+                    "Face" to Icons.Default.Face,
+                    "Eyes" to Icons.Default.Visibility,
+                    "Lips" to Icons.Default.Favorite,
+                    "Cheeks" to Icons.Default.AutoAwesome
+                )
+                
+                groups.forEach { (name, icon) ->
+                    val count = uiState.cosmeticsByGroup.entries.find { it.key.contains(name, ignoreCase = true) }?.value ?: 0
+                    if (count > 0) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(16.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.secondary)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(text = "$count $name", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(28.dp))
+            
+            // "Recently Added" Section
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "RECENTLY ADDED",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+                
+                HorizontalDivider(modifier = Modifier.weight(1f).padding(start = 16.dp))
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                uiState.popularCosmetics.forEach { item ->
+                    CompactProductCard(
                         uiState = item,
                         onEvent = {},
                         navTo = {}
                     )
                 }
             }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Text(
-                text = "Manage inventory",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.align(Alignment.End)
-            )
         }
     }
 }
 
 @Composable
-fun InventoryMiniItem(
-    uiState: InventoryPreviewItem,
+fun WardrobeDashboard(
+    uiState: HomeUiState,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        onClick = { navTo(KoColorRoute.Wardrobe) }
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // Background Decorative Icon
+            Icon(
+                Icons.Default.Checkroom,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(140.dp)
+                    .align(Alignment.CenterEnd)
+                    .offset(x = 30.dp, y = 30.dp)
+                    .alpha(0.05f),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(
+                    text = "Wardrobe",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Text(
+                    text = "${uiState.totalClothing} Pieces",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Black
+                )
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    uiState.popularClothing.forEach { item ->
+                        val colorHex = item.colorHex
+                        Box(
+                            modifier = Modifier
+                                .size(72.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(
+                                    if (colorHex != null) parseColor(colorHex)
+                                    else MaterialTheme.colorScheme.surfaceVariant
+                                )
+                                .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(16.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (item.imageUrl != null) {
+                                AsyncImage(
+                                    model = item.imageUrl,
+                                    contentDescription = item.name,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else if (colorHex == null) {
+                                Icon(Icons.Default.Checkroom, null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+                            }
+                        }
+                    }
+                    
+                    // "More" circle
+                    if (uiState.totalClothing > 5) {
+                        Surface(
+                            modifier = Modifier.size(72.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = "+${uiState.totalClothing - 5}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CompactProductCard(
+    uiState: CosmeticItem,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    val bgColor = uiState.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant
+    val contentColor = if (uiState.colorHex != null) {
+        if (isColorDark(bgColor)) Color.White else Color.Black
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
     Column(
-        modifier = Modifier.padding(horizontal = 4.dp), // Replaced weight(1f) to stay within signature only
+        modifier = Modifier.width(100.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(
-                    if (uiState.colorHex != null) {
-                        try { Color(android.graphics.Color.parseColor(uiState.colorHex)) } 
-                        catch (e: Exception) { MaterialTheme.colorScheme.surfaceVariant }
-                    } else {
-                        MaterialTheme.colorScheme.surfaceVariant
-                    }
-                ),
+                .size(80.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(bgColor)
+                .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
-            if (uiState.colorHex == null) {
+            if (uiState.imageUrl != null) {
+                AsyncImage(
+                    model = uiState.imageUrl,
+                    contentDescription = uiState.name,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
                 Icon(
-                    Icons.Default.Category,
-                    contentDescription = null, 
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = contentColor.copy(alpha = 0.4f),
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = uiState.name,
             style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
             maxLines = 1,
-            fontWeight = FontWeight.Medium
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Text(
+            text = uiState.brand,
+            style = MaterialTheme.typography.bodyExtraSmall, // Custom or using caption style
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1
         )
     }
 }
+
+// Helper for smaller text
+val Typography.bodyExtraSmall: androidx.compose.ui.text.TextStyle
+    get() = labelSmall.copy(fontSize = 10.sp, letterSpacing = 0.sp)
 
 @Composable
 fun SectionTitle(
@@ -408,17 +611,28 @@ fun SectionTitle(
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(uiState.second, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = uiState.first,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.secondary
-        )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(uiState.second, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = uiState.first,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
+        
+        TextButton(onClick = { /* Could navigate to full list */ }) {
+            Text("See All", style = MaterialTheme.typography.labelMedium)
+        }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
@@ -454,9 +668,13 @@ private fun SectionTitlePreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun InventoryMiniItemPreview() {
+private fun CompactProductCardPreview() {
     MaterialTheme {
-        InventoryMiniItem(uiState = InventoryPreviewItem("Lipstick", "#FF0000"), onEvent = {}, navTo = {})
+        CompactProductCard(
+            uiState = CosmeticItem(name = "Lipstick", brand = "Luxe", category = CosmeticCategory.LIPSTICK, colorHex = "#FF0000"),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 

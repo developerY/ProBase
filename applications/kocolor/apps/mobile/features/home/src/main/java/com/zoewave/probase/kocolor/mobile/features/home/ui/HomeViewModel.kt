@@ -28,7 +28,10 @@ data class HomeUiState(
     val popularClothing: List<ClothingItem> = emptyList(),
     val isDaytime: Boolean = true,
     val isLoadingRoutines: Boolean = true,
-    val beautyTip: String = ""
+    val beautyTip: String = "",
+    val totalCosmetics: Int = 0,
+    val totalClothing: Int = 0,
+    val cosmeticsByGroup: Map<String, Int> = emptyMap()
 )
 
 sealed class HomeEvent {
@@ -99,15 +102,20 @@ class HomeViewModel @Inject constructor(
         _beautyTip
     ) { profile, routines, cosmetics, clothing, tip ->
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        val cosmeticsByGroup = cosmetics.groupBy { it.category.groupName }.mapValues { it.value.size }
+        
         HomeUiState(
             fashionProfile = profile,
             morningRoutine = routines.find { it.time == RoutineTime.MORNING }?.toModel(),
             eveningRoutine = routines.find { it.time == RoutineTime.EVENING }?.toModel(),
-            popularCosmetics = cosmetics.take(3).map { it.toModel() },
-            popularClothing = clothing.take(3).map { it.toModel() },
+            popularCosmetics = cosmetics.sortedByDescending { it.timestamp }.take(5).map { it.toModel() },
+            popularClothing = clothing.sortedByDescending { it.timestamp }.take(5).map { it.toModel() },
             isDaytime = hour in 6..17,
             isLoadingRoutines = routines.isEmpty(),
-            beautyTip = tip
+            beautyTip = tip,
+            totalCosmetics = cosmetics.size,
+            totalClothing = clothing.size,
+            cosmeticsByGroup = cosmeticsByGroup
         )
     }.stateIn(
         scope = viewModelScope,

@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":applications:kocolor:features:suggestions"))
     implementation(project(":applications:kocolor:features:routines"))
     implementation(project(":features:ai:configuration"))
+    implementation(project(":features:graphics"))
 
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
@@ -37,6 +38,7 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.coil.compose)
 
     implementation(libs.kotlinx.collections.immutable)
 }
