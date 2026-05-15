@@ -4,16 +4,63 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class CosmeticCategory {
-    // Face
-    PRIMER, FOUNDATION, CONCEALER, BB_CC_CREAM, SETTING_PRODUCT,
-    // Cheeks
-    BLUSH, BRONZER, CONTOUR, HIGHLIGHTER,
-    // Eyes
-    EYESHADOW, EYELINER, MASCARA, EYEBROW_PRODUCT, FALSE_LASHES,
-    // Lips
-    LIPSTICK, LIP_GLOSS, LIP_LINER, LIP_STAIN_TINT, LIP_PLUMPER,
-    // Tools & Others
-    BRUSHES_SPONGES, EYELASH_CURLER, ORGANIZERS, NAIL_POLISH, OTHER;
+    // Face (Base & Coverage)
+    /** Preps skin and extends makeup wear. */
+    PRIMER,
+    /** Evens out skin tone (liquid, powder, cream). */
+    FOUNDATION,
+    /** Covers imperfections and brightens under-eyes. */
+    CONCEALER,
+    /** Lighter alternatives for coverage and skincare benefits. */
+    BB_CC_CREAM,
+    /** Locks makeup in place. */
+    SETTING_PRODUCT,
+
+    // Cheeks (Color & Dimension)
+    /** Adds color to the cheeks (powder, cream, liquid). */
+    BLUSH,
+    /** Adds warmth for a sun-kissed look. */
+    BRONZER,
+    /** Creates shadows for sculpting. */
+    CONTOUR,
+    /** Adds radiance to high points of the face. */
+    HIGHLIGHTER,
+
+    // Eyes (Definition)
+    /** Adds color and depth to eyelids. */
+    EYESHADOW,
+    /** Defines the lash line. */
+    EYELINER,
+    /** Volumizes, lengthens, or darkens lashes. */
+    MASCARA,
+    /** Pencils, gels, and powders to fill and shape brows. */
+    EYEBROW_PRODUCT,
+    /** Adds volume and length. */
+    FALSE_LASHES,
+
+    // Lips (Color & Texture)
+    /** Provides pigmented color (matte, satin, cream). */
+    LIPSTICK,
+    /** Adds shine. */
+    LIP_GLOSS,
+    /** Defines and prevents bleeding. */
+    LIP_LINER,
+    /** Provides long-lasting sheer color. */
+    LIP_STAIN_TINT,
+    /** Temporarily increases lip volume. */
+    LIP_PLUMPER,
+
+    // Tools & Accessories
+    /** For application and blending. */
+    BRUSHES_SPONGES,
+    /** Curls lashes. */
+    EYELASH_CURLER,
+    /** For storage. */
+    ORGANIZERS,
+
+    // Others
+    NAIL_POLISH,
+    OTHER;
 
     val groupName: String
         get() = when (this) {
