@@ -118,6 +118,35 @@ enum class CosmeticCategory {
             NAIL_POLISH -> "Adds color to your nails."
             OTHER -> "Other beauty essentials."
         }
+
+    val suggestions: List<String>
+        get() = when (this) {
+            PRIMER -> listOf("Hydrating primers for dry skin", "Mattifying primers for oily skin", "Color-correcting primers to cancel redness")
+            FOUNDATION -> listOf("Liquid for a natural finish", "Powder for oily skin", "Full coverage for formal events")
+            CONCEALER -> listOf("Peach tones for dark circles", "Green tones for redness", "Use a shade lighter to brighten under-eyes")
+            BB_CC_CREAM -> listOf("Perfect for 'no-makeup' days", "Combines skincare and coverage", "Usually contains SPF")
+            SETTING_PRODUCT -> listOf("Spray for a dewy finish", "Loose powder for the T-zone", "Pressed powder for touch-ups")
+            BLUSH -> listOf("Peach for warm undertones", "Rose for cool undertones", "Cream blush for a dewy glow")
+            BRONZER -> listOf("Apply where the sun naturally hits", "Matte for subtle warmth", "Shimmer for a glow")
+            CONTOUR -> listOf("Cool-toned shades for shadows", "Apply under cheekbones and jawline", "Blend well to avoid harsh lines")
+            HIGHLIGHTER -> listOf("Apply to high points (cheekbones, brow bone)", "Liquid for subtle glow", "Powder for intense shine")
+            EYESHADOW -> listOf("Neutral palettes for everyday", "Shimmers for center of the lid", "Darker shades for the outer corner")
+            EYELINER -> listOf("Liquid for precise wings", "Pencil for smoky looks", "Gel for long-lasting wear")
+            MASCARA -> listOf("Wiggle at the base for volume", "Waterproof for long events", "Brown for a softer look")
+            EYEBROW_PRODUCT -> listOf("Gel for quick grooming", "Pencil for hair-like strokes", "Powder for a soft, natural look")
+            FALSE_LASHES -> listOf("Trim to fit your eye shape", "Use a thin layer of glue", "Wait 30s for glue to get tacky")
+            LIPSTICK -> listOf("Matte for long wear", "Satin for comfort", "Nude for everyday versatility")
+            LIP_GLOSS -> listOf("Use alone or over lipstick", "Clear for shine", "Plumping for a fuller look")
+            LIP_LINER -> listOf("Prevents feathering", "Outline then fill for longevity", "Pick a shade close to your natural lip color")
+            LIP_STAIN_TINT -> listOf("Great for gradient lips", "Very long-lasting", "Feels weightless on lips")
+            LIP_PLUMPER -> listOf("Expect a slight tingle", "Apply before gloss", "Hydrating formulas are best")
+            BRUSHES_SPONGES -> listOf("Dampen sponges for seamless blending", "Synthetic for creams", "Natural hair for powders")
+            EYELASH_CURLER -> listOf("Curl before mascara", "Pulse 3 times for a lift", "Replace pads every 3-6 months")
+            ORGANIZERS -> listOf("Clear acrylic for visibility", "Stackable to save space", "Keep brushes vertical")
+            NAIL_POLISH -> listOf("Use base coat to prevent staining", "Two thin coats are better than one thick", "Top coat for shine and durability")
+            OTHER -> listOf("Cotton swabs for cleanup", "Brush cleaner", "Micellar water for quick corrections")
+            AI_PENDING -> emptyList()
+        }
 }
 
 @Serializable

@@ -101,6 +101,7 @@ fun CosmeticsScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     var showOrderDialog by remember { mutableStateOf(false) }
     var selectedItemForEdit by remember { mutableStateOf<CosmeticItem?>(null) }
+    var showGuideForCategory by remember { mutableStateOf<CosmeticCategory?>(null) }
 
     // Re-open dialog if coming back from camera
     LaunchedEffect(uiState.capturedImageUri) {
@@ -186,7 +187,12 @@ fun CosmeticsScreen(
                                 item {
                                     SubCategoryCard(
                                         uiState = Triple(category, itemsInCategory.size, isSubExpanded),
-                                        onEvent = { expandedSubgroups[category] = it },
+                                        onEvent = { event ->
+                                            when (event) {
+                                                is Boolean -> expandedSubgroups[category] = event
+                                                "guide" -> showGuideForCategory = category
+                                            }
+                                        },
                                         navTo = {},
                                         modifier = Modifier.padding(start = 16.dp)
                                     )
@@ -269,6 +275,14 @@ fun CosmeticsScreen(
             }
         )
     }
+
+    showGuideForCategory?.let { category ->
+        CategoryGuideDialog(
+            uiState = category,
+            onEvent = {},
+            navTo = { showGuideForCategory = null }
+        )
+    }
 }
 
 @Composable
@@ -332,7 +346,7 @@ fun GroupSectionCard(
 @Composable
 fun SubCategoryCard(
     uiState: Triple<CosmeticCategory, Int, Boolean>,
-    onEvent: (Boolean) -> Unit,
+    onEvent: (Any) -> Unit,
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -352,12 +366,29 @@ fun SubCategoryCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = category.displayName,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = category.displayName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(
+                        onClick = { onEvent("guide") },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Help",
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f)
+                        )
+                    }
+                }
                 Badge(containerColor = MaterialTheme.colorScheme.secondary) {
                     Text(text = itemCount.toString(), modifier = Modifier.padding(horizontal = 4.dp))
                 }
@@ -373,6 +404,75 @@ fun SubCategoryCard(
             )
         }
     }
+}
+
+@Composable
+fun CategoryGuideDialog(
+    uiState: CosmeticCategory,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { navTo(KoColorRoute.Back) },
+        title = { 
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(text = "${uiState.displayName} Guide", fontWeight = FontWeight.Bold)
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "What is it?",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = uiState.description,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                if (uiState.suggestions.isNotEmpty()) {
+                    Column {
+                        Text(
+                            text = "Expert Tips & Suggestions",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        uiState.suggestions.forEach { tip ->
+                            Row(
+                                modifier = Modifier.padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                Text(
+                                    text = "•",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
+                                Text(
+                                    text = tip,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { navTo(KoColorRoute.Back) }) { Text("Got it!") }
+        }
+    )
 }
 
 @Composable
@@ -892,6 +992,18 @@ private fun AddCosmeticDialogPreview() {
     MaterialTheme {
         AddCosmeticDialog(
             uiState = CosmeticsUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CategoryGuideDialogPreview() {
+    MaterialTheme {
+        CategoryGuideDialog(
+            uiState = CosmeticCategory.PRIMER,
             onEvent = {},
             navTo = {}
         )
