@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,19 +12,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -31,13 +39,16 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -113,8 +124,14 @@ fun CosmeticsScreen(
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
             } else {
-                val groupedItems = remember(uiState.items) {
-                    uiState.items.groupBy { it.category }
+                val groupedBySection = remember(uiState.items) {
+                    uiState.items.groupBy { it.category.groupName }
+                }
+
+                val expandedGroups = remember { 
+                    mutableStateMapOf<String, Boolean>().apply {
+                        groupedBySection.keys.forEach { put(it, true) }
+                    }
                 }
 
                 LazyColumn(
@@ -122,27 +139,58 @@ fun CosmeticsScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    groupedItems.forEach { (category, items) ->
+                    groupedBySection.forEach { (groupName, itemsInGroup) ->
                         item {
-                            Column {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = category.name.lowercase().replaceFirstChar { it.uppercase() },
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { expandedGroups[groupName] = !(expandedGroups[groupName] ?: true) }
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = groupName,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Black,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Icon(
+                                        imageVector = if (expandedGroups[groupName] == true) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                        contentDescription = if (expandedGroups[groupName] == true) "Collapse" else "Expand",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                HorizontalDivider(
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                    thickness = 2.dp
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
-                        items(items) { item ->
-                            CosmeticCard(
-                                uiState = item,
-                                onEvent = { onEvent(CosmeticsEvent.DeleteItem(item.id)) },
-                                navTo = navTo
-                            )
+
+                        if (expandedGroups[groupName] == true) {
+                            val itemsByCategory = itemsInGroup.groupBy { it.category }
+                            itemsByCategory.forEach { (category, items) ->
+                                item {
+                                    Text(
+                                        text = category.name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() },
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.padding(top = 8.dp, start = 8.dp)
+                                    )
+                                }
+                                items(items) { item ->
+                                    CosmeticCard(
+                                        uiState = item,
+                                        onEvent = { onEvent(CosmeticsEvent.DeleteItem(item.id)) },
+                                        navTo = navTo
+                                    )
+                                }
+                            }
                         }
                     }
                     item { Spacer(modifier = Modifier.height(80.dp)) }
@@ -287,21 +335,83 @@ fun AddCosmeticDialog(
 ) {
     var name by remember { mutableStateOf("") }
     var brand by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf(CosmeticCategory.LIPSTICK) }
+    var category by remember { mutableStateOf(CosmeticCategory.FOUNDATION) }
     var colorHex by remember { mutableStateOf("") }
     var shadeName by remember { mutableStateOf("") }
+    var showCategoryMenu by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = { navTo(KoColorRoute.Back) },
         title = { Text("Add Cosmetic Item") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name") })
-                OutlinedTextField(value = brand, onValueChange = { brand = it }, label = { Text("Brand") })
-                // Simple category selector could be improved to a dropdown
-                Text("Category: ${category.name}", style = MaterialTheme.typography.labelSmall)
-                OutlinedTextField(value = colorHex, onValueChange = { colorHex = it }, label = { Text("Color Hex (Optional)") })
-                OutlinedTextField(value = shadeName, onValueChange = { shadeName = it }, label = { Text("Shade Name (Optional)") })
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Product Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                OutlinedTextField(
+                    value = brand,
+                    onValueChange = { brand = it },
+                    label = { Text("Brand") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Column {
+                    Text("Category", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(
+                            onClick = { showCategoryMenu = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(category.displayName)
+                        }
+                        DropdownMenu(
+                            expanded = showCategoryMenu,
+                            onDismissRequest = { showCategoryMenu = false },
+                            modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 400.dp)
+                        ) {
+                            CosmeticCategory.entries.groupBy { it.groupName }.forEach { (group, items) ->
+                                Text(
+                                    text = group,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                items.forEach { cat ->
+                                    DropdownMenuItem(
+                                        text = { Text(cat.displayName) },
+                                        onClick = {
+                                            category = cat
+                                            showCategoryMenu = false
+                                        }
+                                    )
+                                }
+                                HorizontalDivider()
+                            }
+                        }
+                    }
+                }
+
+                OutlinedTextField(
+                    value = colorHex,
+                    onValueChange = { colorHex = it },
+                    label = { Text("Color Hex (e.g., #FF0000)") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                OutlinedTextField(
+                    value = shadeName,
+                    onValueChange = { shadeName = it },
+                    label = { Text("Shade Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         },
         confirmButton = {
@@ -312,7 +422,7 @@ fun AddCosmeticDialog(
                 },
                 enabled = name.isNotBlank() && brand.isNotBlank()
             ) {
-                Text("Add")
+                Text("Add to Inventory")
             }
         },
         dismissButton = {
