@@ -9,6 +9,7 @@ import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
+import com.zoewave.probase.kocolor.db.data.ClothingDefaults
 import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
 import com.zoewave.probase.kocolor.model.*
@@ -61,11 +62,24 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
+        viewModelScope.launch {
+            clothingDao.getAllClothing().first().let {
+                if (it.isEmpty()) {
+                    initializeDefaultClothing()
+                }
+            }
+        }
     }
 
     private suspend fun initializeDefaultCosmetics() {
         for (item in CosmeticDefaults.getDefaultCosmetics()) {
             cosmeticDao.insertCosmetic(item)
+        }
+    }
+
+    private suspend fun initializeDefaultClothing() {
+        for (item in ClothingDefaults.getDefaultClothing()) {
+            clothingDao.insertClothing(item)
         }
     }
 
