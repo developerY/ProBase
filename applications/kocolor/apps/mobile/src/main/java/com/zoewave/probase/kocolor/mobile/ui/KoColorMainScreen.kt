@@ -2,15 +2,17 @@ package com.zoewave.probase.kocolor.mobile.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -19,10 +21,6 @@ import androidx.navigation3.ui.NavDisplay
 import com.zoewave.probase.kocolor.mobile.core.ui.theme.KoColorTheme
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.topLevelRoutes
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun KoColorMainScreen(
@@ -76,7 +74,8 @@ fun KoColorMainScreen(
                         onFaceCaptured = viewModel::onFaceCaptured,
                         onHairCaptured = viewModel::onHairCaptured,
                         onShoesCaptured = viewModel::onShoesCaptured,
-                        onClothesCaptured = viewModel::onClothesCaptured
+                        onClothesCaptured = viewModel::onClothesCaptured,
+                        onInventoryItemCaptured = viewModel::onInventoryItemCaptured
                     )
                 }
             )

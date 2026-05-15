@@ -12,6 +12,7 @@ data class CosmeticItemEntity(
     val category: CosmeticCategory,
     val colorHex: String? = null,
     val shadeName: String? = null,
+    val imageUrl: String? = null,
     val notes: String? = null,
     val timestamp: Long
 )

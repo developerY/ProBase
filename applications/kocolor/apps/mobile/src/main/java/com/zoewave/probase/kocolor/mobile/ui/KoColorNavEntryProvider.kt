@@ -30,7 +30,8 @@ fun koColorNavEntryProvider(
     onFaceCaptured: (String) -> Unit,
     onHairCaptured: (String) -> Unit,
     onShoesCaptured: (String) -> Unit,
-    onClothesCaptured: (String) -> Unit
+    onClothesCaptured: (String) -> Unit,
+    onInventoryItemCaptured: (String) -> Unit
 ): NavEntry<KoColorRoute> {
     return when (route) {
         is KoColorRoute.Home -> NavEntry(route) {
@@ -131,6 +132,7 @@ fun koColorNavEntryProvider(
                             "hair" -> onHairCaptured(uri)
                             "shoes" -> onShoesCaptured(uri)
                             "clothes" -> onClothesCaptured(uri)
+                            "inventory_item" -> onInventoryItemCaptured(uri)
                         }
                         onBack()
                     } else {

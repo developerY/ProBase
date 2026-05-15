@@ -82,4 +82,8 @@ class MainViewModel @Inject constructor(
     fun onShoesCaptured(uri: String) {
         sessionRepository.setShoesUri(uri)
     }
+
+    fun onInventoryItemCaptured(uri: String) {
+        sessionRepository.setCapturedItemUri(uri)
+    }
 }

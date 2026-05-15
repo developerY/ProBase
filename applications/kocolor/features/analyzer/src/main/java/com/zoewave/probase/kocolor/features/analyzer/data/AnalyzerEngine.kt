@@ -5,6 +5,8 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import com.zoewave.probase.kocolor.model.FashionAdvice
+import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.kocolor.model.CosmeticCategory
 import com.zoewave.probase.kocolor.model.SeasonalType
 import com.zoewave.probase.kocolor.model.Undertone
 import kotlinx.serialization.json.Json
@@ -106,4 +108,67 @@ class AnalyzerEngine @Inject constructor() {
             )
         }
     }
+
+    suspend fun analyzeCosmeticProduct(
+        image: Bitmap,
+        apiKey: String,
+        modelName: String = "gemini-1.5-flash"
+    ): CosmeticItem? {
+        val generativeModel = GenerativeModel(
+            modelName = modelName,
+            apiKey = apiKey,
+            generationConfig = generationConfig {
+                responseMimeType = "application/json"
+            }
+        )
+
+        val prompt = content {
+            image(image)
+            text("""
+                Identify this cosmetic product from the image. 
+                Extract the product name, brand, shade name (if visible), and the most prominent color (as a HEX code).
+                Also, categorize the product into one of the following categories:
+                ${CosmeticCategory.entries.filter { it != CosmeticCategory.AI_PENDING }.joinToString(", ") { it.name }}
+                
+                Respond ONLY with a valid JSON object matching this exact schema:
+                {
+                  "name": "string",
+                  "brand": "string",
+                  "category": "string (one of the enum values provided)",
+                  "shadeName": "string",
+                  "colorHex": "#HEX",
+                  "notes": "string (brief description of product features)"
+                }
+            """.trimIndent())
+        }
+
+        return try {
+            val response = generativeModel.generateContent(prompt)
+            val jsonText = response.text ?: return null
+            val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
+            val finalJson = "{$cleanedJson}"
+            
+            val result = json.decodeFromString<CosmeticItemJson>(finalJson)
+            CosmeticItem(
+                name = result.name,
+                brand = result.brand,
+                category = CosmeticCategory.valueOf(result.category),
+                colorHex = result.colorHex,
+                shadeName = result.shadeName,
+                notes = result.notes
+            )
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
+
+@kotlinx.serialization.Serializable
+private data class CosmeticItemJson(
+    val name: String,
+    val brand: String,
+    val category: String,
+    val shadeName: String? = null,
+    val colorHex: String? = null,
+    val notes: String? = null
+)
