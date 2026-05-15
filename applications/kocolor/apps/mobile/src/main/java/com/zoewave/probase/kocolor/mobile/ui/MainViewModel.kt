@@ -50,6 +50,10 @@ class MainViewModel @Inject constructor(
     )
 
     fun navigateTo(route: KoColorRoute) {
+        if (route == KoColorRoute.Back) {
+            navigateBack()
+            return
+        }
         if (route in topLevelRoutes) {
             _backStack.value = persistentListOf(route)
         } else {

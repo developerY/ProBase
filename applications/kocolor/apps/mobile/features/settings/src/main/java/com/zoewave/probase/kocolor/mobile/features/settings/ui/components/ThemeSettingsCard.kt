@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.mobile.core.R
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 object ThemeIdentifiers {
     const val SYSTEM = "SYSTEM"
@@ -30,18 +31,20 @@ private val themeOptions = listOf(
 
 @Composable
 fun ThemeSettingsCard(
-    expanded: Boolean,
-    onExpandToggle: () -> Unit,
-    currentTheme: String,
-    onThemeSelected: (String) -> Unit
+    uiState: Pair<Boolean, String>,
+    onEvent: (Any) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val expanded = uiState.first
+    val currentTheme = uiState.second
+
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column {
             Row(
                 modifier = Modifier
-                    .clickable { onExpandToggle() }
+                    .clickable { onEvent(!expanded) }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -73,14 +76,14 @@ fun ThemeSettingsCard(
                                 .fillMaxWidth()
                                 .selectable(
                                     selected = currentTheme == id,
-                                    onClick = { onThemeSelected(id) }
+                                    onClick = { onEvent(id) }
                                 )
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
                                 selected = currentTheme == id,
-                                onClick = { onThemeSelected(id) }
+                                onClick = { onEvent(id) }
                             )
                             Text(
                                 text = stringResource(labelRes),
@@ -100,10 +103,9 @@ fun ThemeSettingsCard(
 private fun ThemeSettingsCardPreview() {
     MaterialTheme {
         ThemeSettingsCard(
-            expanded = true,
-            onExpandToggle = {},
-            currentTheme = ThemeIdentifiers.SYSTEM,
-            onThemeSelected = {}
+            uiState = true to ThemeIdentifiers.SYSTEM,
+            onEvent = {},
+            navTo = {}
         )
     }
 }

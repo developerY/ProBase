@@ -69,18 +69,17 @@ import java.util.Locale
 
 @Composable
 fun ColorUiRoute(
-    windowSizeClass: WindowSizeClass,
-    navTo: (KoColorRoute) -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: ColorViewModel = hiltViewModel()
+    uiState: WindowSizeClass,
+    onEvent: (Unit) -> Unit = {},
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val viewModel: ColorViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     ColorScreen(
-        uiState = uiState,
+        uiState = state,
         onEvent = viewModel::onEvent,
-        navTo = navTo,
-        modifier = modifier
+        navTo = navTo
     )
 }
 
@@ -89,16 +88,14 @@ fun ColorUiRoute(
 fun ColorScreen(
     uiState: ColorUiState,
     onEvent: (ColorEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit,
-    modifier: Modifier = Modifier
+    navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Fashion History") }
             )
-        },
-        modifier = modifier
+        }
     ) { padding ->
         if (uiState.savedSuggestions.isEmpty()) {
             Box(
@@ -119,8 +116,9 @@ fun ColorScreen(
             ) {
                 items(uiState.savedSuggestions) { analysis ->
                     FashionAnalysisCard(
-                        analysis = analysis,
-                        onClick = { navTo(KoColorRoute.ColorDetail(analysis.id)) }
+                        uiState = analysis,
+                        onEvent = {},
+                        navTo = { navTo(KoColorRoute.ColorDetail(analysis.id)) }
                     )
                 }
             }
@@ -130,15 +128,16 @@ fun ColorScreen(
 
 @Composable
 fun FashionAnalysisCard(
-    analysis: SavedAnalysis,
-    onClick: () -> Unit
+    uiState: SavedAnalysis,
+    onEvent: (Unit) -> Unit,
+    navTo: () -> Unit
 ) {
-    val date = SimpleDateFormat("MMM dd, yyyy - HH:mm", Locale.getDefault()).format(Date(analysis.timestamp))
+    val date = SimpleDateFormat("MMM dd, yyyy - HH:mm", Locale.getDefault()).format(Date(uiState.timestamp))
     
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { navTo() },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -149,7 +148,7 @@ fun FashionAnalysisCard(
             ) {
                 Text(text = date, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Badge(containerColor = MaterialTheme.colorScheme.primaryContainer) {
-                    Text(analysis.advice.seasonalType.name)
+                    Text(uiState.advice.seasonalType.name)
                 }
             }
             
@@ -160,12 +159,12 @@ fun FashionAnalysisCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Image previews if available
-                if (analysis.advice.faceUri != null || analysis.advice.clothesUri != null) {
+                if (uiState.advice.faceUri != null || uiState.advice.clothesUri != null) {
                     Row(
                         modifier = Modifier.height(80.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        analysis.advice.faceUri?.let {
+                        uiState.advice.faceUri?.let {
                             AsyncImage(
                                 model = it,
                                 contentDescription = "Face",
@@ -173,7 +172,7 @@ fun FashionAnalysisCard(
                                 contentScale = ContentScale.Crop
                             )
                         }
-                        analysis.advice.clothesUri?.let {
+                        uiState.advice.clothesUri?.let {
                             AsyncImage(
                                 model = it,
                                 contentDescription = "Clothes",
@@ -186,7 +185,7 @@ fun FashionAnalysisCard(
                 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = analysis.advice.summary,
+                        text = uiState.advice.summary,
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 3,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
@@ -201,7 +200,7 @@ fun FashionAnalysisCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                analysis.advice.recommendedPalette.take(6).forEach { hex ->
+                uiState.advice.recommendedPalette.take(6).forEach { hex ->
                     Box(
                         modifier = Modifier
                             .size(24.dp)
@@ -218,23 +217,21 @@ fun FashionAnalysisCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColorDetailScreen(
-    analysis: SavedAnalysis,
-    onBack: () -> Unit,
-    navTo: (KoColorRoute) -> Unit,
-    modifier: Modifier = Modifier
+    uiState: SavedAnalysis,
+    onEvent: (ColorEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Analysis Details") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
-        },
-        modifier = modifier
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -248,7 +245,7 @@ fun ColorDetailScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                analysis.advice.faceUri?.let {
+                uiState.advice.faceUri?.let {
                     Card(modifier = Modifier.weight(1f).aspectRatio(1f)) {
                         AsyncImage(
                             model = it,
@@ -258,7 +255,7 @@ fun ColorDetailScreen(
                         )
                     }
                 }
-                analysis.advice.clothesUri?.let {
+                uiState.advice.clothesUri?.let {
                     Card(modifier = Modifier.weight(1f).aspectRatio(1f)) {
                         AsyncImage(
                             model = it,
@@ -283,12 +280,12 @@ fun ColorDetailScreen(
                 ) {
                     Column {
                         Text("Seasonal Type", style = MaterialTheme.typography.labelMedium)
-                        Text(analysis.advice.seasonalType.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                        Text(uiState.advice.seasonalType.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     }
                     VerticalDivider(modifier = Modifier.height(40.dp).width(1.dp))
                     Column(horizontalAlignment = Alignment.End) {
                         Text("Undertone", style = MaterialTheme.typography.labelMedium)
-                        Text(analysis.advice.undertone.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                        Text(uiState.advice.undertone.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -304,7 +301,11 @@ fun ColorDetailScreen(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            MakeupPaletteGraphic(analysis.advice.recommendedPalette)
+            MakeupPaletteGraphic(
+                uiState = uiState.advice.recommendedPalette,
+                onEvent = {},
+                navTo = {}
+            )
             
             Spacer(modifier = Modifier.height(32.dp))
             Text(
@@ -315,7 +316,7 @@ fun ColorDetailScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             
-            analysis.advice.makeupSuggestions.forEach { suggestion ->
+            uiState.advice.makeupSuggestions.forEach { suggestion ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -363,7 +364,7 @@ fun ColorDetailScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             ) {
                 Text(
-                    text = analysis.advice.summary,
+                    text = uiState.advice.summary,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(16.dp)
                 )
@@ -373,7 +374,11 @@ fun ColorDetailScreen(
 }
 
 @Composable
-fun MakeupPaletteGraphic(colors: List<String>) {
+fun MakeupPaletteGraphic(
+    uiState: List<String>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     val paletteBackground = Brush.linearGradient(
         colors = listOf(Color(0xFFE0E0E0), Color(0xFFBDBDBD))
     )
@@ -393,8 +398,12 @@ fun MakeupPaletteGraphic(colors: List<String>) {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.heightIn(max = 600.dp)
             ) {
-                items(colors) { hex ->
-                    MakeupPan(hex)
+                items(uiState) { hex ->
+                    MakeupPan(
+                        uiState = hex,
+                        onEvent = {},
+                        navTo = {}
+                    )
                 }
             }
         }
@@ -402,9 +411,13 @@ fun MakeupPaletteGraphic(colors: List<String>) {
 }
 
 @Composable
-fun MakeupPan(hex: String) {
+fun MakeupPan(
+    uiState: String,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     val color = try {
-        Color(android.graphics.Color.parseColor(hex))
+        Color(android.graphics.Color.parseColor(uiState))
     } catch (e: Exception) {
         Color.Gray
     }
@@ -423,7 +436,7 @@ fun MakeupPan(hex: String) {
                 .border(0.5.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(4.dp))
         )
         Text(
-            text = hex.uppercase(),
+            text = uiState.uppercase(),
             style = MaterialTheme.typography.labelSmall,
             color = Color.Black.copy(alpha = 0.6f),
             modifier = Modifier.padding(top = 4.dp)
@@ -436,6 +449,45 @@ fun parseColor(hex: String): Color {
         Color(android.graphics.Color.parseColor(hex))
     } catch (e: Exception) {
         Color.Gray
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MakeupPanPreview() {
+    MaterialTheme {
+        MakeupPan(uiState = "#FF0000", onEvent = {}, navTo = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MakeupPaletteGraphicPreview() {
+    MaterialTheme {
+        MakeupPaletteGraphic(uiState = listOf("#FF0000", "#00FF00", "#0000FF"), onEvent = {}, navTo = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FashionAnalysisCardPreview() {
+    MaterialTheme {
+        FashionAnalysisCard(
+            uiState = SavedAnalysis(
+                id = 1,
+                timestamp = System.currentTimeMillis(),
+                advice = FashionAdvice(
+                    summary = "Summary",
+                    seasonalType = SeasonalType.WINTER,
+                    undertone = Undertone.COOL,
+                    makeupSuggestions = emptyList(),
+                    outfitSuggestions = emptyList(),
+                    recommendedPalette = listOf("#FF0000")
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 
@@ -471,7 +523,7 @@ private fun ColorScreenPreview_Populated() {
 private fun ColorDetailScreenPreview() {
     MaterialTheme {
         ColorDetailScreen(
-            analysis = SavedAnalysis(
+            uiState = SavedAnalysis(
                 id = 1,
                 timestamp = System.currentTimeMillis(),
                 advice = FashionAdvice(
@@ -483,7 +535,7 @@ private fun ColorDetailScreenPreview() {
                     recommendedPalette = listOf("#1A1A1A", "#FFFFFF", "#C0C0C0", "#FF007F", "#4B0082", "#000080")
                 )
             ),
-            onBack = {},
+            onEvent = {},
             navTo = {}
         )
     }

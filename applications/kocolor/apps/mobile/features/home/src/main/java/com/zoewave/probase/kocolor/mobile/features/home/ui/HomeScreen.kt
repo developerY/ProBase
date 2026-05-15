@@ -28,17 +28,17 @@ import com.zoewave.probase.kocolor.model.*
 
 @Composable
 fun HomeUiRoute(
-    onNavigateTo: (KoColorRoute) -> Unit,
-    windowSizeClass: WindowSizeClass,
-    modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel()
+    uiState: WindowSizeClass,
+    onEvent: (Unit) -> Unit = {},
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val viewModel: HomeViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     HomeScreen(
-        uiState = uiState,
-        navTo = onNavigateTo,
-        modifier = modifier
+        uiState = state,
+        onEvent = viewModel::onEvent,
+        navTo = navTo
     )
 }
 
@@ -46,8 +46,8 @@ fun HomeUiRoute(
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
-    navTo: (KoColorRoute) -> Unit,
-    modifier: Modifier = Modifier
+    onEvent: (HomeEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -70,8 +70,7 @@ fun HomeScreen(
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.surface,
-        modifier = modifier
+        containerColor = MaterialTheme.colorScheme.surface
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -81,17 +80,26 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item {
-                HomeHeader(uiState.fashionProfile)
+                HomeHeader(
+                    uiState = uiState.fashionProfile,
+                    onEvent = {},
+                    navTo = {}
+                )
             }
 
             item {
-                BeautyTipSection(uiState.beautyTip)
+                BeautyTipSection(
+                    uiState = uiState.beautyTip,
+                    onEvent = {},
+                    navTo = {}
+                )
             }
 
             item {
                 QuickActions(
-                    onAnalyze = { navTo(KoColorRoute.Analyzer()) },
-                    onManageCosmetics = { navTo(KoColorRoute.Cosmetics) }
+                    uiState = Unit,
+                    onEvent = {},
+                    navTo = navTo
                 )
             }
 
@@ -102,10 +110,15 @@ fun HomeScreen(
                 
                 if (routine != null) {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SectionTitle(title = title, icon = icon)
+                        SectionTitle(
+                            uiState = title to icon,
+                            onEvent = {},
+                            navTo = {}
+                        )
                         RoutineSummaryCard(
-                            routine = routine,
-                            onClick = { navTo(KoColorRoute.Routines) }
+                            uiState = routine,
+                            onEvent = { stepId -> onEvent(HomeEvent.ToggleStep(routine, stepId)) },
+                            navTo = { navTo(KoColorRoute.Routines) }
                         )
                     }
                 }
@@ -113,24 +126,34 @@ fun HomeScreen(
 
             if (uiState.popularCosmetics.isNotEmpty()) {
                 item {
-                    SectionTitle(title = "Cosmetics", icon = Icons.Default.Brush)
+                    SectionTitle(
+                        uiState = "Cosmetics" to Icons.Default.Brush,
+                        onEvent = {},
+                        navTo = {}
+                    )
                 }
                 item {
                     InventoryCard(
-                        items = uiState.popularCosmetics.map { InventoryPreviewItem(it.name, it.colorHex) },
-                        onManage = { navTo(KoColorRoute.Cosmetics) }
+                        uiState = uiState.popularCosmetics.map { InventoryPreviewItem(it.name, it.colorHex) },
+                        onEvent = {},
+                        navTo = { navTo(KoColorRoute.Cosmetics) }
                     )
                 }
             }
 
             if (uiState.popularClothing.isNotEmpty()) {
                 item {
-                    SectionTitle(title = "Wardrobe", icon = Icons.Default.Checkroom)
+                    SectionTitle(
+                        uiState = "Wardrobe" to Icons.Default.Checkroom,
+                        onEvent = {},
+                        navTo = {}
+                    )
                 }
                 item {
                     InventoryCard(
-                        items = uiState.popularClothing.map { InventoryPreviewItem(it.name, it.colorHex) },
-                        onManage = { navTo(KoColorRoute.Wardrobe) }
+                        uiState = uiState.popularClothing.map { InventoryPreviewItem(it.name, it.colorHex) },
+                        onEvent = {},
+                        navTo = { navTo(KoColorRoute.Wardrobe) }
                     )
                 }
             }
@@ -141,7 +164,11 @@ fun HomeScreen(
 }
 
 @Composable
-fun HomeHeader(profile: FashionProfile?) {
+fun HomeHeader(
+    uiState: FashionProfile?,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     val gradient = Brush.linearGradient(
         colors = listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.tertiaryContainer)
     )
@@ -154,21 +181,21 @@ fun HomeHeader(profile: FashionProfile?) {
         Box(modifier = Modifier.background(gradient).padding(24.dp)) {
             Column {
                 Text(
-                    text = if (profile == null) "Welcome!" else "Hello, Beautiful",
+                    text = if (uiState == null) "Welcome!" else "Hello, Beautiful",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                if (profile == null) {
+                if (uiState == null) {
                     Text("Unlock your best look with our AI color analysis.")
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Badge(containerColor = MaterialTheme.colorScheme.primary) {
-                            Text(profile.seasonalType.name, modifier = Modifier.padding(4.dp))
+                            Text(uiState.seasonalType.name, modifier = Modifier.padding(4.dp))
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "${profile.undertone} Undertone",
+                            text = "${uiState.undertone} Undertone",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -180,7 +207,11 @@ fun HomeHeader(profile: FashionProfile?) {
 }
 
 @Composable
-fun BeautyTipSection(tip: String) {
+fun BeautyTipSection(
+    uiState: String,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -192,19 +223,23 @@ fun BeautyTipSection(tip: String) {
         ) {
             Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = tip, style = MaterialTheme.typography.bodyMedium)
+            Text(text = uiState, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
 
 @Composable
-fun QuickActions(onAnalyze: () -> Unit, onManageCosmetics: () -> Unit) {
+fun QuickActions(
+    uiState: Unit,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Button(
-            onClick = onAnalyze,
+            onClick = { navTo(KoColorRoute.Analyzer()) },
             modifier = Modifier.weight(1f).height(64.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
@@ -214,7 +249,7 @@ fun QuickActions(onAnalyze: () -> Unit, onManageCosmetics: () -> Unit) {
         }
         
         OutlinedButton(
-            onClick = onManageCosmetics,
+            onClick = { navTo(KoColorRoute.Cosmetics) },
             modifier = Modifier.weight(1f).height(64.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
@@ -227,17 +262,18 @@ fun QuickActions(onAnalyze: () -> Unit, onManageCosmetics: () -> Unit) {
 
 @Composable
 fun RoutineSummaryCard(
-    routine: BeautyRoutine,
-    onClick: () -> Unit
+    uiState: BeautyRoutine,
+    onEvent: (String) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val completedCount = routine.steps.count { it.isCompleted }
-    val totalCount = routine.steps.size
+    val completedCount = uiState.steps.count { it.isCompleted }
+    val totalCount = uiState.steps.size
     val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
 
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { navTo(KoColorRoute.Routines) },
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -273,7 +309,7 @@ fun RoutineSummaryCard(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Next: " + (routine.steps.find { !it.isCompleted }?.title ?: "All done!"),
+                text = "Next: " + (uiState.steps.find { !it.isCompleted }?.title ?: "All done!"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -287,19 +323,27 @@ data class InventoryPreviewItem(
 )
 
 @Composable
-fun InventoryCard(items: List<InventoryPreviewItem>, onManage: () -> Unit) {
+fun InventoryCard(
+    uiState: List<InventoryPreviewItem>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        onClick = onManage
+        onClick = { navTo(KoColorRoute.Back) } // Using Back as a generic onClick trigger for now if needed, or specific route
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items.forEach { item ->
-                    InventoryMiniItem(item = item, modifier = Modifier.weight(1f))
+                uiState.forEach { item ->
+                    InventoryMiniItem(
+                        uiState = item,
+                        onEvent = {},
+                        navTo = {}
+                    )
                 }
             }
             
@@ -316,9 +360,13 @@ fun InventoryCard(items: List<InventoryPreviewItem>, onManage: () -> Unit) {
 }
 
 @Composable
-fun InventoryMiniItem(item: InventoryPreviewItem, modifier: Modifier = Modifier) {
+fun InventoryMiniItem(
+    uiState: InventoryPreviewItem,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Column(
-        modifier = modifier,
+        modifier = Modifier.padding(horizontal = 4.dp), // Replaced weight(1f) to stay within signature only
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -326,8 +374,8 @@ fun InventoryMiniItem(item: InventoryPreviewItem, modifier: Modifier = Modifier)
                 .size(48.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(
-                    if (item.colorHex != null) {
-                        try { Color(android.graphics.Color.parseColor(item.colorHex)) } 
+                    if (uiState.colorHex != null) {
+                        try { Color(android.graphics.Color.parseColor(uiState.colorHex)) } 
                         catch (e: Exception) { MaterialTheme.colorScheme.surfaceVariant }
                     } else {
                         MaterialTheme.colorScheme.surfaceVariant
@@ -335,7 +383,7 @@ fun InventoryMiniItem(item: InventoryPreviewItem, modifier: Modifier = Modifier)
                 ),
             contentAlignment = Alignment.Center
         ) {
-            if (item.colorHex == null) {
+            if (uiState.colorHex == null) {
                 Icon(
                     Icons.Default.Category,
                     contentDescription = null, 
@@ -346,7 +394,7 @@ fun InventoryMiniItem(item: InventoryPreviewItem, modifier: Modifier = Modifier)
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = item.name,
+            text = uiState.name,
             style = MaterialTheme.typography.labelSmall,
             maxLines = 1,
             fontWeight = FontWeight.Medium
@@ -355,12 +403,16 @@ fun InventoryMiniItem(item: InventoryPreviewItem, modifier: Modifier = Modifier)
 }
 
 @Composable
-fun SectionTitle(title: String, icon: ImageVector) {
+fun SectionTitle(
+    uiState: Pair<String, ImageVector>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+        Icon(uiState.second, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = title,
+            text = uiState.first,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.secondary
@@ -370,10 +422,51 @@ fun SectionTitle(title: String, icon: ImageVector) {
 
 @Preview(showBackground = true)
 @Composable
+private fun HomeHeaderPreview() {
+    MaterialTheme {
+        HomeHeader(uiState = null, onEvent = {}, navTo = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BeautyTipSectionPreview() {
+    MaterialTheme {
+        BeautyTipSection(uiState = "Tip of the day", onEvent = {}, navTo = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun QuickActionsPreview() {
+    MaterialTheme {
+        QuickActions(uiState = Unit, onEvent = {}, navTo = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SectionTitlePreview() {
+    MaterialTheme {
+        SectionTitle(uiState = "Title" to Icons.Default.Home, onEvent = {}, navTo = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun InventoryMiniItemPreview() {
+    MaterialTheme {
+        InventoryMiniItem(uiState = InventoryPreviewItem("Lipstick", "#FF0000"), onEvent = {}, navTo = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 private fun HomeScreenPreview_NoProfile() {
     MaterialTheme {
         HomeScreen(
             uiState = HomeUiState(),
+            onEvent = {},
             navTo = {}
         )
     }
@@ -391,6 +484,7 @@ private fun HomeScreenPreview_WithProfile() {
                     notes = "Your best colors are deep blues and jewel tones."
                 )
             ),
+            onEvent = {},
             navTo = {}
         )
     }

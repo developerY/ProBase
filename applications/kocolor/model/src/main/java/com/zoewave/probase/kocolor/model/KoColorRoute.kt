@@ -35,6 +35,9 @@ sealed class KoColorRoute {
     data object Settings : KoColorRoute()
 
     @Serializable
+    data object Back : KoColorRoute()
+
+    @Serializable
     data class ColorDetail(val suggestionId: Long) : KoColorRoute()
 
     @Serializable

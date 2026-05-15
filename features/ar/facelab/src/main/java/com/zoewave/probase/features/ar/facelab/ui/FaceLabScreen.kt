@@ -26,22 +26,26 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.zoewave.probase.features.ar.facelab.data.FaceLandmarkerHelper
 import com.zoewave.probase.features.ar.facelab.domain.FaceRenderingEngine
+import androidx.compose.ui.tooling.preview.Preview
 import java.util.concurrent.Executors
 
 @Composable
 fun FaceLabUiRoute(
-    colorHex: String,
-    category: String,
-    onBack: () -> Unit,
-    viewModel: FaceLabViewModel = hiltViewModel()
+    uiState: Pair<String, String>,
+    onEvent: (Unit) -> Unit = {},
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val colorHex = uiState.first
+    val category = uiState.second
+    val viewModel: FaceLabViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(colorHex, category) {
         viewModel.onEvent(FaceLabEvent.OnColorChanged(colorHex))
@@ -49,9 +53,9 @@ fun FaceLabUiRoute(
     }
 
     FaceLabScreen(
-        uiState = uiState,
+        uiState = state,
         onEvent = viewModel::onEvent,
-        onBack = onBack
+        navTo = navTo
     )
 }
 
@@ -60,7 +64,7 @@ fun FaceLabUiRoute(
 fun FaceLabScreen(
     uiState: FaceLabUiState,
     onEvent: (FaceLabEvent) -> Unit,
-    onBack: () -> Unit
+    navTo: (KoColorRoute) -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -123,7 +127,7 @@ fun FaceLabScreen(
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
             
-            val preview = Preview.Builder().build().also {
+            val preview = androidx.camera.core.Preview.Builder().build().also {
                 it.setSurfaceProvider(previewView.surfaceProvider)
             }
 
@@ -173,7 +177,7 @@ fun FaceLabScreen(
             TopAppBar(
                 title = { Text("Face AR Lab") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -261,5 +265,17 @@ fun FaceLabScreen(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FaceLabScreenPreview() {
+    MaterialTheme {
+        FaceLabScreen(
+            uiState = FaceLabUiState(colorHex = "#FF0000", category = "Lipstick"),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }

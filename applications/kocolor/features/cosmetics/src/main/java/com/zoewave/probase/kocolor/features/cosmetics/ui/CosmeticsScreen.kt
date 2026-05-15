@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -49,22 +50,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.CosmeticCategory
 import com.zoewave.probase.kocolor.model.CosmeticItem
 
 @Composable
 fun CosmeticsUiRoute(
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: CosmeticsViewModel = hiltViewModel()
+    uiState: Unit = Unit,
+    onEvent: (Unit) -> Unit = {},
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val viewModel: CosmeticsViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     CosmeticsScreen(
-        uiState = uiState,
+        uiState = state,
         onEvent = viewModel::onEvent,
-        onBack = onBack,
-        modifier = modifier
+        navTo = navTo
     )
 }
 
@@ -73,18 +75,23 @@ fun CosmeticsUiRoute(
 fun CosmeticsScreen(
     uiState: CosmeticsUiState,
     onEvent: (CosmeticsEvent) -> Unit,
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    navTo: (KoColorRoute) -> Unit
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
+    var showOrderDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Cosmetic Inventory") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showOrderDialog = true }) {
+                        Icon(Icons.Default.Info, contentDescription = "Application Order")
                     }
                 }
             )
@@ -93,8 +100,7 @@ fun CosmeticsScreen(
             FloatingActionButton(onClick = { showAddDialog = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Add Item")
             }
-        },
-        modifier = modifier
+        }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             if (uiState.isLoading) {
@@ -132,7 +138,11 @@ fun CosmeticsScreen(
                             }
                         }
                         items(items) { item ->
-                            CosmeticCard(item = item, onDelete = { onEvent(CosmeticsEvent.DeleteItem(item.id)) })
+                            CosmeticCard(
+                                uiState = item,
+                                onEvent = { onEvent(CosmeticsEvent.DeleteItem(item.id)) },
+                                navTo = navTo
+                            )
                         }
                     }
                     item { Spacer(modifier = Modifier.height(80.dp)) }
@@ -143,14 +153,101 @@ fun CosmeticsScreen(
 
     if (showAddDialog) {
         AddCosmeticDialog(
-            onDismiss = { showAddDialog = false },
-            onConfirm = { onEvent(CosmeticsEvent.AddItem(it)) }
+            uiState = Unit,
+            onEvent = { onEvent(CosmeticsEvent.AddItem(it)) },
+            navTo = { showAddDialog = false }
+        )
+    }
+
+    if (showOrderDialog) {
+        MakeupOrderDialog(
+            uiState = Unit,
+            onEvent = {},
+            navTo = { showOrderDialog = false }
         )
     }
 }
 
 @Composable
-fun CosmeticCard(item: CosmeticItem, onDelete: () -> Unit) {
+fun MakeupOrderDialog(
+    uiState: Unit,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { navTo(KoColorRoute.Back) },
+        title = { Text("Standard Application Order", fontWeight = FontWeight.Bold) },
+        text = {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                item {
+                    OrderSection(
+                        uiState = "Phase 1: Skin Prep" to "Skincare (Cleanser, toner, moisturizer, sunscreen) followed by Primer.",
+                        onEvent = {},
+                        navTo = {}
+                    )
+                }
+                item {
+                    OrderSection(
+                        uiState = "Phase 2: The Base" to "Foundation/Skin Tint, then Concealer for blemishes, and Setting Powder for oily areas.",
+                        onEvent = {},
+                        navTo = {}
+                    )
+                }
+                item {
+                    OrderSection(
+                        uiState = "Phase 3: Dimension & Cheeks" to "Apply Cream products (blush/bronzer) now, then Powder products, and Highlighter last.",
+                        onEvent = {},
+                        navTo = {}
+                    )
+                }
+                item {
+                    OrderSection(
+                        uiState = "Phase 4: Eyes & Brows" to "Eyebrows first to frame the face, then Eyeshadow, Eyeliner, and finally Mascara.",
+                        onEvent = {},
+                        navTo = {}
+                    )
+                }
+                item {
+                    OrderSection(
+                        uiState = "Phase 5: Lips & Setting" to "Lip Liner to shape, Lipstick/Gloss to fill, and Setting Spray to lock it all in.",
+                        onEvent = {},
+                        navTo = {}
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { navTo(KoColorRoute.Back) }) { Text("Got it!") }
+        }
+    )
+}
+
+@Composable
+fun OrderSection(
+    uiState: Pair<String, String>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    Column {
+        Text(
+            text = uiState.first,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = uiState.second,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+@Composable
+fun CosmeticCard(
+    uiState: CosmeticItem,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -158,7 +255,7 @@ fun CosmeticCard(item: CosmeticItem, onDelete: () -> Unit) {
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val colorHex = item.colorHex
+            val colorHex = uiState.colorHex
             if (colorHex != null) {
                 Box(
                     modifier = Modifier
@@ -169,13 +266,13 @@ fun CosmeticCard(item: CosmeticItem, onDelete: () -> Unit) {
                 Spacer(modifier = Modifier.width(16.dp))
             }
             Column(modifier = Modifier.weight(1f)) {
-                Text(item.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text("${item.brand} • ${item.category.name}", style = MaterialTheme.typography.bodySmall)
-                if (!item.shadeName.isNullOrEmpty()) {
-                    Text("Shade: ${item.shadeName}", style = MaterialTheme.typography.bodySmall)
+                Text(uiState.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("${uiState.brand} • ${uiState.category.name}", style = MaterialTheme.typography.bodySmall)
+                if (!uiState.shadeName.isNullOrEmpty()) {
+                    Text("Shade: ${uiState.shadeName}", style = MaterialTheme.typography.bodySmall)
                 }
             }
-            IconButton(onClick = onDelete) {
+            IconButton(onClick = { onEvent(Unit) }) {
                 Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
             }
         }
@@ -183,7 +280,11 @@ fun CosmeticCard(item: CosmeticItem, onDelete: () -> Unit) {
 }
 
 @Composable
-fun AddCosmeticDialog(onDismiss: () -> Unit, onConfirm: (CosmeticItem) -> Unit) {
+fun AddCosmeticDialog(
+    uiState: Unit,
+    onEvent: (CosmeticItem) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     var name by remember { mutableStateOf("") }
     var brand by remember { mutableStateOf("") }
     var category by remember { mutableStateOf(CosmeticCategory.LIPSTICK) }
@@ -191,7 +292,7 @@ fun AddCosmeticDialog(onDismiss: () -> Unit, onConfirm: (CosmeticItem) -> Unit) 
     var shadeName by remember { mutableStateOf("") }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { navTo(KoColorRoute.Back) },
         title = { Text("Add Cosmetic Item") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -206,8 +307,8 @@ fun AddCosmeticDialog(onDismiss: () -> Unit, onConfirm: (CosmeticItem) -> Unit) 
         confirmButton = {
             Button(
                 onClick = {
-                    onConfirm(CosmeticItem(name = name, brand = brand, category = category, colorHex = colorHex.takeIf { it.isNotBlank() }, shadeName = shadeName.takeIf { it.isNotBlank() }))
-                    onDismiss()
+                    onEvent(CosmeticItem(name = name, brand = brand, category = category, colorHex = colorHex.takeIf { it.isNotBlank() }, shadeName = shadeName.takeIf { it.isNotBlank() }))
+                    navTo(KoColorRoute.Back)
                 },
                 enabled = name.isNotBlank() && brand.isNotBlank()
             ) {
@@ -215,7 +316,7 @@ fun AddCosmeticDialog(onDismiss: () -> Unit, onConfirm: (CosmeticItem) -> Unit) 
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = { navTo(KoColorRoute.Back) }) { Text("Cancel") }
         }
     )
 }
@@ -230,17 +331,54 @@ fun parseColor(hex: String): Color {
 
 @Preview(showBackground = true)
 @Composable
+private fun OrderSectionPreview() {
+    MaterialTheme {
+        OrderSection(
+            uiState = "Phase 1" to "Description here",
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MakeupOrderDialogPreview() {
+    MaterialTheme {
+        MakeupOrderDialog(
+            uiState = Unit,
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AddCosmeticDialogPreview() {
+    MaterialTheme {
+        AddCosmeticDialog(
+            uiState = Unit,
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 private fun CosmeticCardPreview() {
     MaterialTheme {
         CosmeticCard(
-            item = CosmeticItem(
+            uiState = CosmeticItem(
                 name = "Velvet Matte",
                 brand = "Sample Brand",
                 category = CosmeticCategory.LIPSTICK,
                 colorHex = "#FF0000",
                 shadeName = "True Red"
             ),
-            onDelete = {}
+            onEvent = {},
+            navTo = {}
         )
     }
 }
@@ -258,7 +396,7 @@ private fun CosmeticsScreenPreview() {
                 isLoading = false
             ),
             onEvent = {},
-            onBack = {}
+            navTo = {}
         )
     }
 }
