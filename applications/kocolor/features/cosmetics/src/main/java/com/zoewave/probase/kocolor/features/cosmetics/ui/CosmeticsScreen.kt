@@ -124,13 +124,21 @@ fun CosmeticsScreen(
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
             } else {
+                val allGroups = listOf(
+                    "Face (Base & Coverage)",
+                    "Cheeks (Color & Dimension)",
+                    "Eyes (Definition)",
+                    "Lips (Color & Texture)",
+                    "Tools & Accessories"
+                )
+
                 val groupedBySection = remember(uiState.items) {
                     uiState.items.groupBy { it.category.groupName }
                 }
 
                 val expandedGroups = remember { 
                     mutableStateMapOf<String, Boolean>().apply {
-                        groupedBySection.keys.forEach { put(it, true) }
+                        allGroups.forEach { put(it, true) }
                     }
                 }
 
@@ -139,7 +147,9 @@ fun CosmeticsScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    groupedBySection.forEach { (groupName, itemsInGroup) ->
+                    allGroups.forEach { groupName ->
+                        val itemsInGroup = groupedBySection[groupName] ?: emptyList()
+                        
                         item {
                             Column(
                                 modifier = Modifier
@@ -172,23 +182,34 @@ fun CosmeticsScreen(
                         }
 
                         if (expandedGroups[groupName] == true) {
-                            val itemsByCategory = itemsInGroup.groupBy { it.category }
-                            itemsByCategory.forEach { (category, items) ->
+                            if (itemsInGroup.isEmpty()) {
                                 item {
                                     Text(
-                                        text = category.name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() },
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        modifier = Modifier.padding(top = 8.dp, start = 8.dp)
+                                        text = "No items in this section yet.",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(16.dp)
                                     )
                                 }
-                                items(items) { item ->
-                                    CosmeticCard(
-                                        uiState = item,
-                                        onEvent = { onEvent(CosmeticsEvent.DeleteItem(item.id)) },
-                                        navTo = navTo
-                                    )
+                            } else {
+                                val itemsByCategory = itemsInGroup.groupBy { it.category }
+                                itemsByCategory.forEach { (category, items) ->
+                                    item {
+                                        Text(
+                                            text = category.displayName,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.secondary,
+                                            modifier = Modifier.padding(top = 8.dp, start = 8.dp)
+                                        )
+                                    }
+                                    items(items) { item ->
+                                        CosmeticCard(
+                                            uiState = item,
+                                            onEvent = { onEvent(CosmeticsEvent.DeleteItem(item.id)) },
+                                            navTo = navTo
+                                        )
+                                    }
                                 }
                             }
                         }
