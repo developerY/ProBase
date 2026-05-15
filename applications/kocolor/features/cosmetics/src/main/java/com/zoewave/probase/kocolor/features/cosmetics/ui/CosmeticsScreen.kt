@@ -142,6 +142,12 @@ fun CosmeticsScreen(
                     }
                 }
 
+                val expandedSubgroups = remember {
+                    mutableStateMapOf<CosmeticCategory, Boolean>().apply {
+                        CosmeticCategory.entries.forEach { put(it, false) }
+                    }
+                }
+
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
@@ -182,7 +188,9 @@ fun CosmeticsScreen(
                         }
 
                         if (expandedGroups[groupName] == true) {
-                            if (itemsInGroup.isEmpty()) {
+                            val categoriesInGroup = CosmeticCategory.entries.filter { it.groupName == groupName }
+                            
+                            if (categoriesInGroup.isEmpty()) {
                                 item {
                                     Text(
                                         text = "No items in this section yet.",
@@ -192,23 +200,63 @@ fun CosmeticsScreen(
                                     )
                                 }
                             } else {
-                                val itemsByCategory = itemsInGroup.groupBy { it.category }
-                                itemsByCategory.forEach { (category, items) ->
+                                categoriesInGroup.forEach { category ->
+                                    val itemsInCategory = itemsInGroup.filter { it.category == category }
+                                    val isSubExpanded = expandedSubgroups[category] == true
+
                                     item {
-                                        Text(
-                                            text = category.displayName,
-                                            style = MaterialTheme.typography.labelLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.secondary,
-                                            modifier = Modifier.padding(top = 8.dp, start = 8.dp)
-                                        )
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable { expandedSubgroups[category] = !isSubExpanded }
+                                                .padding(top = 12.dp, start = 8.dp)
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Text(
+                                                    text = category.displayName,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.secondary
+                                                )
+                                                Icon(
+                                                    imageVector = if (isSubExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                                    contentDescription = if (isSubExpanded) "Collapse" else "Expand",
+                                                    modifier = Modifier.size(20.dp),
+                                                    tint = MaterialTheme.colorScheme.secondary
+                                                )
+                                            }
+                                            Text(
+                                                text = category.description,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                            )
+                                        }
                                     }
-                                    items(items) { item ->
-                                        CosmeticCard(
-                                            uiState = item,
-                                            onEvent = { onEvent(CosmeticsEvent.DeleteItem(item.id)) },
-                                            navTo = navTo
-                                        )
+
+                                    if (isSubExpanded) {
+                                        if (itemsInCategory.isEmpty()) {
+                                            item {
+                                                Text(
+                                                    text = "No items added to this category yet.",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                                    modifier = Modifier.padding(start = 16.dp, bottom = 4.dp, top = 8.dp)
+                                                )
+                                            }
+                                        } else {
+                                            items(itemsInCategory) { item ->
+                                                CosmeticCard(
+                                                    uiState = item,
+                                                    onEvent = { onEvent(CosmeticsEvent.DeleteItem(item.id)) },
+                                                    navTo = navTo
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }

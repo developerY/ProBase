@@ -84,6 +84,34 @@ enum class CosmeticCategory {
             NAIL_POLISH -> "Nail Polish"
             else -> name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
         }
+
+    val description: String
+        get() = when (this) {
+            PRIMER -> "Preps skin and extends makeup wear."
+            FOUNDATION -> "Evens out skin tone (liquid, powder, cream)."
+            CONCEALER -> "Covers imperfections and brightens under-eyes."
+            BB_CC_CREAM -> "Lighter alternatives for coverage and skincare benefits."
+            SETTING_PRODUCT -> "Locks makeup in place."
+            BLUSH -> "Adds color to the cheeks (powder, cream, liquid)."
+            BRONZER -> "Adds warmth for a sun-kissed look."
+            CONTOUR -> "Creates shadows for sculpting."
+            HIGHLIGHTER -> "Adds radiance to high points of the face."
+            EYESHADOW -> "Adds color and depth to eyelids."
+            EYELINER -> "Defines the lash line."
+            MASCARA -> "Volumizes, lengthens, or darkens lashes."
+            EYEBROW_PRODUCT -> "Pencils, gels, and powders to fill and shape brows."
+            FALSE_LASHES -> "Adds volume and length."
+            LIPSTICK -> "Provides pigmented color (matte, satin, cream)."
+            LIP_GLOSS -> "Adds shine."
+            LIP_LINER -> "Defines and prevents bleeding."
+            LIP_STAIN_TINT -> "Provides long-lasting sheer color."
+            LIP_PLUMPER -> "Temporarily increases lip volume."
+            BRUSHES_SPONGES -> "For application and blending."
+            EYELASH_CURLER -> "Curls lashes."
+            ORGANIZERS -> "For storage."
+            NAIL_POLISH -> "Adds color to your nails."
+            OTHER -> "Other beauty essentials."
+        }
 }
 
 @Serializable
