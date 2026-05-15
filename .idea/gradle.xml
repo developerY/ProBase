@@ -175,6 +175,7 @@
             <option value="$PROJECT_DIR$/features/calendar" />
             <option value="$PROJECT_DIR$/features/camera" />
             <option value="$PROJECT_DIR$/features/compliance" />
+            <option value="$PROJECT_DIR$/features/graphics" />
             <option value="$PROJECT_DIR$/features/health" />
             <option value="$PROJECT_DIR$/features/health/cgm" />
             <option value="$PROJECT_DIR$/features/health/core" />
