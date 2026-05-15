@@ -23,8 +23,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.LaunchedEffect
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
@@ -90,6 +97,13 @@ fun CosmeticsScreen(
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     var showOrderDialog by remember { mutableStateOf(false) }
+
+    // Re-open dialog if coming back from camera
+    LaunchedEffect(uiState.capturedImageUri) {
+        if (uiState.capturedImageUri != null) {
+            showAddDialog = true
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -270,9 +284,16 @@ fun CosmeticsScreen(
 
     if (showAddDialog) {
         AddCosmeticDialog(
-            uiState = Unit,
-            onEvent = { onEvent(CosmeticsEvent.AddItem(it)) },
-            navTo = { showAddDialog = false }
+            uiState = uiState,
+            onEvent = onEvent,
+            navTo = { route ->
+                if (route == KoColorRoute.Back) {
+                    showAddDialog = false
+                    onEvent(CosmeticsEvent.ClearCapturedImage)
+                } else {
+                    navTo(route)
+                }
+            }
         )
     }
 
@@ -398,8 +419,8 @@ fun CosmeticCard(
 
 @Composable
 fun AddCosmeticDialog(
-    uiState: Unit,
-    onEvent: (CosmeticItem) -> Unit,
+    uiState: CosmeticsUiState,
+    onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
@@ -409,6 +430,17 @@ fun AddCosmeticDialog(
     var shadeName by remember { mutableStateOf("") }
     var showCategoryMenu by remember { mutableStateOf(false) }
 
+    // Auto-fill from AI result
+    LaunchedEffect(uiState.aiResult) {
+        uiState.aiResult?.let { result ->
+            name = result.name
+            brand = result.brand
+            category = result.category
+            colorHex = result.colorHex ?: ""
+            shadeName = result.shadeName ?: ""
+        }
+    }
+
     AlertDialog(
         onDismissRequest = { navTo(KoColorRoute.Back) },
         title = { Text("Add Cosmetic Item") },
@@ -417,6 +449,49 @@ fun AddCosmeticDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Image Capture / Preview
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(160.dp)
+                        .clickable { navTo(KoColorRoute.Camera("inventory_item")) },
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        if (uiState.capturedImageUri != null) {
+                            AsyncImage(
+                                model = uiState.capturedImageUri,
+                                contentDescription = "Captured Product",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(32.dp))
+                                Text("Take Product Photo", style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                    }
+                }
+
+                if (uiState.capturedImageUri != null) {
+                    Button(
+                        onClick = { onEvent(CosmeticsEvent.ScanWithGemini) },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !uiState.isAnalyzing
+                    ) {
+                        if (uiState.isAnalyzing) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+                        } else {
+                            Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Auto-fill with Gemini")
+                        }
+                    }
+                }
+
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -446,7 +521,7 @@ fun AddCosmeticDialog(
                             onDismissRequest = { showCategoryMenu = false },
                             modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 400.dp)
                         ) {
-                            CosmeticCategory.entries.groupBy { it.groupName }.forEach { (group, items) ->
+                            CosmeticCategory.entries.filter { it != CosmeticCategory.AI_PENDING }.groupBy { it.groupName }.forEach { (group, items) ->
                                 Text(
                                     text = group,
                                     style = MaterialTheme.typography.labelSmall,
@@ -486,7 +561,16 @@ fun AddCosmeticDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    onEvent(CosmeticItem(name = name, brand = brand, category = category, colorHex = colorHex.takeIf { it.isNotBlank() }, shadeName = shadeName.takeIf { it.isNotBlank() }))
+                    onEvent(CosmeticsEvent.AddItem(
+                        CosmeticItem(
+                            name = name, 
+                            brand = brand, 
+                            category = category, 
+                            colorHex = colorHex.takeIf { it.isNotBlank() }, 
+                            shadeName = shadeName.takeIf { it.isNotBlank() },
+                            imageUrl = uiState.capturedImageUri
+                        )
+                    ))
                     navTo(KoColorRoute.Back)
                 },
                 enabled = name.isNotBlank() && brand.isNotBlank()
@@ -537,7 +621,7 @@ private fun MakeupOrderDialogPreview() {
 private fun AddCosmeticDialogPreview() {
     MaterialTheme {
         AddCosmeticDialog(
-            uiState = Unit,
+            uiState = CosmeticsUiState(),
             onEvent = {},
             navTo = {}
         )

@@ -58,6 +58,10 @@ enum class CosmeticCategory {
     /** For storage. */
     ORGANIZERS,
 
+    // AI Assisted
+    /** Item captured by camera, awaiting analysis. */
+    AI_PENDING,
+
     // Others
     NAIL_POLISH,
     OTHER;
@@ -68,7 +72,7 @@ enum class CosmeticCategory {
             BLUSH, BRONZER, CONTOUR, HIGHLIGHTER -> "Cheeks (Color & Dimension)"
             EYESHADOW, EYELINER, MASCARA, EYEBROW_PRODUCT, FALSE_LASHES -> "Eyes (Definition)"
             LIPSTICK, LIP_GLOSS, LIP_LINER, LIP_STAIN_TINT, LIP_PLUMPER -> "Lips (Color & Texture)"
-            BRUSHES_SPONGES, EYELASH_CURLER, ORGANIZERS, NAIL_POLISH, OTHER -> "Tools & Accessories"
+            BRUSHES_SPONGES, EYELASH_CURLER, ORGANIZERS, AI_PENDING, NAIL_POLISH, OTHER -> "Tools & Accessories"
         }
 
     val displayName: String
@@ -81,6 +85,7 @@ enum class CosmeticCategory {
             EYELASH_CURLER -> "Eyelash Curler"
             LIP_STAIN_TINT -> "Lip Stain/Tint"
             LIP_PLUMPER -> "Lip Plumper"
+            AI_PENDING -> "New Capture"
             NAIL_POLISH -> "Nail Polish"
             else -> name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
         }
@@ -109,6 +114,7 @@ enum class CosmeticCategory {
             BRUSHES_SPONGES -> "For application and blending."
             EYELASH_CURLER -> "Curls lashes."
             ORGANIZERS -> "For storage."
+            AI_PENDING -> "Awaiting Gemini analysis."
             NAIL_POLISH -> "Adds color to your nails."
             OTHER -> "Other beauty essentials."
         }
@@ -122,6 +128,7 @@ data class CosmeticItem(
     val category: CosmeticCategory,
     val colorHex: String? = null,
     val shadeName: String? = null,
+    val imageUrl: String? = null,
     val notes: String? = null,
     val timestamp: Long = System.currentTimeMillis()
 )
