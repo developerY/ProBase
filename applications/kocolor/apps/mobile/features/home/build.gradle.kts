@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:model"))
 
+    implementation(libs.androidx.health.connect.client)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)

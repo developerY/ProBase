@@ -16,7 +16,9 @@ import com.zoewave.probase.kocolor.model.*
 import com.zoewave.probase.features.health.core.WellnessCorrelationEngine
 import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
-import com.zoewave.probase.core.model.health.SleepSessionData
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.SleepSessionRecord
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -37,7 +39,8 @@ data class HomeUiState(
     val totalClothing: Int = 0,
     val cosmeticsByGroup: Map<String, Int> = emptyMap(),
     val wellnessInsights: List<SkinInsight> = emptyList(),
-    val lastNightSleepDuration: String? = null
+    val lastNightSleepDuration: String? = null,
+    val isHealthPermissionGranted: Boolean = false
 )
 
 sealed class HomeEvent {
@@ -108,14 +111,29 @@ class HomeViewModel @Inject constructor(
         cosmeticDao.getAllCosmetics(),
         clothingDao.getAllClothing(),
         _beautyTip,
-        flow { emit(getHealthData()) }
+        healthSessionManager.availability.flatMapLatest { availability ->
+            if (availability == HealthConnectClient.SDK_AVAILABLE) {
+                flow {
+                    val permissions = setOf(HealthPermission.getReadPermission(SleepSessionRecord::class))
+                    val hasPerms = healthSessionManager.hasAllPermissions(permissions)
+                    if (hasPerms) {
+                        emit(hasPerms to getHealthData())
+                    } else {
+                        emit(false to (null as Float? to null as String?))
+                    }
+                }
+            } else {
+                flowOf(false to (null as Float? to null as String?))
+            }
+        }
     ) { array ->
         val profile = array[0] as FashionProfile?
         val routines = array[1] as List<RoutineEntity>
         val cosmetics = array[2] as List<CosmeticItemEntity>
         val clothing = array[3] as List<ClothingItemEntity>
         val tip = array[4] as String
-        val healthData = array[5] as Pair<Float?, String?>
+        val healthInfo = array[5] as Pair<Boolean, Pair<Float?, String?>>
+        val (hasPerms, healthData) = healthInfo
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val cosmeticsByGroup = cosmetics.groupBy { it.category.groupName }.mapValues { it.value.size }
@@ -139,7 +157,8 @@ class HomeViewModel @Inject constructor(
             totalClothing = clothing.size,
             cosmeticsByGroup = cosmeticsByGroup,
             wellnessInsights = insights,
-            lastNightSleepDuration = healthData.second
+            lastNightSleepDuration = healthData.second,
+            isHealthPermissionGranted = hasPerms
         )
     }.stateIn(
         scope = viewModelScope,

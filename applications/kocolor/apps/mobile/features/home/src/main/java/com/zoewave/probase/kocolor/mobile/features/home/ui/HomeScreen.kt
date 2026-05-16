@@ -98,14 +98,12 @@ fun HomeScreen(
                 )
             }
 
-            if (uiState.wellnessInsights.isNotEmpty()) {
-                item {
-                    WellnessInsightsSection(
-                        uiState = uiState.wellnessInsights to uiState.lastNightSleepDuration,
-                        onEvent = {},
-                        navTo = {}
-                    )
-                }
+            item {
+                WellnessInsightsSection(
+                    uiState = Triple(uiState.wellnessInsights, uiState.lastNightSleepDuration, uiState.isHealthPermissionGranted),
+                    onEvent = {},
+                    navTo = navTo
+                )
             }
 
             item {
@@ -229,11 +227,11 @@ fun HomeHeader(
 
 @Composable
 fun WellnessInsightsSection(
-    uiState: Pair<List<com.zoewave.probase.features.health.core.SkinInsight>, String?>,
+    uiState: Triple<List<com.zoewave.probase.features.health.core.SkinInsight>, String?, Boolean>,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val (insights, sleepDuration) = uiState
+    val (insights, sleepDuration, isPermissionGranted) = uiState
     
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionTitle(
@@ -250,50 +248,96 @@ fun WellnessInsightsSection(
             )
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                if (sleepDuration != null) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Bedtime, null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.tertiary)
-                        Spacer(modifier = Modifier.width(8.dp))
+                if (!isPermissionGranted) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        Icon(Icons.Default.Lock, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.tertiary)
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Last Night: $sleepDuration sleep",
-                            style = MaterialTheme.typography.labelLarge,
+                            text = "Connect Health Data",
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                insights.forEachIndexed { index, insight ->
-                    Row(verticalAlignment = Alignment.Top) {
-                        Box(
-                            modifier = Modifier
-                                .padding(top = 4.dp)
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.tertiary)
+                        Text(
+                            text = "Grant access to sleep and stress data in Settings to unlock biological skin insights.",
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = insight.trigger,
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = insight.manifestation,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "Recommendation: ${insight.recommendation}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(top = 4.dp),
-                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                            )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        TextButton(onClick = { navTo(KoColorRoute.Settings) }) {
+                            Text("Go to Settings")
                         }
                     }
-                    if (index < insights.size - 1) {
+                } else if (insights.isEmpty() && sleepDuration == null) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        Icon(Icons.Default.QueryStats, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.tertiary)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "No Recent Data",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Your health data from last night hasn't synced yet. Wear your tracker to bed for personalized insights!",
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    if (sleepDuration != null) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Bedtime, null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.tertiary)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Last Night: $sleepDuration sleep",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    if (insights.isEmpty()) {
+                        Text(
+                            text = "Your vitals look great! Your skin is in optimal condition for standard routines.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        insights.forEachIndexed { index, insight ->
+                            Row(verticalAlignment = Alignment.Top) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(top = 4.dp)
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.tertiary)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = insight.trigger,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = insight.manifestation,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = "Recommendation: ${insight.recommendation}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(top = 4.dp),
+                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                    )
+                                }
+                            }
+                            if (index < insights.size - 1) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                        }
                     }
                 }
             }

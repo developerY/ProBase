@@ -10,6 +10,7 @@ import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.records.WeightRecord
+import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
@@ -67,7 +68,8 @@ class HealthViewModel @Inject constructor(
         HealthPermission.getWritePermission(HeartRateRecord::class),
         HealthPermission.getReadPermission(HeartRateRecord::class),
         HealthPermission.getWritePermission(WeightRecord::class),
-        HealthPermission.getReadPermission(WeightRecord::class)
+        HealthPermission.getReadPermission(WeightRecord::class),
+        HealthPermission.getReadPermission(SleepSessionRecord::class)
     )
 
     // Note: Acceptable for specific UI toggles, though Flow is preferred for data
