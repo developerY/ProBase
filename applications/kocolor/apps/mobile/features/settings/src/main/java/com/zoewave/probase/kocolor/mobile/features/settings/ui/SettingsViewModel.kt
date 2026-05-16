@@ -20,6 +20,7 @@ data class SettingsUiState(
     val isAboutExpanded: Boolean = false,
     val isThemeExpanded: Boolean = false,
     val isPaletteExpanded: Boolean = false,
+    val isHealthExpanded: Boolean = false,
     val currentTheme: String = "SYSTEM",
     val currentPalette: String = "CLASSIC"
 )
@@ -29,6 +30,7 @@ sealed class SettingsEvent {
     data class OnAboutExpandedToggled(val expanded: Boolean) : SettingsEvent()
     data class OnThemeExpandedToggled(val expanded: Boolean) : SettingsEvent()
     data class OnPaletteExpandedToggled(val expanded: Boolean) : SettingsEvent()
+    data class OnHealthExpandedToggled(val expanded: Boolean) : SettingsEvent()
     data class OnThemeSelected(val theme: String) : SettingsEvent()
     data class OnPaletteSelected(val palette: String) : SettingsEvent()
     data object OnGenerateSampleCosmetics : SettingsEvent()
@@ -41,7 +43,7 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _expandState = MutableStateFlow(
-        listOf(false, false, false, false) // AI, About, Theme, Palette
+        listOf(false, false, false, false, false) // AI, About, Theme, Palette, Health
     )
 
     val uiState: StateFlow<SettingsUiState> = combine(
@@ -54,6 +56,7 @@ class SettingsViewModel @Inject constructor(
             isAboutExpanded = expands[1],
             isThemeExpanded = expands[2],
             isPaletteExpanded = expands[3],
+            isHealthExpanded = expands[4],
             currentTheme = theme,
             currentPalette = palette
         )
@@ -76,6 +79,9 @@ class SettingsViewModel @Inject constructor(
             }
             is SettingsEvent.OnPaletteExpandedToggled -> {
                 _expandState.value = _expandState.value.toMutableList().apply { this[3] = event.expanded }
+            }
+            is SettingsEvent.OnHealthExpandedToggled -> {
+                _expandState.value = _expandState.value.toMutableList().apply { this[4] = event.expanded }
             }
             is SettingsEvent.OnThemeSelected -> {
                 viewModelScope.launch {

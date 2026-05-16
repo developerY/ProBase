@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":applications:kocolor:apps:mobile:core"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:ai:capture"))
+    implementation(project(":features:health:core"))
 
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.navigation3.runtime)

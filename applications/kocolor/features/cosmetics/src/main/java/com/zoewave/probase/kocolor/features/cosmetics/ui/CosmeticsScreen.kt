@@ -1,10 +1,8 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,7 +51,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -62,7 +59,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,12 +66,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -83,6 +74,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
+import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
+import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 import com.zoewave.probase.kocolor.model.CosmeticCategory
 import com.zoewave.probase.kocolor.model.CosmeticItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -233,7 +228,10 @@ fun CosmeticsScreen(
                                                 onEvent = { event ->
                                                     when (event) {
                                                         "delete" -> onEvent(CosmeticsEvent.DeleteItem(item.id))
-                                                        "edit" -> selectedItemForEdit = item
+                                                        "edit" -> {
+                                                            onEvent(CosmeticsEvent.StartEditing(item))
+                                                            selectedItemForEdit = item
+                                                        }
                                                     }
                                                 },
                                                 navTo = navTo,
@@ -274,10 +272,10 @@ fun CosmeticsScreen(
         )
     }
 
-    selectedItemForEdit?.let { item ->
+    selectedItemForEdit?.let { _ ->
         EditCosmeticDialog(
-            uiState = item,
-            onEvent = { onEvent(CosmeticsEvent.UpdateItem(it)) },
+            uiState = uiState,
+            onEvent = onEvent,
             navTo = { route ->
                 if (route == KoColorRoute.Back) {
                     selectedItemForEdit = null
@@ -582,230 +580,23 @@ fun CosmeticProductCard(
     }
 }
 
-fun isColorDark(color: Color): Boolean {
-    val luminance = 0.299 * color.red + 0.587 * color.green + 0.114 * color.blue
-    return luminance < 0.5
-}
-
-@Composable
-fun FullColorPicker(
-    uiState: String,
-    onEvent: (String) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
-    val controller = rememberColorPickerController(initialColor = parseColor(uiState))
-
-    AlertDialog(
-        onDismissRequest = { navTo(KoColorRoute.Back) },
-        title = { Text("Pick Custom Color", fontWeight = FontWeight.Bold) },
-        text = {
-            Column(
-                modifier = Modifier.padding(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Top Preview Tile
-                AlphaTile(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)),
-                    controller = controller
-                )
-
-                // The Main HSV Color Wheel/Picker
-                HsvColorPicker(
-                    modifier = Modifier
-                        .size(240.dp)
-                        .padding(10.dp),
-                    controller = controller
-                )
-
-                // Brightness Slider
-                Column {
-                    Text("Brightness", style = MaterialTheme.typography.labelSmall)
-                    BrightnessSlider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(35.dp),
-                        controller = controller
-                    )
-                }
-
-                Text(
-                    text = String.format("#%06X", (0xFFFFFF and controller.selectedColor.value.toArgb())),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = { 
-                val hex = String.format("#%06X", (0xFFFFFF and controller.selectedColor.value.toArgb()))
-                onEvent(hex)
-                navTo(KoColorRoute.Back)
-            }) {
-                Text("Select Color")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = { navTo(KoColorRoute.Back) }) { Text("Cancel") }
-        }
-    )
-}
-
-class ColorPickerController(initialColor: Color) {
-    var selectedColor = mutableStateOf(initialColor)
-    
-    // Internal HSV state for the picker logic
-    var hue = mutableFloatStateOf(0f)
-    var saturation = mutableFloatStateOf(0f)
-    var value = mutableFloatStateOf(1f)
-
-    init {
-        val hsv = FloatArray(3)
-        android.graphics.Color.colorToHSV(
-            android.graphics.Color.rgb(
-                (initialColor.red * 255).toInt(),
-                (initialColor.green * 255).toInt(),
-                (initialColor.blue * 255).toInt()
-            ),
-            hsv
-        )
-        hue.floatValue = hsv[0]
-        saturation.floatValue = hsv[1]
-        value.floatValue = hsv[2]
-    }
-
-    fun updateFromHsv() {
-        val argb = android.graphics.Color.HSVToColor(floatArrayOf(hue.floatValue, saturation.floatValue, value.floatValue))
-        selectedColor.value = Color(argb)
-    }
-}
-
-@Composable
-fun rememberColorPickerController(initialColor: Color): ColorPickerController {
-    return remember(initialColor) { ColorPickerController(initialColor) }
-}
-
-@Composable
-fun AlphaTile(
-    modifier: Modifier,
-    controller: ColorPickerController
-) {
-    Box(
-        modifier = modifier.background(controller.selectedColor.value)
-    )
-}
-
-@Composable
-fun HsvColorPicker(
-    modifier: Modifier,
-    controller: ColorPickerController
-) {
-    Canvas(
-        modifier = modifier
-            .pointerInput(Unit) {
-                detectDragGestures { change, _ ->
-                    val w = size.width.toFloat()
-                    val h = size.height.toFloat()
-                    val center = Offset(w / 2f, h / 2f)
-                    val pos = change.position
-                    
-                    val dx = pos.x - center.x
-                    val dy = pos.y - center.y
-                    val radius = w / 2f
-                    
-                    val dist = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
-                    val angle = Math.toDegrees(Math.atan2(dy.toDouble(), dx.toDouble())).toFloat()
-                    
-                    controller.hue.floatValue = (if (angle < 0) angle + 360 else angle)
-                    controller.saturation.floatValue = (dist / radius).coerceIn(0f, 1f)
-                    controller.updateFromHsv()
-                }
-            }
-    ) {
-        val w = size.width
-        val h = size.height
-        val radius = w / 2f
-        val center = Offset(w / 2f, h / 2f)
-        
-        // Draw the color wheel background (simple radial sweep)
-        for (i in 0 until 360) {
-            val angle = Math.toRadians(i.toDouble()).toFloat()
-            val start = center
-            val end = Offset(
-                center.x + Math.cos(angle.toDouble()).toFloat() * radius,
-                center.y + Math.sin(angle.toDouble()).toFloat() * radius
-            )
-            val hsvColor = Color(android.graphics.Color.HSVToColor(floatArrayOf(i.toFloat(), 1f, 1f)))
-            
-            drawLine(
-                brush = Brush.linearGradient(listOf(Color.White, hsvColor), start, end),
-                start = start,
-                end = end,
-                strokeWidth = 2f
-            )
-        }
-        
-        // Draw the indicator
-        val indicatorAngle = Math.toRadians(controller.hue.floatValue.toDouble()).toFloat()
-        val indicatorRadius = controller.saturation.floatValue * radius
-        val indicatorOffset = Offset(
-            center.x + Math.cos(indicatorAngle.toDouble()).toFloat() * indicatorRadius,
-            center.y + Math.sin(indicatorAngle.toDouble()).toFloat() * indicatorRadius
-        )
-        
-        drawCircle(
-            color = if (controller.value.floatValue > 0.5f) Color.Black else Color.White,
-            radius = 8.dp.toPx(),
-            center = indicatorOffset,
-            style = Stroke(width = 2.dp.toPx())
-        )
-    }
-}
-
-@Composable
-fun BrightnessSlider(
-    modifier: Modifier,
-    controller: ColorPickerController
-) {
-    Slider(
-        value = controller.value.floatValue,
-        onValueChange = { 
-            controller.value.floatValue = it
-            controller.updateFromHsv()
-        },
-        valueRange = 0f..1f,
-        modifier = modifier,
-        colors = SliderDefaults.colors(
-            thumbColor = controller.selectedColor.value,
-            activeTrackColor = controller.selectedColor.value.copy(alpha = 0.5f)
-        )
-    )
-}
-
 @Composable
 fun EditCosmeticDialog(
-    uiState: CosmeticItem,
-    onEvent: (CosmeticItem) -> Unit,
+    uiState: CosmeticsUiState,
+    onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    var name by remember { mutableStateOf(uiState.name) }
-    var brand by remember { mutableStateOf(uiState.brand) }
-    var category by remember { mutableStateOf(uiState.category) }
-    var colorHex by remember { mutableStateOf(uiState.colorHex ?: "") }
-    var shadeName by remember { mutableStateOf(uiState.shadeName ?: "") }
-    var notes by remember { mutableStateOf(uiState.notes ?: "") }
+    val draft = uiState.draftItem
     var showCategoryMenu by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
 
     if (showColorPicker) {
-        FullColorPicker(
-            uiState = colorHex,
-            onEvent = { colorHex = it },
-            navTo = { showColorPicker = false }
+        val colorHex = draft.colorHex ?: ""
+        ColorPickerDialog(
+            initialColor = parseColor(colorHex),
+            onColorSelected = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it.toHex()))) },
+            onDismissRequest = { showColorPicker = false },
+            title = "Pick Product Color"
         )
     }
 
@@ -817,7 +608,7 @@ fun EditCosmeticDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Image Capture / Preview (Reusing existing imageUrl or capturing new one)
+                // Image Capture / Preview
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -828,7 +619,7 @@ fun EditCosmeticDialog(
                     )
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        val imageUrl = uiState.imageUrl
+                        val imageUrl = draft.imageUrl
                         if (imageUrl != null) {
                             AsyncImage(
                                 model = imageUrl,
@@ -846,15 +637,15 @@ fun EditCosmeticDialog(
                 }
 
                 OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
+                    value = draft.name,
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(name = it))) },
                     label = { Text("Product Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
                 OutlinedTextField(
-                    value = brand,
-                    onValueChange = { brand = it },
+                    value = draft.brand,
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(brand = it))) },
                     label = { Text("Brand") },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -867,7 +658,7 @@ fun EditCosmeticDialog(
                             onClick = { showCategoryMenu = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(category.displayName)
+                            Text(draft.category.displayName)
                         }
                         DropdownMenu(
                             expanded = showCategoryMenu,
@@ -885,7 +676,7 @@ fun EditCosmeticDialog(
                                     DropdownMenuItem(
                                         text = { Text(cat.displayName) },
                                         onClick = {
-                                            category = cat
+                                            onEvent(CosmeticsEvent.UpdateDraft(draft.copy(category = cat)))
                                             showCategoryMenu = false
                                         }
                                     )
@@ -901,9 +692,10 @@ fun EditCosmeticDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    val colorHex = draft.colorHex ?: ""
                     OutlinedTextField(
                         value = colorHex,
-                        onValueChange = { colorHex = it },
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it))) },
                         label = { Text("Color Hex") },
                         modifier = Modifier.weight(1f)
                     )
@@ -920,7 +712,7 @@ fun EditCosmeticDialog(
                                 shape = RoundedCornerShape(8.dp)
                             ),
                         color = try { 
-                            if (colorHex.isNotEmpty()) Color(android.graphics.Color.parseColor(colorHex)) else Color.Transparent 
+                            if (colorHex.isNotEmpty()) parseColor(colorHex) else Color.Transparent 
                         } catch (e: Exception) { Color.Transparent }
                     ) {
                         if (colorHex.isEmpty()) {
@@ -935,15 +727,15 @@ fun EditCosmeticDialog(
                 }
                 
                 OutlinedTextField(
-                    value = shadeName,
-                    onValueChange = { shadeName = it },
+                    value = draft.shadeName ?: "",
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(shadeName = it))) },
                     label = { Text("Shade Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
-                    value = notes,
-                    onValueChange = { notes = it },
+                    value = draft.notes ?: "",
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(notes = it))) },
                     label = { Text("Notes / Description") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3
@@ -953,17 +745,10 @@ fun EditCosmeticDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    onEvent(uiState.copy(
-                        name = name,
-                        brand = brand,
-                        category = category,
-                        colorHex = colorHex.takeIf { it.isNotBlank() },
-                        shadeName = shadeName.takeIf { it.isNotBlank() },
-                        notes = notes.takeIf { it.isNotBlank() }
-                    ))
+                    onEvent(CosmeticsEvent.UpdateItem(draft))
                     navTo(KoColorRoute.Back)
                 },
-                enabled = name.isNotBlank() && brand.isNotBlank()
+                enabled = draft.name.isNotBlank() && draft.brand.isNotBlank()
             ) {
                 Text("Update Item")
             }
@@ -1054,30 +839,17 @@ fun AddCosmeticDialog(
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var brand by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf(CosmeticCategory.FOUNDATION) }
-    var colorHex by remember { mutableStateOf("") }
-    var shadeName by remember { mutableStateOf("") }
+    val draft = uiState.draftItem
     var showCategoryMenu by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
 
-    // Auto-fill from AI result
-    LaunchedEffect(uiState.aiResult) {
-        uiState.aiResult?.let { result ->
-            name = result.name
-            brand = result.brand
-            category = result.category
-            colorHex = result.colorHex ?: ""
-            shadeName = result.shadeName ?: ""
-        }
-    }
-
     if (showColorPicker) {
-        FullColorPicker(
-            uiState = colorHex,
-            onEvent = { colorHex = it },
-            navTo = { showColorPicker = false }
+        val colorHex = draft.colorHex ?: ""
+        ColorPickerDialog(
+            initialColor = parseColor(colorHex),
+            onColorSelected = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it.toHex()))) },
+            onDismissRequest = { showColorPicker = false },
+            title = "Pick Product Color"
         )
     }
 
@@ -1100,9 +872,10 @@ fun AddCosmeticDialog(
                     )
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        if (uiState.capturedImageUri != null) {
+                        val imageUrl = draft.imageUrl
+                        if (imageUrl != null) {
                             AsyncImage(
-                                model = uiState.capturedImageUri,
+                                model = imageUrl,
                                 contentDescription = "Captured Product",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
@@ -1133,15 +906,15 @@ fun AddCosmeticDialog(
                 }
 
                 OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
+                    value = draft.name,
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(name = it))) },
                     label = { Text("Product Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
                 OutlinedTextField(
-                    value = brand,
-                    onValueChange = { brand = it },
+                    value = draft.brand,
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(brand = it))) },
                     label = { Text("Brand") },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -1154,7 +927,7 @@ fun AddCosmeticDialog(
                             onClick = { showCategoryMenu = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(category.displayName)
+                            Text(draft.category.displayName)
                         }
                         DropdownMenu(
                             expanded = showCategoryMenu,
@@ -1172,7 +945,7 @@ fun AddCosmeticDialog(
                                     DropdownMenuItem(
                                         text = { Text(cat.displayName) },
                                         onClick = {
-                                            category = cat
+                                            onEvent(CosmeticsEvent.UpdateDraft(draft.copy(category = cat)))
                                             showCategoryMenu = false
                                         }
                                     )
@@ -1188,9 +961,10 @@ fun AddCosmeticDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    val colorHex = draft.colorHex ?: ""
                     OutlinedTextField(
                         value = colorHex,
-                        onValueChange = { colorHex = it },
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it))) },
                         label = { Text("Color Hex") },
                         modifier = Modifier.weight(1f)
                     )
@@ -1207,7 +981,7 @@ fun AddCosmeticDialog(
                                 shape = RoundedCornerShape(8.dp)
                             ),
                         color = try { 
-                            if (colorHex.isNotEmpty()) Color(android.graphics.Color.parseColor(colorHex)) else Color.Transparent 
+                            if (colorHex.isNotEmpty()) parseColor(colorHex) else Color.Transparent 
                         } catch (e: Exception) { Color.Transparent }
                     ) {
                         if (colorHex.isEmpty()) {
@@ -1222,8 +996,8 @@ fun AddCosmeticDialog(
                 }
                 
                 OutlinedTextField(
-                    value = shadeName,
-                    onValueChange = { shadeName = it },
+                    value = draft.shadeName ?: "",
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(shadeName = it))) },
                     label = { Text("Shade Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -1232,19 +1006,10 @@ fun AddCosmeticDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    onEvent(CosmeticsEvent.AddItem(
-                        CosmeticItem(
-                            name = name, 
-                            brand = brand, 
-                            category = category, 
-                            colorHex = colorHex.takeIf { it.isNotBlank() }, 
-                            shadeName = shadeName.takeIf { it.isNotBlank() },
-                            imageUrl = uiState.capturedImageUri
-                        )
-                    ))
+                    onEvent(CosmeticsEvent.AddItem(draft))
                     navTo(KoColorRoute.Back)
                 },
-                enabled = name.isNotBlank() && brand.isNotBlank()
+                enabled = draft.name.isNotBlank() && draft.brand.isNotBlank()
             ) {
                 Text("Add to Inventory")
             }
@@ -1253,14 +1018,6 @@ fun AddCosmeticDialog(
             TextButton(onClick = { navTo(KoColorRoute.Back) }) { Text("Cancel") }
         }
     )
-}
-
-fun parseColor(hex: String): Color {
-    return try {
-        Color(android.graphics.Color.parseColor(hex))
-    } catch (e: Exception) {
-        Color.Gray
-    }
 }
 
 @Preview(showBackground = true)
@@ -1316,13 +1073,15 @@ private fun CategoryGuideDialogPreview() {
 private fun EditCosmeticDialogPreview() {
     MaterialTheme {
         EditCosmeticDialog(
-            uiState = CosmeticItem(
-                name = "Velvet Matte",
-                brand = "Sample Brand",
-                category = CosmeticCategory.LIPSTICK,
-                colorHex = "#FF0000",
-                shadeName = "True Red",
-                notes = "Long-lasting finish."
+            uiState = CosmeticsUiState(
+                draftItem = CosmeticItem(
+                    name = "Velvet Matte",
+                    brand = "Sample Brand",
+                    category = CosmeticCategory.LIPSTICK,
+                    colorHex = "#FF0000",
+                    shadeName = "True Red",
+                    notes = "Long-lasting finish."
+                )
             ),
             onEvent = {},
             navTo = {}
@@ -1366,18 +1125,6 @@ private fun SubCategoryCardPreview() {
     MaterialTheme {
         SubCategoryCard(
             uiState = Triple(CosmeticCategory.FOUNDATION, 3, false),
-            onEvent = {},
-            navTo = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun FullColorPickerPreview() {
-    MaterialTheme {
-        FullColorPicker(
-            uiState = "#FF0000",
             onEvent = {},
             navTo = {}
         )

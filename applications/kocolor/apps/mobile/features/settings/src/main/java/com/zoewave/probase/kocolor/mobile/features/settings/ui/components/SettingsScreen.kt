@@ -1,10 +1,14 @@
 package com.zoewave.probase.kocolor.mobile.features.settings.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
+import com.zoewave.probase.features.health.core.ui.HealthRoute
 import com.zoewave.probase.kocolor.mobile.core.R
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsEvent
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsUiState
@@ -99,6 +104,11 @@ fun SettingsScreen(
                 description = "Configure your Gemini API Key for style analysis and personal suggestions."
             )
 
+            HealthConnectCard(
+                expanded = uiState.isHealthExpanded,
+                onExpandToggle = { onEvent(SettingsEvent.OnHealthExpandedToggled(!uiState.isHealthExpanded)) }
+            )
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f))
@@ -148,6 +158,52 @@ fun SettingsScreen(
                             style = MaterialTheme.typography.labelLarge
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun HealthConnectCard(
+    expanded: Boolean,
+    onExpandToggle: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onExpandToggle() }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Google Health Connect", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Sync sleep and wellness data for skin analysis",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp 
+                                 else Icons.Default.KeyboardArrowDown,
+                    contentDescription = null
+                )
+            }
+            if (expanded) {
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                Box(modifier = Modifier.padding(16.dp)) {
+                    HealthRoute(statusOnly = true)
                 }
             }
         }

@@ -13,6 +13,12 @@ import com.zoewave.probase.kocolor.db.data.ClothingDefaults
 import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
 import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.features.health.core.WellnessCorrelationEngine
+import com.zoewave.probase.features.health.core.SkinInsight
+import com.zoewave.probase.core.data.service.health.HealthSessionManager
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.SleepSessionRecord
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -28,7 +34,13 @@ data class HomeUiState(
     val popularClothing: List<ClothingItem> = emptyList(),
     val isDaytime: Boolean = true,
     val isLoadingRoutines: Boolean = true,
-    val beautyTip: String = ""
+    val beautyTip: String = "",
+    val totalCosmetics: Int = 0,
+    val totalClothing: Int = 0,
+    val cosmeticsByGroup: Map<String, Int> = emptyMap(),
+    val wellnessInsights: List<SkinInsight> = emptyList(),
+    val lastNightSleepDuration: String? = null,
+    val isHealthPermissionGranted: Boolean = false
 )
 
 sealed class HomeEvent {
@@ -42,7 +54,9 @@ class HomeViewModel @Inject constructor(
     private val fashionRepository: FashionRepository,
     private val routineDao: RoutineDao,
     private val cosmeticDao: CosmeticDao,
-    private val clothingDao: ClothingDao
+    private val clothingDao: ClothingDao,
+    private val wellnessEngine: WellnessCorrelationEngine,
+    private val healthSessionManager: HealthSessionManager
 ) : ViewModel() {
 
     private val _currentDate = MutableStateFlow(Calendar.getInstance().apply {
@@ -96,24 +110,77 @@ class HomeViewModel @Inject constructor(
         _routines,
         cosmeticDao.getAllCosmetics(),
         clothingDao.getAllClothing(),
-        _beautyTip
-    ) { profile, routines, cosmetics, clothing, tip ->
+        _beautyTip,
+        healthSessionManager.availability.flatMapLatest { availability ->
+            if (availability == HealthConnectClient.SDK_AVAILABLE) {
+                flow {
+                    val permissions = setOf(HealthPermission.getReadPermission(SleepSessionRecord::class))
+                    val hasPerms = healthSessionManager.hasAllPermissions(permissions)
+                    if (hasPerms) {
+                        emit(hasPerms to getHealthData())
+                    } else {
+                        emit(false to (null as Float? to null as String?))
+                    }
+                }
+            } else {
+                flowOf(false to (null as Float? to null as String?))
+            }
+        }
+    ) { array ->
+        val profile = array[0] as FashionProfile?
+        val routines = array[1] as List<RoutineEntity>
+        val cosmetics = array[2] as List<CosmeticItemEntity>
+        val clothing = array[3] as List<ClothingItemEntity>
+        val tip = array[4] as String
+        val healthInfo = array[5] as Pair<Boolean, Pair<Float?, String?>>
+        val (hasPerms, healthData) = healthInfo
+
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        val cosmeticsByGroup = cosmetics.groupBy { it.category.groupName }.mapValues { it.value.size }
+        
+        val insights = wellnessEngine.analyzeTriggers(
+            sleepHours = healthData.first ?: 8f,
+            sugarIntake = "Medium", // Placeholder for now
+            stressLevel = 5 // Placeholder for now
+        )
+
         HomeUiState(
             fashionProfile = profile,
             morningRoutine = routines.find { it.time == RoutineTime.MORNING }?.toModel(),
             eveningRoutine = routines.find { it.time == RoutineTime.EVENING }?.toModel(),
-            popularCosmetics = cosmetics.take(3).map { it.toModel() },
-            popularClothing = clothing.take(3).map { it.toModel() },
+            popularCosmetics = cosmetics.sortedByDescending { it.timestamp }.take(5).map { it.toModel() },
+            popularClothing = clothing.sortedByDescending { it.timestamp }.take(5).map { it.toModel() },
             isDaytime = hour in 6..17,
             isLoadingRoutines = routines.isEmpty(),
-            beautyTip = tip
+            beautyTip = tip,
+            totalCosmetics = cosmetics.size,
+            totalClothing = clothing.size,
+            cosmeticsByGroup = cosmeticsByGroup,
+            wellnessInsights = insights,
+            lastNightSleepDuration = healthData.second,
+            isHealthPermissionGranted = hasPerms
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeUiState()
     )
+
+    private suspend fun getHealthData(): Pair<Float?, String?> {
+        return try {
+            val sleepSessions = healthSessionManager.readSleepSessions()
+            val lastNight = sleepSessions.firstOrNull()
+            if (lastNight != null) {
+                val hours = (lastNight.duration?.toMinutes() ?: 0L) / 60f
+                val durationStr = "${(hours).toInt()}h ${lastNight.duration?.toMinutes()?.rem(60)}m"
+                hours to durationStr
+            } else {
+                null to null
+            }
+        } catch (e: Exception) {
+            null to null
+        }
+    }
 
     private fun initializeDay(date: Long) {
         viewModelScope.launch {
@@ -172,7 +239,17 @@ class HomeViewModel @Inject constructor(
         colorHex = colorHex,
         shadeName = shadeName,
         notes = notes,
-        timestamp = timestamp
+        timestamp = timestamp,
+        batchCode = batchCode,
+        openedDate = openedDate,
+        paoMonths = paoMonths,
+        expiryDate = expiryDate,
+        price = price,
+        volume = volume,
+        isOpened = isOpened,
+        isFinished = isFinished,
+        isArchived = isArchived,
+        usageCount = usageCount
     )
 
     private fun ClothingItemEntity.toModel() = ClothingItem(
