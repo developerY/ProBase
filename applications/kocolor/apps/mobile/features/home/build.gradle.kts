@@ -20,6 +20,9 @@ dependencies {
     implementation(project(":applications:kocolor:features:routines"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:graphics"))
+    implementation(project(":features:health:core"))
+    implementation(project(":core:data"))
+    implementation(project(":core:model"))
 
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)

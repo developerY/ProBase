@@ -98,6 +98,16 @@ fun HomeScreen(
                 )
             }
 
+            if (uiState.wellnessInsights.isNotEmpty()) {
+                item {
+                    WellnessInsightsSection(
+                        uiState = uiState.wellnessInsights to uiState.lastNightSleepDuration,
+                        onEvent = {},
+                        navTo = {}
+                    )
+                }
+            }
+
             item {
                 BeautyTipSection(
                     uiState = uiState.beautyTip,
@@ -210,6 +220,80 @@ fun HomeHeader(
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.SemiBold
                         )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WellnessInsightsSection(
+    uiState: Pair<List<com.zoewave.probase.features.health.core.SkinInsight>, String?>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    val (insights, sleepDuration) = uiState
+    
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        SectionTitle(
+            uiState = "Wellness & Skin" to Icons.Default.HealthAndSafety,
+            onEvent = {},
+            navTo = {}
+        )
+        
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
+            )
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                if (sleepDuration != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Bedtime, null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.tertiary)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Last Night: $sleepDuration sleep",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                insights.forEachIndexed { index, insight ->
+                    Row(verticalAlignment = Alignment.Top) {
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 4.dp)
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.tertiary)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = insight.trigger,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = insight.manifestation,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "Recommendation: ${insight.recommendation}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(top = 4.dp),
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                            )
+                        }
+                    }
+                    if (index < insights.size - 1) {
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }
