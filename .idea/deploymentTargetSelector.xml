@@ -26,10 +26,10 @@
       </SelectionState>
       <SelectionState runConfigName="applications.ashbike.apps.wear">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-03-15T20:40:47.049966Z">
+        <DropdownSelection timestamp="2026-05-16T22:19:20.269073Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Pixel_9a.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Pixel_10_Pro.avd" />
             </handle>
           </Target>
         </DropdownSelection>

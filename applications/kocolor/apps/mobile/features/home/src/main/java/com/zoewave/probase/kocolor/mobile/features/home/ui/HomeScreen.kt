@@ -1,31 +1,80 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.*
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.material.icons.filled.DocumentScanner
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Inventory
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.QueryStats
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,9 +82,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.features.health.core.SkinInsight
+import com.zoewave.probase.kocolor.model.BeautyRoutine
+import com.zoewave.probase.kocolor.model.CosmeticCategory
+import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.kocolor.model.FashionProfile
+import com.zoewave.probase.kocolor.model.KoColorRoute
+import com.zoewave.probase.kocolor.model.SeasonalType
+import com.zoewave.probase.kocolor.model.Undertone
 
 @Composable
 fun HomeUiRoute(
@@ -60,6 +115,14 @@ fun HomeScreen(
     onEvent: (HomeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    // Smoothly animate the background based on time of day
+    val backgroundColor by animateColorAsState(
+        targetValue = if (uiState.isDaytime) MaterialTheme.colorScheme.surface
+        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        animationSpec = tween(durationMillis = 1500),
+        label = "ChronobiologicalBackground"
+    )
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -68,12 +131,12 @@ fun HomeScreen(
                         "KoColor", 
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Black,
-                        letterSpacing = 2.sp
+                        letterSpacing = (-1).sp
                     ) 
                 },
                 actions = {
                     IconButton(onClick = { navTo(KoColorRoute.Settings) }) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -81,63 +144,53 @@ fun HomeScreen(
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = backgroundColor
     ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            contentPadding = PaddingValues(top = 8.dp, bottom = 48.dp, start = 20.dp, end = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             item {
                 HomeHeader(
                     uiState = uiState.fashionProfile,
-                    onEvent = {},
-                    navTo = {}
+                    isDaytime = uiState.isDaytime
                 )
             }
 
             item {
                 WellnessInsightsSection(
-                    uiState = Triple(uiState.wellnessInsights, uiState.lastNightSleepDuration, uiState.isHealthPermissionGranted),
-                    onEvent = {},
+                    insights = uiState.wellnessInsights,
+                    sleepDuration = uiState.lastNightSleepDuration,
+                    isPermissionGranted = uiState.isHealthPermissionGranted,
                     navTo = navTo
                 )
             }
 
             item {
-                BeautyTipSection(
-                    uiState = uiState.beautyTip,
-                    onEvent = {},
-                    navTo = {}
-                )
+                BeautyTipSection(uiState.beautyTip)
             }
 
             item {
-                QuickActions(
-                    uiState = Unit,
-                    onEvent = {},
-                    navTo = navTo
-                )
+                QuickActions(navTo = navTo)
             }
 
             item {
                 val routine = if (uiState.isDaytime) uiState.morningRoutine else uiState.eveningRoutine
-                val title = if (uiState.isDaytime) "morning beautiful routine" else "Evening Ritual"
-                val icon = if (uiState.isDaytime) Icons.Default.LightMode else Icons.Default.Nightlight
+                val title = if (uiState.isDaytime) "Morning Ritual" else "Evening Ritual"
                 
                 if (routine != null) {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                         SectionTitle(
-                            uiState = title to icon,
-                            onEvent = {},
-                            navTo = {}
+                            title = title,
+                            subtitle = "Your bio-synced ritual"
                         )
                         RoutineSummaryCard(
-                            uiState = routine,
-                            onEvent = { stepId -> onEvent(HomeEvent.ToggleStep(routine, stepId)) },
-                            navTo = { navTo(KoColorRoute.Routines) }
+                            routine = routine,
+                            isDaytime = uiState.isDaytime,
+                            onClick = { navTo(KoColorRoute.Routines) }
                         )
                     }
                 }
@@ -145,35 +198,31 @@ fun HomeScreen(
 
             if (uiState.totalCosmetics > 0) {
                 item {
-                    SectionTitle(
-                        uiState = "Cosmetic Collection" to Icons.Default.Brush,
-                        onEvent = {},
-                        navTo = {}
-                    )
-                }
-                item {
-                    InventoryDashboard(
-                        uiState = uiState,
-                        onEvent = {},
-                        navTo = { navTo(KoColorRoute.Cosmetics) }
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                        SectionTitle(
+                            title = "The Vanity",
+                            subtitle = "${uiState.totalCosmetics} items tracked"
+                        )
+                        InventoryDashboard(
+                            uiState = uiState,
+                            navTo = { navTo(KoColorRoute.Cosmetics) }
+                        )
+                    }
                 }
             }
 
             if (uiState.totalClothing > 0) {
                 item {
-                    SectionTitle(
-                        uiState = "Wardrobe" to Icons.Default.Checkroom,
-                        onEvent = {},
-                        navTo = {}
-                    )
-                }
-                item {
-                    WardrobeDashboard(
-                        uiState = uiState,
-                        onEvent = {},
-                        navTo = { navTo(KoColorRoute.Wardrobe) }
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                        SectionTitle(
+                            title = "The Wardrobe",
+                            subtitle = "${uiState.totalClothing} pieces curated"
+                        )
+                        WardrobeDashboard(
+                            uiState = uiState,
+                            navTo = { navTo(KoColorRoute.Wardrobe) }
+                        )
+                    }
                 }
             }
             
@@ -185,40 +234,57 @@ fun HomeScreen(
 @Composable
 fun HomeHeader(
     uiState: FashionProfile?,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    isDaytime: Boolean
 ) {
-    val gradient = Brush.linearGradient(
-        colors = listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.tertiaryContainer)
+    val gradientColors = if (isDaytime) {
+        listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surface)
+    } else {
+        listOf(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.surfaceVariant)
+    }
+
+    val expressiveShape = RoundedCornerShape(
+        topStart = 48.dp,
+        topEnd = 12.dp,
+        bottomEnd = 48.dp,
+        bottomStart = 12.dp
     )
-    
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(expressiveShape)
+            .background(Brush.linearGradient(colors = gradientColors))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), expressiveShape)
+            .padding(32.dp)
     ) {
-        Box(modifier = Modifier.background(gradient).padding(24.dp)) {
-            Column {
-                Text(
-                    text = if (uiState == null) "Welcome!" else "Hello, Beautiful",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                if (uiState == null) {
-                    Text("Unlock your best look with our AI color analysis.")
-                } else {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Badge(containerColor = MaterialTheme.colorScheme.primary) {
-                            Text(uiState.seasonalType.name, modifier = Modifier.padding(4.dp))
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            Text(
+                text = if (isDaytime) "Radiant Morning." else "Deep Restoration.",
+                style = MaterialTheme.typography.headlineLarge,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            if (uiState != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    ) {
                         Text(
-                            text = "${uiState.undertone} Undertone",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.SemiBold
+                            text = uiState.seasonalType.name,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold
                         )
                     }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "· ${uiState.undertone.name.lowercase().replaceFirstChar { it.uppercase() }} Undertone",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }
@@ -227,27 +293,25 @@ fun HomeHeader(
 
 @Composable
 fun WellnessInsightsSection(
-    uiState: Triple<List<com.zoewave.probase.features.health.core.SkinInsight>, String?, Boolean>,
-    onEvent: (Unit) -> Unit,
+    insights: List<SkinInsight>,
+    sleepDuration: String?,
+    isPermissionGranted: Boolean,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val (insights, sleepDuration, isPermissionGranted) = uiState
-    
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionTitle(
-            uiState = "Wellness & Skin" to Icons.Default.HealthAndSafety,
-            onEvent = {},
-            navTo = {}
+            title = "Biological Context",
+            subtitle = "Vital skin insights"
         )
         
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(32.dp),
             colors = CardDefaults.elevatedCardColors(
                 containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
             )
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
+            Column(modifier = Modifier.padding(24.dp)) {
                 if (!isPermissionGranted) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                         Icon(Icons.Default.Lock, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.tertiary)
@@ -346,33 +410,25 @@ fun WellnessInsightsSection(
 }
 
 @Composable
-fun BeautyTipSection(
-    uiState: String,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
+fun BeautyTipSection(uiState: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f))
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(24.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = uiState, style = MaterialTheme.typography.bodyMedium)
+            Text(text = uiState, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Serif)
         }
     }
 }
 
 @Composable
-fun QuickActions(
-    uiState: Unit,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
+fun QuickActions(navTo: (KoColorRoute) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -380,78 +436,151 @@ fun QuickActions(
         Button(
             onClick = { navTo(KoColorRoute.Analyzer()) },
             modifier = Modifier.weight(1f).height(64.dp),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(20.dp)
         ) {
             Icon(Icons.Default.CameraAlt, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Text("Analyze", style = MaterialTheme.typography.titleMedium)
         }
         
         OutlinedButton(
             onClick = { navTo(KoColorRoute.Cosmetics) },
             modifier = Modifier.weight(1f).height(64.dp),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(20.dp)
         ) {
             Icon(Icons.Default.Inventory, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Inventory", style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.width(12.dp))
+            Text("Vanity", style = MaterialTheme.typography.titleMedium)
         }
     }
 }
 
 @Composable
 fun RoutineSummaryCard(
-    uiState: BeautyRoutine,
-    onEvent: (String) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    routine: BeautyRoutine,
+    isDaytime: Boolean,
+    onClick: () -> Unit
 ) {
-    val completedCount = uiState.steps.count { it.isCompleted }
-    val totalCount = uiState.steps.size
+    val completedCount = routine.steps.count { it.isCompleted }
+    val totalCount = routine.steps.size
     val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
 
-    ElevatedCard(
+    val nextStep = routine.steps.sortedBy { it.layeringOrder }.find { !it.isCompleted }
+
+    val cardColor = if (isDaytime) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
+    else MaterialTheme.colorScheme.surfaceVariant
+
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navTo(KoColorRoute.Routines) },
-        shape = RoundedCornerShape(20.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(32.dp),
+        color = cardColor
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    val displayObjective = routine.biologicalObjective ?: routine.time.biologicalObjective
+
+                    Text(
+                        text = "Objective: $displayObjective",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    if (routine.contextFactors.isNotEmpty()) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.errorContainer,
+                            shape = CircleShape
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Warning,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(12.dp),
+                                    tint = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = routine.contextFactors.first().uppercase(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "$completedCount of $totalCount steps",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "${(progress * 100).toInt()}%",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Next Step",
+                        style = MaterialTheme.typography.labelSmall,
+                        letterSpacing = 1.5.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = nextStep?.title ?: "Ritual Complete",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    if (nextStep != null && nextStep.minWaitMinutes > 0) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Timer, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Wait ${nextStep.minWaitMinutes} mins to absorb",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(56.dp)) {
+                    CircularProgressIndicator(
+                        progress = { 1f },
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f),
+                        strokeWidth = 5.dp
+                    )
+                    CircularProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 5.dp,
+                        strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                    )
+                    Text(
+                        text = "$completedCount/$totalCount",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black
+                    )
+                }
             }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(CircleShape),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.primaryContainer
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Text(
-                text = "Next: " + (uiState.steps.find { !it.isCompleted }?.title ?: "All done!"),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
@@ -459,120 +588,51 @@ fun RoutineSummaryCard(
 @Composable
 fun InventoryDashboard(
     uiState: HomeUiState,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    navTo: () -> Unit
 ) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        onClick = { navTo(KoColorRoute.Cosmetics) },
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Column(modifier = Modifier.padding(24.dp)) {
-            // Header with Total Count
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column {
-                    Text(
-                        text = "Cosmetics",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "${uiState.totalCosmetics} Total Items",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Black
-                    )
-                }
-                
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos,
-                        contentDescription = null,
-                        modifier = Modifier.padding(8.dp).size(12.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
+    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        // Advanced Horizontal Collection
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
+        ) {
+            items(uiState.popularCosmetics) { item ->
+                VanityProductCard(uiState = item)
             }
-            
-            Spacer(modifier = Modifier.height(20.dp))
-            
-            // Category Breakdown Row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val groups = listOf(
-                    "Face" to Icons.Default.Face,
-                    "Eyes" to Icons.Default.Visibility,
-                    "Lips" to Icons.Default.Favorite,
-                    "Cheeks" to Icons.Default.AutoAwesome
+
+            item {
+                ViewAllCard(
+                    itemCount = uiState.totalCosmetics,
+                    onClick = navTo
                 )
-                
-                groups.forEach { (name, icon) ->
-                    val count = uiState.cosmeticsByGroup.entries.find { it.key.contains(name, ignoreCase = true) }?.value ?: 0
-                    if (count > 0) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
-                            shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.secondary)
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(text = "$count $name", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-                            }
-                        }
-                    }
-                }
             }
+        }
+        
+        // Category Breakdown Quick-Access
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val sections = listOf(
+                "Face" to Icons.Default.Face,
+                "Eyes" to Icons.Default.Visibility,
+                "Lips" to Icons.Default.Favorite,
+                "Cheeks" to Icons.Default.AutoAwesome
+            )
             
-            Spacer(modifier = Modifier.height(28.dp))
-            
-            // "Recently Added" Section
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "RECENTLY ADDED",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-                
-                HorizontalDivider(modifier = Modifier.weight(1f).padding(start = 16.dp))
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                uiState.popularCosmetics.forEach { item ->
-                    CompactProductCard(
-                        uiState = item,
-                        onEvent = {},
-                        navTo = {}
+            sections.forEach { (name, icon) ->
+                val count = uiState.cosmeticsByGroup.entries.find { it.key.contains(name, ignoreCase = true) }?.value ?: 0
+                if (count > 0) {
+                    AssistChip(
+                        onClick = navTo,
+                        label = { Text("$count $name") },
+                        leadingIcon = { Icon(icon, null, modifier = Modifier.size(16.dp)) },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f)
+                        ),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+                        shape = RoundedCornerShape(12.dp)
                     )
                 }
             }
@@ -581,15 +641,167 @@ fun InventoryDashboard(
 }
 
 @Composable
+fun VanityProductCard(uiState: CosmeticItem) {
+    val bgColor = uiState.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant
+    val costPerUse = uiState.costPerUse
+    
+    // Professional Expiry Logic
+    val isExpiringSoon = uiState.estimatedExpiry?.let { expiry ->
+        val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
+        (expiry - System.currentTimeMillis()) in 0..thirtyDaysInMillis
+    } ?: false
+
+    Column(
+        modifier = Modifier.width(140.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(0.8f)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .shadow(
+                        elevation = 12.dp, 
+                        shape = RoundedCornerShape(24.dp), 
+                        spotColor = bgColor.copy(alpha = 0.4f)
+                    ),
+                shape = RoundedCornerShape(24.dp),
+                color = bgColor,
+                border = BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.05f))
+            ) {
+                if (uiState.imageUrl != null) {
+                    AsyncImage(
+                        model = uiState.imageUrl,
+                        contentDescription = uiState.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else if (uiState.category == CosmeticCategory.AI_PENDING) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    }
+                }
+            }
+
+            // High-End Status Overlay
+            Column(
+                modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                if (isExpiringSoon) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.error,
+                        shape = CircleShape,
+                        modifier = Modifier.size(10.dp)
+                    ) {}
+                }
+                
+                if (uiState.isOpened) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            "OPEN", 
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Brand Label (Minimalist)
+        Text(
+            text = uiState.brand.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 1.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            maxLines = 1
+        )
+
+        Text(
+            text = uiState.name,
+            style = MaterialTheme.typography.titleSmall,
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = uiState.category.displayName,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            if (costPerUse != null) {
+                Text(
+                    text = "$%.2f/use".format(costPerUse),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ViewAllCard(itemCount: Int, onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .size(width = 140.dp, height = 175.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+    ) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowForward, 
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "View All",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "$itemCount tracked",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
 fun WardrobeDashboard(
     uiState: HomeUiState,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    navTo: () -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        onClick = { navTo(KoColorRoute.Wardrobe) }
+        shape = RoundedCornerShape(32.dp),
+        onClick = navTo
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             // Background Decorative Icon
@@ -605,12 +817,6 @@ fun WardrobeDashboard(
             )
             
             Column(modifier = Modifier.padding(24.dp)) {
-                Text(
-                    text = "Wardrobe",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.secondary
-                )
                 Text(
                     text = "${uiState.totalClothing} Pieces",
                     style = MaterialTheme.typography.headlineMedium,
@@ -648,23 +854,6 @@ fun WardrobeDashboard(
                             }
                         }
                     }
-                    
-                    // "More" circle
-                    if (uiState.totalClothing > 5) {
-                        Surface(
-                            modifier = Modifier.size(72.dp),
-                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    text = "+${uiState.totalClothing - 5}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -672,92 +861,119 @@ fun WardrobeDashboard(
 }
 
 @Composable
-fun CompactProductCard(
-    uiState: CosmeticItem,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
+fun CompactProductCard(uiState: CosmeticItem) {
     val bgColor = uiState.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant
-    val contentColor = if (uiState.colorHex != null) {
-        if (isColorDark(bgColor)) Color.White else Color.Black
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
+    val costPerUse = uiState.costPerUse
+
+    // Check if the product is expiring within the next 30 days
+    val isExpiringSoon = uiState.estimatedExpiry?.let { expiry ->
+        val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
+        (expiry - System.currentTimeMillis()) in 0..thirtyDaysInMillis
+    } ?: false
 
     Column(
-        modifier = Modifier.width(100.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.width(120.dp),
     ) {
         Box(
             modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(bgColor)
-                .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(16.dp)),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .aspectRatio(0.85f)
         ) {
-            if (uiState.imageUrl != null) {
-                AsyncImage(
-                    model = uiState.imageUrl,
-                    contentDescription = uiState.name,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Icon(
-                    Icons.Default.AutoAwesome,
-                    contentDescription = null,
-                    tint = contentColor.copy(alpha = 0.4f),
-                    modifier = Modifier.size(24.dp)
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp), spotColor = bgColor.copy(alpha = 0.5f)),
+                shape = RoundedCornerShape(24.dp),
+                color = bgColor
+            ) {
+                if (uiState.imageUrl != null) {
+                    AsyncImage(
+                        model = uiState.imageUrl,
+                        contentDescription = uiState.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else if (uiState.category == CosmeticCategory.AI_PENDING) {
+                    Icon(
+                        Icons.Default.DocumentScanner,
+                        contentDescription = null,
+                        modifier = Modifier.padding(32.dp).fillMaxSize(),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                    )
+                }
+            }
+
+            // Expiry Warning Badge
+            if (isExpiringSoon) {
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(12.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.error
+                ) {}
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = uiState.brand.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier.weight(1f)
+            )
+
+            // Display Cost Per Use if available
+            if (costPerUse != null) {
+                Text(
+                    text = "$%.2f".format(costPerUse),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
+
         Text(
             text = uiState.name,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            style = MaterialTheme.typography.bodyMedium,
+            fontFamily = FontFamily.Serif,
+            maxLines = 1
         )
         Text(
-            text = uiState.brand,
-            style = MaterialTheme.typography.bodyExtraSmall, // Custom or using caption style
+            text = uiState.category.displayName,
+            style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1
         )
     }
 }
 
-// Helper for smaller text
-val Typography.bodyExtraSmall: androidx.compose.ui.text.TextStyle
-    get() = labelSmall.copy(fontSize = 10.sp, letterSpacing = 0.sp)
-
 @Composable
-fun SectionTitle(
-    uiState: Pair<String, ImageVector>,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(uiState.second, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = uiState.first,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.secondary
-            )
-        }
-        
-        TextButton(onClick = { /* Could navigate to full list */ }) {
-            Text("See All", style = MaterialTheme.typography.labelMedium)
-        }
+fun SectionTitle(title: String, subtitle: String) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Serif
+        )
+        Text(
+            text = subtitle.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            letterSpacing = 2.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -766,7 +982,7 @@ fun SectionTitle(
 @Composable
 private fun HomeHeaderPreview() {
     MaterialTheme {
-        HomeHeader(uiState = null, onEvent = {}, navTo = {})
+        HomeHeader(uiState = null, isDaytime = true)
     }
 }
 
@@ -774,7 +990,7 @@ private fun HomeHeaderPreview() {
 @Composable
 private fun BeautyTipSectionPreview() {
     MaterialTheme {
-        BeautyTipSection(uiState = "Tip of the day", onEvent = {}, navTo = {})
+        BeautyTipSection(uiState = "Tip of the day")
     }
 }
 
@@ -782,7 +998,7 @@ private fun BeautyTipSectionPreview() {
 @Composable
 private fun QuickActionsPreview() {
     MaterialTheme {
-        QuickActions(uiState = Unit, onEvent = {}, navTo = {})
+        QuickActions(navTo = {})
     }
 }
 
@@ -790,7 +1006,7 @@ private fun QuickActionsPreview() {
 @Composable
 private fun SectionTitlePreview() {
     MaterialTheme {
-        SectionTitle(uiState = "Title" to Icons.Default.Home, onEvent = {}, navTo = {})
+        SectionTitle(title = "Title", subtitle = "Subtitle")
     }
 }
 
@@ -799,9 +1015,7 @@ private fun SectionTitlePreview() {
 private fun CompactProductCardPreview() {
     MaterialTheme {
         CompactProductCard(
-            uiState = CosmeticItem(name = "Lipstick", brand = "Luxe", category = CosmeticCategory.LIPSTICK, colorHex = "#FF0000"),
-            onEvent = {},
-            navTo = {}
+            uiState = CosmeticItem(name = "Lipstick", brand = "Luxe", category = CosmeticCategory.LIPSTICK, colorHex = "#FF0000")
         )
     }
 }
