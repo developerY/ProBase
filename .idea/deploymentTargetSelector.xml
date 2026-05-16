@@ -46,9 +46,6 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="applications.ashbike.apps.mobile.data">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="applications.seaweed.apps.mobile">
         <option name="selectionMode" value="DROPDOWN" />
         <DropdownSelection timestamp="2026-05-15T18:34:33.506715Z">
