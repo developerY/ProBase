@@ -82,6 +82,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.kocolor.model.BeautyRoutine
@@ -205,7 +206,7 @@ fun HomeScreen(
                         )
                         InventoryDashboard(
                             uiState = uiState,
-                            navTo = { navTo(KoColorRoute.Cosmetics) }
+                            navTo = navTo
                         )
                     }
                 }
@@ -444,7 +445,7 @@ fun QuickActions(navTo: (KoColorRoute) -> Unit) {
         }
         
         OutlinedButton(
-            onClick = { navTo(KoColorRoute.Cosmetics) },
+            onClick = { navTo(KoColorRoute.Cosmetics()) },
             modifier = Modifier.weight(1f).height(64.dp),
             shape = RoundedCornerShape(20.dp)
         ) {
@@ -588,22 +589,25 @@ fun RoutineSummaryCard(
 @Composable
 fun InventoryDashboard(
     uiState: HomeUiState,
-    navTo: () -> Unit
+    navTo: (KoColorRoute) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        // Advanced Horizontal Collection
+    Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        // Advanced Horizontal Collection (The Vanity)
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
         ) {
             items(uiState.popularCosmetics) { item ->
-                VanityProductCard(uiState = item)
+                VanityProductCard(
+                    uiState = item,
+                    onClick = { navTo(KoColorRoute.Cosmetics()) } // Maybe detail later
+                )
             }
 
             item {
                 ViewAllCard(
                     itemCount = uiState.totalCosmetics,
-                    onClick = navTo
+                    onClick = { navTo(KoColorRoute.Cosmetics()) }
                 )
             }
         }
@@ -611,8 +615,8 @@ fun InventoryDashboard(
         // Category Breakdown Quick-Access
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             val sections = listOf(
                 "Face" to Icons.Default.Face,
@@ -625,14 +629,27 @@ fun InventoryDashboard(
                 val count = uiState.cosmeticsByGroup.entries.find { it.key.contains(name, ignoreCase = true) }?.value ?: 0
                 if (count > 0) {
                     AssistChip(
-                        onClick = navTo,
-                        label = { Text("$count $name") },
-                        leadingIcon = { Icon(icon, null, modifier = Modifier.size(16.dp)) },
+                        onClick = { navTo(KoColorRoute.Cosmetics(filter = name)) },
+                        label = { 
+                            Text(
+                                text = "$count $name",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            ) 
+                        },
+                        leadingIcon = { Icon(icon, null, modifier = Modifier.size(18.dp)) },
                         colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f)
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            labelColor = MaterialTheme.colorScheme.onSurface,
+                            leadingIconContentColor = MaterialTheme.colorScheme.primary
                         ),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
-                        shape = RoundedCornerShape(12.dp)
+                        border = AssistChipDefaults.assistChipBorder(
+                            enabled = true,
+                            borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            borderWidth = 1.dp
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.height(40.dp)
                     )
                 }
             }
@@ -641,8 +658,17 @@ fun InventoryDashboard(
 }
 
 @Composable
-fun VanityProductCard(uiState: CosmeticItem) {
+fun VanityProductCard(
+    uiState: CosmeticItem,
+    onClick: () -> Unit
+) {
     val bgColor = uiState.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant
+    val contentColor = if (uiState.colorHex != null) {
+        if (isColorDark(bgColor)) Color.White else Color.Black
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+    
     val costPerUse = uiState.costPerUse
     
     // Professional Expiry Logic
@@ -652,24 +678,26 @@ fun VanityProductCard(uiState: CosmeticItem) {
     } ?: false
 
     Column(
-        modifier = Modifier.width(140.dp)
+        modifier = Modifier
+            .width(160.dp)
+            .clickable { onClick() }
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(0.8f)
+                .aspectRatio(0.85f)
         ) {
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
                     .shadow(
-                        elevation = 12.dp, 
-                        shape = RoundedCornerShape(24.dp), 
-                        spotColor = bgColor.copy(alpha = 0.4f)
+                        elevation = 16.dp, 
+                        shape = RoundedCornerShape(28.dp), 
+                        spotColor = bgColor.copy(alpha = 0.5f)
                     ),
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(28.dp),
                 color = bgColor,
-                border = BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.05f))
+                border = BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.1f))
             ) {
                 if (uiState.imageUrl != null) {
                     AsyncImage(
@@ -680,59 +708,96 @@ fun VanityProductCard(uiState: CosmeticItem) {
                     )
                 } else if (uiState.category == CosmeticCategory.AI_PENDING) {
                     Box(contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp), 
+                            strokeWidth = 2.dp,
+                            color = contentColor.copy(alpha = 0.5f)
+                        )
+                    }
+                } else {
+                    // Modern placeholder for items without images
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = contentColor.copy(alpha = 0.2f),
+                            modifier = Modifier.size(48.dp)
+                        )
                     }
                 }
             }
 
             // High-End Status Overlay
             Column(
-                modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+                modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
                 horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 if (isExpiringSoon) {
                     Surface(
-                        color = MaterialTheme.colorScheme.error,
+                        color = Color.Red,
                         shape = CircleShape,
-                        modifier = Modifier.size(10.dp)
+                        modifier = Modifier.size(10.dp).border(1.5.dp, Color.White, CircleShape)
                     ) {}
                 }
                 
                 if (uiState.isOpened) {
                     Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(6.dp)
+                        color = Color.White.copy(alpha = 0.9f),
+                        shape = RoundedCornerShape(8.dp),
+                        shadowElevation = 4.dp
                     ) {
                         Text(
                             "OPEN", 
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
-                            fontWeight = FontWeight.Black
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                            fontWeight = FontWeight.Black,
+                            color = Color.Black
                         )
                     }
                 }
             }
+            
+            // Usage Counter Badge (Bottom Left)
+            if (uiState.usageCount > 0) {
+                Surface(
+                    modifier = Modifier.align(Alignment.BottomStart).padding(12.dp),
+                    color = Color.Black.copy(alpha = 0.6f),
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text(
+                        text = "${uiState.usageCount}x",
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-        // Brand Label (Minimalist)
+        // Brand Label (Minimalist & Professional)
         Text(
             text = uiState.brand.uppercase(),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 1.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            letterSpacing = 1.2.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             maxLines = 1
         )
 
         Text(
             text = uiState.name,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleMedium,
             fontFamily = FontFamily.Serif,
-            fontWeight = FontWeight.SemiBold,
-            maxLines = 1
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         Row(
@@ -742,17 +807,24 @@ fun VanityProductCard(uiState: CosmeticItem) {
         ) {
             Text(
                 text = uiState.category.displayName,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Medium
             )
             
             if (costPerUse != null) {
-                Text(
-                    text = "$%.2f/use".format(costPerUse),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        text = "$%.2f".format(costPerUse),
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontWeight = FontWeight.Black
+                    )
+                }
             }
         }
     }

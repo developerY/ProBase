@@ -64,7 +64,7 @@ fun koColorNavEntryProvider(
         }
         is KoColorRoute.Cosmetics -> NavEntry(route) {
             CosmeticsUiRoute(
-                uiState = Unit,
+                initialFilter = route.filter,
                 onEvent = {},
                 navTo = onNavigateTo
             )

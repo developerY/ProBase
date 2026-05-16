@@ -55,12 +55,18 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
 fun CosmeticsUiRoute(
-    uiState: Unit = Unit,
+    initialFilter: String? = null,
     onEvent: (Unit) -> Unit = {},
     navTo: (KoColorRoute) -> Unit
 ) {
     val viewModel: CosmeticsViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(initialFilter) {
+        if (initialFilter != null) {
+            viewModel.onEvent(CosmeticsEvent.UpdateSearchQuery(initialFilter))
+        }
+    }
 
     CosmeticsScreen(
         uiState = state,
