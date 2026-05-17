@@ -16,7 +16,11 @@ import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
 import com.zoewave.probase.kocolor.features.color.ui.ColorDetailScreen
 import com.zoewave.probase.kocolor.features.color.ui.ColorUiRoute
 import com.zoewave.probase.kocolor.features.color.ui.ColorViewModel
+import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailScreen
+import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticEditScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsUiRoute
+import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsViewModel
+import com.zoewave.probase.kocolor.features.cosmetics.ui.StitchProductBuilder
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
@@ -103,6 +107,35 @@ fun koColorNavEntryProvider(
             SuggestionsUiRoute(
                 uiState = Unit,
                 onEvent = {},
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.CosmeticAdd -> NavEntry(route) {
+            val viewModel: CosmeticsViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            StitchProductBuilder(
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.CosmeticDetail -> NavEntry(route) {
+            val viewModel: CosmeticsViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            CosmeticDetailScreen(
+                itemId = route.itemId,
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.CosmeticEdit -> NavEntry(route) {
+            val viewModel: CosmeticsViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            CosmeticEditScreen(
+                itemId = route.itemId,
+                uiState = state,
+                onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
         }
