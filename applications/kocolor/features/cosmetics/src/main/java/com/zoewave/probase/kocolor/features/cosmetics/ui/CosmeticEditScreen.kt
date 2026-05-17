@@ -175,6 +175,24 @@ fun CosmeticEditScreen(
                 shape = RoundedCornerShape(16.dp)
             )
 
+            OutlinedTextField(
+                value = draft.instructions ?: "",
+                onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(instructions = it))) },
+                label = { Text("Instructions") },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 100.dp),
+                shape = RoundedCornerShape(16.dp),
+                minLines = 3
+            )
+
+            OutlinedTextField(
+                value = draft.notes ?: "",
+                onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(notes = it))) },
+                label = { Text("Personal Notes") },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 100.dp),
+                shape = RoundedCornerShape(16.dp),
+                minLines = 3
+            )
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = draft.isOpened,

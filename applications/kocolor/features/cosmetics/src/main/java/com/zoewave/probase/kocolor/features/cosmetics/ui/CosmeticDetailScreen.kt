@@ -177,6 +177,58 @@ fun CosmeticDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // 3. Pro Insights (Shelf Life, Usage, Notes)
+                SectionHeader("Shelf Life")
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    val daysRemaining = item.estimatedExpiry?.let { ((it - System.currentTimeMillis()) / (24 * 60 * 60 * 1000)).toInt() }
+                    ProMetricCard(
+                        title = "TIME REMAINING",
+                        value = if (daysRemaining != null) "$daysRemaining Days" else null,
+                        icon = Icons.Default.HourglassEmpty,
+                        modifier = Modifier.weight(1.5f),
+                        progress = daysRemaining?.let { it / 365f } // Mock progress
+                    )
+                }
+                
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    val openedStr = item.openedDate?.let { 
+                        val sdf = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
+                        sdf.format(java.util.Date(it))
+                    }
+                    ProMetricCard(
+                        title = "OPENED ON",
+                        value = openedStr,
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    val expiryStr = item.estimatedExpiry?.let { 
+                        val sdf = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
+                        sdf.format(java.util.Date(it))
+                    }
+                    ProMetricCard(
+                        title = "EXPIRES BY",
+                        value = expiryStr,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                SectionHeader("Usage Details")
+                
+                ProInsightCard(
+                    title = "Instructions",
+                    content = item.instructions,
+                    icon = Icons.Default.Opacity
+                )
+
+                ProInsightCard(
+                    title = "Personal Notes",
+                    content = item.notes,
+                    icon = Icons.Default.StickyNote2
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
                 // Action Buttons
                 Button(
                     onClick = { onEvent(CosmeticsEvent.UseItem(item.id)) },
@@ -196,6 +248,113 @@ fun CosmeticDetailScreen(
                     Text("Add to Beauty Routine")
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        fontFamily = FontFamily.Serif,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
+}
+
+@Composable
+private fun ProMetricCard(
+    title: String,
+    value: String?,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    progress: Float? = null,
+    modifier: Modifier = Modifier
+) {
+    val isAvailable = value != null
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        modifier = modifier
+    ) {
+        Box(modifier = Modifier.padding(16.dp)) {
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (isAvailable) 0.6f else 0.3f),
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = value ?: "Pending",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isAvailable) 1f else 0.2f),
+                    fontWeight = FontWeight.Black
+                )
+            }
+            
+            if (icon != null) {
+                Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+                    if (progress != null) {
+                        CircularProgressIndicator(
+                            progress = { progress },
+                            modifier = Modifier.size(48.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = if (isAvailable) 1f else 0.2f),
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            strokeWidth = 4.dp
+                        )
+                    }
+                    Icon(
+                        icon, 
+                        contentDescription = null, 
+                        modifier = Modifier.size(24.dp).align(Alignment.Center),
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = if (isAvailable) 0.8f else 0.2f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProInsightCard(
+    title: String,
+    content: String?,
+    icon: androidx.compose.ui.graphics.vector.ImageVector
+) {
+    val isAvailable = !content.isNullOrBlank()
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    icon, 
+                    contentDescription = null, 
+                    modifier = Modifier.size(16.dp), 
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = if (isAvailable) 1f else 0.2f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = title, 
+                    style = MaterialTheme.typography.labelLarge, 
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (isAvailable) 1f else 0.3f)
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = content ?: "No $title details provided by manufacturer or user.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isAvailable) 0.8f else 0.2f),
+                lineHeight = 22.sp
+            )
         }
     }
 }
