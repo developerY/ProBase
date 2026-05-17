@@ -61,5 +61,17 @@ fun SettingsTab(
         ) {
             Text(stringResource(R.string.features_health_action_add_test_ride))
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = { onEvent(HealthEvent.SeedData) },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary
+            ),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.features_health_core_action_seed_data))
+        }
     }
 }

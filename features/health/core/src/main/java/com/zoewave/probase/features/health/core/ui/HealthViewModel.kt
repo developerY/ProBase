@@ -105,6 +105,7 @@ class HealthViewModel @Inject constructor(
             is HealthEvent.DeleteAll -> delData()
             is HealthEvent.ReadAll -> readAllData()
             is HealthEvent.WriteTestRide -> writeTestCityRide()
+            is HealthEvent.SeedData -> seedHealthData()
             is HealthEvent.ManagePermissions -> {
                 viewModelScope.launch {
                     _sideEffect.emit(HealthSideEffect.OpenHealthConnectSettings)
@@ -271,6 +272,40 @@ class HealthViewModel @Inject constructor(
             // 3. Insert into Health Connect
             tryWithPermissionsCheck {
                 healthSessionManager.insertRecords(records)
+                onEvent(HealthEvent.LoadHealthData)
+            }
+        }
+    }
+
+    private fun seedHealthData() {
+        viewModelScope.launch {
+            tryWithPermissionsCheck {
+                Log.d("HealthViewModel", "Seeding health data starting...")
+                
+                // 1. Generate Sleep Data (last 7 days)
+                healthSessionManager.generateSleepData()
+                
+                // 2. Generate multiple Exercise Sessions
+                val now = ZonedDateTime.now()
+                
+                // Yesterday - Bike Ride
+                healthSessionManager.insertBikeExerciseSession(
+                    start = now.minusDays(1).minusHours(2),
+                    end = now.minusDays(1).minusHours(1),
+                    title = "Afternoon Ride"
+                )
+                
+                // 2 Days ago - Test Run
+                healthSessionManager.writeExerciseSessionTest()
+                
+                // 3. Generate some Nutrition/Hydration/Steps
+                // We can use writeExerciseSessionNotUse for this as it adds steps, distance, calories
+                healthSessionManager.writeExerciseSessionNotUse(
+                    start = now.minusDays(3).minusHours(1),
+                    end = now.minusDays(3)
+                )
+
+                Log.d("HealthViewModel", "Seeding health data complete.")
                 onEvent(HealthEvent.LoadHealthData)
             }
         }

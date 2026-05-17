@@ -44,6 +44,7 @@
 
     <!-- Debug / Test Actions -->
     <string name="features_health_action_add_test_ride">Add Test City Ride (4.5km)</string>
+    <string name="features_health_core_action_seed_data">Seed Comprehensive Data (Last 7 Days)</string>
     <string name="features_health_action_add">Add</string>
     <string name="features_health_action_log">Log!</string>
     <string name="features_health_action_delete_all">Delete All!</string>

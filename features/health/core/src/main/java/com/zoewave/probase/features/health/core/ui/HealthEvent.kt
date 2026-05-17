@@ -11,6 +11,7 @@ sealed interface HealthEvent {
 
     // New Events
     data object WriteTestRide : HealthEvent
+    data object SeedData : HealthEvent
     data object ManagePermissions : HealthEvent // <--- Added this
 
     data class DeleteSession(val uid: String) : HealthEvent // <--- NEW
