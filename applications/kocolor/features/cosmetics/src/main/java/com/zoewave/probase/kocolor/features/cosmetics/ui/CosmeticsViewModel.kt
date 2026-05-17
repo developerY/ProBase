@@ -47,6 +47,7 @@ sealed class CosmeticsEvent {
     data object ScanWithGemini : CosmeticsEvent()
     data object ClearCapturedImage : CosmeticsEvent()
     data class StartEditing(val item: CosmeticItem) : CosmeticsEvent()
+    data class HandleScanResult(val code: String) : CosmeticsEvent()
 }
 
 @HiltViewModel
@@ -72,6 +73,14 @@ class CosmeticsViewModel @Inject constructor(
                 }
             }
         }
+
+        sessionRepository.lastScannedCode
+            .filterNotNull()
+            .onEach { code ->
+                _draftItem.value = _draftItem.value.copy(batchCode = code)
+                sessionRepository.setLastScannedCode(null) // Consume it
+            }
+            .launchIn(viewModelScope)
     }
 
     private suspend fun initializeDefaultCosmetics() {
@@ -140,6 +149,7 @@ class CosmeticsViewModel @Inject constructor(
             is CosmeticsEvent.UpdateSortOption -> _sortOption.value = event.option
             CosmeticsEvent.ScanWithGemini -> scanWithGemini()
             CosmeticsEvent.ClearCapturedImage -> sessionRepository.setCapturedItemUri(null)
+            is CosmeticsEvent.HandleScanResult -> _draftItem.value = _draftItem.value.copy(batchCode = event.code)
         }
     }
 

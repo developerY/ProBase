@@ -52,6 +52,12 @@ sealed class KoColorRoute {
     @Serializable
     data class Camera(val target: String) : KoColorRoute()
 
+    @Serializable
+    data object QRScanner : KoColorRoute()
+
+    @Serializable
+    data object BarcodeScanner : KoColorRoute()
+
     val icon: ImageVector?
         get() = when (this) {
             Home -> Icons.Default.Home

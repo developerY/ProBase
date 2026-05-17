@@ -22,7 +22,7 @@ dependencies {
     // --- 2. Feature Dependencies ---
     // Mapping old ":feature:..." to new ":apps:mobile:features:..." structure
     // implementation(project(":apps:mobile:features:health")) // Fixed typo 'heatlh'
-    // implementation(project(":apps:mobile:features:nfc"))
+    // implementation(project(":applications:ashbike:apps:mobile:features:nfc"))
     // implementation(project(":apps:mobile:features:weather"))
 
     // --- 3. Core Android ---

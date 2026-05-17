@@ -75,7 +75,8 @@ fun KoColorMainScreen(
                         onHairCaptured = viewModel::onHairCaptured,
                         onShoesCaptured = viewModel::onShoesCaptured,
                         onClothesCaptured = viewModel::onClothesCaptured,
-                        onInventoryItemCaptured = viewModel::onInventoryItemCaptured
+                        onInventoryItemCaptured = viewModel::onInventoryItemCaptured,
+                        onCodeScanned = viewModel::onCodeScanned
                     )
                 }
             )

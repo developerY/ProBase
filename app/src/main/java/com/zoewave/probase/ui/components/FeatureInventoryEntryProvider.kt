@@ -14,8 +14,8 @@ import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.features.health.core.ui.HealthRoute
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventory
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventoryScreen
-import com.zoewave.probase.features.nfc.ui.NfcUiRoute
-import com.zoewave.probase.features.qrscanner.ui.QRCodeScannerScreen
+import com.zoewave.probase.features.readers.nfc.ui.NfcUiRoute
+import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.ai.capture.ui.SmartCaptureUiRoute
 import com.zoewave.probase.photodo.features.smartadvice.ui.SmartAdviceUiRoute
 

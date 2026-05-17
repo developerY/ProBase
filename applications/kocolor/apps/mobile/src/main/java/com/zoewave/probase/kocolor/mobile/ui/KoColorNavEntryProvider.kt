@@ -10,6 +10,8 @@ import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.features.ar.facelab.ui.FaceLabUiRoute
 import com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
+import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
+import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
 import com.zoewave.probase.kocolor.features.color.ui.ColorDetailScreen
 import com.zoewave.probase.kocolor.features.color.ui.ColorUiRoute
@@ -32,7 +34,8 @@ fun koColorNavEntryProvider(
     onHairCaptured: (String) -> Unit,
     onShoesCaptured: (String) -> Unit,
     onClothesCaptured: (String) -> Unit,
-    onInventoryItemCaptured: (String) -> Unit
+    onInventoryItemCaptured: (String) -> Unit,
+    onCodeScanned: (String) -> Unit
 ): NavEntry<KoColorRoute> {
     return when (route) {
         is KoColorRoute.Home -> NavEntry(route) {
@@ -66,6 +69,7 @@ fun koColorNavEntryProvider(
         is KoColorRoute.Cosmetics -> NavEntry(route) {
             CosmeticsUiRoute(
                 initialFilter = route.filter,
+                onCodeScanned = onCodeScanned,
                 onEvent = {},
                 navTo = onNavigateTo
             )
@@ -127,6 +131,12 @@ fun koColorNavEntryProvider(
                 onEvent = {},
                 navTo = onNavigateTo
             )
+        }
+        is KoColorRoute.QRScanner -> NavEntry(route) {
+            QRCodeScannerScreen(onCodeScanned = { onCodeScanned(it); onBack() })
+        }
+        is KoColorRoute.BarcodeScanner -> NavEntry(route) {
+            BarcodeScannerScreen(onCodeScanned = { onCodeScanned(it); onBack() })
         }
         is KoColorRoute.Camera -> NavEntry(route) {
             CameraUIRoute(

@@ -86,4 +86,8 @@ class MainViewModel @Inject constructor(
     fun onInventoryItemCaptured(uri: String) {
         sessionRepository.setCapturedItemUri(uri)
     }
+
+    fun onCodeScanned(code: String) {
+        sessionRepository.setLastScannedCode(code)
+    }
 }
