@@ -26,6 +26,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -106,16 +108,19 @@ fun CosmeticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Cosmetic Inventory") },
+                title = { Text("Inventory", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
+                    IconButton(onClick = { navTo(KoColorRoute.CosmeticAdd) }) {
+                        Icon(Icons.Default.Add, contentDescription = "Add")
+                    }
                     Box {
                         IconButton(onClick = { showSortMenu = true }) {
-                            Icon(Icons.Default.Sort, contentDescription = "Sort")
+                            Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
                         }
                         DropdownMenu(
                             expanded = showSortMenu,
@@ -537,7 +542,7 @@ fun CosmeticProductCard(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onEvent("edit") },
+            .clickable { navTo(KoColorRoute.CosmeticDetail(uiState.id)) },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = cardColor,
