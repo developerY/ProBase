@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:db"))
     implementation(project(":applications:kocolor:data"))
+    implementation(project(":features:graphics"))
 
     // MediaPipe
     implementation(libs.mediapipe.vision)
