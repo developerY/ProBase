@@ -44,6 +44,15 @@ sealed class KoColorRoute {
     data class ColorDetail(val suggestionId: Long) : KoColorRoute()
 
     @Serializable
+    data object CosmeticAdd : KoColorRoute()
+
+    @Serializable
+    data class CosmeticDetail(val itemId: Long) : KoColorRoute()
+
+    @Serializable
+    data class CosmeticEdit(val itemId: Long) : KoColorRoute()
+
+    @Serializable
     data class NailLab(val colorHex: String, val finish: String) : KoColorRoute()
 
     @Serializable
