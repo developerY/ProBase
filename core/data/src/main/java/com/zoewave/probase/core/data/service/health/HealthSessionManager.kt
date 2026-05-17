@@ -16,6 +16,7 @@ import androidx.health.connect.client.changes.Change
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.SpeedRecord
@@ -128,6 +129,17 @@ class HealthSessionManager(private val context: Context) {
         healthConnectClient.readRecords(
             ReadRecordsRequest(
                 recordType = TotalCaloriesBurnedRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(start, end)
+            )
+        ).records
+
+    /**
+     * Reads hydration records for a specific time range.
+     */
+    suspend fun readHydration(start: Instant, end: Instant): List<HydrationRecord> =
+        healthConnectClient.readRecords(
+            ReadRecordsRequest(
+                recordType = HydrationRecord::class,
                 timeRangeFilter = TimeRangeFilter.between(start, end)
             )
         ).records
@@ -491,7 +503,8 @@ class HealthSessionManager(private val context: Context) {
             DistanceRecord::class,
             TotalCaloriesBurnedRecord::class,
             HeartRateRecord::class,
-            WeightRecord::class
+            WeightRecord::class,
+            HydrationRecord::class
         )
 
         recordTypes.forEach { type ->
@@ -520,7 +533,8 @@ class HealthSessionManager(private val context: Context) {
             DistanceRecord::class,
             TotalCaloriesBurnedRecord::class,
             HeartRateRecord::class,
-            WeightRecord::class
+            WeightRecord::class,
+            HydrationRecord::class
         )
 
         recordTypes.forEach { type ->

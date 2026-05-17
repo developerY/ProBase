@@ -15,8 +15,8 @@ sealed interface HealthUiState {
         val sessions: List<ExerciseSessionRecord>,
         val sleepSessions: List<SleepSessionData> = emptyList(),
         val weeklySteps: Map<String, Long> = emptyMap(),
-        // Add these two new fields:
         val weeklyDistance: Map<String, Double> = emptyMap(), // Meters
-        val weeklyCalories: Map<String, Double> = emptyMap()  // Kcal
+        val weeklyCalories: Map<String, Double> = emptyMap(), // Kcal
+        val weeklyHydration: Map<String, Double> = emptyMap() // Liters
     ) : HealthUiState
 }

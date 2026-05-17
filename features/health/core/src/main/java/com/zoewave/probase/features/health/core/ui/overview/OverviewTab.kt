@@ -61,5 +61,12 @@ fun OverviewTab(
             color = Color(0xFF03A9F4),
             formatValue = { v -> String.format("%.1f", v / 1000) }
         )
+
+        GenericWeeklyChart(
+            title = "Hydration (L)",
+            data = state.weeklyHydration,
+            color = Color(0xFF2196F3),
+            formatValue = { v -> String.format("%.1f", v) }
+        )
     }
 }

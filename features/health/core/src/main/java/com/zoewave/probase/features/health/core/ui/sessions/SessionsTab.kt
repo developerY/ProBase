@@ -150,7 +150,7 @@ fun SessionsTab(
             )
         }
         
-        val dates = (state.weeklySteps.keys + state.weeklyCalories.keys + state.weeklyDistance.keys).sortedDescending()
+        val dates = (state.weeklySteps.keys + state.weeklyCalories.keys + state.weeklyDistance.keys + state.weeklyHydration.keys).sortedDescending()
         
         if (dates.isEmpty()) {
             item {
@@ -162,7 +162,8 @@ fun SessionsTab(
                     date = date,
                     steps = state.weeklySteps[date],
                     calories = state.weeklyCalories[date],
-                    distance = state.weeklyDistance[date]
+                    distance = state.weeklyDistance[date],
+                    hydration = state.weeklyHydration[date]
                 )
             }
         }
@@ -222,7 +223,7 @@ fun SleepSessionCard(sleep: SleepSessionData) {
 }
 
 @Composable
-fun DailyMetricCard(date: String, steps: Long?, calories: Double?, distance: Double?) {
+fun DailyMetricCard(date: String, steps: Long?, calories: Double?, distance: Double?, hydration: Double? = null) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
         shape = RoundedCornerShape(12.dp),
@@ -233,7 +234,10 @@ fun DailyMetricCard(date: String, steps: Long?, calories: Double?, distance: Dou
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 steps?.let { Text("Steps: $it", style = MaterialTheme.typography.bodySmall) }
                 calories?.let { Text("Cals: ${it.toInt()}kcal", style = MaterialTheme.typography.bodySmall) }
+            }
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 distance?.let { Text("Dist: ${String.format("%.1f", it / 1000)}km", style = MaterialTheme.typography.bodySmall) }
+                hydration?.let { Text("Water: ${String.format("%.1f", it)}L", style = MaterialTheme.typography.bodySmall) }
             }
         }
     }
