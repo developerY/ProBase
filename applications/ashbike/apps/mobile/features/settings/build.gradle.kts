@@ -21,8 +21,8 @@ dependencies {
 
     implementation(project(":features:health"))
     implementation(project(":features:ble"))
-    implementation(project(":features:nfc"))
-    implementation(project(":features:qrscanner"))
+    implementation(project(":features:readers:nfc"))
+    implementation(project(":features:readers:qrscanner"))
 
 
 

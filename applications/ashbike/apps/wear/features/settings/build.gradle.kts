@@ -24,12 +24,12 @@ dependencies {
     // --- Hardware Features ---
     implementation(project(":features:health"))
     implementation(project(":features:ble"))
-    implementation(project(":features:nfc"))
+    implementation(project(":features:readers:nfc"))
 
     // ⚠️ WATCH OUT: Wear OS devices generally do not have cameras.
     // If your qrscanner module relies on CameraX or MLKit Vision,
     // it will likely crash or be unusable on a smartwatch.
-    implementation(project(":features:qrscanner"))
+    implementation(project(":features:readers:qrscanner"))
 
     // --- AshBike Database & Models ---
     implementation(project(":applications:ashbike:database"))

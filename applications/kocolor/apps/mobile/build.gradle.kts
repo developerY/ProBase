@@ -59,6 +59,8 @@ dependencies {
     implementation(project(":features:ai:capture"))
     implementation(project(":features:camera"))
     implementation(project(":features:health:core"))
+    implementation(project(":features:readers:barcode"))
+    implementation(project(":features:readers:qrscanner"))
 
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)

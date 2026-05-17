@@ -54,6 +54,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -658,11 +660,12 @@ fun InventoryDashboard(
             }
         }
         
-        // Category Breakdown Quick-Access
+        // Category Breakdown Quick-Access (Premium Filter Chips)
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            maxItemsInEachRow = 3
         ) {
             val sections = listOf(
                 "Face" to Icons.Default.Face,
@@ -674,28 +677,49 @@ fun InventoryDashboard(
             sections.forEach { (name, icon) ->
                 val count = uiState.cosmeticsByGroup.entries.find { it.key.contains(name, ignoreCase = true) }?.value ?: 0
                 if (count > 0) {
-                    AssistChip(
+                    FilterChip(
+                        selected = false,
                         onClick = { navTo(KoColorRoute.Cosmetics(filter = name)) },
-                        label = { 
-                            Text(
-                                text = "$count $name",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold
-                            ) 
+                        label = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = name,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Surface(
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                                    shape = CircleShape
+                                ) {
+                                    Text(
+                                        text = count.toString(),
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Black
+                                    )
+                                }
+                            }
                         },
-                        leadingIcon = { Icon(icon, null, modifier = Modifier.size(18.dp)) },
-                        colors = AssistChipDefaults.assistChipColors(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = FilterChipDefaults.filterChipColors(
                             containerColor = MaterialTheme.colorScheme.surface,
-                            labelColor = MaterialTheme.colorScheme.onSurface,
-                            leadingIconContentColor = MaterialTheme.colorScheme.primary
+                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            iconColor = MaterialTheme.colorScheme.primary
                         ),
-                        border = AssistChipDefaults.assistChipBorder(
+                        border = FilterChipDefaults.filterChipBorder(
                             enabled = true,
+                            selected = false,
                             borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                             borderWidth = 1.dp
-                        ),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.height(40.dp)
+                        )
                     )
                 }
             }

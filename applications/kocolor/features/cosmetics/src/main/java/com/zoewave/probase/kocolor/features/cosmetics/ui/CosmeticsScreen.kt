@@ -56,6 +56,7 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 @Composable
 fun CosmeticsUiRoute(
     initialFilter: String? = null,
+    onCodeScanned: (String) -> Unit = {},
     onEvent: (Unit) -> Unit = {},
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -66,6 +67,13 @@ fun CosmeticsUiRoute(
         if (initialFilter != null) {
             viewModel.onEvent(CosmeticsEvent.UpdateSearchQuery(initialFilter))
         }
+    }
+    
+    // Wire up scan results to the viewmodel
+    LaunchedEffect(onCodeScanned) {
+        // This lambda is a shell, but we can't easily capture the 'scanned' value 
+        // across the nav3 boundary without a shared viewmodel or a results bus.
+        // However, we'll keep the plumbing ready.
     }
 
     CosmeticsScreen(
@@ -812,10 +820,34 @@ fun EditCosmeticDialog(
                         modifier = Modifier.weight(1f),
                         singleLine = true
                     )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { navTo(KoColorRoute.BarcodeScanner) },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.QrCodeScanner, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Scan Barcode")
+                        }
+                        OutlinedButton(
+                            onClick = { navTo(KoColorRoute.QRScanner) },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.QrCode, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Scan QR")
+                        }
+                    }
+
                     OutlinedTextField(
                         value = draft.batchCode ?: "",
                         onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
-                        label = { Text("Batch Code") },
+                        label = { Text("Batch Code / SKU") },
                         modifier = Modifier.weight(1f),
                         singleLine = true
                     )
@@ -1093,10 +1125,34 @@ fun AddCosmeticDialog(
                         modifier = Modifier.weight(1f),
                         singleLine = true
                     )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { navTo(KoColorRoute.BarcodeScanner) },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.QrCodeScanner, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Scan Barcode")
+                        }
+                        OutlinedButton(
+                            onClick = { navTo(KoColorRoute.QRScanner) },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.QrCode, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Scan QR")
+                        }
+                    }
+
                     OutlinedTextField(
                         value = draft.batchCode ?: "",
                         onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
-                        label = { Text("Batch Code") },
+                        label = { Text("Batch Code / SKU") },
                         modifier = Modifier.weight(1f),
                         singleLine = true
                     )
