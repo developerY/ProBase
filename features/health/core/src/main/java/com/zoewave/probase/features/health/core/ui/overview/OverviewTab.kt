@@ -25,7 +25,6 @@ import com.zoewave.probase.features.health.core.ui.components.charts.GenericWeek
 @Composable
 fun OverviewTab(
     state: HealthUiState.Success,
-    onEvent: (HealthEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -62,14 +61,5 @@ fun OverviewTab(
             color = Color(0xFF03A9F4),
             formatValue = { v -> String.format("%.1f", v / 1000) }
         )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = { onEvent(HealthEvent.WriteTestRide) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.features_health_action_add_test_ride))
-        }
     }
 }

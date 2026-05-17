@@ -69,9 +69,9 @@ fun HealthDashboard(
         ) {
             when (currentTab) {
                 HealthTab.Settings -> SettingsTab(onEvent = onEvent)
-                HealthTab.Data -> OverviewTab(state = state, onEvent = onEvent)
+                HealthTab.Data -> OverviewTab(state = state)
                 HealthTab.Glucose -> GlucoseTab()
-                HealthTab.Sessions -> SessionsTab(sessions = state.sessions, onEvent = onEvent)
+                HealthTab.Sessions -> SessionsTab(state = state, onEvent = onEvent)
             }
         }
     }

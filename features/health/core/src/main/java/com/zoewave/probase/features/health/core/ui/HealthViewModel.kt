@@ -186,6 +186,7 @@ class HealthViewModel @Inject constructor(
             try {
                 if (healthSessionManager.hasAllPermissions(permissions)) {
                     val sessions = readSessionInputs()
+                    val sleepSessions = healthSessionManager.readSleepSessions()
 
                     // Define the range
                     val end = Instant.now()
@@ -208,6 +209,7 @@ class HealthViewModel @Inject constructor(
 
                     _uiState.value = HealthUiState.Success(
                         sessions = sessions,
+                        sleepSessions = sleepSessions,
                         weeklySteps = stepsMap,
                         weeklyDistance = distMap,
                         weeklyCalories = calMap
