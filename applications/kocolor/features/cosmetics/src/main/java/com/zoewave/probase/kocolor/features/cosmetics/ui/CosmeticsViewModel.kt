@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
@@ -9,6 +10,7 @@ import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.kocolor.model.KoColorRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
@@ -18,20 +20,30 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+enum class SortOption {
+    NEWEST, EXPIRY, COST_PER_USE, BRAND
+}
+
 data class CosmeticsUiState(
     val items: List<CosmeticItem> = emptyList(),
+    val filteredItems: List<CosmeticItem> = emptyList(),
     val isLoading: Boolean = true,
     val capturedImageUri: String? = null,
     val isAnalyzing: Boolean = false,
     val aiResult: CosmeticItem? = null,
-    val draftItem: CosmeticItem = CosmeticItem(name = "", brand = "", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION)
+    val draftItem: CosmeticItem = CosmeticItem(name = "", brand = "", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION),
+    val searchQuery: String = "",
+    val sortOption: SortOption = SortOption.NEWEST
 )
 
 sealed class CosmeticsEvent {
     data class AddItem(val item: CosmeticItem) : CosmeticsEvent()
     data class UpdateItem(val item: CosmeticItem) : CosmeticsEvent()
     data class DeleteItem(val id: Long) : CosmeticsEvent()
+    data class UseItem(val id: Long) : CosmeticsEvent()
     data class UpdateDraft(val item: CosmeticItem) : CosmeticsEvent()
+    data class UpdateSearchQuery(val query: String) : CosmeticsEvent()
+    data class UpdateSortOption(val option: SortOption) : CosmeticsEvent()
     data object ScanWithGemini : CosmeticsEvent()
     data object ClearCapturedImage : CosmeticsEvent()
     data class StartEditing(val item: CosmeticItem) : CosmeticsEvent()
@@ -49,6 +61,8 @@ class CosmeticsViewModel @Inject constructor(
     private val _isAnalyzing = MutableStateFlow(false)
     private val _aiResult = MutableStateFlow<CosmeticItem?>(null)
     private val _draftItem = MutableStateFlow(CosmeticItem(name = "", brand = "", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION))
+    private val _searchQuery = MutableStateFlow("")
+    private val _sortOption = MutableStateFlow(SortOption.NEWEST)
 
     init {
         viewModelScope.launch {
@@ -71,15 +85,43 @@ class CosmeticsViewModel @Inject constructor(
         sessionRepository.capturedItemUri,
         _isAnalyzing,
         _aiResult,
-        _draftItem
-    ) { entities, capturedUri, analyzing, aiResult, draft ->
+        _draftItem,
+        _searchQuery,
+        _sortOption
+    ) { array ->
+        val entities = array[0] as List<CosmeticItemEntity>
+        val capturedUri = array[1] as String?
+        val analyzing = array[2] as Boolean
+        val aiResult = array[3] as CosmeticItem?
+        val draft = array[4] as CosmeticItem
+        val query = array[5] as String
+        val sort = array[6] as SortOption
+
+        val models = entities.map { it.toModel() }
+        
+        val filtered = models.filter {
+            it.name.contains(query, ignoreCase = true) || 
+            it.brand.contains(query, ignoreCase = true) ||
+            it.category.displayName.contains(query, ignoreCase = true)
+        }.let { list ->
+            when (sort) {
+                SortOption.NEWEST -> list.sortedByDescending { it.timestamp }
+                SortOption.EXPIRY -> list.sortedBy { it.estimatedExpiry ?: Long.MAX_VALUE }
+                SortOption.COST_PER_USE -> list.sortedByDescending { it.costPerUse ?: 0.0 }
+                SortOption.BRAND -> list.sortedBy { it.brand }
+            }
+        }
+
         CosmeticsUiState(
-            items = entities.map { it.toModel() },
+            items = models,
+            filteredItems = filtered,
             isLoading = false,
             capturedImageUri = capturedUri,
             isAnalyzing = analyzing,
             aiResult = aiResult,
-            draftItem = draft.copy(imageUrl = capturedUri ?: draft.imageUrl)
+            draftItem = draft.copy(imageUrl = capturedUri ?: draft.imageUrl),
+            searchQuery = query,
+            sortOption = sort
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CosmeticsUiState())
 
@@ -91,10 +133,25 @@ class CosmeticsViewModel @Inject constructor(
             }
             is CosmeticsEvent.UpdateItem -> updateItem(event.item)
             is CosmeticsEvent.DeleteItem -> deleteItem(event.id)
+            is CosmeticsEvent.UseItem -> useItem(event.id)
             is CosmeticsEvent.UpdateDraft -> _draftItem.value = event.item
             is CosmeticsEvent.StartEditing -> _draftItem.value = event.item
+            is CosmeticsEvent.UpdateSearchQuery -> _searchQuery.value = event.query
+            is CosmeticsEvent.UpdateSortOption -> _sortOption.value = event.option
             CosmeticsEvent.ScanWithGemini -> scanWithGemini()
             CosmeticsEvent.ClearCapturedImage -> sessionRepository.setCapturedItemUri(null)
+        }
+    }
+
+    private fun useItem(id: Long) {
+        viewModelScope.launch {
+            val item = uiState.value.items.find { it.id == id } ?: return@launch
+            val updated = item.copy(
+                usageCount = item.usageCount + 1,
+                isOpened = true,
+                openedDate = item.openedDate ?: System.currentTimeMillis()
+            )
+            cosmeticDao.updateCosmetic(updated.toEntity())
         }
     }
 

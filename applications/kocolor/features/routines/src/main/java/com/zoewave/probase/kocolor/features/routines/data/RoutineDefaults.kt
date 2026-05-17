@@ -30,13 +30,19 @@ object RoutineDefaults {
         RoutineStep("e10", "Night Cream/Sleeping Mask", "Korean Skincare Step 9: Intense overnight recovery.", isRecommended = true)
     )
 
-    val dailyBeautyAdvice = listOf(
+    val morningAdvice = listOf(
         "Always apply sunscreen, even on cloudy days!",
-        "Double cleansing at night is the secret to clear Korean skin.",
+        "Vitamin C in the morning protects against daily pollutants.",
         "Pat your products in gently rather than rubbing.",
-        "Change your pillowcase weekly to avoid bacteria buildup.",
-        "Drink at least 8 glasses of water for that natural glow.",
-        "Sheet masks are best used for 15-20 minutes, don't let them dry out on your face!",
+        "Drink a glass of water first thing for that natural morning glow.",
         "Apply products from thinnest consistency to thickest."
+    )
+
+    val eveningAdvice = listOf(
+        "Double cleansing at night is the secret to clear Korean skin.",
+        "Change your pillowcase weekly to avoid bacteria buildup.",
+        "Sheet masks are best used for 15-20 minutes, don't let them dry out!",
+        "Nighttime is for repair—focus on hydration and barrier support.",
+        "Apply a thicker night cream to seal in all your active serums."
     )
 }

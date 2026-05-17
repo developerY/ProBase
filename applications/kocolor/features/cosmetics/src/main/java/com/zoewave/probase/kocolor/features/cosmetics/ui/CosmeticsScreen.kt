@@ -24,38 +24,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Badge
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -84,12 +55,18 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
 fun CosmeticsUiRoute(
-    uiState: Unit = Unit,
+    initialFilter: String? = null,
     onEvent: (Unit) -> Unit = {},
     navTo: (KoColorRoute) -> Unit
 ) {
     val viewModel: CosmeticsViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(initialFilter) {
+        if (initialFilter != null) {
+            viewModel.onEvent(CosmeticsEvent.UpdateSearchQuery(initialFilter))
+        }
+    }
 
     CosmeticsScreen(
         uiState = state,
@@ -109,6 +86,7 @@ fun CosmeticsScreen(
     var showOrderDialog by remember { mutableStateOf(false) }
     var selectedItemForEdit by remember { mutableStateOf<CosmeticItem?>(null) }
     var showGuideForCategory by remember { mutableStateOf<CosmeticCategory?>(null) }
+    var showSortMenu by remember { mutableStateOf(false) }
 
     // Re-open dialog if coming back from camera
     LaunchedEffect(uiState.capturedImageUri) {
@@ -127,6 +105,30 @@ fun CosmeticsScreen(
                     }
                 },
                 actions = {
+                    Box {
+                        IconButton(onClick = { showSortMenu = true }) {
+                            Icon(Icons.Default.Sort, contentDescription = "Sort")
+                        }
+                        DropdownMenu(
+                            expanded = showSortMenu,
+                            onDismissRequest = { showSortMenu = false }
+                        ) {
+                            SortOption.entries.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(option.name.lowercase().capitalize()) },
+                                    onClick = {
+                                        onEvent(CosmeticsEvent.UpdateSortOption(option))
+                                        showSortMenu = false
+                                    },
+                                    leadingIcon = {
+                                        if (uiState.sortOption == option) {
+                                            Icon(Icons.Default.Check, contentDescription = null)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
                     IconButton(onClick = { showOrderDialog = true }) {
                         Icon(Icons.Default.Info, contentDescription = "Application Order")
                     }
@@ -139,111 +141,131 @@ fun CosmeticsScreen(
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else {
-                val allGroups = listOf(
-                    "Face (Base & Coverage)",
-                    "Cheeks (Color & Dimension)",
-                    "Eyes (Definition)",
-                    "Lips (Color & Texture)",
-                    "Tools & Accessories"
-                )
+        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+            // Search Bar
+            OutlinedTextField(
+                value = uiState.searchQuery,
+                onValueChange = { onEvent(CosmeticsEvent.UpdateSearchQuery(it)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                placeholder = { Text("Search by name, brand, or category...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp)
+            )
 
-                val groupedBySection = remember(uiState.items) {
-                    uiState.items.groupBy { it.category.groupName }
-                }
+            Box(modifier = Modifier.weight(1f)) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else {
+                    val allGroups = listOf(
+                        "Face (Base & Coverage)",
+                        "Cheeks (Color & Dimension)",
+                        "Eyes (Definition)",
+                        "Lips (Color & Texture)",
+                        "Tools & Accessories"
+                    )
 
-                val expandedGroups = remember { 
-                    mutableStateMapOf<String, Boolean>().apply {
-                        allGroups.forEach { put(it, false) }
+                    val groupedBySection = remember(uiState.filteredItems) {
+                        uiState.filteredItems.groupBy { it.category.groupName }
                     }
-                }
 
-                val expandedSubgroups = remember {
-                    mutableStateMapOf<CosmeticCategory, Boolean>().apply {
-                        CosmeticCategory.entries.forEach { put(it, false) }
-                    }
-                }
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    allGroups.forEach { groupName ->
-                        val itemsInGroup = groupedBySection[groupName] ?: emptyList()
-                        val isGroupExpanded = expandedGroups[groupName] == true
-                        
-                        item {
-                            GroupSectionCard(
-                                uiState = Triple(groupName, itemsInGroup.size, isGroupExpanded),
-                                onEvent = { expandedGroups[groupName] = it },
-                                navTo = {}
-                            )
+                    val expandedGroups = remember { 
+                        mutableStateMapOf<String, Boolean>().apply {
+                            allGroups.forEach { put(it, true) } // Expand all by default when searching
                         }
+                    }
 
-                        if (isGroupExpanded) {
-                            val categoriesInGroup = CosmeticCategory.entries.filter { it.groupName == groupName }
+                    val expandedSubgroups = remember {
+                        mutableStateMapOf<CosmeticCategory, Boolean>().apply {
+                            CosmeticCategory.entries.forEach { put(it, true) }
+                        }
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        allGroups.forEach { groupName ->
+                            val itemsInGroup = groupedBySection[groupName] ?: emptyList()
+                            if (itemsInGroup.isEmpty() && uiState.searchQuery.isNotEmpty()) return@forEach
+
+                            val isGroupExpanded = expandedGroups[groupName] == true
                             
-                            categoriesInGroup.forEach { category ->
-                                val itemsInCategory = itemsInGroup.filter { it.category == category }
-                                val isSubExpanded = expandedSubgroups[category] == true
+                            item {
+                                GroupSectionCard(
+                                    uiState = Triple(groupName, itemsInGroup.size, isGroupExpanded),
+                                    onEvent = { expandedGroups[groupName] = it },
+                                    navTo = {}
+                                )
+                            }
 
-                                item {
-                                    SubCategoryCard(
-                                        uiState = Triple(category, itemsInCategory.size, isSubExpanded),
-                                        onEvent = { event ->
-                                            when (event) {
-                                                is Boolean -> expandedSubgroups[category] = event
-                                                "guide" -> showGuideForCategory = category
+                            if (isGroupExpanded) {
+                                val categoriesInGroup = CosmeticCategory.entries.filter { it.groupName == groupName }
+                                
+                                categoriesInGroup.forEach { category ->
+                                    val itemsInCategory = itemsInGroup.filter { it.category == category }
+                                    if (itemsInCategory.isEmpty() && uiState.searchQuery.isNotEmpty()) return@forEach
+
+                                    val isSubExpanded = expandedSubgroups[category] == true
+
+                                    item {
+                                        SubCategoryCard(
+                                            uiState = Triple(category, itemsInCategory.size, isSubExpanded),
+                                            onEvent = { event ->
+                                                when (event) {
+                                                    is Boolean -> expandedSubgroups[category] = event
+                                                    "guide" -> showGuideForCategory = category
+                                                }
+                                            },
+                                            navTo = {},
+                                            modifier = Modifier.padding(start = 16.dp)
+                                        )
+                                    }
+
+                                    if (isSubExpanded) {
+                                        if (itemsInCategory.isEmpty()) {
+                                            item {
+                                                Surface(
+                                                    modifier = Modifier.padding(start = 32.dp, top = 4.dp),
+                                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                                                    shape = RoundedCornerShape(12.dp)
+                                                ) {
+                                                    Text(
+                                                        text = "No items added yet.",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        modifier = Modifier.padding(12.dp)
+                                                    )
+                                                }
                                             }
-                                        },
-                                        navTo = {},
-                                        modifier = Modifier.padding(start = 16.dp)
-                                    )
-                                }
-
-                                if (isSubExpanded) {
-                                    if (itemsInCategory.isEmpty()) {
-                                        item {
-                                            Surface(
-                                                modifier = Modifier.padding(start = 32.dp, top = 4.dp),
-                                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                                                shape = RoundedCornerShape(12.dp)
-                                            ) {
-                                                Text(
-                                                    text = "No items added yet. Tap + to start your collection!",
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                    modifier = Modifier.padding(12.dp)
+                                        } else {
+                                            items(itemsInCategory) { item ->
+                                                CosmeticProductCard(
+                                                    uiState = item,
+                                                    onEvent = { event ->
+                                                        when (event) {
+                                                            "delete" -> onEvent(CosmeticsEvent.DeleteItem(item.id))
+                                                            "edit" -> {
+                                                                onEvent(CosmeticsEvent.StartEditing(item))
+                                                                selectedItemForEdit = item
+                                                            }
+                                                            "use" -> onEvent(CosmeticsEvent.UseItem(item.id))
+                                                        }
+                                                    },
+                                                    navTo = navTo,
+                                                    modifier = Modifier.padding(start = 32.dp)
                                                 )
                                             }
-                                        }
-                                    } else {
-                                        items(itemsInCategory) { item ->
-                                            CosmeticProductCard(
-                                                uiState = item,
-                                                onEvent = { event ->
-                                                    when (event) {
-                                                        "delete" -> onEvent(CosmeticsEvent.DeleteItem(item.id))
-                                                        "edit" -> {
-                                                            onEvent(CosmeticsEvent.StartEditing(item))
-                                                            selectedItemForEdit = item
-                                                        }
-                                                    }
-                                                },
-                                                navTo = navTo,
-                                                modifier = Modifier.padding(start = 32.dp)
-                                            )
                                         }
                                     }
                                 }
                             }
                         }
+                        item { Spacer(modifier = Modifier.height(100.dp)) }
                     }
-                    item { Spacer(modifier = Modifier.height(100.dp)) }
                 }
             }
         }
@@ -499,82 +521,163 @@ fun CosmeticProductCard(
         MaterialTheme.colorScheme.onSurface
     }
 
+    val isExpiringSoon = uiState.estimatedExpiry?.let { expiry ->
+        val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
+        (expiry - System.currentTimeMillis()) in 0..thirtyDaysInMillis
+    } ?: false
+
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onEvent("edit") },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = cardColor,
             contentColor = contentColor
         )
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Product Image or Swatch
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(contentColor.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                val imageUrl = uiState.imageUrl
-                if (imageUrl != null) {
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = uiState.name,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // Product Image or Swatch
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(contentColor.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val imageUrl = uiState.imageUrl
+                    if (imageUrl != null) {
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = uiState.name,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = contentColor.copy(alpha = 0.5f)
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.width(16.dp))
+                
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = uiState.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            color = contentColor,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (isExpiringSoon) {
+                            Icon(
+                                Icons.Default.Warning, 
+                                contentDescription = "Expiring Soon",
+                                tint = Color.Red,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                    Text(
+                        text = uiState.brand,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = contentColor.copy(alpha = 0.7f)
                     )
-                } else {
+                    
+                    Row(
+                        modifier = Modifier.padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        uiState.shadeName?.let { shade ->
+                            Surface(
+                                color = contentColor.copy(alpha = 0.15f),
+                                shape = CircleShape
+                            ) {
+                                Text(
+                                    text = shade,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                    color = contentColor
+                                )
+                            }
+                        }
+                        
+                        if (uiState.isOpened) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                shape = CircleShape
+                            ) {
+                                Text(
+                                    text = "OPEN",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                IconButton(onClick = { onEvent("delete") }) {
                     Icon(
-                        Icons.Default.AutoAwesome,
-                        contentDescription = null,
-                        tint = contentColor.copy(alpha = 0.5f)
+                        Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = if (uiState.colorHex != null) contentColor.copy(alpha = 0.8f) else MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
                     )
                 }
             }
             
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+            HorizontalDivider(color = contentColor.copy(alpha = 0.1f))
+            Spacer(modifier = Modifier.height(12.dp))
             
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = uiState.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    color = contentColor
-                )
-                Text(
-                    text = uiState.brand,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = contentColor.copy(alpha = 0.7f)
-                )
-                uiState.shadeName?.let { shade ->
-                    Surface(
-                        color = contentColor.copy(alpha = 0.15f),
-                        shape = CircleShape,
-                        modifier = Modifier.padding(top = 4.dp)
-                    ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Professional Metrics
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Column {
+                        Text("COST / USE", style = MaterialTheme.typography.labelSmall, color = contentColor.copy(alpha = 0.6f))
                         Text(
-                            text = shade,
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            text = uiState.costPerUse?.let { "$%.2f".format(it) } ?: "N/A",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = contentColor
+                        )
+                    }
+                    Column {
+                        Text("USES", style = MaterialTheme.typography.labelSmall, color = contentColor.copy(alpha = 0.6f))
+                        Text(
+                            text = uiState.usageCount.toString(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
                             color = contentColor
                         )
                     }
                 }
-            }
-            
-            IconButton(onClick = { onEvent("delete") }) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = if (uiState.colorHex != null) contentColor.copy(alpha = 0.8f) else MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
-                )
+                
+                Button(
+                    onClick = { onEvent("use") },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = contentColor.copy(alpha = 0.2f),
+                        contentColor = contentColor
+                    ),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                    modifier = Modifier.height(36.dp),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("USE", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
+                }
             }
         }
     }
@@ -593,8 +696,11 @@ fun EditCosmeticDialog(
     if (showColorPicker) {
         val colorHex = draft.colorHex ?: ""
         ColorPickerDialog(
-            initialColor = parseColor(colorHex),
-            onColorSelected = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it.toHex()))) },
+            initialColor = try { parseColor(colorHex) } catch (e: Exception) { Color.Gray },
+            onColorSelected = { 
+                onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it.toHex()))) 
+                showColorPicker = false
+            },
             onDismissRequest = { showColorPicker = false },
             title = "Pick Product Color"
         )
@@ -650,88 +756,70 @@ fun EditCosmeticDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Column {
-                    Text("Category", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Box(modifier = Modifier.fillMaxWidth()) {
+                // Professional Inventory Row 1: Category & Price
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Category", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                         OutlinedButton(
                             onClick = { showCategoryMenu = true },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(horizontal = 8.dp)
                         ) {
-                            Text(draft.category.displayName)
-                        }
-                        DropdownMenu(
-                            expanded = showCategoryMenu,
-                            onDismissRequest = { showCategoryMenu = false },
-                            modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 400.dp)
-                        ) {
-                            CosmeticCategory.entries.filter { it != CosmeticCategory.AI_PENDING }.groupBy { it.groupName }.forEach { (group, items) ->
-                                Text(
-                                    text = group,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                items.forEach { cat ->
-                                    DropdownMenuItem(
-                                        text = { Text(cat.displayName) },
-                                        onClick = {
-                                            onEvent(CosmeticsEvent.UpdateDraft(draft.copy(category = cat)))
-                                            showCategoryMenu = false
-                                        }
-                                    )
-                                }
-                                HorizontalDivider()
-                            }
+                            Text(draft.category.displayName, maxLines = 1)
                         }
                     }
+                    OutlinedTextField(
+                        value = draft.price?.toString() ?: "",
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(price = it.toDoubleOrNull()))) },
+                        label = { Text("Price ($)") },
+                        modifier = Modifier.weight(0.6f),
+                        singleLine = true
+                    )
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val colorHex = draft.colorHex ?: ""
+                // Professional Inventory Row 2: Shade & Color
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
-                        value = colorHex,
-                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it))) },
-                        label = { Text("Color Hex") },
-                        modifier = Modifier.weight(1f)
+                        value = draft.shadeName ?: "",
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(shadeName = it))) },
+                        label = { Text("Shade Name") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
                     )
                     
+                    val colorHex = draft.colorHex ?: ""
                     Surface(
                         modifier = Modifier
                             .size(56.dp)
                             .padding(top = 8.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(12.dp))
                             .clickable { showColorPicker = true }
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outline,
-                                shape = RoundedCornerShape(8.dp)
-                            ),
-                        color = try { 
-                            if (colorHex.isNotEmpty()) parseColor(colorHex) else Color.Transparent 
-                        } catch (e: Exception) { Color.Transparent }
+                            .border(width = 1.dp, color = MaterialTheme.colorScheme.outline, shape = RoundedCornerShape(12.dp)),
+                        color = try { if (colorHex.isNotEmpty()) parseColor(colorHex) else Color.Transparent } catch (e: Exception) { Color.Transparent }
                     ) {
                         if (colorHex.isEmpty()) {
-                            Icon(
-                                Icons.Default.Palette,
-                                contentDescription = "Pick Color",
-                                modifier = Modifier.padding(12.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Icon(Icons.Default.Palette, contentDescription = null, modifier = Modifier.padding(12.dp))
                         }
                     }
                 }
-                
-                OutlinedTextField(
-                    value = draft.shadeName ?: "",
-                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(shadeName = it))) },
-                    label = { Text("Shade Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+
+                // Professional Inventory Row 3: PAO & Batch Code
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = draft.paoMonths?.toString() ?: "",
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(paoMonths = it.toIntOrNull()))) },
+                        label = { Text("PAO (Months)") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = draft.batchCode ?: "",
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
+                        label = { Text("Batch Code") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                }
 
                 OutlinedTextField(
                     value = draft.notes ?: "",
@@ -740,6 +828,32 @@ fun EditCosmeticDialog(
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3
                 )
+
+                DropdownMenu(
+                    expanded = showCategoryMenu,
+                    onDismissRequest = { showCategoryMenu = false },
+                    modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 400.dp)
+                ) {
+                    CosmeticCategory.entries.filter { it != CosmeticCategory.AI_PENDING }.groupBy { it.groupName }.forEach { (group, items) ->
+                        Text(
+                            text = group,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                        items.forEach { cat ->
+                            DropdownMenuItem(
+                                text = { Text(cat.displayName) },
+                                onClick = {
+                                    onEvent(CosmeticsEvent.UpdateDraft(draft.copy(category = cat)))
+                                    showCategoryMenu = false
+                                }
+                            )
+                        }
+                        HorizontalDivider()
+                    }
+                }
             }
         },
         confirmButton = {
@@ -846,8 +960,11 @@ fun AddCosmeticDialog(
     if (showColorPicker) {
         val colorHex = draft.colorHex ?: ""
         ColorPickerDialog(
-            initialColor = parseColor(colorHex),
-            onColorSelected = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it.toHex()))) },
+            initialColor = try { parseColor(colorHex) } catch (e: Exception) { Color.Gray },
+            onColorSelected = { 
+                onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it.toHex()))) 
+                showColorPicker = false
+            },
             onDismissRequest = { showColorPicker = false },
             title = "Pick Product Color"
         )
@@ -855,7 +972,7 @@ fun AddCosmeticDialog(
 
     AlertDialog(
         onDismissRequest = { navTo(KoColorRoute.Back) },
-        title = { Text("Add Cosmetic Item") },
+        title = { Text("Add Cosmetic Item", fontWeight = FontWeight.Bold) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -893,14 +1010,15 @@ fun AddCosmeticDialog(
                     Button(
                         onClick = { onEvent(CosmeticsEvent.ScanWithGemini) },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !uiState.isAnalyzing
+                        enabled = !uiState.isAnalyzing,
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         if (uiState.isAnalyzing) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                         } else {
-                            Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                            Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Auto-fill with Gemini")
+                            Text("Auto-fill with Gemini AI")
                         }
                     }
                 }
@@ -919,88 +1037,96 @@ fun AddCosmeticDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Column {
-                    Text("Category", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Box(modifier = Modifier.fillMaxWidth()) {
+                // Professional Inventory Row 1: Category & Price
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Category", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                         OutlinedButton(
                             onClick = { showCategoryMenu = true },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(horizontal = 8.dp)
                         ) {
-                            Text(draft.category.displayName)
-                        }
-                        DropdownMenu(
-                            expanded = showCategoryMenu,
-                            onDismissRequest = { showCategoryMenu = false },
-                            modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 400.dp)
-                        ) {
-                            CosmeticCategory.entries.filter { it != CosmeticCategory.AI_PENDING }.groupBy { it.groupName }.forEach { (group, items) ->
-                                Text(
-                                    text = group,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                items.forEach { cat ->
-                                    DropdownMenuItem(
-                                        text = { Text(cat.displayName) },
-                                        onClick = {
-                                            onEvent(CosmeticsEvent.UpdateDraft(draft.copy(category = cat)))
-                                            showCategoryMenu = false
-                                        }
-                                    )
-                                }
-                                HorizontalDivider()
-                            }
+                            Text(draft.category.displayName, maxLines = 1)
                         }
                     }
+                    OutlinedTextField(
+                        value = draft.price?.toString() ?: "",
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(price = it.toDoubleOrNull()))) },
+                        label = { Text("Price ($)") },
+                        modifier = Modifier.weight(0.6f),
+                        singleLine = true
+                    )
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val colorHex = draft.colorHex ?: ""
+                // Professional Inventory Row 2: Shade & Color
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
-                        value = colorHex,
-                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it))) },
-                        label = { Text("Color Hex") },
-                        modifier = Modifier.weight(1f)
+                        value = draft.shadeName ?: "",
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(shadeName = it))) },
+                        label = { Text("Shade Name") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
                     )
                     
+                    val colorHex = draft.colorHex ?: ""
                     Surface(
                         modifier = Modifier
                             .size(56.dp)
                             .padding(top = 8.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(12.dp))
                             .clickable { showColorPicker = true }
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outline,
-                                shape = RoundedCornerShape(8.dp)
-                            ),
-                        color = try { 
-                            if (colorHex.isNotEmpty()) parseColor(colorHex) else Color.Transparent 
-                        } catch (e: Exception) { Color.Transparent }
+                            .border(width = 1.dp, color = MaterialTheme.colorScheme.outline, shape = RoundedCornerShape(12.dp)),
+                        color = try { if (colorHex.isNotEmpty()) parseColor(colorHex) else Color.Transparent } catch (e: Exception) { Color.Transparent }
                     ) {
                         if (colorHex.isEmpty()) {
-                            Icon(
-                                Icons.Default.Palette,
-                                contentDescription = "Pick Color",
-                                modifier = Modifier.padding(12.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Icon(Icons.Default.Palette, contentDescription = null, modifier = Modifier.padding(12.dp))
                         }
                     }
                 }
-                
-                OutlinedTextField(
-                    value = draft.shadeName ?: "",
-                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(shadeName = it))) },
-                    label = { Text("Shade Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+
+                // Professional Inventory Row 3: PAO & Batch Code
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = draft.paoMonths?.toString() ?: "",
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(paoMonths = it.toIntOrNull()))) },
+                        label = { Text("PAO (Months)") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = draft.batchCode ?: "",
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
+                        label = { Text("Batch Code") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = showCategoryMenu,
+                    onDismissRequest = { showCategoryMenu = false },
+                    modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 400.dp)
+                ) {
+                    CosmeticCategory.entries.filter { it != CosmeticCategory.AI_PENDING }.groupBy { it.groupName }.forEach { (group, items) ->
+                        Text(
+                            text = group,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                        items.forEach { cat ->
+                            DropdownMenuItem(
+                                text = { Text(cat.displayName) },
+                                onClick = {
+                                    onEvent(CosmeticsEvent.UpdateDraft(draft.copy(category = cat)))
+                                    showCategoryMenu = false
+                                }
+                            )
+                        }
+                        HorizontalDivider()
+                    }
+                }
             }
         },
         confirmButton = {
@@ -1009,7 +1135,8 @@ fun AddCosmeticDialog(
                     onEvent(CosmeticsEvent.AddItem(draft))
                     navTo(KoColorRoute.Back)
                 },
-                enabled = draft.name.isNotBlank() && draft.brand.isNotBlank()
+                enabled = draft.name.isNotBlank() && draft.brand.isNotBlank(),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Add to Inventory")
             }

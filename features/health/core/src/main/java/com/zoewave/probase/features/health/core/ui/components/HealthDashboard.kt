@@ -25,15 +25,16 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.probase.features.health.core.ui.HealthEvent
 import com.zoewave.probase.features.health.core.ui.HealthUiState
 import com.zoewave.probase.features.health.cgm.ui.GlucoseTab
+import com.zoewave.probase.features.health.core.ui.hydration.HydrationTab
 import com.zoewave.probase.features.health.core.ui.overview.OverviewTab
 import com.zoewave.probase.features.health.core.ui.sessions.SessionsTab
 import com.zoewave.probase.features.health.core.ui.settings.SettingsTab
 
 private enum class HealthTab(val label: String, val icon: ImageVector) {
-    Settings("Settings", Icons.Default.Settings),
-    Data("Overview", Icons.Default.DateRange),
-    Glucose("Glucose", Icons.Default.WaterDrop),
-    Sessions("Sessions", Icons.Default.List)
+    Overview("Overview", Icons.Default.DateRange),
+    Hydration("Hydration", Icons.Default.WaterDrop),
+    Sessions("Activity", Icons.Default.List),
+    Settings("Settings", Icons.Default.Settings)
 }
 
 @Composable
@@ -42,7 +43,7 @@ fun HealthDashboard(
     onEvent: (HealthEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var currentTab by remember { mutableStateOf(HealthTab.Data) }
+    var currentTab by remember { mutableStateOf(HealthTab.Overview) }
 
     Scaffold(
         modifier = modifier,
@@ -69,9 +70,9 @@ fun HealthDashboard(
         ) {
             when (currentTab) {
                 HealthTab.Settings -> SettingsTab(onEvent = onEvent)
-                HealthTab.Data -> OverviewTab(state = state)
-                HealthTab.Glucose -> GlucoseTab()
-                HealthTab.Sessions -> SessionsTab(sessions = state.sessions, onEvent = onEvent)
+                HealthTab.Overview -> OverviewTab(state = state)
+                HealthTab.Hydration -> HydrationTab(state = state, onEvent = onEvent)
+                HealthTab.Sessions -> SessionsTab(state = state, onEvent = onEvent)
             }
         }
     }

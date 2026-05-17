@@ -6,13 +6,51 @@ import com.zoewave.probase.kocolor.model.CosmeticCategory
 object CosmeticDefaults {
     fun getDefaultCosmetics(): List<CosmeticItemEntity> {
         val now = System.currentTimeMillis()
+        val month = 30L * 24 * 60 * 60 * 1000
+        
         return listOf(
             // --- Face (Base & Coverage) ---
-            /** Primer: Preps skin and extends makeup wear. */
-            CosmeticItemEntity(name = "Silk Primer", brand = "KoColor", category = CosmeticCategory.PRIMER, colorHex = "#F8F0E3", shadeName = "Translucent", timestamp = now),
-            /** Foundation: Evens out skin tone (liquid, powder, cream). */
-            CosmeticItemEntity(name = "Cool Ivory", brand = "KoColor", category = CosmeticCategory.FOUNDATION, colorHex = "#FAD4D4", shadeName = "Cool", timestamp = now),
-            CosmeticItemEntity(name = "Warm Honey", brand = "KoColor", category = CosmeticCategory.FOUNDATION, colorHex = "#F0C080", shadeName = "Warm", timestamp = now),
+            CosmeticItemEntity(
+                name = "Silk Primer", 
+                brand = "KoColor", 
+                category = CosmeticCategory.PRIMER, 
+                colorHex = "#F8F0E3", 
+                shadeName = "Translucent", 
+                timestamp = now,
+                price = 28.0,
+                paoMonths = 12,
+                usageCount = 45,
+                isOpened = true,
+                openedDate = now - (3 * month),
+                imageUrl = "https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=400&q=80"
+            ),
+            CosmeticItemEntity(
+                name = "Cool Ivory", 
+                brand = "KoColor", 
+                category = CosmeticCategory.FOUNDATION, 
+                colorHex = "#FAD4D4", 
+                shadeName = "Cool", 
+                timestamp = now,
+                price = 42.0,
+                paoMonths = 24,
+                usageCount = 120,
+                isOpened = true,
+                openedDate = now - (23 * month),
+                imageUrl = "https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=400&q=80"
+            ),
+            CosmeticItemEntity(
+                name = "Warm Honey", 
+                brand = "KoColor", 
+                category = CosmeticCategory.FOUNDATION, 
+                colorHex = "#F0C080", 
+                shadeName = "Warm", 
+                timestamp = now,
+                price = 42.0,
+                paoMonths = 24,
+                usageCount = 10,
+                isOpened = false,
+                imageUrl = "https://images.unsplash.com/photo-1599733594230-6b823276abcc?w=400&q=80"
+            ),
             CosmeticItemEntity(name = "Neutral Beige", brand = "KoColor", category = CosmeticCategory.FOUNDATION, colorHex = "#EAD4B4", shadeName = "Neutral", timestamp = now),
             /** Concealer: Covers imperfections and brightens under-eyes. */
             CosmeticItemEntity(name = "Perfect Hide", brand = "KoColor", category = CosmeticCategory.CONCEALER, colorHex = "#F5F5DC", shadeName = "Light", timestamp = now),

@@ -11,6 +11,10 @@ import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.HydrationRecord
+import androidx.health.connect.client.records.NutritionRecord
+import androidx.health.connect.client.records.metadata.Metadata
+import androidx.health.connect.client.units.Volume
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
@@ -34,6 +38,7 @@ import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.random.Random
 
 // 1. Define Side Effects
 sealed interface HealthSideEffect {
@@ -69,7 +74,12 @@ class HealthViewModel @Inject constructor(
         HealthPermission.getReadPermission(HeartRateRecord::class),
         HealthPermission.getWritePermission(WeightRecord::class),
         HealthPermission.getReadPermission(WeightRecord::class),
-        HealthPermission.getReadPermission(SleepSessionRecord::class)
+        HealthPermission.getReadPermission(SleepSessionRecord::class),
+        HealthPermission.getWritePermission(SleepSessionRecord::class),
+        HealthPermission.getReadPermission(HydrationRecord::class),
+        HealthPermission.getWritePermission(HydrationRecord::class),
+        HealthPermission.getReadPermission(NutritionRecord::class),
+        HealthPermission.getWritePermission(NutritionRecord::class)
     )
 
     // Note: Acceptable for specific UI toggles, though Flow is preferred for data
@@ -98,16 +108,27 @@ class HealthViewModel @Inject constructor(
             is HealthEvent.DeleteAll -> delData()
             is HealthEvent.ReadAll -> readAllData()
             is HealthEvent.WriteTestRide -> writeTestCityRide()
+            is HealthEvent.SeedData -> seedHealthData()
             is HealthEvent.ManagePermissions -> {
                 viewModelScope.launch {
                     _sideEffect.emit(HealthSideEffect.OpenHealthConnectSettings)
                 }
             }
             is HealthEvent.DeleteSession -> deleteSession(event.uid)
+            is HealthEvent.LogHydration -> logHydration(event.volumeLiters)
         }
     }
 
     // --- Private Actions ---
+
+    private fun logHydration(liters: Double) {
+        viewModelScope.launch {
+            tryWithPermissionsCheck {
+                healthSessionManager.insertHydration(liters)
+                initialLoad()
+            }
+        }
+    }
 
     private fun deleteSession(uid: String) {
         viewModelScope.launch {
@@ -178,6 +199,7 @@ class HealthViewModel @Inject constructor(
             try {
                 if (healthSessionManager.hasAllPermissions(permissions)) {
                     val sessions = readSessionInputs()
+                    val sleepSessions = healthSessionManager.readSleepSessions()
 
                     // Define the range
                     val end = Instant.now()
@@ -198,11 +220,18 @@ class HealthViewModel @Inject constructor(
                         .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
                         .mapValues { entry -> entry.value.sumOf { it.energy.inKilocalories } }
 
+                    // 4. Fetch Hydration (Liters)
+                    val hydrationMap = healthSessionManager.readHydration(start, end)
+                        .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
+                        .mapValues { entry -> entry.value.sumOf { it.volume.inLiters } }
+
                     _uiState.value = HealthUiState.Success(
                         sessions = sessions,
+                        sleepSessions = sleepSessions,
                         weeklySteps = stepsMap,
                         weeklyDistance = distMap,
-                        weeklyCalories = calMap
+                        weeklyCalories = calMap,
+                        weeklyHydration = hydrationMap
                     )
 
                     observeHealthConnectChanges()
@@ -264,6 +293,53 @@ class HealthViewModel @Inject constructor(
             // 3. Insert into Health Connect
             tryWithPermissionsCheck {
                 healthSessionManager.insertRecords(records)
+                onEvent(HealthEvent.LoadHealthData)
+            }
+        }
+    }
+
+    private fun seedHealthData() {
+        viewModelScope.launch {
+            tryWithPermissionsCheck {
+                Log.d("HealthViewModel", "Seeding health data starting...")
+                
+                // 1. Generate Sleep Data (last 7 days)
+                healthSessionManager.generateSleepData()
+                
+                // 2. Generate multiple Exercise Sessions
+                val now = ZonedDateTime.now()
+                
+                // Yesterday - Bike Ride
+                healthSessionManager.insertBikeExerciseSession(
+                    start = now.minusDays(1).minusHours(2),
+                    end = now.minusDays(1).minusHours(1),
+                    title = "Afternoon Ride"
+                )
+                
+                // 2 Days ago - Test Run
+                healthSessionManager.writeExerciseSessionTest()
+                
+                // 3. Generate some Nutrition/Hydration/Steps
+                // We can use writeExerciseSessionNotUse for this as it adds steps, distance, calories
+                healthSessionManager.writeExerciseSessionNotUse(
+                    start = now.minusDays(3).minusHours(1),
+                    end = now.minusDays(3)
+                )
+
+                // Add explicit Hydration records
+                val hydrationRecords = (0..6).map { day ->
+                    HydrationRecord(
+                        startTime = now.minusDays(day.toLong()).toInstant(),
+                        startZoneOffset = now.offset,
+                        endTime = now.minusDays(day.toLong()).plusMinutes(1).toInstant(),
+                        endZoneOffset = now.offset,
+                        volume = Volume.liters(0.5 * (Random.nextInt(4) + 1)),
+                        metadata = Metadata.manualEntry()
+                    )
+                }
+                healthSessionManager.insertRecords(hydrationRecords)
+
+                Log.d("HealthViewModel", "Seeding health data complete.")
                 onEvent(HealthEvent.LoadHealthData)
             }
         }

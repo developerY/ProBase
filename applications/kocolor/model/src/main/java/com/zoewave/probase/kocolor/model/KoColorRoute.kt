@@ -20,7 +20,7 @@ sealed class KoColorRoute {
     data object Routines : KoColorRoute()
 
     @Serializable
-    data object Cosmetics : KoColorRoute()
+    data class Cosmetics(val filter: String? = null) : KoColorRoute()
 
     @Serializable
     data object Wardrobe : KoColorRoute()
@@ -33,6 +33,9 @@ sealed class KoColorRoute {
     
     @Serializable
     data object Settings : KoColorRoute()
+
+    @Serializable
+    data object Health : KoColorRoute()
 
     @Serializable
     data object Back : KoColorRoute()
