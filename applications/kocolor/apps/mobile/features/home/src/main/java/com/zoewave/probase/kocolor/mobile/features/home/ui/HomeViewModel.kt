@@ -73,7 +73,13 @@ class HomeViewModel @Inject constructor(
         set(Calendar.MILLISECOND, 0)
     }.timeInMillis)
 
-    private val _beautyTip = MutableStateFlow(RoutineDefaults.dailyBeautyAdvice.random())
+    private val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    private val isDaytime = hour in 6..17
+
+    private val _beautyTip = MutableStateFlow(
+        if (isDaytime) RoutineDefaults.morningAdvice.random() 
+        else RoutineDefaults.eveningAdvice.random()
+    )
 
     init {
         viewModelScope.launch {
@@ -226,7 +232,8 @@ class HomeViewModel @Inject constructor(
         when (event) {
             is HomeEvent.ToggleStep -> toggleStep(event.routine, event.stepId)
             HomeEvent.RefreshTip -> {
-                _beautyTip.value = RoutineDefaults.dailyBeautyAdvice.random()
+                _beautyTip.value = if (isDaytime) RoutineDefaults.morningAdvice.random() 
+                else RoutineDefaults.eveningAdvice.random()
             }
             is HomeEvent.LogHydration -> {
                 viewModelScope.launch {

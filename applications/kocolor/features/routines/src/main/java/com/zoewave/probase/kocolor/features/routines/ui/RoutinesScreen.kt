@@ -128,7 +128,7 @@ fun BeautyAdviceCard(
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val advice = remember { RoutineDefaults.dailyBeautyAdvice.random() }
+    val advice = remember { RoutineDefaults.morningAdvice.random() } // Quick fix for build, will match time in Home
 
     Card(
         modifier = Modifier.fillMaxWidth(),

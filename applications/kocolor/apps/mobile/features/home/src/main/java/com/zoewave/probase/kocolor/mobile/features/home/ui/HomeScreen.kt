@@ -158,7 +158,8 @@ fun HomeScreen(
             item {
                 HomeHeader(
                     uiState = uiState.fashionProfile,
-                    isDaytime = uiState.isDaytime
+                    isDaytime = uiState.isDaytime,
+                    beautyTip = uiState.beautyTip
                 )
             }
 
@@ -171,10 +172,6 @@ fun HomeScreen(
                     isPermissionGranted = uiState.isHealthPermissionGranted,
                     navTo = navTo
                 )
-            }
-
-            item {
-                BeautyTipSection(uiState.beautyTip)
             }
 
             item {
@@ -238,7 +235,8 @@ fun HomeScreen(
 @Composable
 fun HomeHeader(
     uiState: FashionProfile?,
-    isDaytime: Boolean
+    isDaytime: Boolean,
+    beautyTip: String
 ) {
     val gradientColors = if (isDaytime) {
         listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surface)
@@ -269,8 +267,30 @@ fun HomeHeader(
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(modifier = Modifier.height(12.dp))
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.alpha(0.8f)
+            ) {
+                Icon(
+                    Icons.Default.AutoAwesome, 
+                    null, 
+                    modifier = Modifier.size(16.dp), 
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = beautyTip, 
+                    style = MaterialTheme.typography.bodyMedium, 
+                    fontFamily = FontFamily.Serif,
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                )
+            }
+
             if (uiState != null) {
+                Spacer(modifier = Modifier.height(20.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(
                         color = MaterialTheme.colorScheme.primary,
@@ -341,7 +361,7 @@ fun WellnessInsightsSection(
                 } else {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         BioMarkerItem(
@@ -353,8 +373,8 @@ fun WellnessInsightsSection(
                         )
                         
                         VerticalDivider(
-                            modifier = Modifier.height(40.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            modifier = Modifier.height(48.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                         )
 
                         BioMarkerItem(
@@ -366,8 +386,8 @@ fun WellnessInsightsSection(
                         )
                         
                         VerticalDivider(
-                            modifier = Modifier.height(40.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            modifier = Modifier.height(48.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                         )
                         
                         BioMarkerItem(
@@ -414,34 +434,35 @@ fun BioMarkerItem(
     color: Color,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Column(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Surface(
             color = color.copy(alpha = 0.1f),
             shape = CircleShape,
-            modifier = Modifier.size(44.dp)
+            modifier = Modifier.size(40.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(icon, null, modifier = Modifier.size(20.dp), tint = color)
+                Icon(icon, null, modifier = Modifier.size(18.dp), tint = color)
             }
         }
-        Spacer(modifier = Modifier.width(16.dp))
-        Column {
-            Text(
-                text = label, 
-                style = MaterialTheme.typography.labelSmall, 
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = value, 
-                style = MaterialTheme.typography.bodyLarge, 
-                fontWeight = FontWeight.Black,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = label, 
+            style = MaterialTheme.typography.labelSmall, 
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            fontWeight = FontWeight.Bold,
+            maxLines = 1
+        )
+        Text(
+            text = value, 
+            style = MaterialTheme.typography.bodyMedium, 
+            fontWeight = FontWeight.Black,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1
+        )
     }
 }
 
@@ -471,22 +492,12 @@ fun QuickActions(navTo: (KoColorRoute) -> Unit) {
     ) {
         Button(
             onClick = { navTo(KoColorRoute.Analyzer()) },
-            modifier = Modifier.weight(1f).height(64.dp),
+            modifier = Modifier.fillMaxWidth().height(64.dp),
             shape = RoundedCornerShape(20.dp)
         ) {
             Icon(Icons.Default.CameraAlt, contentDescription = null)
             Spacer(modifier = Modifier.width(12.dp))
-            Text("Analyze", style = MaterialTheme.typography.titleMedium)
-        }
-        
-        OutlinedButton(
-            onClick = { navTo(KoColorRoute.Cosmetics()) },
-            modifier = Modifier.weight(1f).height(64.dp),
-            shape = RoundedCornerShape(20.dp)
-        ) {
-            Icon(Icons.Default.Inventory, contentDescription = null)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text("Vanity", style = MaterialTheme.typography.titleMedium)
+            Text("AI Style Analyze", style = MaterialTheme.typography.titleMedium)
         }
     }
 }
@@ -698,8 +709,9 @@ fun VanityProductCard(
     onClick: () -> Unit
 ) {
     val bgColor = uiState.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant
+    val isDark = isColorDark(bgColor)
     val contentColor = if (uiState.colorHex != null) {
-        if (isColorDark(bgColor)) Color.White else Color.Black
+        if (isDark) Color.White else Color.Black
     } else {
         MaterialTheme.colorScheme.onSurface
     }
@@ -712,153 +724,163 @@ fun VanityProductCard(
         (expiry - System.currentTimeMillis()) in 0..thirtyDaysInMillis
     } ?: false
 
-    Column(
+    ElevatedCard(
         modifier = Modifier
-            .width(160.dp)
-            .clickable { onClick() }
+            .width(180.dp)
+            .aspectRatio(0.7f)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = bgColor),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(0.85f)
-        ) {
-            Surface(
+        Box(modifier = Modifier.fillMaxSize()) {
+            // 1. Background Image (if present)
+            if (uiState.imageUrl != null) {
+                AsyncImage(
+                    model = uiState.imageUrl,
+                    contentDescription = uiState.name,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                // Large subtle decorative icon for solid colors
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(120.dp)
+                        .align(Alignment.Center)
+                        .alpha(0.1f),
+                    tint = contentColor
+                )
+            }
+            
+            // 2. Gradient Scrim for Readability
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .shadow(
-                        elevation = 16.dp, 
-                        shape = RoundedCornerShape(28.dp), 
-                        spotColor = bgColor.copy(alpha = 0.5f)
-                    ),
-                shape = RoundedCornerShape(28.dp),
-                color = bgColor,
-                border = BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.1f))
-            ) {
-                if (uiState.imageUrl != null) {
-                    AsyncImage(
-                        model = uiState.imageUrl,
-                        contentDescription = uiState.name,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.05f),
+                                Color.Black.copy(alpha = 0.8f)
+                            ),
+                            startY = 400f
+                        )
                     )
-                } else if (uiState.category == CosmeticCategory.AI_PENDING) {
-                    Box(contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp), 
-                            strokeWidth = 2.dp,
-                            color = contentColor.copy(alpha = 0.5f)
-                        )
-                    }
-                } else {
-                    // Modern placeholder for items without images
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            tint = contentColor.copy(alpha = 0.2f),
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
-                }
-            }
+            )
 
-            // High-End Status Overlay
-            Column(
-                modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+            // 3. Status Badges (Top)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                if (isExpiringSoon) {
+                if (uiState.usageCount > 0) {
                     Surface(
-                        color = Color.Red,
-                        shape = CircleShape,
-                        modifier = Modifier.size(10.dp).border(1.5.dp, Color.White, CircleShape)
-                    ) {}
-                }
-                
-                if (uiState.isOpened) {
-                    Surface(
-                        color = Color.White.copy(alpha = 0.9f),
-                        shape = RoundedCornerShape(8.dp),
-                        shadowElevation = 4.dp
+                        color = Color.Black.copy(alpha = 0.4f),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            "OPEN", 
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                            fontWeight = FontWeight.Black,
-                            color = Color.Black
+                            text = "${uiState.usageCount}x",
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
                         )
+                    }
+                } else { Spacer(Modifier.width(1.dp)) }
+
+                Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (isExpiringSoon) {
+                        Surface(
+                            color = Color.Red,
+                            shape = CircleShape,
+                            modifier = Modifier.size(10.dp).border(1.5.dp, Color.White, CircleShape)
+                        ) {}
+                    }
+                    if (uiState.isOpened) {
+                        Surface(
+                            color = Color.White,
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                "OPEN", 
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                                fontWeight = FontWeight.Black,
+                                color = Color.Black
+                            )
+                        }
                     }
                 }
             }
-            
-            // Usage Counter Badge (Bottom Left)
-            if (uiState.usageCount > 0) {
-                Surface(
-                    modifier = Modifier.align(Alignment.BottomStart).padding(12.dp),
-                    color = Color.Black.copy(alpha = 0.6f),
-                    shape = RoundedCornerShape(6.dp)
-                ) {
+
+            // 4. Integrated Product Info (Bottom)
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = uiState.brand.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.2.sp,
+                    maxLines = 1
+                )
+                Text(
+                    text = uiState.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    lineHeight = 20.sp
+                )
+                val shade = uiState.shadeName
+                if (!shade.isNullOrBlank()) {
                     Text(
-                        text = "${uiState.usageCount}x",
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        text = shade,
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
+                        color = Color.White.copy(alpha = 0.9f),
+                        maxLines = 1
                     )
                 }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        // Brand Label (Minimalist & Professional)
-        Text(
-            text = uiState.brand.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 1.2.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            maxLines = 1
-        )
-
-        Text(
-            text = uiState.name,
-            style = MaterialTheme.typography.titleMedium,
-            fontFamily = FontFamily.Serif,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = uiState.category.displayName,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = FontWeight.Medium
-            )
-            
-            if (costPerUse != null) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(4.dp)
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "$%.2f".format(costPerUse),
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        fontWeight = FontWeight.Black
+                        text = uiState.category.displayName,
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                        color = Color.White.copy(alpha = 0.5f),
+                        fontWeight = FontWeight.Bold
                     )
+                    
+                    if (costPerUse != null) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(6.dp),
+                            shadowElevation = 4.dp
+                        ) {
+                            Text(
+                                text = "$%.2f".format(costPerUse),
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -1185,7 +1207,7 @@ fun HydrationTrackingSection(
 @Composable
 private fun HomeHeaderPreview() {
     MaterialTheme {
-        HomeHeader(uiState = null, isDaytime = true)
+        HomeHeader(uiState = null, isDaytime = true, beautyTip = "Stay hydrated for glowing skin!")
     }
 }
 
