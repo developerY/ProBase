@@ -223,7 +223,8 @@ fun HomeScreen(
                         )
                         WardrobeDashboard(
                             uiState = uiState,
-                            navTo = { navTo(KoColorRoute.Wardrobe) }
+                            navTo = { navTo(KoColorRoute.Wardrobe) },
+                            navToDetail = { id -> navTo(KoColorRoute.WardrobeDetail(id)) }
                         )
                     }
                 }
@@ -965,7 +966,8 @@ fun ViewAllCard(itemCount: Int, onClick: () -> Unit) {
 @Composable
 fun WardrobeDashboard(
     uiState: HomeUiState,
-    navTo: () -> Unit
+    navTo: () -> Unit,
+    navToDetail: (Long) -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -1008,7 +1010,8 @@ fun WardrobeDashboard(
                                     if (colorHex != null) parseColor(colorHex)
                                     else MaterialTheme.colorScheme.surfaceVariant
                                 )
-                                .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(16.dp)),
+                                .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
+                                .clickable { navToDetail(item.id) },
                             contentAlignment = Alignment.Center
                         ) {
                             if (item.imageUrl != null) {
