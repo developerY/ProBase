@@ -21,7 +21,8 @@ object CosmeticDefaults {
                 paoMonths = 12,
                 usageCount = 45,
                 isOpened = true,
-                openedDate = now - (3 * month)
+                openedDate = now - (3 * month),
+                imageUrl = "https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=400&q=80"
             ),
             CosmeticItemEntity(
                 name = "Cool Ivory", 
@@ -34,7 +35,8 @@ object CosmeticDefaults {
                 paoMonths = 24,
                 usageCount = 120,
                 isOpened = true,
-                openedDate = now - (23 * month) // Expiring soon!
+                openedDate = now - (23 * month),
+                imageUrl = "https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=400&q=80"
             ),
             CosmeticItemEntity(
                 name = "Warm Honey", 
@@ -46,7 +48,8 @@ object CosmeticDefaults {
                 price = 42.0,
                 paoMonths = 24,
                 usageCount = 10,
-                isOpened = false
+                isOpened = false,
+                imageUrl = "https://images.unsplash.com/photo-1599733594230-6b823276abcc?w=400&q=80"
             ),
             CosmeticItemEntity(name = "Neutral Beige", brand = "KoColor", category = CosmeticCategory.FOUNDATION, colorHex = "#EAD4B4", shadeName = "Neutral", timestamp = now),
             /** Concealer: Covers imperfections and brightens under-eyes. */

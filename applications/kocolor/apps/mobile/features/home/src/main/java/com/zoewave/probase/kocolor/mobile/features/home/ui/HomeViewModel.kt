@@ -273,6 +273,7 @@ class HomeViewModel @Inject constructor(
         category = category,
         colorHex = colorHex,
         shadeName = shadeName,
+        imageUrl = imageUrl,
         notes = notes,
         timestamp = timestamp,
         batchCode = batchCode,

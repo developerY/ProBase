@@ -734,15 +734,28 @@ fun VanityProductCard(
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // 1. Background Image (if present)
+            // 1. Dual Visual: Image and Color
             if (uiState.imageUrl != null) {
-                AsyncImage(
-                    model = uiState.imageUrl,
-                    contentDescription = uiState.name,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                Column(modifier = Modifier.fillMaxSize()) {
+                    // Top half: Product Image
+                    AsyncImage(
+                        model = uiState.imageUrl,
+                        contentDescription = uiState.name,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentScale = ContentScale.Crop
+                    )
+                    // Bottom half: Solid Color swatch
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .background(bgColor)
+                    )
+                }
             } else {
+                // Background is just the color (already set by card container)
                 // Large subtle decorative icon for solid colors
                 Icon(
                     imageVector = Icons.Default.AutoAwesome,
@@ -755,21 +768,24 @@ fun VanityProductCard(
                 )
             }
             
-            // 2. Gradient Scrim for Readability
+            // 2. Gradient Scrim for Readability (Now positioned over the color swatch area)
+            val scrimBrush = Brush.verticalGradient(
+                colors = listOf(
+                    Color.Transparent,
+                    if (isDark) Color.Black.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.4f),
+                    if (isDark) Color.Black.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.8f)
+                ),
+                startY = 400f
+            )
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.Black.copy(alpha = 0.05f),
-                                Color.Black.copy(alpha = 0.8f)
-                            ),
-                            startY = 400f
-                        )
-                    )
+                    .background(scrimBrush)
             )
+
+            // Dynamic text color based on background darkness
+            val textOnScrim = if (isDark) Color.White else Color.Black
 
             // 3. Status Badges (Top)
             Row(
@@ -781,7 +797,7 @@ fun VanityProductCard(
             ) {
                 if (uiState.usageCount > 0) {
                     Surface(
-                        color = Color.Black.copy(alpha = 0.4f),
+                        color = (if (uiState.imageUrl != null) Color.Black else contentColor).copy(alpha = 0.6f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
@@ -804,7 +820,7 @@ fun VanityProductCard(
                     }
                     if (uiState.isOpened) {
                         Surface(
-                            color = Color.White,
+                            color = contentColor,
                             shape = RoundedCornerShape(6.dp)
                         ) {
                             Text(
@@ -812,7 +828,7 @@ fun VanityProductCard(
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                                 fontWeight = FontWeight.Black,
-                                color = Color.Black
+                                color = if (isDark) Color.Black else Color.White
                             )
                         }
                     }
@@ -828,7 +844,7 @@ fun VanityProductCard(
                 Text(
                     text = uiState.brand.uppercase(),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = textOnScrim.copy(alpha = 0.7f),
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.2.sp,
                     maxLines = 1
@@ -836,7 +852,7 @@ fun VanityProductCard(
                 Text(
                     text = uiState.name,
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
+                    color = textOnScrim,
                     fontFamily = FontFamily.Serif,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
@@ -847,7 +863,7 @@ fun VanityProductCard(
                     Text(
                         text = shade,
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.9f),
+                        color = textOnScrim.copy(alpha = 0.9f),
                         maxLines = 1
                     )
                 }
@@ -862,7 +878,7 @@ fun VanityProductCard(
                     Text(
                         text = uiState.category.displayName,
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                        color = Color.White.copy(alpha = 0.5f),
+                        color = textOnScrim.copy(alpha = 0.6f),
                         fontWeight = FontWeight.Bold
                     )
                     
