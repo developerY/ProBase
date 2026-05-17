@@ -16,6 +16,9 @@ interface ClothingDao {
     @Query("SELECT * FROM clothing_items WHERE category = :category ORDER BY timestamp DESC")
     fun getClothingByCategory(category: String): Flow<List<ClothingItemEntity>>
 
+    @Query("SELECT * FROM clothing_items WHERE id = :id")
+    fun getClothingById(id: Long): Flow<ClothingItemEntity?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertClothing(item: ClothingItemEntity)
 
