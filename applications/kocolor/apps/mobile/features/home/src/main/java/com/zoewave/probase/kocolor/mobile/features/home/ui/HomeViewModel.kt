@@ -19,11 +19,15 @@ import com.zoewave.probase.core.data.service.health.HealthSessionManager
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.HydrationRecord
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.time.Instant
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 data class HomeUiState(
@@ -40,12 +44,15 @@ data class HomeUiState(
     val cosmeticsByGroup: Map<String, Int> = emptyMap(),
     val wellnessInsights: List<SkinInsight> = emptyList(),
     val lastNightSleepDuration: String? = null,
+    val hydrationLiters: Double = 0.0,
+    val hydrationGoalLiters: Double = 2.0,
     val isHealthPermissionGranted: Boolean = false
 )
 
 sealed class HomeEvent {
     data class ToggleStep(val routine: BeautyRoutine, val stepId: String) : HomeEvent()
     data object RefreshTip : HomeEvent()
+    data class LogHydration(val volumeLiters: Double) : HomeEvent()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -114,16 +121,20 @@ class HomeViewModel @Inject constructor(
         healthSessionManager.availability.flatMapLatest { availability ->
             if (availability == HealthConnectClient.SDK_AVAILABLE) {
                 flow {
-                    val permissions = setOf(HealthPermission.getReadPermission(SleepSessionRecord::class))
+                    val permissions = setOf(
+                        HealthPermission.getReadPermission(SleepSessionRecord::class),
+                        HealthPermission.getReadPermission(HydrationRecord::class),
+                        HealthPermission.getWritePermission(HydrationRecord::class)
+                    )
                     val hasPerms = healthSessionManager.hasAllPermissions(permissions)
                     if (hasPerms) {
                         emit(hasPerms to getHealthData())
                     } else {
-                        emit(false to (null as Float? to null as String?))
+                        emit(false to Triple(null as Float?, null as String?, 0.0))
                     }
                 }
             } else {
-                flowOf(false to (null as Float? to null as String?))
+                flowOf(false to Triple(null as Float?, null as String?, 0.0))
             }
         }
     ) { array ->
@@ -132,7 +143,7 @@ class HomeViewModel @Inject constructor(
         val cosmetics = array[2] as List<CosmeticItemEntity>
         val clothing = array[3] as List<ClothingItemEntity>
         val tip = array[4] as String
-        val healthInfo = array[5] as Pair<Boolean, Pair<Float?, String?>>
+        val healthInfo = array[5] as Pair<Boolean, Triple<Float?, String?, Double>>
         val (hasPerms, healthData) = healthInfo
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
@@ -158,6 +169,7 @@ class HomeViewModel @Inject constructor(
             cosmeticsByGroup = cosmeticsByGroup,
             wellnessInsights = insights,
             lastNightSleepDuration = healthData.second,
+            hydrationLiters = healthData.third,
             isHealthPermissionGranted = hasPerms
         )
     }.stateIn(
@@ -166,8 +178,11 @@ class HomeViewModel @Inject constructor(
         initialValue = HomeUiState()
     )
 
-    private suspend fun getHealthData(): Pair<Float?, String?> {
-        return try {
+    private suspend fun getHealthData(): Triple<Float?, String?, Double> {
+        val now = Instant.now()
+        val startOfDay = ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS).toInstant()
+
+        val sleepData = try {
             val sleepSessions = healthSessionManager.readSleepSessions()
             val lastNight = sleepSessions.firstOrNull()
             if (lastNight != null) {
@@ -180,6 +195,14 @@ class HomeViewModel @Inject constructor(
         } catch (e: Exception) {
             null to null
         }
+
+        val hydration = try {
+            healthSessionManager.readTotalHydration(startOfDay, now)?.inLiters ?: 0.0
+        } catch (e: Exception) {
+            0.0
+        }
+
+        return Triple(sleepData.first, sleepData.second, hydration)
     }
 
     private fun initializeDay(date: Long) {
@@ -204,6 +227,11 @@ class HomeViewModel @Inject constructor(
             is HomeEvent.ToggleStep -> toggleStep(event.routine, event.stepId)
             HomeEvent.RefreshTip -> {
                 _beautyTip.value = RoutineDefaults.dailyBeautyAdvice.random()
+            }
+            is HomeEvent.LogHydration -> {
+                viewModelScope.launch {
+                    healthSessionManager.insertHydration(event.volumeLiters)
+                }
             }
         }
     }

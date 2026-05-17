@@ -39,11 +39,11 @@ import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -73,6 +73,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -167,6 +168,14 @@ fun HomeScreen(
                     sleepDuration = uiState.lastNightSleepDuration,
                     isPermissionGranted = uiState.isHealthPermissionGranted,
                     navTo = navTo
+                )
+            }
+
+            item {
+                HydrationTrackingSection(
+                    currentLiters = uiState.hydrationLiters,
+                    goalLiters = uiState.hydrationGoalLiters,
+                    onLogHydration = { onEvent(HomeEvent.LogHydration(it)) }
                 )
             }
 
@@ -301,8 +310,8 @@ fun WellnessInsightsSection(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionTitle(
-            title = "Biological Context",
-            subtitle = "Vital skin insights"
+            title = "Bio-Markers",
+            subtitle = "Style from the inside out"
         )
         
         ElevatedCard(
@@ -318,58 +327,46 @@ fun WellnessInsightsSection(
                         Icon(Icons.Default.Lock, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.tertiary)
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Connect Health Data",
+                            text = "Connect Style Sync",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Grant access to sleep and stress data in Settings to unlock biological skin insights.",
+                            text = "Sync sleep, activity, and vitals from Health Connect to unlock advanced skin analysis.",
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         TextButton(onClick = { navTo(KoColorRoute.Settings) }) {
-                            Text("Go to Settings")
+                            Text("Setup Health Sync")
                         }
-                    }
-                } else if (insights.isEmpty() && sleepDuration == null) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                        Icon(Icons.Default.QueryStats, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.tertiary)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "No Recent Data",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Your health data from last night hasn't synced yet. Wear your tracker to bed for personalized insights!",
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
                 } else {
-                    if (sleepDuration != null) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Bedtime, null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.tertiary)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Last Night: $sleepDuration sleep",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
+                    // Summary Grid for Bio-Markers
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        BioMarkerItem(
+                            icon = Icons.Default.Bedtime,
+                            label = "Sleep",
+                            value = sleepDuration ?: "--",
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                        BioMarkerItem(
+                            icon = Icons.Default.AutoAwesome, // Use more appropriate icon if available
+                            label = "Vitals",
+                            value = if (insights.isEmpty()) "Optimal" else "${insights.size} Alerts",
+                            color = if (insights.isEmpty()) MaterialTheme.colorScheme.primary else Color.Red
+                        )
                     }
 
-                    if (insights.isEmpty()) {
-                        Text(
-                            text = "Your vitals look great! Your skin is in optimal condition for standard routines.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    } else {
+                    if (insights.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                        Spacer(modifier = Modifier.height(24.dp))
+                        
                         insights.forEachIndexed { index, insight ->
                             Row(verticalAlignment = Alignment.Top) {
                                 Box(
@@ -392,10 +389,11 @@ fun WellnessInsightsSection(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     Text(
-                                        text = "Recommendation: ${insight.recommendation}",
+                                        text = "Skin fix: ${insight.recommendation}",
                                         style = MaterialTheme.typography.bodyMedium,
                                         modifier = Modifier.padding(top = 4.dp),
-                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
@@ -407,6 +405,21 @@ fun WellnessInsightsSection(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun BioMarkerItem(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    color: Color
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(icon, null, modifier = Modifier.size(24.dp), tint = color)
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text = value, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -1046,6 +1059,99 @@ fun SectionTitle(title: String, subtitle: String) {
             letterSpacing = 2.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+fun HydrationTrackingSection(
+    currentLiters: Double,
+    goalLiters: Double,
+    onLogHydration: (Double) -> Unit
+) {
+    val progress = (currentLiters / goalLiters).coerceIn(0.0, 1.0).toFloat()
+    
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        SectionTitle(
+            title = "Skin Hydration",
+            subtitle = "Biological moisture"
+        )
+        
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(32.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+            )
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Daily Intake",
+                            style = MaterialTheme.typography.labelSmall,
+                            letterSpacing = 1.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "%.1f / %.1f L".format(currentLiters, goalLiters),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                    
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(56.dp)) {
+                        CircularProgressIndicator(
+                            progress = { 1f },
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f),
+                            strokeWidth = 6.dp
+                        )
+                        CircularProgressIndicator(
+                            progress = { progress },
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 6.dp,
+                            strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                        )
+                        Icon(
+                            Icons.Default.WaterDrop, 
+                            contentDescription = null, 
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    listOf(
+                        "Glass" to 0.25,
+                        "Bottle" to 0.5,
+                        "Large" to 0.75
+                    ).forEach { (label, volume) ->
+                        OutlinedButton(
+                            onClick = { onLogHydration(volume) },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            contentPadding = PaddingValues(vertical = 12.dp)
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(label, style = MaterialTheme.typography.labelSmall)
+                                Text("+${(volume * 1000).toInt()}ml", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -33,6 +33,7 @@ import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Length
 import androidx.health.connect.client.units.Mass
+import androidx.health.connect.client.units.Volume
 import com.zoewave.probase.core.model.health.SleepSessionData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -143,6 +144,33 @@ class HealthSessionManager(private val context: Context) {
                 timeRangeFilter = TimeRangeFilter.between(start, end)
             )
         ).records
+
+    /**
+     * Aggregates total hydration for a specific time range.
+     */
+    suspend fun readTotalHydration(start: Instant, end: Instant): Volume? {
+        val request = AggregateRequest(
+            metrics = setOf(HydrationRecord.VOLUME_TOTAL),
+            timeRangeFilter = TimeRangeFilter.between(start, end)
+        )
+        return healthConnectClient.aggregate(request)[HydrationRecord.VOLUME_TOTAL]
+    }
+
+    /**
+     * Inserts a hydration record.
+     */
+    suspend fun insertHydration(volumeLiters: Double): InsertRecordsResponse {
+        val now = Instant.now()
+        val record = HydrationRecord(
+            startTime = now,
+            startZoneOffset = ZonedDateTime.now().offset,
+            endTime = now.plusSeconds(1),
+            endZoneOffset = ZonedDateTime.now().offset,
+            volume = Volume.liters(volumeLiters),
+            metadata = Metadata.manualEntry()
+        )
+        return healthConnectClient.insertRecords(listOf(record))
+    }
 
     /**
      * Reads in existing [StepsRecord]s for a specific time range.
