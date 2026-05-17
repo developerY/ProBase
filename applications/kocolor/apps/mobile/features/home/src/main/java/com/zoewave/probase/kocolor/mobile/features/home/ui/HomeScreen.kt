@@ -648,7 +648,7 @@ fun InventoryDashboard(
             items(uiState.popularCosmetics) { item ->
                 VanityProductCard(
                     uiState = item,
-                    onClick = { navTo(KoColorRoute.Cosmetics()) } // Maybe detail later
+                    onClick = { navTo(KoColorRoute.CosmeticDetail(item.id)) }
                 )
             }
 

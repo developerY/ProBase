@@ -258,16 +258,7 @@ fun CosmeticsScreen(
                                             items(itemsInCategory) { item ->
                                                 CosmeticProductCard(
                                                     uiState = item,
-                                                    onEvent = { event ->
-                                                        when (event) {
-                                                            "delete" -> onEvent(CosmeticsEvent.DeleteItem(item.id))
-                                                            "edit" -> {
-                                                                onEvent(CosmeticsEvent.StartEditing(item))
-                                                                selectedItemForEdit = item
-                                                            }
-                                                            "use" -> onEvent(CosmeticsEvent.UseItem(item.id))
-                                                        }
-                                                    },
+                                                    onEvent = onEvent,
                                                     navTo = navTo,
                                                     modifier = Modifier.padding(start = 32.dp)
                                                 )
@@ -523,7 +514,7 @@ fun CategoryGuideDialog(
 @Composable
 fun CosmeticProductCard(
     uiState: CosmeticItem,
-    onEvent: (String) -> Unit,
+    onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -637,7 +628,7 @@ fun CosmeticProductCard(
                     }
                 }
                 
-                IconButton(onClick = { onEvent("delete") }) {
+                IconButton(onClick = { onEvent(CosmeticsEvent.DeleteItem(uiState.id)) }) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Delete",
@@ -678,7 +669,7 @@ fun CosmeticProductCard(
                 }
                 
                 Button(
-                    onClick = { onEvent("use") },
+                    onClick = { onEvent(CosmeticsEvent.UseItem(uiState.id)) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = contentColor.copy(alpha = 0.2f),
                         contentColor = contentColor
