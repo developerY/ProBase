@@ -18,6 +18,7 @@ import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsUiRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
+import com.zoewave.probase.kocolor.mobile.features.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.components.SettingsUiRoute
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -106,6 +107,11 @@ fun koColorNavEntryProvider(
                 uiState = Unit,
                 onEvent = {},
                 navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.Health -> NavEntry(route) {
+            HealthUiRoute(
+                onBack = onBack
             )
         }
         is KoColorRoute.NailLab -> NavEntry(route) {

@@ -16,6 +16,8 @@ sealed interface HealthEvent {
 
     data class DeleteSession(val uid: String) : HealthEvent // <--- NEW
 
+    data class LogHydration(val volumeLiters: Double) : HealthEvent
+
     /** Insert a prepared list of Health Connect Record objects */
     data class Insert(
         val rideId: String,

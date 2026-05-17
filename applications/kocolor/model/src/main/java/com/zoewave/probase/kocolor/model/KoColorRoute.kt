@@ -35,6 +35,9 @@ sealed class KoColorRoute {
     data object Settings : KoColorRoute()
 
     @Serializable
+    data object Health : KoColorRoute()
+
+    @Serializable
     data object Back : KoColorRoute()
 
     @Serializable

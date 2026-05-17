@@ -61,8 +61,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -166,16 +166,10 @@ fun HomeScreen(
                 WellnessInsightsSection(
                     insights = uiState.wellnessInsights,
                     sleepDuration = uiState.lastNightSleepDuration,
+                    hydrationLiters = uiState.hydrationLiters,
+                    hydrationGoalLiters = uiState.hydrationGoalLiters,
                     isPermissionGranted = uiState.isHealthPermissionGranted,
                     navTo = navTo
-                )
-            }
-
-            item {
-                HydrationTrackingSection(
-                    currentLiters = uiState.hydrationLiters,
-                    goalLiters = uiState.hydrationGoalLiters,
-                    onLogHydration = { onEvent(HomeEvent.LogHydration(it)) }
                 )
             }
 
@@ -305,6 +299,8 @@ fun HomeHeader(
 fun WellnessInsightsSection(
     insights: List<SkinInsight>,
     sleepDuration: String?,
+    hydrationLiters: Double,
+    hydrationGoalLiters: Double,
     isPermissionGranted: Boolean,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -315,90 +311,92 @@ fun WellnessInsightsSection(
         )
         
         ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(32.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { navTo(KoColorRoute.Health) },
+            shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
+                containerColor = MaterialTheme.colorScheme.surface
             )
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
                 if (!isPermissionGranted) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                        Icon(Icons.Default.Lock, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.tertiary)
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally, 
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
+                    ) {
+                        Icon(Icons.Default.Lock, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Connect Style Sync",
-                            style = MaterialTheme.typography.titleSmall,
+                            text = "Sync Health Data",
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Sync sleep, activity, and vitals from Health Connect to unlock advanced skin analysis.",
+                            text = "Tap to connect your style vitals.",
                             style = MaterialTheme.typography.bodySmall,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        TextButton(onClick = { navTo(KoColorRoute.Settings) }) {
-                            Text("Setup Health Sync")
-                        }
                     }
                 } else {
-                    // Summary Grid for Bio-Markers
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         BioMarkerItem(
                             icon = Icons.Default.Bedtime,
                             label = "Sleep",
                             value = sleepDuration ?: "--",
-                            color = MaterialTheme.colorScheme.tertiary
+                            color = Color(0xFF9C27B0),
+                            modifier = Modifier.weight(1f)
                         )
+                        
+                        VerticalDivider(
+                            modifier = Modifier.height(40.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+
                         BioMarkerItem(
-                            icon = Icons.Default.AutoAwesome, // Use more appropriate icon if available
+                            icon = Icons.Default.WaterDrop,
+                            label = "Hydration",
+                            value = "%.1fL".format(hydrationLiters),
+                            color = Color(0xFF2196F3),
+                            modifier = Modifier.weight(1f)
+                        )
+                        
+                        VerticalDivider(
+                            modifier = Modifier.height(40.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                        
+                        BioMarkerItem(
+                            icon = Icons.Default.AutoAwesome,
                             label = "Vitals",
                             value = if (insights.isEmpty()) "Optimal" else "${insights.size} Alerts",
-                            color = if (insights.isEmpty()) MaterialTheme.colorScheme.primary else Color.Red
+                            color = if (insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336),
+                            modifier = Modifier.weight(1f)
                         )
                     }
 
                     if (insights.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(24.dp))
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-                        Spacer(modifier = Modifier.height(24.dp))
-                        
-                        insights.forEachIndexed { index, insight ->
-                            Row(verticalAlignment = Alignment.Top) {
-                                Box(
-                                    modifier = Modifier
-                                        .padding(top = 4.dp)
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.tertiary)
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Surface(
+                            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.Warning, null, tint = Color(0xFFD32F2F), modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "${insights.size} style triggers detected. Tap to view fixes.",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
                                 )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        text = insight.trigger,
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = insight.manifestation,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        text = "Skin fix: ${insight.recommendation}",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        modifier = Modifier.padding(top = 4.dp),
-                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
-                            if (index < insights.size - 1) {
-                                Spacer(modifier = Modifier.height(16.dp))
                             }
                         }
                     }
@@ -413,13 +411,37 @@ fun BioMarkerItem(
     icon: ImageVector,
     label: String,
     value: String,
-    color: Color
+    color: Color,
+    modifier: Modifier = Modifier
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(icon, null, modifier = Modifier.size(24.dp), tint = color)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(text = value, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            color = color.copy(alpha = 0.1f),
+            shape = CircleShape,
+            modifier = Modifier.size(44.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(icon, null, modifier = Modifier.size(20.dp), tint = color)
+            }
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(
+                text = label, 
+                style = MaterialTheme.typography.labelSmall, 
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = value, 
+                style = MaterialTheme.typography.bodyLarge, 
+                fontWeight = FontWeight.Black,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 
@@ -1066,7 +1088,8 @@ fun SectionTitle(title: String, subtitle: String) {
 fun HydrationTrackingSection(
     currentLiters: Double,
     goalLiters: Double,
-    onLogHydration: (Double) -> Unit
+    onLogHydration: (Double) -> Unit,
+    onNavigateToHealth: () -> Unit
 ) {
     val progress = (currentLiters / goalLiters).coerceIn(0.0, 1.0).toFloat()
     
@@ -1077,7 +1100,9 @@ fun HydrationTrackingSection(
         )
         
         ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onNavigateToHealth() },
             shape = RoundedCornerShape(32.dp),
             colors = CardDefaults.elevatedCardColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)

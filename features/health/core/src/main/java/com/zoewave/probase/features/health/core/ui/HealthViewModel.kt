@@ -115,10 +115,20 @@ class HealthViewModel @Inject constructor(
                 }
             }
             is HealthEvent.DeleteSession -> deleteSession(event.uid)
+            is HealthEvent.LogHydration -> logHydration(event.volumeLiters)
         }
     }
 
     // --- Private Actions ---
+
+    private fun logHydration(liters: Double) {
+        viewModelScope.launch {
+            tryWithPermissionsCheck {
+                healthSessionManager.insertHydration(liters)
+                initialLoad()
+            }
+        }
+    }
 
     private fun deleteSession(uid: String) {
         viewModelScope.launch {
