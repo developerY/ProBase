@@ -16,6 +16,7 @@ data class ClothingItem(
     val colorHex: String? = null,
     val size: String? = null,
     val material: String? = null,
+    val price: Double? = null,
     val imageUrl: String? = null,
     val notes: String? = null,
     val timestamp: Long = System.currentTimeMillis()

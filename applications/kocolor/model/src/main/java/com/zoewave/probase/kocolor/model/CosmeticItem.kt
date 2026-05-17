@@ -159,6 +159,8 @@ data class CosmeticItem(
     val shadeName: String? = null,
     val imageUrl: String? = null,
     val notes: String? = null,
+    /** Official manufacturer instructions for use. */
+    val instructions: String? = null,
     val timestamp: Long = System.currentTimeMillis(),
 
     // --- Professional Inventory & Logistics ---
