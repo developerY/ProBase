@@ -1,6 +1,8 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
-import androidx.lifecycle.SavedStateHandle
+import android.content.Context
+import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
@@ -10,13 +12,17 @@ import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.KoColorRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import android.content.Context
-import android.net.Uri
-import androidx.core.net.toUri
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -47,6 +53,7 @@ sealed class CosmeticsEvent {
     data object ScanWithGemini : CosmeticsEvent()
     data object ClearCapturedImage : CosmeticsEvent()
     data class StartEditing(val item: CosmeticItem) : CosmeticsEvent()
+    data class InitializeEdit(val itemId: Long) : CosmeticsEvent()
     data class HandleScanResult(val code: String) : CosmeticsEvent()
 }
 
@@ -145,6 +152,13 @@ class CosmeticsViewModel @Inject constructor(
             is CosmeticsEvent.UseItem -> useItem(event.id)
             is CosmeticsEvent.UpdateDraft -> _draftItem.value = event.item
             is CosmeticsEvent.StartEditing -> _draftItem.value = event.item
+            is CosmeticsEvent.InitializeEdit -> {
+                viewModelScope.launch {
+                    cosmeticDao.getCosmeticById(event.itemId).first()?.let { entity ->
+                        _draftItem.value = entity.toModel()
+                    }
+                }
+            }
             is CosmeticsEvent.UpdateSearchQuery -> _searchQuery.value = event.query
             is CosmeticsEvent.UpdateSortOption -> _sortOption.value = event.option
             CosmeticsEvent.ScanWithGemini -> scanWithGemini()

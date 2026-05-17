@@ -37,6 +37,12 @@ fun CosmeticEditScreen(
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    LaunchedEffect(itemId) {
+        if (itemId != 0L) {
+            onEvent(CosmeticsEvent.InitializeEdit(itemId))
+        }
+    }
+
     val draft = uiState.draftItem
     var showCategoryMenu by remember { mutableStateOf(false) }
 
