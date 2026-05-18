@@ -59,22 +59,22 @@ object ClothingDefaults {
                 imageUrl = "https://images.unsplash.com/photo-1473966968600-fa804b86d30b?w=400&q=80"
             ),
 
-            // Dresses
+            // Dresses (Map to TOPS or OTHER if removed, but user requested clean categorization)
             ClothingItemEntity(
                 name = "Wrap Dress", 
                 brand = "KoColor", 
-                category = ClothingCategory.DRESSES, 
+                category = ClothingCategory.OTHER, 
                 colorHex = "#FF0000", 
                 price = 180.0,
                 timestamp = now,
                 imageUrl = "https://images.unsplash.com/photo-1539008886427-464469802c0b?w=400&q=80"
             ),
 
-            // Outerwear
+            // Outerwear (Map to TOPS)
             ClothingItemEntity(
                 name = "Trench Coat", 
                 brand = "KoColor", 
-                category = ClothingCategory.OUTERWEAR, 
+                category = ClothingCategory.TOPS,
                 colorHex = "#F0E68C", 
                 price = 450.0,
                 timestamp = now,
@@ -91,14 +91,24 @@ object ClothingDefaults {
                 timestamp = now,
                 imageUrl = "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400&q=80"
             ),
+            // Accessories
             ClothingItemEntity(
-                name = "Running Sneakers", 
-                brand = "KoColor", 
-                category = ClothingCategory.SHOES, 
-                colorHex = "#FFFFFF", 
-                price = 130.0,
+                name = "Leather Bag",
+                brand = "KoColor",
+                category = ClothingCategory.ACCESSORIES,
+                colorHex = "#4B3621",
+                price = 220.0,
                 timestamp = now,
-                imageUrl = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80"
+                imageUrl = "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&q=80"
+            ),
+            ClothingItemEntity(
+                name = "Gold Watch",
+                brand = "KoColor",
+                category = ClothingCategory.ACCESSORIES,
+                colorHex = "#FFD700",
+                price = 350.0,
+                timestamp = now,
+                imageUrl = "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&q=80"
             )
         )
     }
