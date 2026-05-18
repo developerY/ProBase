@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,10 +20,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -33,13 +36,12 @@ import com.zoewave.probase.kocolor.model.*
 fun RoutineEditorScreen(
     uiState: RoutinesUiState,
     onEvent: (RoutinesEvent) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    initialStepId: String? = null // Allow navigating directly to a specific step's hero
 ) {
     val routine = uiState.activeEditRoutine ?: return
-    var editingStepId by remember { mutableStateOf<String?>(null) }
-    
-    // Multi-stage product selection state
-    var selectionStage by remember { mutableStateOf<ProductSelectionStage>(ProductSelectionStage.MainForm) }
+    var editingStepId by remember { mutableStateOf(initialStepId) }
+    var selectionStage by remember { mutableStateOf(ProductSelectionStage.HeroPage) }
     var selectedGroup by remember { mutableStateOf<String?>(null) }
     var selectedCategory by remember { mutableStateOf<CosmeticCategory?>(null) }
 
@@ -51,7 +53,8 @@ fun RoutineEditorScreen(
                 title = { 
                     Text(
                         text = when (selectionStage) {
-                            ProductSelectionStage.MainForm -> if (editingStepId == null) "Curate Ritual" else "Edit Step"
+                            ProductSelectionStage.HeroPage -> if (editingStepId == null) "Curate Ritual" else "Ritual Knowledge"
+                            ProductSelectionStage.MainForm -> "Edit Stage"
                             ProductSelectionStage.Group -> "Select Group"
                             ProductSelectionStage.Category -> "Select Category"
                             ProductSelectionStage.Item -> "Select Product"
@@ -63,23 +66,24 @@ fun RoutineEditorScreen(
                 navigationIcon = {
                     IconButton(onClick = { 
                         when (selectionStage) {
-                            ProductSelectionStage.MainForm -> {
+                            ProductSelectionStage.HeroPage -> {
                                 if (editingStepId != null) editingStepId = null else onBack()
                             }
+                            ProductSelectionStage.MainForm -> selectionStage = ProductSelectionStage.HeroPage
                             ProductSelectionStage.Group -> selectionStage = ProductSelectionStage.MainForm
                             ProductSelectionStage.Category -> selectionStage = ProductSelectionStage.Group
                             ProductSelectionStage.Item -> selectionStage = ProductSelectionStage.Category
                         }
                     }) { 
                         Icon(
-                            if (selectionStage == ProductSelectionStage.MainForm && editingStepId == null) Icons.Default.Close 
+                            if (selectionStage == ProductSelectionStage.HeroPage && editingStepId == null) Icons.Default.Close 
                             else Icons.AutoMirrored.Filled.ArrowBack, 
                             null
                         ) 
                     }
                 },
                 actions = {
-                    if (selectionStage == ProductSelectionStage.MainForm) {
+                    if (selectionStage == ProductSelectionStage.HeroPage || selectionStage == ProductSelectionStage.MainForm) {
                         TextButton(onClick = { onEvent(RoutinesEvent.CloseEditDialog); onBack() }) {
                             Text("Save", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                         }
@@ -97,23 +101,30 @@ fun RoutineEditorScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(routine.steps) { step ->
-                        StepSummaryRow(step) { editingStepId = step.id }
+                        StepSummaryRow(step) { editingStepId = step.id; selectionStage = ProductSelectionStage.HeroPage }
                     }
                     item {
                         OutlinedButton(
-                            onClick = { /* Logic for adding new step entity */ },
+                            onClick = { /* Logic for adding new step */ },
                             modifier = Modifier.fillMaxWidth().height(56.dp).padding(top = 8.dp),
                             shape = RoundedCornerShape(16.dp),
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                         ) {
-                            Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Add, null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Add Ritual Stage", fontWeight = FontWeight.Bold)
+                            Text("Add Ritual Stage")
                         }
                     }
                 }
             } else if (activeStep != null) {
                 when (selectionStage) {
+                    ProductSelectionStage.HeroPage -> {
+                        StepHeroPage(
+                            step = activeStep,
+                            allProducts = uiState.allProducts,
+                            onEditClick = { selectionStage = ProductSelectionStage.MainForm }
+                        )
+                    }
                     ProductSelectionStage.MainForm -> {
                         EditStepForm(
                             step = activeStep,
@@ -154,7 +165,7 @@ fun RoutineEditorScreen(
     }
 }
 
-enum class ProductSelectionStage { MainForm, Group, Category, Item }
+enum class ProductSelectionStage { HeroPage, MainForm, Group, Category, Item }
 
 @Composable
 private fun StepSummaryRow(step: RoutineStep, onClick: () -> Unit) {
@@ -183,26 +194,25 @@ private fun StepSummaryRow(step: RoutineStep, onClick: () -> Unit) {
 }
 
 @Composable
-private fun EditStepForm(
+private fun StepHeroPage(
     step: RoutineStep,
     allProducts: List<CosmeticItem>,
-    onProductClick: () -> Unit,
-    onRemoveStep: () -> Unit
+    onEditClick: () -> Unit
 ) {
     val linkedProduct = allProducts.find { step.productIds.contains(it.id) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(24.dp),
-        verticalArrangement = Arrangement.spacedBy(28.dp)
+        verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
-        // 1. Hero Visual
+        // 1. Editorial Hero Image
         item {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(240.dp)
-                    .clip(RoundedCornerShape(24.dp))
+                    .height(340.dp)
+                    .clip(RoundedCornerShape(32.dp))
                     .background(Color(0xFFF1F3F0))
             ) {
                 if (linkedProduct?.imageUrl != null) {
@@ -216,13 +226,163 @@ private fun EditStepForm(
                     Icon(
                         Icons.Default.AutoAwesome, 
                         null, 
-                        modifier = Modifier.size(64.dp).align(Alignment.Center).alpha(0.1f)
+                        modifier = Modifier.size(80.dp).align(Alignment.Center).alpha(0.1f)
+                    )
+                }
+                
+                // Bottom Gradient Overlay for Title
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)),
+                                startY = 500f
+                            )
+                        )
+                )
+                
+                Column(
+                    modifier = Modifier.align(Alignment.BottomStart).padding(24.dp)
+                ) {
+                    Text(
+                        text = "STAGE ${step.layeringOrder + 1}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.8f),
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp
+                    )
+                    Text(
+                        text = step.title,
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = Color.White,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
         }
 
-        // 2. Field: Step Title
+        // 2. Curated Product Insight
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    text = "CURATED SELECTION", 
+                    style = MaterialTheme.typography.labelSmall, 
+                    fontWeight = FontWeight.Black, 
+                    modifier = Modifier.alpha(0.4f),
+                    letterSpacing = 2.sp
+                )
+                
+                if (linkedProduct != null) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(20.dp),
+                        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+                    ) {
+                        Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(modifier = Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
+                                if (linkedProduct.imageUrl != null) AsyncImage(model = linkedProduct.imageUrl, null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                            }
+                            Spacer(Modifier.width(16.dp))
+                            Column {
+                                Text(text = linkedProduct.brand.uppercase(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
+                                Text(text = linkedProduct.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+                                Text(text = linkedProduct.category.displayName, style = MaterialTheme.typography.labelSmall, modifier = Modifier.alpha(0.5f))
+                            }
+                        }
+                    }
+                } else {
+                    Text("No product selected for this ritual stage. Curate one to track performance.", style = MaterialTheme.typography.bodyMedium, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic, modifier = Modifier.alpha(0.5f))
+                }
+            }
+        }
+
+        // 3. Ritual Notes & Instructions
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    text = "PERFORMANCE NOTES", 
+                    style = MaterialTheme.typography.labelSmall, 
+                    fontWeight = FontWeight.Black, 
+                    modifier = Modifier.alpha(0.4f),
+                    letterSpacing = 2.sp
+                )
+                
+                Surface(
+                    color = Color.White,
+                    shape = RoundedCornerShape(20.dp),
+                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+                ) {
+                    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.AutoMirrored.Filled.Notes, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(12.dp))
+                            Text(text = "How-to Instructions", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        }
+                        Text(
+                            text = "Apply 3-4 drops to clean, dry skin. Gently press into the face and neck until fully absorbed. Wait 2 minutes before applying moisturizer.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            lineHeight = 24.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        // 4. AI Style Suggestions
+        item {
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.width(12.dp))
+                        Text(text = "Pro Suggestions", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    }
+                    Text(
+                        text = "For maximum absorption, use a slightly damp skin surface. This stage pairs perfectly with a cooling Gua Sha massage.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                    )
+                }
+            }
+        }
+
+        // 5. Action: Edit
+        item {
+            Button(
+                onClick = onEditClick,
+                modifier = Modifier.fillMaxWidth().height(64.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSurface)
+            ) {
+                Icon(Icons.Default.Tune, null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(12.dp))
+                Text("EDIT RITUAL STAGE", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            }
+            Spacer(Modifier.height(48.dp))
+        }
+    }
+}
+
+@Composable
+private fun EditStepForm(
+    step: RoutineStep,
+    allProducts: List<CosmeticItem>,
+    onProductClick: () -> Unit,
+    onRemoveStep: () -> Unit
+) {
+    val linkedProduct = allProducts.find { step.productIds.contains(it.id) }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(24.dp),
+        verticalArrangement = Arrangement.spacedBy(28.dp)
+    ) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
@@ -241,7 +401,6 @@ private fun EditStepForm(
             }
         }
 
-        // 3. Field: Product Used
         item {
             Column(
                 modifier = Modifier.clickable { onProductClick() }.fillMaxWidth(),
@@ -264,7 +423,6 @@ private fun EditStepForm(
             }
         }
 
-        // 4. Card: Timing & Reminders
         item {
             Card(
                 shape = RoundedCornerShape(24.dp),
@@ -333,34 +491,6 @@ private fun EditStepForm(
             }
         }
 
-        // 5. Field: How-to Instructions
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = "How-to Instructions", 
-                    style = MaterialTheme.typography.labelSmall, 
-                    fontWeight = FontWeight.Black, 
-                    modifier = Modifier.alpha(0.4f),
-                    letterSpacing = 1.sp
-                )
-                Surface(
-                    color = Color.White,
-                    shape = RoundedCornerShape(20.dp),
-                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Apply 3-4 drops to clean, dry skin. Gently press into the face and neck until fully absorbed. Wait 2 minutes before applying moisturizer.",
-                        modifier = Modifier.padding(24.dp),
-                        style = MaterialTheme.typography.bodyMedium,
-                        lineHeight = 24.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-
-        // 6. Action: Remove Step
         item {
             TextButton(
                 onClick = onRemoveStep,

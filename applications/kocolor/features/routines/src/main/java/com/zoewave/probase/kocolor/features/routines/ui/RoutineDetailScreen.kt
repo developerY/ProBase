@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -150,9 +151,11 @@ fun RoutineDetailScreen(
             }
 
             items(routine.steps) { step ->
-                CleanRitualStep(step) {
-                    onEvent(RoutinesEvent.ToggleStep(routine.id, step.id))
-                }
+                CleanRitualStep(
+                    step = step,
+                    onToggle = { onEvent(RoutinesEvent.ToggleStep(routine.id, step.id)) },
+                    onInfoClick = { onEdit(routine.id) } // For now, taking to editor. We'll refine the specific step-focus in the editor.
+                )
             }
             
             item { DailyInsightSmall() }
@@ -165,14 +168,15 @@ fun RoutineDetailScreen(
 @Composable
 private fun CleanRitualStep(
     step: RoutineStep,
-    onClick: () -> Unit
+    onToggle: () -> Unit,
+    onInfoClick: () -> Unit
 ) {
     val isCompleted = step.isCompleted
-    val backgroundColor = if (isCompleted) Color(0xFFE5E7E1) else Color.White // Muted Gray-Sage for completed
+    val backgroundColor = if (isCompleted) Color(0xFFE5E7E1) else Color.White
     val iconColor = if (isCompleted) Color(0xFF5A5F4B) else MaterialTheme.colorScheme.outlineVariant
 
     Surface(
-        onClick = onClick,
+        onClick = onToggle,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = backgroundColor,
@@ -194,7 +198,7 @@ private fun CleanRitualStep(
             
             Spacer(Modifier.width(20.dp))
             
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = step.title,
                     style = MaterialTheme.typography.titleMedium,
@@ -220,6 +224,15 @@ private fun CleanRitualStep(
                         fontWeight = FontWeight.Black
                     )
                 }
+            }
+
+            IconButton(onClick = onInfoClick) {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = "Details",
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }
