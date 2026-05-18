@@ -39,7 +39,10 @@ data class CosmeticsUiState(
     val aiResult: CosmeticItem? = null,
     val draftItem: CosmeticItem = CosmeticItem(name = "", brand = "", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION),
     val searchQuery: String = "",
-    val sortOption: SortOption = SortOption.NEWEST
+    val sortOption: SortOption = SortOption.NEWEST,
+    val totalCosmetics: Int = 0,
+    val expiringCosmeticsCount: Int = 0,
+    val cosmeticsByGroup: Map<String, Int> = emptyMap()
 )
 
 sealed class CosmeticsEvent {
@@ -114,7 +117,16 @@ class CosmeticsViewModel @Inject constructor(
         val sort = array[6] as SortOption
 
         val models = entities.map { it.toModel() }
+        val groupStats = entities.groupBy { it.category.groupName }.mapValues { it.value.size }
         
+        val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
+        val now = System.currentTimeMillis()
+        val expiringCount = models.count { item ->
+            item.estimatedExpiry?.let { expiry ->
+                (expiry - now) in 0..thirtyDaysInMillis
+            } ?: false
+        }
+
         val filtered = models.filter {
             it.name.contains(query, ignoreCase = true) || 
             it.brand.contains(query, ignoreCase = true) ||
@@ -137,7 +149,10 @@ class CosmeticsViewModel @Inject constructor(
             aiResult = aiResult,
             draftItem = draft.copy(imageUrl = capturedUri ?: draft.imageUrl),
             searchQuery = query,
-            sortOption = sort
+            sortOption = sort,
+            totalCosmetics = models.size,
+            expiringCosmeticsCount = expiringCount,
+            cosmeticsByGroup = groupStats
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CosmeticsUiState())
 
