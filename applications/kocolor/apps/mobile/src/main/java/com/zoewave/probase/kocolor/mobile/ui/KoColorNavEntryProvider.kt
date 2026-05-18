@@ -19,7 +19,9 @@ import com.zoewave.probase.kocolor.features.color.ui.ColorViewModel
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticEditScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsUiRoute
+import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsViewModel
+import com.zoewave.probase.kocolor.features.cosmetics.ui.VanityLandingScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.StitchProductBuilder
 import com.zoewave.probase.kocolor.features.inventory.ui.*
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
@@ -71,11 +73,37 @@ fun koColorNavEntryProvider(
                 navTo = onNavigateTo
             )
         }
+        is KoColorRoute.VanityLanding -> NavEntry(route) {
+            val viewModel: CosmeticsViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            VanityLandingScreen(
+                uiState = state,
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.WardrobeLanding -> NavEntry(route) {
+            val viewModel: WardrobeViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            WardrobeLandingScreen(
+                uiState = state,
+                navTo = onNavigateTo
+            )
+        }
         is KoColorRoute.Cosmetics -> NavEntry(route) {
             CosmeticsUiRoute(
                 initialFilter = route.filter,
                 onCodeScanned = onCodeScanned,
                 onEvent = {},
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.CosmeticCategoryCover -> NavEntry(route) {
+            val viewModel: CosmeticsViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            CosmeticCategoryCoverScreen(
+                categoryName = route.categoryName,
+                uiState = state,
+                onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
         }
@@ -87,8 +115,16 @@ fun koColorNavEntryProvider(
         }
         is KoColorRoute.Wardrobe -> NavEntry(route) {
             WardrobeRoute(
-                uiState = Unit,
-                onEvent = {},
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.WardrobeCategoryCover -> NavEntry(route) {
+            val viewModel: WardrobeViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            WardrobeCategoryCoverScreen(
+                categoryName = route.categoryName,
+                uiState = state,
+                onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
         }
