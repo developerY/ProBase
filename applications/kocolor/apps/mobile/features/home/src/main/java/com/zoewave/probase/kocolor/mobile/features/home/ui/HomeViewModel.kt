@@ -42,6 +42,8 @@ data class HomeUiState(
     val totalCosmetics: Int = 0,
     val totalClothing: Int = 0,
     val expiringCosmeticsCount: Int = 0,
+    val totalVanityValue: Double = 0.0,
+    val totalWardrobeValue: Double = 0.0,
     val cosmeticsByGroup: Map<String, Int> = emptyMap(),
     val clothingByCategory: Map<String, Int> = emptyMap(),
     val wellnessInsights: List<SkinInsight> = emptyList(),
@@ -158,6 +160,9 @@ class HomeViewModel @Inject constructor(
         val cosmeticsByGroup = cosmetics.groupBy { it.category.groupName }.mapValues { it.value.size }
         val clothingByCategory = clothing.groupBy { it.category.name }.mapValues { it.value.size }
 
+        val totalVanityValue = cosmetics.sumOf { it.price ?: 0.0 }
+        val totalWardrobeValue = clothing.sumOf { it.price ?: 0.0 }
+
         val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
         val now = System.currentTimeMillis()
         val expiringCount = cosmetics.count { entity ->
@@ -184,6 +189,8 @@ class HomeViewModel @Inject constructor(
             beautyTip = tip,
             totalCosmetics = cosmetics.size,
             totalClothing = clothing.size,
+            totalVanityValue = totalVanityValue,
+            totalWardrobeValue = totalWardrobeValue,
             expiringCosmeticsCount = expiringCount,
             cosmeticsByGroup = cosmeticsByGroup,
             clothingByCategory = clothingByCategory,
