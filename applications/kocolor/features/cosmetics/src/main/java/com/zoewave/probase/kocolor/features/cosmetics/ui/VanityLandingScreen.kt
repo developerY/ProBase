@@ -120,11 +120,11 @@ fun VanityLandingScreen(
                             ) {
                                 rowSections.forEach { (name, props) ->
                                     val (icon, color) = props
-                                    val count = uiState.cosmeticsByGroup.entries.find { it.key.contains(name, ignoreCase = true) }?.value ?: 0
+                                    val metadata = uiState.categoriesMetadata.entries.find { it.key.contains(name, ignoreCase = true) }?.value
                                     CategoryHeroCard(
                                         name = name,
                                         icon = icon,
-                                        count = count,
+                                        metadata = metadata,
                                         baseColor = color,
                                         onClick = { navTo(KoColorRoute.CosmeticCategoryCover(categoryName = name)) },
                                         modifier = Modifier.weight(1f)
@@ -174,49 +174,81 @@ fun VanityLandingScreen(
 private fun CategoryHeroCard(
     name: String,
     icon: ImageVector,
-    count: Int,
+    metadata: CategoryMetadata?,
     baseColor: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val count = metadata?.itemCount ?: 0
+    val totalValue = metadata?.totalValue ?: 0.0
+    val imageUrl = metadata?.representativeImageUrl
+    val itemColor = metadata?.representativeColorHex?.let { parseColor(it) }
+
     Card(
         onClick = onClick,
-        modifier = modifier.height(140.dp),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = baseColor.copy(alpha = 0.5f)),
-        border = BorderStroke(1.dp, baseColor.copy(alpha = 0.8f))
+        modifier = modifier.height(160.dp),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = baseColor.copy(alpha = 0.4f)),
+        border = BorderStroke(1.dp, baseColor.copy(alpha = 0.6f))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+            // Background Image/Color
+            if (imageUrl != null) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize().alpha(0.2f),
+                    contentScale = ContentScale.Crop
+                )
+            } else if (itemColor != null) {
+                Box(modifier = Modifier.fillMaxSize().background(itemColor).alpha(0.1f))
+            }
+
             // Ambient Icon Watermark
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .offset(x = 20.dp, y = 20.dp)
-                    .size(120.dp)
-                    .alpha(0.1f),
+                    .offset(x = 24.dp, y = 24.dp)
+                    .size(140.dp)
+                    .alpha(0.05f),
                 tint = Color.Black
             )
 
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.padding(24.dp).fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Surface(
-                    color = Color.White.copy(alpha = 0.6f),
-                    shape = CircleShape,
-                    modifier = Modifier.size(36.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(icon, null, modifier = Modifier.size(18.dp), tint = Color.Black.copy(alpha = 0.7f))
+                    Surface(
+                        color = Color.White.copy(alpha = 0.8f),
+                        shape = CircleShape,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(icon, null, modifier = Modifier.size(20.dp), tint = Color.Black)
+                        }
+                    }
+
+                    if (totalValue > 0) {
+                        Text(
+                            text = "$${"%.2f".format(totalValue)}",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
                 
                 Column {
                     Text(
                         text = name,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Serif
                     )
@@ -224,7 +256,8 @@ private fun CategoryHeroCard(
                         text = "$count ITEMS",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Black,
-                        modifier = Modifier.alpha(0.5f)
+                        modifier = Modifier.alpha(0.5f),
+                        letterSpacing = 1.sp
                     )
                 }
             }
@@ -326,6 +359,14 @@ private fun RecentProductCard(
                 Text(text = item.brand, color = Color.White.copy(alpha = 0.7f), style = MaterialTheme.typography.labelSmall)
             }
         }
+    }
+}
+
+private fun parseColor(hex: String): Color {
+    return try {
+        Color(android.graphics.Color.parseColor(hex))
+    } catch (e: Exception) {
+        Color.Gray
     }
 }
 

@@ -30,6 +30,13 @@ enum class SortOption {
     NEWEST, EXPIRY, COST_PER_USE, BRAND
 }
 
+data class CategoryMetadata(
+    val itemCount: Int = 0,
+    val totalValue: Double = 0.0,
+    val representativeImageUrl: String? = null,
+    val representativeColorHex: String? = null
+)
+
 data class CosmeticsUiState(
     val items: List<CosmeticItem> = emptyList(),
     val filteredItems: List<CosmeticItem> = emptyList(),
@@ -42,7 +49,8 @@ data class CosmeticsUiState(
     val sortOption: SortOption = SortOption.NEWEST,
     val totalCosmetics: Int = 0,
     val expiringCosmeticsCount: Int = 0,
-    val cosmeticsByGroup: Map<String, Int> = emptyMap()
+    val cosmeticsByGroup: Map<String, Int> = emptyMap(),
+    val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap()
 )
 
 sealed class CosmeticsEvent {
@@ -119,6 +127,15 @@ class CosmeticsViewModel @Inject constructor(
         val models = entities.map { it.toModel() }
         val groupStats = entities.groupBy { it.category.groupName }.mapValues { it.value.size }
         
+        val categoryMetadata = models.groupBy { it.category.groupName }.mapValues { (_, items) ->
+            val representativeItem = items.filter { it.imageUrl != null }.maxByOrNull { it.usageCount } ?: items.maxByOrNull { it.usageCount }
+            CategoryMetadata(
+                itemCount = items.size,
+                totalValue = items.sumOf { it.price ?: 0.0 },
+                representativeImageUrl = representativeItem?.imageUrl,
+                representativeColorHex = representativeItem?.colorHex
+            )
+        }
         val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
         val now = System.currentTimeMillis()
         val expiringCount = models.count { item ->
@@ -152,7 +169,8 @@ class CosmeticsViewModel @Inject constructor(
             sortOption = sort,
             totalCosmetics = models.size,
             expiringCosmeticsCount = expiringCount,
-            cosmeticsByGroup = groupStats
+            cosmeticsByGroup = groupStats,
+            categoriesMetadata = categoryMetadata
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CosmeticsUiState())
 
