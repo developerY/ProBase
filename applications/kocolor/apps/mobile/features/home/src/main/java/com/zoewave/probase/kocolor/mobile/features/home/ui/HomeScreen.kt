@@ -223,7 +223,7 @@ fun HomeScreen(
                         )
                         WardrobeDashboard(
                             uiState = uiState,
-                            navTo = { navTo(KoColorRoute.Wardrobe) }
+                            navTo = navTo
                         )
                     }
                 }
@@ -487,19 +487,51 @@ fun BeautyTipSection(uiState: String) {
 }
 
 @Composable
-fun QuickActions(navTo: (KoColorRoute) -> Unit) {
+private fun QuickActions(
+    navTo: (KoColorRoute) -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Button(
+        QuickActionCard(
+            title = "Analyze Style",
+            subtitle = "AI Visual Analysis",
+            icon = Icons.Default.AutoAwesome,
+            color = MaterialTheme.colorScheme.primary,
+            onClick = { navTo(KoColorRoute.StyleSimulator) },
+            modifier = Modifier.weight(1f)
+        )
+        QuickActionCard(
+            title = "Capture Product",
+            subtitle = "Gemini Scanner",
+            icon = Icons.Default.CameraAlt,
+            color = MaterialTheme.colorScheme.secondary,
             onClick = { navTo(KoColorRoute.Analyzer()) },
-            modifier = Modifier.fillMaxWidth().height(64.dp),
-            shape = RoundedCornerShape(20.dp)
-        ) {
-            Icon(Icons.Default.CameraAlt, contentDescription = null)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text("AI Style Analyze", style = MaterialTheme.typography.titleMedium)
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun QuickActionCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    color: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    ElevatedCard(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Icon(icon, null, tint = color, modifier = Modifier.size(28.dp))
+            Spacer(Modifier.height(12.dp))
+            Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(text = subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -640,87 +672,110 @@ fun InventoryDashboard(
     navTo: (KoColorRoute) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
-        // Advanced Horizontal Collection (The Vanity)
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
-        ) {
-            items(uiState.popularCosmetics) { item ->
-                VanityProductCard(
-                    uiState = item,
-                    onClick = { navTo(KoColorRoute.Cosmetics()) } // Maybe detail later
-                )
-            }
-
-            item {
-                ViewAllCard(
-                    itemCount = uiState.totalCosmetics,
-                    onClick = { navTo(KoColorRoute.Cosmetics()) }
-                )
-            }
-        }
-        
-        // Category Breakdown Quick-Access (Premium Filter Chips)
-        FlowRow(
+        // Advanced High-Density "Vanity Vault" Card
+        ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            maxItemsInEachRow = 3
+            shape = RoundedCornerShape(32.dp),
+            onClick = { navTo(KoColorRoute.VanityLanding) }
         ) {
-            val sections = listOf(
-                "Face" to Icons.Default.Face,
-                "Eyes" to Icons.Default.Visibility,
-                "Lips" to Icons.Default.Favorite,
-                "Cheeks" to Icons.Default.AutoAwesome
-            )
-            
-            sections.forEach { (name, icon) ->
-                val count = uiState.cosmeticsByGroup.entries.find { it.key.contains(name, ignoreCase = true) }?.value ?: 0
-                if (count > 0) {
-                    FilterChip(
-                        selected = false,
-                        onClick = { navTo(KoColorRoute.Cosmetics(filter = name)) },
-                        label = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = name,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(Modifier.width(6.dp))
-                                Surface(
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                                    shape = CircleShape
-                                ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                // Background Decorative Icon
+                Icon(
+                    Icons.Default.Face,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(160.dp)
+                        .align(Alignment.CenterEnd)
+                        .offset(x = 40.dp, y = 40.dp)
+                        .alpha(0.05f),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Total Count Column
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = uiState.totalCosmetics.toString(),
+                                style = MaterialTheme.typography.displayMedium,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "TOTAL PRODUCTS",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        // Expiring Warning Column (if any)
+                        if (uiState.expiringCosmeticsCount > 0) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(20.dp),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Icon(
+                                        Icons.Default.Warning,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(Modifier.height(4.dp))
                                     Text(
-                                        text = count.toString(),
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        text = uiState.expiringCosmeticsCount.toString(),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Black,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                    Text(
+                                        text = "EXPIRING SOON",
                                         style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Black
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
                                     )
                                 }
                             }
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        },
-                        shape = RoundedCornerShape(16.dp),
-                        colors = FilterChipDefaults.filterChipColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            iconColor = MaterialTheme.colorScheme.primary
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            enabled = true,
-                            selected = false,
-                            borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                            borderWidth = 1.dp
-                        )
-                    )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Horizontal Scroll of recent items
+                    Row(
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        uiState.popularCosmetics.forEach { item ->
+                            val colorHex = item.colorHex
+                            Box(
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(
+                                        if (colorHex != null) parseColor(colorHex)
+                                        else MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                    .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(16.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (item.imageUrl != null) {
+                                    AsyncImage(
+                                        model = item.imageUrl,
+                                        contentDescription = item.name,
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -965,65 +1020,153 @@ fun ViewAllCard(itemCount: Int, onClick: () -> Unit) {
 @Composable
 fun WardrobeDashboard(
     uiState: HomeUiState,
-    navTo: () -> Unit
+    navTo: (KoColorRoute) -> Unit
 ) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(32.dp),
-        onClick = navTo
-    ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            // Background Decorative Icon
-            Icon(
-                Icons.Default.Checkroom,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(140.dp)
-                    .align(Alignment.CenterEnd)
-                    .offset(x = 30.dp, y = 30.dp)
-                    .alpha(0.05f),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            
-            Column(modifier = Modifier.padding(24.dp)) {
-                Text(
-                    text = "${uiState.totalClothing} Pieces",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Black
+    Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        // Advanced High-Density "Curated Closet" Card
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(32.dp),
+            onClick = { navTo(KoColorRoute.WardrobeLanding) }
+        ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                // Background Decorative Icon
+                Icon(
+                    Icons.Default.Checkroom,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(160.dp)
+                        .align(Alignment.CenterEnd)
+                        .offset(x = 40.dp, y = 40.dp)
+                        .alpha(0.05f),
+                    tint = MaterialTheme.colorScheme.primary
                 )
-                
-                Spacer(modifier = Modifier.height(20.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    uiState.popularClothing.forEach { item ->
-                        val colorHex = item.colorHex
-                        Box(
-                            modifier = Modifier
-                                .size(72.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(
-                                    if (colorHex != null) parseColor(colorHex)
-                                    else MaterialTheme.colorScheme.surfaceVariant
-                                )
-                                .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(16.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (item.imageUrl != null) {
-                                AsyncImage(
-                                    model = item.imageUrl,
-                                    contentDescription = item.name,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                            } else if (colorHex == null) {
-                                Icon(Icons.Default.Checkroom, null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Total Count Column
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = uiState.totalClothing.toString(),
+                                style = MaterialTheme.typography.displayMedium,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "TOTAL PIECES",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Horizontal Scroll of recent items
+                    Row(
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        uiState.popularClothing.forEach { item ->
+                            val colorHex = item.colorHex
+                            Box(
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(
+                                        if (colorHex != null) parseColor(colorHex)
+                                        else MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                    .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(16.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (item.imageUrl != null) {
+                                    AsyncImage(
+                                        model = item.imageUrl,
+                                        contentDescription = item.name,
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun ClothingItemCard(
+    uiState: com.zoewave.probase.kocolor.model.ClothingItem,
+    onClick: () -> Unit
+) {
+    val bgColor = uiState.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant
+    val isDark = isColorDark(bgColor)
+    val contentColor = if (isDark) Color.White else Color.Black
+
+    ElevatedCard(
+        modifier = Modifier
+            .width(160.dp)
+            .aspectRatio(0.75f)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = bgColor)
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (uiState.imageUrl != null) {
+                AsyncImage(
+                    model = uiState.imageUrl,
+                    contentDescription = uiState.name,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    Icons.Default.Checkroom,
+                    null,
+                    modifier = Modifier.size(64.dp).align(Alignment.Center).alpha(0.1f),
+                    tint = contentColor
+                )
+            }
+
+            // Scrim
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f)),
+                            startY = 200f
+                        )
+                    )
+            )
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = uiState.brand?.uppercase() ?: "KOCOLOR",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    text = uiState.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
             }
         }
     }

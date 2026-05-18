@@ -14,6 +14,15 @@ sealed class KoColorRoute {
     data object Home : KoColorRoute()
     
     @Serializable
+    data object VanityLanding : KoColorRoute()
+    
+    @Serializable
+    data object StyleSimulator : KoColorRoute()
+
+    @Serializable
+    data object WardrobeLanding : KoColorRoute()
+
+    @Serializable
     data object Color : KoColorRoute()
 
     @Serializable
@@ -23,7 +32,19 @@ sealed class KoColorRoute {
     data class Cosmetics(val filter: String? = null) : KoColorRoute()
 
     @Serializable
+    data class CosmeticCategoryCover(val categoryName: String) : KoColorRoute()
+
+    @Serializable
     data object Wardrobe : KoColorRoute()
+
+    @Serializable
+    data class WardrobeCategoryCover(val categoryName: String) : KoColorRoute()
+
+    @Serializable
+    data class WardrobeDetail(val itemId: Long) : KoColorRoute()
+
+    @Serializable
+    data class WardrobeEdit(val itemId: Long) : KoColorRoute()
     
     @Serializable
     data class Analyzer(val uri: String? = null) : KoColorRoute()
@@ -42,6 +63,15 @@ sealed class KoColorRoute {
 
     @Serializable
     data class ColorDetail(val suggestionId: Long) : KoColorRoute()
+
+    @Serializable
+    data object CosmeticAdd : KoColorRoute()
+
+    @Serializable
+    data class CosmeticDetail(val itemId: Long) : KoColorRoute()
+
+    @Serializable
+    data class CosmeticEdit(val itemId: Long) : KoColorRoute()
 
     @Serializable
     data class NailLab(val colorHex: String, val finish: String) : KoColorRoute()

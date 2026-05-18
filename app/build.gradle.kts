@@ -51,6 +51,7 @@ dependencies {
     implementation(project(":features:weather"))
     implementation(project(":features:readers:nfc"))
     implementation(project(":features:readers:qrscanner"))
+    implementation(project(":features:readers:barcode"))
     implementation(project(":features:camera"))
     implementation(project(":features:calendar"))
     implementation(project(":features:ai:capture"))

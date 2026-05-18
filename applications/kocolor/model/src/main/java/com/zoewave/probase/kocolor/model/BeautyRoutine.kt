@@ -23,9 +23,9 @@ enum class RoutineTime {
 
 @Serializable
 data class RoutineStep(
-    val id: String,
+    val id: String = java.util.UUID.randomUUID().toString(),
     val title: String,
-    val description: String,
+    val description: String = "",
     val isCompleted: Boolean = false,
     val isRecommended: Boolean = false,
     /** Recommended layering order (e.g., 1 for Cleansing, 2 for Toning). */
@@ -33,7 +33,9 @@ data class RoutineStep(
     /** Minimum wait time in minutes before proceeding to the next step or sleep. */
     val minWaitMinutes: Int = 0,
     /** Product category linked to this step. */
-    val category: CosmeticCategory? = null
+    val category: CosmeticCategory? = null,
+    /** IDs of actual inventory products linked to this step. */
+    val productIds: List<Long> = emptyList()
 )
 
 @Serializable

@@ -1,6 +1,8 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
-import androidx.lifecycle.SavedStateHandle
+import android.content.Context
+import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
@@ -10,13 +12,17 @@ import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.KoColorRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import android.content.Context
-import android.net.Uri
-import androidx.core.net.toUri
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,7 +39,10 @@ data class CosmeticsUiState(
     val aiResult: CosmeticItem? = null,
     val draftItem: CosmeticItem = CosmeticItem(name = "", brand = "", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION),
     val searchQuery: String = "",
-    val sortOption: SortOption = SortOption.NEWEST
+    val sortOption: SortOption = SortOption.NEWEST,
+    val totalCosmetics: Int = 0,
+    val expiringCosmeticsCount: Int = 0,
+    val cosmeticsByGroup: Map<String, Int> = emptyMap()
 )
 
 sealed class CosmeticsEvent {
@@ -47,6 +56,7 @@ sealed class CosmeticsEvent {
     data object ScanWithGemini : CosmeticsEvent()
     data object ClearCapturedImage : CosmeticsEvent()
     data class StartEditing(val item: CosmeticItem) : CosmeticsEvent()
+    data class InitializeEdit(val itemId: Long) : CosmeticsEvent()
     data class HandleScanResult(val code: String) : CosmeticsEvent()
 }
 
@@ -107,7 +117,16 @@ class CosmeticsViewModel @Inject constructor(
         val sort = array[6] as SortOption
 
         val models = entities.map { it.toModel() }
+        val groupStats = entities.groupBy { it.category.groupName }.mapValues { it.value.size }
         
+        val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
+        val now = System.currentTimeMillis()
+        val expiringCount = models.count { item ->
+            item.estimatedExpiry?.let { expiry ->
+                (expiry - now) in 0..thirtyDaysInMillis
+            } ?: false
+        }
+
         val filtered = models.filter {
             it.name.contains(query, ignoreCase = true) || 
             it.brand.contains(query, ignoreCase = true) ||
@@ -130,7 +149,10 @@ class CosmeticsViewModel @Inject constructor(
             aiResult = aiResult,
             draftItem = draft.copy(imageUrl = capturedUri ?: draft.imageUrl),
             searchQuery = query,
-            sortOption = sort
+            sortOption = sort,
+            totalCosmetics = models.size,
+            expiringCosmeticsCount = expiringCount,
+            cosmeticsByGroup = groupStats
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CosmeticsUiState())
 
@@ -145,6 +167,13 @@ class CosmeticsViewModel @Inject constructor(
             is CosmeticsEvent.UseItem -> useItem(event.id)
             is CosmeticsEvent.UpdateDraft -> _draftItem.value = event.item
             is CosmeticsEvent.StartEditing -> _draftItem.value = event.item
+            is CosmeticsEvent.InitializeEdit -> {
+                viewModelScope.launch {
+                    cosmeticDao.getCosmeticById(event.itemId).first()?.let { entity ->
+                        _draftItem.value = entity.toModel()
+                    }
+                }
+            }
             is CosmeticsEvent.UpdateSearchQuery -> _searchQuery.value = event.query
             is CosmeticsEvent.UpdateSortOption -> _sortOption.value = event.option
             CosmeticsEvent.ScanWithGemini -> scanWithGemini()
@@ -233,6 +262,7 @@ class CosmeticsViewModel @Inject constructor(
         shadeName = shadeName,
         imageUrl = imageUrl,
         notes = notes,
+        instructions = instructions,
         timestamp = timestamp,
         batchCode = batchCode,
         openedDate = openedDate,
@@ -255,6 +285,7 @@ class CosmeticsViewModel @Inject constructor(
         shadeName = shadeName,
         imageUrl = imageUrl,
         notes = notes,
+        instructions = instructions,
         timestamp = timestamp,
         batchCode = batchCode,
         openedDate = openedDate,

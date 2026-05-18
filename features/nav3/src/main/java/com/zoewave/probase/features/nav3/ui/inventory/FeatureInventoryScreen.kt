@@ -43,6 +43,7 @@ fun FeatureInventoryScreen(
     onNavigateToBle: () -> Unit,
     onNavigateToNfc: () -> Unit,
     onNavigateToQrScanner: () -> Unit,
+    onNavigateToBarcode: () -> Unit,
     onNavigateToCamera: () -> Unit, // ✅ Added Camera Callback
     onNavigateToCalendar: () -> Unit,
     onNavigateToSmartCapture: () -> Unit
@@ -100,6 +101,14 @@ fun FeatureInventoryScreen(
                     description = "Scan QR codes and barcodes.",
                     icon = Icons.Default.QrCodeScanner, // Uses the built-in Bluetooth icon
                     onClick = onNavigateToQrScanner
+                )
+            }
+            item {
+                FeatureCard(
+                    title = "Barcode Scanner",
+                    description = "Universal barcode scanning module.",
+                    icon = Icons.Default.QrCodeScanner, // Use QrCodeScanner for now or find Barcode equivalent
+                    onClick = onNavigateToBarcode
                 )
             }
             item {

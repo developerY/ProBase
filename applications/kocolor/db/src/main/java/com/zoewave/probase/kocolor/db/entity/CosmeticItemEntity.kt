@@ -14,6 +14,7 @@ data class CosmeticItemEntity(
     val shadeName: String? = null,
     val imageUrl: String? = null,
     val notes: String? = null,
+    val instructions: String? = null,
     val timestamp: Long,
     
     // --- Professional Inventory ---

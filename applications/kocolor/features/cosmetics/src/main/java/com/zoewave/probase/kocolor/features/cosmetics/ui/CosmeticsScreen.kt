@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.features.cosmetics.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,6 +69,8 @@ fun CosmeticsUiRoute(
     LaunchedEffect(initialFilter) {
         if (initialFilter != null) {
             viewModel.onEvent(CosmeticsEvent.UpdateSearchQuery(initialFilter))
+        } else {
+            viewModel.onEvent(CosmeticsEvent.UpdateSearchQuery(""))
         }
     }
     
@@ -106,16 +111,19 @@ fun CosmeticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Cosmetic Inventory") },
+                title = { Text("Inventory", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
+                    IconButton(onClick = { navTo(KoColorRoute.CosmeticAdd) }) {
+                        Icon(Icons.Default.Add, contentDescription = "Add")
+                    }
                     Box {
                         IconButton(onClick = { showSortMenu = true }) {
-                            Icon(Icons.Default.Sort, contentDescription = "Sort")
+                            Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
                         }
                         DropdownMenu(
                             expanded = showSortMenu,
@@ -253,16 +261,7 @@ fun CosmeticsScreen(
                                             items(itemsInCategory) { item ->
                                                 CosmeticProductCard(
                                                     uiState = item,
-                                                    onEvent = { event ->
-                                                        when (event) {
-                                                            "delete" -> onEvent(CosmeticsEvent.DeleteItem(item.id))
-                                                            "edit" -> {
-                                                                onEvent(CosmeticsEvent.StartEditing(item))
-                                                                selectedItemForEdit = item
-                                                            }
-                                                            "use" -> onEvent(CosmeticsEvent.UseItem(item.id))
-                                                        }
-                                                    },
+                                                    onEvent = onEvent,
                                                     navTo = navTo,
                                                     modifier = Modifier.padding(start = 32.dp)
                                                 )
@@ -518,7 +517,7 @@ fun CategoryGuideDialog(
 @Composable
 fun CosmeticProductCard(
     uiState: CosmeticItem,
-    onEvent: (String) -> Unit,
+    onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -537,7 +536,7 @@ fun CosmeticProductCard(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onEvent("edit") },
+            .clickable { navTo(KoColorRoute.CosmeticDetail(uiState.id)) },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = cardColor,
@@ -632,7 +631,7 @@ fun CosmeticProductCard(
                     }
                 }
                 
-                IconButton(onClick = { onEvent("delete") }) {
+                IconButton(onClick = { onEvent(CosmeticsEvent.DeleteItem(uiState.id)) }) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Delete",
@@ -673,7 +672,7 @@ fun CosmeticProductCard(
                 }
                 
                 Button(
-                    onClick = { onEvent("use") },
+                    onClick = { onEvent(CosmeticsEvent.UseItem(uiState.id)) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = contentColor.copy(alpha = 0.2f),
                         contentColor = contentColor

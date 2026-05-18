@@ -16,6 +16,7 @@ import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventory
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventoryScreen
 import com.zoewave.probase.features.readers.nfc.ui.NfcUiRoute
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
+import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.ai.capture.ui.SmartCaptureUiRoute
 import com.zoewave.probase.photodo.features.smartadvice.ui.SmartAdviceUiRoute
 
@@ -35,6 +36,7 @@ fun featureInventoryEntryProvider(
                     onNavigateToBle = { navigateTo(FeatureInventory.Ble) },
                     onNavigateToNfc = { navigateTo(FeatureInventory.Nfc) },
                     onNavigateToQrScanner = { navigateTo(FeatureInventory.QrScanner) },
+                    onNavigateToBarcode = { navigateTo(FeatureInventory.BarcodeScanner) },
                     onNavigateToCamera = { navigateTo(FeatureInventory.Camera) }, // ✅ Added Camera Callback
                     onNavigateToCalendar = { navigateTo(FeatureInventory.Calendar) },
                     onNavigateToSmartCapture = { navigateTo(FeatureInventory.SmartCapture) }
@@ -70,6 +72,12 @@ fun featureInventoryEntryProvider(
             is FeatureInventory.QrScanner -> {
                 FeatureScaffold(title = "QR Scanner", onBack = navigateBack) {
                     QRCodeScannerScreen()
+                }
+            }
+
+            is FeatureInventory.BarcodeScanner -> {
+                FeatureScaffold(title = "Barcode Scanner", onBack = navigateBack) {
+                    BarcodeScannerScreen()
                 }
             }
 

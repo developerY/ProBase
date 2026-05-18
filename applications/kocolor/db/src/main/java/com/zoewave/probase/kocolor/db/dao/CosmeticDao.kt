@@ -23,6 +23,9 @@ interface CosmeticDao {
     @Query("SELECT * FROM cosmetic_items WHERE category = :category ORDER BY timestamp DESC")
     fun getCosmeticsByCategory(category: String): Flow<List<CosmeticItemEntity>>
 
+    @Query("SELECT * FROM cosmetic_items WHERE id = :id")
+    fun getCosmeticById(id: Long): Flow<CosmeticItemEntity?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCosmetic(item: CosmeticItemEntity)
 
