@@ -40,7 +40,8 @@ fun RoutineEditorScreen(
     
     // Multi-stage product selection state
     var selectionStage by remember { mutableStateOf<ProductSelectionStage>(ProductSelectionStage.MainForm) }
-    var selectedCategory by remember { mutableStateOf<String?>(null) }
+    var selectedGroup by remember { mutableStateOf<String?>(null) }
+    var selectedCategory by remember { mutableStateOf<CosmeticCategory?>(null) }
 
     val activeStep = routine.steps.find { it.id == editingStepId }
 
@@ -49,19 +50,25 @@ fun RoutineEditorScreen(
             CenterAlignedTopAppBar(
                 title = { 
                     Text(
-                        text = if (selectionStage == ProductSelectionStage.MainForm) "Edit Step" else "Select Product",
+                        text = when (selectionStage) {
+                            ProductSelectionStage.MainForm -> if (editingStepId == null) "Curate Ritual" else "Edit Step"
+                            ProductSelectionStage.Group -> "Select Group"
+                            ProductSelectionStage.Category -> "Select Category"
+                            ProductSelectionStage.Item -> "Select Product"
+                        },
                         style = MaterialTheme.typography.titleLarge,
                         fontFamily = FontFamily.Serif
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = { 
-                        if (selectionStage != ProductSelectionStage.MainForm) {
-                            selectionStage = ProductSelectionStage.MainForm
-                        } else if (editingStepId != null) {
-                            editingStepId = null
-                        } else {
-                            onBack()
+                        when (selectionStage) {
+                            ProductSelectionStage.MainForm -> {
+                                if (editingStepId != null) editingStepId = null else onBack()
+                            }
+                            ProductSelectionStage.Group -> selectionStage = ProductSelectionStage.MainForm
+                            ProductSelectionStage.Category -> selectionStage = ProductSelectionStage.Group
+                            ProductSelectionStage.Item -> selectionStage = ProductSelectionStage.Category
                         }
                     }) { 
                         Icon(
@@ -94,13 +101,14 @@ fun RoutineEditorScreen(
                     }
                     item {
                         OutlinedButton(
-                            onClick = { /* Add Step Logic */ },
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(16.dp)
+                            onClick = { /* Logic for adding new step entity */ },
+                            modifier = Modifier.fillMaxWidth().height(56.dp).padding(top = 8.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                         ) {
-                            Icon(Icons.Default.Add, null)
+                            Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text("Add New Step")
+                            Text("Add Ritual Stage", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -110,22 +118,30 @@ fun RoutineEditorScreen(
                         EditStepForm(
                             step = activeStep,
                             allProducts = uiState.allProducts,
-                            onProductClick = { selectionStage = ProductSelectionStage.Category },
+                            onProductClick = { selectionStage = ProductSelectionStage.Group },
                             onRemoveStep = { 
                                 onEvent(RoutinesEvent.RemoveStep(routine.id, activeStep.id))
                                 editingStepId = null
                             }
                         )
                     }
+                    ProductSelectionStage.Group -> {
+                        GroupSelectionPage(uiState.allProducts) { group ->
+                            selectedGroup = group
+                            selectionStage = ProductSelectionStage.Category
+                        }
+                    }
                     ProductSelectionStage.Category -> {
-                        CategorySelectionPage(uiState.allProducts) { category ->
+                        CategorySelectionPage(
+                            allProducts = uiState.allProducts.filter { it.category.groupName == selectedGroup }
+                        ) { category ->
                             selectedCategory = category
                             selectionStage = ProductSelectionStage.Item
                         }
                     }
                     ProductSelectionStage.Item -> {
                         ItemSelectionPage(
-                            products = uiState.allProducts.filter { it.category.groupName == selectedCategory },
+                            products = uiState.allProducts.filter { it.category == selectedCategory },
                             selectedIds = activeStep.productIds
                         ) { productId ->
                             onEvent(RoutinesEvent.LinkProduct(routine.id, activeStep.id, productId))
@@ -138,7 +154,7 @@ fun RoutineEditorScreen(
     }
 }
 
-enum class ProductSelectionStage { MainForm, Category, Item }
+enum class ProductSelectionStage { MainForm, Group, Category, Item }
 
 @Composable
 private fun StepSummaryRow(step: RoutineStep, onClick: () -> Unit) {
@@ -156,7 +172,7 @@ private fun StepSummaryRow(step: RoutineStep, onClick: () -> Unit) {
             Column {
                 Text(text = step.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(
-                    text = "Step ${step.layeringOrder + 1}", 
+                    text = "Ritual Stage ${step.layeringOrder + 1}", 
                     style = MaterialTheme.typography.labelSmall, 
                     modifier = Modifier.alpha(0.5f)
                 )
@@ -178,16 +194,16 @@ private fun EditStepForm(
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(24.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(28.dp)
     ) {
-        // Hero Image
+        // 1. Hero Visual
         item {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(220.dp)
+                    .height(240.dp)
                     .clip(RoundedCornerShape(24.dp))
-                    .background(Color(0xFFE5E7E1)) // Placeholder background
+                    .background(Color(0xFFF1F3F0))
             ) {
                 if (linkedProduct?.imageUrl != null) {
                     AsyncImage(
@@ -206,24 +222,26 @@ private fun EditStepForm(
             }
         }
 
-        // Form Fields
+        // 2. Field: Step Title
         item {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = "Step Title", 
                     style = MaterialTheme.typography.labelSmall, 
-                    fontWeight = FontWeight.Bold, 
-                    modifier = Modifier.alpha(0.5f)
+                    fontWeight = FontWeight.Black, 
+                    modifier = Modifier.alpha(0.4f),
+                    letterSpacing = 1.sp
                 )
                 Text(
                     text = step.title,
                     style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                 )
                 HorizontalDivider(modifier = Modifier.alpha(0.1f))
             }
         }
 
+        // 3. Field: Product Used
         item {
             Column(
                 modifier = Modifier.clickable { onProductClick() }.fillMaxWidth(),
@@ -232,28 +250,30 @@ private fun EditStepForm(
                 Text(
                     text = "Product Used", 
                     style = MaterialTheme.typography.labelSmall, 
-                    fontWeight = FontWeight.Bold, 
-                    modifier = Modifier.alpha(0.5f)
+                    fontWeight = FontWeight.Black, 
+                    modifier = Modifier.alpha(0.4f),
+                    letterSpacing = 1.sp
                 )
                 Text(
                     text = linkedProduct?.name ?: "Select a product...",
                     style = MaterialTheme.typography.headlineSmall,
                     color = if (linkedProduct == null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
                 HorizontalDivider(modifier = Modifier.alpha(0.1f))
             }
         }
 
-        // Timing & Reminders Card
+        // 4. Card: Timing & Reminders
         item {
             Card(
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                modifier = Modifier.fillMaxWidth().border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
+                modifier = Modifier.fillMaxWidth().border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(24.dp)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                    Text("Timing & Reminders", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                    Text("Timing & Reminders", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
                     
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         Column(modifier = Modifier.weight(1f)) {
@@ -264,13 +284,13 @@ private fun EditStepForm(
                                 modifier = Modifier.alpha(0.5f)
                             )
                             Surface(
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                             ) {
-                                Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text(text = "${step.minWaitMinutes}")
-                                    Icon(Icons.Default.ArrowDropDown, null)
+                                Row(modifier = Modifier.padding(14.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                    Text(text = "${step.minWaitMinutes}", fontWeight = FontWeight.Bold)
+                                    Icon(Icons.Default.ArrowDropDown, null, modifier = Modifier.size(20.dp))
                                 }
                             }
                         }
@@ -282,13 +302,13 @@ private fun EditStepForm(
                                 modifier = Modifier.alpha(0.5f)
                             )
                             Surface(
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                             ) {
-                                Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text(text = "07:30 AM")
-                                    Icon(Icons.Default.AccessTime, null, modifier = Modifier.size(18.dp))
+                                Row(modifier = Modifier.padding(14.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                    Text(text = "07:30 AM", fontWeight = FontWeight.Bold)
+                                    Icon(Icons.Default.AccessTime, null, modifier = Modifier.size(16.dp).alpha(0.6f))
                                 }
                             }
                         }
@@ -313,42 +333,61 @@ private fun EditStepForm(
             }
         }
 
-        // How-to Instructions
+        // 5. Field: How-to Instructions
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     text = "How-to Instructions", 
                     style = MaterialTheme.typography.labelSmall, 
-                    fontWeight = FontWeight.Bold, 
-                    modifier = Modifier.alpha(0.5f)
+                    fontWeight = FontWeight.Black, 
+                    modifier = Modifier.alpha(0.4f),
+                    letterSpacing = 1.sp
                 )
                 Surface(
                     color = Color.White,
-                    shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.1f)),
+                    shape = RoundedCornerShape(20.dp),
+                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = "Apply 3-4 drops to clean, dry skin. Gently press into the face and neck until fully absorbed. Wait 2 minutes before applying moisturizer.",
-                        modifier = Modifier.padding(20.dp),
+                        modifier = Modifier.padding(24.dp),
                         style = MaterialTheme.typography.bodyMedium,
-                        lineHeight = 22.sp
+                        lineHeight = 24.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         }
 
-        // Remove Step
+        // 6. Action: Remove Step
         item {
             TextButton(
                 onClick = onRemoveStep,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 48.dp),
                 colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFB03030))
             ) {
-                Icon(Icons.Default.DeleteOutline, null)
+                Icon(Icons.Default.DeleteOutline, null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Remove Step")
+                Text("Remove Ritual Stage", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
             }
+        }
+    }
+}
+
+@Composable
+private fun GroupSelectionPage(
+    allProducts: List<CosmeticItem>,
+    onGroupClick: (String) -> Unit
+) {
+    val groups = allProducts.map { it.category.groupName }.distinct()
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(groups) { group ->
+            SelectionRow(text = group) { onGroupClick(group) }
         }
     }
 }
@@ -356,28 +395,33 @@ private fun EditStepForm(
 @Composable
 private fun CategorySelectionPage(
     allProducts: List<CosmeticItem>,
-    onCategoryClick: (String) -> Unit
+    onCategoryClick: (CosmeticCategory) -> Unit
 ) {
-    val categories = allProducts.map { it.category.groupName }.distinct()
+    val categories = allProducts.map { it.category }.distinct()
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(categories) { category ->
-            Surface(
-                onClick = { onCategoryClick(category) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surface,
-                border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
-            ) {
-                Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = category, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.weight(1f))
-                    Icon(Icons.Default.ChevronRight, null, modifier = Modifier.alpha(0.3f))
-                }
-            }
+            SelectionRow(text = category.displayName) { onCategoryClick(category) }
+        }
+    }
+}
+
+@Composable
+private fun SelectionRow(text: String, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+    ) {
+        Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(text = text, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.weight(1f))
+            Icon(Icons.Default.ChevronRight, null, modifier = Modifier.alpha(0.3f))
         }
     }
 }
@@ -403,7 +447,7 @@ private fun ItemSelectionPage(
                 border = BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else Color.Black.copy(alpha = 0.05f))
             ) {
                 Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
+                    Box(modifier = Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
                         if (product.imageUrl != null) {
                             AsyncImage(model = product.imageUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                         }
