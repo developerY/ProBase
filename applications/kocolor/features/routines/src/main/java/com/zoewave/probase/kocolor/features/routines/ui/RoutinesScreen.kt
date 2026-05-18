@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.routines.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -41,7 +42,7 @@ fun RoutinesScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* History */ }) { Icon(Icons.Default.History, null) }
+                    IconButton(onClick = { /* Settings */ }) { Icon(Icons.Default.Settings, null) }
                 }
             )
         }
@@ -54,13 +55,13 @@ fun RoutinesScreen(
             item {
                 Column {
                     Text(
-                        text = "Bio-Synced Beauty.",
+                        text = "Serene Rituals.",
                         style = MaterialTheme.typography.headlineLarge,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Rituals curated for your circadian rhythm.",
+                        text = "Your daily acts of mindful care.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
@@ -86,8 +87,7 @@ fun RoutinesScreen(
             }
 
             item {
-                SectionTitle(title = "Ritual Performance", subtitle = "Monthly consistency")
-                RitualAnalyticsCard()
+                DailyInsightBanner()
             }
         }
     }
@@ -99,61 +99,59 @@ private fun HeroRitualCard(
     onClick: () -> Unit
 ) {
     val isMorning = routine.time == RoutineTime.MORNING
-    val accentColor = if (isMorning) Color(0xFFFFB74D) else Color(0xFF7986CB)
+    val accentColor = if (isMorning) Color(0xFF6B705C) else Color(0xFF457B9D) // Sage vs Muted Blue
     val bgBrush = if (isMorning) {
-        Brush.verticalGradient(listOf(Color(0xFFFFF9C4).copy(alpha = 0.4f), Color.White))
+        Brush.verticalGradient(listOf(Color(0xFFF1F3F0), Color.White)) // Pale Sage
     } else {
-        Brush.verticalGradient(listOf(Color(0xFFE8EAF6).copy(alpha = 0.4f), Color.White))
+        Brush.verticalGradient(listOf(Color(0xFFE9F5F9), Color.White)) // Pale Blue
     }
 
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth().height(260.dp),
+        modifier = Modifier.fillMaxWidth().height(240.dp),
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = BorderStroke(1.dp, accentColor.copy(alpha = 0.15f))
+        border = BorderStroke(1.dp, accentColor.copy(alpha = 0.1f))
     ) {
         Box(modifier = Modifier.fillMaxSize().background(bgBrush).padding(32.dp)) {
-            // Ambient Watermark
-            Icon(
-                imageVector = if (isMorning) Icons.Default.LightMode else Icons.Default.NightsStay,
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .offset(x = 24.dp, y = 24.dp)
-                    .size(180.dp)
-                    .alpha(0.05f),
-                tint = accentColor
-            )
-
             Column(verticalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxSize()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top
                 ) {
-                    Surface(
-                        color = accentColor.copy(alpha = 0.1f),
-                        shape = CircleShape,
-                        modifier = Modifier.size(56.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = if (isMorning) Icons.Default.LightMode else Icons.Default.NightsStay,
                                 contentDescription = null,
                                 tint = accentColor,
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = if (isMorning) "CURRENT RITUAL" else "EVENING RITUAL",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = accentColor,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 2.sp
                             )
                         }
+                        Text(
+                            text = if (isMorning) "Your Morning Ritual" else "Your Evening Ritual",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = FontFamily.Serif,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
-                    // Progress Ring
+                    // Minimal Circular Progress
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp)) {
                         CircularProgressIndicator(
                             progress = { 1f },
                             modifier = Modifier.fillMaxSize(),
                             color = accentColor.copy(alpha = 0.1f),
-                            strokeWidth = 4.dp
+                            strokeWidth = 3.dp
                         )
                         val completedCount = routine.steps.count { it.isCompleted }
                         val totalCount = routine.steps.size
@@ -162,93 +160,63 @@ private fun HeroRitualCard(
                             progress = { progress },
                             modifier = Modifier.fillMaxSize(),
                             color = accentColor,
-                            strokeWidth = 4.dp,
+                            strokeWidth = 3.dp,
                             strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                        )
+                        Text(
+                            text = "$completedCount/$totalCount",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                            fontWeight = FontWeight.Black,
+                            color = accentColor
                         )
                     }
                 }
                 
-                Column {
-                    Text(
-                        text = routine.time.biologicalObjective.uppercase(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = accentColor,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 2.sp
-                    )
-                    Text(
-                        text = if (isMorning) "The Radiance Ritual" else "The Deep Restoration",
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold,
-                        lineHeight = 40.sp
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = routine.time.objectiveDescription,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                        maxLines = 2
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RitualAnalyticsCard() {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth().height(120.dp),
-        shape = RoundedCornerShape(28.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(24.dp).fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(text = "94%", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
                 Text(
-                    text = "CONSISTENCY SCORE", 
-                    style = MaterialTheme.typography.labelSmall, 
-                    fontWeight = FontWeight.Bold, 
-                    modifier = Modifier.alpha(0.5f)
+                    text = if (isMorning) "Every step is an act of care. Prepare for a balanced day ahead." 
+                           else "Unwind and restore. Every step is an act of self-love.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    lineHeight = 22.sp
                 )
             }
-            
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                repeat(7) { i ->
-                    Box(
-                        modifier = Modifier
-                            .size(height = 40.dp, width = 8.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (i < 6) MaterialTheme.colorScheme.primary 
-                                else MaterialTheme.colorScheme.surfaceVariant
-                            )
-                    )
-                }
-            }
         }
     }
 }
 
 @Composable
-fun SectionTitle(title: String, subtitle: String) {
-    Column(modifier = Modifier.padding(bottom = 8.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Serif
-        )
-        Text(
-            text = subtitle.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            letterSpacing = 2.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+private fun DailyInsightBanner() {
+    Surface(
+        color = Color(0xFFFDF0ED), // Soft Peach
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(24.dp)) {
+            Text(
+                text = "Daily Insight",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color(0xFF8B5E3C),
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "\"Patience is the foundation of every lasting ritual.\"",
+                style = MaterialTheme.typography.bodyLarge,
+                fontFamily = FontFamily.Serif,
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                color = Color(0xFF5D4037)
+            )
+            Spacer(Modifier.height(20.dp))
+            Button(
+                onClick = { /* View Progress */ },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B5E57)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("VIEW PROGRESS", fontWeight = FontWeight.Bold)
+            }
+        }
     }
 }
 
