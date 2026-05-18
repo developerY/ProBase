@@ -49,7 +49,7 @@ private fun isColorDark(color: Color): Boolean {
 
 @Composable
 fun WardrobeRoute(
-    uiState: Unit = Unit,
+    filter: String? = null,
     onEvent: (Unit) -> Unit = {},
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -59,7 +59,8 @@ fun WardrobeRoute(
     WardrobeScreen(
         uiState = state,
         onEvent = viewModel::onEvent,
-        navTo = navTo
+        navTo = navTo,
+        filter = filter
     )
 }
 
@@ -68,7 +69,8 @@ fun WardrobeRoute(
 fun WardrobeScreen(
     uiState: WardrobeUiState,
     onEvent: (WardrobeEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    navTo: (KoColorRoute) -> Unit,
+    filter: String? = null
 ) {
     Scaffold(
         topBar = {
@@ -105,8 +107,13 @@ fun WardrobeScreen(
                 Text("Your collection is ready to be curated.", style = MaterialTheme.typography.bodyLarge)
             }
         } else {
-            val groupedItems = remember(uiState.items) {
-                uiState.items.groupBy { it.category }
+            val filteredItems = remember(uiState.items, filter) {
+                if (filter == null) uiState.items
+                else uiState.items.filter { it.category.name.contains(filter, ignoreCase = true) }
+            }
+
+            val groupedItems = remember(filteredItems) {
+                filteredItems.groupBy { it.category }
             }
 
             LazyColumn(

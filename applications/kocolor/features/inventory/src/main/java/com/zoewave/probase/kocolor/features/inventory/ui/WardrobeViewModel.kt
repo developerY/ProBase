@@ -25,7 +25,10 @@ import javax.inject.Inject
 data class WardrobeUiState(
     val items: List<ClothingItem> = emptyList(),
     val isLoading: Boolean = true,
-    val draftItem: ClothingItem = ClothingItem(name = "", category = ClothingCategory.TOPS)
+    val draftItem: ClothingItem = ClothingItem(name = "", category = ClothingCategory.TOPS),
+    val totalInvestment: Double = 0.0,
+    val totalItems: Int = 0,
+    val itemsByCategory: Map<String, Int> = emptyMap()
 )
 
 sealed class WardrobeEvent {
@@ -86,10 +89,17 @@ class WardrobeViewModel @Inject constructor(
         clothingDao.getAllClothing(),
         _draftItem
     ) { entities, draft ->
+        val models = entities.map { it.toModel() }
+        val totalInvestment = models.sumOf { it.price ?: 0.0 }
+        val itemsByCategory = models.groupBy { it.category.name }.mapValues { it.value.size }
+        
         WardrobeUiState(
-            items = entities.map { it.toModel() },
+            items = models,
             isLoading = false,
-            draftItem = draft
+            draftItem = draft,
+            totalInvestment = totalInvestment,
+            totalItems = models.size,
+            itemsByCategory = itemsByCategory
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), WardrobeUiState())
 
