@@ -31,14 +31,6 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.model.*
 
-private fun parseColor(hex: String): Color {
-    return try {
-        Color(android.graphics.Color.parseColor(hex))
-    } catch (e: Exception) {
-        Color.Gray
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutinesScreen(
@@ -67,21 +59,19 @@ fun RoutinesScreen(
                     RoutineSection(
                         routine = uiState.morningRoutine,
                         allProducts = uiState.allProducts,
-                        onEvent = onEvent
+                        onEvent = onEvent,
+                        onEdit = { navTo(KoColorRoute.RoutineEditor(it)) }
                     )
                 }
                 item {
                     RoutineSection(
                         routine = uiState.eveningRoutine,
                         allProducts = uiState.allProducts,
-                        onEvent = onEvent
+                        onEvent = onEvent,
+                        onEdit = { navTo(KoColorRoute.RoutineEditor(it)) }
                     )
                 }
             }
-        }
-
-        if (uiState.showEditDialog && uiState.activeEditRoutine != null) {
-            EditRoutineDialog(uiState, onEvent)
         }
     }
 }
@@ -90,7 +80,8 @@ fun RoutinesScreen(
 private fun RoutineSection(
     routine: BeautyRoutine?,
     allProducts: List<CosmeticItem>,
-    onEvent: (RoutinesEvent) -> Unit
+    onEvent: (RoutinesEvent) -> Unit,
+    onEdit: (Long) -> Unit
 ) {
     if (routine == null) return
     
@@ -119,7 +110,7 @@ private fun RoutineSection(
                     Text(text = routine.time.biologicalObjective, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
                 }
             }
-            IconButton(onClick = { onEvent(RoutinesEvent.StartEditing(routine.id)) }) {
+            IconButton(onClick = { onEdit(routine.id) }) {
                 Icon(Icons.Default.Tune, null, tint = MaterialTheme.colorScheme.primary)
             }
         }
@@ -197,102 +188,6 @@ private enum class StepStatus(val color: Color) {
     ORANGE(Color(0xFFFF9800)),
     RED(Color(0xFFF44336)),
     MISSING(Color.LightGray)
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun EditRoutineDialog(
-    uiState: RoutinesUiState,
-    onEvent: (RoutinesEvent) -> Unit
-) {
-    val routine = uiState.activeEditRoutine ?: return
-    
-    Dialog(
-        onDismissRequest = { onEvent(RoutinesEvent.CloseEditDialog) },
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.surface
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                TopAppBar(
-                    title = { Text("Edit ${routine.title}") },
-                    navigationIcon = {
-                        IconButton(onClick = { onEvent(RoutinesEvent.CloseEditDialog) }) {
-                            Icon(Icons.Default.Close, null)
-                        }
-                    }
-                )
-
-                LazyColumn(
-                    modifier = Modifier.weight(1f).padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-                    // Current Steps
-                    items(routine.steps) { step ->
-                        Column(modifier = Modifier.fillMaxWidth().border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)).padding(16.dp)) {
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = step.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                                IconButton(onClick = { onEvent(RoutinesEvent.RemoveStep(routine.id, step.id)) }) {
-                                    Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error)
-                                }
-                            }
-                            
-                            Text("LINKED PRODUCTS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
-                            Spacer(Modifier.height(8.dp))
-                            
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                items(uiState.allProducts) { product ->
-                                    val isLinked = step.productIds.contains(product.id)
-                                    Box(
-                                        modifier = Modifier
-                                            .size(48.dp)
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(if (isLinked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
-                                            .clickable { onEvent(RoutinesEvent.LinkProduct(routine.id, step.id, product.id)) },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        if (product.imageUrl != null) {
-                                            AsyncImage(model = product.imageUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                                        } else {
-                                            Box(modifier = Modifier.fillMaxSize().background(product.colorHex?.let { parseColor(it) } ?: Color.Gray))
-                                        }
-                                        if (isLinked) Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)), contentAlignment = Alignment.Center) {
-                                            Icon(Icons.Default.Check, null, tint = Color.White, modifier = Modifier.size(20.dp))
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Add New Step
-                    item {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Text("ADD NEW STEP", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
-                            OutlinedTextField(
-                                value = uiState.draftStep.title,
-                                onValueChange = { onEvent(RoutinesEvent.UpdateDraftStep(uiState.draftStep.copy(title = it))) },
-                                label = { Text("Step Title (e.g. Double Cleanse)") },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            Button(
-                                onClick = { onEvent(RoutinesEvent.AddStep(routine.id)) },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Icon(Icons.Default.Add, null)
-                                Spacer(Modifier.width(8.dp))
-                                Text("Add Step")
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 @Preview(showBackground = true)

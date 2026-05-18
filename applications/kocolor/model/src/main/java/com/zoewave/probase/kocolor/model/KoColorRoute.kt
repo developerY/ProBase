@@ -29,6 +29,9 @@ sealed class KoColorRoute {
     data object Routines : KoColorRoute()
 
     @Serializable
+    data class RoutineEditor(val routineId: Long) : KoColorRoute()
+
+    @Serializable
     data class Cosmetics(val filter: String? = null) : KoColorRoute()
 
     @Serializable

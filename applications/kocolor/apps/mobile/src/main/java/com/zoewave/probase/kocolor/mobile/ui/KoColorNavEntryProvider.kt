@@ -29,6 +29,7 @@ import com.zoewave.probase.kocolor.features.inventory.ui.*
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
+import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
 import com.zoewave.probase.kocolor.mobile.features.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
@@ -76,6 +77,18 @@ fun koColorNavEntryProvider(
                 uiState = state,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.RoutineEditor -> NavEntry(route) {
+            val viewModel: RoutinesViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            androidx.compose.runtime.LaunchedEffect(route.routineId) {
+                viewModel.onEvent(com.zoewave.probase.kocolor.features.routines.ui.RoutinesEvent.StartEditing(route.routineId))
+            }
+            RoutineEditorScreen(
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                onBack = onBack
             )
         }
         is KoColorRoute.VanityLanding -> NavEntry(route) {
