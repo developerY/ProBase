@@ -88,7 +88,7 @@ fun koColorNavEntryProvider(
                 uiState = state,
                 onEvent = viewModel::onEvent,
                 onBack = onBack,
-                onEdit = { id -> onNavigateTo(KoColorRoute.RoutineEditor(id)) }
+                onEdit = { stepId -> onNavigateTo(KoColorRoute.RoutineEditor(route.routineId, stepId)) }
             )
         }
         is KoColorRoute.RoutineEditor -> NavEntry(route) {
@@ -100,7 +100,8 @@ fun koColorNavEntryProvider(
             RoutineEditorScreen(
                 uiState = state,
                 onEvent = viewModel::onEvent,
-                onBack = onBack
+                onBack = onBack,
+                initialStepId = route.stepId
             )
         }
         is KoColorRoute.VanityLanding -> NavEntry(route) {

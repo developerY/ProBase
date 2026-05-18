@@ -38,6 +38,7 @@ sealed class RoutinesEvent {
     data class AddStep(val routineId: Long) : RoutinesEvent()
     data class RemoveStep(val routineId: Long, val stepId: String) : RoutinesEvent()
     data class LinkProduct(val routineId: Long, val stepId: String, val productId: Long) : RoutinesEvent()
+    data class ReorderSteps(val routineId: Long, val fromIndex: Int, val toIndex: Int) : RoutinesEvent()
 }
 
 @HiltViewModel
@@ -121,6 +122,7 @@ class RoutinesViewModel @Inject constructor(
             is RoutinesEvent.AddStep -> addStepToActive(event.routineId)
             is RoutinesEvent.RemoveStep -> removeStepFromActive(event.routineId, event.stepId)
             is RoutinesEvent.LinkProduct -> linkProductToStep(event.routineId, event.stepId, event.productId)
+            is RoutinesEvent.ReorderSteps -> reorderSteps(event.routineId, event.fromIndex, event.toIndex)
         }
     }
 
@@ -183,6 +185,20 @@ class RoutinesViewModel @Inject constructor(
         }
         val updatedRoutine = routine.copy(steps = updatedSteps)
         updateRoutine(updatedRoutine)
+    }
+
+    private fun reorderSteps(routineId: Long, fromIndex: Int, toIndex: Int) {
+        val currentRoutine = (uiState.value.morningRoutine ?: uiState.value.eveningRoutine)?.takeIf { it.id == routineId }
+            ?: return
+        
+        val updatedSteps = currentRoutine.steps.toMutableList().apply {
+            val item = removeAt(fromIndex)
+            add(toIndex, item)
+        }.mapIndexed { index, step ->
+            step.copy(layeringOrder = index)
+        }
+        
+        updateRoutine(currentRoutine.copy(steps = updatedSteps))
     }
 
     private fun RoutineEntity.toModel() = BeautyRoutine(

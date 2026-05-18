@@ -1,11 +1,14 @@
 package com.zoewave.probase.kocolor.features.routines.ui
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -13,17 +16,20 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.model.*
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,13 +38,15 @@ fun RoutineDetailScreen(
     uiState: RoutinesUiState,
     onEvent: (RoutinesEvent) -> Unit,
     onBack: () -> Unit,
-    onEdit: (Long) -> Unit
+    onEdit: (String) -> Unit
 ) {
     val routine = if (uiState.morningRoutine?.id == routineId) uiState.morningRoutine else uiState.eveningRoutine
     if (routine == null) return
 
     val isMorning = routine.time == RoutineTime.MORNING
     val accentColor = if (isMorning) Color(0xFF6B705C) else Color(0xFF457B9D)
+
+    var isReorderMode by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -48,13 +56,24 @@ fun RoutineDetailScreen(
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                 },
                 actions = {
-                    IconButton(onClick = { onEdit(routine.id) }) { Icon(Icons.Default.Tune, null) }
+                    IconButton(onClick = { isReorderMode = !isReorderMode }) {
+                        Icon(if (isReorderMode) Icons.Default.Check else Icons.Default.Reorder, null)
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
+        val lazyListState = rememberLazyListState()
+        val reorderableState = rememberReorderableLazyListState(
+            lazyListState = lazyListState,
+            onMove = { from, to ->
+                onEvent(RoutinesEvent.ReorderSteps(routineId, from.index - 1, to.index - 1))
+            }
+        )
+
         LazyColumn(
+            state = lazyListState,
             modifier = Modifier.padding(padding).fillMaxSize(),
             contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -91,7 +110,6 @@ fun RoutineDetailScreen(
                             )
                         }
                         
-                        // Progress Indicator
                         val completedCount = routine.steps.count { it.isCompleted }
                         val totalCount = routine.steps.size
                         val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
@@ -131,31 +149,18 @@ fun RoutineDetailScreen(
                 }
             }
 
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    Text(
-                        text = if (isMorning) "AM Essentials" else "Evening Ritual",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "5 mins remaining",
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.alpha(0.5f)
+            itemsIndexed(routine.steps, key = { _, step -> step.id }) { index, step ->
+                ReorderableItem(reorderableState, key = step.id) { isDragging ->
+                    val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
+                    
+                    SplitRitualStep(
+                        step = step,
+                        isReorderMode = isReorderMode,
+                        onToggle = { onEvent(RoutinesEvent.ToggleStep(routine.id, step.id)) },
+                        onInfoClick = { onEdit(step.id) },
+                        modifier = Modifier.shadow(elevation).draggableHandle()
                     )
                 }
-            }
-
-            items(routine.steps) { step ->
-                CleanRitualStep(
-                    step = step,
-                    onToggle = { onEvent(RoutinesEvent.ToggleStep(routine.id, step.id)) },
-                    onInfoClick = { onEdit(routine.id) } // For now, taking to editor. We'll refine the specific step-focus in the editor.
-                )
             }
             
             item { DailyInsightSmall() }
@@ -166,73 +171,91 @@ fun RoutineDetailScreen(
 }
 
 @Composable
-private fun CleanRitualStep(
+private fun SplitRitualStep(
     step: RoutineStep,
+    isReorderMode: Boolean,
     onToggle: () -> Unit,
-    onInfoClick: () -> Unit
+    onInfoClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val isCompleted = step.isCompleted
     val backgroundColor = if (isCompleted) Color(0xFFE5E7E1) else Color.White
     val iconColor = if (isCompleted) Color(0xFF5A5F4B) else MaterialTheme.colorScheme.outlineVariant
 
     Surface(
-        onClick = onToggle,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = backgroundColor,
         border = if (!isCompleted) BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)) else null
     ) {
         Row(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                color = if (isCompleted) iconColor else Color.Transparent,
-                shape = CircleShape,
-                modifier = Modifier.size(24.dp).border(1.5.dp, iconColor, CircleShape)
+            // LEFT ZONE: Mark Done
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .clickable(enabled = !isReorderMode, onClick = onToggle)
+                    .padding(horizontal = 20.dp, vertical = 24.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    if (isCompleted) Icon(Icons.Default.Check, null, tint = Color.White, modifier = Modifier.size(16.dp))
-                }
-            }
-            
-            Spacer(Modifier.width(20.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = step.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.alpha(if (isCompleted) 0.6f else 1f)
-                )
-                Text(
-                    text = "Gentle care for healthy skin.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-                
-                Spacer(Modifier.height(8.dp))
-                
-                Surface(
-                    color = Color.Black.copy(alpha = 0.05f),
-                    shape = RoundedCornerShape(4.dp)
-                ) {
-                    Text(
-                        text = "STEP ${step.layeringOrder + 1}",
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp).alpha(0.4f),
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
-                        fontWeight = FontWeight.Black
+                if (isReorderMode) {
+                    Icon(
+                        Icons.Default.DragHandle, 
+                        null, 
+                        modifier = Modifier.size(24.dp).alpha(0.3f)
                     )
+                } else {
+                    Surface(
+                        color = if (isCompleted) iconColor else Color.Transparent,
+                        shape = CircleShape,
+                        modifier = Modifier.size(28.dp).border(1.5.dp, iconColor, CircleShape)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            if (isCompleted) Icon(Icons.Default.Check, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                        }
+                    }
                 }
             }
 
-            IconButton(onClick = onInfoClick) {
-                Icon(
-                    imageVector = Icons.Outlined.Info,
-                    contentDescription = "Details",
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                    modifier = Modifier.size(20.dp)
-                )
+            // Sublte Vertical Divider/Break
+            VerticalDivider(
+                modifier = Modifier.fillMaxHeight().padding(vertical = 16.dp),
+                color = if (isCompleted) Color.Black.copy(alpha = 0.05f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
+            )
+
+            // RIGHT ZONE: Info / Knowledge Hub
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clickable(onClick = onInfoClick)
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = step.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.alpha(if (isCompleted) 0.6f else 1f)
+                    )
+                    Text(
+                        text = "Gentle care for healthy skin.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                }
+
+                if (!isReorderMode) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = "Details",
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }
