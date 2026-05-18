@@ -62,6 +62,23 @@ fun RoutineDetailScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
+        },
+        floatingActionButton = {
+            if (!isReorderMode) {
+                LargeFloatingActionButton(
+                    onClick = { onEdit("new_step") },
+                    shape = CircleShape,
+                    containerColor = accentColor,
+                    contentColor = Color.White,
+                    modifier = Modifier.padding(bottom = 16.dp, end = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add Ritual Stage",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
         }
     ) { padding ->
         val lazyListState = rememberLazyListState()
@@ -245,15 +262,6 @@ private fun SplitRitualStep(
                         text = "Gentle care for healthy skin.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                }
-
-                if (!isReorderMode) {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = "Details",
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

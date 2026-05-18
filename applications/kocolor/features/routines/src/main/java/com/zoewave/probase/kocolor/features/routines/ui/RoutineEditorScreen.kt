@@ -41,7 +41,12 @@ fun RoutineEditorScreen(
 ) {
     val routine = uiState.activeEditRoutine ?: return
     var editingStepId by remember { mutableStateOf(initialStepId) }
-    var selectionStage by remember { mutableStateOf(ProductSelectionStage.HeroPage) }
+    
+    // Auto-transition to "MainForm" if we're adding a new step
+    var selectionStage by remember { 
+        mutableStateOf(if (initialStepId == "new_step") ProductSelectionStage.MainForm else ProductSelectionStage.HeroPage) 
+    }
+
     var selectedGroup by remember { mutableStateOf<String?>(null) }
     var selectedCategory by remember { mutableStateOf<CosmeticCategory?>(null) }
 
