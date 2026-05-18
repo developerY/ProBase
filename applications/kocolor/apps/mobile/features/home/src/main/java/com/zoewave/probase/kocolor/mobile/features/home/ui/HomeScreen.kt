@@ -1,82 +1,37 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Bedtime
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Checkroom
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.VerticalDivider
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.health.core.SkinInsight
-import com.zoewave.probase.kocolor.model.BeautyRoutine
-import com.zoewave.probase.kocolor.model.FashionProfile
-import com.zoewave.probase.kocolor.model.KoColorRoute
+import com.zoewave.probase.kocolor.mobile.features.home.ui.components.*
+import com.zoewave.probase.kocolor.model.*
 
 @Composable
 fun HomeUiRoute(
@@ -186,49 +141,6 @@ fun HomeScreen(
             
             item { Spacer(modifier = Modifier.height(48.dp)) }
         }
-    }
-}
-
-@Composable
-private fun LuxuryBrandLogo() {
-    val infiniteTransition = rememberInfiniteTransition(label = "LuxuryLight")
-    val lightX by infiniteTransition.animateFloat(
-        initialValue = -150f,
-        targetValue = 150f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 6000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "lightX"
-    )
-
-    // Calculate shadow offset based on light position
-    val shadowOffsetX = -(lightX / 10).dp
-    val shadowAlpha = (0.3f - (kotlin.math.abs(lightX) / 1000f)).coerceAtLeast(0.1f)
-
-    Box(contentAlignment = Alignment.Center) {
-        // Subtle moving light source (Sun)
-        Box(
-            modifier = Modifier
-                .offset { IntOffset(lightX.toInt(), -20) }
-                .size(40.dp)
-                .blur(20.dp)
-                .background(Color(0xFFFFF9C4).copy(alpha = 0.4f), CircleShape)
-        )
-
-        Text(
-            text = "KoColor",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                shadow = androidx.compose.ui.graphics.Shadow(
-                    color = Color.Black.copy(alpha = shadowAlpha),
-                    offset = androidx.compose.ui.geometry.Offset(shadowOffsetX.value, 4f),
-                    blurRadius = 8f
-                )
-            ),
-            fontWeight = FontWeight.Black,
-            letterSpacing = (-1).sp,
-            color = MaterialTheme.colorScheme.onSurface
-        )
     }
 }
 
@@ -352,85 +264,6 @@ private fun QuickActionCard(title: String, subtitle: String, icon: ImageVector, 
             Spacer(Modifier.height(12.dp))
             Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Text(text = subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-@Composable
-fun RoutineSummaryCard(routine: BeautyRoutine, isDaytime: Boolean, onClick: () -> Unit) {
-    val completedCount = routine.steps.count { it.isCompleted }
-    val totalCount = routine.steps.size
-    val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
-    val nextStep = routine.steps.sortedBy { it.layeringOrder }.find { !it.isCompleted }
-    val cardColor = if (isDaytime) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) else MaterialTheme.colorScheme.surfaceVariant
-
-    Surface(modifier = Modifier.fillMaxWidth().clickable { onClick() }, shape = RoundedCornerShape(32.dp), color = cardColor) {
-        Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                val displayObjective = routine.biologicalObjective ?: routine.time.biologicalObjective
-                Text(text = "Objective: $displayObjective", style = MaterialTheme.typography.labelMedium, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "Next Step", style = MaterialTheme.typography.labelSmall, letterSpacing = 1.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = nextStep?.title ?: "Ritual Complete", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                }
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(56.dp)) {
-                    CircularProgressIndicator(progress = { 1f }, modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f), strokeWidth = 5.dp)
-                    CircularProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.primary, strokeWidth = 5.dp, strokeCap = androidx.compose.ui.graphics.StrokeCap.Round)
-                    Text(text = "$completedCount/$totalCount", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun InventoryDashboard(uiState: HomeUiState, navTo: (KoColorRoute) -> Unit) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(32.dp), onClick = { navTo(KoColorRoute.VanityLanding) }) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Icon(Icons.Default.Face, null, modifier = Modifier.size(160.dp).align(Alignment.CenterEnd).offset(x = 40.dp, y = 40.dp).alpha(0.05f), tint = MaterialTheme.colorScheme.primary)
-            Column(modifier = Modifier.padding(24.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(text = uiState.totalCosmetics.toString(), style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
-                        Text(text = "TOTAL PRODUCTS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-                Spacer(modifier = Modifier.height(24.dp))
-                Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    uiState.popularCosmetics.forEach { item ->
-                        Box(modifier = Modifier.size(64.dp).clip(RoundedCornerShape(16.dp)).background(item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant).border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
-                            if (item.imageUrl != null) AsyncImage(model = item.imageUrl, contentDescription = item.name, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun WardrobeDashboard(uiState: HomeUiState, navTo: (KoColorRoute) -> Unit) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(32.dp), onClick = { navTo(KoColorRoute.WardrobeLanding) }) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Icon(Icons.Default.Checkroom, null, modifier = Modifier.size(160.dp).align(Alignment.CenterEnd).offset(x = 40.dp, y = 40.dp).alpha(0.05f), tint = MaterialTheme.colorScheme.primary)
-            Column(modifier = Modifier.padding(24.dp)) {
-                Column {
-                    Text(text = uiState.totalClothing.toString(), style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
-                    Text(text = "TOTAL PIECES", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Spacer(modifier = Modifier.height(24.dp))
-                Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    uiState.popularClothing.forEach { item ->
-                        Box(modifier = Modifier.size(64.dp).clip(RoundedCornerShape(16.dp)).background(item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant).border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
-                            if (item.imageUrl != null) AsyncImage(model = item.imageUrl, contentDescription = item.name, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                        }
-                    }
-                }
-            }
         }
     }
 }
