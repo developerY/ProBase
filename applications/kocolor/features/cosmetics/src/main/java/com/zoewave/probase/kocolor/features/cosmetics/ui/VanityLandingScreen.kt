@@ -1,10 +1,15 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,11 +32,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.kocolor.model.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun VanityLandingScreen(
     uiState: CosmeticsUiState,
@@ -97,63 +100,40 @@ fun VanityLandingScreen(
                 }
             }
 
-            // 3. Categories Circular
+            // 3. Category Hero Cards
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     Text("CATEGORIES", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                     
-                    // Professional Category Chips
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        maxItemsInEachRow = 3
-                    ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         val sections = listOf(
-                            "Face" to Icons.Default.Face,
-                            "Eyes" to Icons.Default.Visibility,
-                            "Lips" to Icons.Default.Favorite,
-                            "Cheeks" to Icons.Default.AutoAwesome
+                            "Face" to (Icons.Default.Face to Color(0xFFFDEEF4)),
+                            "Eyes" to (Icons.Default.Visibility to Color(0xFFE8F1FD)),
+                            "Lips" to (Icons.Default.Favorite to Color(0xFFFEECEB)),
+                            "Cheeks" to (Icons.Default.AutoAwesome to Color(0xFFF3EBFD))
                         )
                         
-                        sections.forEach { (name, icon) ->
-                            val count = uiState.cosmeticsByGroup.entries.find { it.key.contains(name, ignoreCase = true) }?.value ?: 0
-                            FilterChip(
-                                selected = false,
-                                onClick = { navTo(KoColorRoute.CosmeticCategoryCover(categoryName = name)) },
-                                label = {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(text = name, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-                                        if (count > 0) {
-                                            Spacer(Modifier.width(6.dp))
-                                            Surface(
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                                                shape = CircleShape
-                                            ) {
-                                                Text(
-                                                    text = count.toString(),
-                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    fontWeight = FontWeight.Black
-                                                )
-                                            }
-                                        }
-                                    }
-                                },
-                                leadingIcon = { Icon(icon, null, modifier = Modifier.size(18.dp)) },
-                                shape = RoundedCornerShape(16.dp),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    containerColor = MaterialTheme.colorScheme.surface,
-                                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    iconColor = MaterialTheme.colorScheme.primary
-                                ),
-                                border = FilterChipDefaults.filterChipBorder(
-                                    enabled = true,
-                                    selected = false,
-                                    borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                                    borderWidth = 1.dp
-                                )
-                            )
+                        sections.chunked(2).forEach { rowSections ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                rowSections.forEach { (name, props) ->
+                                    val (icon, color) = props
+                                    val count = uiState.cosmeticsByGroup.entries.find { it.key.contains(name, ignoreCase = true) }?.value ?: 0
+                                    CategoryHeroCard(
+                                        name = name,
+                                        icon = icon,
+                                        count = count,
+                                        baseColor = color,
+                                        onClick = { navTo(KoColorRoute.CosmeticCategoryCover(categoryName = name)) },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                                if (rowSections.size == 1) {
+                                    Spacer(Modifier.weight(1f))
+                                }
+                            }
                         }
                     }
                 }
@@ -191,6 +171,68 @@ fun VanityLandingScreen(
 }
 
 @Composable
+private fun CategoryHeroCard(
+    name: String,
+    icon: ImageVector,
+    count: Int,
+    baseColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier.height(140.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = baseColor.copy(alpha = 0.5f)),
+        border = BorderStroke(1.dp, baseColor.copy(alpha = 0.8f))
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Ambient Icon Watermark
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 20.dp, y = 20.dp)
+                    .size(120.dp)
+                    .alpha(0.1f),
+                tint = Color.Black
+            )
+
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Surface(
+                    color = Color.White.copy(alpha = 0.6f),
+                    shape = CircleShape,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(icon, null, modifier = Modifier.size(18.dp), tint = Color.Black.copy(alpha = 0.7f))
+                    }
+                }
+                
+                Column {
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif
+                    )
+                    Text(
+                        text = "$count ITEMS",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.alpha(0.5f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun SummaryStatCard(
     label: String,
     value: String,
@@ -198,16 +240,16 @@ private fun SummaryStatCard(
     color: Color = MaterialTheme.colorScheme.primary,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    Card(
         modifier = modifier,
-        color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(24.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Surface(
                 color = color.copy(alpha = 0.1f),
-                shape = CircleShape,
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.size(40.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -215,34 +257,23 @@ private fun SummaryStatCard(
                 }
             }
             Spacer(Modifier.height(16.dp))
-            Text(text = value, style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Black)
-            Text(text = label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = value, style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold)
+            Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
 @Composable
-private fun CategoryCircle(label: String, icon: ImageVector, onClick: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Surface(
-            modifier = Modifier.size(64.dp).clickable { onClick() },
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surface,
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(icon, null, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onSurface)
-            }
-        }
-        Text(text = label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Medium)
-    }
-}
-
-@Composable
-private fun RecentProductCard(item: CosmeticItem, onClick: () -> Unit) {
+private fun RecentProductCard(
+    item: CosmeticItem,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.width(220.dp).aspectRatio(0.8f).clickable { onClick() },
-        shape = RoundedCornerShape(28.dp)
+        modifier = Modifier
+            .width(200.dp)
+            .height(260.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(24.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (item.imageUrl != null) {
@@ -253,29 +284,46 @@ private fun RecentProductCard(item: CosmeticItem, onClick: () -> Unit) {
                     contentScale = ContentScale.Crop
                 )
             } else {
-                Box(modifier = Modifier.fillMaxSize().background(item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant))
-            }
-            
-            // Badge Overlay
-            Surface(
-                modifier = Modifier.padding(16.dp).align(Alignment.TopStart),
-                color = Color.White.copy(alpha = 0.9f),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = item.category.displayName.uppercase(),
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                    fontWeight = FontWeight.Black
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color.Gray.copy(alpha = 0.1f), Color.Gray.copy(alpha = 0.3f))
+                            )
+                        )
                 )
             }
-
-            // Scrim
-            Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f)), startY = 300f)))
             
-            Column(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
-                Text(text = item.name, style = MaterialTheme.typography.titleMedium, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
-                Text(text = item.brand, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f))
+            // Category Badge
+            Surface(
+                modifier = Modifier.padding(16.dp),
+                color = Color.White.copy(alpha = 0.9f),
+                shape = CircleShape
+            ) {
+                Text(
+                    text = item.category.name.uppercase(),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 9.sp
+                )
+            }
+            
+            // Info Overlay
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f))
+                        )
+                    )
+                    .padding(16.dp)
+            ) {
+                Text(text = item.name, color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(text = item.brand, color = Color.White.copy(alpha = 0.7f), style = MaterialTheme.typography.labelSmall)
             }
         }
     }
@@ -286,11 +334,8 @@ private fun RecentProductCard(item: CosmeticItem, onClick: () -> Unit) {
 private fun VanityLandingScreenPreview() {
     VanityLandingScreen(
         uiState = CosmeticsUiState(
-            totalCosmetics = 142,
-            expiringCosmeticsCount = 3,
-            items = listOf(
-                CosmeticItem(id = 1, name = "Serum", brand = "Luxury", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION)
-            )
+            totalCosmetics = 34,
+            cosmeticsByGroup = mapOf("Face" to 7, "Eyes" to 9, "Lips" to 7, "Cheeks" to 5)
         ),
         onEvent = {},
         navTo = {}
