@@ -42,6 +42,19 @@ fun RoutineEditorScreen(
     val routine = uiState.activeEditRoutine ?: return
     var editingStepId by remember { mutableStateOf(initialStepId) }
     
+    // Draft for adding a new step
+    var newStepDraft by remember { 
+        mutableStateOf(
+            if (initialStepId == "new_step") {
+                RoutineStep(
+                    id = java.util.UUID.randomUUID().toString(),
+                    title = "New Ritual Stage",
+                    layeringOrder = routine.steps.size
+                )
+            } else null
+        )
+    }
+
     // Auto-transition to "MainForm" if we're adding a new step
     var selectionStage by remember { 
         mutableStateOf(if (initialStepId == "new_step") ProductSelectionStage.MainForm else ProductSelectionStage.HeroPage) 
@@ -50,7 +63,7 @@ fun RoutineEditorScreen(
     var selectedGroup by remember { mutableStateOf<String?>(null) }
     var selectedCategory by remember { mutableStateOf<CosmeticCategory?>(null) }
 
-    val activeStep = routine.steps.find { it.id == editingStepId }
+    val activeStep = newStepDraft ?: routine.steps.find { it.id == editingStepId }
 
     Scaffold(
         topBar = {
@@ -59,7 +72,7 @@ fun RoutineEditorScreen(
                     Text(
                         text = when (selectionStage) {
                             ProductSelectionStage.HeroPage -> if (editingStepId == null) "Curate Ritual" else "Ritual Knowledge"
-                            ProductSelectionStage.MainForm -> "Edit Stage"
+                            ProductSelectionStage.MainForm -> if (newStepDraft != null) "New Stage" else "Edit Stage"
                             ProductSelectionStage.Group -> "Select Group"
                             ProductSelectionStage.Category -> "Select Category"
                             ProductSelectionStage.Item -> "Select Product"
@@ -74,7 +87,9 @@ fun RoutineEditorScreen(
                             ProductSelectionStage.HeroPage -> {
                                 if (editingStepId != null) editingStepId = null else onBack()
                             }
-                            ProductSelectionStage.MainForm -> selectionStage = ProductSelectionStage.HeroPage
+                            ProductSelectionStage.MainForm -> {
+                                if (newStepDraft != null) onBack() else selectionStage = ProductSelectionStage.HeroPage
+                            }
                             ProductSelectionStage.Group -> selectionStage = ProductSelectionStage.MainForm
                             ProductSelectionStage.Category -> selectionStage = ProductSelectionStage.Group
                             ProductSelectionStage.Item -> selectionStage = ProductSelectionStage.Category
@@ -89,7 +104,13 @@ fun RoutineEditorScreen(
                 },
                 actions = {
                     if (selectionStage == ProductSelectionStage.HeroPage || selectionStage == ProductSelectionStage.MainForm) {
-                        TextButton(onClick = { onEvent(RoutinesEvent.CloseEditDialog); onBack() }) {
+                        TextButton(onClick = { 
+                            if (newStepDraft != null) {
+                                onEvent(RoutinesEvent.UpdateRoutine(routine.copy(steps = routine.steps + newStepDraft!!)))
+                            }
+                            onEvent(RoutinesEvent.CloseEditDialog); 
+                            onBack() 
+                        }) {
                             Text("Save", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                         }
                     }
@@ -98,7 +119,7 @@ fun RoutineEditorScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            if (editingStepId == null) {
+            if (editingStepId == null && newStepDraft == null) {
                 // Step List Overview
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -134,10 +155,24 @@ fun RoutineEditorScreen(
                         EditStepForm(
                             step = activeStep,
                             allProducts = uiState.allProducts,
+                            onTitleChange = { newTitle ->
+                                if (newStepDraft != null) {
+                                    newStepDraft = newStepDraft!!.copy(title = newTitle)
+                                } else {
+                                    // Update existing step logic would go here, 
+                                    // but currently steps are immutable within the session 
+                                    // unless we use a broader state or a draft for all edits.
+                                    // For now, let's just support the new step draft.
+                                }
+                            },
                             onProductClick = { selectionStage = ProductSelectionStage.Group },
                             onRemoveStep = { 
-                                onEvent(RoutinesEvent.RemoveStep(routine.id, activeStep.id))
-                                editingStepId = null
+                                if (newStepDraft != null) {
+                                    onBack()
+                                } else {
+                                    onEvent(RoutinesEvent.RemoveStep(routine.id, activeStep.id))
+                                    editingStepId = null
+                                }
                             }
                         )
                     }
@@ -160,7 +195,16 @@ fun RoutineEditorScreen(
                             products = uiState.allProducts.filter { it.category == selectedCategory },
                             selectedIds = activeStep.productIds
                         ) { productId ->
-                            onEvent(RoutinesEvent.LinkProduct(routine.id, activeStep.id, productId))
+                            if (newStepDraft != null) {
+                                val newIds = if (newStepDraft!!.productIds.contains(productId)) {
+                                    newStepDraft!!.productIds - productId
+                                } else {
+                                    newStepDraft!!.productIds + productId
+                                }
+                                newStepDraft = newStepDraft!!.copy(productIds = newIds)
+                            } else {
+                                onEvent(RoutinesEvent.LinkProduct(routine.id, activeStep.id, productId))
+                            }
                             selectionStage = ProductSelectionStage.MainForm
                         }
                     }
@@ -378,6 +422,7 @@ private fun StepHeroPage(
 private fun EditStepForm(
     step: RoutineStep,
     allProducts: List<CosmeticItem>,
+    onTitleChange: (String) -> Unit,
     onProductClick: () -> Unit,
     onRemoveStep: () -> Unit
 ) {
@@ -397,11 +442,21 @@ private fun EditStepForm(
                     modifier = Modifier.alpha(0.4f),
                     letterSpacing = 1.sp
                 )
-                Text(
-                    text = step.title,
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                
+                TextField(
+                    value = step.title,
+                    onValueChange = onTitleChange,
+                    textStyle = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    placeholder = { Text("Stage Title", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.alpha(0.3f)) }
                 )
+
                 HorizontalDivider(modifier = Modifier.alpha(0.1f))
             }
         }
