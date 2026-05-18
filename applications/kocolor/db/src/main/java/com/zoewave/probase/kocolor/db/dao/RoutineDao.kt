@@ -16,6 +16,9 @@ interface RoutineDao {
     @Query("SELECT * FROM beauty_routines WHERE date >= :startOfDay AND date < :endOfDay")
     fun getRoutinesForDay(startOfDay: Long, endOfDay: Long): Flow<List<RoutineEntity>>
 
+    @Query("SELECT * FROM beauty_routines WHERE id = :id")
+    fun getRoutineById(id: Long): Flow<RoutineEntity?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRoutine(routine: RoutineEntity)
 
