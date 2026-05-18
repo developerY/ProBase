@@ -4,7 +4,16 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class ClothingCategory {
-    TOPS, BOTTOMS, DRESSES, OUTERWEAR, SHOES, ACCESSORIES, OTHER
+    TOPS, BOTTOMS, SHOES, ACCESSORIES, OTHER;
+
+    val displayName: String
+        get() = when (this) {
+            TOPS -> "Tops"
+            BOTTOMS -> "Bottoms"
+            SHOES -> "Shoes"
+            ACCESSORIES -> "Accessories"
+            OTHER -> "Other"
+        }
 }
 
 @Serializable
