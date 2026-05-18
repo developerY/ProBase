@@ -41,7 +41,9 @@ data class HomeUiState(
     val beautyTip: String = "",
     val totalCosmetics: Int = 0,
     val totalClothing: Int = 0,
+    val expiringCosmeticsCount: Int = 0,
     val cosmeticsByGroup: Map<String, Int> = emptyMap(),
+    val clothingByCategory: Map<String, Int> = emptyMap(),
     val wellnessInsights: List<SkinInsight> = emptyList(),
     val lastNightSleepDuration: String? = null,
     val hydrationLiters: Double = 0.0,
@@ -154,6 +156,16 @@ class HomeViewModel @Inject constructor(
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val cosmeticsByGroup = cosmetics.groupBy { it.category.groupName }.mapValues { it.value.size }
+        val clothingByCategory = clothing.groupBy { it.category.name }.mapValues { it.value.size }
+
+        val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
+        val now = System.currentTimeMillis()
+        val expiringCount = cosmetics.count { entity ->
+            val item = entity.toModel()
+            item.estimatedExpiry?.let { expiry ->
+                (expiry - now) in 0..thirtyDaysInMillis
+            } ?: false
+        }
         
         val insights = wellnessEngine.analyzeTriggers(
             sleepHours = healthData.first ?: 8f,
@@ -172,7 +184,9 @@ class HomeViewModel @Inject constructor(
             beautyTip = tip,
             totalCosmetics = cosmetics.size,
             totalClothing = clothing.size,
+            expiringCosmeticsCount = expiringCount,
             cosmeticsByGroup = cosmeticsByGroup,
+            clothingByCategory = clothingByCategory,
             wellnessInsights = insights,
             lastNightSleepDuration = healthData.second,
             hydrationLiters = healthData.third,
