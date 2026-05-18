@@ -1,46 +1,42 @@
 package com.zoewave.probase.kocolor.features.routines.ui
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
-import com.zoewave.probase.kocolor.model.BeautyRoutine
-import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.kocolor.model.RoutineStep
-import com.zoewave.probase.kocolor.model.RoutineTime
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImage
+import com.zoewave.probase.kocolor.model.*
 
-@Composable
-fun RoutinesUiRoute(
-    uiState: Unit = Unit,
-    onEvent: (Unit) -> Unit = {},
-    navTo: (KoColorRoute) -> Unit
-) {
-    val viewModel: RoutinesViewModel = hiltViewModel()
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
-
-    RoutinesScreen(
-        uiState = state,
-        onEvent = viewModel::onEvent,
-        navTo = navTo
-    )
+private fun parseColor(hex: String): Color {
+    return try {
+        Color(android.graphics.Color.parseColor(hex))
+    } catch (e: Exception) {
+        Color.Gray
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,235 +48,263 @@ fun RoutinesScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Beauty Routines") },
-                navigationIcon = {
-                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
+            CenterAlignedTopAppBar(
+                title = { Text("AM/PM Rituals", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) }
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            when (uiState) {
-                RoutinesUiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-                is RoutinesUiState.Success -> {
-                    RoutinesContent(
-                        uiState = uiState.morningRoutine to uiState.eveningRoutine,
-                        onEvent = onEvent,
-                        navTo = navTo
-                    )
-                }
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
-        }
-    }
-}
-
-@Composable
-fun RoutinesContent(
-    uiState: Pair<BeautyRoutine?, BeautyRoutine?>,
-    onEvent: (RoutinesEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
-    val morningRoutine = uiState.first
-    val eveningRoutine = uiState.second
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            BeautyAdviceCard(
-                uiState = Unit,
-                onEvent = {},
-                navTo = {}
-            )
-        }
-
-        if (morningRoutine != null) {
-            item {
-                RoutineCard(
-                    uiState = morningRoutine,
-                    onEvent = { stepId -> onEvent(RoutinesEvent.ToggleStep(morningRoutine, stepId)) },
-                    navTo = navTo
-                )
-            }
-        }
-
-        if (eveningRoutine != null) {
-            item {
-                RoutineCard(
-                    uiState = eveningRoutine,
-                    onEvent = { stepId -> onEvent(RoutinesEvent.ToggleStep(eveningRoutine, stepId)) },
-                    navTo = navTo
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun BeautyAdviceCard(
-    uiState: Unit,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
-    val advice = remember { RoutineDefaults.morningAdvice.random() } // Quick fix for build, will match time in Home
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Lightbulb, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Beauty Tip of the Day", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = advice,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
-            )
-        }
-    }
-}
-
-@Composable
-fun RoutineCard(
-    uiState: BeautyRoutine,
-    onEvent: (String) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
-    var expanded by remember { mutableStateOf(true) }
-
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+        } else {
+            LazyColumn(
+                modifier = Modifier.padding(padding).fillMaxSize(),
+                contentPadding = PaddingValues(24.dp),
+                verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
+                item {
+                    RoutineSection(
+                        routine = uiState.morningRoutine,
+                        allProducts = uiState.allProducts,
+                        onEvent = onEvent
+                    )
+                }
+                item {
+                    RoutineSection(
+                        routine = uiState.eveningRoutine,
+                        allProducts = uiState.allProducts,
+                        onEvent = onEvent
+                    )
+                }
+            }
+        }
+
+        if (uiState.showEditDialog && uiState.activeEditRoutine != null) {
+            EditRoutineDialog(uiState, onEvent)
+        }
+    }
+}
+
+@Composable
+private fun RoutineSection(
+    routine: BeautyRoutine?,
+    allProducts: List<CosmeticItem>,
+    onEvent: (RoutinesEvent) -> Unit
+) {
+    if (routine == null) return
+    
+    val timeIcon = if (routine.time == RoutineTime.MORNING) Icons.Default.LightMode else Icons.Default.NightsStay
+    val accentColor = if (routine.time == RoutineTime.MORNING) Color(0xFFFFB74D) else Color(0xFF7986CB)
+
+    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    color = accentColor.copy(alpha = 0.1f),
+                    shape = CircleShape,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(timeIcon, null, modifier = Modifier.size(20.dp), tint = accentColor)
+                    }
+                }
+                Spacer(Modifier.width(16.dp))
+                Column {
+                    Text(text = routine.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+                    Text(text = routine.time.biologicalObjective, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
+                }
+            }
+            IconButton(onClick = { onEvent(RoutinesEvent.StartEditing(routine.id)) }) {
+                Icon(Icons.Default.Tune, null, tint = MaterialTheme.colorScheme.primary)
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            routine.steps.forEach { step ->
+                StepItem(step, allProducts) {
+                    onEvent(RoutinesEvent.ToggleStep(routine.id, step.id))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StepItem(
+    step: RoutineStep,
+    allProducts: List<CosmeticItem>,
+    onClick: () -> Unit
+) {
+    val linkedProducts = allProducts.filter { step.productIds.contains(it.id) }
+    
+    // Status Logic
+    val status = when {
+        linkedProducts.isEmpty() -> StepStatus.MISSING
+        linkedProducts.any { it.isFinished } -> StepStatus.RED
+        linkedProducts.any { it.usageCount > 50 } -> StepStatus.ORANGE // Placeholder logic
+        else -> StepStatus.OK
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(24.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Status Indicator
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .clip(CircleShape)
+                    .background(status.color)
+            )
+            Spacer(Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = uiState.title,
-                    style = MaterialTheme.typography.titleLarge,
+                    text = step.title,
+                    style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
+                    color = if (step.isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f) else MaterialTheme.colorScheme.onSurface
                 )
-                IconButton(onClick = { expanded = !expanded }) {
-                    Icon(
-                        imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = "Expand"
+                if (linkedProducts.isNotEmpty()) {
+                    Text(
+                        text = linkedProducts.joinToString { it.brand },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                     )
                 }
             }
 
-            AnimatedVisibility(visible = expanded) {
-                Column {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    uiState.steps.forEach { step ->
-                        StepItem(
-                            uiState = step,
-                            onEvent = { onEvent(step.id) },
-                            navTo = navTo
-                        )
+            if (step.isCompleted) {
+                Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF4CAF50), modifier = Modifier.size(24.dp))
+            }
+        }
+    }
+}
+
+private enum class StepStatus(val color: Color) {
+    OK(Color(0xFF4CAF50)),
+    ORANGE(Color(0xFFFF9800)),
+    RED(Color(0xFFF44336)),
+    MISSING(Color.LightGray)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditRoutineDialog(
+    uiState: RoutinesUiState,
+    onEvent: (RoutinesEvent) -> Unit
+) {
+    val routine = uiState.activeEditRoutine ?: return
+    
+    Dialog(
+        onDismissRequest = { onEvent(RoutinesEvent.CloseEditDialog) },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                TopAppBar(
+                    title = { Text("Edit ${routine.title}") },
+                    navigationIcon = {
+                        IconButton(onClick = { onEvent(RoutinesEvent.CloseEditDialog) }) {
+                            Icon(Icons.Default.Close, null)
+                        }
+                    }
+                )
+
+                LazyColumn(
+                    modifier = Modifier.weight(1f).padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    // Current Steps
+                    items(routine.steps) { step ->
+                        Column(modifier = Modifier.fillMaxWidth().border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)).padding(16.dp)) {
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = step.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                                IconButton(onClick = { onEvent(RoutinesEvent.RemoveStep(routine.id, step.id)) }) {
+                                    Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error)
+                                }
+                            }
+                            
+                            Text("LINKED PRODUCTS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+                            Spacer(Modifier.height(8.dp))
+                            
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                items(uiState.allProducts) { product ->
+                                    val isLinked = step.productIds.contains(product.id)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(if (isLinked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                                            .clickable { onEvent(RoutinesEvent.LinkProduct(routine.id, step.id, product.id)) },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (product.imageUrl != null) {
+                                            AsyncImage(model = product.imageUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                        } else {
+                                            Box(modifier = Modifier.fillMaxSize().background(product.colorHex?.let { parseColor(it) } ?: Color.Gray))
+                                        }
+                                        if (isLinked) Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)), contentAlignment = Alignment.Center) {
+                                            Icon(Icons.Default.Check, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Add New Step
+                    item {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text("ADD NEW STEP", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+                            OutlinedTextField(
+                                value = uiState.draftStep.title,
+                                onValueChange = { onEvent(RoutinesEvent.UpdateDraftStep(uiState.draftStep.copy(title = it))) },
+                                label = { Text("Step Title (e.g. Double Cleanse)") },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            Button(
+                                onClick = { onEvent(RoutinesEvent.AddStep(routine.id)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Icon(Icons.Default.Add, null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Add Step")
+                            }
+                        }
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun StepItem(
-    uiState: RoutineStep,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
-    Surface(
-        onClick = { onEvent(Unit) },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
-            Icon(
-                imageVector = if (uiState.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-                contentDescription = null,
-                tint = if (uiState.isCompleted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.outline
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(
-                    text = uiState.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = if (uiState.isRecommended) FontWeight.SemiBold else FontWeight.Normal,
-                    color = if (uiState.isCompleted) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface
-                )
-                if (uiState.description.isNotEmpty()) {
-                    Text(
-                        text = uiState.description,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun BeautyAdviceCardPreview() {
-    MaterialTheme {
-        BeautyAdviceCard(uiState = Unit, onEvent = {}, navTo = {})
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun StepItemPreview() {
-    MaterialTheme {
-        StepItem(
-            uiState = RoutineStep("1", "Step Title", "Description"),
-            onEvent = {},
-            navTo = {}
-        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun RoutinesScreenPreview() {
-    MaterialTheme {
-        RoutinesScreen(
-            uiState = RoutinesUiState.Success(
-                morningRoutine = BeautyRoutine(
-                    title = "Morning Routine",
-                    time = RoutineTime.MORNING,
-                    steps = listOf(
-                        RoutineStep("1", "Brush Teeth", "Common hygiene."),
-                        RoutineStep("2", "Sunscreen", "Korean Skincare", isRecommended = true)
-                    ),
-                    date = 0
-                ),
-                eveningRoutine = BeautyRoutine(
-                    title = "Evening Routine",
-                    time = RoutineTime.EVENING,
-                    steps = listOf(
-                        RoutineStep("1", "Double Cleanse", "Korean Skincare", isRecommended = true)
-                    ),
-                    date = 0
-                )
-            ),
-            onEvent = {},
-            navTo = {}
-        )
-    }
+    RoutinesScreen(
+        uiState = RoutinesUiState(
+            morningRoutine = BeautyRoutine(id = 1, title = "Morning Glow", time = RoutineTime.MORNING, steps = listOf(RoutineStep(title = "Cleanse")), date = 0L),
+            eveningRoutine = BeautyRoutine(id = 2, title = "Night Repair", time = RoutineTime.EVENING, steps = listOf(RoutineStep(title = "Retinol")), date = 0L),
+            isLoading = false
+        ),
+        onEvent = {},
+        navTo = {}
+    )
 }
