@@ -487,19 +487,51 @@ fun BeautyTipSection(uiState: String) {
 }
 
 @Composable
-fun QuickActions(navTo: (KoColorRoute) -> Unit) {
+private fun QuickActions(
+    navTo: (KoColorRoute) -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Button(
+        QuickActionCard(
+            title = "Analyze Style",
+            subtitle = "AI Visual Analysis",
+            icon = Icons.Default.AutoAwesome,
+            color = MaterialTheme.colorScheme.primary,
+            onClick = { navTo(KoColorRoute.StyleSimulator) },
+            modifier = Modifier.weight(1f)
+        )
+        QuickActionCard(
+            title = "Capture Product",
+            subtitle = "Gemini Scanner",
+            icon = Icons.Default.CameraAlt,
+            color = MaterialTheme.colorScheme.secondary,
             onClick = { navTo(KoColorRoute.Analyzer()) },
-            modifier = Modifier.fillMaxWidth().height(64.dp),
-            shape = RoundedCornerShape(20.dp)
-        ) {
-            Icon(Icons.Default.CameraAlt, contentDescription = null)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text("AI Style Analyze", style = MaterialTheme.typography.titleMedium)
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun QuickActionCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    color: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    ElevatedCard(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Icon(icon, null, tint = color, modifier = Modifier.size(28.dp))
+            Spacer(Modifier.height(12.dp))
+            Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(text = subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

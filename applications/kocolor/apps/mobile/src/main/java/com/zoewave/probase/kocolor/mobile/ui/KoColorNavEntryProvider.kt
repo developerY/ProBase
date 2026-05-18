@@ -13,6 +13,8 @@ import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.color.ui.ColorDetailScreen
 import com.zoewave.probase.kocolor.features.color.ui.ColorUiRoute
 import com.zoewave.probase.kocolor.features.color.ui.ColorViewModel
@@ -25,7 +27,8 @@ import com.zoewave.probase.kocolor.features.cosmetics.ui.VanityLandingScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.StitchProductBuilder
 import com.zoewave.probase.kocolor.features.inventory.ui.*
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
-import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
+import com.zoewave.probase.kocolor.features.routines.ui.RoutinesScreen
+import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
 import com.zoewave.probase.kocolor.mobile.features.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
@@ -67,9 +70,11 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.Routines -> NavEntry(route) {
-            RoutinesUiRoute(
-                uiState = Unit,
-                onEvent = {},
+            val viewModel: RoutinesViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            RoutinesScreen(
+                uiState = state,
+                onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
         }
@@ -77,6 +82,15 @@ fun koColorNavEntryProvider(
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             VanityLandingScreen(
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.StyleSimulator -> NavEntry(route) {
+            val viewModel: StyleSimulatorViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            StyleSimulatorScreen(
                 uiState = state,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
