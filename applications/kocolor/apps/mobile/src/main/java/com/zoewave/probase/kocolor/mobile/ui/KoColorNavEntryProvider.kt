@@ -78,6 +78,7 @@ fun koColorNavEntryProvider(
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             VanityLandingScreen(
                 uiState = state,
+                onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
         }
@@ -86,6 +87,7 @@ fun koColorNavEntryProvider(
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             WardrobeLandingScreen(
                 uiState = state,
+                onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
         }

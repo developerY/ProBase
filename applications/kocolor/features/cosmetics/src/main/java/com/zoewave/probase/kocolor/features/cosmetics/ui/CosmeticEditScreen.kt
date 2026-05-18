@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -244,4 +245,22 @@ fun CosmeticEditScreen(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CosmeticEditScreenPreview() {
+    CosmeticEditScreen(
+        itemId = 1L,
+        uiState = CosmeticsUiState(
+            draftItem = CosmeticItem(
+                id = 1L,
+                name = "Blush",
+                brand = "NARS",
+                category = com.zoewave.probase.kocolor.model.CosmeticCategory.BLUSH
+            )
+        ),
+        onEvent = {},
+        navTo = {}
+    )
 }

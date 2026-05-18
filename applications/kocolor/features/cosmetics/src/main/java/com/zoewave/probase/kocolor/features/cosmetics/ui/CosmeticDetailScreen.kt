@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -378,4 +379,25 @@ private fun DetailRow(label: String, value: String, valueColor: Color = Color.Un
         Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = valueColor)
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CosmeticDetailScreenPreview() {
+    CosmeticDetailScreen(
+        itemId = 1L,
+        uiState = CosmeticsUiState(
+            items = listOf(
+                CosmeticItem(
+                    id = 1L,
+                    name = "Foundation",
+                    brand = "Luxury",
+                    category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION,
+                    price = 45.0
+                )
+            )
+        ),
+        onEvent = {},
+        navTo = {}
+    )
 }

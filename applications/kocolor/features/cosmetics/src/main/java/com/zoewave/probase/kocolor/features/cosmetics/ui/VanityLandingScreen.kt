@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -34,6 +35,7 @@ import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 @Composable
 fun VanityLandingScreen(
     uiState: CosmeticsUiState,
+    onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
@@ -277,4 +279,20 @@ private fun RecentProductCard(item: CosmeticItem, onClick: () -> Unit) {
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun VanityLandingScreenPreview() {
+    VanityLandingScreen(
+        uiState = CosmeticsUiState(
+            totalCosmetics = 142,
+            expiringCosmeticsCount = 3,
+            items = listOf(
+                CosmeticItem(id = 1, name = "Serum", brand = "Luxury", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION)
+            )
+        ),
+        onEvent = {},
+        navTo = {}
+    )
 }

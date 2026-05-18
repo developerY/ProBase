@@ -49,8 +49,6 @@ private fun isColorDark(color: Color): Boolean {
 
 @Composable
 fun WardrobeRoute(
-    filter: String? = null,
-    onEvent: (Unit) -> Unit = {},
     navTo: (KoColorRoute) -> Unit
 ) {
     val viewModel: WardrobeViewModel = hiltViewModel()
@@ -59,8 +57,7 @@ fun WardrobeRoute(
     WardrobeScreen(
         uiState = state,
         onEvent = viewModel::onEvent,
-        navTo = navTo,
-        filter = filter
+        navTo = navTo
     )
 }
 
@@ -69,8 +66,7 @@ fun WardrobeRoute(
 fun WardrobeScreen(
     uiState: WardrobeUiState,
     onEvent: (WardrobeEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit,
-    filter: String? = null
+    navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -107,10 +103,7 @@ fun WardrobeScreen(
                 Text("Your collection is ready to be curated.", style = MaterialTheme.typography.bodyLarge)
             }
         } else {
-            val filteredItems = remember(uiState.items, filter) {
-                if (filter == null) uiState.items
-                else uiState.items.filter { it.category.name.contains(filter, ignoreCase = true) }
-            }
+            val filteredItems = uiState.items
 
             val groupedItems = remember(filteredItems) {
                 filteredItems.groupBy { it.category }

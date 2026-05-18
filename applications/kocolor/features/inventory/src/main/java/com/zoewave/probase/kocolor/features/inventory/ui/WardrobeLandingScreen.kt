@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -36,6 +37,7 @@ import java.util.Locale
 @Composable
 fun WardrobeLandingScreen(
     uiState: WardrobeUiState,
+    onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
@@ -279,4 +281,20 @@ private fun RecentClothingCard(item: ClothingItem, onClick: () -> Unit) {
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WardrobeLandingScreenPreview() {
+    WardrobeLandingScreen(
+        uiState = WardrobeUiState(
+            totalItems = 9,
+            totalInvestment = 1615.0,
+            items = listOf(
+                com.zoewave.probase.kocolor.model.ClothingItem(id = 1, name = "Blouse", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS)
+            )
+        ),
+        onEvent = {},
+        navTo = {}
+    )
 }
