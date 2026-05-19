@@ -16,7 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.probase.kocolor.model.ClothingItem
+import com.zoewave.probase.kocolor.model.ClothingItem
 import com.probase.kocolor.features.inventory.util.toComposeColor
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,7 +32,7 @@ fun GarmentDetailScreen(
             modifier = Modifier.fillMaxSize().padding(paddingValues).verticalScroll(rememberScrollState())
         ) {
             AsyncImage(
-                model = clothingItem.imageUri, contentDescription = "Garment Image",
+                model = clothingItem.imageUrl, contentDescription = "Garment Image",
                 modifier = Modifier.fillMaxWidth().height(300.dp).clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)),
                 contentScale = ContentScale.Crop
             )
