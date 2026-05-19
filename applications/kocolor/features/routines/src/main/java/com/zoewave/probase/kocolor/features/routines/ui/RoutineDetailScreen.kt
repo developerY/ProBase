@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -85,6 +84,7 @@ fun RoutineDetailScreen(
         val reorderableState = rememberReorderableLazyListState(
             lazyListState = lazyListState,
             onMove = { from, to ->
+                // Account for the header item (index 0)
                 onEvent(RoutinesEvent.ReorderSteps(routineId, from.index - 1, to.index - 1))
             }
         )
@@ -227,7 +227,7 @@ private fun SplitRitualStep(
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .clickable(enabled = !isReorderMode && hasAmountInfo, onClick = onToggle)
+                    .clickable(enabled = !isReorderMode, onClick = onToggle)
                     .padding(horizontal = 20.dp, vertical = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -238,14 +238,23 @@ private fun SplitRitualStep(
                         modifier = Modifier.size(24.dp).alpha(0.3f)
                     )
                 } else {
-                    Surface(
-                        color = if (isCompleted) iconColor else statusColor.copy(alpha = 0.1f),
-                        shape = CircleShape,
-                        modifier = Modifier.size(28.dp).border(1.5.dp, statusColor, CircleShape)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            if (isCompleted) Icon(Icons.Default.Check, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                    Box(contentAlignment = Alignment.BottomEnd) {
+                        Surface(
+                            color = if (isCompleted) iconColor else Color.Transparent,
+                            shape = CircleShape,
+                            modifier = Modifier.size(28.dp).border(1.5.dp, iconColor, CircleShape)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                if (isCompleted) Icon(Icons.Default.Check, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                            }
                         }
+                        
+                        // Health Indicator Icon (Small dot/circle)
+                        Surface(
+                            color = statusColor,
+                            shape = CircleShape,
+                            modifier = Modifier.size(10.dp).border(1.dp, Color.White, CircleShape)
+                        ) {}
                     }
                 }
             }
@@ -275,15 +284,6 @@ private fun SplitRitualStep(
                         text = if (hasAmountInfo) "${(fillLevel * 100).toInt()}% Remaining" else "Missing consumption data",
                         style = MaterialTheme.typography.bodySmall,
                         color = if (hasAmountInfo) statusColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                }
-
-                if (!isReorderMode) {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = "Details",
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
