@@ -25,22 +25,16 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.kocolor.features.inventory.util.toComposeColor
 import com.zoewave.probase.kocolor.model.ClothingCategory
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
-
-private fun parseColor(hex: String): Color {
-    return try {
-        Color(android.graphics.Color.parseColor(hex))
-    } catch (e: Exception) {
-        Color.Gray
-    }
-}
 
 private fun isColorDark(color: Color): Boolean {
     val luminance = 0.299 * color.red + 0.587 * color.green + 0.114 * color.blue
@@ -78,6 +72,9 @@ fun WardrobeScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { navTo(KoColorRoute.WardrobeColorVerification) }) {
+                        Icon(Icons.Default.Palette, contentDescription = "Test Colors")
+                    }
                     IconButton(onClick = { 
                         // We could add a proper "Add" route later
                         onEvent(WardrobeEvent.AddItem(
@@ -164,7 +161,7 @@ fun WardrobeCard(
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val bgColor = uiState.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant
+    val bgColor = uiState.colorHex.toComposeColor()
     val isDark = isColorDark(bgColor)
     val contentColor = if (isDark) Color.White else Color.Black
 
