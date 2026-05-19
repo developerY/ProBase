@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,19 +34,31 @@ import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.*
 import com.zoewave.probase.kocolor.model.*
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@Preview(showBackground = true)
+@Composable
+private fun HomeUiRoutePreview() {
+    MaterialTheme {
+        HomeUiRoute(
+            uiState = HomeUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun HomeUiRoute(
-    uiState: WindowSizeClass,
-    onEvent: (Unit) -> Unit = {},
-    navTo: (KoColorRoute) -> Unit
+    uiState: HomeUiState,
+    onEvent: (HomeEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val viewModel: HomeViewModel = hiltViewModel()
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
-
     HomeScreen(
-        uiState = state,
-        onEvent = viewModel::onEvent,
-        navTo = navTo
+        uiState = uiState,
+        onEvent = onEvent,
+        navTo = navTo,
+        modifier = modifier
     )
 }
 
@@ -54,7 +67,8 @@ fun HomeUiRoute(
 fun HomeScreen(
     uiState: HomeUiState,
     onEvent: (HomeEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = if (uiState.isDaytime) MaterialTheme.colorScheme.surface
@@ -66,7 +80,7 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { LuxuryBrandLogo() },
+                title = { LuxuryBrandLogo(uiState = Unit, onEvent = {}, navTo = {}) },
                 actions = {
                     IconButton(onClick = { navTo(KoColorRoute.Settings) }) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.onSurface)
@@ -75,7 +89,8 @@ fun HomeScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
-        containerColor = backgroundColor
+        containerColor = backgroundColor,
+        modifier = modifier
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -84,25 +99,28 @@ fun HomeScreen(
         ) {
             item {
                 HomeHeader(
-                    uiState = uiState.fashionProfile,
-                    isDaytime = uiState.isDaytime,
-                    beautyTip = uiState.beautyTip
+                    uiState = HomeHeaderUiState(uiState.fashionProfile, uiState.isDaytime, uiState.beautyTip),
+                    onEvent = {},
+                    navTo = {}
                 )
             }
 
             item {
                 WellnessInsightsSection(
-                    insights = uiState.wellnessInsights,
-                    sleepDuration = uiState.lastNightSleepDuration,
-                    hydrationLiters = uiState.hydrationLiters,
-                    hydrationGoalLiters = uiState.hydrationGoalLiters,
-                    isPermissionGranted = uiState.isHealthPermissionGranted,
+                    uiState = WellnessInsightsUiState(
+                        uiState.wellnessInsights,
+                        uiState.lastNightSleepDuration,
+                        uiState.hydrationLiters,
+                        uiState.hydrationGoalLiters,
+                        uiState.isHealthPermissionGranted
+                    ),
+                    onEvent = {},
                     navTo = navTo
                 )
             }
 
             item {
-                QuickActions(navTo = navTo)
+                QuickActions(uiState = Unit, onEvent = {}, navTo = navTo)
             }
 
             item {
@@ -111,11 +129,11 @@ fun HomeScreen(
                 
                 if (routine != null) {
                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        SectionTitle(title = title, subtitle = "Your bio-synced ritual")
+                        SectionTitle(uiState = SectionTitleUiState(title, "Your bio-synced ritual"), onEvent = {}, navTo = {})
                         RoutineSummaryCard(
-                            routine = routine,
-                            isDaytime = uiState.isDaytime,
-                            onClick = { navTo(KoColorRoute.Routines) }
+                            uiState = routine to uiState.isDaytime,
+                            onEvent = {},
+                            navTo = navTo
                         )
                     }
                 }
@@ -124,8 +142,8 @@ fun HomeScreen(
             if (uiState.totalCosmetics > 0) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        SectionTitle(title = "The Vanity", subtitle = "${uiState.totalCosmetics} items tracked")
-                        InventoryDashboard(uiState = uiState, navTo = navTo)
+                        SectionTitle(uiState = SectionTitleUiState("The Vanity", "${uiState.totalCosmetics} items tracked"), onEvent = {}, navTo = {})
+                        InventoryDashboard(uiState = uiState, onEvent = {}, navTo = navTo)
                     }
                 }
             }
@@ -133,8 +151,8 @@ fun HomeScreen(
             if (uiState.totalClothing > 0) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        SectionTitle(title = "The Wardrobe", subtitle = "${uiState.totalClothing} pieces curated")
-                        WardrobeDashboard(uiState = uiState, navTo = navTo)
+                        SectionTitle(uiState = SectionTitleUiState("The Wardrobe", "${uiState.totalClothing} pieces curated"), onEvent = {}, navTo = {})
+                        WardrobeDashboard(uiState = uiState, onEvent = {}, navTo = navTo)
                     }
                 }
             }
@@ -144,13 +162,27 @@ fun HomeScreen(
     }
 }
 
+data class HomeHeaderUiState(
+    val fashionProfile: FashionProfile?,
+    val isDaytime: Boolean,
+    val beautyTip: String
+)
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeHeaderPreview() {
+    MaterialTheme {
+        HomeHeader(uiState = HomeHeaderUiState(null, true, "Stay Radiant!"), onEvent = {}, navTo = {})
+    }
+}
+
 @Composable
 fun HomeHeader(
-    uiState: FashionProfile?,
-    isDaytime: Boolean,
-    beautyTip: String
+    uiState: HomeHeaderUiState,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val gradientColors = if (isDaytime) {
+    val gradientColors = if (uiState.isDaytime) {
         listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surface)
     } else {
         listOf(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.surfaceVariant)
@@ -168,7 +200,7 @@ fun HomeHeader(
     ) {
         Column {
             Text(
-                text = if (isDaytime) "Radiant Morning." else "Deep Restoration.",
+                text = if (uiState.isDaytime) "Radiant Morning." else "Deep Restoration.",
                 style = MaterialTheme.typography.headlineLarge,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.Medium,
@@ -180,34 +212,51 @@ fun HomeHeader(
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alpha(0.8f)) {
                 Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = beautyTip, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Serif, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                Text(text = uiState.beautyTip, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Serif, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
             }
 
-            if (uiState != null) {
+            if (uiState.fashionProfile != null) {
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(color = MaterialTheme.colorScheme.primary, shape = CircleShape) {
-                        Text(text = uiState.seasonalType.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                        Text(text = uiState.fashionProfile.seasonalType.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
-                    Text(text = "· ${uiState.undertone.name.lowercase().replaceFirstChar { it.uppercase() }} Undertone", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = "· ${uiState.fashionProfile.undertone.name.lowercase().replaceFirstChar { it.uppercase() }} Undertone", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
     }
 }
 
+data class WellnessInsightsUiState(
+    val insights: List<SkinInsight>,
+    val sleepDuration: String?,
+    val hydrationLiters: Double,
+    val hydrationGoalLiters: Double,
+    val isPermissionGranted: Boolean
+)
+
+@Preview(showBackground = true)
+@Composable
+private fun WellnessInsightsSectionPreview() {
+    MaterialTheme {
+        WellnessInsightsSection(
+            uiState = WellnessInsightsUiState(emptyList(), "8h", 1.5, 2.0, true),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun WellnessInsightsSection(
-    insights: List<SkinInsight>,
-    sleepDuration: String?,
-    hydrationLiters: Double,
-    hydrationGoalLiters: Double,
-    isPermissionGranted: Boolean,
+    uiState: WellnessInsightsUiState,
+    onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        SectionTitle(title = "Bio-Markers", subtitle = "Style from the inside out")
+        SectionTitle(uiState = SectionTitleUiState("Bio-Markers", "Style from the inside out"), onEvent = {}, navTo = {})
         
         ElevatedCard(
             modifier = Modifier.fillMaxWidth().clickable { navTo(KoColorRoute.Health) },
@@ -215,7 +264,7 @@ fun WellnessInsightsSection(
             colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
-                if (!isPermissionGranted) {
+                if (!uiState.isPermissionGranted) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
                         Icon(Icons.Default.Lock, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.height(12.dp))
@@ -224,11 +273,11 @@ fun WellnessInsightsSection(
                     }
                 } else {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-                        BioMarkerItem(icon = Icons.Default.Bedtime, label = "Sleep", value = sleepDuration ?: "--", color = Color(0xFF9C27B0), modifier = Modifier.weight(1f))
+                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.Bedtime, "Sleep", uiState.sleepDuration ?: "--", Color(0xFF9C27B0)), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
                         VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        BioMarkerItem(icon = Icons.Default.WaterDrop, label = "Hydration", value = "%.1fL".format(hydrationLiters), color = Color(0xFF2196F3), modifier = Modifier.weight(1f))
+                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.WaterDrop, "Hydration", "%.1fL".format(uiState.hydrationLiters), Color(0xFF2196F3)), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
                         VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        BioMarkerItem(icon = Icons.Default.AutoAwesome, label = "Vitals", value = if (insights.isEmpty()) "Optimal" else "${insights.size} Alerts", color = if (insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336), modifier = Modifier.weight(1f))
+                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.AutoAwesome, "Vitals", if (uiState.insights.isEmpty()) "Optimal" else "${uiState.insights.size} Alerts", if (uiState.insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
                     }
                 }
             }
@@ -236,43 +285,81 @@ fun WellnessInsightsSection(
     }
 }
 
+data class BioMarkerUiState(val icon: ImageVector, val label: String, val value: String, val color: Color)
+
+@Preview(showBackground = true)
 @Composable
-fun BioMarkerItem(icon: ImageVector, label: String, value: String, color: Color, modifier: Modifier = Modifier) {
+private fun BioMarkerItemPreview() {
+    MaterialTheme {
+        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.Info, "Label", "Value", Color.Red), onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+fun BioMarkerItem(uiState: BioMarkerUiState, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit, modifier: Modifier = Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Surface(color = color.copy(alpha = 0.1f), shape = CircleShape, modifier = Modifier.size(40.dp)) {
-            Box(contentAlignment = Alignment.Center) { Icon(icon, null, modifier = Modifier.size(18.dp), tint = color) }
+        Surface(color = uiState.color.copy(alpha = 0.1f), shape = CircleShape, modifier = Modifier.size(40.dp)) {
+            Box(contentAlignment = Alignment.Center) { Icon(uiState.icon, null, modifier = Modifier.size(18.dp), tint = uiState.color) }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), fontWeight = FontWeight.Bold, maxLines = 1)
-        Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
+        Text(text = uiState.label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), fontWeight = FontWeight.Bold, maxLines = 1)
+        Text(text = uiState.value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun QuickActionsPreview() {
+    MaterialTheme {
+        QuickActions(uiState = Unit, onEvent = {}, navTo = {})
     }
 }
 
 @Composable
-private fun QuickActions(navTo: (KoColorRoute) -> Unit) {
+private fun QuickActions(uiState: Unit, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        QuickActionCard(title = "Analyze Style", subtitle = "AI Visual Analysis", icon = Icons.Default.AutoAwesome, color = MaterialTheme.colorScheme.primary, onClick = { navTo(KoColorRoute.StyleSimulator) }, modifier = Modifier.weight(1f))
-        QuickActionCard(title = "Capture Product", subtitle = "Gemini Scanner", icon = Icons.Default.CameraAlt, color = MaterialTheme.colorScheme.secondary, onClick = { navTo(KoColorRoute.Analyzer()) }, modifier = Modifier.weight(1f))
+        QuickActionCard(uiState = QuickActionUiState("Analyze Style", "AI Visual Analysis", Icons.Default.AutoAwesome, MaterialTheme.colorScheme.primary), onEvent = { navTo(KoColorRoute.StyleSimulator) }, navTo = navTo, modifier = Modifier.weight(1f))
+        QuickActionCard(uiState = QuickActionUiState("Capture Product", "Gemini Scanner", Icons.Default.CameraAlt, MaterialTheme.colorScheme.secondary), onEvent = { navTo(KoColorRoute.Analyzer()) }, navTo = navTo, modifier = Modifier.weight(1f))
+    }
+}
+
+data class QuickActionUiState(val title: String, val subtitle: String, val icon: ImageVector, val color: Color)
+
+@Preview(showBackground = true)
+@Composable
+private fun QuickActionCardPreview() {
+    MaterialTheme {
+        QuickActionCard(uiState = QuickActionUiState("Title", "Subtitle", Icons.Default.Info, Color.Red), onEvent = {}, navTo = {})
     }
 }
 
 @Composable
-private fun QuickActionCard(title: String, subtitle: String, icon: ImageVector, color: Color, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    ElevatedCard(onClick = onClick, modifier = modifier, shape = RoundedCornerShape(24.dp)) {
+private fun QuickActionCard(uiState: QuickActionUiState, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit, modifier: Modifier = Modifier) {
+    ElevatedCard(onClick = { onEvent(Unit) }, modifier = modifier, shape = RoundedCornerShape(24.dp)) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Icon(icon, null, tint = color, modifier = Modifier.size(28.dp))
+            Icon(uiState.icon, null, tint = uiState.color, modifier = Modifier.size(28.dp))
             Spacer(Modifier.height(12.dp))
-            Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(text = subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = uiState.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(text = uiState.subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
+data class SectionTitleUiState(val title: String, val subtitle: String)
+
+@Preview(showBackground = true)
 @Composable
-fun SectionTitle(title: String, subtitle: String) {
+private fun SectionTitlePreview() {
+    MaterialTheme {
+        SectionTitle(uiState = SectionTitleUiState("Title", "Subtitle"), onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+fun SectionTitle(uiState: SectionTitleUiState, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
     Column {
-        Text(text = title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
-        Text(text = subtitle.uppercase(), style = MaterialTheme.typography.labelSmall, letterSpacing = 2.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text = uiState.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+        Text(text = uiState.subtitle.uppercase(), style = MaterialTheme.typography.labelSmall, letterSpacing = 2.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

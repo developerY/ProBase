@@ -21,25 +21,34 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
-import com.zoewave.probase.features.health.core.ui.HealthRoute
 import com.zoewave.probase.kocolor.mobile.core.R
+import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsEvent
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsUiState
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsViewModel
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+@Preview(showBackground = true)
+@Composable
+private fun SettingsUiRoutePreview() {
+    MaterialTheme {
+        SettingsUiRoute(
+            uiState = SettingsUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun SettingsUiRoute(
-    uiState: Unit = Unit,
-    onEvent: (Unit) -> Unit = {},
+    uiState: SettingsUiState,
+    onEvent: (SettingsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val viewModel: SettingsViewModel = hiltViewModel()
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
-
     SettingsScreen(
-        uiState = state,
-        onEvent = viewModel::onEvent,
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo
     )
 }
@@ -77,24 +86,14 @@ fun SettingsScreen(
         ) {
             ThemeSettingsCard(
                 uiState = uiState.isThemeExpanded to uiState.currentTheme,
-                onEvent = { event ->
-                    when (event) {
-                        is Boolean -> onEvent(SettingsEvent.OnThemeExpandedToggled(event))
-                        is String -> onEvent(SettingsEvent.OnThemeSelected(event))
-                    }
-                },
-                navTo = {}
+                onEvent = onEvent,
+                navTo = navTo
             )
 
             PaletteSettingsCard(
                 uiState = uiState.isPaletteExpanded to uiState.currentPalette,
-                onEvent = { event ->
-                    when (event) {
-                        is Boolean -> onEvent(SettingsEvent.OnPaletteExpandedToggled(event))
-                        is String -> onEvent(SettingsEvent.OnPaletteSelected(event))
-                    }
-                },
-                navTo = {}
+                onEvent = onEvent,
+                navTo = navTo
             )
 
             AiConfigurationCard(
@@ -105,8 +104,9 @@ fun SettingsScreen(
             )
 
             HealthConnectCard(
-                expanded = uiState.isHealthExpanded,
-                onExpandToggle = { onEvent(SettingsEvent.OnHealthExpandedToggled(!uiState.isHealthExpanded)) }
+                uiState = uiState.isHealthExpanded,
+                onEvent = onEvent,
+                navTo = navTo
             )
 
             Card(
@@ -164,11 +164,21 @@ fun SettingsScreen(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun HealthConnectCardPreview() {
+    MaterialTheme {
+        HealthConnectCard(uiState = true, onEvent = {}, navTo = {})
+    }
+}
+
 @Composable
 fun HealthConnectCard(
-    expanded: Boolean,
-    onExpandToggle: () -> Unit
+    uiState: Boolean,
+    onEvent: (SettingsEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val expanded = uiState
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -176,7 +186,7 @@ fun HealthConnectCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onExpandToggle() }
+                    .clickable { onEvent(SettingsEvent.OnHealthExpandedToggled(!expanded)) }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -203,7 +213,13 @@ fun HealthConnectCard(
             if (expanded) {
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                 Box(modifier = Modifier.padding(16.dp)) {
-                    HealthRoute(statusOnly = true)
+                    val healthViewModel: com.zoewave.probase.features.health.core.ui.HealthViewModel = hiltViewModel()
+                    val healthState by healthViewModel.uiState.collectAsStateWithLifecycle()
+                    HealthUiRoute(
+                        uiState = healthState,
+                        onEvent = healthViewModel::onEvent,
+                        navTo = navTo
+                    )
                 }
             }
         }

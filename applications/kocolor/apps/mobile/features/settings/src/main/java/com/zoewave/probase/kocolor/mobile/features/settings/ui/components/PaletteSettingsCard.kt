@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.mobile.core.R
+import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsEvent
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 object PaletteIdentifiers {
@@ -33,10 +34,22 @@ private val paletteOptions = listOf(
     PaletteIdentifiers.DYNAMIC to R.string.applications_kocolor_apps_mobile_core_palette_dynamic
 )
 
+@Preview(showBackground = true)
+@Composable
+private fun PaletteSettingsCardPreview() {
+    MaterialTheme {
+        PaletteSettingsCard(
+            uiState = true to PaletteIdentifiers.CLASSIC,
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun PaletteSettingsCard(
     uiState: Pair<Boolean, String>,
-    onEvent: (Any) -> Unit,
+    onEvent: (SettingsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val expanded = uiState.first
@@ -48,7 +61,7 @@ fun PaletteSettingsCard(
         Column {
             Row(
                 modifier = Modifier
-                    .clickable { onEvent(!expanded) }
+                    .clickable { onEvent(SettingsEvent.OnPaletteExpandedToggled(!expanded)) }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -80,14 +93,14 @@ fun PaletteSettingsCard(
                                 .fillMaxWidth()
                                 .selectable(
                                     selected = currentPalette == id,
-                                    onClick = { onEvent(id) }
+                                    onClick = { onEvent(SettingsEvent.OnPaletteSelected(id)) }
                                 )
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
                                 selected = currentPalette == id,
-                                onClick = { onEvent(id) }
+                                onClick = { onEvent(SettingsEvent.OnPaletteSelected(id)) }
                             )
                             Text(
                                 text = stringResource(labelRes),
@@ -99,17 +112,5 @@ fun PaletteSettingsCard(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PaletteSettingsCardPreview() {
-    MaterialTheme {
-        PaletteSettingsCard(
-            uiState = true to PaletteIdentifiers.CLASSIC,
-            onEvent = {},
-            navTo = {}
-        )
     }
 }
