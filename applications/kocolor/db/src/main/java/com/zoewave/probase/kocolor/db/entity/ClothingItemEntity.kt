@@ -24,5 +24,7 @@ data class ClothingItemEntity(
     val mutedHex: String? = null,
     val paletteHexes: List<String> = emptyList(),
     val colorTemperature: String? = null,
-    val seasonalPalette: String? = null
+    val seasonalPalette: String? = null,
+    val contrastLevel: String? = null,
+    val koColorGroup: String? = null
 )
