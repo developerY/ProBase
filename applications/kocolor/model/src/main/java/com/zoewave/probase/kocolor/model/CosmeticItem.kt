@@ -177,12 +177,16 @@ data class CosmeticItem(
     /** Product volume/weight (e.g., 30ml, 15g). */
     val volume: String? = null,
 
-    // --- Usage & State ---
+    // --- Usage & Consumption Engine ---
     val isOpened: Boolean = false,
     val isFinished: Boolean = false,
     val isArchived: Boolean = false,
     /** Total number of times this product has been used. */
-    val usageCount: Int = 0
+    val usageCount: Int = 0,
+    /** Total amount remaining (same unit as volume). */
+    val amountRemaining: Double? = null,
+    /** Amount consumed per single usage event. */
+    val amountPerUse: Double? = null
 ) {
     /** 
      * Calculated estimated expiration based on PAO and opened date. 
@@ -207,4 +211,13 @@ data class CosmeticItem(
     /** Cost per single usage event. */
     val costPerUse: Double?
         get() = if (price != null && usageCount > 0) price / usageCount else null
+    
+    /** Percentage of product remaining (0.0 to 1.0). */
+    val fillLevel: Double?
+        get() {
+            val total = volume?.filter { it.isDigit() || it == '.' }?.toDoubleOrNull()
+            return if (total != null && amountRemaining != null && total > 0) {
+                (amountRemaining / total).coerceIn(0.0, 1.0)
+            } else null
+        }
 }

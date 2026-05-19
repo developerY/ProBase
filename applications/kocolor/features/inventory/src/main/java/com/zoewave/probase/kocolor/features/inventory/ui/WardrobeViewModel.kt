@@ -22,13 +22,21 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class CategoryMetadata(
+    val itemCount: Int = 0,
+    val totalValue: Double = 0.0,
+    val representativeImageUrl: String? = null,
+    val representativeColorHex: String? = null
+)
+
 data class WardrobeUiState(
     val items: List<ClothingItem> = emptyList(),
     val isLoading: Boolean = true,
     val draftItem: ClothingItem = ClothingItem(name = "", category = ClothingCategory.TOPS),
     val totalInvestment: Double = 0.0,
     val totalItems: Int = 0,
-    val itemsByCategory: Map<String, Int> = emptyMap()
+    val itemsByCategory: Map<String, Int> = emptyMap(),
+    val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap()
 )
 
 sealed class WardrobeEvent {
@@ -93,13 +101,24 @@ class WardrobeViewModel @Inject constructor(
         val totalInvestment = models.sumOf { it.price ?: 0.0 }
         val itemsByCategory = models.groupBy { it.category.name }.mapValues { it.value.size }
         
+        val categoryMetadata = models.groupBy { it.category.name }.mapValues { (_, items) ->
+            val representativeItem = items.filter { it.imageUrl != null }.maxByOrNull { it.timestamp } ?: items.maxByOrNull { it.timestamp }
+            CategoryMetadata(
+                itemCount = items.size,
+                totalValue = items.sumOf { it.price ?: 0.0 },
+                representativeImageUrl = representativeItem?.imageUrl,
+                representativeColorHex = representativeItem?.colorHex
+            )
+        }
+
         WardrobeUiState(
             items = models,
             isLoading = false,
             draftItem = draft,
             totalInvestment = totalInvestment,
             totalItems = models.size,
-            itemsByCategory = itemsByCategory
+            itemsByCategory = itemsByCategory,
+            categoriesMetadata = categoryMetadata
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), WardrobeUiState())
 

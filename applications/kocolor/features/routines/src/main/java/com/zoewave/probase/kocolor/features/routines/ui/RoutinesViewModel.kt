@@ -38,6 +38,7 @@ sealed class RoutinesEvent {
     data class AddStep(val routineId: Long) : RoutinesEvent()
     data class RemoveStep(val routineId: Long, val stepId: String) : RoutinesEvent()
     data class LinkProduct(val routineId: Long, val stepId: String, val productId: Long) : RoutinesEvent()
+    data class ReorderSteps(val routineId: Long, val fromIndex: Int, val toIndex: Int) : RoutinesEvent()
 }
 
 @HiltViewModel
@@ -121,6 +122,7 @@ class RoutinesViewModel @Inject constructor(
             is RoutinesEvent.AddStep -> addStepToActive(event.routineId)
             is RoutinesEvent.RemoveStep -> removeStepFromActive(event.routineId, event.stepId)
             is RoutinesEvent.LinkProduct -> linkProductToStep(event.routineId, event.stepId, event.productId)
+            is RoutinesEvent.ReorderSteps -> reorderSteps(event.routineId, event.fromIndex, event.toIndex)
         }
     }
 
@@ -146,7 +148,17 @@ class RoutinesViewModel @Inject constructor(
         viewModelScope.launch {
             cosmeticDao.getCosmeticById(productId).first()?.let { entity ->
                 val model = entity.toModel()
-                cosmeticDao.updateCosmetic(model.copy(usageCount = model.usageCount + 1).toEntity())
+                val currentAmount = model.amountRemaining
+                val perUse = model.amountPerUse
+                
+                val updatedAmount = if (currentAmount != null && perUse != null) {
+                    (currentAmount - perUse).coerceAtLeast(0.0)
+                } else currentAmount
+                
+                cosmeticDao.updateCosmetic(model.copy(
+                    usageCount = model.usageCount + 1,
+                    amountRemaining = updatedAmount
+                ).toEntity())
             }
         }
     }
@@ -185,6 +197,20 @@ class RoutinesViewModel @Inject constructor(
         updateRoutine(updatedRoutine)
     }
 
+    private fun reorderSteps(routineId: Long, fromIndex: Int, toIndex: Int) {
+        val currentRoutine = (uiState.value.morningRoutine ?: uiState.value.eveningRoutine)?.takeIf { it.id == routineId }
+            ?: return
+        
+        val updatedSteps = currentRoutine.steps.toMutableList().apply {
+            val item = removeAt(fromIndex)
+            add(toIndex, item)
+        }.mapIndexed { index, step ->
+            step.copy(layeringOrder = index)
+        }
+        
+        updateRoutine(currentRoutine.copy(steps = updatedSteps))
+    }
+
     private fun RoutineEntity.toModel() = BeautyRoutine(
         id = id,
         title = title,
@@ -205,13 +231,15 @@ class RoutinesViewModel @Inject constructor(
         id = id, name = name, brand = brand, category = category,
         colorHex = colorHex, shadeName = shadeName, imageUrl = imageUrl,
         price = price, volume = volume, usageCount = usageCount,
-        openedDate = openedDate, paoMonths = paoMonths, timestamp = timestamp
+        openedDate = openedDate, paoMonths = paoMonths, timestamp = timestamp,
+        amountRemaining = amountRemaining, amountPerUse = amountPerUse
     )
 
     private fun CosmeticItem.toEntity() = CosmeticItemEntity(
         id = id, name = name, brand = brand, category = category,
         colorHex = colorHex, shadeName = shadeName, imageUrl = imageUrl,
         price = price, volume = volume, usageCount = usageCount,
-        openedDate = openedDate, paoMonths = paoMonths, timestamp = timestamp
+        openedDate = openedDate, paoMonths = paoMonths, timestamp = timestamp,
+        amountRemaining = amountRemaining, amountPerUse = amountPerUse
     )
 }

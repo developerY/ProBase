@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,6 +17,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -101,61 +103,40 @@ fun WardrobeLandingScreen(
                 }
             }
 
-            // 3. Categories Circular
+            // 3. Verticals Hero Cards
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     Text("VERTICALS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-
-                    // Professional Category Chips
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        maxItemsInEachRow = 3
-                    ) {
+                    
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         val sections = listOf(
-                            "Tops" to Icons.Default.DryCleaning,
-                            "Bottoms" to Icons.AutoMirrored.Filled.Label,
-                            "Shoes" to Icons.Default.IceSkating,
-                            "Accessories" to Icons.Default.Watch
+                            "Tops" to (Icons.Default.DryCleaning to Color(0xFFFDEEF4)),
+                            "Bottoms" to (Icons.AutoMirrored.Filled.Label to Color(0xFFE8F1FD)),
+                            "Shoes" to (Icons.Default.IceSkating to Color(0xFFFEECEB)),
+                            "Accessories" to (Icons.Default.Watch to Color(0xFFF3EBFD))
                         )
-
-                        sections.forEach { (name, icon) ->
-                            val count = uiState.itemsByCategory[name.uppercase()] ?: 0
-                            FilterChip(
-                                selected = false,
-                                onClick = { navTo(KoColorRoute.WardrobeCategoryCover(categoryName = name)) },
-                                label = {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(text = name, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-                                        Spacer(Modifier.width(6.dp))
-                                        Surface(
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                                            shape = CircleShape
-                                        ) {
-                                            Text(
-                                                text = count.toString(),
-                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.Black
-                                            )
-                                        }
-                                    }
-                                },
-                                leadingIcon = { Icon(icon, null, modifier = Modifier.size(18.dp)) },
-                                shape = RoundedCornerShape(16.dp),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    containerColor = MaterialTheme.colorScheme.surface,
-                                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    iconColor = MaterialTheme.colorScheme.primary
-                                ),
-                                border = FilterChipDefaults.filterChipBorder(
-                                    enabled = true,
-                                    selected = false,
-                                    borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                                    borderWidth = 1.dp
-                                )
-                            )
+                        
+                        sections.chunked(2).forEach { rowSections ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                rowSections.forEach { (name, props) ->
+                                    val (icon, color) = props
+                                    val metadata = uiState.categoriesMetadata.entries.find { it.key.equals(name, ignoreCase = true) }?.value
+                                    CategoryHeroCard(
+                                        name = name,
+                                        icon = icon,
+                                        metadata = metadata,
+                                        baseColor = color,
+                                        onClick = { navTo(KoColorRoute.WardrobeCategoryCover(categoryName = name)) },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                                if (rowSections.size == 1) {
+                                    Spacer(Modifier.weight(1f))
+                                }
+                            }
                         }
                     }
                 }
@@ -204,7 +185,7 @@ private fun SummaryStatCard(
         modifier = modifier,
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(24.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Surface(
@@ -224,19 +205,105 @@ private fun SummaryStatCard(
 }
 
 @Composable
-private fun CategoryCircle(label: String, icon: ImageVector, onClick: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Surface(
-            modifier = Modifier.size(64.dp).clickable { onClick() },
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surface,
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(icon, null, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onSurface)
+private fun CategoryHeroCard(
+    name: String,
+    icon: ImageVector,
+    metadata: CategoryMetadata?,
+    baseColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val count = metadata?.itemCount ?: 0
+    val totalValue = metadata?.totalValue ?: 0.0
+    val imageUrl = metadata?.representativeImageUrl
+    val itemColor = metadata?.representativeColorHex?.let { parseColor(it) }
+
+    Card(
+        onClick = onClick,
+        modifier = modifier.height(160.dp),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = baseColor.copy(alpha = 0.4f)),
+        border = BorderStroke(1.dp, baseColor.copy(alpha = 0.6f))
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Background Image/Color
+            if (imageUrl != null) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize().alpha(0.2f),
+                    contentScale = ContentScale.Crop
+                )
+            } else if (itemColor != null) {
+                Box(modifier = Modifier.fillMaxSize().background(itemColor).alpha(0.1f))
+            }
+
+            // Ambient Icon Watermark
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 24.dp, y = 24.dp)
+                    .size(140.dp)
+                    .alpha(0.05f),
+                tint = Color.Black
+            )
+
+            Column(
+                modifier = Modifier.padding(24.dp).fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Surface(
+                        color = Color.White.copy(alpha = 0.8f),
+                        shape = CircleShape,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(icon, null, modifier = Modifier.size(20.dp), tint = Color.Black)
+                        }
+                    }
+
+                    if (totalValue > 0) {
+                        Text(
+                            text = "$${"%,.2f".format(totalValue)}",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                
+                Column {
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif
+                    )
+                    Text(
+                        text = "$count PIECES",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.alpha(0.5f),
+                        letterSpacing = 1.sp
+                    )
+                }
             }
         }
-        Text(text = label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Medium)
+    }
+}
+
+private fun parseColor(hex: String): Color {
+    return try {
+        Color(android.graphics.Color.parseColor(hex))
+    } catch (e: Exception) {
+        Color.Gray
     }
 }
 
