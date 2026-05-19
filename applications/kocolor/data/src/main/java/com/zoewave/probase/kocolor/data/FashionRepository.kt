@@ -1,80 +1,69 @@
 package com.zoewave.probase.kocolor.data
 
+import android.util.Log
+import com.zoewave.probase.kocolor.data.mapper.toEntity
+import com.zoewave.probase.kocolor.data.mapper.toModel
+import com.zoewave.probase.kocolor.data.mapper.toSavedSuggestionEntity
 import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
 import com.zoewave.probase.kocolor.db.dao.SavedSuggestionDao
-import com.zoewave.probase.kocolor.db.entity.FashionProfileEntity
-import com.zoewave.probase.kocolor.db.entity.SavedSuggestionEntity
 import com.zoewave.probase.kocolor.model.FashionAdvice
 import com.zoewave.probase.kocolor.model.FashionProfile
 import com.zoewave.probase.kocolor.model.SavedAnalysis
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
+private const val TAG = "FashionRepository"
+
+@Singleton
 class FashionRepository @Inject constructor(
     private val fashionProfileDao: FashionProfileDao,
     private val savedSuggestionDao: SavedSuggestionDao
 ) {
     fun getProfile(): Flow<FashionProfile?> {
-        return fashionProfileDao.getProfile().map { entity ->
-            entity?.let {
-                FashionProfile(
-                    id = it.id,
-                    seasonalType = it.seasonalType,
-                    undertone = it.undertone,
-                    skinToneHex = it.skinToneHex,
-                    eyeColor = it.eyeColor,
-                    hairColor = it.hairColor,
-                    notes = it.notes,
-                    recommendedPalette = it.recommendedPalette
-                )
+        return fashionProfileDao.getProfile()
+            .map { it?.toModel() }
+            .catch { e ->
+                Log.e(TAG, "Error fetching fashion profile", e)
+                emit(null)
             }
-        }
     }
 
-    suspend fun saveProfile(profile: FashionProfile) {
-        fashionProfileDao.saveProfile(
-            FashionProfileEntity(
-                id = profile.id,
-                seasonalType = profile.seasonalType,
-                undertone = profile.undertone,
-                skinToneHex = profile.skinToneHex,
-                eyeColor = profile.eyeColor,
-                hairColor = profile.hairColor,
-                notes = profile.notes,
-                recommendedPalette = profile.recommendedPalette
-            )
-        )
+    suspend fun saveProfile(profile: FashionProfile) = withContext(Dispatchers.IO) {
+        try {
+            fashionProfileDao.saveProfile(profile.toEntity())
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save fashion profile", e)
+        }
     }
 
     fun getSavedSuggestions(): Flow<List<SavedAnalysis>> {
-        return savedSuggestionDao.getAllSuggestions().map { list ->
-            list.map { 
-                SavedAnalysis(
-                    id = it.id,
-                    timestamp = it.timestamp,
-                    advice = it.advice
-                )
+        return savedSuggestionDao.getAllSuggestions()
+            .map { list -> list.map { it.toModel() } }
+            .catch { e ->
+                Log.e(TAG, "Error fetching saved suggestions", e)
+                emit(emptyList())
             }
+    }
+
+    suspend fun getSuggestionById(id: Long): SavedAnalysis? = withContext(Dispatchers.IO) {
+        try {
+            savedSuggestionDao.getSuggestionById(id)?.toModel()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching suggestion by id: $id", e)
+            null
         }
     }
 
-    suspend fun getSuggestionById(id: Long): SavedAnalysis? {
-        return savedSuggestionDao.getSuggestionById(id)?.let {
-            SavedAnalysis(
-                id = it.id,
-                timestamp = it.timestamp,
-                advice = it.advice
-            )
+    suspend fun saveSuggestion(advice: FashionAdvice) = withContext(Dispatchers.IO) {
+        try {
+            savedSuggestionDao.saveSuggestion(advice.toSavedSuggestionEntity())
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save suggestion", e)
         }
-    }
-
-    suspend fun saveSuggestion(advice: FashionAdvice) {
-        savedSuggestionDao.saveSuggestion(
-            SavedSuggestionEntity(
-                timestamp = System.currentTimeMillis(),
-                advice = advice
-            )
-        )
     }
 }

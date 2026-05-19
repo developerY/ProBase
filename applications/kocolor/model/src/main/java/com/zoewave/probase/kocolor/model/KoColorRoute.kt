@@ -53,6 +53,9 @@ sealed class KoColorRoute {
     data class WardrobeEdit(val itemId: Long) : KoColorRoute()
     
     @Serializable
+    data object WardrobeColorVerification : KoColorRoute()
+
+    @Serializable
     data class Analyzer(val uri: String? = null) : KoColorRoute()
     
     @Serializable
