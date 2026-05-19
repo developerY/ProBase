@@ -22,4 +22,5 @@ dependencies {
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.coil.compose)
+    implementation("androidx.palette:palette-ktx:1.0.0")
 }
