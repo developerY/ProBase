@@ -16,5 +16,13 @@ data class ClothingItemEntity(
     val price: Double? = null,
     val imageUrl: String? = null,
     val notes: String? = null,
-    val timestamp: Long
+    val timestamp: Long,
+    
+    // --- Wardrobe Color Engine Metadata ---
+    val dominantHex: String? = null,
+    val vibrantHex: String? = null,
+    val mutedHex: String? = null,
+    val paletteHexes: List<String> = emptyList(),
+    val colorTemperature: String? = null,
+    val seasonalPalette: String? = null
 )

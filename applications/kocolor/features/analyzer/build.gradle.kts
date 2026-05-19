@@ -27,5 +27,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
+    implementation("androidx.palette:palette-ktx:1.0.0")
     implementation(libs.kotlinx.serialization.json)
 }
