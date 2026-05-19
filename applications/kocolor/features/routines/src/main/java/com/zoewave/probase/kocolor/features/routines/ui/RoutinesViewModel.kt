@@ -39,6 +39,7 @@ sealed class RoutinesEvent {
     data class RemoveStep(val routineId: Long, val stepId: String) : RoutinesEvent()
     data class LinkProduct(val routineId: Long, val stepId: String, val productId: Long) : RoutinesEvent()
     data class ReorderSteps(val routineId: Long, val fromIndex: Int, val toIndex: Int) : RoutinesEvent()
+    data class ResetRoutine(val routineId: Long) : RoutinesEvent()
 }
 
 @HiltViewModel
@@ -123,6 +124,7 @@ class RoutinesViewModel @Inject constructor(
             is RoutinesEvent.RemoveStep -> removeStepFromActive(event.routineId, event.stepId)
             is RoutinesEvent.LinkProduct -> linkProductToStep(event.routineId, event.stepId, event.productId)
             is RoutinesEvent.ReorderSteps -> reorderSteps(event.routineId, event.fromIndex, event.toIndex)
+            is RoutinesEvent.ResetRoutine -> resetRoutine(event.routineId)
         }
     }
 
@@ -209,6 +211,16 @@ class RoutinesViewModel @Inject constructor(
         }
         
         updateRoutine(currentRoutine.copy(steps = updatedSteps))
+    }
+
+    private fun resetRoutine(routineId: Long) {
+        viewModelScope.launch {
+            val routine = (uiState.value.morningRoutine ?: uiState.value.eveningRoutine)?.takeIf { it.id == routineId }
+                ?: return@launch
+            
+            val resetSteps = routine.steps.map { it.copy(isCompleted = false) }
+            routineDao.updateRoutine(routine.copy(steps = resetSteps).toEntity())
+        }
     }
 
     private fun RoutineEntity.toModel() = BeautyRoutine(

@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.datastore.preferences)
+    implementation("androidx.palette:palette-ktx:1.0.0")
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)

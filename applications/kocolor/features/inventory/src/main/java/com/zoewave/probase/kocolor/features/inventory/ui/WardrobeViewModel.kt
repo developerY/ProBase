@@ -3,10 +3,9 @@ package com.zoewave.probase.kocolor.features.inventory.ui
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zoewave.probase.kocolor.db.dao.ClothingDao
+import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.db.data.ClothingDefaults
-import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.kocolor.model.ClothingCategory
 import com.zoewave.probase.kocolor.model.ClothingItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,7 +48,7 @@ sealed class WardrobeEvent {
 
 @HiltViewModel
 class WardrobeViewModel @Inject constructor(
-    private val clothingDao: ClothingDao,
+    private val wardrobeRepository: WardrobeRepository,
     private val sessionRepository: FashionSessionRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -58,7 +57,7 @@ class WardrobeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            clothingDao.getAllClothing().first().let {
+            wardrobeRepository.getAllClothing().first().let {
                 if (it.isEmpty()) {
                     initializeDefaultClothing()
                 }
@@ -79,8 +78,8 @@ class WardrobeViewModel @Inject constructor(
         itemId?.let { id ->
             if (id != 0L) {
                 viewModelScope.launch {
-                    clothingDao.getClothingById(id).first()?.let { entity ->
-                        _draftItem.value = entity.toModel()
+                    wardrobeRepository.getClothingById(id).first()?.let { model ->
+                        _draftItem.value = model
                     }
                 }
             }
@@ -88,16 +87,24 @@ class WardrobeViewModel @Inject constructor(
     }
 
     private suspend fun initializeDefaultClothing() {
-        for (item in ClothingDefaults.getDefaultClothing()) {
-            clothingDao.insertClothing(item)
+        for (itemEntity in ClothingDefaults.getDefaultClothing()) {
+            // Mapping default entities to models for repository save
+            val item = ClothingItem(
+                name = itemEntity.name,
+                brand = itemEntity.brand,
+                category = itemEntity.category,
+                colorHex = itemEntity.colorHex,
+                imageUrl = itemEntity.imageUrl,
+                price = itemEntity.price
+            )
+            wardrobeRepository.saveClothingItem(item)
         }
     }
 
     val uiState: StateFlow<WardrobeUiState> = combine(
-        clothingDao.getAllClothing(),
+        wardrobeRepository.getAllClothing(),
         _draftItem
-    ) { entities, draft ->
-        val models = entities.map { it.toModel() }
+    ) { models, draft ->
         val totalInvestment = models.sumOf { it.price ?: 0.0 }
         val itemsByCategory = models.groupBy { it.category.name }.mapValues { it.value.size }
         
@@ -130,8 +137,8 @@ class WardrobeViewModel @Inject constructor(
             is WardrobeEvent.UpdateDraft -> _draftItem.value = event.item
             is WardrobeEvent.InitializeEdit -> {
                 viewModelScope.launch {
-                    clothingDao.getClothingById(event.itemId).first()?.let { entity ->
-                        _draftItem.value = entity.toModel()
+                    wardrobeRepository.getClothingById(event.itemId).first()?.let { model ->
+                        _draftItem.value = model
                     }
                 }
             }
@@ -140,47 +147,19 @@ class WardrobeViewModel @Inject constructor(
 
     private fun addItem(item: ClothingItem) {
         viewModelScope.launch {
-            clothingDao.insertClothing(item.toEntity())
+            wardrobeRepository.saveClothingItem(item)
         }
     }
 
     private fun updateItem(item: ClothingItem) {
         viewModelScope.launch {
-            clothingDao.updateClothing(item.toEntity())
+            wardrobeRepository.saveClothingItem(item)
         }
     }
 
     private fun deleteItem(id: Long) {
         viewModelScope.launch {
-            clothingDao.deleteClothing(id)
+            wardrobeRepository.deleteClothing(id)
         }
     }
-
-    private fun ClothingItemEntity.toModel() = ClothingItem(
-        id = id,
-        name = name,
-        brand = brand,
-        category = category,
-        colorHex = colorHex,
-        size = size,
-        material = material,
-        price = price,
-        imageUrl = imageUrl,
-        notes = notes,
-        timestamp = timestamp
-    )
-
-    private fun ClothingItem.toEntity() = ClothingItemEntity(
-        id = id,
-        name = name,
-        brand = brand,
-        category = category,
-        colorHex = colorHex,
-        size = size,
-        material = material,
-        price = price,
-        imageUrl = imageUrl,
-        notes = notes,
-        timestamp = timestamp
-    )
 }

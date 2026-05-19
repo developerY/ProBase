@@ -28,5 +28,15 @@ data class ClothingItem(
     val price: Double? = null,
     val imageUrl: String? = null,
     val notes: String? = null,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    
+    // --- Wardrobe Color Engine Metadata ---
+    val dominantHex: String? = null,
+    val vibrantHex: String? = null,
+    val mutedHex: String? = null,
+    val paletteHexes: List<String> = emptyList(),
+    val colorTemperature: String? = null, // WARM, COOL, NEUTRAL
+    val seasonalPalette: String? = null,  // SPRING, SUMMER, AUTUMN, WINTER
+    val contrastLevel: String? = null,    // LOW, MEDIUM, HIGH
+    val koColorGroup: String? = null      // Semantic group
 )

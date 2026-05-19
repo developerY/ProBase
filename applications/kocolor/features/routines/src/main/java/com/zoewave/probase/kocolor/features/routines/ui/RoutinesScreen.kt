@@ -72,7 +72,8 @@ fun RoutinesScreen(
                 uiState.morningRoutine?.let { routine ->
                     HeroRitualCard(
                         routine = routine,
-                        onClick = { navTo(KoColorRoute.RoutineDetail(routine.id)) }
+                        onClick = { navTo(KoColorRoute.RoutineDetail(routine.id)) },
+                        onReset = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) }
                     )
                 }
             }
@@ -81,7 +82,8 @@ fun RoutinesScreen(
                 uiState.eveningRoutine?.let { routine ->
                     HeroRitualCard(
                         routine = routine,
-                        onClick = { navTo(KoColorRoute.RoutineDetail(routine.id)) }
+                        onClick = { navTo(KoColorRoute.RoutineDetail(routine.id)) },
+                        onReset = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) }
                     )
                 }
             }
@@ -96,7 +98,8 @@ fun RoutinesScreen(
 @Composable
 private fun HeroRitualCard(
     routine: BeautyRoutine,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onReset: () -> Unit
 ) {
     val isMorning = routine.time == RoutineTime.MORNING
     val accentColor = if (isMorning) Color(0xFF6B705C) else Color(0xFF457B9D) // Sage vs Muted Blue
@@ -145,8 +148,13 @@ private fun HeroRitualCard(
                         )
                     }
 
-                    // Minimal Circular Progress
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp)) {
+                    // Minimal Circular Progress with Reset Trigger
+                    Box(
+                        contentAlignment = Alignment.Center, 
+                        modifier = Modifier
+                            .size(54.dp)
+                            .clickable(onClick = onReset)
+                    ) {
                         CircularProgressIndicator(
                             progress = { 1f },
                             modifier = Modifier.fillMaxSize(),
@@ -156,6 +164,7 @@ private fun HeroRitualCard(
                         val completedCount = routine.steps.count { it.isCompleted }
                         val totalCount = routine.steps.size
                         val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
+                        
                         CircularProgressIndicator(
                             progress = { progress },
                             modifier = Modifier.fillMaxSize(),
@@ -163,12 +172,18 @@ private fun HeroRitualCard(
                             strokeWidth = 3.dp,
                             strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                         )
-                        Text(
-                            text = "$completedCount/$totalCount",
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                            fontWeight = FontWeight.Black,
-                            color = accentColor
-                        )
+                        
+                        // Show Refresh icon if progress is high, otherwise fraction
+                        if (progress > 0.99f && totalCount > 0) {
+                            Icon(Icons.Default.Refresh, null, tint = accentColor, modifier = Modifier.size(16.dp))
+                        } else {
+                            Text(
+                                text = "$completedCount/$totalCount",
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                fontWeight = FontWeight.Black,
+                                color = accentColor
+                            )
+                        }
                     }
                 }
                 
