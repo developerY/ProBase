@@ -2,9 +2,10 @@ package com.zoewave.probase.kocolor.features.routines.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.kocolor.data.mapper.toEntity
+import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
-import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
 import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
 import com.zoewave.probase.kocolor.model.BeautyRoutine
@@ -222,36 +223,4 @@ class RoutinesViewModel @Inject constructor(
             routineDao.updateRoutine(routine.copy(steps = resetSteps).toEntity())
         }
     }
-
-    private fun RoutineEntity.toModel() = BeautyRoutine(
-        id = id,
-        title = title,
-        time = time,
-        steps = steps,
-        date = date
-    )
-
-    private fun BeautyRoutine.toEntity() = RoutineEntity(
-        id = id,
-        title = title,
-        time = time,
-        steps = steps,
-        date = date
-    )
-
-    private fun CosmeticItemEntity.toModel() = CosmeticItem(
-        id = id, name = name, brand = brand, category = category,
-        colorHex = colorHex, shadeName = shadeName, imageUrl = imageUrl,
-        price = price, volume = volume, usageCount = usageCount,
-        openedDate = openedDate, paoMonths = paoMonths, timestamp = timestamp,
-        amountRemaining = amountRemaining, amountPerUse = amountPerUse
-    )
-
-    private fun CosmeticItem.toEntity() = CosmeticItemEntity(
-        id = id, name = name, brand = brand, category = category,
-        colorHex = colorHex, shadeName = shadeName, imageUrl = imageUrl,
-        price = price, volume = volume, usageCount = usageCount,
-        openedDate = openedDate, paoMonths = paoMonths, timestamp = timestamp,
-        amountRemaining = amountRemaining, amountPerUse = amountPerUse
-    )
 }
