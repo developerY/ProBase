@@ -6,6 +6,8 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.kocolor.data.mapper.toEntity
+import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
@@ -270,50 +272,4 @@ class CosmeticsViewModel @Inject constructor(
             cosmeticDao.deleteCosmetic(id)
         }
     }
-
-    private fun CosmeticItemEntity.toModel() = CosmeticItem(
-        id = id,
-        name = name,
-        brand = brand,
-        category = category,
-        colorHex = colorHex,
-        shadeName = shadeName,
-        imageUrl = imageUrl,
-        notes = notes,
-        instructions = instructions,
-        timestamp = timestamp,
-        batchCode = batchCode,
-        openedDate = openedDate,
-        paoMonths = paoMonths,
-        expiryDate = expiryDate,
-        price = price,
-        volume = volume,
-        isOpened = isOpened,
-        isFinished = isFinished,
-        isArchived = isArchived,
-        usageCount = usageCount
-    )
-
-    private fun CosmeticItem.toEntity() = CosmeticItemEntity(
-        id = id,
-        name = name,
-        brand = brand,
-        category = category,
-        colorHex = colorHex,
-        shadeName = shadeName,
-        imageUrl = imageUrl,
-        notes = notes,
-        instructions = instructions,
-        timestamp = timestamp,
-        batchCode = batchCode,
-        openedDate = openedDate,
-        paoMonths = paoMonths,
-        expiryDate = expiryDate,
-        price = price,
-        volume = volume,
-        isOpened = isOpened,
-        isFinished = isFinished,
-        isArchived = isArchived,
-        usageCount = usageCount
-    )
 }
