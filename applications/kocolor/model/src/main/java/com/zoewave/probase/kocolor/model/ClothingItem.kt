@@ -36,5 +36,7 @@ data class ClothingItem(
     val mutedHex: String? = null,
     val paletteHexes: List<String> = emptyList(),
     val colorTemperature: String? = null, // WARM, COOL, NEUTRAL
-    val seasonalPalette: String? = null   // SPRING, SUMMER, AUTUMN, WINTER
+    val seasonalPalette: String? = null,  // SPRING, SUMMER, AUTUMN, WINTER
+    val contrastLevel: String? = null,    // LOW, MEDIUM, HIGH
+    val koColorGroup: String? = null      // Semantic group
 )
