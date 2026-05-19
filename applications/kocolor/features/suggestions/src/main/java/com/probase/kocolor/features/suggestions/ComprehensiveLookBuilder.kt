@@ -1,6 +1,6 @@
 package com.probase.kocolor.features.suggestions
 
-import com.probase.kocolor.model.ClothingItem
+import com.zoewave.probase.kocolor.model.ClothingItem
 import com.probase.kocolor.model.CosmeticCategory
 import com.probase.kocolor.model.CosmeticItem
 import com.probase.kocolor.model.HarmonizedLook
