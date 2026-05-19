@@ -29,8 +29,30 @@ class WardrobeAnalyzer @Inject constructor() {
             dominantHex = dominant,
             vibrantHex = vibrant,
             mutedHex = muted,
-            secondaryPalette = secondaryColors
+            secondaryPalette = secondaryColors,
+            allSwatches = palette.swatches.map { it.rgb.toHex() }
         )
+    }
+
+    fun calculateContrastLevel(swatches: List<String>): String {
+        if (swatches.size < 2) return "LOW"
+        
+        val brightnesses = swatches.map { hex ->
+            val color = try { android.graphics.Color.parseColor(hex) } catch (e: Exception) { 0 }
+            (android.graphics.Color.red(color) * 0.299 + 
+             android.graphics.Color.green(color) * 0.587 + 
+             android.graphics.Color.blue(color) * 0.114) / 255.0
+        }
+        
+        val min = brightnesses.minOrNull() ?: 0.0
+        val max = brightnesses.maxOrNull() ?: 1.0
+        val diff = max - min
+        
+        return when {
+            diff > 0.6 -> "HIGH"
+            diff > 0.3 -> "MEDIUM"
+            else -> "LOW"
+        }
     }
 
     private fun Int.toHex(): String = String.format("#%06X", 0xFFFFFF and this)
@@ -43,5 +65,6 @@ data class GarmentColorSignature(
     val dominantHex: String,
     val vibrantHex: String? = null,
     val mutedHex: String? = null,
-    val secondaryPalette: List<String> = emptyList()
+    val secondaryPalette: List<String> = emptyList(),
+    val allSwatches: List<String> = emptyList()
 )

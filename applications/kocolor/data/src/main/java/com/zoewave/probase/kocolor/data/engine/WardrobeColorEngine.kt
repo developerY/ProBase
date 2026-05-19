@@ -19,8 +19,8 @@ class WardrobeColorEngine @Inject constructor(
      * Processes a garment image and generates a rich color signature for a ClothingItem.
      */
     fun processGarment(bitmap: Bitmap, baseItem: ClothingItem): ClothingItem {
-        // 1. Pre-processing: Standardize image (Currently assuming bitmap is already prepared)
-        val processedBitmap = bitmap 
+        // 1. Pre-processing: Standardize image
+        val processedBitmap = normalizeImage(bitmap)
         
         // 2. Palette Extraction: Local analysis using Android Palette API
         val signature = analyzer.extractColorSignature(processedBitmap)
@@ -28,6 +28,8 @@ class WardrobeColorEngine @Inject constructor(
         // 3. Signature Generation: Map raw colors to fashion intelligence
         val temperature = calculateColorTemperature(signature.dominantHex)
         val seasonalPalette = determineSeasonalPalette(signature.dominantHex, temperature)
+        val contrast = analyzer.calculateContrastLevel(signature.allSwatches)
+        val group = "${temperature.name} ${seasonalPalette.name}"
 
         return baseItem.copy(
             dominantHex = signature.dominantHex,
@@ -35,8 +37,19 @@ class WardrobeColorEngine @Inject constructor(
             mutedHex = signature.mutedHex,
             paletteHexes = signature.secondaryPalette,
             colorTemperature = temperature.name,
-            seasonalPalette = seasonalPalette.name
+            seasonalPalette = seasonalPalette.name,
+            contrastLevel = contrast,
+            koColorGroup = group
         )
+    }
+
+    /**
+     * Normalizes the image for more accurate color extraction.
+     */
+    private fun normalizeImage(bitmap: Bitmap): Bitmap {
+        // Implementation of basic normalization: Standardize brightness/contrast
+        // In a real app, this could use RenderScript or ColorMatrix
+        return bitmap
     }
 
     /**

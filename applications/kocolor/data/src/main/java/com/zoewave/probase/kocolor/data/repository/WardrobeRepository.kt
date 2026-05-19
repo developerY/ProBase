@@ -105,7 +105,9 @@ class WardrobeRepository @Inject constructor(
         mutedHex = mutedHex,
         paletteHexes = paletteHexes,
         colorTemperature = colorTemperature,
-        seasonalPalette = seasonalPalette
+        seasonalPalette = seasonalPalette,
+        contrastLevel = contrastLevel,
+        koColorGroup = koColorGroup
     )
 
     private fun ClothingItem.toEntity() = ClothingItemEntity(
@@ -125,6 +127,8 @@ class WardrobeRepository @Inject constructor(
         mutedHex = mutedHex,
         paletteHexes = paletteHexes,
         colorTemperature = colorTemperature,
-        seasonalPalette = seasonalPalette
+        seasonalPalette = seasonalPalette,
+        contrastLevel = contrastLevel,
+        koColorGroup = koColorGroup
     )
 }
