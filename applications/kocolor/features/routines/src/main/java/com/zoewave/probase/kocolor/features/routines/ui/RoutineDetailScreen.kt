@@ -170,8 +170,11 @@ fun RoutineDetailScreen(
                 ReorderableItem(reorderableState, key = step.id) { isDragging ->
                     val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
                     
+                    val linkedProduct = uiState.allProducts.find { step.productIds.contains(it.id) }
+                    
                     SplitRitualStep(
                         step = step,
+                        linkedProduct = linkedProduct,
                         isReorderMode = isReorderMode,
                         onToggle = { onEvent(RoutinesEvent.ToggleStep(routine.id, step.id)) },
                         onInfoClick = { onEdit(step.id) },
@@ -190,20 +193,31 @@ fun RoutineDetailScreen(
 @Composable
 private fun SplitRitualStep(
     step: RoutineStep,
+    linkedProduct: CosmeticItem?,
     isReorderMode: Boolean,
     onToggle: () -> Unit,
     onInfoClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isCompleted = step.isCompleted
-    val backgroundColor = if (isCompleted) Color(0xFFE5E7E1) else Color.White
+    val hasAmountInfo = linkedProduct?.amountPerUse != null && linkedProduct.amountRemaining != null
+    
+    val backgroundColor = if (isCompleted) Color(0xFFE5E7E1) else if (!hasAmountInfo) Color(0xFFF5F5F5) else Color.White
     val iconColor = if (isCompleted) Color(0xFF5A5F4B) else MaterialTheme.colorScheme.outlineVariant
+
+    val fillLevel = linkedProduct?.fillLevel ?: 1.0
+    val statusColor = when {
+        !hasAmountInfo -> Color.Gray.copy(alpha = 0.3f)
+        fillLevel > 0.5 -> Color(0xFF4CAF50) // Green
+        fillLevel > 0.2 -> Color(0xFFFFA000) // Orange
+        else -> Color(0xFFD32F2F) // Red
+    }
 
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = backgroundColor,
-        border = if (!isCompleted) BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)) else null
+        border = if (!isCompleted && hasAmountInfo) BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)) else null
     ) {
         Row(
             modifier = Modifier.height(IntrinsicSize.Min),
@@ -213,7 +227,7 @@ private fun SplitRitualStep(
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .clickable(enabled = !isReorderMode, onClick = onToggle)
+                    .clickable(enabled = !isReorderMode && hasAmountInfo, onClick = onToggle)
                     .padding(horizontal = 20.dp, vertical = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -225,9 +239,9 @@ private fun SplitRitualStep(
                     )
                 } else {
                     Surface(
-                        color = if (isCompleted) iconColor else Color.Transparent,
+                        color = if (isCompleted) iconColor else statusColor.copy(alpha = 0.1f),
                         shape = CircleShape,
-                        modifier = Modifier.size(28.dp).border(1.5.dp, iconColor, CircleShape)
+                        modifier = Modifier.size(28.dp).border(1.5.dp, statusColor, CircleShape)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             if (isCompleted) Icon(Icons.Default.Check, null, tint = Color.White, modifier = Modifier.size(18.dp))
@@ -236,7 +250,6 @@ private fun SplitRitualStep(
                 }
             }
 
-            // Sublte Vertical Divider/Break
             VerticalDivider(
                 modifier = Modifier.fillMaxHeight().padding(vertical = 16.dp),
                 color = if (isCompleted) Color.Black.copy(alpha = 0.05f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
@@ -251,7 +264,7 @@ private fun SplitRitualStep(
                     .padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(1f).alpha(if (hasAmountInfo) 1f else 0.5f)) {
                     Text(
                         text = step.title,
                         style = MaterialTheme.typography.titleMedium,
@@ -259,9 +272,18 @@ private fun SplitRitualStep(
                         modifier = Modifier.alpha(if (isCompleted) 0.6f else 1f)
                     )
                     Text(
-                        text = "Gentle care for healthy skin.",
+                        text = if (hasAmountInfo) "${(fillLevel * 100).toInt()}% Remaining" else "Missing consumption data",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        color = if (hasAmountInfo) statusColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                }
+
+                if (!isReorderMode) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = "Details",
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

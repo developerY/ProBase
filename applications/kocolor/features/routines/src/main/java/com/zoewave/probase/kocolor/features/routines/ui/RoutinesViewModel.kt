@@ -148,7 +148,17 @@ class RoutinesViewModel @Inject constructor(
         viewModelScope.launch {
             cosmeticDao.getCosmeticById(productId).first()?.let { entity ->
                 val model = entity.toModel()
-                cosmeticDao.updateCosmetic(model.copy(usageCount = model.usageCount + 1).toEntity())
+                val currentAmount = model.amountRemaining
+                val perUse = model.amountPerUse
+                
+                val updatedAmount = if (currentAmount != null && perUse != null) {
+                    (currentAmount - perUse).coerceAtLeast(0.0)
+                } else currentAmount
+                
+                cosmeticDao.updateCosmetic(model.copy(
+                    usageCount = model.usageCount + 1,
+                    amountRemaining = updatedAmount
+                ).toEntity())
             }
         }
     }
@@ -221,13 +231,15 @@ class RoutinesViewModel @Inject constructor(
         id = id, name = name, brand = brand, category = category,
         colorHex = colorHex, shadeName = shadeName, imageUrl = imageUrl,
         price = price, volume = volume, usageCount = usageCount,
-        openedDate = openedDate, paoMonths = paoMonths, timestamp = timestamp
+        openedDate = openedDate, paoMonths = paoMonths, timestamp = timestamp,
+        amountRemaining = amountRemaining, amountPerUse = amountPerUse
     )
 
     private fun CosmeticItem.toEntity() = CosmeticItemEntity(
         id = id, name = name, brand = brand, category = category,
         colorHex = colorHex, shadeName = shadeName, imageUrl = imageUrl,
         price = price, volume = volume, usageCount = usageCount,
-        openedDate = openedDate, paoMonths = paoMonths, timestamp = timestamp
+        openedDate = openedDate, paoMonths = paoMonths, timestamp = timestamp,
+        amountRemaining = amountRemaining, amountPerUse = amountPerUse
     )
 }

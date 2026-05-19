@@ -25,9 +25,11 @@ data class CosmeticItemEntity(
     val price: Double? = null,
     val volume: String? = null,
 
-    // --- Usage & State ---
+    // --- Usage & Consumption Engine ---
     val isOpened: Boolean = false,
     val isFinished: Boolean = false,
     val isArchived: Boolean = false,
-    val usageCount: Int = 0
+    val usageCount: Int = 0,
+    val amountRemaining: Double? = null,
+    val amountPerUse: Double? = null
 )
