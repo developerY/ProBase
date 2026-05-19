@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.data.engine
 
 import android.graphics.Bitmap
 import androidx.palette.graphics.Palette
+import com.zoewave.probase.kocolor.data.util.ColorScience
 import javax.inject.Inject
 
 /**
@@ -38,10 +39,10 @@ class WardrobeAnalyzer @Inject constructor() {
         if (swatches.size < 2) return "LOW"
         
         val brightnesses = swatches.map { hex ->
-            val color = try { android.graphics.Color.parseColor(hex) } catch (e: Exception) { 0 }
-            (android.graphics.Color.red(color) * 0.299 + 
-             android.graphics.Color.green(color) * 0.587 + 
-             android.graphics.Color.blue(color) * 0.114) / 255.0
+            val rgb = ColorScience.hexToRgb(hex)
+            if (rgb != null) {
+                (rgb.first * 0.299 + rgb.second * 0.587 + rgb.third * 0.114) / 255.0
+            } else 0.0
         }
         
         val min = brightnesses.minOrNull() ?: 0.0

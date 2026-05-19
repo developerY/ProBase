@@ -1,7 +1,7 @@
 package com.zoewave.probase.kocolor.data.engine
 
 import android.graphics.Bitmap
-import android.graphics.Color
+import com.zoewave.probase.kocolor.data.util.ColorScience
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.SeasonalType
 import com.zoewave.probase.kocolor.model.Undertone
@@ -26,8 +26,7 @@ class WardrobeColorEngine @Inject constructor(
         val signature = analyzer.extractColorSignature(processedBitmap)
         
         // 3. Signature Generation: Map raw colors to fashion intelligence
-        val temperature = calculateColorTemperature(signature.dominantHex)
-        val seasonalPalette = determineSeasonalPalette(signature.dominantHex, temperature)
+        val (temperature, seasonalPalette) = analyzeColorIntelligence(signature.dominantHex)
         val contrast = analyzer.calculateContrastLevel(signature.allSwatches)
         val group = "${temperature.name} ${seasonalPalette.name}"
 
@@ -43,54 +42,23 @@ class WardrobeColorEngine @Inject constructor(
         )
     }
 
+    private fun analyzeColorIntelligence(hex: String): Pair<Undertone, SeasonalType> {
+        val rgb = ColorScience.hexToRgb(hex) ?: return Undertone.NEUTRAL to SeasonalType.UNKNOWN
+        val hsl = ColorScience.rgbToHsl(rgb.first, rgb.second, rgb.third)
+        
+        val tempStr = ColorScience.determineTemperature(hsl)
+        val seasonStr = ColorScience.mapToSeasonalPalette(hsl, tempStr)
+        
+        val temperature = try { Undertone.valueOf(tempStr) } catch (e: Exception) { Undertone.NEUTRAL }
+        val seasonalPalette = try { SeasonalType.valueOf(seasonStr) } catch (e: Exception) { SeasonalType.UNKNOWN }
+        
+        return temperature to seasonalPalette
+    }
+
     /**
      * Normalizes the image for more accurate color extraction.
      */
     private fun normalizeImage(bitmap: Bitmap): Bitmap {
-        // Implementation of basic normalization: Standardize brightness/contrast
-        // In a real app, this could use RenderScript or ColorMatrix
         return bitmap
-    }
-
-    /**
-     * Heuristic-based calculation of color temperature (WARM vs COOL).
-     */
-    private fun calculateColorTemperature(hex: String): Undertone {
-        val color = try { Color.parseColor(hex) } catch (e: Exception) { return Undertone.NEUTRAL }
-        
-        val red = Color.red(color)
-        val blue = Color.blue(color)
-        
-        return when {
-            red > blue + 30 -> Undertone.WARM
-            blue > red + 30 -> Undertone.COOL
-            else -> Undertone.NEUTRAL
-        }
-    }
-
-    /**
-     * Heuristic-based determination of seasonal palette based on dominant color and temperature.
-     */
-    private fun determineSeasonalPalette(hex: String, temperature: Undertone): SeasonalType {
-        val hsv = FloatArray(3)
-        try { Color.colorToHSV(Color.parseColor(hex), hsv) } catch (e: Exception) { return SeasonalType.UNKNOWN }
-        
-        val value = hsv[2] // Brightness/Lightness
-        val saturation = hsv[1]
-
-        return when (temperature) {
-            Undertone.WARM -> {
-                if (value > 0.6f && saturation > 0.5f) SeasonalType.SPRING else SeasonalType.AUTUMN
-            }
-            Undertone.COOL -> {
-                if (value > 0.5f && saturation > 0.5f) SeasonalType.WINTER else SeasonalType.SUMMER
-            }
-            Undertone.NEUTRAL -> {
-                if (value > 0.8f) SeasonalType.SPRING 
-                else if (value < 0.3f) SeasonalType.WINTER 
-                else SeasonalType.AUTUMN
-            }
-            else -> SeasonalType.UNKNOWN
-        }
     }
 }
