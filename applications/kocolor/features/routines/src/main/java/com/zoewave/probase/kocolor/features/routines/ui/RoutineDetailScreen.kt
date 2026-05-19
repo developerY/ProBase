@@ -178,7 +178,9 @@ fun RoutineDetailScreen(
                         isReorderMode = isReorderMode,
                         onToggle = { onEvent(RoutinesEvent.ToggleStep(routine.id, step.id)) },
                         onInfoClick = { onEdit(step.id) },
-                        modifier = Modifier.shadow(elevation).draggableHandle()
+                        modifier = Modifier
+                            .shadow(elevation)
+                            .then(if (isReorderMode) Modifier.draggableHandle() else Modifier)
                     )
                 }
             }
