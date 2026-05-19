@@ -190,6 +190,11 @@ fun koColorNavEntryProvider(
                 navTo = onNavigateTo
             )
         }
+        is KoColorRoute.WardrobeColorVerification -> NavEntry(route) {
+            ColorVerificationRoute(
+                navTo = onNavigateTo
+            )
+        }
         is KoColorRoute.ColorDetail -> NavEntry(route) {
             val colorViewModel: ColorViewModel = hiltViewModel()
             val uiState by colorViewModel.uiState.collectAsStateWithLifecycle()
