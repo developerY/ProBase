@@ -4,17 +4,22 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
+import com.zoewave.probase.kocolor.data.mapper.toEntity
+import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
-import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.kocolor.data.engine.WardrobeColorEngine
 import com.zoewave.probase.kocolor.model.ClothingItem
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private const val TAG = "WardrobeRepository"
 
 @Singleton
 class WardrobeRepository @Inject constructor(
@@ -24,44 +29,65 @@ class WardrobeRepository @Inject constructor(
 ) {
 
     fun getAllClothing(): Flow<List<ClothingItem>> {
-        return clothingDao.getAllClothing().map { entities ->
-            entities.map { it.toModel() }
-        }
+        return clothingDao.getAllClothing()
+            .map { entities -> entities.map { it.toModel() } }
+            .catch { e ->
+                Log.e(TAG, "Error fetching all clothing items", e)
+                emit(emptyList())
+            }
     }
 
     fun getClothingById(id: Long): Flow<ClothingItem?> {
-        return clothingDao.getClothingById(id).map { it?.toModel() }
+        return clothingDao.getClothingById(id)
+            .map { it?.toModel() }
+            .catch { e ->
+                Log.e(TAG, "Error fetching clothing item by id: $id", e)
+                emit(null)
+            }
     }
 
     /**
      * Saves a garment and automatically triggers the analytical color pipeline.
      */
     suspend fun saveClothingItem(item: ClothingItem) = withContext(Dispatchers.IO) {
-        val analyzedItem = if (item.imageUrl != null && item.dominantHex == null) {
-            analyzeGarment(item)
-        } else item
+        try {
+            val analyzedItem = if (item.imageUrl != null && item.dominantHex == null) {
+                analyzeGarment(item)
+            } else item
 
-        clothingDao.insertClothing(analyzedItem.toEntity())
+            clothingDao.insertClothing(analyzedItem.toEntity())
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save clothing item: ${item.name}", e)
+        }
     }
 
-    suspend fun deleteClothing(id: Long) {
-        clothingDao.deleteClothing(id)
+    suspend fun deleteClothing(id: Long) = withContext(Dispatchers.IO) {
+        try {
+            clothingDao.deleteClothing(id)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to delete clothing item: $id", e)
+        }
     }
 
     private suspend fun analyzeGarment(item: ClothingItem): ClothingItem {
-        val uri = Uri.parse(item.imageUrl)
-        val bitmap = loadDownsampledBitmap(uri) ?: return item
-        return colorEngine.processGarment(bitmap, item)
+        return try {
+            val uri = Uri.parse(item.imageUrl)
+            val bitmap = loadDownsampledBitmap(uri) ?: return item
+            colorEngine.processGarment(bitmap, item)
+        } catch (e: Exception) {
+            Log.e(TAG, "Analysis failed for item: ${item.name}", e)
+            item
+        }
     }
 
     private fun loadDownsampledBitmap(uri: Uri): Bitmap? {
         return try {
-            val inputStream = context.contentResolver.openInputStream(uri)
+            val inputStream = context.contentResolver.openInputStream(uri) ?: return null
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
             }
             BitmapFactory.decodeStream(inputStream, null, options)
-            inputStream?.close()
+            inputStream.close()
 
             // Target dimensions for analysis (speed vs accuracy)
             val targetWidth = 400
@@ -84,51 +110,8 @@ class WardrobeRepository @Inject constructor(
             finalStream?.close()
             bitmap
         } catch (e: Exception) {
+            Log.e(TAG, "Failed to load downsampled bitmap: $uri", e)
             null
         }
     }
-
-    private fun ClothingItemEntity.toModel() = ClothingItem(
-        id = id,
-        name = name,
-        brand = brand,
-        category = category,
-        colorHex = colorHex,
-        size = size,
-        material = material,
-        price = price,
-        imageUrl = imageUrl,
-        notes = notes,
-        timestamp = timestamp,
-        dominantHex = dominantHex,
-        vibrantHex = vibrantHex,
-        mutedHex = mutedHex,
-        paletteHexes = paletteHexes,
-        colorTemperature = colorTemperature,
-        seasonalPalette = seasonalPalette,
-        contrastLevel = contrastLevel,
-        koColorGroup = koColorGroup
-    )
-
-    private fun ClothingItem.toEntity() = ClothingItemEntity(
-        id = id,
-        name = name,
-        brand = brand,
-        category = category,
-        colorHex = colorHex,
-        size = size,
-        material = material,
-        price = price,
-        imageUrl = imageUrl,
-        notes = notes,
-        timestamp = timestamp,
-        dominantHex = dominantHex,
-        vibrantHex = vibrantHex,
-        mutedHex = mutedHex,
-        paletteHexes = paletteHexes,
-        colorTemperature = colorTemperature,
-        seasonalPalette = seasonalPalette,
-        contrastLevel = contrastLevel,
-        koColorGroup = koColorGroup
-    )
 }
