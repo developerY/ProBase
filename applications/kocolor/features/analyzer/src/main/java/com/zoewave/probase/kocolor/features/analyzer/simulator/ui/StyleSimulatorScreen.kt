@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -64,9 +65,21 @@ fun StyleSimulatorScreen(
                     label = "step_transition"
                 ) { step ->
                     when (step) {
-                        SimulationStep.MESSAGING -> MessagingStep(uiState.userMessage, onEvent)
-                        SimulationStep.BIO_MARKERS, SimulationStep.ROUTINE, SimulationStep.GENERATING -> AnalysisStep(uiState)
-                        SimulationStep.RESULT -> ResultStep(uiState, onEvent)
+                        SimulationStep.MESSAGING -> MessagingStep(
+                            uiState = uiState.userMessage,
+                            onEvent = onEvent,
+                            navTo = navTo
+                        )
+                        SimulationStep.BIO_MARKERS, SimulationStep.ROUTINE, SimulationStep.GENERATING -> AnalysisStep(
+                            uiState = uiState,
+                            onEvent = onEvent,
+                            navTo = navTo
+                        )
+                        SimulationStep.RESULT -> ResultStep(
+                            uiState = uiState,
+                            onEvent = onEvent,
+                            navTo = navTo
+                        )
                     }
                 }
             }
@@ -96,8 +109,20 @@ private fun MagicBackground() {
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun MessagingStep(message: String, onEvent: (SimulatorEvent) -> Unit) {
+private fun MessagingStepPreview() {
+    MaterialTheme {
+        MessagingStep(uiState = "High-stakes negotiation.", onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+fun MessagingStep(
+    uiState: String,
+    onEvent: (SimulatorEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(32.dp)) {
         Spacer(Modifier.height(40.dp))
         Text(
@@ -109,7 +134,7 @@ private fun MessagingStep(message: String, onEvent: (SimulatorEvent) -> Unit) {
         )
         
         OutlinedTextField(
-            value = message,
+            value = uiState,
             onValueChange = { onEvent(SimulatorEvent.UpdateMessage(it)) },
             placeholder = { Text("e.g. A crisp look for high-stakes negotiation.", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.alpha(0.4f)) },
             modifier = Modifier.fillMaxWidth().height(200.dp),
@@ -131,8 +156,20 @@ private fun MessagingStep(message: String, onEvent: (SimulatorEvent) -> Unit) {
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun AnalysisStep(uiState: StyleSimulatorUiState) {
+private fun AnalysisStepPreview() {
+    MaterialTheme {
+        AnalysisStep(uiState = StyleSimulatorUiState(simulationStep = SimulationStep.BIO_MARKERS), onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+fun AnalysisStep(
+    uiState: StyleSimulatorUiState,
+    onEvent: (SimulatorEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -192,8 +229,20 @@ private fun AnalysisStep(uiState: StyleSimulatorUiState) {
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun ResultStep(uiState: StyleSimulatorUiState, onEvent: (SimulatorEvent) -> Unit) {
+private fun ResultStepPreview() {
+    MaterialTheme {
+        ResultStep(uiState = StyleSimulatorUiState(), onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+fun ResultStep(
+    uiState: StyleSimulatorUiState,
+    onEvent: (SimulatorEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(40.dp)
@@ -228,7 +277,7 @@ private fun ResultStep(uiState: StyleSimulatorUiState, onEvent: (SimulatorEvent)
         }
 
         items(uiState.recommendedClothing) { item ->
-            ResultCard(item)
+            ResultCard(uiState = item, onEvent = {}, navTo = {})
         }
         
         item {
@@ -244,8 +293,25 @@ private fun ResultStep(uiState: StyleSimulatorUiState, onEvent: (SimulatorEvent)
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun ResultCard(item: ClothingItem) {
+private fun ResultCardPreview() {
+    MaterialTheme {
+        ResultCard(
+            uiState = ClothingItem(name = "Shirt", category = ClothingCategory.TOPS),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Composable
+fun ResultCard(
+    uiState: ClothingItem,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    val item = uiState
     Card(
         modifier = Modifier.fillMaxWidth().height(160.dp),
         shape = RoundedCornerShape(32.dp),
