@@ -32,6 +32,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.kocolor.model.FashionAdvice
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+@Preview(showBackground = true)
+@Composable
+private fun SuggestionsUiRoutePreview() {
+    MaterialTheme {
+        SuggestionsUiRoute(navTo = {})
+    }
+}
+
 @Composable
 fun SuggestionsUiRoute(
     uiState: Unit = Unit,
