@@ -24,9 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.settings.R
-import com.zoewave.probase.features.nfc.ui.NfcRwEvent
-import com.zoewave.probase.features.nfc.ui.NfcUiState
-import com.zoewave.probase.features.nfc.ui.components.NfcScanScreen
+import com.zoewave.probase.features.readers.nfc.ui.NfcRwEvent
+import com.zoewave.probase.features.readers.nfc.ui.NfcUiState
+import com.zoewave.probase.features.readers.nfc.ui.components.NfcScanScreen
 
 @Composable
 fun NfcExpandableEx(

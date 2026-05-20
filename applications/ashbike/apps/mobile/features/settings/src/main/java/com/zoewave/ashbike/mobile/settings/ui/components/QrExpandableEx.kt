@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zoewave.ashbike.mobile.settings.R
-import com.zoewave.probase.features.qrscanner.ui.QRCodeScannerScreen
+import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 
 @Composable
 fun QrExpandableEx(

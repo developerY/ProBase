@@ -8,7 +8,7 @@ import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.core.ui.components.status.ErrorScreen
 import com.zoewave.probase.core.ui.components.status.LoadingScreen
 import com.zoewave.probase.features.ble.ui.BluetoothLeViewModel
-import com.zoewave.probase.features.nfc.ui.NfcViewModel
+import com.zoewave.probase.features.readers.nfc.ui.NfcViewModel
 
 internal const val ROUTE_NAME =
     "settings_ui_route" // Assuming this was intended to be here or is defined elsewhere for navigation

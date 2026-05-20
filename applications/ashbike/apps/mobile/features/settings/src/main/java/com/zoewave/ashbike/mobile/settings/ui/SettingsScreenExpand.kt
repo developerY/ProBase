@@ -45,8 +45,8 @@ import com.zoewave.ashbike.mobile.settings.ui.components.health.HealthExpandable
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
 import com.zoewave.probase.features.ble.ui.BluetoothLeEvent
 import com.zoewave.probase.features.ble.ui.BluetoothLeUiState
-import com.zoewave.probase.features.nfc.ui.NfcRwEvent
-import com.zoewave.probase.features.nfc.ui.NfcUiState
+import com.zoewave.probase.features.readers.nfc.ui.NfcRwEvent
+import com.zoewave.probase.features.readers.nfc.ui.NfcUiState
 
 //import com.zoewave.probase.features.nfc..ui.NfcRwEvent
 //import com.zoewave.probase.features.nfc..ui.NfcUiState
