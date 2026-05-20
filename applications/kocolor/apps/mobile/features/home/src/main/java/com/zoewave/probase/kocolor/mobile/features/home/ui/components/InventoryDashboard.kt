@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -25,9 +26,22 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.Locale
 
+@Preview(showBackground = true)
+@Composable
+private fun InventoryDashboardPreview() {
+    MaterialTheme {
+        InventoryDashboard(
+            uiState = HomeUiState(totalCosmetics = 10, totalVanityValue = 500.0),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun InventoryDashboard(
     uiState: HomeUiState,
+    onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
@@ -120,7 +134,7 @@ fun InventoryDashboard(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(Icons.Default.Warning, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.error)
-                                Spacer(Modifier.width(6.dp))
+                                Spacer(Modifier.width(6.6.dp))
                                 Text(
                                     text = "${uiState.expiringCosmeticsCount} EXPIRING",
                                     style = MaterialTheme.typography.labelSmall,

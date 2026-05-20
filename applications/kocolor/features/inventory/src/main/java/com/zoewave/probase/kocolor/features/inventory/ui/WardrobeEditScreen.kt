@@ -22,19 +22,39 @@ import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 
+@Preview(showBackground = true)
+@Composable
+private fun WardrobeEditScreenPreview() {
+    MaterialTheme {
+        WardrobeEditScreen(
+            uiState = 1L to WardrobeUiState(
+                draftItem = ClothingItem(
+                    id = 1L,
+                    name = "Blazer",
+                    category = ClothingCategory.TOPS
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun WardrobeEditScreen(
-    itemId: Long,
-    uiState: WardrobeUiState,
+    uiState: Pair<Long, WardrobeUiState>,
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    val itemId = uiState.first
+    val state = uiState.second
+    
     LaunchedEffect(itemId) {
         onEvent(WardrobeEvent.InitializeEdit(itemId))
     }
 
-    val draft = uiState.draftItem
+    val draft = state.draftItem
 
     Scaffold(
         topBar = {
@@ -166,21 +186,4 @@ fun WardrobeEditScreen(
             Spacer(Modifier.height(100.dp))
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun WardrobeEditScreenPreview() {
-    WardrobeEditScreen(
-        itemId = 1L,
-        uiState = WardrobeUiState(
-            draftItem = ClothingItem(
-                id = 1L,
-                name = "Blazer",
-                category = ClothingCategory.TOPS
-            )
-        ),
-        onEvent = {},
-        navTo = {}
-    )
 }

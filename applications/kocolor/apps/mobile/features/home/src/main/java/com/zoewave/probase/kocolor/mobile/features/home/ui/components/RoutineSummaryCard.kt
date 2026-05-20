@@ -11,16 +11,32 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.model.BeautyRoutine
+import com.zoewave.probase.kocolor.model.KoColorRoute
+import com.zoewave.probase.kocolor.model.RoutineTime
+
+@Preview(showBackground = true)
+@Composable
+private fun RoutineSummaryCardPreview() {
+    MaterialTheme {
+        RoutineSummaryCard(
+            uiState = BeautyRoutine(title = "Routine", time = RoutineTime.MORNING, steps = emptyList(), date = 0) to true,
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
 
 @Composable
 fun RoutineSummaryCard(
-    routine: BeautyRoutine,
-    isDaytime: Boolean,
-    onClick: () -> Unit
+    uiState: Pair<BeautyRoutine, Boolean>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val (routine, isDaytime) = uiState
     val completedCount = routine.steps.count { it.isCompleted }
     val totalCount = routine.steps.size
     val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
@@ -28,7 +44,7 @@ fun RoutineSummaryCard(
     val cardColor = if (isDaytime) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) else MaterialTheme.colorScheme.surfaceVariant
 
     Surface(
-        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        modifier = Modifier.fillMaxWidth().clickable { navTo(KoColorRoute.Routines) },
         shape = RoundedCornerShape(32.dp),
         color = cardColor
     ) {

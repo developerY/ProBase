@@ -42,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -67,18 +68,27 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@Preview(showBackground = true)
+@Composable
+private fun ColorUiRoutePreview() {
+    MaterialTheme {
+        ColorUiRoute(
+            uiState = ColorUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun ColorUiRoute(
-    uiState: WindowSizeClass,
-    onEvent: (Unit) -> Unit = {},
+    uiState: ColorUiState,
+    onEvent: (ColorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val viewModel: ColorViewModel = hiltViewModel()
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
-
     ColorScreen(
-        uiState = state,
-        onEvent = viewModel::onEvent,
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo
     )
 }
@@ -117,8 +127,8 @@ fun ColorScreen(
                 items(uiState.savedSuggestions) { analysis ->
                     FashionAnalysisCard(
                         uiState = analysis,
-                        onEvent = {},
-                        navTo = { navTo(KoColorRoute.ColorDetail(analysis.id)) }
+                        onEvent = onEvent,
+                        navTo = navTo
                     )
                 }
             }
@@ -129,15 +139,15 @@ fun ColorScreen(
 @Composable
 fun FashionAnalysisCard(
     uiState: SavedAnalysis,
-    onEvent: (Unit) -> Unit,
-    navTo: () -> Unit
+    onEvent: (ColorEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     val date = SimpleDateFormat("MMM dd, yyyy - HH:mm", Locale.getDefault()).format(Date(uiState.timestamp))
     
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navTo() },
+            .clickable { navTo(KoColorRoute.ColorDetail(uiState.id)) },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -303,8 +313,8 @@ fun ColorDetailScreen(
             
             MakeupPaletteGraphic(
                 uiState = uiState.advice.recommendedPalette,
-                onEvent = {},
-                navTo = {}
+                onEvent = onEvent,
+                navTo = navTo
             )
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -376,7 +386,7 @@ fun ColorDetailScreen(
 @Composable
 fun MakeupPaletteGraphic(
     uiState: List<String>,
-    onEvent: (Unit) -> Unit,
+    onEvent: (ColorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val paletteBackground = Brush.linearGradient(
@@ -401,8 +411,8 @@ fun MakeupPaletteGraphic(
                 items(uiState) { hex ->
                     MakeupPan(
                         uiState = hex,
-                        onEvent = {},
-                        navTo = {}
+                        onEvent = onEvent,
+                        navTo = navTo
                     )
                 }
             }
@@ -413,7 +423,7 @@ fun MakeupPaletteGraphic(
 @Composable
 fun MakeupPan(
     uiState: String,
-    onEvent: (Unit) -> Unit,
+    onEvent: (ColorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val color = try {

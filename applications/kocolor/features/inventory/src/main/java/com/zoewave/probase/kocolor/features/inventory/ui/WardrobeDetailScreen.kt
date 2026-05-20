@@ -36,16 +36,33 @@ private fun isColorDark(color: Color): Boolean {
     return luminance < 0.5
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun WardrobeDetailScreenPreview() {
+    MaterialTheme {
+        WardrobeDetailScreen(
+            uiState = 1L to WardrobeUiState(
+                items = listOf(
+                    ClothingItem(id = 1L, name = "Silk Blouse", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 120.0)
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WardrobeDetailScreen(
-    itemId: Long,
-    uiState: WardrobeUiState,
+    uiState: Pair<Long, WardrobeUiState>,
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val item = remember(uiState.items, itemId) {
-        uiState.items.find { it.id == itemId }
+    val itemId = uiState.first
+    val state = uiState.second
+    val item = remember(state.items, itemId) {
+        state.items.find { it.id == itemId }
     } ?: return
 
     val itemColor = item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant
@@ -100,19 +117,29 @@ fun WardrobeDetailScreen(
             // Metrics
             Row(modifier = Modifier.padding(24.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
-                MetricItem(label = "INVESTMENT", value = item.price?.let { currencyFormatter.format(it) } ?: "---", icon = Icons.Default.Payments, modifier = Modifier.weight(1f))
-                MetricItem(label = "SIZE", value = item.size ?: "OS", icon = Icons.Default.Straighten, modifier = Modifier.weight(1f))
+                MetricItem(
+                    uiState = Triple("INVESTMENT", item.price?.let { currencyFormatter.format(it) } ?: "---", Icons.Default.Payments),
+                    onEvent = {},
+                    navTo = {},
+                    modifier = Modifier.weight(1f)
+                )
+                MetricItem(
+                    uiState = Triple("SIZE", item.size ?: "OS", Icons.Default.Straighten),
+                    onEvent = {},
+                    navTo = {},
+                    modifier = Modifier.weight(1f)
+                )
             }
 
             // Detail Content
             Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(32.dp)) {
                 Column {
-                    SectionHeader("Composition")
-                    DetailRow("Material", item.material ?: "Unknown")
+                    SectionHeader(uiState = "Composition", onEvent = {}, navTo = {})
+                    DetailRow(uiState = "Material" to (item.material ?: "Unknown"), onEvent = {}, navTo = {})
                 }
                 Column {
-                    SectionHeader("Archive Notes")
-                    ProInsightCard(content = item.notes, icon = Icons.AutoMirrored.Filled.MenuBook)
+                    SectionHeader(uiState = "Archive Notes", onEvent = {}, navTo = {})
+                    ProInsightCard(uiState = item.notes to Icons.AutoMirrored.Filled.MenuBook, onEvent = {}, navTo = {})
                 }
             }
             Spacer(Modifier.height(100.dp))
@@ -120,13 +147,30 @@ fun WardrobeDetailScreen(
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun SectionHeader(title: String) {
-    Text(text = title.uppercase(), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Black, letterSpacing = 2.sp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))
+private fun SectionHeaderPreview() {
+    MaterialTheme {
+        SectionHeader(uiState = "Composition", onEvent = {}, navTo = {})
+    }
 }
 
 @Composable
-private fun MetricItem(label: String, value: String, icon: ImageVector, modifier: Modifier = Modifier) {
+private fun SectionHeader(uiState: String, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+    Text(text = uiState.uppercase(), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Black, letterSpacing = 2.sp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MetricItemPreview() {
+    MaterialTheme {
+        MetricItem(uiState = Triple("INVESTMENT", "$100", Icons.Default.Payments), onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+private fun MetricItem(uiState: Triple<String, String, ImageVector>, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit, modifier: Modifier = Modifier) {
+    val (label, value, icon) = uiState
     Column(modifier = modifier) {
         Icon(icon, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.height(8.dp))
@@ -135,16 +179,35 @@ private fun MetricItem(label: String, value: String, icon: ImageVector, modifier
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun DetailRow(label: String, value: String) {
+private fun DetailRowPreview() {
+    MaterialTheme {
+        DetailRow(uiState = "Material" to "Silk", onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+private fun DetailRow(uiState: Pair<String, String>, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+    val (label, value) = uiState
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun ProInsightCard(content: String?, icon: ImageVector) {
+private fun ProInsightCardPreview() {
+    MaterialTheme {
+        ProInsightCard(uiState = "Notes" to Icons.AutoMirrored.Filled.MenuBook, onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+private fun ProInsightCard(uiState: Pair<String?, ImageVector>, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+    val content = uiState.first
+    val icon = uiState.second
     val isAvailable = !content.isNullOrBlank()
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -157,19 +220,4 @@ private fun ProInsightCard(content: String?, icon: ImageVector) {
             Text(text = content ?: "No notes provided.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isAvailable) 0.8f else 0.2f), lineHeight = 22.sp)
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun WardrobeDetailScreenPreview() {
-    WardrobeDetailScreen(
-        itemId = 1L,
-        uiState = WardrobeUiState(
-            items = listOf(
-                ClothingItem(id = 1L, name = "Silk Blouse", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 120.0)
-            )
-        ),
-        onEvent = {},
-        navTo = {}
-    )
 }

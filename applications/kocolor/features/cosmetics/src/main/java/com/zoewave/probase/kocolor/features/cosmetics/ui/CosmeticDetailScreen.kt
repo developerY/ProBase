@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -29,15 +30,37 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 
+@Preview(showBackground = true)
+@Composable
+private fun CosmeticDetailScreenPreview() {
+    MaterialTheme {
+        CosmeticDetailScreen(
+            uiState = 1L to CosmeticsUiState(
+                items = listOf(
+                    CosmeticItem(
+                        id = 1L,
+                        name = "Foundation",
+                        brand = "Luxury",
+                        category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION,
+                        price = 45.0
+                    )
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CosmeticDetailScreen(
-    itemId: Long,
-    uiState: CosmeticsUiState,
+    uiState: Pair<Long, CosmeticsUiState>,
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val item = uiState.items.find { it.id == itemId } ?: return
+    val itemId = uiState.first
+    val item = uiState.second.items.find { it.id == itemId } ?: return
     val bgColor = item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surface
     val isDark = isColorDark(bgColor)
 
@@ -140,9 +163,9 @@ fun CosmeticDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    MetricItem("Category", item.category.displayName, Icons.Default.Category)
-                    MetricItem("Price", item.price?.let { "$%.2f".format(it) } ?: "N/A", Icons.Default.Payments)
-                    MetricItem("Uses", item.usageCount.toString(), Icons.Default.History)
+                    MetricItem(uiState = Triple("Category", item.category.displayName, Icons.Default.Category), onEvent = {}, navTo = {})
+                    MetricItem(uiState = Triple("Price", item.price?.let { "$%.2f".format(it) } ?: "N/A", Icons.Default.Payments), onEvent = {}, navTo = {})
+                    MetricItem(uiState = Triple("Uses", item.usageCount.toString(), Icons.Default.History), onEvent = {}, navTo = {})
                 }
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -168,26 +191,30 @@ fun CosmeticDetailScreen(
                 }
 
                 // Additional Metadata
-                DetailRow("Batch Code / SKU", item.batchCode ?: "Not Set")
-                DetailRow("Status", if (item.isOpened) "Opened" else "New / Sealed")
+                DetailRow(uiState = Triple("Batch Code / SKU", item.batchCode ?: "Not Set", Color.Unspecified), onEvent = {}, navTo = {})
+                DetailRow(uiState = Triple("Status", if (item.isOpened) "Opened" else "New / Sealed", Color.Unspecified), onEvent = {}, navTo = {})
                 
                 item.estimatedExpiry?.let { expiry ->
                     val daysLeft = ((expiry - System.currentTimeMillis()) / (24 * 60 * 60 * 1000)).toInt()
-                    DetailRow("Estimated Expiry", if (daysLeft > 0) "$daysLeft days left" else "Expired", if (daysLeft < 30) Color.Red else MaterialTheme.colorScheme.onSurface)
+                    DetailRow(uiState = Triple("Estimated Expiry", if (daysLeft > 0) "$daysLeft days left" else "Expired", if (daysLeft < 30) Color.Red else MaterialTheme.colorScheme.onSurface), onEvent = {}, navTo = {})
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // 3. Pro Insights (Shelf Life, Usage, Notes)
-                SectionHeader("Shelf Life")
+                SectionHeader(uiState = "Shelf Life", onEvent = {}, navTo = {})
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     val daysRemaining = item.estimatedExpiry?.let { ((it - System.currentTimeMillis()) / (24 * 60 * 60 * 1000)).toInt() }
                     ProMetricCard(
-                        title = "TIME REMAINING",
-                        value = if (daysRemaining != null) "$daysRemaining Days" else null,
-                        icon = Icons.Default.HourglassEmpty,
-                        modifier = Modifier.weight(1.5f),
-                        progress = daysRemaining?.let { it / 365f } // Mock progress
+                        uiState = Quadruple(
+                            "TIME REMAINING",
+                            if (daysRemaining != null) "$daysRemaining Days" else null,
+                            Icons.Default.HourglassEmpty,
+                            daysRemaining?.let { it / 365f }
+                        ),
+                        onEvent = {},
+                        navTo = {},
+                        modifier = Modifier.weight(1.5f)
                     )
                 }
                 
@@ -197,8 +224,9 @@ fun CosmeticDetailScreen(
                         sdf.format(java.util.Date(it))
                     }
                     ProMetricCard(
-                        title = "OPENED ON",
-                        value = openedStr,
+                        uiState = Quadruple("OPENED ON", openedStr, null, null),
+                        onEvent = {},
+                        navTo = {},
                         modifier = Modifier.weight(1f)
                     )
                     
@@ -207,25 +235,26 @@ fun CosmeticDetailScreen(
                         sdf.format(java.util.Date(it))
                     }
                     ProMetricCard(
-                        title = "EXPIRES BY",
-                        value = expiryStr,
+                        uiState = Quadruple("EXPIRES BY", expiryStr, null, null),
+                        onEvent = {},
+                        navTo = {},
                         modifier = Modifier.weight(1f)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
-                SectionHeader("Usage Details")
+                SectionHeader(uiState = "Usage Details", onEvent = {}, navTo = {})
                 
                 ProInsightCard(
-                    title = "Instructions",
-                    content = item.instructions,
-                    icon = Icons.Default.Opacity
+                    uiState = Triple("Instructions", item.instructions, Icons.Default.Opacity),
+                    onEvent = {},
+                    navTo = {}
                 )
 
                 ProInsightCard(
-                    title = "Personal Notes",
-                    content = item.notes,
-                    icon = Icons.Default.StickyNote2
+                    uiState = Triple("Personal Notes", item.notes, Icons.Default.StickyNote2),
+                    onEvent = {},
+                    navTo = {}
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -253,10 +282,18 @@ fun CosmeticDetailScreen(
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun SectionHeader(title: String) {
+private fun SectionHeaderPreview() {
+    MaterialTheme {
+        SectionHeader(uiState = "Header", onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+private fun SectionHeader(uiState: String, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
     Text(
-        text = title,
+        text = uiState,
         style = MaterialTheme.typography.titleMedium,
         fontFamily = FontFamily.Serif,
         fontWeight = FontWeight.Bold,
@@ -264,14 +301,36 @@ private fun SectionHeader(title: String) {
     )
 }
 
+data class Quadruple<out A, out B, out C, out D>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D
+)
+
+@Preview(showBackground = true)
+@Composable
+private fun ProMetricCardPreview() {
+    MaterialTheme {
+        ProMetricCard(
+            uiState = Quadruple("Title", "Value", Icons.Default.Info, 0.5f),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 private fun ProMetricCard(
-    title: String,
-    value: String?,
-    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
-    progress: Float? = null,
+    uiState: Quadruple<String, String?, androidx.compose.ui.graphics.vector.ImageVector?, Float?>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val title = uiState.first
+    val value = uiState.second
+    val icon = uiState.third
+    val progress = uiState.fourth
     val isAvailable = value != null
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -320,12 +379,27 @@ private fun ProMetricCard(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun ProInsightCardPreview() {
+    MaterialTheme {
+        ProInsightCard(
+            uiState = Triple("Title", "Content", Icons.Default.Info),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 private fun ProInsightCard(
-    title: String,
-    content: String?,
-    icon: androidx.compose.ui.graphics.vector.ImageVector
+    uiState: Triple<String, String?, androidx.compose.ui.graphics.vector.ImageVector>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val title = uiState.first
+    val content = uiState.second
+    val icon = uiState.third
     val isAvailable = !content.isNullOrBlank()
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -360,8 +434,23 @@ private fun ProInsightCard(
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun MetricItem(label: String, value: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+private fun MetricItemPreview() {
+    MaterialTheme {
+        MetricItem(
+            uiState = Triple("Label", "Value", Icons.Default.Info),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Composable
+private fun MetricItem(uiState: Triple<String, String, androidx.compose.ui.graphics.vector.ImageVector>, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+    val label = uiState.first
+    val value = uiState.second
+    val icon = uiState.third
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
         Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -369,8 +458,23 @@ private fun MetricItem(label: String, value: String, icon: androidx.compose.ui.g
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun DetailRow(label: String, value: String, valueColor: Color = Color.Unspecified) {
+private fun DetailRowPreview() {
+    MaterialTheme {
+        DetailRow(
+            uiState = Triple("Label", "Value", Color.Unspecified),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Composable
+private fun DetailRow(uiState: Triple<String, String, Color>, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+    val label = uiState.first
+    val value = uiState.second
+    val valueColor = uiState.third
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -379,25 +483,4 @@ private fun DetailRow(label: String, value: String, valueColor: Color = Color.Un
         Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = valueColor)
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun CosmeticDetailScreenPreview() {
-    CosmeticDetailScreen(
-        itemId = 1L,
-        uiState = CosmeticsUiState(
-            items = listOf(
-                CosmeticItem(
-                    id = 1L,
-                    name = "Foundation",
-                    brand = "Luxury",
-                    category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION,
-                    price = 45.0
-                )
-            )
-        ),
-        onEvent = {},
-        navTo = {}
-    )
 }

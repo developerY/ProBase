@@ -56,34 +56,27 @@ import com.zoewave.probase.kocolor.model.CosmeticCategory
 import com.zoewave.probase.kocolor.model.CosmeticItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+@Preview(showBackground = true)
+@Composable
+private fun CosmeticsUiRoutePreview() {
+    MaterialTheme {
+        CosmeticsUiRoute(
+            uiState = CosmeticsUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun CosmeticsUiRoute(
-    initialFilter: String? = null,
-    onCodeScanned: (String) -> Unit = {},
-    onEvent: (Unit) -> Unit = {},
+    uiState: CosmeticsUiState,
+    onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val viewModel: CosmeticsViewModel = hiltViewModel()
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(initialFilter) {
-        if (initialFilter != null) {
-            viewModel.onEvent(CosmeticsEvent.UpdateSearchQuery(initialFilter))
-        } else {
-            viewModel.onEvent(CosmeticsEvent.UpdateSearchQuery(""))
-        }
-    }
-    
-    // Wire up scan results to the viewmodel
-    LaunchedEffect(onCodeScanned) {
-        // This lambda is a shell, but we can't easily capture the 'scanned' value 
-        // across the nav3 boundary without a shared viewmodel or a results bus.
-        // However, we'll keep the plumbing ready.
-    }
-
     CosmeticsScreen(
-        uiState = state,
-        onEvent = viewModel::onEvent,
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo
     )
 }

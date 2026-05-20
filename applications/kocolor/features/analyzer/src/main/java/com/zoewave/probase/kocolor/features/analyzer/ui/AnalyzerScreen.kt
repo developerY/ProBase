@@ -67,6 +67,14 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.SeasonalType
 import com.zoewave.probase.kocolor.model.Undertone
 
+@Preview(showBackground = true)
+@Composable
+private fun AnalyzerUiRoutePreview() {
+    MaterialTheme {
+        AnalyzerUiRoute(navTo = {})
+    }
+}
+
 @Composable
 fun AnalyzerUiRoute(
     uiState: Unit = Unit,
@@ -153,6 +161,18 @@ fun AnalyzerScreen(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun StyleCaptureStatePreview() {
+    MaterialTheme {
+        StyleCaptureState(
+            uiState = AnalyzerScreenUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun StyleCaptureState(
     uiState: AnalyzerScreenUiState,
@@ -180,24 +200,24 @@ fun StyleCaptureState(
             Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 StyleCaptureSlot(
                     uiState = "Your Face" to uiState.faceUri,
-                    onEvent = { uri -> onEvent(AnalyzerEvent.OnFaceCaptured(uri)) },
+                    onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("face")) }
                 )
                 StyleCaptureSlot(
                     uiState = "Your Hair" to uiState.hairUri,
-                    onEvent = { uri -> onEvent(AnalyzerEvent.OnHairCaptured(uri)) },
+                    onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("hair")) }
                 )
             }
             Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 StyleCaptureSlot(
                     uiState = "Your Shoes" to uiState.shoesUri,
-                    onEvent = { uri -> onEvent(AnalyzerEvent.OnShoesCaptured(uri)) },
+                    onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("shoes")) }
                 )
                 StyleCaptureSlot(
                     uiState = "Your Clothes" to uiState.clothesUri,
-                    onEvent = { uri -> onEvent(AnalyzerEvent.OnClothesCaptured(uri)) },
+                    onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("clothes")) }
                 )
             }
@@ -205,18 +225,13 @@ fun StyleCaptureState(
 
         OccasionFilter(
             uiState = uiState.selectedOccasion,
-            onEvent = { onEvent(AnalyzerEvent.OnOccasionSelected(it)) },
+            onEvent = onEvent,
             navTo = {}
         )
 
         LocationInput(
             uiState = uiState.locationName to uiState.isLocating,
-            onEvent = { event ->
-                when (event) {
-                    is String? -> onEvent(AnalyzerEvent.OnLocationChanged(event))
-                    else -> onEvent(AnalyzerEvent.OnDetectLocationClicked)
-                }
-            },
+            onEvent = onEvent,
             navTo = {}
         )
 
@@ -234,10 +249,22 @@ fun StyleCaptureState(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun OccasionFilterPreview() {
+    MaterialTheme {
+        OccasionFilter(
+            uiState = "Work",
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun OccasionFilter(
     uiState: String,
-    onEvent: (String) -> Unit,
+    onEvent: (AnalyzerEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val occasions = listOf("Work", "Date Night", "Outdoor/Sport", "Formal")
@@ -253,7 +280,7 @@ fun OccasionFilter(
             occasions.forEach { occasion ->
                 FilterChip(
                     selected = uiState == occasion,
-                    onClick = { onEvent(occasion) },
+                    onClick = { onEvent(AnalyzerEvent.OnOccasionSelected(occasion)) },
                     label = { Text(occasion) }
                 )
             }
@@ -261,14 +288,25 @@ fun OccasionFilter(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun LocationInputPreview() {
+    MaterialTheme {
+        LocationInput(
+            uiState = "New York" to false,
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun LocationInput(
     uiState: Pair<String?, Boolean>,
-    onEvent: (Any?) -> Unit,
+    onEvent: (AnalyzerEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val locationName = uiState.first
-    val isLocating = uiState.second
+    val (locationName, isLocating) = uiState
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text("Style Location", style = MaterialTheme.typography.labelMedium)
@@ -281,7 +319,7 @@ fun LocationInput(
         ) {
             OutlinedTextField(
                 value = locationName ?: "",
-                onValueChange = { onEvent(it.takeIf { it.isNotBlank() }) },
+                onValueChange = { onEvent(AnalyzerEvent.OnLocationChanged(it.takeIf { it.isNotBlank() })) },
                 modifier = Modifier.weight(1f),
                 placeholder = { Text("City, Style Capital...") },
                 label = { Text("Local Context") },
@@ -290,7 +328,7 @@ fun LocationInput(
                     if (isLocating) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                     } else {
-                        IconButton(onClick = { onEvent(Unit) }) {
+                        IconButton(onClick = { onEvent(AnalyzerEvent.OnDetectLocationClicked) }) {
                             Icon(Icons.Default.MyLocation, contentDescription = "Detect Location")
                         }
                     }
@@ -308,7 +346,7 @@ fun LocationInput(
 @Composable
 fun StyleCaptureSlot(
     uiState: Pair<String, String?>,
-    onEvent: (String) -> Unit,
+    onEvent: (AnalyzerEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val title = uiState.first
@@ -317,7 +355,15 @@ fun StyleCaptureSlot(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { pickedUri ->
-        pickedUri?.let { onEvent(it.toString()) }
+        pickedUri?.let { 
+            val uriStr = it.toString()
+            when {
+                title.contains("Face", true) -> onEvent(AnalyzerEvent.OnFaceCaptured(uriStr))
+                title.contains("Hair", true) -> onEvent(AnalyzerEvent.OnHairCaptured(uriStr))
+                title.contains("Shoes", true) -> onEvent(AnalyzerEvent.OnShoesCaptured(uriStr))
+                title.contains("Clothes", true) -> onEvent(AnalyzerEvent.OnClothesCaptured(uriStr))
+            }
+        }
     }
 
     var showOptions by remember { mutableStateOf(false) }
@@ -401,6 +447,25 @@ private fun StyleCaptureSlotPreview() {
     MaterialTheme {
         StyleCaptureSlot(
             uiState = "Your Face" to null,
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AnalysisResultScreenPreview() {
+    MaterialTheme {
+        AnalysisResultScreen(
+            uiState = FashionAdvice(
+                summary = "Test summary",
+                seasonalType = SeasonalType.WINTER,
+                undertone = Undertone.COOL,
+                makeupSuggestions = emptyList(),
+                outfitSuggestions = emptyList(),
+                recommendedPalette = listOf("#FF0000", "#00FF00")
+            ),
             onEvent = {},
             navTo = {}
         )

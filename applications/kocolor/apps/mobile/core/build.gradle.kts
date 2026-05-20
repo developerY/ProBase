@@ -12,6 +12,11 @@ android {
 dependencies {
     implementation(project(":applications:kocolor:data"))
     implementation(project(":applications:kocolor:model"))
+    implementation(project(":core:model"))
+    implementation(project(":features:health:core"))
+
+    implementation(libs.androidx.health.connect.client)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)

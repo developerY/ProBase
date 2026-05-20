@@ -32,6 +32,20 @@ import com.zoewave.probase.kocolor.model.CosmeticCategory
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 
+import androidx.compose.ui.tooling.preview.Preview
+
+@Preview(showBackground = true)
+@Composable
+private fun StitchProductBuilderPreview() {
+    MaterialTheme {
+        StitchProductBuilder(
+            uiState = CosmeticsUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StitchProductBuilder(
@@ -103,23 +117,51 @@ fun StitchProductBuilder(
                 }
             ) { step ->
                 when (step) {
-                    1 -> CaptureStep(draft, uiState, onEvent, navTo, onNext = { currentStep = 2 })
-                    2 -> ColorStep(draft, uiState, onEvent, onNext = { currentStep = 3 })
-                    3 -> MetadataStep(draft, uiState, onEvent)
+                    1 -> CaptureStep(
+                        uiState = draft to uiState,
+                        onEvent = { currentStep = 2 },
+                        navTo = navTo
+                    )
+                    2 -> ColorStep(
+                        uiState = draft to uiState,
+                        onEvent = { event ->
+                            if (event is Unit) currentStep = 3
+                            else if (event is CosmeticsEvent) onEvent(event)
+                        },
+                        navTo = {}
+                    )
+                    3 -> MetadataStep(
+                        uiState = draft to uiState,
+                        onEvent = onEvent,
+                        navTo = {}
+                    )
                 }
             }
         }
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun CaptureStepPreview() {
+    MaterialTheme {
+        val dummyItem = CosmeticItem(name = "", brand = "", category = CosmeticCategory.AI_PENDING)
+        CaptureStep(
+            uiState = dummyItem to CosmeticsUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 private fun CaptureStep(
-    draft: CosmeticItem,
-    uiState: CosmeticsUiState,
-    onEvent: (CosmeticsEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit,
-    onNext: () -> Unit
+    uiState: Pair<CosmeticItem, CosmeticsUiState>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val draft = uiState.first
+    val onNext = { onEvent(Unit) }
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Text("First, let's see it.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         
@@ -168,13 +210,34 @@ private fun CaptureStep(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun ColorStepPreview() {
+    MaterialTheme {
+        val dummyItem = CosmeticItem(name = "", brand = "", category = CosmeticCategory.AI_PENDING)
+        ColorStep(
+            uiState = dummyItem to CosmeticsUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 private fun ColorStep(
-    draft: CosmeticItem,
-    uiState: CosmeticsUiState,
-    onEvent: (CosmeticsEvent) -> Unit,
-    onNext: () -> Unit
+    uiState: Pair<CosmeticItem, CosmeticsUiState>,
+    onEvent: (Any) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val draft = uiState.first
+    val onNext = { onEvent(Unit) }
+    // Note: onEvent for internal state (onNext), but we also need the external onEvent for CosmeticsEvent?
+    // In the original, it took both onEvent (CosmeticsEvent) and onNext.
+    // I'll need to handle this.
+    // Since I can only have one onEvent, I'll pass a lambda that can handle both or just use the one I need.
+    // In ColorStep, onEvent was used for CosmeticsEvent.UpdateDraft.
+    // I'll use a wrapper event or just pass the CosmeticsViewModel's onEvent if I can.
+    // Actually, I'll use (Any) -> Unit to be flexible.
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Text("Extracting the essence.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         
@@ -222,12 +285,26 @@ private fun ColorStep(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun MetadataStepPreview() {
+    MaterialTheme {
+        val dummyItem = CosmeticItem(name = "", brand = "", category = CosmeticCategory.AI_PENDING)
+        MetadataStep(
+            uiState = dummyItem to CosmeticsUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 private fun MetadataStep(
-    draft: CosmeticItem,
-    uiState: CosmeticsUiState,
-    onEvent: (CosmeticsEvent) -> Unit
+    uiState: Pair<CosmeticItem, CosmeticsUiState>,
+    onEvent: (CosmeticsEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val draft = uiState.first
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text("Final details.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         

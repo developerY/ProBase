@@ -35,6 +35,24 @@ import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import java.text.NumberFormat
 import java.util.Locale
 
+@Preview(showBackground = true)
+@Composable
+private fun WardrobeLandingScreenPreview() {
+    MaterialTheme {
+        WardrobeLandingScreen(
+            uiState = WardrobeUiState(
+                totalItems = 9,
+                totalInvestment = 1615.0,
+                items = listOf(
+                    com.zoewave.probase.kocolor.model.ClothingItem(id = 1, name = "Blouse", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS)
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WardrobeLandingScreen(
@@ -86,18 +104,17 @@ fun WardrobeLandingScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     SummaryStatCard(
-                        label = "TOTAL PIECES",
-                        value = uiState.totalItems.toString(),
-                        icon = Icons.Default.Checkroom,
+                        uiState = Triple("TOTAL PIECES", uiState.totalItems.toString(), Icons.Default.Checkroom),
+                        onEvent = {},
+                        navTo = {},
                         modifier = Modifier.weight(1f)
                     )
                     
                     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
                     SummaryStatCard(
-                        label = "TOTAL VALUE",
-                        value = currencyFormatter.format(uiState.totalInvestment),
-                        icon = Icons.Default.MonetizationOn,
-                        color = Color(0xFF4CAF50),
+                        uiState = Triple("TOTAL VALUE", currencyFormatter.format(uiState.totalInvestment), Icons.Default.MonetizationOn),
+                        onEvent = {},
+                        navTo = {},
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -125,11 +142,9 @@ fun WardrobeLandingScreen(
                                     val (icon, color) = props
                                     val metadata = uiState.categoriesMetadata.entries.find { it.key.equals(name, ignoreCase = true) }?.value
                                     CategoryHeroCard(
-                                        name = name,
-                                        icon = icon,
-                                        metadata = metadata,
-                                        baseColor = color,
-                                        onClick = { navTo(KoColorRoute.WardrobeCategoryCover(categoryName = name)) },
+                                        uiState = Quadruple(name, icon, metadata, color),
+                                        onEvent = {},
+                                        navTo = navTo,
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
@@ -164,7 +179,11 @@ fun WardrobeLandingScreen(
                         contentPadding = PaddingValues(horizontal = 4.dp)
                     ) {
                         items(uiState.items.take(5)) { item ->
-                            RecentClothingCard(item) { navTo(KoColorRoute.WardrobeDetail(item.id)) }
+                            RecentClothingCard(
+                                uiState = item,
+                                onEvent = {},
+                                navTo = navTo
+                            )
                         }
                     }
                 }
@@ -173,14 +192,23 @@ fun WardrobeLandingScreen(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun SummaryStatCardPreview() {
+    MaterialTheme {
+        SummaryStatCard(uiState = Triple("Label", "Value", Icons.Default.Info), onEvent = {}, navTo = {})
+    }
+}
+
 @Composable
 private fun SummaryStatCard(
-    label: String,
-    value: String,
-    icon: ImageVector,
-    color: Color = MaterialTheme.colorScheme.primary,
+    uiState: Triple<String, String, ImageVector>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val (label, value, icon) = uiState
+    val color = if (label.contains("VALUE")) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.surface,
@@ -204,22 +232,36 @@ private fun SummaryStatCard(
     }
 }
 
+data class Quadruple<out A, out B, out C, out D>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D
+)
+
+@Preview(showBackground = true)
+@Composable
+private fun CategoryHeroCardPreview() {
+    MaterialTheme {
+        CategoryHeroCard(uiState = Quadruple("Tops", Icons.Default.Info, null, Color.Blue), onEvent = {}, navTo = {})
+    }
+}
+
 @Composable
 private fun CategoryHeroCard(
-    name: String,
-    icon: ImageVector,
-    metadata: CategoryMetadata?,
-    baseColor: Color,
-    onClick: () -> Unit,
+    uiState: Quadruple<String, ImageVector, CategoryMetadata?, Color>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val (name, icon, metadata, baseColor) = uiState
     val count = metadata?.itemCount ?: 0
     val totalValue = metadata?.totalValue ?: 0.0
     val imageUrl = metadata?.representativeImageUrl
     val itemColor = metadata?.representativeColorHex?.let { parseColor(it) }
 
     Card(
-        onClick = onClick,
+        onClick = { navTo(KoColorRoute.WardrobeCategoryCover(categoryName = name)) },
         modifier = modifier.height(160.dp),
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = baseColor.copy(alpha = 0.4f)),
@@ -299,16 +341,22 @@ private fun CategoryHeroCard(
     }
 }
 
-private fun parseColor(hex: String): Color {
-    return try {
-        Color(android.graphics.Color.parseColor(hex))
-    } catch (e: Exception) {
-        Color.Gray
+@Preview(showBackground = true)
+@Composable
+private fun RecentClothingCardPreview() {
+    MaterialTheme {
+        RecentClothingCard(
+            uiState = ClothingItem(id = 1, name = "Item", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 
 @Composable
-private fun RecentClothingCard(item: ClothingItem, onClick: () -> Unit) {
+private fun RecentClothingCard(uiState: ClothingItem, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+    val item = uiState
+    val onClick = { navTo(KoColorRoute.WardrobeDetail(item.id)) }
     Card(
         modifier = Modifier.width(220.dp).aspectRatio(0.8f).clickable { onClick() },
         shape = RoundedCornerShape(28.dp)
@@ -348,20 +396,4 @@ private fun RecentClothingCard(item: ClothingItem, onClick: () -> Unit) {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun WardrobeLandingScreenPreview() {
-    WardrobeLandingScreen(
-        uiState = WardrobeUiState(
-            totalItems = 9,
-            totalInvestment = 1615.0,
-            items = listOf(
-                com.zoewave.probase.kocolor.model.ClothingItem(id = 1, name = "Blouse", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS)
-            )
-        ),
-        onEvent = {},
-        navTo = {}
-    )
 }

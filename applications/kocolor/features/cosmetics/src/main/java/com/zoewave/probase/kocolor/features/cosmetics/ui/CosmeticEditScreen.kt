@@ -30,21 +30,42 @@ import com.zoewave.probase.kocolor.model.CosmeticCategory
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 
+@Preview(showBackground = true)
+@Composable
+private fun CosmeticEditScreenPreview() {
+    MaterialTheme {
+        CosmeticEditScreen(
+            uiState = 1L to CosmeticsUiState(
+                draftItem = CosmeticItem(
+                    id = 1L,
+                    name = "Blush",
+                    brand = "NARS",
+                    category = com.zoewave.probase.kocolor.model.CosmeticCategory.BLUSH
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CosmeticEditScreen(
-    itemId: Long,
-    uiState: CosmeticsUiState,
+    uiState: Pair<Long, CosmeticsUiState>,
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    val itemId = uiState.first
+    val state = uiState.second
+    
     LaunchedEffect(itemId) {
         if (itemId != 0L) {
             onEvent(CosmeticsEvent.InitializeEdit(itemId))
         }
     }
 
-    val draft = uiState.draftItem
+    val draft = state.draftItem
     var showCategoryMenu by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -247,20 +268,3 @@ fun CosmeticEditScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun CosmeticEditScreenPreview() {
-    CosmeticEditScreen(
-        itemId = 1L,
-        uiState = CosmeticsUiState(
-            draftItem = CosmeticItem(
-                id = 1L,
-                name = "Blush",
-                brand = "NARS",
-                category = com.zoewave.probase.kocolor.model.CosmeticCategory.BLUSH
-            )
-        ),
-        onEvent = {},
-        navTo = {}
-    )
-}

@@ -26,20 +26,40 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.model.*
 
+@Preview(showBackground = true)
+@Composable
+private fun RoutineEditorScreenPreview() {
+    val routine = BeautyRoutine(id = 1L, title = "Morning", time = RoutineTime.MORNING, steps = emptyList(), date = 0)
+    MaterialTheme {
+        RoutineEditorScreen(
+            uiState = Triple(null, RoutinesUiState(
+                morningRoutine = routine,
+                activeEditRoutineId = 1L
+            ), null),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineEditorScreen(
-    uiState: RoutinesUiState,
+    uiState: Triple<String?, RoutinesUiState, (() -> Unit)?>,
     onEvent: (RoutinesEvent) -> Unit,
-    onBack: () -> Unit,
-    initialStepId: String? = null // Allow navigating directly to a specific step's hero
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val routine = uiState.activeEditRoutine ?: return
+    val initialStepId = uiState.first
+    val state = uiState.second
+    val onBack = uiState.third ?: {}
+    
+    val routine = state.activeEditRoutine ?: return
     var editingStepId by remember { mutableStateOf(initialStepId) }
     
     // Draft for adding a new step
@@ -127,7 +147,7 @@ fun RoutineEditorScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(routine.steps) { step ->
-                        StepSummaryRow(step) { editingStepId = step.id; selectionStage = ProductSelectionStage.HeroPage }
+                        StepSummaryRow(uiState = step, onEvent = { editingStepId = step.id; selectionStage = ProductSelectionStage.HeroPage }, navTo = {})
                     }
                     item {
                         OutlinedButton(
@@ -146,67 +166,72 @@ fun RoutineEditorScreen(
                 when (selectionStage) {
                     ProductSelectionStage.HeroPage -> {
                         StepHeroPage(
-                            step = activeStep,
-                            allProducts = uiState.allProducts,
-                            onEditClick = { selectionStage = ProductSelectionStage.MainForm }
+                            uiState = activeStep to state.allProducts,
+                            onEvent = { selectionStage = ProductSelectionStage.MainForm },
+                            navTo = {}
                         )
                     }
                     ProductSelectionStage.MainForm -> {
                         EditStepForm(
-                            step = activeStep,
-                            allProducts = uiState.allProducts,
-                            onTitleChange = { newTitle ->
+                            uiState = Triple(activeStep, state.allProducts, { newTitle: String ->
                                 if (newStepDraft != null) {
                                     newStepDraft = newStepDraft!!.copy(title = newTitle)
-                                } else {
-                                    // Update existing step logic would go here, 
-                                    // but currently steps are immutable within the session 
-                                    // unless we use a broader state or a draft for all edits.
-                                    // For now, let's just support the new step draft.
+                                }
+                            }),
+                            onEvent = { event ->
+                                when (event) {
+                                    "product" -> selectionStage = ProductSelectionStage.Group
+                                    "remove" -> {
+                                        if (newStepDraft != null) {
+                                            onBack()
+                                        } else {
+                                            onEvent(RoutinesEvent.RemoveStep(routine.id, activeStep.id))
+                                            editingStepId = null
+                                        }
+                                    }
                                 }
                             },
-                            onProductClick = { selectionStage = ProductSelectionStage.Group },
-                            onRemoveStep = { 
-                                if (newStepDraft != null) {
-                                    onBack()
-                                } else {
-                                    onEvent(RoutinesEvent.RemoveStep(routine.id, activeStep.id))
-                                    editingStepId = null
-                                }
-                            }
+                            navTo = {}
                         )
                     }
                     ProductSelectionStage.Group -> {
-                        GroupSelectionPage(uiState.allProducts) { group ->
-                            selectedGroup = group
-                            selectionStage = ProductSelectionStage.Category
-                        }
+                        GroupSelectionPage(
+                            uiState = state.allProducts,
+                            onEvent = { group ->
+                                selectedGroup = group
+                                selectionStage = ProductSelectionStage.Category
+                            },
+                            navTo = {}
+                        )
                     }
                     ProductSelectionStage.Category -> {
                         CategorySelectionPage(
-                            allProducts = uiState.allProducts.filter { it.category.groupName == selectedGroup }
-                        ) { category ->
-                            selectedCategory = category
-                            selectionStage = ProductSelectionStage.Item
-                        }
+                            uiState = state.allProducts.filter { it.category.groupName == selectedGroup },
+                            onEvent = { category ->
+                                selectedCategory = category
+                                selectionStage = ProductSelectionStage.Item
+                            },
+                            navTo = {}
+                        )
                     }
                     ProductSelectionStage.Item -> {
                         ItemSelectionPage(
-                            products = uiState.allProducts.filter { it.category == selectedCategory },
-                            selectedIds = activeStep.productIds
-                        ) { productId ->
-                            if (newStepDraft != null) {
-                                val newIds = if (newStepDraft!!.productIds.contains(productId)) {
-                                    newStepDraft!!.productIds - productId
+                            uiState = Triple(state.allProducts.filter { it.category == selectedCategory }, activeStep.productIds, { productId: Long ->
+                                if (newStepDraft != null) {
+                                    val newIds = if (newStepDraft!!.productIds.contains(productId)) {
+                                        newStepDraft!!.productIds - productId
+                                    } else {
+                                        newStepDraft!!.productIds + productId
+                                    }
+                                    newStepDraft = newStepDraft!!.copy(productIds = newIds)
                                 } else {
-                                    newStepDraft!!.productIds + productId
+                                    onEvent(RoutinesEvent.LinkProduct(routine.id, activeStep.id, productId))
                                 }
-                                newStepDraft = newStepDraft!!.copy(productIds = newIds)
-                            } else {
-                                onEvent(RoutinesEvent.LinkProduct(routine.id, activeStep.id, productId))
-                            }
-                            selectionStage = ProductSelectionStage.MainForm
-                        }
+                                selectionStage = ProductSelectionStage.MainForm
+                            }),
+                            onEvent = {},
+                            navTo = {}
+                        )
                     }
                 }
             }
@@ -216,10 +241,19 @@ fun RoutineEditorScreen(
 
 enum class ProductSelectionStage { HeroPage, MainForm, Group, Category, Item }
 
+@Preview(showBackground = true)
 @Composable
-private fun StepSummaryRow(step: RoutineStep, onClick: () -> Unit) {
+private fun StepSummaryRowPreview() {
+    MaterialTheme {
+        StepSummaryRow(uiState = RoutineStep(id = "1", title = "Step", layeringOrder = 0), onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+private fun StepSummaryRow(uiState: RoutineStep, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+    val step = uiState
     Surface(
-        onClick = onClick,
+        onClick = { onEvent(Unit) },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
@@ -242,12 +276,21 @@ private fun StepSummaryRow(step: RoutineStep, onClick: () -> Unit) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun StepHeroPagePreview() {
+    MaterialTheme {
+        StepHeroPage(uiState = RoutineStep(id = "1", title = "Step", layeringOrder = 0) to emptyList(), onEvent = {}, navTo = {})
+    }
+}
+
 @Composable
 private fun StepHeroPage(
-    step: RoutineStep,
-    allProducts: List<CosmeticItem>,
-    onEditClick: () -> Unit
+    uiState: Pair<RoutineStep, List<CosmeticItem>>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val (step, allProducts) = uiState
     val linkedProduct = allProducts.find { step.productIds.contains(it.id) }
 
     LazyColumn(
@@ -404,7 +447,7 @@ private fun StepHeroPage(
         // 5. Action: Edit
         item {
             Button(
-                onClick = onEditClick,
+                onClick = { onEvent(Unit) },
                 modifier = Modifier.fillMaxWidth().height(64.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSurface)
@@ -418,14 +461,21 @@ private fun StepHeroPage(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun EditStepFormPreview() {
+    MaterialTheme {
+        EditStepForm(uiState = Triple(RoutineStep(id = "1", title = "Step", layeringOrder = 0), emptyList(), {}), onEvent = {}, navTo = {})
+    }
+}
+
 @Composable
 private fun EditStepForm(
-    step: RoutineStep,
-    allProducts: List<CosmeticItem>,
-    onTitleChange: (String) -> Unit,
-    onProductClick: () -> Unit,
-    onRemoveStep: () -> Unit
+    uiState: Triple<RoutineStep, List<CosmeticItem>, (String) -> Unit>,
+    onEvent: (String) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val (step, allProducts, onTitleChange) = uiState
     val linkedProduct = allProducts.find { step.productIds.contains(it.id) }
 
     LazyColumn(
@@ -463,7 +513,7 @@ private fun EditStepForm(
 
         item {
             Column(
-                modifier = Modifier.clickable { onProductClick() }.fillMaxWidth(),
+                modifier = Modifier.clickable { onEvent("product") }.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
@@ -553,7 +603,7 @@ private fun EditStepForm(
 
         item {
             TextButton(
-                onClick = onRemoveStep,
+                onClick = { onEvent("remove") },
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 48.dp),
                 colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFB03030))
             ) {
@@ -565,11 +615,21 @@ private fun EditStepForm(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun GroupSelectionPagePreview() {
+    MaterialTheme {
+        GroupSelectionPage(uiState = emptyList(), onEvent = {}, navTo = {})
+    }
+}
+
 @Composable
 private fun GroupSelectionPage(
-    allProducts: List<CosmeticItem>,
-    onGroupClick: (String) -> Unit
+    uiState: List<CosmeticItem>,
+    onEvent: (String) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val allProducts = uiState
     val groups = allProducts.map { it.category.groupName }.distinct()
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -577,16 +637,26 @@ private fun GroupSelectionPage(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(groups) { group ->
-            SelectionRow(text = group) { onGroupClick(group) }
+            SelectionRow(uiState = group, onEvent = { onEvent(group) }, navTo = {})
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CategorySelectionPagePreview() {
+    MaterialTheme {
+        CategorySelectionPage(uiState = emptyList(), onEvent = {}, navTo = {})
     }
 }
 
 @Composable
 private fun CategorySelectionPage(
-    allProducts: List<CosmeticItem>,
-    onCategoryClick: (CosmeticCategory) -> Unit
+    uiState: List<CosmeticItem>,
+    onEvent: (CosmeticCategory) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val allProducts = uiState
     val categories = allProducts.map { it.category }.distinct()
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -594,15 +664,24 @@ private fun CategorySelectionPage(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(categories) { category ->
-            SelectionRow(text = category.displayName) { onCategoryClick(category) }
+            SelectionRow(uiState = category.displayName, onEvent = { onEvent(category) }, navTo = {})
         }
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun SelectionRow(text: String, onClick: () -> Unit) {
+private fun SelectionRowPreview() {
+    MaterialTheme {
+        SelectionRow(uiState = "Selection", onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+private fun SelectionRow(uiState: String, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+    val text = uiState
     Surface(
-        onClick = onClick,
+        onClick = { onEvent(Unit) },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface,
@@ -616,12 +695,21 @@ private fun SelectionRow(text: String, onClick: () -> Unit) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun ItemSelectionPagePreview() {
+    MaterialTheme {
+        ItemSelectionPage(uiState = Triple(emptyList(), emptyList(), {}), onEvent = {}, navTo = {})
+    }
+}
+
 @Composable
 private fun ItemSelectionPage(
-    products: List<CosmeticItem>,
-    selectedIds: List<Long>,
-    onItemClick: (Long) -> Unit
+    uiState: Triple<List<CosmeticItem>, List<Long>, (Long) -> Unit>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val (products, selectedIds, onItemClick) = uiState
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(24.dp),

@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -24,32 +25,57 @@ import com.zoewave.probase.kocolor.features.inventory.util.toComposeColor
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+@Preview(showBackground = true)
+@Composable
+private fun ColorVerificationRoutePreview() {
+    MaterialTheme {
+        ColorVerificationRoute(
+            uiState = WardrobeUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColorVerificationRoute(
+    uiState: WardrobeUiState,
+    onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val viewModel: WardrobeViewModel = hiltViewModel()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
     ColorVerificationScreen(
-        items = uiState.items,
-        onBack = { navTo(KoColorRoute.Back) }
+        uiState = uiState.items,
+        onEvent = {},
+        navTo = navTo
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ColorVerificationScreenPreview() {
+    MaterialTheme {
+        ColorVerificationScreen(
+            uiState = listOf(ClothingItem(name = "Item", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS)),
+            onEvent = {},
+            navTo = {}
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColorVerificationScreen(
-    items: List<ClothingItem>,
-    onBack: () -> Unit
+    uiState: List<ClothingItem>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Color Verification") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -63,15 +89,32 @@ fun ColorVerificationScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(items) { item ->
-                ColorVerificationItem(item)
+            items(uiState) { item ->
+                ColorVerificationItem(uiState = item, onEvent = {}, navTo = {})
             }
         }
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-fun ColorVerificationItem(item: ClothingItem) {
+private fun ColorVerificationItemPreview() {
+    MaterialTheme {
+        ColorVerificationItem(
+            uiState = ClothingItem(name = "Item", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Composable
+fun ColorVerificationItem(
+    uiState: ClothingItem,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    val item = uiState
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
