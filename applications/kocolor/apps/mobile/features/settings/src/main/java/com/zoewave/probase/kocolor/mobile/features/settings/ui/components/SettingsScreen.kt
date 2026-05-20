@@ -22,6 +22,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
 import com.zoewave.probase.kocolor.mobile.core.R
+import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContent
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsEvent
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsUiState
@@ -215,10 +216,12 @@ fun HealthConnectCard(
                 Box(modifier = Modifier.padding(16.dp)) {
                     val healthViewModel: com.zoewave.probase.features.health.core.ui.HealthViewModel = hiltViewModel()
                     val healthState by healthViewModel.uiState.collectAsStateWithLifecycle()
-                    HealthUiRoute(
+                    HealthContent(
                         uiState = healthState,
                         onEvent = healthViewModel::onEvent,
-                        navTo = navTo
+                        navTo = navTo,
+                        sideEffects = healthViewModel.sideEffect,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }

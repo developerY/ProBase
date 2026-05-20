@@ -120,7 +120,11 @@ fun HomeScreen(
             }
 
             item {
-                QuickActions(uiState = Unit, onEvent = {}, navTo = navTo)
+                QuickActions(
+                    uiState = Unit,
+                    onEvent = {},
+                    navTo = navTo
+                )
             }
 
             item {
@@ -316,26 +320,26 @@ private fun QuickActionsPreview() {
 }
 
 @Composable
-private fun QuickActions(uiState: Unit, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+fun QuickActions(uiState: Unit, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        QuickActionCard(uiState = QuickActionUiState("Analyze Style", "AI Visual Analysis", Icons.Default.AutoAwesome, MaterialTheme.colorScheme.primary), onEvent = { navTo(KoColorRoute.StyleSimulator) }, navTo = navTo, modifier = Modifier.weight(1f))
-        QuickActionCard(uiState = QuickActionUiState("Capture Product", "Gemini Scanner", Icons.Default.CameraAlt, MaterialTheme.colorScheme.secondary), onEvent = { navTo(KoColorRoute.Analyzer()) }, navTo = navTo, modifier = Modifier.weight(1f))
+        QuickActionCard(uiState = QuickActionUiState("Analyze Style", "AI Visual Analysis", Icons.Default.AutoAwesome, MaterialTheme.colorScheme.primary, KoColorRoute.StyleSimulator), onEvent = {}, navTo = navTo, modifier = Modifier.weight(1f))
+        QuickActionCard(uiState = QuickActionUiState("Capture Product", "Gemini Scanner", Icons.Default.CameraAlt, MaterialTheme.colorScheme.secondary, KoColorRoute.Analyzer()), onEvent = {}, navTo = navTo, modifier = Modifier.weight(1f))
     }
 }
 
-data class QuickActionUiState(val title: String, val subtitle: String, val icon: ImageVector, val color: Color)
+data class QuickActionUiState(val title: String, val subtitle: String, val icon: ImageVector, val color: Color, val route: KoColorRoute)
 
 @Preview(showBackground = true)
 @Composable
 private fun QuickActionCardPreview() {
     MaterialTheme {
-        QuickActionCard(uiState = QuickActionUiState("Title", "Subtitle", Icons.Default.Info, Color.Red), onEvent = {}, navTo = {})
+        QuickActionCard(uiState = QuickActionUiState("Title", "Subtitle", Icons.Default.Info, Color.Red, KoColorRoute.Home), onEvent = {}, navTo = {})
     }
 }
 
 @Composable
-private fun QuickActionCard(uiState: QuickActionUiState, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit, modifier: Modifier = Modifier) {
-    ElevatedCard(onClick = { onEvent(Unit) }, modifier = modifier, shape = RoundedCornerShape(24.dp)) {
+fun QuickActionCard(uiState: QuickActionUiState, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit, modifier: Modifier = Modifier) {
+    ElevatedCard(onClick = { navTo(uiState.route) }, modifier = modifier, shape = RoundedCornerShape(24.dp)) {
         Column(modifier = Modifier.padding(20.dp)) {
             Icon(uiState.icon, null, tint = uiState.color, modifier = Modifier.size(28.dp))
             Spacer(Modifier.height(12.dp))
@@ -365,6 +369,8 @@ fun SectionTitle(uiState: SectionTitleUiState, onEvent: (Unit) -> Unit, navTo: (
 
 @Preview(showBackground = true)
 @Composable
-private fun HomeScreenPreview() {
-    HomeScreen(uiState = HomeUiState(), onEvent = {}, navTo = {})
+private fun HomeScreenPreview_Default() {
+    MaterialTheme {
+        HomeScreen(uiState = HomeUiState(), onEvent = {}, navTo = {})
+    }
 }
