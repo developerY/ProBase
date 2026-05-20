@@ -25,6 +25,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.model.*
 
+@Preview(showBackground = true)
+@Composable
+private fun RoutinesScreenPreview() {
+    MaterialTheme {
+        RoutinesScreen(
+            uiState = RoutinesUiState(
+                morningRoutine = BeautyRoutine(title = "Morning beautiful routine", time = RoutineTime.MORNING, steps = emptyList(), date = 0),
+                eveningRoutine = BeautyRoutine(title = "Evening restoration", time = RoutineTime.EVENING, steps = emptyList(), date = 0)
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutinesScreen(
@@ -71,9 +86,9 @@ fun RoutinesScreen(
             item {
                 uiState.morningRoutine?.let { routine ->
                     HeroRitualCard(
-                        routine = routine,
-                        onClick = { navTo(KoColorRoute.RoutineDetail(routine.id)) },
-                        onReset = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) }
+                        uiState = routine,
+                        onEvent = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) },
+                        navTo = navTo
                     )
                 }
             }
@@ -81,26 +96,39 @@ fun RoutinesScreen(
             item {
                 uiState.eveningRoutine?.let { routine ->
                     HeroRitualCard(
-                        routine = routine,
-                        onClick = { navTo(KoColorRoute.RoutineDetail(routine.id)) },
-                        onReset = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) }
+                        uiState = routine,
+                        onEvent = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) },
+                        navTo = navTo
                     )
                 }
             }
 
             item {
-                DailyInsightBanner()
+                DailyInsightBanner(uiState = Unit, onEvent = {}, navTo = {})
             }
         }
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun HeroRitualCard(
-    routine: BeautyRoutine,
-    onClick: () -> Unit,
-    onReset: () -> Unit
+private fun HeroRitualCardPreview() {
+    MaterialTheme {
+        HeroRitualCard(
+            uiState = BeautyRoutine(title = "Morning", time = RoutineTime.MORNING, steps = emptyList(), date = 0),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Composable
+fun HeroRitualCard(
+    uiState: BeautyRoutine,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val routine = uiState
     val isMorning = routine.time == RoutineTime.MORNING
     val accentColor = if (isMorning) Color(0xFF6B705C) else Color(0xFF457B9D) // Sage vs Muted Blue
     val bgBrush = if (isMorning) {
@@ -110,7 +138,7 @@ private fun HeroRitualCard(
     }
 
     Card(
-        onClick = onClick,
+        onClick = { navTo(KoColorRoute.RoutineDetail(routine.id)) },
         modifier = Modifier.fillMaxWidth().height(240.dp),
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
@@ -153,7 +181,7 @@ private fun HeroRitualCard(
                         contentAlignment = Alignment.Center, 
                         modifier = Modifier
                             .size(54.dp)
-                            .clickable(onClick = onReset)
+                            .clickable(onClick = { onEvent(Unit) })
                     ) {
                         CircularProgressIndicator(
                             progress = { 1f },
@@ -199,8 +227,20 @@ private fun HeroRitualCard(
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun DailyInsightBanner() {
+private fun DailyInsightBannerPreview() {
+    MaterialTheme {
+        DailyInsightBanner(uiState = Unit, onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+fun DailyInsightBanner(
+    uiState: Unit,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Surface(
         color = Color(0xFFFDF0ED), // Soft Peach
         shape = RoundedCornerShape(24.dp),
@@ -233,17 +273,4 @@ private fun DailyInsightBanner() {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun RoutinesScreenPreview() {
-    RoutinesScreen(
-        uiState = RoutinesUiState(
-            morningRoutine = BeautyRoutine(title = "Morning beautiful routine", time = RoutineTime.MORNING, steps = emptyList(), date = 0),
-            eveningRoutine = BeautyRoutine(title = "Evening restoration", time = RoutineTime.EVENING, steps = emptyList(), date = 0)
-        ),
-        onEvent = {},
-        navTo = {}
-    )
 }

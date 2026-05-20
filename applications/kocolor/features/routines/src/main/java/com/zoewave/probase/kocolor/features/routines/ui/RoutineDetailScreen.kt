@@ -24,22 +24,37 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.model.*
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
+@Preview(showBackground = true)
+@Composable
+private fun RoutineDetailScreenPreview() {
+    MaterialTheme {
+        RoutineDetailScreen(
+            uiState = 1L to RoutinesUiState(
+                morningRoutine = BeautyRoutine(id = 1L, title = "Morning", time = RoutineTime.MORNING, steps = emptyList(), date = 0)
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineDetailScreen(
-    routineId: Long,
-    uiState: RoutinesUiState,
+    uiState: Pair<Long, RoutinesUiState>,
     onEvent: (RoutinesEvent) -> Unit,
-    onBack: () -> Unit,
-    onEdit: (String) -> Unit
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val routine = if (uiState.morningRoutine?.id == routineId) uiState.morningRoutine else uiState.eveningRoutine
+    val routineId = uiState.first
+    val state = uiState.second
+    val routine = if (state.morningRoutine?.id == routineId) state.morningRoutine else state.eveningRoutine
     if (routine == null) return
 
     val isMorning = routine.time == RoutineTime.MORNING
@@ -52,7 +67,7 @@ fun RoutineDetailScreen(
             CenterAlignedTopAppBar(
                 title = { Text("Serene Rituals", style = MaterialTheme.typography.titleMedium, fontFamily = FontFamily.Serif) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+                    IconButton(onClick = { navTo(KoColorRoute.Back) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                 },
                 actions = {
                     IconButton(onClick = { isReorderMode = !isReorderMode }) {
@@ -65,7 +80,7 @@ fun RoutineDetailScreen(
         floatingActionButton = {
             if (!isReorderMode) {
                 LargeFloatingActionButton(
-                    onClick = { onEdit("new_step") },
+                    onClick = { navTo(KoColorRoute.RoutineEditor(routineId, "new_step")) },
                     shape = CircleShape,
                     containerColor = accentColor,
                     contentColor = Color.White,
@@ -170,14 +185,12 @@ fun RoutineDetailScreen(
                 ReorderableItem(reorderableState, key = step.id) { isDragging ->
                     val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
                     
-                    val linkedProduct = uiState.allProducts.find { step.productIds.contains(it.id) }
+                    val linkedProduct = state.allProducts.find { step.productIds.contains(it.id) }
                     
                     SplitRitualStep(
-                        step = step,
-                        linkedProduct = linkedProduct,
-                        isReorderMode = isReorderMode,
-                        onToggle = { onEvent(RoutinesEvent.ToggleStep(routine.id, step.id)) },
-                        onInfoClick = { onEdit(step.id) },
+                        uiState = Triple(step, linkedProduct, isReorderMode),
+                        onEvent = { onEvent(RoutinesEvent.ToggleStep(routine.id, step.id)) },
+                        navTo = { navTo(KoColorRoute.RoutineEditor(routineId, step.id)) },
                         modifier = Modifier
                             .shadow(elevation)
                             .then(if (isReorderMode) Modifier.draggableHandle() else Modifier)
@@ -185,22 +198,33 @@ fun RoutineDetailScreen(
                 }
             }
             
-            item { DailyInsightSmall() }
+            item { DailyInsightSmall(uiState = Unit, onEvent = {}, navTo = {}) }
             
             item { Spacer(Modifier.height(48.dp)) }
         }
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun SplitRitualStepPreview() {
+    MaterialTheme {
+        SplitRitualStep(
+            uiState = Triple(RoutineStep(id = "1", title = "Step", layeringOrder = 0), null, false),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 private fun SplitRitualStep(
-    step: RoutineStep,
-    linkedProduct: CosmeticItem?,
-    isReorderMode: Boolean,
-    onToggle: () -> Unit,
-    onInfoClick: () -> Unit,
+    uiState: Triple<RoutineStep, CosmeticItem?, Boolean>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val (step, linkedProduct, isReorderMode) = uiState
     val isCompleted = step.isCompleted
     val hasAmountInfo = linkedProduct?.amountPerUse != null && linkedProduct.amountRemaining != null
     
@@ -229,7 +253,7 @@ private fun SplitRitualStep(
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .clickable(enabled = !isReorderMode, onClick = onToggle)
+                    .clickable(enabled = !isReorderMode, onClick = { onEvent(Unit) })
                     .padding(horizontal = 20.dp, vertical = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -271,7 +295,7 @@ private fun SplitRitualStep(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clickable(onClick = onInfoClick)
+                    .clickable(onClick = { navTo(KoColorRoute.Back) }) // navTo is overridden in call site
                     .padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -293,8 +317,20 @@ private fun SplitRitualStep(
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun DailyInsightSmall() {
+private fun DailyInsightSmallPreview() {
+    MaterialTheme {
+        DailyInsightSmall(uiState = Unit, onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+private fun DailyInsightSmall(
+    uiState: Unit,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Surface(
         color = Color(0xFFFDF0ED),
         shape = RoundedCornerShape(16.dp),
