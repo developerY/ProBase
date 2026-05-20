@@ -41,16 +41,27 @@ private fun isColorDark(color: Color): Boolean {
     return luminance < 0.5
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun WardrobeRoutePreview() {
+    MaterialTheme {
+        WardrobeRoute(
+            uiState = WardrobeUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun WardrobeRoute(
+    uiState: WardrobeUiState,
+    onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val viewModel: WardrobeViewModel = hiltViewModel()
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
-
     WardrobeScreen(
-        uiState = state,
-        onEvent = viewModel::onEvent,
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo
     )
 }

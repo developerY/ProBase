@@ -30,16 +30,33 @@ import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import java.text.NumberFormat
 import java.util.Locale
 
+@Preview(showBackground = true)
+@Composable
+private fun WardrobeCategoryCoverScreenPreview() {
+    MaterialTheme {
+        WardrobeCategoryCoverScreen(
+            uiState = "Tops" to WardrobeUiState(
+                items = listOf(
+                    com.zoewave.probase.kocolor.model.ClothingItem(id = 1, name = "Silk Shirt", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 85.0)
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WardrobeCategoryCoverScreen(
-    categoryName: String,
-    uiState: WardrobeUiState,
+    uiState: Pair<String, WardrobeUiState>,
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val items = remember(uiState.items, categoryName) {
-        uiState.items.filter { it.category.name.contains(categoryName, ignoreCase = true) }
+    val categoryName = uiState.first
+    val state = uiState.second
+    val items = remember(state.items, categoryName) {
+        state.items.filter { it.category.name.contains(categoryName, ignoreCase = true) }
     }
     
     val totalInvestment = items.sumOf { it.price ?: 0.0 }
@@ -76,21 +93,31 @@ fun WardrobeCategoryCoverScreen(
                     Spacer(Modifier.height(24.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
-                        CategoryStatCard("TOTAL INVESTMENT", currencyFormatter.format(totalInvestment), Modifier.weight(1f))
-                        CategoryStatCard("RECENT ADDITION", recentItem?.name ?: "None", Modifier.weight(1f))
+                        CategoryStatCard(uiState = "TOTAL INVESTMENT" to currencyFormatter.format(totalInvestment), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                        CategoryStatCard(uiState = "RECENT ADDITION" to (recentItem?.name ?: "None"), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
                     }
                 }
             }
 
             items(items) { item ->
-                ClothingProductGridCard(item) { navTo(KoColorRoute.WardrobeDetail(item.id)) }
+                ClothingProductGridCard(uiState = item, onEvent = {}, navTo = navTo)
             }
         }
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun CategoryStatCard(title: String, value: String, modifier: Modifier = Modifier) {
+private fun CategoryStatCardPreview() {
+    MaterialTheme {
+        CategoryStatCard(uiState = "Label" to "Value", onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+private fun CategoryStatCard(uiState: Pair<String, String>, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit, modifier: Modifier = Modifier) {
+    val title = uiState.first
+    val value = uiState.second
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
@@ -109,8 +136,22 @@ private fun CategoryStatCard(title: String, value: String, modifier: Modifier = 
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun ClothingProductGridCard(item: ClothingItem, onClick: () -> Unit) {
+private fun ClothingProductGridCardPreview() {
+    MaterialTheme {
+        ClothingProductGridCard(
+            uiState = ClothingItem(id = 1, name = "Item", brand = "Brand", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Composable
+private fun ClothingProductGridCard(uiState: ClothingItem, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+    val item = uiState
+    val onClick = { navTo(KoColorRoute.WardrobeDetail(item.id)) }
     Card(
         modifier = Modifier.fillMaxWidth().aspectRatio(0.75f).clickable { onClick() },
         shape = RoundedCornerShape(24.dp)
@@ -136,19 +177,4 @@ private fun ClothingProductGridCard(item: ClothingItem, onClick: () -> Unit) {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun WardrobeCategoryCoverScreenPreview() {
-    WardrobeCategoryCoverScreen(
-        categoryName = "Tops",
-        uiState = WardrobeUiState(
-            items = listOf(
-                com.zoewave.probase.kocolor.model.ClothingItem(id = 1, name = "Silk Shirt", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 85.0)
-            )
-        ),
-        onEvent = {},
-        navTo = {}
-    )
 }
