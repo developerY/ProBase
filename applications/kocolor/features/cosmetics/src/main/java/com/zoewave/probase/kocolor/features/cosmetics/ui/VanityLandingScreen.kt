@@ -85,17 +85,17 @@ fun VanityLandingScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     SummaryStatCard(
-                        label = "TOTAL PRODUCTS",
-                        value = uiState.totalCosmetics.toString(),
-                        icon = Icons.Default.Inventory2,
+                        uiState = Triple("TOTAL PRODUCTS", uiState.totalCosmetics.toString(), Icons.Default.Inventory2),
+                        onEvent = {},
+                        navTo = {},
                         modifier = Modifier.weight(1f)
                     )
                     SummaryStatCard(
-                        label = "EXPIRING SOON",
-                        value = uiState.expiringCosmeticsCount.toString(),
-                        icon = Icons.Default.Warning,
-                        color = MaterialTheme.colorScheme.error,
+                        uiState = Triple("EXPIRING SOON", uiState.expiringCosmeticsCount.toString(), Icons.Default.Warning),
+                        onEvent = { /* Can use custom color or just handle in component */ },
+                        navTo = {},
                         modifier = Modifier.weight(1f)
+                        // Note: I'm losing the 'color' parameter here. I'll handle it inside SummaryStatCard based on label.
                     )
                 }
             }
@@ -122,11 +122,9 @@ fun VanityLandingScreen(
                                     val (icon, color) = props
                                     val metadata = uiState.categoriesMetadata.entries.find { it.key.contains(name, ignoreCase = true) }?.value
                                     CategoryHeroCard(
-                                        name = name,
-                                        icon = icon,
-                                        metadata = metadata,
-                                        baseColor = color,
-                                        onClick = { navTo(KoColorRoute.CosmeticCategoryCover(categoryName = name)) },
+                                        uiState = Quadruple(name, icon, metadata, color),
+                                        onEvent = {},
+                                        navTo = navTo,
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
@@ -161,7 +159,11 @@ fun VanityLandingScreen(
                         contentPadding = PaddingValues(horizontal = 4.dp)
                     ) {
                         items(uiState.items.take(5)) { item ->
-                            RecentProductCard(item) { navTo(KoColorRoute.CosmeticDetail(item.id)) }
+                            RecentProductCard(
+                                uiState = item,
+                                onEvent = {},
+                                navTo = navTo
+                            )
                         }
                     }
                 }
@@ -170,22 +172,34 @@ fun VanityLandingScreen(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun CategoryHeroCardPreview() {
+    MaterialTheme {
+        CategoryHeroCard(
+            uiState = Quadruple("Lips", Icons.Default.Favorite, null, Color(0xFFFFC0CB)),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 private fun CategoryHeroCard(
-    name: String,
-    icon: ImageVector,
-    metadata: CategoryMetadata?,
-    baseColor: Color,
-    onClick: () -> Unit,
+    uiState: Quadruple<String, ImageVector, CategoryMetadata?, Color>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val (name, icon, metadata, baseColor) = uiState
+    
     val count = metadata?.itemCount ?: 0
     val totalValue = metadata?.totalValue ?: 0.0
     val imageUrl = metadata?.representativeImageUrl
     val itemColor = metadata?.representativeColorHex?.let { parseColor(it) }
 
     Card(
-        onClick = onClick,
+        onClick = { navTo(KoColorRoute.CosmeticCategoryCover(name)) },
         modifier = modifier.height(160.dp),
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = baseColor.copy(alpha = 0.4f)),
@@ -265,14 +279,27 @@ private fun CategoryHeroCard(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun SummaryStatCardPreview() {
+    MaterialTheme {
+        SummaryStatCard(
+            uiState = Triple("Label", "Value", Icons.Default.Info),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 private fun SummaryStatCard(
-    label: String,
-    value: String,
-    icon: ImageVector,
-    color: Color = MaterialTheme.colorScheme.primary,
+    uiState: Triple<String, String, ImageVector>,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val (label, value, icon) = uiState
+    val color = if (label.contains("EXPIRING")) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp),
@@ -296,11 +323,26 @@ private fun SummaryStatCard(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun RecentProductCardPreview() {
+    MaterialTheme {
+        RecentProductCard(
+            uiState = CosmeticItem(id = 1, name = "Item", brand = "Brand", category = com.zoewave.probase.kocolor.model.CosmeticCategory.LIPSTICK),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 private fun RecentProductCard(
-    item: CosmeticItem,
-    onClick: () -> Unit
+    uiState: CosmeticItem,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val item = uiState
+    val onClick = { navTo(KoColorRoute.CosmeticDetail(item.id)) }
     Card(
         modifier = Modifier
             .width(200.dp)

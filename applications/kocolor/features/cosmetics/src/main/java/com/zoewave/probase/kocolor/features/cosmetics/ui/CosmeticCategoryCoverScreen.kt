@@ -30,16 +30,33 @@ import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import java.text.NumberFormat
 import java.util.Locale
 
+@Preview(showBackground = true)
+@Composable
+private fun CosmeticCategoryCoverScreenPreview() {
+    MaterialTheme {
+        CosmeticCategoryCoverScreen(
+            uiState = "Lips" to CosmeticsUiState(
+                items = listOf(
+                    CosmeticItem(id = 1, name = "Lipstick", brand = "Luxury", category = com.zoewave.probase.kocolor.model.CosmeticCategory.LIPSTICK, price = 35.0)
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CosmeticCategoryCoverScreen(
-    categoryName: String,
-    uiState: CosmeticsUiState,
+    uiState: Pair<String, CosmeticsUiState>,
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val items = remember(uiState.items, categoryName) {
-        uiState.items.filter { it.category.groupName.contains(categoryName, ignoreCase = true) }
+    val categoryName = uiState.first
+    val state = uiState.second
+    val items = remember(state.items, categoryName) {
+        state.items.filter { it.category.groupName.contains(categoryName, ignoreCase = true) }
     }
     
     val totalValue = items.sumOf { it.price ?: 0.0 }
@@ -76,21 +93,35 @@ fun CosmeticCategoryCoverScreen(
                     Spacer(Modifier.height(24.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
-                        CategoryStatCard("TOTAL VALUE", currencyFormatter.format(totalValue), Modifier.weight(1f))
-                        CategoryStatCard("MOST USED", mostUsed?.name ?: "None", Modifier.weight(1f))
+                        CategoryStatCard(uiState = "TOTAL VALUE" to currencyFormatter.format(totalValue), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                        CategoryStatCard(uiState = "MOST USED" to (mostUsed?.name ?: "None"), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
                     }
                 }
             }
 
             items(items) { item ->
-                CosmeticProductGridCard(item) { navTo(KoColorRoute.CosmeticDetail(item.id)) }
+                CosmeticProductGridCard(
+                    uiState = item,
+                    onEvent = {},
+                    navTo = navTo
+                )
             }
         }
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun CategoryStatCard(title: String, value: String, modifier: Modifier = Modifier) {
+private fun CategoryStatCardPreview() {
+    MaterialTheme {
+        CategoryStatCard(uiState = "Label" to "Value", onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+private fun CategoryStatCard(uiState: Pair<String, String>, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit, modifier: Modifier = Modifier) {
+    val title = uiState.first
+    val value = uiState.second
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
@@ -109,8 +140,26 @@ private fun CategoryStatCard(title: String, value: String, modifier: Modifier = 
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun CosmeticProductGridCard(item: CosmeticItem, onClick: () -> Unit) {
+private fun CosmeticProductGridCardPreview() {
+    MaterialTheme {
+        CosmeticProductGridCard(
+            uiState = CosmeticItem(id = 1, name = "Item", brand = "Brand", category = com.zoewave.probase.kocolor.model.CosmeticCategory.LIPSTICK),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Composable
+private fun CosmeticProductGridCard(
+    uiState: CosmeticItem,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    val item = uiState
+    val onClick = { navTo(KoColorRoute.CosmeticDetail(item.id)) }
     Card(
         modifier = Modifier.fillMaxWidth().aspectRatio(0.75f).clickable { onClick() },
         shape = RoundedCornerShape(24.dp)
@@ -138,17 +187,3 @@ private fun CosmeticProductGridCard(item: CosmeticItem, onClick: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun CosmeticCategoryCoverScreenPreview() {
-    CosmeticCategoryCoverScreen(
-        categoryName = "Lips",
-        uiState = CosmeticsUiState(
-            items = listOf(
-                CosmeticItem(id = 1, name = "Lipstick", brand = "Luxury", category = com.zoewave.probase.kocolor.model.CosmeticCategory.LIPSTICK, price = 35.0)
-            )
-        ),
-        onEvent = {},
-        navTo = {}
-    )
-}

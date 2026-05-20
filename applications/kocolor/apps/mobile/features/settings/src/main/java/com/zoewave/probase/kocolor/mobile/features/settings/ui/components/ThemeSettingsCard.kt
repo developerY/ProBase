@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.mobile.core.R
+import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsEvent
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 object ThemeIdentifiers {
@@ -29,10 +30,22 @@ private val themeOptions = listOf(
     ThemeIdentifiers.DARK to R.string.applications_kocolor_apps_mobile_core_theme_dark
 )
 
+@Preview(showBackground = true)
+@Composable
+private fun ThemeSettingsCardPreview() {
+    MaterialTheme {
+        ThemeSettingsCard(
+            uiState = true to ThemeIdentifiers.SYSTEM,
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @Composable
 fun ThemeSettingsCard(
     uiState: Pair<Boolean, String>,
-    onEvent: (Any) -> Unit,
+    onEvent: (SettingsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val expanded = uiState.first
@@ -44,7 +57,7 @@ fun ThemeSettingsCard(
         Column {
             Row(
                 modifier = Modifier
-                    .clickable { onEvent(!expanded) }
+                    .clickable { onEvent(SettingsEvent.OnThemeExpandedToggled(!expanded)) }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -76,14 +89,14 @@ fun ThemeSettingsCard(
                                 .fillMaxWidth()
                                 .selectable(
                                     selected = currentTheme == id,
-                                    onClick = { onEvent(id) }
+                                    onClick = { onEvent(SettingsEvent.OnThemeSelected(id)) }
                                 )
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
                                 selected = currentTheme == id,
-                                onClick = { onEvent(id) }
+                                onClick = { onEvent(SettingsEvent.OnThemeSelected(id)) }
                             )
                             Text(
                                 text = stringResource(labelRes),
@@ -95,17 +108,5 @@ fun ThemeSettingsCard(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ThemeSettingsCardPreview() {
-    MaterialTheme {
-        ThemeSettingsCard(
-            uiState = true to ThemeIdentifiers.SYSTEM,
-            onEvent = {},
-            navTo = {}
-        )
     }
 }

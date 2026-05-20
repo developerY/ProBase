@@ -20,12 +20,26 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.kocolor.model.KoColorRoute
+
+@Preview(showBackground = true)
+@Composable
+private fun LuxuryBrandLogoPreview() {
+    MaterialTheme {
+        LuxuryBrandLogo(uiState = Unit, onEvent = {}, navTo = {})
+    }
+}
 
 @Composable
-fun LuxuryBrandLogo() {
+fun LuxuryBrandLogo(
+    uiState: Unit,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     val infiniteTransition = rememberInfiniteTransition(label = "LuxuryEffects")
     
     // Light Source / Sun Animation

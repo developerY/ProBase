@@ -1,13 +1,11 @@
-package com.zoewave.probase.kocolor.mobile.features.health
+package com.zoewave.probase.kocolor.mobile.core.ui.health
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.WaterDrop
@@ -23,28 +21,31 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.core.model.health.SleepSessionData
 import com.zoewave.probase.features.health.core.ui.HealthEvent
 import com.zoewave.probase.features.health.core.ui.HealthUiState
+import com.zoewave.probase.kocolor.mobile.core.ui.theme.KoColorTheme
+import com.zoewave.probase.kocolor.model.KoColorRoute
+import java.time.Duration
 import java.time.LocalDate
 
 @Composable
 fun StyleHealthDashboard(
-    state: HealthUiState.Success,
+    uiState: HealthUiState.Success,
     onEvent: (HealthEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val today = LocalDate.now().toString()
-    val hydration = state.weeklyHydration[today] ?: 0.0
+    val hydration = uiState.weeklyHydration[today] ?: 0.0
     val hydrationGoal = 2.0
-    val lastSleep = state.sleepSessions.firstOrNull()
+    val lastSleep = uiState.sleepSessions.firstOrNull()
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+        modifier = modifier.padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
         Text(
@@ -65,6 +66,22 @@ fun StyleHealthDashboard(
         SleepVisual(sleepData = lastSleep)
         
         Spacer(modifier = Modifier.height(48.dp))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun StyleHealthDashboardPreview() {
+    KoColorTheme {
+        StyleHealthDashboard(
+            uiState = HealthUiState.Success(
+                sessions = emptyList(),
+                weeklyHydration = mapOf(LocalDate.now().toString() to 1.2),
+                sleepSessions = emptyList()
+            ),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 
@@ -135,7 +152,7 @@ private fun HydrationVisual(
 }
 
 @Composable
-private fun SleepVisual(sleepData: com.zoewave.probase.core.model.health.SleepSessionData?) {
+private fun SleepVisual(sleepData: SleepSessionData?) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(32.dp),
@@ -162,8 +179,8 @@ private fun SleepVisual(sleepData: com.zoewave.probase.core.model.health.SleepSe
             Spacer(modifier = Modifier.height(24.dp))
 
             if (sleepData != null) {
-                val hours = sleepData.duration?.toHours() ?: 0
-                val minutes = sleepData.duration?.toMinutesPart() ?: 0
+                val hours = sleepData.duration?.toHours() ?: 0L
+                val minutes = sleepData.duration?.toMinutes()?.let { it % 60 } ?: 0L
                 
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(text = hours.toString(), style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Black)
