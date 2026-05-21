@@ -35,6 +35,7 @@ import com.zoewave.probase.kocolor.mobile.features.home.ui.components.*
 import com.zoewave.probase.kocolor.model.*
 
 import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherCard
+import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherInfoIcon
 import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherUiState
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -114,7 +115,7 @@ fun HomeScreen(
 
             item {
                 HomeHeader(
-                    uiState = HomeHeaderUiState(uiState.fashionProfile, uiState.isDaytime, uiState.beautyTip),
+                    uiState = HomeHeaderUiState(uiState.fashionProfile, uiState.isDaytime, uiState.beautyTip, uiState.weather),
                     onEvent = {},
                     navTo = {}
                 )
@@ -184,7 +185,8 @@ fun HomeScreen(
 data class HomeHeaderUiState(
     val fashionProfile: FashionProfile?,
     val isDaytime: Boolean,
-    val beautyTip: String
+    val beautyTip: String,
+    val weather: LayeredWeatherUiState? = null
 )
 
 @Preview(showBackground = true)
@@ -217,32 +219,47 @@ fun HomeHeader(
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), expressiveShape)
             .padding(32.dp)
     ) {
-        Column {
-            Text(
-                text = if (uiState.isDaytime) "Radiant Morning." else "Deep Restoration.",
-                style = MaterialTheme.typography.headlineLarge,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alpha(0.8f)) {
-                Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = uiState.beautyTip, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Serif, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = if (uiState.isDaytime) "Radiant Morning." else "Deep Restoration.",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alpha(0.8f)) {
+                    Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = uiState.beautyTip, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Serif, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                }
+
+                if (uiState.fashionProfile != null) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(color = MaterialTheme.colorScheme.primary, shape = CircleShape) {
+                            Text(text = uiState.fashionProfile.seasonalType.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(text = "· ${uiState.fashionProfile.undertone.name.lowercase().replaceFirstChar { it.uppercase() }} Undertone", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
             }
 
-            if (uiState.fashionProfile != null) {
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(color = MaterialTheme.colorScheme.primary, shape = CircleShape) {
-                        Text(text = uiState.fashionProfile.seasonalType.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(text = "· ${uiState.fashionProfile.undertone.name.lowercase().replaceFirstChar { it.uppercase() }} Undertone", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+            uiState.weather?.let {
+                LayeredWeatherInfoIcon(
+                    uiState = it,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .offset(x = 16.dp, y = (-16).dp)
+                )
             }
         }
     }
