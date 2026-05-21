@@ -21,6 +21,8 @@ dependencies {
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:graphics"))
     implementation(project(":features:health:core"))
+    implementation(project(":features:weather"))
+    implementation(project(":core:network"))
     implementation(project(":core:data"))
     implementation(project(":core:model"))
 

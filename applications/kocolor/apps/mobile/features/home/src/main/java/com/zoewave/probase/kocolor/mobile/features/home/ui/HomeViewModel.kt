@@ -30,6 +30,10 @@ import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
+import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherUiState
+import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherCondition
+import com.zoewave.probase.core.network.repository.weather.WeatherRepo
+
 data class HomeUiState(
     val fashionProfile: FashionProfile? = null,
     val morningRoutine: BeautyRoutine? = null,
@@ -50,7 +54,8 @@ data class HomeUiState(
     val lastNightSleepDuration: String? = null,
     val hydrationLiters: Double = 0.0,
     val hydrationGoalLiters: Double = 2.0,
-    val isHealthPermissionGranted: Boolean = false
+    val isHealthPermissionGranted: Boolean = false,
+    val weather: LayeredWeatherUiState? = null
 )
 
 sealed class HomeEvent {
@@ -67,7 +72,8 @@ class HomeViewModel @Inject constructor(
     private val cosmeticDao: CosmeticDao,
     private val clothingDao: ClothingDao,
     private val wellnessEngine: WellnessCorrelationEngine,
-    private val healthSessionManager: HealthSessionManager
+    private val healthSessionManager: HealthSessionManager,
+    private val weatherRepo: com.zoewave.probase.core.network.repository.weather.WeatherRepo
 ) : ViewModel() {
 
     private val _currentDate = MutableStateFlow(Calendar.getInstance().apply {
@@ -85,7 +91,10 @@ class HomeViewModel @Inject constructor(
         else RoutineDefaults.eveningAdvice.random()
     )
 
+    private val _weather = MutableStateFlow<LayeredWeatherUiState?>(null)
+
     init {
+        fetchWeather()
         viewModelScope.launch {
             cosmeticDao.getAllCosmetics().first().let {
                 if (it.isEmpty()) {
@@ -128,6 +137,7 @@ class HomeViewModel @Inject constructor(
         cosmeticDao.getAllCosmetics(),
         clothingDao.getAllClothing(),
         _beautyTip,
+        _weather,
         healthSessionManager.availability.flatMapLatest { availability ->
             if (availability == HealthConnectClient.SDK_AVAILABLE) {
                 flow {
@@ -153,7 +163,8 @@ class HomeViewModel @Inject constructor(
         val cosmetics = array[2] as List<CosmeticItemEntity>
         val clothing = array[3] as List<ClothingItemEntity>
         val tip = array[4] as String
-        val healthInfo = array[5] as Pair<Boolean, Triple<Float?, String?, Double>>
+        val weather = array[5] as LayeredWeatherUiState?
+        val healthInfo = array[6] as Pair<Boolean, Triple<Float?, String?, Double>>
         val (hasPerms, healthData) = healthInfo
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
@@ -197,7 +208,8 @@ class HomeViewModel @Inject constructor(
             wellnessInsights = insights,
             lastNightSleepDuration = healthData.second,
             hydrationLiters = healthData.third,
-            isHealthPermissionGranted = hasPerms
+            isHealthPermissionGranted = hasPerms,
+            weather = weather
         )
     }.stateIn(
         scope = viewModelScope,
@@ -230,6 +242,33 @@ class HomeViewModel @Inject constructor(
         }
 
         return Triple(sleepData.first, sleepData.second, hydration)
+    }
+
+    private fun fetchWeather() {
+        viewModelScope.launch {
+            try {
+                val response = weatherRepo.openCurrentWeatherByCity("Santa Barbara, US")
+                if (response != null) {
+                    val conditions = mutableListOf<LayeredWeatherCondition>()
+                    val main = response.weather.firstOrNull()?.main ?: ""
+                    when {
+                        main.contains("Cloud", true) -> conditions.add(LayeredWeatherCondition.CLOUDY)
+                        main.contains("Rain", true) -> conditions.add(LayeredWeatherCondition.RAINY)
+                        main.contains("Thunder", true) -> conditions.add(LayeredWeatherCondition.THUNDER)
+                        else -> conditions.add(LayeredWeatherCondition.SUNNY)
+                    }
+                    if (response.wind.speed > 5.0) conditions.add(LayeredWeatherCondition.WINDY)
+                    
+                    _weather.value = LayeredWeatherUiState(
+                        temperature = response.main.temp,
+                        uvIndex = 5.0, // Mock UV index
+                        conditions = conditions
+                    )
+                }
+            } catch (e: Exception) {
+                // handle error
+            }
+        }
     }
 
     private fun initializeDay(date: Long) {
