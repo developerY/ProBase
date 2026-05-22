@@ -53,6 +53,7 @@ dependencies {
     implementation(project(":applications:seaweed:apps:mobile:features:bills"))
     implementation(project(":applications:seaweed:apps:mobile:features:budget"))
     implementation(project(":applications:seaweed:apps:mobile:features:glass"))
+    implementation(project(":applications:seaweed:apps:mobile:features:smartcamera"))
     implementation(project(":features:camera"))
 
     implementation(libs.androidx.glimmer.core)
