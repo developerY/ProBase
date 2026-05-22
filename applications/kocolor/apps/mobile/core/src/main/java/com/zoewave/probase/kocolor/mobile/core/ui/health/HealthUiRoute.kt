@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.probase.features.health.core.ui.HealthEvent
 import com.zoewave.probase.features.health.core.ui.HealthSideEffect
 import com.zoewave.probase.features.health.core.ui.HealthUiState
+import com.zoewave.probase.features.health.core.ui.settings.HealthConnectionStatus
 import com.zoewave.probase.kocolor.mobile.core.ui.theme.KoColorTheme
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlinx.coroutines.flow.Flow
@@ -65,11 +66,18 @@ fun HealthContent(
     onEvent: (HealthEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier,
-    sideEffects: Flow<HealthSideEffect> = emptyFlow()
+    sideEffects: Flow<HealthSideEffect> = emptyFlow(),
+    statusOnly: Boolean = false
 ) {
     val context = LocalContext.current
     val permissionsLauncher = rememberLauncherForActivityResult(
         contract = androidx.health.connect.client.PermissionController.createRequestPermissionResultContract()
+    ) {
+        onEvent(HealthEvent.LoadHealthData)
+    }
+
+    val settingsLauncher = rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
     ) {
         onEvent(HealthEvent.LoadHealthData)
     }
@@ -79,11 +87,43 @@ fun HealthContent(
         sideEffects.collect { effect ->
             when (effect) {
                 is HealthSideEffect.LaunchPermissions -> {
-                    permissionsLauncher.launch(effect.permissions)
+                    try {
+                        permissionsLauncher.launch(effect.permissions)
+                    } catch (e: Exception) {
+                        android.util.Log.e("HealthContent", "Failed to launch permissions", e)
+                    }
                 }
                 HealthSideEffect.OpenHealthConnectSettings -> {
-                    val settingsIntent = Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS")
-                    context.startActivity(settingsIntent)
+                    val packageName = context.packageName
+                    val intents = listOf(
+                        // 1. App-specific permissions (Android 14+)
+                        Intent("android.health.connect.action.MANAGE_HEALTH_PERMISSIONS")
+                            .putExtra(Intent.EXTRA_PACKAGE_NAME, packageName),
+                        // 2. General Health Connect Settings (System Integrated)
+                        Intent("android.settings.HEALTH_CONNECT_SETTINGS"),
+                        // 3. Legacy Health Connect App Settings
+                        Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS")
+                    )
+
+                    var launched = false
+                    for (intent in intents) {
+                        try {
+                            settingsLauncher.launch(intent)
+                            launched = true
+                            break
+                        } catch (ignore: Exception) {
+                            android.util.Log.w("HealthContent", "Could not launch intent: ${intent.action}")
+                        }
+                    }
+
+                    if (!launched) {
+                        // Final fallback: Play Store
+                        try {
+                            val playStoreIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("market://details?id=com.google.android.apps.healthdata"))
+                            playStoreIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(playStoreIntent)
+                        } catch (ignore: Exception) {}
+                    }
                 }
                 else -> {}
             }
@@ -98,12 +138,19 @@ fun HealthContent(
                 }
             }
             is HealthUiState.Success -> {
-                StyleHealthDashboard(
-                    uiState = uiState,
-                    onEvent = onEvent,
-                    navTo = navTo,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if (statusOnly) {
+                    HealthConnectionStatus(
+                        onEvent = onEvent,
+                        modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    )
+                } else {
+                    StyleHealthDashboard(
+                        uiState = uiState,
+                        onEvent = onEvent,
+                        navTo = navTo,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
             is HealthUiState.PermissionsRequired -> {
                 Column(

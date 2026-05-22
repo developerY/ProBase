@@ -221,7 +221,8 @@ fun HealthConnectCard(
                         onEvent = healthViewModel::onEvent,
                         navTo = navTo,
                         sideEffects = healthViewModel.sideEffect,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        statusOnly = true
                     )
                 }
             }

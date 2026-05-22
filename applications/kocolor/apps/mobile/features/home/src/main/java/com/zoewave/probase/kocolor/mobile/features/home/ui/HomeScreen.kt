@@ -34,7 +34,6 @@ import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.*
 import com.zoewave.probase.kocolor.model.*
 
-import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherCard
 import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherInfoIcon
 import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherUiState
 
@@ -103,16 +102,6 @@ fun HomeScreen(
             contentPadding = PaddingValues(top = 8.dp, bottom = 48.dp, start = 20.dp, end = 20.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            uiState.weather?.let { weatherState ->
-                item {
-                    LayeredWeatherCard(
-                        uiState = weatherState,
-                        onEvent = {},
-                        navTo = { /* Could navigate to full weather detail if needed */ }
-                    )
-                }
-            }
-
             item {
                 HomeHeader(
                     uiState = HomeHeaderUiState(uiState.fashionProfile, uiState.isDaytime, uiState.beautyTip, uiState.weather),

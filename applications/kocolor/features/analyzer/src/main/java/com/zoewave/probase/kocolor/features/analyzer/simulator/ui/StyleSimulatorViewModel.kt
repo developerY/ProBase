@@ -2,11 +2,13 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zoewave.probase.kocolor.db.dao.ClothingDao
-import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
+import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
+import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleSimulatorEngine
 import com.zoewave.probase.kocolor.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,7 +22,9 @@ data class StyleSimulatorUiState(
     val recommendedAccessories: List<ClothingItem> = emptyList(),
     val isAnalyzing: Boolean = false,
     val simulationStep: SimulationStep = SimulationStep.MESSAGING,
-    val userMessage: String = ""
+    val userMessage: String = "",
+    val rationale: String? = null,
+    val isLocalResult: Boolean = false
 )
 
 enum class SimulationStep {
@@ -37,8 +41,9 @@ sealed class SimulatorEvent {
 @HiltViewModel
 class StyleSimulatorViewModel @Inject constructor(
     private val routineDao: RoutineDao,
-    private val clothingDao: ClothingDao,
-    private val cosmeticDao: CosmeticDao
+    private val wardrobeRepository: WardrobeRepository,
+    private val simulatorEngine: StyleSimulatorEngine,
+    private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StyleSimulatorUiState())
@@ -81,23 +86,43 @@ class StyleSimulatorViewModel @Inject constructor(
 
     private fun runSimulation() {
         viewModelScope.launch {
+            val apiKey = aiSettings.getGeminiApiKey()
+            val allClothing = wardrobeRepository.getAllClothing().first()
+
             _uiState.update { it.copy(isAnalyzing = true, simulationStep = SimulationStep.BIO_MARKERS) }
-            kotlinx.coroutines.delay(1500)
+            delay(1000)
             _uiState.update { it.copy(simulationStep = SimulationStep.ROUTINE) }
-            kotlinx.coroutines.delay(1500)
+            delay(1000)
             _uiState.update { it.copy(simulationStep = SimulationStep.GENERATING) }
             
-            val allClothing = clothingDao.getAllClothing().first().map { it.toModel() }
+            val blueprint = if (apiKey.isNullOrBlank()) {
+                simulatorEngine.architectLocalBlueprint(
+                    userIntent = uiState.value.userMessage,
+                    availableWardrobe = allClothing
+                )
+            } else {
+                simulatorEngine.architectStyleBlueprint(
+                    userIntent = uiState.value.userMessage,
+                    circadianContext = uiState.value.circadianContext,
+                    routineCompleted = uiState.value.morningRoutineCompleted,
+                    wellnessScore = uiState.value.wellnessScore,
+                    availableWardrobe = allClothing,
+                    apiKey = apiKey
+                )
+            }
             
+            val isLocal = apiKey.isNullOrBlank() || blueprint.rationale.startsWith("Local Architect")
+            val selectedItems = allClothing.filter { it.id in blueprint.selectedItemIds }
+
             _uiState.update { state ->
                 state.copy(
                     isAnalyzing = false,
                     simulationStep = SimulationStep.RESULT,
-                    recommendedPalette = listOf("#F4D03F", "#16A085", "#2C3E50"),
-                    recommendedClothing = allClothing.filter { it.category == ClothingCategory.TOPS }.take(1) +
-                                         allClothing.filter { it.category == ClothingCategory.BOTTOMS }.take(1) +
-                                         allClothing.filter { it.category == ClothingCategory.SHOES }.take(1),
-                    recommendedAccessories = allClothing.filter { it.category == ClothingCategory.ACCESSORIES }.take(2)
+                    recommendedPalette = blueprint.recommendedPalette,
+                    recommendedClothing = selectedItems.filter { it.category != ClothingCategory.ACCESSORIES },
+                    recommendedAccessories = selectedItems.filter { it.category == ClothingCategory.ACCESSORIES },
+                    rationale = blueprint.rationale,
+                    isLocalResult = isLocal
                 )
             }
         }
@@ -106,8 +131,4 @@ class StyleSimulatorViewModel @Inject constructor(
     private fun saveSelectionToColorTab() {
         // Implementation logic
     }
-
-    private fun com.zoewave.probase.kocolor.db.entity.ClothingItemEntity.toModel() = ClothingItem(
-        id = id, name = name, brand = brand, category = category, colorHex = colorHex, price = price, timestamp = timestamp
-    )
 }

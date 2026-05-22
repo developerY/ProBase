@@ -812,36 +812,18 @@ fun EditCosmeticDialog(
                         modifier = Modifier.weight(1f),
                         singleLine = true
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = { navTo(KoColorRoute.BarcodeScanner) },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(Icons.Default.QrCodeScanner, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text("Scan Barcode")
-                        }
-                        OutlinedButton(
-                            onClick = { navTo(KoColorRoute.QRScanner) },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(Icons.Default.QrCode, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text("Scan QR")
-                        }
-                    }
 
                     OutlinedTextField(
                         value = draft.batchCode ?: "",
                         onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
                         label = { Text("Batch Code / SKU") },
                         modifier = Modifier.weight(1f),
-                        singleLine = true
+                        singleLine = true,
+                        trailingIcon = {
+                            IconButton(onClick = { navTo(KoColorRoute.BarcodeScanner) }) {
+                                Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan Barcode")
+                            }
+                        }
                     )
                 }
 
@@ -1117,36 +1099,18 @@ fun AddCosmeticDialog(
                         modifier = Modifier.weight(1f),
                         singleLine = true
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = { navTo(KoColorRoute.BarcodeScanner) },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(Icons.Default.QrCodeScanner, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text("Scan Barcode")
-                        }
-                        OutlinedButton(
-                            onClick = { navTo(KoColorRoute.QRScanner) },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(Icons.Default.QrCode, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text("Scan QR")
-                        }
-                    }
 
                     OutlinedTextField(
                         value = draft.batchCode ?: "",
                         onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
                         label = { Text("Batch Code / SKU") },
                         modifier = Modifier.weight(1f),
-                        singleLine = true
+                        singleLine = true,
+                        trailingIcon = {
+                            IconButton(onClick = { navTo(KoColorRoute.BarcodeScanner) }) {
+                                Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan Barcode")
+                            }
+                        }
                     )
                 }
 

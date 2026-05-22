@@ -31,6 +31,8 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.CosmeticCategory
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
+import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 
 import androidx.compose.ui.tooling.preview.Preview
 
@@ -231,13 +233,22 @@ private fun ColorStep(
 ) {
     val draft = uiState.first
     val onNext = { onEvent(Unit) }
-    // Note: onEvent for internal state (onNext), but we also need the external onEvent for CosmeticsEvent?
-    // In the original, it took both onEvent (CosmeticsEvent) and onNext.
-    // I'll need to handle this.
-    // Since I can only have one onEvent, I'll pass a lambda that can handle both or just use the one I need.
-    // In ColorStep, onEvent was used for CosmeticsEvent.UpdateDraft.
-    // I'll use a wrapper event or just pass the CosmeticsViewModel's onEvent if I can.
-    // Actually, I'll use (Any) -> Unit to be flexible.
+    
+    var showColorPicker by remember { mutableStateOf(false) }
+
+    if (showColorPicker) {
+        val colorHex = draft.colorHex ?: ""
+        ColorPickerDialog(
+            initialColor = try { parseColor(colorHex) } catch (e: Exception) { Color.Gray },
+            onColorSelected = { 
+                onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it.toHex()))) 
+                showColorPicker = false
+            },
+            onDismissRequest = { showColorPicker = false },
+            title = "Pick Product Color"
+        )
+    }
+
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Text("Extracting the essence.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         
@@ -249,7 +260,7 @@ private fun ColorStep(
                 .height(200.dp)
                 .clip(RoundedCornerShape(32.dp))
                 .background(bgColor)
-                .clickable { /* Future: Color Picker */ },
+                .clickable { showColorPicker = true },
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -338,7 +349,12 @@ private fun MetadataStep(
                 onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
                 label = { Text("Batch / SKU") },
                 modifier = Modifier.weight(1.2f),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                trailingIcon = {
+                    IconButton(onClick = { navTo(KoColorRoute.BarcodeScanner) }) {
+                        Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan Barcode")
+                    }
+                }
             )
         }
         
