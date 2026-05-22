@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.probase.features.health.core.ui.HealthEvent
 import com.zoewave.probase.features.health.core.ui.HealthSideEffect
 import com.zoewave.probase.features.health.core.ui.HealthUiState
+import com.zoewave.probase.features.health.core.ui.settings.HealthConnectionStatus
 import com.zoewave.probase.kocolor.mobile.core.ui.theme.KoColorTheme
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlinx.coroutines.flow.Flow
@@ -65,7 +66,8 @@ fun HealthContent(
     onEvent: (HealthEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier,
-    sideEffects: Flow<HealthSideEffect> = emptyFlow()
+    sideEffects: Flow<HealthSideEffect> = emptyFlow(),
+    statusOnly: Boolean = false
 ) {
     val context = LocalContext.current
     val permissionsLauncher = rememberLauncherForActivityResult(
@@ -98,12 +100,19 @@ fun HealthContent(
                 }
             }
             is HealthUiState.Success -> {
-                StyleHealthDashboard(
-                    uiState = uiState,
-                    onEvent = onEvent,
-                    navTo = navTo,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if (statusOnly) {
+                    HealthConnectionStatus(
+                        onEvent = onEvent,
+                        modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    )
+                } else {
+                    StyleHealthDashboard(
+                        uiState = uiState,
+                        onEvent = onEvent,
+                        navTo = navTo,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
             is HealthUiState.PermissionsRequired -> {
                 Column(
