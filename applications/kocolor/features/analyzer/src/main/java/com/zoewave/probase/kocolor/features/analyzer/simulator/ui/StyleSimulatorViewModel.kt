@@ -23,7 +23,8 @@ data class StyleSimulatorUiState(
     val isAnalyzing: Boolean = false,
     val simulationStep: SimulationStep = SimulationStep.MESSAGING,
     val userMessage: String = "",
-    val rationale: String? = null
+    val rationale: String? = null,
+    val isLocalResult: Boolean = false
 )
 
 enum class SimulationStep {
@@ -86,11 +87,7 @@ class StyleSimulatorViewModel @Inject constructor(
     private fun runSimulation() {
         viewModelScope.launch {
             val apiKey = aiSettings.getGeminiApiKey()
-            if (apiKey.isNullOrBlank()) {
-                // Should probably show error, but for now we follow the flow
-                _uiState.update { it.copy(simulationStep = SimulationStep.RESULT, rationale = "Gemini API Key missing.") }
-                return@launch
-            }
+            val allClothing = wardrobeRepository.getAllClothing().first()
 
             _uiState.update { it.copy(isAnalyzing = true, simulationStep = SimulationStep.BIO_MARKERS) }
             delay(1000)
@@ -98,17 +95,23 @@ class StyleSimulatorViewModel @Inject constructor(
             delay(1000)
             _uiState.update { it.copy(simulationStep = SimulationStep.GENERATING) }
             
-            val allClothing = wardrobeRepository.getAllClothing().first()
+            val blueprint = if (apiKey.isNullOrBlank()) {
+                simulatorEngine.architectLocalBlueprint(
+                    userIntent = uiState.value.userMessage,
+                    availableWardrobe = allClothing
+                )
+            } else {
+                simulatorEngine.architectStyleBlueprint(
+                    userIntent = uiState.value.userMessage,
+                    circadianContext = uiState.value.circadianContext,
+                    routineCompleted = uiState.value.morningRoutineCompleted,
+                    wellnessScore = uiState.value.wellnessScore,
+                    availableWardrobe = allClothing,
+                    apiKey = apiKey
+                )
+            }
             
-            val blueprint = simulatorEngine.architectStyleBlueprint(
-                userIntent = uiState.value.userMessage,
-                circadianContext = uiState.value.circadianContext,
-                routineCompleted = uiState.value.morningRoutineCompleted,
-                wellnessScore = uiState.value.wellnessScore,
-                availableWardrobe = allClothing,
-                apiKey = apiKey
-            )
-            
+            val isLocal = apiKey.isNullOrBlank() || blueprint.rationale.startsWith("Local Architect")
             val selectedItems = allClothing.filter { it.id in blueprint.selectedItemIds }
 
             _uiState.update { state ->
@@ -118,7 +121,8 @@ class StyleSimulatorViewModel @Inject constructor(
                     recommendedPalette = blueprint.recommendedPalette,
                     recommendedClothing = selectedItems.filter { it.category != ClothingCategory.ACCESSORIES },
                     recommendedAccessories = selectedItems.filter { it.category == ClothingCategory.ACCESSORIES },
-                    rationale = blueprint.rationale
+                    rationale = blueprint.rationale,
+                    isLocalResult = isLocal
                 )
             }
         }

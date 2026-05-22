@@ -252,9 +252,14 @@ fun ResultStep(
                 Text("Your Blueprint.", style = MaterialTheme.typography.displaySmall, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color.Green))
+                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(if (uiState.isLocalResult) Color.Gray else Color.Green))
                     Spacer(Modifier.width(8.dp))
-                    Text("OPTIMIZED BY GEMINI AI", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Text(
+                        text = if (uiState.isLocalResult) "BEST-EFFORT LOCAL CALCULATION" else "OPTIMIZED BY GEMINI AI", 
+                        style = MaterialTheme.typography.labelSmall, 
+                        fontWeight = FontWeight.Black, 
+                        letterSpacing = 1.sp
+                    )
                 }
                 
                 uiState.rationale?.let {
