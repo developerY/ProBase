@@ -338,7 +338,12 @@ private fun MetadataStep(
                 onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
                 label = { Text("Batch / SKU") },
                 modifier = Modifier.weight(1.2f),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                trailingIcon = {
+                    IconButton(onClick = { navTo(KoColorRoute.BarcodeScanner) }) {
+                        Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan Barcode")
+                    }
+                }
             )
         }
         

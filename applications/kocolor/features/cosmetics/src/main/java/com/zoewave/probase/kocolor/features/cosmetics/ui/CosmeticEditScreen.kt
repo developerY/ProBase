@@ -194,7 +194,12 @@ fun CosmeticEditScreen(
                 onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
                 label = { Text("Batch Code / SKU") },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                trailingIcon = {
+                    IconButton(onClick = { navTo(KoColorRoute.BarcodeScanner) }) {
+                        Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan Barcode")
+                    }
+                }
             )
 
             OutlinedTextField(
