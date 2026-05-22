@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -68,6 +69,7 @@ fun HealthContent(
     sideEffects: Flow<HealthSideEffect> = emptyFlow(),
     statusOnly: Boolean = false
 ) {
+    val context = LocalContext.current
     val permissionsLauncher = rememberLauncherForActivityResult(
         contract = androidx.health.connect.client.PermissionController.createRequestPermissionResultContract()
     ) {
@@ -93,20 +95,32 @@ fun HealthContent(
                 }
                 HealthSideEffect.OpenHealthConnectSettings -> {
                     val settingsIntent = if (android.os.Build.VERSION.SDK_INT >= 34) {
-                        Intent("android.settings.HEALTH_CONNECT_SETTINGS")
+                        Intent("android.health.connect.action.MANAGE_HEALTH_PERMISSIONS")
+                            .putExtra(Intent.EXTRA_PACKAGE_NAME, context.packageName)
                     } else {
-                        Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS")
+                        Intent("androidx.health.ACTION_MANAGE_HEALTH_PERMISSIONS")
+                            .putExtra(Intent.EXTRA_PACKAGE_NAME, context.packageName)
                     }
+
                     try {
                         settingsLauncher.launch(settingsIntent)
                     } catch (e: Exception) {
-                        android.util.Log.e("HealthContent", "Failed to launch Health Connect settings", e)
-                        // Fallback: try opening the Play Store page for Health Connect
+                        android.util.Log.e("HealthContent", "Failed to launch specific Health Connect settings, trying general", e)
+                        // Fallback to general settings
+                        val generalIntent = if (android.os.Build.VERSION.SDK_INT >= 34) {
+                            Intent("android.settings.HEALTH_CONNECT_SETTINGS")
+                        } else {
+                            Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS")
+                        }
                         try {
-                            val playStoreIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("market://details?id=com.google.android.apps.healthdata"))
-                            settingsLauncher.launch(playStoreIntent)
+                            settingsLauncher.launch(generalIntent)
                         } catch (ignore: Exception) {
-                            // Give up
+                            // Final fallback: Play Store
+                            try {
+                                val playStoreIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("market://details?id=com.google.android.apps.healthdata"))
+                                playStoreIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                settingsLauncher.launch(playStoreIntent)
+                            } catch (ignore2: Exception) {}
                         }
                     }
                 }
