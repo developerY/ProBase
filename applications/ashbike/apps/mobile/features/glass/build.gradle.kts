@@ -25,7 +25,8 @@ dependencies {
 
     // --- 2. Android XR / Glass (Glimmer) ---
     // Keeping these as they appear to be specific XR libraries in your catalog
-    implementation(libs.androidx.glimmer)
+    implementation(libs.androidx.glimmer.core)
+    implementation(libs.androidx.glimmer.google.fonts)
     implementation(libs.androidx.projected)
 
     // --- 3. AI & Gemini (Isolated Firebase SDK) ---
