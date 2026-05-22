@@ -29,6 +29,8 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.CosmeticCategory
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
+import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 
 @Preview(showBackground = true)
 @Composable
@@ -67,6 +69,20 @@ fun CosmeticEditScreen(
 
     val draft = state.draftItem
     var showCategoryMenu by remember { mutableStateOf(false) }
+    var showColorPicker by remember { mutableStateOf(false) }
+
+    if (showColorPicker) {
+        val colorHex = draft.colorHex ?: ""
+        ColorPickerDialog(
+            initialColor = try { parseColor(colorHex) } catch (e: Exception) { Color.Gray },
+            onColorSelected = { 
+                onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it.toHex()))) 
+                showColorPicker = false
+            },
+            onDismissRequest = { showColorPicker = false },
+            title = "Pick Product Color"
+        )
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -185,7 +201,7 @@ fun CosmeticEditScreen(
                         .clip(RoundedCornerShape(16.dp))
                         .background(parseColor(colorHex))
                         .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
-                        .clickable { /* Color Picker Later */ }
+                        .clickable { showColorPicker = true }
                 )
             }
 
