@@ -28,5 +28,6 @@ data class ReceiptDiagnosticResult(
     val error: String? = null,
     val warnings: List<String> = emptyList(),
     val rawResponse: String? = null,
-    val whatIsThis: String? = null
+    val whatIsThis: String? = null,
+    val financialImpact: String? = null
 )

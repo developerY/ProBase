@@ -8,5 +8,6 @@ data class SmartReceiptDraft(
     val total: Double? = null,
     val date: String? = null, // MM/DD/YYYY formatted
     val category: String? = null,
-    val photoUri: String? = null
+    val photoUri: String? = null,
+    val financialImpact: String? = null
 )
