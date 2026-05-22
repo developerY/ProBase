@@ -12,7 +12,7 @@ import androidx.lifecycle.LifecycleOwner
  */
 class SeaweedAudioInterface(
     context: Context,
-    initializationMessage: String,
+    private val initializationMessage: String,
 ) : DefaultLifecycleObserver {
 
     private var tts: TextToSpeech? = null
@@ -20,34 +20,41 @@ class SeaweedAudioInterface(
     private val pendingMessages = mutableListOf<String>()
 
     init {
-        // Initialize TTS. The constructor returns immediately, and the listener is called when ready.
-        tts = TextToSpeech(context.applicationContext) { status ->
+        Log.d(TAG, "Initializing SeaweedAudioInterface with: $initializationMessage")
+        tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 isTtsReady = true
                 Log.d(TAG, "TTS initialized successfully")
+                // On some devices, even after SUCCESS, it needs a moment
                 processPendingMessages()
             } else {
                 Log.e(TAG, "TTS Initialization failed with status: $status")
             }
         }
-        
-        // Queue the initialization message. It will be spoken as soon as TTS is ready.
+    }
+
+    override fun onStart(owner: LifecycleOwner) {
+        super.onStart(owner)
+        Log.d(TAG, "onStart: Triggering initial message")
         speak(initializationMessage)
     }
 
     /**
-     * Speaks the given text. If TTS is not ready, the message is queued.
+     * Speaks the given text.
+     * @param flush If true, clears the queue and speaks immediately.
      */
-    fun speak(textToSpeak: String) {
+    fun speak(textToSpeak: String, flush: Boolean = false) {
         if (textToSpeak.isBlank()) return
 
         synchronized(pendingMessages) {
             val currentTts = tts
             if (currentTts != null && isTtsReady) {
+                Log.d(TAG, "Speaking: $textToSpeak (flush=$flush)")
+                val mode = if (flush) TextToSpeech.QUEUE_FLUSH else TextToSpeech.QUEUE_ADD
                 val utteranceId = "msg_${System.nanoTime()}"
                 currentTts.speak(
                     textToSpeak,
-                    TextToSpeech.QUEUE_ADD,
+                    mode,
                     null,
                     utteranceId
                 )
@@ -62,6 +69,7 @@ class SeaweedAudioInterface(
         synchronized(pendingMessages) {
             val currentTts = tts
             if (currentTts != null && isTtsReady) {
+                Log.d(TAG, "Processing ${pendingMessages.size} pending messages")
                 pendingMessages.forEachIndexed { index, msg ->
                     val utteranceId = "msg_${System.nanoTime()}_$index"
                     currentTts.speak(msg, TextToSpeech.QUEUE_ADD, null, utteranceId)
