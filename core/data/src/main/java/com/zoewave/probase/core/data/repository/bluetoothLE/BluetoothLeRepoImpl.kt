@@ -405,7 +405,7 @@ class BluetoothLeRepImpl @Inject constructor(
                                 .build()
                         )
                     }
-                    bleScanner.startScan(filters, scanSettings, scanCallback)
+                    bleScanner?.startScan(filters, scanSettings, scanCallback)
                     Log.d(
                         TAG,
                         "startScan - Scan started (scanAll=$scanAll). Filters: ${filters?.joinToString { it.toString() } ?: "None"}")
@@ -428,7 +428,7 @@ class BluetoothLeRepImpl @Inject constructor(
             }
             if (_scanState.value == ScanState.SCANNING || _scanState.value == ScanState.STOPPING) {
                 try {
-                    bleScanner.stopScan(scanCallback)
+                    bleScanner?.stopScan(scanCallback)
                     Log.d(TAG, "stopScan - Scan stopped successfully.")
                 } catch (e: Exception) {
                     Log.e(TAG, "stopScan - Error stopping scan: ${e.message}", e)
