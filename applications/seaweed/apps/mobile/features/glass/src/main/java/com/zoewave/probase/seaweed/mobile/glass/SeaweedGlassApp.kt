@@ -3,11 +3,16 @@ package com.zoewave.probase.seaweed.mobile.glass
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.xr.glimmer.Button
 import androidx.xr.glimmer.Card
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Text
@@ -17,7 +22,12 @@ import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
-fun SeaweedGlassApp(profile: FinancialProfile) {
+fun SeaweedGlassApp(
+    profile: FinancialProfile,
+    analysisResult: String? = null,
+    onTalkToGemini: () -> Unit = {},
+    onCaptureImage: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -57,5 +67,32 @@ fun SeaweedGlassApp(profile: FinancialProfile) {
             style = GlimmerTheme.typography.bodySmall,
             modifier = Modifier.padding(top = 16.dp)
         )
+
+        analysisResult?.let {
+            Spacer(modifier = Modifier.height(16.dp))
+            Card {
+                Text(
+                    text = it,
+                    style = GlimmerTheme.typography.bodySmall,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Button(
+                onClick = onCaptureImage
+            ) {
+                Text("Analyze View")
+            }
+
+            Button(
+                onClick = onTalkToGemini
+            ) {
+                Text("Gemini Live")
+            }
+        }
     }
 }
