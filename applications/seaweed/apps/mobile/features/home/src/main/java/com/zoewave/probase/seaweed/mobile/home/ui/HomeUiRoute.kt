@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -81,6 +82,7 @@ fun HomeUiRoute(
     navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
+    topBarActions: @Composable RowScope.() -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -88,7 +90,8 @@ fun HomeUiRoute(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         navTo = navTo,
-        modifier = modifier
+        modifier = modifier,
+        topBarActions = topBarActions
     )
 }
 
@@ -98,12 +101,14 @@ internal fun HomeUiRoute(
     onEvent: (HomeUiEvent) -> Unit,
     navTo: (SeaweedDestination) -> Unit,
     modifier: Modifier = Modifier,
+    topBarActions: @Composable RowScope.() -> Unit = {},
 ) {
     HomeScreen(
         uiState = uiState,
         onEvent = onEvent,
         navTo = navTo,
-        modifier = modifier
+        modifier = modifier,
+        topBarActions = topBarActions
     )
 }
 
@@ -113,7 +118,8 @@ fun HomeScreen(
     uiState: HomeUiState,
     onEvent: (HomeUiEvent) -> Unit,
     navTo: (SeaweedDestination) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    topBarActions: @Composable RowScope.() -> Unit = {},
 ) {
     val adaptiveInfo = currentWindowAdaptiveInfo()
     val isExpanded = adaptiveInfo.windowSizeClass.windowWidthSizeClass == androidx.window.core.layout.WindowWidthSizeClass.EXPANDED
@@ -123,6 +129,7 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_home_summary_title)) },
                 actions = {
+                    topBarActions()
                     IconButton(onClick = { onEvent(HomeUiEvent.AddRandomTransaction) }) {
                         Icon(
                             Icons.Default.Add,
