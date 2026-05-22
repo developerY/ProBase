@@ -39,6 +39,7 @@ import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
+import com.zoewave.probase.features.ai.vision.financial.FinancialAdvisorEngine
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -56,7 +57,7 @@ class GlassesActivity : ComponentActivity() {
     lateinit var firebaseLiveSessionManager: FirebaseLiveSessionManager
 
     @Inject
-    lateinit var visionEngine: SeaweedGlassVisionEngine
+    lateinit var visionEngine: FinancialAdvisorEngine
 
     @Inject
     lateinit var aiSettings: AiConfigurationSettings
@@ -188,7 +189,13 @@ class GlassesActivity : ComponentActivity() {
                             image.close()
                             
                             lifecycleScope.launch {
-                                val result = visionEngine.analyzeImage(bitmap, apiKey, modelName, financialContext)
+                                val result = visionEngine.analyzeFinancialImpact(
+                                    bitmap = bitmap,
+                                    apiKey = apiKey,
+                                    modelName = modelName,
+                                    financialContext = financialContext,
+                                    deviceBranding = "glasses"
+                                )
                                 onResult(result)
                             }
                         }
