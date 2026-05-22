@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -69,9 +68,14 @@ fun HealthContent(
     sideEffects: Flow<HealthSideEffect> = emptyFlow(),
     statusOnly: Boolean = false
 ) {
-    val context = LocalContext.current
     val permissionsLauncher = rememberLauncherForActivityResult(
         contract = androidx.health.connect.client.PermissionController.createRequestPermissionResultContract()
+    ) {
+        onEvent(HealthEvent.LoadHealthData)
+    }
+
+    val settingsLauncher = rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
     ) {
         onEvent(HealthEvent.LoadHealthData)
     }
@@ -81,11 +85,30 @@ fun HealthContent(
         sideEffects.collect { effect ->
             when (effect) {
                 is HealthSideEffect.LaunchPermissions -> {
-                    permissionsLauncher.launch(effect.permissions)
+                    try {
+                        permissionsLauncher.launch(effect.permissions)
+                    } catch (e: Exception) {
+                        android.util.Log.e("HealthContent", "Failed to launch permissions", e)
+                    }
                 }
                 HealthSideEffect.OpenHealthConnectSettings -> {
-                    val settingsIntent = Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS")
-                    context.startActivity(settingsIntent)
+                    val settingsIntent = if (android.os.Build.VERSION.SDK_INT >= 34) {
+                        Intent("android.settings.HEALTH_CONNECT_SETTINGS")
+                    } else {
+                        Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS")
+                    }
+                    try {
+                        settingsLauncher.launch(settingsIntent)
+                    } catch (e: Exception) {
+                        android.util.Log.e("HealthContent", "Failed to launch Health Connect settings", e)
+                        // Fallback: try opening the Play Store page for Health Connect
+                        try {
+                            val playStoreIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("market://details?id=com.google.android.apps.healthdata"))
+                            settingsLauncher.launch(playStoreIntent)
+                        } catch (ignore: Exception) {
+                            // Give up
+                        }
+                    }
                 }
                 else -> {}
             }
