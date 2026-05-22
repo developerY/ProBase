@@ -56,6 +56,7 @@ work = "2.11.1"
 okhttp = "5.3.2"
 squareupRetrofit = "3.0.0"
 apollo = "4.4.1"
+ktor = "2.3.12"
 
 # -- UI Utilities --
 coil = "2.7.0"
@@ -198,6 +199,12 @@ squareup-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref
 squareup-okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 squareup-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareupRetrofit" }
 squareup-retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareupRetrofit" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-serialization = { group = "io.ktor", name = "ktor-client-serialization", version.ref = "ktor" }
+ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+ktor-client-plugins = { group = "io.ktor", name = "ktor-client-json", version.ref = "ktor" } # Some SDKs might look for json plugin too
 apollo-graphql-runtime = { group = "com.apollographql.apollo", name = "apollo-runtime", version.ref = "apollo" }
 apollo-graphql-normalized-cache = { group = "com.apollographql.apollo", name = "apollo-normalized-cache", version.ref = "apollo" }
 

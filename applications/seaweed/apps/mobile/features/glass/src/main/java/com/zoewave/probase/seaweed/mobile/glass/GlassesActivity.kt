@@ -32,6 +32,7 @@ import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSetti
 import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -102,6 +103,7 @@ class GlassesActivity : ComponentActivity() {
     private fun captureAndAnalyze(imageCapture: ImageCapture, onResult: (String) -> Unit) {
         lifecycleScope.launch {
             val apiKey = aiSettings.getGeminiApiKey() ?: return@launch
+            val modelName = aiSettings.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
             
             imageCapture.takePicture(
                 ContextCompat.getMainExecutor(this@GlassesActivity),
@@ -111,7 +113,7 @@ class GlassesActivity : ComponentActivity() {
                         image.close()
                         
                         lifecycleScope.launch {
-                            val result = visionEngine.analyzeImage(bitmap, apiKey)
+                            val result = visionEngine.analyzeImage(bitmap, apiKey, modelName)
                             onResult(result)
                         }
                     }

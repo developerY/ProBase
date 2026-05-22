@@ -1,8 +1,6 @@
 package com.zoewave.probase.seaweed.mobile.glass
 
-import android.R.attr.text
 import android.graphics.Bitmap
-import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.mlkit.vision.common.InputImage
@@ -18,15 +16,15 @@ import javax.inject.Singleton
 class SeaweedGlassVisionEngine @Inject constructor() {
 
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-    
-    private val generativeModel = GenerativeModel(
-        modelName = "gemini-1.5-flash",
-        apiKey = "" // Needs to be provided at runtime or injected
-    )
 
-    suspend fun analyzeImage(bitmap: Bitmap, apiKey: String, userContext: String? = null): String = withContext(Dispatchers.Default) {
+    suspend fun analyzeImage(
+        bitmap: Bitmap,
+        apiKey: String,
+        modelName: String,
+        userContext: String? = null
+    ): String = withContext(Dispatchers.Default) {
         val model = GenerativeModel(
-            modelName = "gemini-1.5-flash",
+            modelName = modelName,
             apiKey = apiKey
         )
 
