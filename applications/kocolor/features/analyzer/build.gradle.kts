@@ -29,4 +29,9 @@ dependencies {
     implementation(libs.coil.compose)
     implementation("androidx.palette:palette-ktx:1.0.0")
     implementation(libs.kotlinx.serialization.json)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.truth)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
