@@ -254,7 +254,17 @@ fun ResultStep(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color.Green))
                     Spacer(Modifier.width(8.dp))
-                    Text("OPTIMIZED FOR DEFENSE & PROTECTION", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Text("OPTIMIZED BY GEMINI AI", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                }
+                
+                uiState.rationale?.let {
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                        lineHeight = 22.sp
+                    )
                 }
             }
         }

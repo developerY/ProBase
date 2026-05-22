@@ -94,34 +94,35 @@ fun HealthContent(
                     }
                 }
                 HealthSideEffect.OpenHealthConnectSettings -> {
-                    val settingsIntent = if (android.os.Build.VERSION.SDK_INT >= 34) {
+                    val packageName = context.packageName
+                    val intents = listOf(
+                        // 1. App-specific permissions (Android 14+)
                         Intent("android.health.connect.action.MANAGE_HEALTH_PERMISSIONS")
-                            .putExtra(Intent.EXTRA_PACKAGE_NAME, context.packageName)
-                    } else {
-                        Intent("androidx.health.ACTION_MANAGE_HEALTH_PERMISSIONS")
-                            .putExtra(Intent.EXTRA_PACKAGE_NAME, context.packageName)
+                            .putExtra(Intent.EXTRA_PACKAGE_NAME, packageName),
+                        // 2. General Health Connect Settings (System Integrated)
+                        Intent("android.settings.HEALTH_CONNECT_SETTINGS"),
+                        // 3. Legacy Health Connect App Settings
+                        Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS")
+                    )
+
+                    var launched = false
+                    for (intent in intents) {
+                        try {
+                            settingsLauncher.launch(intent)
+                            launched = true
+                            break
+                        } catch (ignore: Exception) {
+                            android.util.Log.w("HealthContent", "Could not launch intent: ${intent.action}")
+                        }
                     }
 
-                    try {
-                        settingsLauncher.launch(settingsIntent)
-                    } catch (e: Exception) {
-                        android.util.Log.e("HealthContent", "Failed to launch specific Health Connect settings, trying general", e)
-                        // Fallback to general settings
-                        val generalIntent = if (android.os.Build.VERSION.SDK_INT >= 34) {
-                            Intent("android.settings.HEALTH_CONNECT_SETTINGS")
-                        } else {
-                            Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS")
-                        }
+                    if (!launched) {
+                        // Final fallback: Play Store
                         try {
-                            settingsLauncher.launch(generalIntent)
-                        } catch (ignore: Exception) {
-                            // Final fallback: Play Store
-                            try {
-                                val playStoreIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("market://details?id=com.google.android.apps.healthdata"))
-                                playStoreIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                settingsLauncher.launch(playStoreIntent)
-                            } catch (ignore2: Exception) {}
-                        }
+                            val playStoreIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("market://details?id=com.google.android.apps.healthdata"))
+                            playStoreIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(playStoreIntent)
+                        } catch (ignore: Exception) {}
                     }
                 }
                 else -> {}
