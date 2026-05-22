@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.xr.glimmer.Button
@@ -45,9 +46,9 @@ fun AshGlassLayout(
 
     Box(
         modifier = modifier
+            .background(Color.Black) // MANDATORY for additive displays
             .surface(focusable = false)
             .fillMaxSize()
-            .background(GlimmerTheme.colors.surface)
             .onFocusChanged {
                 if (it.isFocused) Log.d("FOCUS_DEBUG", "Speed Card got Focus!")
             },

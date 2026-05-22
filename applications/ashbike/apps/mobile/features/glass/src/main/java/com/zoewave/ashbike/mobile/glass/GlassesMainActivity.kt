@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.ui.ComposeUiFlags
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
@@ -43,13 +45,16 @@ class GlassesMainActivity : ComponentActivity() {
             }
         }
 
+    @OptIn(ExperimentalProjectedApi::class, ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Recommended for XR glasses to handle initial focus correctly
+        ComposeUiFlags.isInitialFocusOnFocusableAvailable = true
 
         audioInterface = AudioInterface(
             this,
-            getString(R.string.applications_ashbike_apps_mobile_features_glass_hello_ai_glasses)
+            getString(R.string.applications_ashbike_apps_mobile_features_glass_hello_ai_glasses),
         )
         lifecycle.addObserver(audioInterface)
 
@@ -134,7 +139,7 @@ class GlassesMainActivity : ComponentActivity() {
         // --- THE FIX: Tell the Repository "I am here!" ---
         lifecycleScope.launch {
             // This updates the flow that BikeViewModel is watching
-            repository.updateGlassSessionState(true)
+            repository.updateGlassSessionState(isActive = true)
         }
     }
 
@@ -149,7 +154,7 @@ class GlassesMainActivity : ComponentActivity() {
         // --- THE FIX: Tell the Repository "I am gone!" ---
         lifecycleScope.launch {
             // This resets the button on the phone to "Start Projection"
-            repository.updateGlassSessionState(false)
+            repository.updateGlassSessionState(isActive = false)
         }
         // ProjectionState.setProjecting(false)
         //Stop all the data source access

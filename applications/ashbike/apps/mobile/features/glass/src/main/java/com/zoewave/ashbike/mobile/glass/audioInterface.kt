@@ -6,34 +6,80 @@ import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 
+/**
+ * Interface for Text-To-Speech operations, lifecycle-aware.
+ * Handles initialization and queuing of messages if the engine is not yet ready.
+ */
 class AudioInterface(
-    private val context: Context,
-    private val initializationMessage: String
+    context: Context,
+    initializationMessage: String,
 ) : DefaultLifecycleObserver {
-    private lateinit var tts: TextToSpeech
-    override fun onStart(owner: LifecycleOwner) {
-        super.onStart(owner)
-        tts = TextToSpeech(context) { status ->
+
+    private var tts: TextToSpeech? = null
+    private var isTtsReady = false
+    private val pendingMessages = mutableListOf<String>()
+
+    init {
+        // Initialize TTS. The constructor returns immediately, and the listener is called when ready.
+        tts = TextToSpeech(context.applicationContext) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                speak(initializationMessage)
+                isTtsReady = true
+                Log.d(TAG, "TTS initialized successfully")
+                processPendingMessages()
             } else {
-                Log.e(TAG, "Initialization failed with status: $status")
+                Log.e(TAG, "TTS Initialization failed with status: $status")
+            }
+        }
+        
+        // Queue the initialization message. It will be spoken as soon as TTS is ready.
+        speak(initializationMessage)
+    }
+
+    /**
+     * Speaks the given text. If TTS is not ready, the message is queued.
+     */
+    fun speak(textToSpeak: String) {
+        if (textToSpeak.isBlank()) return
+
+        synchronized(pendingMessages) {
+            val currentTts = tts
+            if (currentTts != null && isTtsReady) {
+                val utteranceId = "msg_${System.nanoTime()}"
+                currentTts.speak(
+                    textToSpeak,
+                    TextToSpeech.QUEUE_ADD,
+                    null,
+                    utteranceId
+                )
+            } else {
+                Log.d(TAG, "TTS not ready, queuing message: $textToSpeak")
+                pendingMessages.add(textToSpeak)
             }
         }
     }
 
-    fun speak(textToSpeak: String) {
-        tts.speak(
-            textToSpeak,
-            TextToSpeech.QUEUE_ADD,
-            null,
-            initializationMessage.lowercase().replace(" ", "_")
-        )
+    private fun processPendingMessages() {
+        synchronized(pendingMessages) {
+            val currentTts = tts
+            if (currentTts != null && isTtsReady) {
+                pendingMessages.forEachIndexed { index, msg ->
+                    val utteranceId = "msg_${System.nanoTime()}_$index"
+                    currentTts.speak(msg, TextToSpeech.QUEUE_ADD, null, utteranceId)
+                }
+                pendingMessages.clear()
+            }
+        }
     }
 
-    override fun onStop(owner: LifecycleOwner) {
-        super.onStop(owner)
-        tts.shutdown()
+    override fun onDestroy(owner: LifecycleOwner) {
+        super.onDestroy(owner)
+        synchronized(pendingMessages) {
+            tts?.stop()
+            tts?.shutdown()
+            tts = null
+            isTtsReady = false
+            pendingMessages.clear()
+        }
     }
 
     companion object {

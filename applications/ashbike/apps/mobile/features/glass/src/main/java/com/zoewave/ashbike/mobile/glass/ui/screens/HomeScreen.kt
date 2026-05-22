@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.xr.glimmer.Button
@@ -33,9 +34,9 @@ fun HomeScreen(
 
     Box(
         modifier = modifier
+            .background(Color.Black)
             .surface(focusable = false)
-            .fillMaxSize()
-            .background(GlimmerTheme.colors.surface),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Card(
