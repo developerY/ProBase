@@ -1,6 +1,5 @@
 package com.zoewave.probase.seaweed.mobile.settings.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -104,97 +103,144 @@ private fun SettingsContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_income), style = MaterialTheme.typography.titleLarge)
-        OutlinedTextField(
-            value = settings.monthlyIncome.toString(),
-            onValueChange = { val income = it.toDoubleOrNull() ?: 0.0; onEvent(SettingsUiEvent.UpdateIncome(income)) },
-            label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_monthly_income)) },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_appearance), style = MaterialTheme.typography.titleLarge)
-        ThemeConfigSelectionGroup(
-            currentConfig = settings.themeConfig,
-            onConfigSelected = { onEvent(SettingsUiEvent.UpdateTheme(it)) }
-        )
-
-        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_mode), style = MaterialTheme.typography.titleLarge)
-        ThemeModeSelectionGroup(
-            currentMode = settings.themeMode,
-            onModeSelected = { onEvent(SettingsUiEvent.UpdateThemeMode(it)) }
-        )
-
-        var isAiExpanded by remember { mutableStateOf(false) }
-        AiConfigurationCard(
-            expanded = isAiExpanded,
-            onExpandToggle = { isAiExpanded = !isAiExpanded },
-            title = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_title),
-            description = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_desc)
-        )
-
-        HorizontalDivider()
-
-        SettingsLinkItem(
-            label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_privacy_policy),
-            icon = Icons.Default.PrivacyTip,
-            onClick = { onEvent(SettingsUiEvent.NavigateTo(SeaweedDestination.PrivacyPolicy)) }
-        )
-
-        SettingsLinkItem(
-            label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_data_deletion),
-            icon = Icons.Default.Delete,
-            onClick = { onEvent(SettingsUiEvent.NavigateTo(SeaweedDestination.DataDeletion)) }
-        )
-
-        HorizontalDivider()
-
-        AboutSection(deviceId = uiState.firebaseDeviceId)
-
-        HorizontalDivider()
-
-        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_developer_options), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
-        Button(
-            onClick = { onEvent(SettingsUiEvent.GenerateTestData) },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_generate_test_data))
+            SectionHeader(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_income))
+            
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = settings.monthlyIncome.toString(),
+                    onValueChange = { 
+                        val income = it.toDoubleOrNull() ?: 0.0
+                        onEvent(SettingsUiEvent.UpdateIncome(income)) 
+                    },
+                    label = { Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_monthly_income)) },
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    shape = RoundedCornerShape(12.dp)
+                )
+            }
+
+            SectionHeader(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_appearance))
+            ThemeConfigSelectionGroup(
+                currentConfig = settings.themeConfig,
+                onConfigSelected = { onEvent(SettingsUiEvent.UpdateTheme(it)) }
+            )
+
+            SectionHeader(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_mode))
+            ThemeModeSelectionGroup(
+                currentMode = settings.themeMode,
+                onModeSelected = { onEvent(SettingsUiEvent.UpdateThemeMode(it)) }
+            )
+
+            SectionHeader(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_title))
+            var isAiExpanded by remember { mutableStateOf(false) }
+            AiConfigurationCard(
+                expanded = isAiExpanded,
+                onExpandToggle = { isAiExpanded = !isAiExpanded },
+                title = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_title),
+                description = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_receipt_ai_desc)
+            )
+
+            SectionHeader(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_privacy_policy))
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Column {
+                    SettingsLinkItem(
+                        label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_privacy_policy),
+                        icon = Icons.Default.PrivacyTip,
+                        onClick = { onEvent(SettingsUiEvent.NavigateTo(SeaweedDestination.PrivacyPolicy)) }
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingsLinkItem(
+                        label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_data_deletion),
+                        icon = Icons.Default.Delete,
+                        onClick = { onEvent(SettingsUiEvent.NavigateTo(SeaweedDestination.DataDeletion)) }
+                    )
+                }
+            }
+
+            SectionHeader(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_about))
+            AboutSection(deviceId = uiState.firebaseDeviceId)
+
+            SectionHeader(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_developer_options), color = MaterialTheme.colorScheme.error)
+            Button(
+                onClick = { onEvent(SettingsUiEvent.GenerateTestData) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+            ) {
+                Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_generate_test_data))
+            }
+            
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
+private fun SectionHeader(
+    title: String,
+    color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary
+) {
+    Text(
+        text = title.uppercase(),
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+        color = color,
+        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+    )
+}
+
+@Composable
 private fun AboutSection(deviceId: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(R.string.applications_seaweed_apps_mobile_features_settings_about), style = MaterialTheme.typography.titleLarge)
-        Text(
-            text = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_app_instance_id),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(8.dp)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = deviceId,
-                modifier = Modifier.padding(12.dp),
-                style = androidx.compose.ui.text.TextStyle(
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                    fontSize = 12.sp
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_app_instance_id),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(8.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            ) {
+                Text(
+                    text = deviceId,
+                    modifier = Modifier.padding(12.dp),
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                        fontSize = 11.sp
+                    )
                 )
+            }
+            Text(
+                text = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_deletion_request_instruction),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Text(
-            text = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_deletion_request_instruction),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }
 
@@ -203,16 +249,21 @@ private fun ThemeConfigSelectionGroup(
     currentConfig: SeaweedThemeConfig,
     onConfigSelected: (SeaweedThemeConfig) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        ThemeOption(
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        TonalSelectableCard(
             label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_default),
             isSelected = currentConfig == SeaweedThemeConfig.DEFAULT,
-            onClick = { onConfigSelected(SeaweedThemeConfig.DEFAULT) }
+            onClick = { onConfigSelected(SeaweedThemeConfig.DEFAULT) },
+            modifier = Modifier.weight(1f)
         )
-        ThemeOption(
+        TonalSelectableCard(
             label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_theme_coral),
             isSelected = currentConfig == SeaweedThemeConfig.CORAL,
-            onClick = { onConfigSelected(SeaweedThemeConfig.CORAL) }
+            onClick = { onConfigSelected(SeaweedThemeConfig.CORAL) },
+            modifier = Modifier.weight(1f)
         )
     }
 }
@@ -222,49 +273,55 @@ private fun ThemeModeSelectionGroup(
     currentMode: ThemeMode,
     onModeSelected: (ThemeMode) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        ThemeOption(
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        TonalSelectableCard(
             label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_mode_system),
             isSelected = currentMode == ThemeMode.SYSTEM,
-            onClick = { onModeSelected(ThemeMode.SYSTEM) }
+            onClick = { onModeSelected(ThemeMode.SYSTEM) },
+            modifier = Modifier.weight(1f)
         )
-        ThemeOption(
+        TonalSelectableCard(
             label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_mode_light),
             isSelected = currentMode == ThemeMode.LIGHT,
-            onClick = { onModeSelected(ThemeMode.LIGHT) }
+            onClick = { onModeSelected(ThemeMode.LIGHT) },
+            modifier = Modifier.weight(1f)
         )
-        ThemeOption(
+        TonalSelectableCard(
             label = stringResource(R.string.applications_seaweed_apps_mobile_features_settings_mode_dark),
             isSelected = currentMode == ThemeMode.DARK,
-            onClick = { onModeSelected(ThemeMode.DARK) }
+            onClick = { onModeSelected(ThemeMode.DARK) },
+            modifier = Modifier.weight(1f)
         )
     }
 }
 
 @Composable
-private fun ThemeOption(
+private fun TonalSelectableCard(
     label: String,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically
+    Card(
+        onClick = onClick,
+        modifier = modifier.height(56.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        border = if (isSelected) androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
-        RadioButton(
-            selected = isSelected,
-            onClick = onClick
-        )
-        Text(
-            text = label,
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .weight(1f),
-            style = MaterialTheme.typography.bodyLarge
-        )
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
+            )
+        }
     }
 }
 
@@ -280,7 +337,7 @@ private fun SettingsLinkItem(
         color = androidx.compose.ui.graphics.Color.Transparent
     ) {
         Row(
-            modifier = Modifier.padding(vertical = 12.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
