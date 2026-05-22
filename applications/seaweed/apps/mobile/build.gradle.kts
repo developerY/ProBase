@@ -52,7 +52,12 @@ dependencies {
     implementation(project(":applications:seaweed:apps:mobile:features:settings"))
     implementation(project(":applications:seaweed:apps:mobile:features:bills"))
     implementation(project(":applications:seaweed:apps:mobile:features:budget"))
+    implementation(project(":applications:seaweed:apps:mobile:features:glass"))
     implementation(project(":features:camera"))
+
+    implementation(libs.androidx.glimmer.core)
+    implementation(libs.androidx.glimmer.google.fonts)
+    implementation(libs.androidx.projected)
 
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
@@ -67,6 +72,7 @@ dependencies {
     implementation(libs.androidx.window.core)
     implementation(libs.androidx.compose.material3.window.size)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -23,19 +23,23 @@ import com.zoewave.probase.seaweed.mobile.transaction.ui.AnalyticsUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.TransactionsUiRoute
 import com.zoewave.probase.seaweed.mobile.ui.components.AdaptiveSeaweedScreen
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.runtime.Composable
 
 fun seaweedNavEntryProvider(
     key: SeaweedDestination,
     windowSizeClass: WindowSizeClass,
     navigateTo: (SeaweedDestination) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    topBarActions: @Composable RowScope.() -> Unit = {}
 ): NavEntry<SeaweedDestination> {
     return NavEntry(key) {
         when (key) {
             SeaweedDestination.Home -> {
                 HomeUiRoute(
                     modifier = Modifier.fillMaxSize(),
-                    navTo = navigateTo
+                    navTo = navigateTo,
+                    topBarActions = topBarActions
                 )
             }
             SeaweedDestination.CategoryGrid -> {

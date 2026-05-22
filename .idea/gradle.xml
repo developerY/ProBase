@@ -137,6 +137,7 @@
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/bills" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/budget" />
+            <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/glass" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/home" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/settings" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/transaction" />

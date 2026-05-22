@@ -1,6 +1,6 @@
 [versions]
 # -- Project Configuration --
-android-compileSdk = "36"
+android-compileSdk = "37"
 android-minSdk = "34"
 android-targetSdk = "35"
 
@@ -21,14 +21,14 @@ material = "1.13.0"
 constraintLayout = "2.2.1"
 
 # -- Jetpack Compose --
-composeBom = "2026.01.01"
+composeBom = "2026.05.01"
 composeMaterial = "1.7.8"  # Jetpack Compose Material (used for icons, wear material)
-composeMaterial3Expressive = "1.5.0-alpha15"
+composeMaterial3Expressive = "1.5.0-alpha20"
 
 # -- Nav3 --
 nav3Core = "1.0.1"
 lifecycleViewmodelNav3 = "2.10.0"
-material3AdaptiveNav3 = "1.3.0-alpha09"
+material3AdaptiveNav3 = "1.3.0-beta02"
 
 # -- Dependency Injection (Hilt) --
 hilt = "2.59"
@@ -56,6 +56,7 @@ work = "2.11.1"
 okhttp = "5.3.2"
 squareupRetrofit = "3.0.0"
 apollo = "4.4.1"
+ktor = "2.3.12"
 
 # -- UI Utilities --
 coil = "2.7.0"
@@ -85,8 +86,8 @@ horologist = "0.7.15"
 watchfaceComplicationsDataSourceKtx = "1.2.1"
 
 # -- XR & Glass --
-glimmer = "1.0.0-alpha06"
-projectedXR = "1.0.0-alpha04"
+glimmer = "1.0.0-alpha13"
+projectedXR = "1.0.0-alpha08"
 
 # -- Google Services & Firebase --
 playAgeSignals = "0.0.3"
@@ -198,6 +199,12 @@ squareup-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref
 squareup-okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 squareup-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareupRetrofit" }
 squareup-retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareupRetrofit" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-serialization = { group = "io.ktor", name = "ktor-client-serialization", version.ref = "ktor" }
+ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+ktor-client-plugins = { group = "io.ktor", name = "ktor-client-json", version.ref = "ktor" } # Some SDKs might look for json plugin too
 apollo-graphql-runtime = { group = "com.apollographql.apollo", name = "apollo-runtime", version.ref = "apollo" }
 apollo-graphql-normalized-cache = { group = "com.apollographql.apollo", name = "apollo-normalized-cache", version.ref = "apollo" }
 
@@ -253,7 +260,8 @@ horologist-composables = { group = "com.google.android.horologist", name = "horo
 horologist-compose-material = { group = "com.google.android.horologist", name = "horologist-compose-material", version.ref = "horologist" }
 
 # -- XR --
-androidx-glimmer = { group = "androidx.xr.glimmer", name = "glimmer", version.ref = "glimmer" }
+androidx-glimmer-core = { group = "androidx.xr.glimmer", name = "glimmer", version.ref = "glimmer" }
+androidx-glimmer-google-fonts = { group = "androidx.xr.glimmer", name = "glimmer-google-fonts", version.ref = "glimmer" }
 androidx-projected = { group = "androidx.xr.projected", name = "projected", version.ref = "projectedXR" }
 
 # -- Firebase & ML --

@@ -7,6 +7,7 @@ import com.zoewave.probase.features.ai.capture.data.ImageLoader
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptOrchestrator
 import com.zoewave.probase.core.util.CurrencyUtils
+import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.data.TransactionRepository
 import com.zoewave.probase.seaweed.model.SpendingType
 import com.zoewave.probase.seaweed.model.Transaction
@@ -28,7 +29,8 @@ class SmartReceiptViewModel @Inject constructor(
     private val aiSettings: AiConfigurationSettings,
     private val imageLoader: ImageLoader,
     private val networkStatsProvider: NetworkStatsProvider,
-    private val transactionRepo: TransactionRepository
+    private val transactionRepo: TransactionRepository,
+    private val financialRepo: FinancialRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SmartReceiptUiState>(SmartReceiptUiState.Idle())
@@ -60,13 +62,21 @@ class SmartReceiptViewModel @Inject constructor(
                     val modelName = aiSettings.aiModelFlow.firstOrNull()
                     val isUsingCloud = !apiKey.isNullOrBlank()
                     
+                    val profile = financialRepo.getFinancialProfile().firstOrNull()
+                    val financialContext = profile?.let {
+                        "User current flexible money remaining: ${CurrencyUtils.formatCents(it.flexibleMoneyRemainingCents)}. " +
+                        "Month progress: ${(it.monthProgress * 100).toInt()}%."
+                    } ?: ""
+                    
+                    val combinedContext = listOfNotNull(userContext, financialContext).joinToString(". ")
+
                     _uiState.value = SmartReceiptUiState.Loading(
                         logs = listOf("Image loaded", "Engine: ${if (isUsingCloud) "Cloud ($modelName)" else "Local AI"}"),
                         isUsingCloud = isUsingCloud,
                         networkSpeed = netType
                     )
 
-                    val result = orchestrator.processReceipt(bitmap, apiKey, modelName, userContext)
+                    val result = orchestrator.processReceipt(bitmap, apiKey, modelName, combinedContext)
                     
                     _uiState.value = SmartReceiptUiState.Success(
                         draft = SmartReceiptDraft(
@@ -74,7 +84,8 @@ class SmartReceiptViewModel @Inject constructor(
                             total = result.total,
                             date = result.date,
                             category = result.category,
-                            photoUri = uriString
+                            photoUri = uriString,
+                            financialImpact = result.financialImpact
                         ),
                         engineUsed = result.engineUsed,
                         diagnostics = result.logs,

@@ -17,7 +17,8 @@ private data class GeminiReceiptDraft(
     val date: String? = null,
     val category: String? = null,
     val importance: String? = null,
-    val whatIsThis: String? = null
+    val whatIsThis: String? = null,
+    val financialImpact: String? = null
 )
 
 class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
@@ -62,6 +63,7 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
                 - category: Suggest a broad category (e.g. Food, Travel, Office, Shopping).
                 - importance: Decide if this purchase is a NEED (essential) or a WANT (discretionary).
                 - whatIsThis: A detailed description of what this is a picture of.
+                - financialImpact: Describe how this specific purchase affects the user's finances based on the provided context if available. Be concise.
                 
                 Respond ONLY with valid JSON matching this schema:
                 {
@@ -70,7 +72,8 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
                   "date": string or null,
                   "category": string or null,
                   "importance": "NEED" | "WANT" | null,
-                  "whatIsThis": string or null
+                  "whatIsThis": string or null,
+                  "financialImpact": string or null
                 }
             """.trimIndent())
         }
@@ -92,7 +95,8 @@ class CloudReceiptEngine @Inject constructor() : ReceiptEngine {
                 logs = logs,
                 engineUsed = "Cloud AI (Gemini)",
                 rawResponse = jsonText,
-                whatIsThis = draft.whatIsThis
+                whatIsThis = draft.whatIsThis,
+                financialImpact = draft.financialImpact
             )
         } catch (e: Exception) {
             logs.add("Cloud API failed: ${e.localizedMessage}")
