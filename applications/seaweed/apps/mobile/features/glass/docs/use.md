@@ -1,4 +1,3 @@
-```markdown id="seaweed-glass-update"
 # Seaweed Glass — Feature Expansion Summary
 
 ## Overview

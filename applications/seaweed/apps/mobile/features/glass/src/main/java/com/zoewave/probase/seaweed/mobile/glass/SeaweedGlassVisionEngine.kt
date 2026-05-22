@@ -21,6 +21,7 @@ class SeaweedGlassVisionEngine @Inject constructor() {
         bitmap: Bitmap,
         apiKey: String,
         modelName: String,
+        financialContext: String? = null,
         userContext: String? = null
     ): String = withContext(Dispatchers.Default) {
         val model = GenerativeModel(
@@ -36,11 +37,19 @@ class SeaweedGlassVisionEngine @Inject constructor() {
         }
 
         val prompt = """
-            Look at this image. 
-            ${userContext?.let { "Context: $it" } ?: ""}
-            Extracted text: $visionText
+            You are a helpful financial assistant on a pair of smart glasses.
+            Look at this image. The user is asking if they can afford this or what the impact is.
             
-            Describe what this is and how it might impact the user's finances.
+            Current Financial Context:
+            ${financialContext ?: "No context available."}
+            
+            ${userContext?.let { "User Input: $it" } ?: ""}
+            Extracted text from image: $visionText
+            
+            Task:
+            1. Identify the product/item and its price if possible.
+            2. Tell the user if they can afford it based on their "Flexible Money Remaining".
+            3. Provide a concise, spoken-style advice (max 2 sentences).
         """.trimIndent()
 
         val inputContent = content {
