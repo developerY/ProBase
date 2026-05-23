@@ -53,6 +53,7 @@ dependencies {
     implementation(project(":applications:seaweed:apps:mobile:features:bills"))
     implementation(project(":applications:seaweed:apps:mobile:features:budget"))
     implementation(project(":applications:seaweed:apps:mobile:features:glass"))
+    implementation(project(":applications:seaweed:apps:mobile:features:smartcamera"))
     implementation(project(":features:camera"))
 
     implementation(libs.androidx.glimmer.core)
@@ -72,6 +73,9 @@ dependencies {
     implementation(libs.androidx.window.core)
     implementation(libs.androidx.compose.material3.window.size)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    
+    // AI / Gemini Dependencies (Letting transitive dependencies handle Ktor)
+    implementation(libs.google.generative.ai)
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

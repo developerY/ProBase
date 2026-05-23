@@ -7,6 +7,7 @@ import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.PieChart
@@ -126,6 +127,12 @@ sealed class SeaweedDestination(
     data object CashFlow : SeaweedDestination(
         title = "Cash Flow Awareness",
         icon = Icons.Default.Payments
+    )
+
+    @Serializable
+    data object SmartCamera : SeaweedDestination(
+        title = "Smart AI Camera",
+        icon = Icons.Default.AutoAwesome
     )
 }
 

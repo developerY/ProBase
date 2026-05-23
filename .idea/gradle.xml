@@ -140,6 +140,7 @@
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/glass" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/home" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/settings" />
+            <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/smartcamera" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/mobile/features/transaction" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/wear" />
             <option value="$PROJECT_DIR$/applications/seaweed/apps/wear/features" />

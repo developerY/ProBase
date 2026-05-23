@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Shield
@@ -205,6 +206,9 @@ private fun HomeExpandedScreen(
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 65 })) {
                 CashFlowAwarenessCard(onClick = { navTo(SeaweedDestination.CashFlow) })
             }
+            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 68 })) {
+                SmartCameraPromotionCard(onClick = { navTo(SeaweedDestination.SmartCamera) })
+            }
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 70 })) {
                 EnvelopePromotionCard(onClick = { navTo(SeaweedDestination.Envelopes) })
             }
@@ -328,6 +332,14 @@ private fun HomeCompactScreen(
         item {
             AnimatedVisibility(
                 visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 68 })
+            ) {
+                SmartCameraPromotionCard(onClick = { navTo(SeaweedDestination.SmartCamera) })
+            }
+        }
+        item {
+            AnimatedVisibility(
+                visible = isVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { 70 })
             ) {
                 EnvelopePromotionCard(onClick = { navTo(SeaweedDestination.Envelopes) })
@@ -412,6 +424,43 @@ private fun HomeCompactScreen(
                     onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun SmartCameraPromotionCard(onClick: () -> Unit) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Can I Afford This?",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Use AI Camera to check item impact",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+                )
+            }
+            Icon(
+                Icons.Default.AutoAwesome,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.tertiary
+            )
         }
     }
 }

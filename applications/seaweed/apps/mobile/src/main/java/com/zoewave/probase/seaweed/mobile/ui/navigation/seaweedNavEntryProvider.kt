@@ -12,6 +12,7 @@ import com.zoewave.probase.seaweed.features.spendingcontrol.ui.EnvelopeManagemen
 import com.zoewave.probase.seaweed.mobile.ui.legal.PrivacyPolicyScreen
 import com.zoewave.probase.seaweed.mobile.ui.legal.DataDeletionScreen
 import com.zoewave.probase.seaweed.mobile.budget.ui.BudgetUiRoute
+import com.zoewave.probase.seaweed.mobile.smartcamera.ui.SmartCameraUiRoute
 import com.zoewave.probase.seaweed.mobile.home.ui.CategoryGridRoute
 import com.zoewave.probase.seaweed.mobile.home.ui.HomeUiRoute
 import com.zoewave.probase.seaweed.mobile.settings.ui.SettingsUiRoute
@@ -154,6 +155,12 @@ fun seaweedNavEntryProvider(
             }
             SeaweedDestination.CashFlow -> {
                 CashFlowUiRoute(
+                    onBack = onBack,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            SeaweedDestination.SmartCamera -> {
+                SmartCameraUiRoute(
                     onBack = onBack,
                     modifier = Modifier.fillMaxSize()
                 )

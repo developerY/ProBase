@@ -85,3 +85,7 @@ The application is strictly decoupled into clean, isolated feature modules:
 ## License
 
 This application is part of the ProBase repository and is protected by a **Source Available License**. Please refer to the root [LICENSE.md](file:///Users/developer/AndroidStudioProjects/ProBase/LICENSE.md) for details.
+
+People:
+Siamak Ashrafi: biologica@gmail.com
+Solomon Wu: apiswswsw@gmail.com

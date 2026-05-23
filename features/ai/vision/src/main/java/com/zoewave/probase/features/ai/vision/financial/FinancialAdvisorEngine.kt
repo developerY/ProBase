@@ -1,4 +1,4 @@
-package com.zoewave.probase.seaweed.mobile.glass
+package com.zoewave.probase.features.ai.vision.financial
 
 import android.graphics.Bitmap
 import com.google.ai.client.generativeai.GenerativeModel
@@ -13,16 +13,17 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SeaweedGlassVisionEngine @Inject constructor() {
+class FinancialAdvisorEngine @Inject constructor() {
 
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
-    suspend fun analyzeImage(
+    suspend fun analyzeFinancialImpact(
         bitmap: Bitmap,
         apiKey: String,
         modelName: String,
         financialContext: String? = null,
-        userContext: String? = null
+        userContext: String? = null,
+        deviceBranding: String = "phone"
     ): String = withContext(Dispatchers.Default) {
         val model = GenerativeModel(
             modelName = modelName,
@@ -37,7 +38,7 @@ class SeaweedGlassVisionEngine @Inject constructor() {
         }
 
         val prompt = """
-            You are a helpful financial assistant on a pair of smart glasses.
+            You are a helpful financial assistant on a $deviceBranding.
             Look at this image. The user is asking if they can afford this or what the impact is.
             
             Current Financial Context:

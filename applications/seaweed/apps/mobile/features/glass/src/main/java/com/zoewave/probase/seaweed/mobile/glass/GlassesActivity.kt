@@ -39,6 +39,7 @@ import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
+import com.zoewave.probase.features.ai.vision.financial.FinancialAdvisorEngine
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -56,7 +57,7 @@ class GlassesActivity : ComponentActivity() {
     lateinit var firebaseLiveSessionManager: FirebaseLiveSessionManager
 
     @Inject
-    lateinit var visionEngine: SeaweedGlassVisionEngine
+    lateinit var visionEngine: FinancialAdvisorEngine
 
     @Inject
     lateinit var aiSettings: AiConfigurationSettings
@@ -103,52 +104,40 @@ class GlassesActivity : ComponentActivity() {
                     var analysisResult by remember { mutableStateOf<String?>(null) }
 
                     LaunchedEffect(lifecycleOwner) {
+                        val providers = listOf(
+                            "GLASSES" to this@GlassesActivity,
+                            "HOST" to ProjectedContext.createHostDeviceContext(this@GlassesActivity),
+                            "APP" to applicationContext
+                        )
+
                         var bound = false
-                        var attempts = 0
-                        while (!bound && attempts < 3) {
-                            attempts++
+                        for ((name, ctx) in providers) {
+                            if (bound) break
                             try {
-                                // 1. Try glasses camera
-                                val cameraProvider = ProcessCameraProvider.awaitInstance(this@GlassesActivity)
-                                val glassesSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-                                cameraProvider.unbindAll()
-                                cameraProvider.bindToLifecycle(
-                                    lifecycleOwner,
-                                    glassesSelector,
-                                    imageCapture
-                                )
-                                Log.d("GlassesActivity", "Bound to glasses camera on attempt $attempts")
-                                bound = true
-                            } catch (e: Exception) {
-                                Log.w("GlassesActivity", "Attempt $attempts: Glasses camera not ready. ${e.message}")
-                                try {
-                                    // 2. Try phone camera fallback
-                                    val hostContext = ProjectedContext.createHostDeviceContext(this@GlassesActivity)
-                                    val hostCameraProvider = ProcessCameraProvider.awaitInstance(hostContext)
-                                    val hostSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-                                    hostCameraProvider.unbindAll()
-                                    hostCameraProvider.bindToLifecycle(
-                                        lifecycleOwner,
-                                        hostSelector,
-                                        imageCapture
-                                    )
-                                    Log.d("GlassesActivity", "Bound to phone camera on attempt $attempts")
+                                val provider = ProcessCameraProvider.awaitInstance(ctx)
+                                val selector = CameraSelector.DEFAULT_BACK_CAMERA
+                                
+                                // Check if this provider actually sees ANY camera before unbinding others
+                                val hasBack = try { provider.hasCamera(selector) } catch (_: Exception) { false }
+                                val hasAny = try { provider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) } catch (_: Exception) { false }
+                                
+                                if (hasBack || hasAny) {
+                                    val finalSelector = if (hasBack) selector else CameraSelector.DEFAULT_FRONT_CAMERA
+                                    provider.unbindAll()
+                                    provider.bindToLifecycle(lifecycleOwner, finalSelector, imageCapture)
+                                    Log.d("GlassesActivity", "SUCCESS: Bound to $name camera (${if (hasBack) "BACK" else "FRONT"})")
                                     bound = true
-                                } catch (e2: Exception) {
-                                    Log.e("GlassesActivity", "Attempt $attempts: Phone camera fallback failed. ${e2.message}")
-                                    if (attempts < 3) {
-                                        Log.d("GlassesActivity", "Waiting for camera system to refresh...")
-                                        delay(1500) // Wait 1.5s for system to refresh
-                                    }
+                                } else {
+                                    Log.w("GlassesActivity", "$name context sees 0 cameras.")
                                 }
+                            } catch (e: Exception) {
+                                Log.w("GlassesActivity", "Failed to probe $name context: ${e.message}")
                             }
                         }
 
                         if (!bound) {
-                            Log.e("GlassesActivity", "Failed to bind camera after all attempts.")
-                            audioInterface.speak("Camera initialization failed. Please try reopening the activity.")
+                            Log.e("GlassesActivity", "CRITICAL: No cameras found in any context.")
+                            audioInterface.speak("Camera hardware not found. Visual features disabled.")
                         }
                     }
 
@@ -161,6 +150,7 @@ class GlassesActivity : ComponentActivity() {
                             },
                             onCaptureImage = {
                                 val financialContext = "Flexible Money Remaining: ${CurrencyUtils.formatCents(currentProfile.flexibleMoneyRemainingCents)}. Month Progress: ${(currentProfile.monthProgress * 100).toInt()}%."
+                                audioInterface.speak("Analyzing...", flush = true)
                                 captureAndAnalyze(imageCapture, financialContext) { result ->
                                     analysisResult = result
                                     audioInterface.speak(result)
@@ -199,7 +189,13 @@ class GlassesActivity : ComponentActivity() {
                             image.close()
                             
                             lifecycleScope.launch {
-                                val result = visionEngine.analyzeImage(bitmap, apiKey, modelName, financialContext)
+                                val result = visionEngine.analyzeFinancialImpact(
+                                    bitmap = bitmap,
+                                    apiKey = apiKey,
+                                    modelName = modelName,
+                                    financialContext = financialContext,
+                                    deviceBranding = "glasses"
+                                )
                                 onResult(result)
                             }
                         }
