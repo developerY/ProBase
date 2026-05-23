@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_seaweed_features_affordability_title">Seaweed Affordability</string>
+    <string name="applications_seaweed_features_affordability_check_button">Check Affordability with Gemini</string>
+</resources>
