@@ -5,13 +5,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -129,11 +128,17 @@ sealed class SeaweedDestination(
         icon = Icons.Default.Payments
     )
 
-    @Serializable
+    /* @Serializable
     data object SmartCamera : SeaweedDestination(
         title = "Smart AI Camera",
         icon = Icons.Default.AutoAwesome
     )
+
+    @Serializable
+    data class Affordability(val photoUri: String? = null) : SeaweedDestination(
+        title = "Affordability Check",
+        icon = Icons.Default.AutoAwesome
+    )*/
 }
 
 val topLevelDestinations = listOf(

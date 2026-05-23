@@ -24,14 +24,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -206,9 +205,12 @@ private fun HomeExpandedScreen(
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 65 })) {
                 CashFlowAwarenessCard(onClick = { navTo(SeaweedDestination.CashFlow) })
             }
+            /*AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 67 })) {
+                AffordabilityCheckCard(onClick = { navTo(SeaweedDestination.Affordability()) })
+            }
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 68 })) {
                 SmartCameraPromotionCard(onClick = { navTo(SeaweedDestination.SmartCamera) })
-            }
+            }*/
             AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically(initialOffsetY = { 70 })) {
                 EnvelopePromotionCard(onClick = { navTo(SeaweedDestination.Envelopes) })
             }
@@ -329,6 +331,14 @@ private fun HomeCompactScreen(
                 CashFlowAwarenessCard(onClick = { navTo(SeaweedDestination.CashFlow) })
             }
         }
+        /*item {
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { 67 })
+            ) {
+                AffordabilityCheckCard(onClick = { navTo(SeaweedDestination.Affordability()) })
+            }
+        }
         item {
             AnimatedVisibility(
                 visible = isVisible,
@@ -336,7 +346,7 @@ private fun HomeCompactScreen(
             ) {
                 SmartCameraPromotionCard(onClick = { navTo(SeaweedDestination.SmartCamera) })
             }
-        }
+        }*/
         item {
             AnimatedVisibility(
                 visible = isVisible,
@@ -424,6 +434,43 @@ private fun HomeCompactScreen(
                     onClick = { navTo(SeaweedDestination.Transactions(category = null, transactionId = transaction.id)) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun AffordabilityCheckCard(onClick: () -> Unit) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Seaweed Smart Capture",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Extract price & check affordability",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                )
+            }
+            Icon(
+                Icons.Default.AutoAwesome,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

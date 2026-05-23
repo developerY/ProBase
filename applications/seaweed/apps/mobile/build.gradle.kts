@@ -42,6 +42,7 @@ dependencies {
     implementation(project(":applications:seaweed:features:receiptcapture"))
     implementation(project(":applications:seaweed:features:spendingcontrol"))
     implementation(project(":applications:seaweed:features:cashflow"))
+    implementation(project(":applications:seaweed:features:affordability"))
     implementation(project(":features:payment:stripe"))
     implementation(project(":features:ai:capture"))
     implementation(project(":features:ai:configuration"))
