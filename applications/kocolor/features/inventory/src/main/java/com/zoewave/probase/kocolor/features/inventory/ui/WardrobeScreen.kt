@@ -172,7 +172,8 @@ fun WardrobeCard(
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val bgColor = uiState.colorHex.toComposeColor()
+    val itemColor = uiState.dominantHex ?: uiState.colorHex ?: "#FFFFFF"
+    val bgColor = itemColor.toComposeColor()
     val isDark = isColorDark(bgColor)
     val contentColor = if (isDark) Color.White else Color.Black
 
@@ -189,6 +190,17 @@ fun WardrobeCard(
                     modifier = Modifier.fillMaxSize(),
                     contentScale = androidx.compose.ui.layout.ContentScale.Crop
                 )
+                
+                // Representative Color Badge
+                Surface(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .size(24.dp)
+                        .align(Alignment.TopEnd),
+                    color = bgColor,
+                    shape = CircleShape,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                ) {}
             } else {
                 Icon(
                     Icons.Default.Checkroom,

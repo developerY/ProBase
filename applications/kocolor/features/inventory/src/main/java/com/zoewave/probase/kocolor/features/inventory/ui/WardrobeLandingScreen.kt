@@ -369,8 +369,26 @@ private fun RecentClothingCard(uiState: ClothingItem, onEvent: (Unit) -> Unit, n
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
+
+                // Representative Color Badge
+                val itemColor = item.dominantHex?.let { parseColor(it) } 
+                    ?: item.colorHex?.let { parseColor(it) } 
+                    ?: Color.White
+                
+                Surface(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .size(24.dp)
+                        .align(Alignment.TopEnd),
+                    color = itemColor,
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                ) {}
             } else {
-                Box(modifier = Modifier.fillMaxSize().background(item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant))
+                val itemColor = item.dominantHex?.let { parseColor(it) } 
+                    ?: item.colorHex?.let { parseColor(it) } 
+                    ?: MaterialTheme.colorScheme.surfaceVariant
+                Box(modifier = Modifier.fillMaxSize().background(itemColor))
             }
             
             // Badge Overlay

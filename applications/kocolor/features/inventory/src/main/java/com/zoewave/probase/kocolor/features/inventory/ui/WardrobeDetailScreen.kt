@@ -1,8 +1,10 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -10,11 +12,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -28,6 +30,8 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -65,7 +69,24 @@ fun WardrobeDetailScreen(
         state.items.find { it.id == itemId }
     } ?: return
 
-    val itemColor = item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant
+    var showColorPicker by remember { mutableStateOf(false) }
+
+    if (showColorPicker) {
+        val initialColorHex = item.dominantHex ?: item.colorHex ?: "#FFFFFF"
+        ColorPickerDialog(
+            initialColor = try { parseColor(initialColorHex) } catch (ignore: Exception) { Color.Gray },
+            onColorSelected = { newColor ->
+                onEvent(WardrobeEvent.UpdateItem(item.copy(dominantHex = newColor.toHex())))
+                showColorPicker = false
+            },
+            onDismissRequest = { showColorPicker = false },
+            title = "Refine Representative Color"
+        )
+    }
+
+    val itemColor = item.dominantHex?.let { parseColor(it) } 
+        ?: item.colorHex?.let { parseColor(it) } 
+        ?: MaterialTheme.colorScheme.surfaceVariant
 
     Scaffold(
         topBar = {
@@ -94,7 +115,12 @@ fun WardrobeDetailScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             // Hero
-            Box(modifier = Modifier.fillMaxWidth().height(420.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(420.dp)
+                    .clickable { showColorPicker = true }
+            ) {
                 Box(modifier = Modifier.fillMaxSize().background(itemColor))
                 if (item.imageUrl != null) {
                     AsyncImage(
@@ -105,6 +131,23 @@ fun WardrobeDetailScreen(
                     )
                 }
                 Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)))))
+                
+                // Color Edit Badge
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(24.dp),
+                    color = Color.Black.copy(alpha = 0.3f),
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Palette,
+                        contentDescription = "Edit Color",
+                        modifier = Modifier.padding(8.dp).size(20.dp),
+                        tint = Color.White
+                    )
+                }
+
                 Column(modifier = Modifier.align(Alignment.BottomStart).padding(24.dp)) {
                     Surface(color = Color.White.copy(alpha = 0.9f), shape = RoundedCornerShape(12.dp)) {
                         Text(text = item.category.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
@@ -133,6 +176,14 @@ fun WardrobeDetailScreen(
 
             // Detail Content
             Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(32.dp)) {
+                
+                // Color Blueprint
+                Column {
+                    SectionHeader(uiState = "Color Blueprint", onEvent = {}, navTo = {})
+                    Spacer(Modifier.height(16.dp))
+                    ColorAnalysisSection(uiState = item, onEvent = {}, navTo = {})
+                }
+
                 Column {
                     SectionHeader(uiState = "Composition", onEvent = {}, navTo = {})
                     DetailRow(uiState = "Material" to (item.material ?: "Unknown"), onEvent = {}, navTo = {})
@@ -193,6 +244,56 @@ private fun DetailRow(uiState: Pair<String, String>, onEvent: (Unit) -> Unit, na
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun ColorAnalysisSection(uiState: ClothingItem, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+    val item = uiState
+    val colors = remember(item) {
+        mutableListOf<String>().apply {
+            item.dominantHex?.let { add(it) }
+            item.vibrantHex?.let { add(it) }
+            item.mutedHex?.let { add(it) }
+            addAll(item.paletteHexes)
+        }.distinct()
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            colors.take(5).forEach { hex ->
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(parseColor(hex))
+                )
+            }
+        }
+
+        if (item.seasonalPalette != null || item.colorTemperature != null) {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text("Temperature", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(item.colorTemperature ?: "Neutral", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                    }
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text("Seasonal Type", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(item.seasonalPalette ?: "Universal", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
     }
 }
 
