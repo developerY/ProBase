@@ -48,10 +48,10 @@
       </SelectionState>
       <SelectionState runConfigName="applications.seaweed.apps.mobile">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-05-15T18:34:33.506715Z">
+        <DropdownSelection timestamp="2026-05-23T01:15:55.773273Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/developer/.android/avd/Pixel_10_Pro.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=58301JEBF12339" />
             </handle>
           </Target>
         </DropdownSelection>
