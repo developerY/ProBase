@@ -17,11 +17,6 @@ dependencies {
     implementation(project(":features:ai:firebase"))
     implementation(project(":features:ai:vision"))
     implementation(libs.google.generative.ai)
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.okhttp)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.client.serialization)
-    implementation(libs.ktor.client.logging)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.ai)
     

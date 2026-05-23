@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":applications:seaweed:model"))
     implementation(project(":applications:seaweed:data"))
+    implementation(project(":applications:seaweed:features:spendingcontrol"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:ai:vision"))
     
@@ -29,6 +30,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.kotlinx.serialization.json)
     
     // AI SDK (Gemini)
     implementation(libs.google.generative.ai)

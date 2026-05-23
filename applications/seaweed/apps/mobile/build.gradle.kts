@@ -74,6 +74,9 @@ dependencies {
     implementation(libs.androidx.compose.material3.window.size)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     
+    // AI / Gemini Dependencies (Letting transitive dependencies handle Ktor)
+    implementation(libs.google.generative.ai)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
