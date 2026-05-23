@@ -66,5 +66,6 @@ class FashionSessionRepository @Inject constructor() {
         _hairUri.value = null
         _shoesUri.value = null
         _clothesUri.value = null
+        _capturedItemUri.value = null
     }
 }

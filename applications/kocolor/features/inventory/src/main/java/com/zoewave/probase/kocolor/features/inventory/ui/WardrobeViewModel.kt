@@ -47,39 +47,50 @@ class WardrobeViewModel @Inject constructor(
 
     private val _draftItem = MutableStateFlow(ClothingItem(name = "", category = ClothingCategory.TOPS))
 
+    private var lastProcessedUri: String? = null
+
     init {
-        viewModelScope.launch {
-            wardrobeRepository.getAllClothing().first().let {
-                if (it.isEmpty()) {
-                    initializeDefaultClothing()
-                }
-            }
-        }
-
-        // Listen for new captures
-        sessionRepository.capturedItemUri
-            .filterNotNull()
-            .onEach { uri ->
-                _draftItem.update { it.copy(imageUrl = uri, dominantHex = null) } // Clear old analysis for new photo
-                sessionRepository.setCapturedItemUri(null) // Consume
-            }
-            .launchIn(viewModelScope)
-
-        // Initialize draft from itemId if editing
+        // 1. Initial load from Database if itemId is present
         val itemId: Long? = savedStateHandle["itemId"]
         itemId?.let { id ->
             if (id != 0L) {
                 viewModelScope.launch {
                     wardrobeRepository.getClothingById(id).first()?.let { model ->
                         _draftItem.update { current ->
-                            // Preserve newly captured image if it exists
-                            if (current.id == id && current.imageUrl != model.imageUrl && current.imageUrl != null) {
+                            // If we already have a NEW image in current (captured), keep it
+                            if (current.imageUrl != null && current.imageUrl != model.imageUrl) {
                                 model.copy(imageUrl = current.imageUrl)
                             } else {
                                 model
                             }
                         }
                     }
+                }
+            }
+        }
+
+        // 2. Listen for captures (can happen after return from camera)
+        sessionRepository.capturedItemUri
+            .filterNotNull()
+            .onEach { uri ->
+                if (uri != lastProcessedUri) {
+                    android.util.Log.d("WardrobeVM", "Processing NEW captured URI: $uri")
+                    lastProcessedUri = uri
+                    val properUri = if (uri.startsWith("content://") || uri.startsWith("file://")) {
+                        uri
+                    } else {
+                        "file://$uri"
+                    }
+                    _draftItem.update { it.copy(imageUrl = properUri, dominantHex = null) }
+                }
+            }
+            .launchIn(viewModelScope)
+
+        // 3. Defaults check
+        viewModelScope.launch {
+            wardrobeRepository.getAllClothing().first().let {
+                if (it.isEmpty()) {
+                    initializeDefaultClothing()
                 }
             }
         }
@@ -139,8 +150,9 @@ class WardrobeViewModel @Inject constructor(
                     viewModelScope.launch {
                         wardrobeRepository.getClothingById(event.itemId).first()?.let { model ->
                             _draftItem.update { current ->
-                                if (current.id == event.itemId && current.imageUrl != model.imageUrl && current.imageUrl != null) {
-                                    model.copy(imageUrl = current.imageUrl)
+                                // Prioritize newly captured image in current draft
+                                if (current.imageUrl != null && current.imageUrl != model.imageUrl) {
+                                    model.copy(imageUrl = current.imageUrl, dominantHex = null)
                                 } else {
                                     model
                                 }
@@ -153,14 +165,20 @@ class WardrobeViewModel @Inject constructor(
     }
 
     private fun addItem(item: ClothingItem) {
+        android.util.Log.d("WardrobeVM", "Triggering add for item: ${item.name} (image: ${item.imageUrl})")
         viewModelScope.launch {
-            wardrobeRepository.saveClothingItem(item)
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.NonCancellable) {
+                wardrobeRepository.saveClothingItem(item)
+            }
         }
     }
 
     private fun updateItem(item: ClothingItem) {
+        android.util.Log.d("WardrobeVM", "Triggering save for item: ${item.name} (image: ${item.imageUrl})")
         viewModelScope.launch {
-            wardrobeRepository.saveClothingItem(item)
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.NonCancellable) {
+                wardrobeRepository.saveClothingItem(item)
+            }
         }
     }
 
