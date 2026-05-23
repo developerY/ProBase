@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -119,7 +120,6 @@ fun WardrobeDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(420.dp)
-                    .clickable { showColorPicker = true }
             ) {
                 Box(modifier = Modifier.fillMaxSize().background(itemColor))
                 if (item.imageUrl != null) {
@@ -132,22 +132,6 @@ fun WardrobeDetailScreen(
                 }
                 Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)))))
                 
-                // Color Edit Badge
-                Surface(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(24.dp),
-                    color = Color.Black.copy(alpha = 0.3f),
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Palette,
-                        contentDescription = "Edit Color",
-                        modifier = Modifier.padding(8.dp).size(20.dp),
-                        tint = Color.White
-                    )
-                }
-
                 Column(modifier = Modifier.align(Alignment.BottomStart).padding(24.dp)) {
                     Surface(color = Color.White.copy(alpha = 0.9f), shape = RoundedCornerShape(12.dp)) {
                         Text(text = item.category.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
@@ -181,7 +165,12 @@ fun WardrobeDetailScreen(
                 Column {
                     SectionHeader(uiState = "Color Blueprint", onEvent = {}, navTo = {})
                     Spacer(Modifier.height(16.dp))
-                    ColorAnalysisSection(uiState = item, onEvent = {}, navTo = {})
+                    ColorAnalysisSection(
+                        uiState = item, 
+                        onEvent = {}, 
+                        navTo = {},
+                        onClick = { showColorPicker = true }
+                    )
                 }
 
                 Column {
@@ -248,7 +237,12 @@ private fun DetailRow(uiState: Pair<String, String>, onEvent: (Unit) -> Unit, na
 }
 
 @Composable
-private fun ColorAnalysisSection(uiState: ClothingItem, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+private fun ColorAnalysisSection(
+    uiState: ClothingItem, 
+    onEvent: (Unit) -> Unit, 
+    navTo: (KoColorRoute) -> Unit,
+    onClick: () -> Unit
+) {
     val item = uiState
     val colors = remember(item) {
         mutableListOf<String>().apply {
@@ -259,7 +253,10 @@ private fun ColorAnalysisSection(uiState: ClothingItem, onEvent: (Unit) -> Unit,
         }.distinct()
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(
+        modifier = Modifier.clickable { onClick() },
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -270,7 +267,24 @@ private fun ColorAnalysisSection(uiState: ClothingItem, onEvent: (Unit) -> Unit,
                         .size(48.dp)
                         .clip(CircleShape)
                         .background(parseColor(hex))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
                 )
+            }
+            
+            // Edit indicator
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                shape = CircleShape,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Colorize,
+                        contentDescription = "Edit Palette",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
 
