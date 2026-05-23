@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -51,7 +52,14 @@ class WardrobeRepository @Inject constructor(
      */
     suspend fun saveClothingItem(item: ClothingItem) = withContext(Dispatchers.IO) {
         try {
-            val analyzedItem = if (item.imageUrl != null && item.dominantHex == null) {
+            val existingItem = clothingDao.getClothingById(item.id).firstOrNull()?.toModel()
+            
+            val needsAnalysis = item.imageUrl != null && (
+                item.dominantHex == null || 
+                item.imageUrl != existingItem?.imageUrl
+            )
+
+            val analyzedItem = if (needsAnalysis) {
                 analyzeGarment(item)
             } else item
 

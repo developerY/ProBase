@@ -9,15 +9,7 @@ import com.zoewave.probase.kocolor.db.data.ClothingDefaults
 import com.zoewave.probase.kocolor.model.ClothingCategory
 import com.zoewave.probase.kocolor.model.ClothingItem
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -65,11 +57,11 @@ class WardrobeViewModel @Inject constructor(
         }
 
         // Listen for new captures
-        sessionRepository.clothesUri
+        sessionRepository.capturedItemUri
             .filterNotNull()
             .onEach { uri ->
-                _draftItem.value = _draftItem.value.copy(imageUrl = uri)
-                sessionRepository.setClothesUri(null) // Consume
+                _draftItem.update { it.copy(imageUrl = uri, dominantHex = null) } // Clear old analysis for new photo
+                sessionRepository.setCapturedItemUri(null) // Consume
             }
             .launchIn(viewModelScope)
 
@@ -79,7 +71,14 @@ class WardrobeViewModel @Inject constructor(
             if (id != 0L) {
                 viewModelScope.launch {
                     wardrobeRepository.getClothingById(id).first()?.let { model ->
-                        _draftItem.value = model
+                        _draftItem.update { current ->
+                            // Preserve newly captured image if it exists
+                            if (current.id == id && current.imageUrl != model.imageUrl && current.imageUrl != null) {
+                                model.copy(imageUrl = current.imageUrl)
+                            } else {
+                                model
+                            }
+                        }
                     }
                 }
             }
@@ -136,9 +135,17 @@ class WardrobeViewModel @Inject constructor(
             is WardrobeEvent.DeleteItem -> deleteItem(event.id)
             is WardrobeEvent.UpdateDraft -> _draftItem.value = event.item
             is WardrobeEvent.InitializeEdit -> {
-                viewModelScope.launch {
-                    wardrobeRepository.getClothingById(event.itemId).first()?.let { model ->
-                        _draftItem.value = model
+                if (_draftItem.value.id != event.itemId) {
+                    viewModelScope.launch {
+                        wardrobeRepository.getClothingById(event.itemId).first()?.let { model ->
+                            _draftItem.update { current ->
+                                if (current.id == event.itemId && current.imageUrl != model.imageUrl && current.imageUrl != null) {
+                                    model.copy(imageUrl = current.imageUrl)
+                                } else {
+                                    model
+                                }
+                            }
+                        }
                     }
                 }
             }
