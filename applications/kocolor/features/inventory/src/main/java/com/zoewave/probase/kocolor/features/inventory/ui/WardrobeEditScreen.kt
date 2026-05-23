@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,8 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,6 +21,8 @@ import com.zoewave.probase.kocolor.model.ClothingCategory
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 
 @Preview(showBackground = true)
 @Composable
@@ -55,6 +57,20 @@ fun WardrobeEditScreen(
     }
 
     val draft = state.draftItem
+    var showColorPicker by remember { mutableStateOf(false) }
+
+    if (showColorPicker) {
+        val initialColorHex = draft.dominantHex ?: draft.colorHex ?: "#FFFFFF"
+        ColorPickerDialog(
+            initialColor = try { parseColor(initialColorHex) } catch (ignore: Exception) { Color.Gray },
+            onColorSelected = { newColor ->
+                onEvent(WardrobeEvent.UpdateDraft(draft.copy(dominantHex = newColor.toHex(), colorHex = newColor.toHex())))
+                showColorPicker = false
+            },
+            onDismissRequest = { showColorPicker = false },
+            title = "Edit Representative Color"
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -89,12 +105,22 @@ fun WardrobeEditScreen(
         ) {
             // Visual Preview Block
             Surface(
-                modifier = Modifier.fillMaxWidth().height(200.dp),
-                color = draft.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clickable { showColorPicker = true },
+                color = draft.dominantHex?.let { parseColor(it) } 
+                    ?: draft.colorHex?.let { parseColor(it) } 
+                    ?: MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(24.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Image, null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                    Icon(
+                        imageVector = Icons.Default.Colorize, 
+                        null, 
+                        modifier = Modifier.size(48.dp), 
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
                 }
             }
 

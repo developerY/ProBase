@@ -31,8 +31,6 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
-import com.zoewave.probase.features.graphics.colorpicker.util.toHex
-import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -69,21 +67,6 @@ fun WardrobeDetailScreen(
     val item = remember(state.items, itemId) {
         state.items.find { it.id == itemId }
     } ?: return
-
-    var showColorPicker by remember { mutableStateOf(false) }
-
-    if (showColorPicker) {
-        val initialColorHex = item.dominantHex ?: item.colorHex ?: "#FFFFFF"
-        ColorPickerDialog(
-            initialColor = try { parseColor(initialColorHex) } catch (ignore: Exception) { Color.Gray },
-            onColorSelected = { newColor ->
-                onEvent(WardrobeEvent.UpdateItem(item.copy(dominantHex = newColor.toHex())))
-                showColorPicker = false
-            },
-            onDismissRequest = { showColorPicker = false },
-            title = "Refine Representative Color"
-        )
-    }
 
     val itemColor = item.dominantHex?.let { parseColor(it) } 
         ?: item.colorHex?.let { parseColor(it) } 
@@ -165,12 +148,7 @@ fun WardrobeDetailScreen(
                 Column {
                     SectionHeader(uiState = "Color Blueprint", onEvent = {}, navTo = {})
                     Spacer(Modifier.height(16.dp))
-                    ColorAnalysisSection(
-                        uiState = item, 
-                        onEvent = {}, 
-                        navTo = {},
-                        onClick = { showColorPicker = true }
-                    )
+                    ColorAnalysisSection(uiState = item, onEvent = {}, navTo = {})
                 }
 
                 Column {
@@ -240,8 +218,7 @@ private fun DetailRow(uiState: Pair<String, String>, onEvent: (Unit) -> Unit, na
 private fun ColorAnalysisSection(
     uiState: ClothingItem, 
     onEvent: (Unit) -> Unit, 
-    navTo: (KoColorRoute) -> Unit,
-    onClick: () -> Unit
+    navTo: (KoColorRoute) -> Unit
 ) {
     val item = uiState
     val colors = remember(item) {
@@ -250,13 +227,15 @@ private fun ColorAnalysisSection(
             item.vibrantHex?.let { add(it) }
             item.mutedHex?.let { add(it) }
             addAll(item.paletteHexes)
+            
+            // Fallback to manual colorHex if no engine data yet
+            if (isEmpty()) {
+                item.colorHex?.let { add(it) }
+            }
         }.distinct()
     }
 
-    Column(
-        modifier = Modifier.clickable { onClick() },
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -269,22 +248,6 @@ private fun ColorAnalysisSection(
                         .background(parseColor(hex))
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
                 )
-            }
-            
-            // Edit indicator
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                shape = CircleShape,
-                modifier = Modifier.size(48.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.Colorize,
-                        contentDescription = "Edit Palette",
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
             }
         }
 
