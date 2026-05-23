@@ -1,21 +1,22 @@
 package com.zoewave.probase.seaweed.mobile.ui.navigation
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
-import com.zoewave.probase.seaweed.features.receiptcapture.ui.SmartReceiptUiRoute
+import com.zoewave.probase.seaweed.features.affordability.ui.AffordabilityUiRoute
 import com.zoewave.probase.seaweed.features.cashflow.ui.CashFlowUiRoute
+import com.zoewave.probase.seaweed.features.receiptcapture.ui.SmartReceiptUiRoute
 import com.zoewave.probase.seaweed.features.spendingcontrol.ui.EnvelopeManagementUiRoute
-import com.zoewave.probase.seaweed.mobile.ui.legal.PrivacyPolicyScreen
-import com.zoewave.probase.seaweed.mobile.ui.legal.DataDeletionScreen
 import com.zoewave.probase.seaweed.mobile.budget.ui.BudgetUiRoute
-import com.zoewave.probase.seaweed.mobile.smartcamera.ui.SmartCameraUiRoute
 import com.zoewave.probase.seaweed.mobile.home.ui.CategoryGridRoute
 import com.zoewave.probase.seaweed.mobile.home.ui.HomeUiRoute
 import com.zoewave.probase.seaweed.mobile.settings.ui.SettingsUiRoute
+// import com.zoewave.probase.seaweed.mobile.smartcamera.ui.SmartCameraUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionUiEvent
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AddTransactionViewModel
@@ -23,9 +24,9 @@ import com.zoewave.probase.seaweed.mobile.transaction.ui.AiDebugScreen
 import com.zoewave.probase.seaweed.mobile.transaction.ui.AnalyticsUiRoute
 import com.zoewave.probase.seaweed.mobile.transaction.ui.TransactionsUiRoute
 import com.zoewave.probase.seaweed.mobile.ui.components.AdaptiveSeaweedScreen
+import com.zoewave.probase.seaweed.mobile.ui.legal.DataDeletionScreen
+import com.zoewave.probase.seaweed.mobile.ui.legal.PrivacyPolicyScreen
 import com.zoewave.probase.seaweed.model.navigation.SeaweedDestination
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.runtime.Composable
 
 fun seaweedNavEntryProvider(
     key: SeaweedDestination,
@@ -159,12 +160,19 @@ fun seaweedNavEntryProvider(
                     modifier = Modifier.fillMaxSize()
                 )
             }
-            SeaweedDestination.SmartCamera -> {
+            /*SeaweedDestination.SmartCamera -> {
                 SmartCameraUiRoute(
                     onBack = onBack,
                     modifier = Modifier.fillMaxSize()
                 )
             }
+            is SeaweedDestination.Affordability -> {
+                AffordabilityUiRoute(
+                    initialPhotoUri = key.photoUri,
+                    onComplete = { _ -> onBack() },
+                    onDismiss = onBack
+                )
+            }*/
         }
     }
 }
