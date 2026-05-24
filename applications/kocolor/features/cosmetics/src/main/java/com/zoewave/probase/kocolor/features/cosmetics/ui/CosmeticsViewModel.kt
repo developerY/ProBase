@@ -52,7 +52,8 @@ data class CosmeticsUiState(
     val totalCosmetics: Int = 0,
     val expiringCosmeticsCount: Int = 0,
     val cosmeticsByGroup: Map<String, Int> = emptyMap(),
-    val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap()
+    val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap(),
+    val categoryFilter: String? = null
 )
 
 sealed class CosmeticsEvent {
@@ -67,6 +68,7 @@ sealed class CosmeticsEvent {
     data object ClearCapturedImage : CosmeticsEvent()
     data class StartEditing(val item: CosmeticItem) : CosmeticsEvent()
     data class InitializeEdit(val itemId: Long) : CosmeticsEvent()
+    data class InitializeAdd(val categoryFilter: String?) : CosmeticsEvent()
     data class HandleScanResult(val code: String) : CosmeticsEvent()
 }
 
@@ -84,6 +86,7 @@ class CosmeticsViewModel @Inject constructor(
     private val _draftItem = MutableStateFlow(CosmeticItem(name = "", brand = "", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION))
     private val _searchQuery = MutableStateFlow("")
     private val _sortOption = MutableStateFlow(SortOption.NEWEST)
+    private val _categoryFilter = MutableStateFlow<String?>(null)
 
     init {
         viewModelScope.launch {
@@ -116,7 +119,8 @@ class CosmeticsViewModel @Inject constructor(
         _aiResult,
         _draftItem,
         _searchQuery,
-        _sortOption
+        _sortOption,
+        _categoryFilter
     ) { array ->
         val entities = array[0] as List<CosmeticItemEntity>
         val capturedUri = array[1] as String?
@@ -125,6 +129,7 @@ class CosmeticsViewModel @Inject constructor(
         val draft = array[4] as CosmeticItem
         val query = array[5] as String
         val sort = array[6] as SortOption
+        val filter = array[7] as String?
 
         val models = entities.map { it.toModel() }
         val groupStats = entities.groupBy { it.category.groupName }.mapValues { it.value.size }
@@ -172,7 +177,8 @@ class CosmeticsViewModel @Inject constructor(
             totalCosmetics = models.size,
             expiringCosmeticsCount = expiringCount,
             cosmeticsByGroup = groupStats,
-            categoriesMetadata = categoryMetadata
+            categoriesMetadata = categoryMetadata,
+            categoryFilter = filter
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CosmeticsUiState())
 
@@ -193,6 +199,16 @@ class CosmeticsViewModel @Inject constructor(
                         _draftItem.value = entity.toModel()
                     }
                 }
+            }
+            is CosmeticsEvent.InitializeAdd -> {
+                _categoryFilter.value = event.categoryFilter
+                // Set a sensible default category based on the filter
+                val defaultCat = com.zoewave.probase.kocolor.model.CosmeticCategory.entries
+                    .filter { it != com.zoewave.probase.kocolor.model.CosmeticCategory.AI_PENDING }
+                    .firstOrNull { it.groupName.contains(event.categoryFilter ?: "", ignoreCase = true) }
+                    ?: com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION
+                
+                _draftItem.value = CosmeticItem(name = "", brand = "", category = defaultCat)
             }
             is CosmeticsEvent.UpdateSearchQuery -> _searchQuery.value = event.query
             is CosmeticsEvent.UpdateSortOption -> _sortOption.value = event.option

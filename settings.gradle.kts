@@ -155,6 +155,7 @@ include(":applications:kocolor:apps:mobile")
 include(":applications:kocolor:apps:mobile:core")
 include(":applications:kocolor:apps:mobile:features:home")
 include(":applications:kocolor:apps:mobile:features:settings")
+include(":applications:kocolor:apps:mobile:features:glass")
 
 // --- GotMind Product Line ---
 include(":applications:gotmind:model")

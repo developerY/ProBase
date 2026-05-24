@@ -18,6 +18,7 @@ import com.zoewave.probase.kocolor.features.color.ui.ColorViewModel
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticEditScreen
+import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsEvent
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsUiRoute
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsViewModel
 import com.zoewave.probase.kocolor.features.cosmetics.ui.StitchProductBuilder
@@ -31,7 +32,7 @@ import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeViewModel
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
-import com.zoewave.probase.kocolor.features.routines.ui.RoutinesScreen
+import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
@@ -79,12 +80,8 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.Routines -> NavEntry(route) {
-            val viewModel: RoutinesViewModel = hiltViewModel()
-            val state by viewModel.uiState.collectAsStateWithLifecycle()
-            RoutinesScreen(
-                uiState = state,
-                onEvent = viewModel::onEvent,
-                navTo = onNavigateTo
+            RoutinesUiRoute(
+                onNavigateTo = onNavigateTo
             )
         }
         is KoColorRoute.RoutineDetail -> NavEntry(route) {
@@ -224,6 +221,11 @@ fun koColorNavEntryProvider(
         is KoColorRoute.CosmeticAdd -> NavEntry(route) {
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
+            
+            androidx.compose.runtime.LaunchedEffect(route.categoryFilter) {
+                viewModel.onEvent(CosmeticsEvent.InitializeAdd(route.categoryFilter))
+            }
+
             StitchProductBuilder(
                 uiState = state,
                 onEvent = viewModel::onEvent,

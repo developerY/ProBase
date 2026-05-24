@@ -1,8 +1,11 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -10,11 +13,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -65,7 +68,9 @@ fun WardrobeDetailScreen(
         state.items.find { it.id == itemId }
     } ?: return
 
-    val itemColor = item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant
+    val itemColor = item.dominantHex?.let { parseColor(it) } 
+        ?: item.colorHex?.let { parseColor(it) } 
+        ?: MaterialTheme.colorScheme.surfaceVariant
 
     Scaffold(
         topBar = {
@@ -94,23 +99,56 @@ fun WardrobeDetailScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             // Hero
-            Box(modifier = Modifier.fillMaxWidth().height(420.dp)) {
-                Box(modifier = Modifier.fillMaxSize().background(itemColor))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+            ) {
                 if (item.imageUrl != null) {
-                    AsyncImage(
-                        model = item.imageUrl,
-                        contentDescription = item.name,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        AsyncImage(
+                            model = item.imageUrl,
+                            contentDescription = item.name,
+                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            contentScale = ContentScale.Crop
+                        )
+                        Box(modifier = Modifier.fillMaxWidth().height(120.dp).background(itemColor))
+                    }
+                } else {
+                    Box(modifier = Modifier.fillMaxSize().background(itemColor))
                 }
-                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)))))
+
+                // Scrim for readability
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)),
+                                startY = 600f
+                            )
+                        )
+                )
+                
                 Column(modifier = Modifier.align(Alignment.BottomStart).padding(24.dp)) {
+                    Text(
+                        text = (item.brand ?: "KOCOLOR").uppercase(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White.copy(alpha = 0.8f),
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp
+                    )
+                    Text(
+                        text = item.name,
+                        style = MaterialTheme.typography.displaySmall,
+                        color = Color.White,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(12.dp))
                     Surface(color = Color.White.copy(alpha = 0.9f), shape = RoundedCornerShape(12.dp)) {
                         Text(text = item.category.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                     }
-                    Spacer(Modifier.height(12.dp))
-                    Text(text = item.name, style = MaterialTheme.typography.displaySmall, color = Color.White, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
                 }
             }
 
@@ -133,6 +171,7 @@ fun WardrobeDetailScreen(
 
             // Detail Content
             Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(32.dp)) {
+                
                 Column {
                     SectionHeader(uiState = "Composition", onEvent = {}, navTo = {})
                     DetailRow(uiState = "Material" to (item.material ?: "Unknown"), onEvent = {}, navTo = {})

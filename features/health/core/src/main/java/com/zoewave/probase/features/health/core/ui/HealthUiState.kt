@@ -2,6 +2,7 @@ package com.zoewave.probase.features.health.core.ui
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import com.zoewave.probase.core.model.health.SleepSessionData
+import com.zoewave.probase.core.model.ble.GattConnectionState
 import java.util.UUID
 
 sealed interface HealthUiState {
@@ -17,6 +18,8 @@ sealed interface HealthUiState {
         val weeklySteps: Map<String, Long> = emptyMap(),
         val weeklyDistance: Map<String, Double> = emptyMap(), // Meters
         val weeklyCalories: Map<String, Double> = emptyMap(), // Kcal
-        val weeklyHydration: Map<String, Double> = emptyMap() // Liters
+        val weeklyHydration: Map<String, Double> = emptyMap(), // Liters
+        val bleConnectionState: GattConnectionState = GattConnectionState.Disconnected,
+        val trackerMetrics: Map<String, String> = emptyMap()
     ) : HealthUiState
 }

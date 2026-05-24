@@ -5,15 +5,16 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
+import com.zoewave.probase.kocolor.data.engine.WardrobeColorEngine
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
-import com.zoewave.probase.kocolor.data.engine.WardrobeColorEngine
 import com.zoewave.probase.kocolor.model.ClothingItem
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -50,12 +51,23 @@ class WardrobeRepository @Inject constructor(
      * Saves a garment and automatically triggers the analytical color pipeline.
      */
     suspend fun saveClothingItem(item: ClothingItem) = withContext(Dispatchers.IO) {
+        Log.d(TAG, "Saving clothing item: ${item.name} (id: ${item.id}, image: ${item.imageUrl})")
         try {
-            val analyzedItem = if (item.imageUrl != null && item.dominantHex == null) {
+            val existingItem = if (item.id != 0L) clothingDao.getClothingById(item.id).firstOrNull()?.toModel() else null
+            
+            val needsAnalysis = item.imageUrl != null && (
+                item.dominantHex == null || 
+                item.imageUrl != existingItem?.imageUrl
+            )
+
+            val analyzedItem = if (needsAnalysis) {
+                Log.d(TAG, "Item needs analysis (new image or missing data)")
                 analyzeGarment(item)
             } else item
 
+            Log.d(TAG, "Inserting into DB: ${analyzedItem.imageUrl}")
             clothingDao.insertClothing(analyzedItem.toEntity())
+            Log.d(TAG, "Save complete for: ${item.name}")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save clothing item: ${item.name}", e)
         }
@@ -70,8 +82,14 @@ class WardrobeRepository @Inject constructor(
     }
 
     private suspend fun analyzeGarment(item: ClothingItem): ClothingItem {
+        val imagePath = item.imageUrl ?: return item
         return try {
-            val uri = Uri.parse(item.imageUrl)
+            val uri = if (imagePath.startsWith("content://") || imagePath.startsWith("file://")) {
+                Uri.parse(imagePath)
+            } else {
+                Uri.fromFile(java.io.File(imagePath))
+            }
+            
             val bitmap = loadDownsampledBitmap(uri) ?: return item
             colorEngine.processGarment(bitmap, item)
         } catch (e: Exception) {
@@ -81,13 +99,34 @@ class WardrobeRepository @Inject constructor(
     }
 
     private fun loadDownsampledBitmap(uri: Uri): Bitmap? {
+        Log.d(TAG, "Loading bitmap for analysis: $uri (scheme: ${uri.scheme}, path: ${uri.path})")
         return try {
-            val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+            val openStream = {
+                if (uri.scheme == "content") {
+                    context.contentResolver.openInputStream(uri)
+                } else {
+                    val path = uri.path ?: ""
+                    Log.d(TAG, "Opening FileInputStream for path: $path")
+                    java.io.FileInputStream(path)
+                }
+            }
+            
+            val inputStream = openStream() ?: run {
+                Log.e(TAG, "Could not open input stream for URI: $uri")
+                return null
+            }
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
             }
             BitmapFactory.decodeStream(inputStream, null, options)
             inputStream.close()
+
+            if (options.outWidth <= 0 || options.outHeight <= 0) {
+                Log.e(TAG, "Bitmap bounds are invalid: ${options.outWidth}x${options.outHeight}")
+                return null
+            }
+            
+            Log.d(TAG, "Original image size: ${options.outWidth}x${options.outHeight}")
 
             // Target dimensions for analysis (speed vs accuracy)
             val targetWidth = 400
@@ -102,12 +141,20 @@ class WardrobeRepository @Inject constructor(
                 }
             }
 
+            Log.d(TAG, "Using inSampleSize: $inSampleSize")
+
             val finalOptions = BitmapFactory.Options().apply {
                 this.inSampleSize = inSampleSize
             }
-            val finalStream = context.contentResolver.openInputStream(uri)
+            val finalStream = openStream() ?: return null
             val bitmap = BitmapFactory.decodeStream(finalStream, null, finalOptions)
-            finalStream?.close()
+            finalStream.close()
+            
+            if (bitmap != null) {
+                Log.d(TAG, "Successfully loaded bitmap: ${bitmap.width}x${bitmap.height}")
+            } else {
+                Log.e(TAG, "Bitmap decoding failed for URI: $uri")
+            }
             bitmap
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load downsampled bitmap: $uri", e)

@@ -3,7 +3,6 @@ package com.zoewave.probase.kocolor.features.cosmetics.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,11 +24,43 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.*
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,11 +73,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
@@ -111,7 +141,7 @@ fun CosmeticsScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { navTo(KoColorRoute.CosmeticAdd) }) {
+                    IconButton(onClick = { navTo(KoColorRoute.CosmeticAdd()) }) {
                         Icon(Icons.Default.Add, contentDescription = "Add")
                     }
                     Box {
@@ -840,7 +870,16 @@ fun EditCosmeticDialog(
                     onDismissRequest = { showCategoryMenu = false },
                     modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 400.dp)
                 ) {
-                    CosmeticCategory.entries.filter { it != CosmeticCategory.AI_PENDING }.groupBy { it.groupName }.forEach { (group, items) ->
+                    val filter = uiState.categoryFilter
+                    val filteredEntries = CosmeticCategory.entries
+                        .filter { it != CosmeticCategory.AI_PENDING }
+                        .filter { cat -> 
+                            filter.isNullOrBlank() || 
+                            cat.groupName.contains(filter, ignoreCase = true) ||
+                            cat.name.contains(filter, ignoreCase = true)
+                        }
+
+                    filteredEntries.groupBy { it.groupName }.forEach { (group, items) ->
                         Text(
                             text = group,
                             style = MaterialTheme.typography.labelSmall,
@@ -1119,7 +1158,16 @@ fun AddCosmeticDialog(
                     onDismissRequest = { showCategoryMenu = false },
                     modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 400.dp)
                 ) {
-                    CosmeticCategory.entries.filter { it != CosmeticCategory.AI_PENDING }.groupBy { it.groupName }.forEach { (group, items) ->
+                    val filter = uiState.categoryFilter
+                    val filteredEntries = CosmeticCategory.entries
+                        .filter { it != CosmeticCategory.AI_PENDING }
+                        .filter { cat -> 
+                            filter.isNullOrBlank() || 
+                            cat.groupName.contains(filter, ignoreCase = true) ||
+                            cat.name.contains(filter, ignoreCase = true)
+                        }
+
+                    filteredEntries.groupBy { it.groupName }.forEach { (group, items) ->
                         Text(
                             text = group,
                             style = MaterialTheme.typography.labelSmall,

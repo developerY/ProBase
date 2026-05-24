@@ -125,7 +125,7 @@ private fun HeroRitualCardPreview() {
 @Composable
 fun HeroRitualCard(
     uiState: BeautyRoutine,
-    onEvent: (Unit) -> Unit,
+    onEvent: (RoutinesEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val routine = uiState
@@ -139,12 +139,12 @@ fun HeroRitualCard(
 
     Card(
         onClick = { navTo(KoColorRoute.RoutineDetail(routine.id)) },
-        modifier = Modifier.fillMaxWidth().height(240.dp),
+        modifier = Modifier.fillMaxWidth().height(260.dp), // Increased height for Glass button
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(1.dp, accentColor.copy(alpha = 0.1f))
     ) {
-        Box(modifier = Modifier.fillMaxSize().background(bgBrush).padding(32.dp)) {
+        Box(modifier = Modifier.fillMaxSize().background(bgBrush).padding(24.dp)) {
             Column(verticalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxSize()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -181,7 +181,7 @@ fun HeroRitualCard(
                         contentAlignment = Alignment.Center, 
                         modifier = Modifier
                             .size(54.dp)
-                            .clickable(onClick = { onEvent(Unit) })
+                            .clickable(onClick = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) })
                     ) {
                         CircularProgressIndicator(
                             progress = { 1f },
@@ -215,13 +215,30 @@ fun HeroRitualCard(
                     }
                 }
                 
-                Text(
-                    text = if (isMorning) "Every step is an act of care. Prepare for a balanced day ahead." 
-                           else "Unwind and restore. Every step is an act of self-love.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                    lineHeight = 22.sp
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text(
+                        text = if (isMorning) "Prepare for a balanced day ahead." 
+                               else "Every step is an act of self-love.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    if (isMorning) {
+                        IconButton(
+                            onClick = { onEvent(RoutinesEvent.ProjectToGlass) },
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(accentColor.copy(alpha = 0.1f))
+                        ) {
+                            Icon(Icons.Default.SmartDisplay, contentDescription = "Project to Glass", tint = accentColor)
+                        }
+                    }
+                }
             }
         }
     }

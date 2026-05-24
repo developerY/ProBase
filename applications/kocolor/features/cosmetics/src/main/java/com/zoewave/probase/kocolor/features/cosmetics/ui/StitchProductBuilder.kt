@@ -135,7 +135,7 @@ fun StitchProductBuilder(
                     3 -> MetadataStep(
                         uiState = draft to uiState,
                         onEvent = onEvent,
-                        navTo = {}
+                        navTo = navTo
                     )
                 }
             }
@@ -370,11 +370,28 @@ private fun MetadataStep(
                 Icon(Icons.Default.ArrowDropDown, contentDescription = null)
             }
             DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                CosmeticCategory.entries.forEach { cat ->
-                    DropdownMenuItem(text = { Text(cat.displayName) }, onClick = { 
-                        onEvent(CosmeticsEvent.UpdateDraft(draft.copy(category = cat)))
-                        showMenu = false
-                    })
+                val filter = uiState.second.categoryFilter
+                
+                // Debug log (won't show in production but helps during development if I could see logs)
+                // android.util.Log.d("StitchBuilder", "Current filter: $filter")
+
+                val availableCategories = if (!filter.isNullOrBlank()) {
+                    CosmeticCategory.entries.filter { 
+                        it.groupName.contains(filter, ignoreCase = true) || 
+                        it.name.contains(filter, ignoreCase = true)
+                    }
+                } else {
+                    CosmeticCategory.entries.filter { it != CosmeticCategory.AI_PENDING }
+                }
+
+                availableCategories.forEach { cat ->
+                    DropdownMenuItem(
+                        text = { Text(cat.displayName) }, 
+                        onClick = { 
+                            onEvent(CosmeticsEvent.UpdateDraft(draft.copy(category = cat)))
+                            showMenu = false
+                        }
+                    )
                 }
             }
         }

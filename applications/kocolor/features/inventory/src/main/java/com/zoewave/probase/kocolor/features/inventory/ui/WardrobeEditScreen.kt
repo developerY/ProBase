@@ -1,26 +1,34 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.model.ClothingCategory
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
+import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 
 @Preview(showBackground = true)
 @Composable
@@ -55,6 +63,20 @@ fun WardrobeEditScreen(
     }
 
     val draft = state.draftItem
+    var showColorPicker by remember { mutableStateOf(false) }
+
+    if (showColorPicker) {
+        val initialColorHex = draft.dominantHex ?: draft.colorHex ?: "#FFFFFF"
+        ColorPickerDialog(
+            initialColor = try { parseColor(initialColorHex) } catch (ignore: Exception) { Color.Gray },
+            onColorSelected = { newColor ->
+                onEvent(WardrobeEvent.UpdateDraft(draft.copy(dominantHex = newColor.toHex(), colorHex = newColor.toHex())))
+                showColorPicker = false
+            },
+            onDismissRequest = { showColorPicker = false },
+            title = "Edit Representative Color"
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -87,14 +109,69 @@ fun WardrobeEditScreen(
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Visual Preview Block
+            // Visual Preview Block (Photo Picker)
             Surface(
-                modifier = Modifier.fillMaxWidth().height(200.dp),
-                color = draft.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp)
+                    .clickable { navTo(KoColorRoute.Camera("inventory_item")) },
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(24.dp)
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Image, null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    if (draft.imageUrl != null) {
+                        AsyncImage(
+                            model = draft.imageUrl,
+                            contentDescription = "Garment Photo",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                        Surface(
+                            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+                            color = Color.Black.copy(alpha = 0.6f),
+                            shape = CircleShape
+                        ) {
+                            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.padding(12.dp), tint = Color.White)
+                        }
+                    } else {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Default.CameraAlt, 
+                                null, 
+                                modifier = Modifier.size(48.dp), 
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Text("Take Product Photo", style = MaterialTheme.typography.labelLarge)
+                        }
+                    }
+                }
+            }
+
+            // Representative Color Refinement
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Representative Color", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+                    Text("Tweak the extracted dominant hue", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                }
+                
+                val itemColorHex = draft.dominantHex ?: draft.colorHex ?: "#CCCCCC"
+                Surface(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable { showColorPicker = true }
+                        .background(parseColor(itemColorHex))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp)),
+                    color = parseColor(itemColorHex)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.Colorize, null, modifier = Modifier.size(20.dp), tint = if (isColorDark(parseColor(itemColorHex))) Color.White else Color.Black)
+                    }
                 }
             }
 

@@ -54,6 +54,16 @@ fun VanityLandingScreen(
                     IconButton(onClick = { /* Search */ }) { Icon(Icons.Default.Search, null) }
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navTo(KoColorRoute.CosmeticAdd()) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = CircleShape
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Product")
+            }
         }
     ) { padding ->
         LazyColumn(

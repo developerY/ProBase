@@ -18,19 +18,12 @@ import androidx.health.connect.client.units.Volume
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
+import com.zoewave.probase.core.data.repository.bluetoothLE.BluetoothLeRepository
+import com.zoewave.probase.core.model.ble.GattConnectionState
 import com.zoewave.probase.features.health.core.domain.HealthRideRequest
 import com.zoewave.probase.features.health.core.domain.SyncRideUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -50,7 +43,8 @@ sealed interface HealthSideEffect {
 @HiltViewModel
 class HealthViewModel @Inject constructor(
     val healthSessionManager: HealthSessionManager,
-    private val syncRideUseCase: SyncRideUseCase
+    private val syncRideUseCase: SyncRideUseCase,
+    private val bleRepository: BluetoothLeRepository
 ) : ViewModel() {
 
     // 2. State & Events
@@ -59,6 +53,23 @@ class HealthViewModel @Inject constructor(
 
     private val _sideEffect = MutableSharedFlow<HealthSideEffect>()
     val sideEffect = _sideEffect.asSharedFlow()
+
+    init {
+        observeTrackerConnection()
+    }
+
+    private fun observeTrackerConnection() {
+        viewModelScope.launch {
+            bleRepository.fetchBluetoothDevice()
+                .filterNotNull()
+                .onEach { device ->
+                    if (device.name.contains("SensorTag", ignoreCase = true)) {
+                        bleRepository.connectToDevice()
+                    }
+                }
+                .launchIn(viewModelScope)
+        }
+    }
 
     // 3. Define Permissions
     val permissions = setOf(
@@ -116,6 +127,11 @@ class HealthViewModel @Inject constructor(
             }
             is HealthEvent.DeleteSession -> deleteSession(event.uid)
             is HealthEvent.LogHydration -> logHydration(event.volumeLiters)
+            HealthEvent.SyncTracker -> {
+                viewModelScope.launch {
+                    bleRepository.startScan(scanAll = false)
+                }
+            }
         }
     }
 
@@ -225,16 +241,22 @@ class HealthViewModel @Inject constructor(
                         .groupBy { it.startTime.atZone(ZoneId.systemDefault()).toLocalDate().toString() }
                         .mapValues { entry -> entry.value.sumOf { it.volume.inLiters } }
 
+                    val bleState = bleRepository.gattConnectionState.value
+                    val bleChars = bleRepository.gattCharacteristicList.value
+
                     _uiState.value = HealthUiState.Success(
                         sessions = sessions,
                         sleepSessions = sleepSessions,
                         weeklySteps = stepsMap,
                         weeklyDistance = distMap,
                         weeklyCalories = calMap,
-                        weeklyHydration = hydrationMap
+                        weeklyHydration = hydrationMap,
+                        bleConnectionState = bleState,
+                        trackerMetrics = bleChars.associate { it.description to it.value }
                     )
 
                     observeHealthConnectChanges()
+                    observeBleChanges()
                 } else {
                     _uiState.value = HealthUiState.PermissionsRequired("Displaying data requires permissions.")
                 }
@@ -364,6 +386,24 @@ class HealthViewModel @Inject constructor(
                 isObservingChanges = false
             }
         }
+    }
+
+    private var isObservingBle = false
+    private fun observeBleChanges() {
+        if (isObservingBle) return
+        isObservingBle = true
+        combine(
+            bleRepository.gattConnectionState,
+            bleRepository.gattCharacteristicList
+        ) { state, chars ->
+            val current = _uiState.value
+            if (current is HealthUiState.Success) {
+                _uiState.value = current.copy(
+                    bleConnectionState = state,
+                    trackerMetrics = chars.associate { it.description to it.value }
+                )
+            }
+        }.launchIn(viewModelScope)
     }
 
     private fun readAllData() {
