@@ -13,6 +13,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,6 +26,20 @@ class FashionRepository @Inject constructor(
     private val fashionProfileDao: FashionProfileDao,
     private val savedSuggestionDao: SavedSuggestionDao
 ) {
+    private val _isGlassConnected = MutableStateFlow(false)
+    val isGlassConnected = _isGlassConnected.asStateFlow()
+
+    private val _isGlassSessionActive = MutableStateFlow(false)
+    val isGlassSessionActive = _isGlassSessionActive.asStateFlow()
+
+    fun updateGlassConnectionState(isConnected: Boolean) {
+        _isGlassConnected.value = isConnected
+    }
+
+    fun updateGlassSessionState(isActive: Boolean) {
+        _isGlassSessionActive.value = isActive
+    }
+
     fun getProfile(): Flow<FashionProfile?> {
         return fashionProfileDao.getProfile()
             .map { it?.toModel() }
