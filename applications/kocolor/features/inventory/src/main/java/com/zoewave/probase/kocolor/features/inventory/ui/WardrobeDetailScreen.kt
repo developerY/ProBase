@@ -102,25 +102,53 @@ fun WardrobeDetailScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(420.dp)
+                    .height(400.dp)
             ) {
-                Box(modifier = Modifier.fillMaxSize().background(itemColor))
                 if (item.imageUrl != null) {
-                    AsyncImage(
-                        model = item.imageUrl,
-                        contentDescription = item.name,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        AsyncImage(
+                            model = item.imageUrl,
+                            contentDescription = item.name,
+                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            contentScale = ContentScale.Crop
+                        )
+                        Box(modifier = Modifier.fillMaxWidth().height(120.dp).background(itemColor))
+                    }
+                } else {
+                    Box(modifier = Modifier.fillMaxSize().background(itemColor))
                 }
-                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)))))
+
+                // Scrim for readability
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)),
+                                startY = 600f
+                            )
+                        )
+                )
                 
                 Column(modifier = Modifier.align(Alignment.BottomStart).padding(24.dp)) {
+                    Text(
+                        text = (item.brand ?: "KOCOLOR").uppercase(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White.copy(alpha = 0.8f),
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp
+                    )
+                    Text(
+                        text = item.name,
+                        style = MaterialTheme.typography.displaySmall,
+                        color = Color.White,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(12.dp))
                     Surface(color = Color.White.copy(alpha = 0.9f), shape = RoundedCornerShape(12.dp)) {
                         Text(text = item.category.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                     }
-                    Spacer(Modifier.height(12.dp))
-                    Text(text = item.name, style = MaterialTheme.typography.displaySmall, color = Color.White, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
                 }
             }
 
