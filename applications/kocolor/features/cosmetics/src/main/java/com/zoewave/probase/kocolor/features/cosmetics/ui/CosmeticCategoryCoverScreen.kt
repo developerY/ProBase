@@ -77,7 +77,7 @@ fun CosmeticCategoryCoverScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navTo(KoColorRoute.CosmeticAdd) },
+                onClick = { navTo(KoColorRoute.CosmeticAdd(categoryFilter = categoryName)) },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape
