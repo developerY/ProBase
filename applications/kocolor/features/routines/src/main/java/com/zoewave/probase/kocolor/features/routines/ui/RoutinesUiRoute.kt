@@ -14,6 +14,7 @@ import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.kocolor.mobile.glass.GlassesMainActivity
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalProjectedApi::class)
 @Composable
@@ -23,6 +24,17 @@ fun RoutinesUiRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+            ProjectedContext.isProjectedDeviceConnected(context, this.coroutineContext)
+                .collectLatest { isConnected ->
+                    viewModel.updateGlassConnection(isConnected)
+                }
+        } else {
+            viewModel.updateGlassConnection(false)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.sideEffect.collect { effect ->

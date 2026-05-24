@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.kocolor.features.routines.ui.components.GlassConnectionCard
 import com.zoewave.probase.kocolor.model.*
 
 @Preview(showBackground = true)
@@ -92,6 +93,13 @@ fun RoutinesScreen(
                     )
                 }
             }
+
+            item {
+                GlassConnectionCard(
+                    buttonState = uiState.glassButtonState,
+                    onButtonClick = { onEvent(RoutinesEvent.ProjectToGlass) }
+                )
+            }
             
             item {
                 uiState.eveningRoutine?.let { routine ->
@@ -139,7 +147,7 @@ fun HeroRitualCard(
 
     Card(
         onClick = { navTo(KoColorRoute.RoutineDetail(routine.id)) },
-        modifier = Modifier.fillMaxWidth().height(260.dp), // Increased height for Glass button
+        modifier = Modifier.fillMaxWidth().height(240.dp),
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(1.dp, accentColor.copy(alpha = 0.1f))
@@ -227,17 +235,6 @@ fun HeroRitualCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                         modifier = Modifier.weight(1f)
                     )
-
-                    if (isMorning) {
-                        IconButton(
-                            onClick = { onEvent(RoutinesEvent.ProjectToGlass) },
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(accentColor.copy(alpha = 0.1f))
-                        ) {
-                            Icon(Icons.Default.SmartDisplay, contentDescription = "Project to Glass", tint = accentColor)
-                        }
-                    }
                 }
             }
         }

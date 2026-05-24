@@ -7,12 +7,17 @@ import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import androidx.lifecycle.lifecycleScope
 import com.zoewave.kocolor.mobile.glass.ui.GlassApp
+import com.zoewave.probase.kocolor.data.FashionRepository
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class GlassesMainActivity : ComponentActivity() {
 
+    @Inject lateinit var fashionRepository: FashionRepository
     private lateinit var audioInterface: KoColorAudioInterface
 
     @OptIn(ExperimentalProjectedApi::class, ExperimentalComposeUiApi::class)
@@ -38,6 +43,20 @@ class GlassesMainActivity : ComponentActivity() {
                     }
                 )
             }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        lifecycleScope.launch {
+            fashionRepository.updateGlassSessionState(isActive = true)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        lifecycleScope.launch {
+            fashionRepository.updateGlassSessionState(isActive = false)
         }
     }
 }
