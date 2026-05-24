@@ -172,13 +172,6 @@ fun WardrobeDetailScreen(
             // Detail Content
             Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(32.dp)) {
                 
-                // Color Blueprint
-                Column {
-                    SectionHeader(uiState = "Color Blueprint", onEvent = {}, navTo = {})
-                    Spacer(Modifier.height(16.dp))
-                    ColorAnalysisSection(uiState = item, onEvent = {}, navTo = {})
-                }
-
                 Column {
                     SectionHeader(uiState = "Composition", onEvent = {}, navTo = {})
                     DetailRow(uiState = "Material" to (item.material ?: "Unknown"), onEvent = {}, navTo = {})
@@ -239,66 +232,6 @@ private fun DetailRow(uiState: Pair<String, String>, onEvent: (Unit) -> Unit, na
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
-    }
-}
-
-@Composable
-private fun ColorAnalysisSection(
-    uiState: ClothingItem, 
-    onEvent: (Unit) -> Unit, 
-    navTo: (KoColorRoute) -> Unit
-) {
-    val item = uiState
-    val colors = remember(item) {
-        mutableListOf<String>().apply {
-            item.dominantHex?.let { add(it) }
-            item.vibrantHex?.let { add(it) }
-            item.mutedHex?.let { add(it) }
-            addAll(item.paletteHexes)
-            
-            // Fallback to manual colorHex if no engine data yet
-            if (isEmpty()) {
-                item.colorHex?.let { add(it) }
-            }
-        }.distinct()
-    }
-
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            colors.take(5).forEach { hex ->
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(parseColor(hex))
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
-                )
-            }
-        }
-
-        if (item.seasonalPalette != null || item.colorTemperature != null) {
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column {
-                        Text("Temperature", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(item.colorTemperature ?: "Neutral", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                    }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text("Seasonal Type", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(item.seasonalPalette ?: "Universal", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-        }
     }
 }
 
