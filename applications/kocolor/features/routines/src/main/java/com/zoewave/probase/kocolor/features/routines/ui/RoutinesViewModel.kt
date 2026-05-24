@@ -41,6 +41,11 @@ sealed class RoutinesEvent {
     data class LinkProduct(val routineId: Long, val stepId: String, val productId: Long) : RoutinesEvent()
     data class ReorderSteps(val routineId: Long, val fromIndex: Int, val toIndex: Int) : RoutinesEvent()
     data class ResetRoutine(val routineId: Long) : RoutinesEvent()
+    data object ProjectToGlass : RoutinesEvent()
+}
+
+sealed class RoutinesSideEffect {
+    data object LaunchGlassProjection : RoutinesSideEffect()
 }
 
 @HiltViewModel
@@ -48,6 +53,9 @@ class RoutinesViewModel @Inject constructor(
     private val routineDao: RoutineDao,
     private val cosmeticDao: CosmeticDao
 ) : ViewModel() {
+
+    private val _sideEffect = MutableSharedFlow<RoutinesSideEffect>()
+    val sideEffect = _sideEffect.asSharedFlow()
 
     private val _currentDate = MutableStateFlow(getStartOfDay(System.currentTimeMillis()))
     private val _activeEditRoutineId = MutableStateFlow<Long?>(null)
@@ -126,6 +134,11 @@ class RoutinesViewModel @Inject constructor(
             is RoutinesEvent.LinkProduct -> linkProductToStep(event.routineId, event.stepId, event.productId)
             is RoutinesEvent.ReorderSteps -> reorderSteps(event.routineId, event.fromIndex, event.toIndex)
             is RoutinesEvent.ResetRoutine -> resetRoutine(event.routineId)
+            RoutinesEvent.ProjectToGlass -> {
+                viewModelScope.launch {
+                    _sideEffect.emit(RoutinesSideEffect.LaunchGlassProjection)
+                }
+            }
         }
     }
 

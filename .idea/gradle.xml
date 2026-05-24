@@ -87,6 +87,7 @@
             <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile/core" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile/features" />
+            <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile/features/glass" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile/features/home" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile/features/settings" />
             <option value="$PROJECT_DIR$/applications/kocolor/data" />
