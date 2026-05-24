@@ -1,5 +1,10 @@
 package com.zoewave.probase.kocolor.mobile.core.ui.health
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,16 +22,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +50,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.health.SleepSessionData
 import com.zoewave.probase.features.health.core.ui.HealthEvent
 import com.zoewave.probase.features.health.core.ui.HealthUiState
@@ -57,6 +70,7 @@ fun StyleHealthDashboard(
     val hydration = uiState.weeklyHydration[today] ?: 0.0
     val hydrationGoal = 2.0
     val lastSleep = uiState.sleepSessions.firstOrNull()
+    var showTracker by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier.padding(24.dp),
@@ -79,18 +93,43 @@ fun StyleHealthDashboard(
         // 2. Beautiful Sleep Section
         SleepVisual(sleepData = lastSleep)
         
-        // Spacer(modifier = Modifier.height(48.dp))
-
-
-        // 3. Element Tracker Hero
-        WellnessTrackerHeroCard(
-            connectionState = uiState.bleConnectionState,
-            metrics = uiState.trackerMetrics,
-            modifier = Modifier.clickable {
-                onEvent(HealthEvent.SyncTracker)
+        // 3. Element Tracker Section with Hide/Show
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showTracker = !showTracker },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "ELEMENT TRACKER",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.sp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                )
+                Icon(
+                    imageVector = if (showTracker) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
-        )
 
+            AnimatedVisibility(
+                visible = showTracker,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                WellnessTrackerHeroCard(
+                    connectionState = uiState.bleConnectionState,
+                    metrics = uiState.trackerMetrics,
+                    modifier = Modifier.clickable {
+                        onEvent(HealthEvent.SyncTracker)
+                    }
+                )
+            }
+        }
     }
 }
 

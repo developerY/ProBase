@@ -45,6 +45,7 @@ dependencies {
     implementation(project(":applications:kocolor:apps:mobile:core"))
     implementation(project(":applications:kocolor:apps:mobile:features:home"))
     implementation(project(":applications:kocolor:apps:mobile:features:settings"))
+    implementation(project(":applications:kocolor:apps:mobile:features:glass"))
     
     implementation(project(":applications:kocolor:features:analyzer"))
     implementation(project(":applications:kocolor:features:suggestions"))

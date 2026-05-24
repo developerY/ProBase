@@ -32,7 +32,7 @@ import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeViewModel
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
-import com.zoewave.probase.kocolor.features.routines.ui.RoutinesScreen
+import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
@@ -80,12 +80,8 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.Routines -> NavEntry(route) {
-            val viewModel: RoutinesViewModel = hiltViewModel()
-            val state by viewModel.uiState.collectAsStateWithLifecycle()
-            RoutinesScreen(
-                uiState = state,
-                onEvent = viewModel::onEvent,
-                navTo = onNavigateTo
+            RoutinesUiRoute(
+                onNavigateTo = onNavigateTo
             )
         }
         is KoColorRoute.RoutineDetail -> NavEntry(route) {
