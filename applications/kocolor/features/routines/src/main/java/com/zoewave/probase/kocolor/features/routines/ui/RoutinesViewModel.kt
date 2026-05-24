@@ -2,16 +2,14 @@ package com.zoewave.probase.kocolor.features.routines.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
 import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
-import com.zoewave.probase.kocolor.model.BeautyRoutine
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.RoutineStep
-import com.zoewave.probase.kocolor.model.RoutineTime
+import com.zoewave.probase.kocolor.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -24,7 +22,8 @@ data class RoutinesUiState(
     val allProducts: List<CosmeticItem> = emptyList(),
     val activeEditRoutineId: Long? = null,
     val showEditDialog: Boolean = false,
-    val draftStep: RoutineStep = RoutineStep(title = "")
+    val draftStep: RoutineStep = RoutineStep(title = ""),
+    val glassButtonState: GlassButtonState = GlassButtonState.NO_GLASSES
 ) {
     val activeEditRoutine: BeautyRoutine?
         get() = if (morningRoutine?.id == activeEditRoutineId) morningRoutine else eveningRoutine?.takeIf { it.id == activeEditRoutineId }
@@ -51,7 +50,8 @@ sealed class RoutinesSideEffect {
 @HiltViewModel
 class RoutinesViewModel @Inject constructor(
     private val routineDao: RoutineDao,
-    private val cosmeticDao: CosmeticDao
+    private val cosmeticDao: CosmeticDao,
+    private val fashionRepository: FashionRepository
 ) : ViewModel() {
 
     private val _sideEffect = MutableSharedFlow<RoutinesSideEffect>()
@@ -75,19 +75,41 @@ class RoutinesViewModel @Inject constructor(
         cosmeticDao.getAllCosmetics(),
         _activeEditRoutineId,
         _showEditDialog,
-        _draftStep
-    ) { routines, cosmetics, activeEditId, showDialog, draft ->
-        val models = routines.map { it.toModel() }
+        _draftStep,
+        fashionRepository.isGlassConnected,
+        fashionRepository.isGlassSessionActive
+    ) { array ->
+        val modelList = array[0] as List<RoutineEntity>
+        val cosmeticList = array[1] as List<com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity>
+        val activeEditRoutineIdVal = array[2] as Long?
+        val showEditDialogVal = array[3] as Boolean
+        val draftStepVal = array[4] as RoutineStep
+        val isGlassConnectedVal = array[5] as Boolean
+        val isGlassSessionActiveVal = array[6] as Boolean
+
+        val models = modelList.map { it.toModel() }
+        
+        val btnState = when {
+            !isGlassConnectedVal -> GlassButtonState.NO_GLASSES
+            isGlassSessionActiveVal -> GlassButtonState.PROJECTING
+            else -> GlassButtonState.READY_TO_START
+        }
+
         RoutinesUiState(
             morningRoutine = models.find { it.time == RoutineTime.MORNING },
             eveningRoutine = models.find { it.time == RoutineTime.EVENING },
             isLoading = false,
-            allProducts = cosmetics.map { it.toModel() },
-            activeEditRoutineId = activeEditId,
-            showEditDialog = showDialog,
-            draftStep = draft
+            allProducts = cosmeticList.map { it.toModel() },
+            activeEditRoutineId = activeEditRoutineIdVal,
+            showEditDialog = showEditDialogVal,
+            draftStep = draftStepVal,
+            glassButtonState = btnState
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), RoutinesUiState())
+
+    fun updateGlassConnection(isConnected: Boolean) {
+        fashionRepository.updateGlassConnectionState(isConnected)
+    }
 
     private fun getStartOfDay(timestamp: Long): Long {
         val cal = java.util.Calendar.getInstance()
