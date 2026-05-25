@@ -6,14 +6,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -21,7 +27,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.xr.glimmer.Button
 import androidx.xr.glimmer.Card
 import androidx.xr.glimmer.GlimmerTheme
+import androidx.xr.glimmer.ListItem
 import androidx.xr.glimmer.Text
+import androidx.xr.glimmer.list.GlimmerLazyColumn
 import androidx.xr.glimmer.surface
 import androidx.xr.projected.ProjectedDeviceController
 import androidx.xr.projected.ProjectedDeviceController.Capability.Companion.CAPABILITY_VISUAL_UI
@@ -168,10 +176,36 @@ fun GoogleTestHomeScreen(
                     }
                 }
             ) {
-                if (areVisualsOn) {
-                    Text("Hello, AI Glasses! This is the Google Example.")
-                } else {
-                    Text("Display is off. Audio guidance active.")
+                var clickCountA by remember { mutableStateOf(0) }
+                var clickCountB by remember { mutableStateOf(0) }
+
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text("Interactive List Test:")
+                    
+                    GlimmerLazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                    ) {
+                        item {
+                            ListItem(
+                                onClick = { 
+                                    clickCountA++
+                                    android.util.Log.d("GoogleXRTest", "Button A clicked: $clickCountA")
+                                },
+                                content = { Text("Button A - Clicked: $clickCountA") }
+                            )
+                        }
+                        item {
+                            ListItem(
+                                onClick = { 
+                                    clickCountB++ 
+                                    android.util.Log.d("GoogleXRTest", "Button B clicked: $clickCountB")
+                                },
+                                content = { Text("Button B - Clicked: $clickCountB") }
+                            )
+                        }
+                    }
                 }
             }
         } else {

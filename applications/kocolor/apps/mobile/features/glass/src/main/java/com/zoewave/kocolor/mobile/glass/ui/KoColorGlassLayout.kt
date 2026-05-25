@@ -1,10 +1,9 @@
 package com.zoewave.kocolor.mobile.glass.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
@@ -19,7 +18,9 @@ import androidx.xr.glimmer.Button
 import androidx.xr.glimmer.Card
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Icon
+import androidx.xr.glimmer.ListItem
 import androidx.xr.glimmer.Text
+import androidx.xr.glimmer.list.GlimmerLazyColumn
 import androidx.xr.glimmer.surface
 
 @Composable
@@ -75,21 +76,38 @@ fun KoColorGlassLayout(
                         color = Color.White
                     )
                 } else {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(vertical = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    // Refactored to use GlimmerLazyColumn and ListItem (The working pattern)
+                    GlimmerLazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(top = 16.dp)
                     ) {
                         uiState.morningRoutine.steps.forEach { step ->
-                            Button(
-                                onClick = { onEvent(GlassUiEvent.ToggleStep(step.id)) },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = step.title,
-                                    style = GlimmerTheme.typography.bodyLarge,
-                                    color = if (step.isCompleted) Color.White.copy(alpha = 0.6f) else Color.White
+                            item {
+                                ListItem(
+                                    onClick = { onEvent(GlassUiEvent.ToggleStep(step.id)) },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = if (step.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                                            contentDescription = null,
+                                            tint = if (step.isCompleted) GlimmerTheme.colors.primary else Color.White
+                                        )
+                                    },
+                                    content = {
+                                        Text(
+                                            text = step.title,
+                                            style = GlimmerTheme.typography.bodyLarge,
+                                            color = if (step.isCompleted) Color.White.copy(alpha = 0.5f) else Color.White
+                                        )
+                                    },
+                                    supportingLabel = {
+                                        if (step.description.isNotBlank()) {
+                                            Text(
+                                                text = step.description,
+                                                style = GlimmerTheme.typography.bodySmall,
+                                                color = Color.White.copy(alpha = 0.6f)
+                                            )
+                                        }
+                                    }
                                 )
                             }
                         }
