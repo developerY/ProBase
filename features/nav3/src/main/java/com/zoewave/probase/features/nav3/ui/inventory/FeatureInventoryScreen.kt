@@ -46,7 +46,8 @@ fun FeatureInventoryScreen(
     onNavigateToBarcode: () -> Unit,
     onNavigateToCamera: () -> Unit, // ✅ Added Camera Callback
     onNavigateToCalendar: () -> Unit,
-    onNavigateToSmartCapture: () -> Unit
+    onNavigateToSmartCapture: () -> Unit,
+    onNavigateToGlassXR: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -133,6 +134,14 @@ fun FeatureInventoryScreen(
                     description = "Extract tasks from photos using AI.",
                     icon = Icons.Default.AutoAwesome,
                     onClick = onNavigateToSmartCapture
+                )
+            }
+            item {
+                FeatureCard(
+                    title = "Glass XR Demos",
+                    description = "Projected UI samples for display glasses.",
+                    icon = Icons.Default.AutoAwesome, // You can find a better icon later
+                    onClick = onNavigateToGlassXR
                 )
             }
 

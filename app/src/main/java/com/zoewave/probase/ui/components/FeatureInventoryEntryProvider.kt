@@ -1,12 +1,16 @@
 package com.zoewave.probase.ui.components
 
-// Feature Routes
-// ✅ Add your Camera route import here
+import android.content.Intent
+import android.os.Build
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Text
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
+import androidx.xr.projected.ProjectedContext
+import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.probase.feature.weather.ui.WeatherUiRoute
 import com.zoewave.probase.features.ble.ui.BluetoothLeRoute
 import com.zoewave.probase.features.calendar.ui.CalendarUiRoute
@@ -18,8 +22,11 @@ import com.zoewave.probase.features.readers.nfc.ui.NfcUiRoute
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.ai.capture.ui.SmartCaptureUiRoute
+import com.zoewave.probase.features.xr.glass.ui.GlassXRDemosPhoneScreen
+import com.zoewave.probase.features.xr.glass.GlassesMainActivity
 import com.zoewave.probase.photodo.features.smartadvice.ui.SmartAdviceUiRoute
 
+@OptIn(ExperimentalProjectedApi::class)
 fun featureInventoryEntryProvider(
     key: NavKey,
     navigateTo: (NavKey) -> Unit,
@@ -28,6 +35,7 @@ fun featureInventoryEntryProvider(
 
     // We wrap the content in a NavEntry, casting the key back to our specific type
     return NavEntry(key) {
+        val context = LocalContext.current
         when (key) {
             is FeatureInventory.List -> {
                 FeatureInventoryScreen(
@@ -39,8 +47,15 @@ fun featureInventoryEntryProvider(
                     onNavigateToBarcode = { navigateTo(FeatureInventory.BarcodeScanner) },
                     onNavigateToCamera = { navigateTo(FeatureInventory.Camera) }, // ✅ Added Camera Callback
                     onNavigateToCalendar = { navigateTo(FeatureInventory.Calendar) },
-                    onNavigateToSmartCapture = { navigateTo(FeatureInventory.SmartCapture) }
+                    onNavigateToSmartCapture = { navigateTo(FeatureInventory.SmartCapture) },
+                    onNavigateToGlassXR = { navigateTo(FeatureInventory.GlassXR) }
                 )
+            }
+
+            is FeatureInventory.GlassXR -> {
+                FeatureScaffold(title = "Glass XR Demos", onBack = navigateBack) {
+                    GlassXRDemosPhoneScreen(onBack = navigateBack)
+                }
             }
 
             is FeatureInventory.Health -> {
