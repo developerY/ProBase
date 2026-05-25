@@ -97,6 +97,9 @@ sealed class KoColorRoute {
     @Serializable
     data object BarcodeScanner : KoColorRoute()
 
+    @Serializable
+    data object GoogleXRTest : KoColorRoute()
+
     val icon: ImageVector?
         get() = when (this) {
             Home -> Icons.Default.Home
