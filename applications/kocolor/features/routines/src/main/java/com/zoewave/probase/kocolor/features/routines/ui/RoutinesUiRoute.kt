@@ -12,7 +12,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import com.zoewave.kocolor.mobile.glass.GlassesMainActivity
+import com.zoewave.probase.features.xr.glass.GlassesMainActivity
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlinx.coroutines.flow.collectLatest
 

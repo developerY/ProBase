@@ -17,7 +17,7 @@ import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Icon
 import androidx.xr.glimmer.ListItem
 import androidx.xr.glimmer.Text
-import androidx.xr.glimmer.list.VerticalList
+import androidx.xr.glimmer.list.GlimmerLazyColumn
 import androidx.xr.glimmer.surface
 import com.zoewave.ashbike.mobile.glass.R
 
@@ -28,13 +28,13 @@ fun GearSelectionScreen(
 ) {
     Box(
         modifier = Modifier
-            .surface(focusable = false)
+            .surface()
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Card(title = { Text(stringResource(R.string.applications_ashbike_apps_mobile_features_glass_select_gear)) }) {
-            // Using VerticalList for proper Glimmer focus handling
-            VerticalList(
+            // Using GlimmerLazyColumn for proper Glimmer focus handling
+            GlimmerLazyColumn(
                 modifier = Modifier
                     .width(300.dp) // Restrict width so it looks like a menu
                     .height(200.dp) // Restrict height to force scrolling behavior

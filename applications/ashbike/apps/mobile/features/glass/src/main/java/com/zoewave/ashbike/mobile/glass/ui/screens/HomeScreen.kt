@@ -35,7 +35,7 @@ fun HomeScreen(
     Box(
         modifier = modifier
             .background(Color.Black)
-            .surface(focusable = false)
+            .surface()
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {

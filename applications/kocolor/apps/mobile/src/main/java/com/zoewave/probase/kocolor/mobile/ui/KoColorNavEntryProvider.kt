@@ -1,12 +1,13 @@
 package com.zoewave.probase.kocolor.mobile.ui
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
-import com.zoewave.probase.features.camera.ui.CameraUIRoute
+import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import androidx.xr.projected.ProjectedContext
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
@@ -41,6 +42,7 @@ import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeViewModel
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.components.SettingsUiRoute
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+@OptIn(ExperimentalProjectedApi::class)
 fun koColorNavEntryProvider(
     route: KoColorRoute,
     windowSizeClass: WindowSizeClass,
@@ -288,6 +290,32 @@ fun koColorNavEntryProvider(
         }
         is KoColorRoute.BarcodeScanner -> NavEntry(route) {
             BarcodeScannerScreen(onCodeScanned = { onCodeScanned(it); onBack() })
+        }
+        is KoColorRoute.GoogleXRTest -> NavEntry(route) {
+            val context = LocalContext.current
+            androidx.compose.runtime.LaunchedEffect(Unit) {
+                android.util.Log.d("NavEntryProvider", "Handling GoogleXRTest route")
+                if (android.os.Build.VERSION.SDK_INT >= 35) {
+                    try {
+                        android.util.Log.d("NavEntryProvider", "Attempting projected activity launch (API 35+) with options")
+                        val options = ProjectedContext.createProjectedActivityOptions(context)
+                        val intent = android.content.Intent(context, com.zoewave.kocolor.mobile.glass.GoogleTestGlassesActivity::class.java).apply {
+                            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent, options.toBundle())
+                        android.util.Log.d("NavEntryProvider", "startActivity called successfully")
+                    } catch (e: Exception) {
+                        android.util.Log.e("NavEntryProvider", "Projected launch failed", e)
+                    }
+                } else {
+                    android.util.Log.d("NavEntryProvider", "Attempting standard activity launch (API < 35)")
+                    val intent = android.content.Intent(context, com.zoewave.kocolor.mobile.glass.GoogleTestGlassesActivity::class.java).apply {
+                        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                }
+                onBack()
+            }
         }
         is KoColorRoute.Camera -> NavEntry(route) {
             com.zoewave.probase.features.camera.ui.CameraUIRoute(

@@ -18,6 +18,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -26,10 +27,12 @@ abstract class DatabaseModule {
 
     @Binds
     @Singleton
+    @Named("KoColor")
     abstract fun bindAiConfigurationSettings(impl: KoColorSettings): AiConfigurationSettings
 
     @Binds
     @Singleton
+    @Named("KoColor")
     abstract fun bindSmartCaptureSettings(impl: KoColorSettings): SmartCaptureSettings
 
     companion object {

@@ -87,6 +87,8 @@ watchfaceComplicationsDataSourceKtx = "1.2.1"
 # -- XR & Glass --
 glimmer = "1.0.0-alpha13"
 projectedXR = "1.0.0-alpha08"
+xrRuntime = "1.0.0-alpha14"
+arcore = "1.0.0-alpha14"
 
 # -- Google Services & Firebase --
 playAgeSignals = "0.0.3"
@@ -256,6 +258,8 @@ horologist-compose-material = { group = "com.google.android.horologist", name = 
 androidx-glimmer-core = { group = "androidx.xr.glimmer", name = "glimmer", version.ref = "glimmer" }
 androidx-glimmer-google-fonts = { group = "androidx.xr.glimmer", name = "glimmer-google-fonts", version.ref = "glimmer" }
 androidx-projected = { group = "androidx.xr.projected", name = "projected", version.ref = "projectedXR" }
+androidx-xr-runtime = { group = "androidx.xr.runtime", name = "runtime", version.ref = "xrRuntime" }
+androidx-xr-arcore = { group = "androidx.xr.arcore", name = "arcore", version.ref = "arcore" }
 
 # -- Firebase & ML --
 google-play-age-signals = { group = "com.google.android.play", name = "age-signals", version.ref = "playAgeSignals" }
