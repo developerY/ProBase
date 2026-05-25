@@ -2,12 +2,16 @@ package com.zoewave.probase.features.xr.xrglasses.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.xr.compose.spatial.Orbiter
+import androidx.xr.compose.spatial.OrbiterAnchorPoint
+import androidx.xr.compose.spatial.Subspace
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.FaceEyeTrackingSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.PlaneDetectionSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.UserTrackingSample
@@ -48,7 +52,8 @@ fun FullXRApp(onClose: () -> Unit) {
     var currentSample by remember { mutableStateOf<XRSample>(XRSample.None) }
 
     if (currentSample != XRSample.None) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Subspace {
+            // Render the actual sample
             when (currentSample) {
                 XRSample.SpatialPanel -> SpatialPanelSample()
                 XRSample.Orbiter -> OrbiterSample()
@@ -61,13 +66,24 @@ fun FullXRApp(onClose: () -> Unit) {
                 XRSample.FaceEyeTracking -> FaceEyeTrackingSample()
                 else -> {}
             }
-            
-            // Back button for samples (since they are full screen XR)
-            IconButton(
-                onClick = { currentSample = XRSample.None },
-                modifier = Modifier.padding(16.dp).statusBarsPadding()
+
+            // Centralized Spatial Exit Orbiter
+            Orbiter(
+                anchorPoint = OrbiterAnchorPoint.TopStart,
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Exit Sample")
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    shape = CircleShape,
+                    shadowElevation = 12.dp
+                ) {
+                    IconButton(onClick = { currentSample = XRSample.None }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack, 
+                            contentDescription = "Exit Sample",
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
             }
         }
         return

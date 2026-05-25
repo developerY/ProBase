@@ -1,72 +1,109 @@
 package com.zoewave.probase.features.xr.xrglasses.ui.samples.compose
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.xr.compose.spatial.Orbiter
 import androidx.xr.compose.spatial.OrbiterAnchorPoint
-import androidx.xr.compose.spatial.Subspace
 import androidx.xr.compose.subspace.SpatialPanel
 import androidx.xr.compose.subspace.layout.SubspaceModifier
+import androidx.xr.compose.subspace.layout.height
+import androidx.xr.compose.subspace.layout.width
 
 @Composable
 fun OrbiterSample() {
-    Subspace {
-        SpatialPanel(modifier = SubspaceModifier) {
-            Surface(
-                modifier = Modifier.padding(16.dp),
-                color = MaterialTheme.colorScheme.surface,
-                shape = MaterialTheme.shapes.medium
+    SpatialPanel(
+        modifier = SubspaceModifier
+            .width(800.dp)
+            .height(600.dp)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.primaryContainer,
+            shape = MaterialTheme.shapes.large
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(modifier = Modifier.padding(48.dp)) {
-                    Text(
-                        text = "Panel with Orbiters",
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                    Text(
-                        text = "Look at the edges of this panel!",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                }
-            }
-            
-            // Top End Orbiter for Settings
-            Orbiter(
-                anchorPoint = OrbiterAnchorPoint.TopEnd,
-            ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = MaterialTheme.shapes.extraLarge,
-                    shadowElevation = 4.dp
-                ) {
-                    IconButton(onClick = { /* Action */ }) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
-                    }
-                }
-            }
-
-            // Bottom Orbiter for Info
-            Orbiter(
-                anchorPoint = OrbiterAnchorPoint.Bottom,
-            ) {
-                FilterChip(
-                    selected = true,
-                    onClick = { /* Action */ },
-                    label = { Text("Details") },
-                    leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) }
+                Text(
+                    text = "Panel with Orbiters",
+                    style = MaterialTheme.typography.displaySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
+                Text(
+                    text = "Orbiters are floating UI elements that stay attached to a panel.",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(top = 16.dp),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    text = "Look for the Settings icon above and the Info bar below.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(top = 24.dp),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+        
+        // Top End Orbiter for Settings
+        Orbiter(
+            anchorPoint = OrbiterAnchorPoint.TopEnd,
+        ) {
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = CircleShape,
+                shadowElevation = 8.dp
+            ) {
+                IconButton(onClick = { /* Action */ }) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Settings",
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
+        }
+
+        // Bottom Orbiter for Info
+        Orbiter(
+            anchorPoint = OrbiterAnchorPoint.Bottom,
+        ) {
+            Surface(
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                shape = MaterialTheme.shapes.medium,
+                shadowElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info, 
+                        contentDescription = null, 
+                        tint = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Projected Orbiter Info",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                }
             }
         }
     }
