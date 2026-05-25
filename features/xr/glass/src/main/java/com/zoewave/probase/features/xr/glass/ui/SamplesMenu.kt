@@ -33,7 +33,19 @@ enum class GlimmerSample(val title: String) {
     ToggleButtons("Toggle Buttons"),
     Typography("Typography"),
     VoiceIndicator("Voice Input Indicator"),
-    Ritual("Morning Ritual Layout")
+    Ritual("Morning Ritual Layout");
+
+    fun next(): GlimmerSample {
+        val entries = entries
+        val index = entries.indexOf(this)
+        return entries[(index + 1) % entries.size]
+    }
+
+    fun previous(): GlimmerSample {
+        val entries = entries
+        val index = entries.indexOf(this)
+        return entries[(index - 1 + entries.size) % entries.size]
+    }
 }
 
 @Composable

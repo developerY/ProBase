@@ -55,6 +55,7 @@ dependencies {
     implementation(project(":features:camera"))
     implementation(project(":features:calendar"))
     implementation(project(":features:xr:glass"))
+    implementation(project(":features:xr:xrglasses"))
     implementation(libs.androidx.projected)
     implementation(project(":features:ai:capture"))
     implementation(project(":features:ai:configuration"))

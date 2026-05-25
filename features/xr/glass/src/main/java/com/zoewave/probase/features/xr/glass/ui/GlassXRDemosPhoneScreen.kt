@@ -6,8 +6,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.CastConnected
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +59,44 @@ fun GlassXRDemosPhoneScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            activeSample?.let { sample ->
+                Surface(
+                    tonalElevation = 8.dp,
+                    shadowElevation = 8.dp,
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                            IconButton(onClick = { viewModel.updateActiveSample(null) }) {
+                                Icon(Icons.Default.Close, contentDescription = "Stop Demo")
+                            }
+                            Spacer(Modifier.width(8.dp))
+                            Column {
+                                Text("Projecting", style = MaterialTheme.typography.labelSmall, color = Color(0xFF4CAF50))
+                                Text(sample.title, style = MaterialTheme.typography.bodyMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                            }
+                        }
+
+                        Row {
+                            IconButton(onClick = { viewModel.updateActiveSample(sample.previous()) }) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous")
+                            }
+                            Spacer(Modifier.width(8.dp))
+                            IconButton(onClick = { viewModel.updateActiveSample(sample.next()) }) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next")
+                            }
+                        }
+                    }
+                }
+            }
         }
     ) { innerPadding ->
         LazyColumn(

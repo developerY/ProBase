@@ -184,15 +184,3 @@ fun SampleNavigationHeader(
     }
 }
 
-private fun GlimmerSample.next(): GlimmerSample {
-    val entries = GlimmerSample.entries
-    val index = entries.indexOf(this)
-    return entries[(index + 1) % entries.size]
-}
-
-private fun GlimmerSample.previous(): GlimmerSample {
-    val entries = GlimmerSample.entries
-    val index = entries.indexOf(this)
-    return entries[(index - 1 + entries.size) % entries.size]
-}
-
