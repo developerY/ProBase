@@ -63,6 +63,7 @@ dependencies {
     implementation(project(":features:readers:barcode"))
     implementation(project(":features:readers:qrscanner"))
 
+    implementation(libs.androidx.projected)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)

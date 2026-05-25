@@ -6,34 +6,36 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ComposeUiFlags
-import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.xr.glimmer.Button
+import androidx.xr.glimmer.Card
 import androidx.xr.glimmer.GlimmerTheme
+import androidx.xr.glimmer.Text
+import androidx.xr.glimmer.surface
 import androidx.xr.projected.ProjectedDeviceController
 import androidx.xr.projected.ProjectedDeviceController.Capability.Companion.CAPABILITY_VISUAL_UI
 import androidx.xr.projected.ProjectedDisplayController
+import androidx.xr.projected.ProjectedDisplayController.PresentationMode
+import androidx.xr.projected.ProjectedDisplayController.PresentationModeFlags
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
 import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
-import com.zoewave.kocolor.mobile.glass.ui.GlassApp
-import com.zoewave.probase.kocolor.data.FashionRepository
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import java.util.function.Consumer
 
 @OptIn(ExperimentalProjectedApi::class)
-@AndroidEntryPoint
-class GlassesMainActivity : ComponentActivity() {
-
-    @Inject lateinit var fashionRepository: FashionRepository
-    private lateinit var audioInterface: KoColorAudioInterface
+class GoogleTestGlassesActivity : ComponentActivity() {
 
     private var displayController: ProjectedDisplayController? = null
     private var isVisualUiSupported by mutableStateOf(false)
@@ -52,17 +54,9 @@ class GlassesMainActivity : ComponentActivity() {
             }
         }
 
-    @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        ComposeUiFlags.isInitialFocusOnFocusableAvailable = true
-
-        audioInterface = KoColorAudioInterface(
-            this,
-            "Welcome to your morning ritual. Let's get started.",
-        )
-        lifecycle.addObserver(audioInterface)
+        android.util.Log.d("GoogleXRTestActivity", "onCreate started")
 
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onDestroy(owner: LifecycleOwner) {
@@ -79,14 +73,12 @@ class GlassesMainActivity : ComponentActivity() {
 
         setContent {
             GlimmerTheme {
-                // We use GlassApp as the entry point, passing the state
-                GlassApp(
+                GoogleTestHomeScreen(
                     areVisualsOn = areVisualsOn,
                     isVisualUiSupported = isVisualUiSupported,
                     isPermissionDenied = isPermissionDenied,
                     onRetryPermission = { requestHardwarePermissions() },
-                    onClose = { finish() },
-                    onSpeak = { text -> audioInterface.speak(text) }
+                    onClose = { finish() }
                 )
             }
         }
@@ -95,12 +87,12 @@ class GlassesMainActivity : ComponentActivity() {
     private fun initializeGlassesFeatures() {
         lifecycleScope.launch {
             // Check device capabilities
-            val projectedDeviceController = ProjectedDeviceController.create(this@GlassesMainActivity)
+            val projectedDeviceController = ProjectedDeviceController.create(this@GoogleTestGlassesActivity)
             isVisualUiSupported = projectedDeviceController.capabilities.contains(CAPABILITY_VISUAL_UI)
 
-            val controller = ProjectedDisplayController.create(this@GlassesMainActivity)
+            val controller = ProjectedDisplayController.create(this@GoogleTestGlassesActivity)
             displayController = controller
-            val observer = GlassesLifecycleObserver(
+            val observer = GoogleExampleObserver(
                 controller = controller,
                 onVisualsChanged = { visualsOn -> areVisualsOn = visualsOn }
             )
@@ -120,18 +112,70 @@ class GlassesMainActivity : ComponentActivity() {
         )
         requestPermissionLauncher.launch(listOf(params))
     }
+}
 
-    override fun onStart() {
-        super.onStart()
-        lifecycleScope.launch {
-            fashionRepository.updateGlassSessionState(isActive = true)
-        }
+@OptIn(ExperimentalProjectedApi::class)
+class GoogleExampleObserver(
+    private val controller: ProjectedDisplayController,
+    private val onVisualsChanged: (Boolean) -> Unit
+) : DefaultLifecycleObserver {
+
+    private val presentationModeListener = Consumer<PresentationModeFlags> { flags ->
+        onVisualsChanged(flags.hasPresentationMode(PresentationMode.VISUALS_ON))
     }
 
-    override fun onStop() {
-        super.onStop()
-        lifecycleScope.launch {
-            fashionRepository.updateGlassSessionState(isActive = false)
+    override fun onStart(owner: LifecycleOwner) {
+        super.onStart(owner)
+        controller.addPresentationModeChangedListener(listener = presentationModeListener)
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        controller.removePresentationModeChangedListener(presentationModeListener)
+    }
+}
+
+@OptIn(ExperimentalProjectedApi::class)
+@Composable
+fun GoogleTestHomeScreen(
+    areVisualsOn: Boolean,
+    isVisualUiSupported: Boolean,
+    isPermissionDenied: Boolean,
+    onRetryPermission: () -> Unit,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .surface()
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isPermissionDenied) {
+            Card(
+                title = { Text("Permissions") },
+                action = { Button(onClick = onClose) { Text("Exit") } }
+            ) {
+                Text("Camera access is needed to use AI glasses features.")
+                Button(onClick = onRetryPermission) { Text("Retry") }
+            }
+        } else if (isVisualUiSupported) {
+            Card(
+                title = { Text("Android XR Test") },
+                action = {
+                    Button(onClick = onClose) {
+                        Text("Close")
+                    }
+                }
+            ) {
+                if (areVisualsOn) {
+                    Text("Hello, AI Glasses! This is the Google Example.")
+                } else {
+                    Text("Display is off. Audio guidance active.")
+                }
+            }
+        } else {
+            Text("Audio Guidance Mode Active")
         }
     }
 }

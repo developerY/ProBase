@@ -17,6 +17,8 @@ dependencies {
     implementation(libs.androidx.glimmer.core)
     implementation(libs.androidx.glimmer.google.fonts)
     implementation(libs.androidx.projected)
+    implementation(libs.androidx.xr.runtime)
+    implementation(libs.androidx.xr.arcore)
 
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.material3)
