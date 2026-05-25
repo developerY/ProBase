@@ -47,7 +47,7 @@ fun AshGlassLayout(
     Box(
         modifier = modifier
             .background(Color.Black) // MANDATORY for additive displays
-            .surface(focusable = false)
+            .surface()
             .fillMaxSize()
             .onFocusChanged {
                 if (it.isFocused) Log.d("FOCUS_DEBUG", "Speed Card got Focus!")

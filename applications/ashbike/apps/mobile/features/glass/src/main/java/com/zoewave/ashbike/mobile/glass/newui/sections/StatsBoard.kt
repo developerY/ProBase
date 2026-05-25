@@ -20,7 +20,7 @@ import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Icon
 import androidx.xr.glimmer.ListItem
 import androidx.xr.glimmer.Text
-import androidx.xr.glimmer.list.VerticalList
+import androidx.xr.glimmer.list.GlimmerLazyColumn
 import com.zoewave.ashbike.mobile.glass.R
 
 
@@ -39,8 +39,8 @@ fun StatsBoard(
     listFocusRequester: FocusRequester? = null
 ) {
     // Card(modifier = modifier) {
-        // CORRECT: Use VerticalList instead of LazyColumn
-        VerticalList(
+        // CORRECT: Use GlimmerLazyColumn instead of LazyColumn
+        GlimmerLazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .then(if (listFocusRequester != null) Modifier.focusRequester(listFocusRequester) else Modifier),
