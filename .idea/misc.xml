@@ -9,6 +9,8 @@
       <file path="$PROJECT_DIR$/applications/rxlogic/docs" />
       <file path="$PROJECT_DIR$/features/health/docs" />
       <file path="$PROJECT_DIR$/features/payment/Docs" />
+      <file path="$PROJECT_DIR$/features/xr/doc" />
+      <file path="$PROJECT_DIR$/features/xr/glass/docs" />
     </excludeRoots>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />

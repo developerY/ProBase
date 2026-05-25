@@ -89,6 +89,8 @@ glimmer = "1.0.0-alpha13"
 projectedXR = "1.0.0-alpha08"
 xrRuntime = "1.0.0-alpha14"
 arcore = "1.0.0-alpha14"
+xrCompose = "1.0.0-alpha14"
+xrScenecore = "1.0.0-alpha15"
 
 # -- Google Services & Firebase --
 playAgeSignals = "0.0.3"
@@ -260,6 +262,8 @@ androidx-glimmer-google-fonts = { group = "androidx.xr.glimmer", name = "glimmer
 androidx-projected = { group = "androidx.xr.projected", name = "projected", version.ref = "projectedXR" }
 androidx-xr-runtime = { group = "androidx.xr.runtime", name = "runtime", version.ref = "xrRuntime" }
 androidx-xr-arcore = { group = "androidx.xr.arcore", name = "arcore", version.ref = "arcore" }
+androidx-xr-compose = { group = "androidx.xr.compose", name = "compose", version.ref = "xrCompose" }
+androidx-xr-scenecore = { group = "androidx.xr.scenecore", name = "scenecore", version.ref = "xrScenecore" }
 
 # -- Firebase & ML --
 google-play-age-signals = { group = "com.google.android.play", name = "age-signals", version.ref = "playAgeSignals" }

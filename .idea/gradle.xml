@@ -194,6 +194,7 @@
             <option value="$PROJECT_DIR$/features/xr/ar/facelab" />
             <option value="$PROJECT_DIR$/features/xr/ar/naillab" />
             <option value="$PROJECT_DIR$/features/xr/glass" />
+            <option value="$PROJECT_DIR$/features/xr/xrglasses" />
           </set>
         </option>
       </GradleProjectSettings>

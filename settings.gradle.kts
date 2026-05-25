@@ -47,6 +47,7 @@ include(":features:calendar")
 include(":features:xr:ar:naillab")
 include(":features:xr:ar:facelab")
 include(":features:xr:glass")
+include(":features:xr:xrglasses")
 include(":features:payment:googlepay")
 include(":features:payment:stripe")
 
