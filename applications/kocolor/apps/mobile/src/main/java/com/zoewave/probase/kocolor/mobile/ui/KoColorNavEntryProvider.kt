@@ -6,8 +6,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
-import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import androidx.xr.projected.ProjectedContext
+import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
@@ -299,7 +299,7 @@ fun koColorNavEntryProvider(
                     try {
                         android.util.Log.d("NavEntryProvider", "Attempting projected activity launch (API 35+) with options")
                         val options = ProjectedContext.createProjectedActivityOptions(context)
-                        val intent = android.content.Intent(context, com.zoewave.kocolor.mobile.glass.GoogleTestGlassesActivity::class.java).apply {
+                        val intent = android.content.Intent(context, com.zoewave.probase.features.xr.glass.GoogleTestGlassesActivity::class.java).apply {
                             addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                         }
                         context.startActivity(intent, options.toBundle())
@@ -309,7 +309,7 @@ fun koColorNavEntryProvider(
                     }
                 } else {
                     android.util.Log.d("NavEntryProvider", "Attempting standard activity launch (API < 35)")
-                    val intent = android.content.Intent(context, com.zoewave.kocolor.mobile.glass.GoogleTestGlassesActivity::class.java).apply {
+                    val intent = android.content.Intent(context, com.zoewave.probase.features.xr.glass.GoogleTestGlassesActivity::class.java).apply {
                         addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
                     context.startActivity(intent)

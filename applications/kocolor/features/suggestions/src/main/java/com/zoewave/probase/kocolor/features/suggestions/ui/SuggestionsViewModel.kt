@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 sealed class SuggestionsLoadingState {
     data object Idle : SuggestionsLoadingState()
@@ -32,7 +33,7 @@ sealed class SuggestionsEvent {
 class SuggestionsViewModel @Inject constructor(
     private val suggestionEngine: SuggestionEngine,
     private val fashionRepository: FashionRepository,
-    private val aiSettings: AiConfigurationSettings
+    @Named("KoColor") private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
     private val _loadingState = MutableStateFlow<SuggestionsLoadingState>(SuggestionsLoadingState.Idle)

@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 enum class SortOption {
     NEWEST, EXPIRY, COST_PER_USE, BRAND
@@ -78,7 +79,7 @@ class CosmeticsViewModel @Inject constructor(
     private val cosmeticDao: CosmeticDao,
     private val sessionRepository: FashionSessionRepository,
     private val analyzerEngine: AnalyzerEngine,
-    private val aiSettings: AiConfigurationSettings
+    @Named("KoColor") private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
     private val _isAnalyzing = MutableStateFlow(false)
