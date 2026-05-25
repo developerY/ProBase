@@ -14,9 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.xr.arcore.Plane
 import androidx.xr.compose.platform.LocalSession
-import androidx.xr.compose.spatial.Subspace
 import androidx.xr.compose.subspace.SpatialPanel
 import androidx.xr.compose.subspace.layout.SubspaceModifier
+import androidx.xr.compose.subspace.layout.height
+import androidx.xr.compose.subspace.layout.width
 
 @Composable
 fun PlaneDetectionSample() {
@@ -31,23 +32,25 @@ fun PlaneDetectionSample() {
         }
     }
 
-    Subspace {
-        SpatialPanel(modifier = SubspaceModifier) {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Text(
-                    "Plane Detection",
-                    modifier = Modifier.padding(24.dp),
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                Text(
-                    "Detected Planes: $planeCount",
-                    modifier = Modifier.padding(top = 8.dp),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
+    SpatialPanel(
+        modifier = SubspaceModifier
+            .width(800.dp)
+            .height(600.dp)
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.primaryContainer,
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Text(
+                "Plane Detection",
+                modifier = Modifier.padding(24.dp),
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Text(
+                "Detected Planes: $planeCount",
+                modifier = Modifier.padding(top = 8.dp),
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
     }
 }

@@ -2,17 +2,29 @@ package com.zoewave.probase.features.xr.xrglasses.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.ui.Alignment
+import androidx.xr.compose.platform.LocalSession
+import androidx.xr.compose.spatial.Orbiter
+import androidx.xr.compose.spatial.OrbiterAnchorPoint
+import androidx.xr.compose.spatial.Subspace
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.FaceEyeTrackingSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.PlaneDetectionSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.UserTrackingSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.OrbiterSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SpatialDialogSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SpatialElevationSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SpatialLayoutSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SpatialPanelSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SpatialPopupSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SubspaceModifierSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SubspaceSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.AnchoringSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.GltfModelSample
@@ -31,6 +43,11 @@ sealed class XRSample(val title: String) {
     data object SpatialPanel : XRSample("Spatial Panel")
     data object Orbiter : XRSample("Orbiter")
     data object Subspace : XRSample("Subspace")
+    data object SpatialDialog : XRSample("Spatial Dialog")
+    data object SpatialPopup : XRSample("Spatial Popup")
+    data object SpatialElevation : XRSample("Spatial Elevation")
+    data object SpatialLayout : XRSample("Spatial Layout")
+    data object SubspaceModifier : XRSample("Subspace Modifier")
     // SceneCore
     data object GltfModel : XRSample("GLTF Model")
     data object Anchoring : XRSample("Anchoring")
@@ -46,13 +63,50 @@ sealed class XRSample(val title: String) {
 fun FullXRApp(onClose: () -> Unit) {
     var currentCategory by remember { mutableStateOf<XRSampleCategory>(XRSampleCategory.None) }
     var currentSample by remember { mutableStateOf<XRSample>(XRSample.None) }
+    val session = LocalSession.current
 
     if (currentSample != XRSample.None) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        // 2D Fallback / Control UI
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Running: ${currentSample.title}") },
+                    navigationIcon = {
+                        IconButton(onClick = { currentSample = XRSample.None }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier.padding(innerPadding).fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text("The sample is rendering in 3D Space.", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(16.dp))
+                
+                if (session != null) {
+                    Text("The XR session is active. Use the emulator's 'Home' and 'Immersive' toggles or your app's programmatic mode requests to transition.", style = MaterialTheme.typography.bodySmall)
+                } else {
+                    Text("XR Session not detected. Ensure you are on an XR device.", color = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
+
+        // 3D Spatial UI
+        Subspace {
+            // Render the actual sample
             when (currentSample) {
                 XRSample.SpatialPanel -> SpatialPanelSample()
                 XRSample.Orbiter -> OrbiterSample()
                 XRSample.Subspace -> SubspaceSample()
+                XRSample.SpatialDialog -> SpatialDialogSample()
+                XRSample.SpatialPopup -> SpatialPopupSample()
+                XRSample.SpatialElevation -> SpatialElevationSample()
+                XRSample.SpatialLayout -> SpatialLayoutSample()
+                XRSample.SubspaceModifier -> SubspaceModifierSample()
                 XRSample.GltfModel -> GltfModelSample()
                 XRSample.Anchoring -> AnchoringSample()
                 XRSample.Transform -> TransformSample()
@@ -61,13 +115,24 @@ fun FullXRApp(onClose: () -> Unit) {
                 XRSample.FaceEyeTracking -> FaceEyeTrackingSample()
                 else -> {}
             }
-            
-            // Back button for samples (since they are full screen XR)
-            IconButton(
-                onClick = { currentSample = XRSample.None },
-                modifier = Modifier.padding(16.dp).statusBarsPadding()
+
+            // Centralized Spatial Exit Orbiter (floats in 3D)
+            Orbiter(
+                anchorPoint = OrbiterAnchorPoint.TopStart,
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Exit Sample")
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    shape = CircleShape,
+                    shadowElevation = 12.dp
+                ) {
+                    IconButton(onClick = { currentSample = XRSample.None }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack, 
+                            contentDescription = "Exit Sample",
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
             }
         }
         return
@@ -150,6 +215,31 @@ fun ComposeXRSamples(onSampleSelected: (XRSample) -> Unit) {
             headlineContent = { Text("Subspace") }, 
             supportingContent = { Text("Defining 3D volumes.") },
             modifier = Modifier.clickable { onSampleSelected(XRSample.Subspace) }
+        )
+        ListItem(
+            headlineContent = { Text("Spatial Dialog") }, 
+            supportingContent = { Text("3D dialogs with depth.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.SpatialDialog) }
+        )
+        ListItem(
+            headlineContent = { Text("Spatial Popup") }, 
+            supportingContent = { Text("Contextual menus in 3D.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.SpatialPopup) }
+        )
+        ListItem(
+            headlineContent = { Text("Spatial Elevation") }, 
+            supportingContent = { Text("Z-axis depth levels.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.SpatialElevation) }
+        )
+        ListItem(
+            headlineContent = { Text("Spatial Layout") }, 
+            supportingContent = { Text("Row, Column, and Curved Row.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.SpatialLayout) }
+        )
+        ListItem(
+            headlineContent = { Text("Subspace Modifiers") }, 
+            supportingContent = { Text("Offset, Rotate, and Movable.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.SubspaceModifier) }
         )
     }
 }
