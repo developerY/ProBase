@@ -24,6 +24,7 @@ import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.ai.capture.ui.SmartCaptureUiRoute
 import com.zoewave.probase.features.xr.glass.ui.GlassXRDemosPhoneScreen
 import com.zoewave.probase.features.xr.glass.GlassesMainActivity
+import com.zoewave.probase.features.xr.xrglasses.XRGlassesActivity
 import com.zoewave.probase.photodo.features.smartadvice.ui.SmartAdviceUiRoute
 
 @OptIn(ExperimentalProjectedApi::class)
@@ -48,7 +49,13 @@ fun featureInventoryEntryProvider(
                     onNavigateToCamera = { navigateTo(FeatureInventory.Camera) }, // ✅ Added Camera Callback
                     onNavigateToCalendar = { navigateTo(FeatureInventory.Calendar) },
                     onNavigateToSmartCapture = { navigateTo(FeatureInventory.SmartCapture) },
-                    onNavigateToGlassXR = { navigateTo(FeatureInventory.GlassXR) }
+                    onNavigateToGlassXR = { navigateTo(FeatureInventory.GlassXR) },
+                    onNavigateToFullXR = { 
+                        val intent = Intent(context, XRGlassesActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
+                    }
                 )
             }
 
