@@ -1,5 +1,6 @@
 package com.zoewave.probase.features.xr.xrglasses.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -7,6 +8,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.FaceEyeTrackingSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.PlaneDetectionSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.UserTrackingSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.OrbiterSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SpatialPanelSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SubspaceSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.AnchoringSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.GltfModelSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.TransformSample
 
 sealed class XRSampleCategory(val title: String) {
     data object Compose : XRSampleCategory("Compose for XR")
@@ -15,10 +25,53 @@ sealed class XRSampleCategory(val title: String) {
     data object None : XRSampleCategory("Menu")
 }
 
+sealed class XRSample(val title: String) {
+    data object None : XRSample("None")
+    // Compose
+    data object SpatialPanel : XRSample("Spatial Panel")
+    data object Orbiter : XRSample("Orbiter")
+    data object Subspace : XRSample("Subspace")
+    // SceneCore
+    data object GltfModel : XRSample("GLTF Model")
+    data object Anchoring : XRSample("Anchoring")
+    data object Transform : XRSample("Transform")
+    // ARCore
+    data object PlaneDetection : XRSample("Plane Detection")
+    data object UserTracking : XRSample("User Tracking")
+    data object FaceEyeTracking : XRSample("Face & Eye Tracking")
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FullXRApp(onClose: () -> Unit) {
     var currentCategory by remember { mutableStateOf<XRSampleCategory>(XRSampleCategory.None) }
+    var currentSample by remember { mutableStateOf<XRSample>(XRSample.None) }
+
+    if (currentSample != XRSample.None) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            when (currentSample) {
+                XRSample.SpatialPanel -> SpatialPanelSample()
+                XRSample.Orbiter -> OrbiterSample()
+                XRSample.Subspace -> SubspaceSample()
+                XRSample.GltfModel -> GltfModelSample()
+                XRSample.Anchoring -> AnchoringSample()
+                XRSample.Transform -> TransformSample()
+                XRSample.PlaneDetection -> PlaneDetectionSample()
+                XRSample.UserTracking -> UserTrackingSample()
+                XRSample.FaceEyeTracking -> FaceEyeTrackingSample()
+                else -> {}
+            }
+            
+            // Back button for samples (since they are full screen XR)
+            IconButton(
+                onClick = { currentSample = XRSample.None },
+                modifier = Modifier.padding(16.dp).statusBarsPadding()
+            ) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Exit Sample")
+            }
+        }
+        return
+    }
 
     Scaffold(
         topBar = {
@@ -37,9 +90,9 @@ fun FullXRApp(onClose: () -> Unit) {
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             when (currentCategory) {
                 XRSampleCategory.None -> FullXRMenu(onCategorySelected = { currentCategory = it })
-                XRSampleCategory.Compose -> ComposeXRSamples()
-                XRSampleCategory.SceneCore -> SceneCoreSamples()
-                XRSampleCategory.ARCore -> ARCoreSamples()
+                XRSampleCategory.Compose -> ComposeXRSamples(onSampleSelected = { currentSample = it })
+                XRSampleCategory.SceneCore -> SceneCoreSamples(onSampleSelected = { currentSample = it })
+                XRSampleCategory.ARCore -> ARCoreSamples(onSampleSelected = { currentSample = it })
             }
         }
     }
@@ -80,32 +133,67 @@ fun XRMenuCard(title: String, description: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun ComposeXRSamples() {
-    // Placeholder for actual XR Compose components
+fun ComposeXRSamples(onSampleSelected: (XRSample) -> Unit) {
     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Spatial UI Components", style = MaterialTheme.typography.headlineSmall)
-        ListItem(headlineContent = { Text("Spatial Panel") }, supportingContent = { Text("Traditional 2D UI in 3D space.") })
-        ListItem(headlineContent = { Text("Orbiter") }, supportingContent = { Text("Floating elements around a panel.") })
-        ListItem(headlineContent = { Text("Subspace") }, supportingContent = { Text("Defining 3D volumes.") })
+        ListItem(
+            headlineContent = { Text("Spatial Panel") }, 
+            supportingContent = { Text("Traditional 2D UI in 3D space.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.SpatialPanel) }
+        )
+        ListItem(
+            headlineContent = { Text("Orbiter") }, 
+            supportingContent = { Text("Floating elements around a panel.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.Orbiter) }
+        )
+        ListItem(
+            headlineContent = { Text("Subspace") }, 
+            supportingContent = { Text("Defining 3D volumes.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.Subspace) }
+        )
     }
 }
 
 @Composable
-fun SceneCoreSamples() {
+fun SceneCoreSamples(onSampleSelected: (XRSample) -> Unit) {
     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("SceneCore 3D Manipulation", style = MaterialTheme.typography.headlineSmall)
-        ListItem(headlineContent = { Text("GLTF Model Viewer") }, supportingContent = { Text("Load .gltf / .glb assets.") })
-        ListItem(headlineContent = { Text("Surface Anchoring") }, supportingContent = { Text("Place objects on floor/tables.") })
-        ListItem(headlineContent = { Text("Transform System") }, supportingContent = { Text("Rotate, Scale, Move 3D entities.") })
+        ListItem(
+            headlineContent = { Text("GLTF Model Viewer") }, 
+            supportingContent = { Text("Load .gltf / .glb assets.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.GltfModel) }
+        )
+        ListItem(
+            headlineContent = { Text("Surface Anchoring") }, 
+            supportingContent = { Text("Place objects on floor/tables.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.Anchoring) }
+        )
+        ListItem(
+            headlineContent = { Text("Transform System") }, 
+            supportingContent = { Text("Rotate, Scale, Move 3D entities.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.Transform) }
+        )
     }
 }
 
 @Composable
-fun ARCoreSamples() {
+fun ARCoreSamples(onSampleSelected: (XRSample) -> Unit) {
     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("ARCore Perception Features", style = MaterialTheme.typography.headlineSmall)
-        ListItem(headlineContent = { Text("Plane Detection") }, supportingContent = { Text("Visualize detected surfaces.") })
-        ListItem(headlineContent = { Text("User Tracking") }, supportingContent = { Text("Position and orientation monitoring.") })
-        ListItem(headlineContent = { Text("Face & Eye Tracking") }, supportingContent = { Text("Immersive gaze-based interaction.") })
+        ListItem(
+            headlineContent = { Text("Plane Detection") }, 
+            supportingContent = { Text("Visualize detected surfaces.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.PlaneDetection) }
+        )
+        ListItem(
+            headlineContent = { Text("User Tracking") }, 
+            supportingContent = { Text("Position and orientation monitoring.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.UserTracking) }
+        )
+        ListItem(
+            headlineContent = { Text("Face & Eye Tracking") }, 
+            supportingContent = { Text("Immersive gaze-based interaction.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.FaceEyeTracking) }
+        )
     }
 }
