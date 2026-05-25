@@ -54,6 +54,8 @@ dependencies {
     implementation(project(":features:readers:barcode"))
     implementation(project(":features:camera"))
     implementation(project(":features:calendar"))
+    implementation(project(":features:xr:glass"))
+    implementation(libs.androidx.projected)
     implementation(project(":features:ai:capture"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":applications:photodo:features:smartadvice"))
