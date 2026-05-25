@@ -16,12 +16,47 @@ Here is an architectural breakdown of the `androidx/xr` modules shown in your sc
 | **`testutils`** | ✅ Yes | ✅ Yes | ✅ Yes | Shared instrumentation and unit testing utilities across all XR environments. |
 
 ---
+## XRGlass vs VR code differences
+The underlying promise of the Android XR SDK is that you are building against a unified "Immersive" track.
+
+From a strict API perspective, the code you write to launch a `SpatialPanel`, load a 3D `.gltf` model using `SceneCore`, or anchor an object to a table via `ARCore` is exactly the same for both devices. The operating system's compositor handles the heavy lifting of translating that code to the specific hardware.
+
+However, while the *code* is the same, the **design paradigms and edge cases** are very different. You will almost certainly find yourself writing conditional logic (e.g., `if (hardware == glasses)`) to account for these three major differences:
+
+### 1. Additive vs. Opaque Rendering (The "Black" Problem)
+
+This is the biggest hurdle when sharing code between the two.
+
+* **VR Headsets** use opaque screens with camera passthrough. If you render a pure black `#000000` background, the user sees a black box blocking their view of the room.
+* **XR Glasses** use optical see-through displays (additive light). They physically cannot render the color black. Rendering `#000000` essentially turns off those pixels, making them **100% transparent**.
+
+If your app uses a standard "Dark Mode" theme, it will look fantastic in VR but will be almost entirely invisible on XR Glasses because the dark backgrounds will just vanish into the real world.
+
+### 2. Field of View (FOV) Constraints
+
+* **VR Headsets** have a massive field of view (often 90 to 110+ degrees). You can spread your Spatial Panels out, throw orbiters wide, and expect the user to turn their head to see things.
+* **XR Glasses** have a much narrower "letterbox" field of view (often 40 to 50 degrees). If you place a spatial panel too far to the side, it will clip awkwardly out of the user's view, breaking the illusion. When coding for glasses, your UI needs to be much more tightly grouped around the center axis.
+
+### 3. Full Immersion
+
+* **VR Headsets** allow you to turn off camera passthrough entirely and plunge the user into a 100% virtual environment (like a video game).
+* **XR Glasses** *always* show the physical world. If you write code that attempts to trigger a fully immersive, 360-degree virtual skybox, the headset will execute it, but the glasses will either ignore the command or it will look completely broken.
+
+---
+
+In short: you get to use the exact same Compose architecture and 3D libraries, but you have to design your UI to survive the physical limitations of optical lenses.
+
+Since you are looking at migrating that "System Features Inventory" Compose app we saw earlier, are you planning to port the existing UI directly into a 3D panel, or are you looking to rebuild the experience completely from the ground up for spatial?
+
+---
 
 ### Architectural Summary
 
 * **The Immersive Stack (`compose`, `scenecore`, `arcore`, `runtime`, `assets`):** These modules form the heavy-duty spatial architecture. If you are building high-performance, 6DoF applications that need to understand the physical room or render objects in true 3D space, you will rely on this stack. It runs identically across both fully immersive headsets and optical see-through XR glasses.
 * **The Projected Stack (`glimmer`, `projected`):** This is the lightweight, 2D-constrained architecture. It bypasses the spatial and 3D rendering engines entirely to deliver low-power, localized UI explicitly for AI Glasses.
 
+
+# Coding
 [Code in this feature directory](https://github.com/androidx/androidx/tree/androidx-main/xr/glimmer/glimmer/samples)
 
 This directory contains sample applications demonstrating how to use the XR libraries:
@@ -171,5 +206,24 @@ Box(
 
 * **Gaze-and-Pinch:** The system automatically handles the "hover" state when a user looks at a `spatialClickable` element.
 * **Entity Input:** For 3D objects (Entities) created via SceneCore, use `setEntityInputListener` to capture 6DoF interactions that occur outside of the Compose layout bounds.
+
+```kotlin
+// Example: Handling input on a 3D Entity (SceneCore)
+val modelEntity = GltfModelEntity.create(context, "models/robot.gltf")
+
+modelEntity.setEntityInputListener { event ->
+    when (event.action) {
+        InputEvent.ACTION_HOVER_ENTER -> {
+            // User is looking at the object (Gaze)
+            modelEntity.setPointerSelected(true)
+        }
+        InputEvent.ACTION_DOWN -> {
+            // User performed a "pinch" or trigger click
+            playAnimation(modelEntity)
+        }
+    }
+    true // Consume the event
+}
+```
 
 ---
