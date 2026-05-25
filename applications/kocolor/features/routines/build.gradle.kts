@@ -16,7 +16,7 @@ dependencies {
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:db"))
     implementation(project(":applications:kocolor:data"))
-    implementation(project(":applications:kocolor:apps:mobile:features:glass"))
+    implementation(project(":features:xr:glass"))
 
     implementation(libs.androidx.projected)
     implementation(libs.androidx.compose.material.icons.extended)
