@@ -47,7 +47,8 @@ fun FeatureInventoryScreen(
     onNavigateToCamera: () -> Unit, // ✅ Added Camera Callback
     onNavigateToCalendar: () -> Unit,
     onNavigateToSmartCapture: () -> Unit,
-    onNavigateToGlassXR: () -> Unit
+    onNavigateToGlassXR: () -> Unit,
+    onNavigateToFullXR: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -142,6 +143,14 @@ fun FeatureInventoryScreen(
                     description = "Projected UI samples for display glasses.",
                     icon = Icons.Default.AutoAwesome, // You can find a better icon later
                     onClick = onNavigateToGlassXR
+                )
+            }
+            item {
+                FeatureCard(
+                    title = "Full XR Showcase",
+                    description = "Spatial UI, 3D Models, and Perception for XR Glasses.",
+                    icon = Icons.Default.AutoAwesome,
+                    onClick = onNavigateToFullXR
                 )
             }
 

@@ -38,5 +38,8 @@ sealed interface FeatureInventory : NavKey {
     data object GlassXR : FeatureInventory
 
     @Serializable
+    data object FullXR : FeatureInventory
+
+    @Serializable
     data class SmartAdvice(val projectId: Long) : FeatureInventory
 }
