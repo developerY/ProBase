@@ -12,6 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 data class StyleSimulatorUiState(
     val morningRoutineCompleted: Boolean = false,
@@ -43,7 +44,7 @@ class StyleSimulatorViewModel @Inject constructor(
     private val routineDao: RoutineDao,
     private val wardrobeRepository: WardrobeRepository,
     private val simulatorEngine: StyleSimulatorEngine,
-    private val aiSettings: AiConfigurationSettings
+    @Named("KoColor") private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StyleSimulatorUiState())

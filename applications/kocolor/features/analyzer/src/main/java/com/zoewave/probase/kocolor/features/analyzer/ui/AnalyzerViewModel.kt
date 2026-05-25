@@ -18,6 +18,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 sealed class AnalyzerUiState {
     data object Idle : AnalyzerUiState()
@@ -55,7 +56,7 @@ class AnalyzerViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val analyzerEngine: AnalyzerEngine,
     private val fashionRepository: FashionRepository,
-    private val aiSettings: AiConfigurationSettings,
+    @Named("KoColor") private val aiSettings: AiConfigurationSettings,
     private val sessionRepository: FashionSessionRepository,
     private val locationRepository: LocationRepository
 ) : ViewModel() {

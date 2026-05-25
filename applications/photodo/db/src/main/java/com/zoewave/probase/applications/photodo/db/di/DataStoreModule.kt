@@ -14,6 +14,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Named
 import javax.inject.Singleton
 
 // TOP-LEVEL: the actual file-backed DataStore<Preferences>
@@ -43,12 +44,14 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    @Named("PhotoDo")
     abstract fun bindAiConfigurationSettings(
         impl: AppSettingsRepository
     ): AiConfigurationSettings
 
     @Binds
     @Singleton
+    @Named("PhotoDo")
     abstract fun bindSmartCaptureSettings(
         impl: RealSmartCaptureSettings
     ): SmartCaptureSettings
