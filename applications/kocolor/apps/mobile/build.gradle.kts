@@ -45,7 +45,7 @@ dependencies {
     implementation(project(":applications:kocolor:apps:mobile:core"))
     implementation(project(":applications:kocolor:apps:mobile:features:home"))
     implementation(project(":applications:kocolor:apps:mobile:features:settings"))
-    implementation(project(":applications:kocolor:apps:mobile:features:glass"))
+    implementation(project(":features:xr:glass"))
     
     implementation(project(":applications:kocolor:features:analyzer"))
     implementation(project(":applications:kocolor:features:suggestions"))
@@ -53,8 +53,8 @@ dependencies {
     implementation(project(":applications:kocolor:features:inventory"))
     implementation(project(":applications:kocolor:features:routines"))
     implementation(project(":applications:kocolor:features:cosmetics"))
-    implementation(project(":features:ar:naillab"))
-    implementation(project(":features:ar:facelab"))
+    implementation(project(":features:xr:ar:naillab"))
+    implementation(project(":features:xr:ar:facelab"))
     
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:ai:capture"))

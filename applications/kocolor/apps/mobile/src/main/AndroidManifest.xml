@@ -42,25 +42,5 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="com.zoewave.kocolor.mobile.glass.GlassesMainActivity"
-            android:exported="true"
-            android:label="Morning Ritual Glass"
-            android:requiredDisplayCategory="xr_projected">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name="com.zoewave.kocolor.mobile.glass.GoogleTestGlassesActivity"
-            android:exported="true"
-            android:label="Google XR Test"
-            android:requiredDisplayCategory="xr_projected">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-        </activity>
-
     </application>
 </manifest>
