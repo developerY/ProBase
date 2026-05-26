@@ -2,6 +2,7 @@ package com.zoewave.probase.features.xr.glass.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.features.xr.glass.data.GlassSessionRepository
 import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
@@ -18,7 +19,8 @@ import javax.inject.Inject
 class GlassViewModel @Inject constructor(
     private val routineDao: RoutineDao,
     private val cosmeticDao: CosmeticDao,
-    private val aiSessionManager: FirebaseLiveSessionManager
+    private val aiSessionManager: FirebaseLiveSessionManager,
+    private val glassSessionRepository: GlassSessionRepository
 ) : ViewModel() {
 
     private val _currentDate = MutableStateFlow(getStartOfDay(System.currentTimeMillis()))
@@ -29,13 +31,21 @@ class GlassViewModel @Inject constructor(
         _currentDate.flatMapLatest { date ->
             val start = date
             val end = start + 86400000L
-            routineDao.getRoutinesForDay(start, end).map { routines ->
-                val models = routines.map { it.toModel() }
-                val currentTime = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+            combine(
+                routineDao.getRoutinesForDay(start, end).map { routines -> routines.map { it.toModel() } },
+                glassSessionRepository.requestedRoutineTime
+            ) { models, requestedTimeName ->
+                val requestedTime = requestedTimeName?.let { 
+                    try { RoutineTime.valueOf(it) } catch (e: Exception) { null } 
+                }
                 
-                // Smart select: If it's late (after 3 PM), show Evening, otherwise Morning
-                val targetTime = if (currentTime >= 15) RoutineTime.EVENING else RoutineTime.MORNING
-                models.find { it.time == targetTime } ?: models.firstOrNull()
+                if (requestedTime != null) {
+                    models.find { it.time == requestedTime } ?: models.firstOrNull()
+                } else {
+                    val currentTime = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+                    val targetTime = if (currentTime >= 15) RoutineTime.EVENING else RoutineTime.MORNING
+                    models.find { it.time == targetTime } ?: models.firstOrNull()
+                }
             }
         },
         _isAiActive,

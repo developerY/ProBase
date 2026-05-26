@@ -40,11 +40,11 @@ sealed class RoutinesEvent {
     data class LinkProduct(val routineId: Long, val stepId: String, val productId: Long) : RoutinesEvent()
     data class ReorderSteps(val routineId: Long, val fromIndex: Int, val toIndex: Int) : RoutinesEvent()
     data class ResetRoutine(val routineId: Long) : RoutinesEvent()
-    data object ProjectToGlass : RoutinesEvent()
+    data class ProjectToGlass(val time: RoutineTime) : RoutinesEvent()
 }
 
 sealed class RoutinesSideEffect {
-    data object LaunchGlassProjection : RoutinesSideEffect()
+    data class LaunchGlassProjection(val time: RoutineTime) : RoutinesSideEffect()
 }
 
 @HiltViewModel
@@ -156,9 +156,9 @@ class RoutinesViewModel @Inject constructor(
             is RoutinesEvent.LinkProduct -> linkProductToStep(event.routineId, event.stepId, event.productId)
             is RoutinesEvent.ReorderSteps -> reorderSteps(event.routineId, event.fromIndex, event.toIndex)
             is RoutinesEvent.ResetRoutine -> resetRoutine(event.routineId)
-            RoutinesEvent.ProjectToGlass -> {
+            is RoutinesEvent.ProjectToGlass -> {
                 viewModelScope.launch {
-                    _sideEffect.emit(RoutinesSideEffect.LaunchGlassProjection)
+                    _sideEffect.emit(RoutinesSideEffect.LaunchGlassProjection(event.time))
                 }
             }
         }

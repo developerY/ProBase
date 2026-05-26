@@ -81,7 +81,7 @@ fun RoutineDetailScreen(
                 actions = {
                     GlassConnectionHeaderAction(
                         buttonState = state.glassButtonState,
-                        onButtonClick = { onEvent(RoutinesEvent.ProjectToGlass) },
+                        onButtonClick = { onEvent(RoutinesEvent.ProjectToGlass(routine.time)) },
                         modifier = Modifier.size(40.dp)
                     )
                     Spacer(Modifier.width(8.dp))

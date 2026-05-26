@@ -56,17 +56,6 @@ fun RoutinesScreen(
                     IconButton(onClick = { navTo(KoColorRoute.Home) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                },
-                actions = {
-                    GlassConnectionHeaderAction(
-                        buttonState = uiState.glassButtonState,
-                        onButtonClick = { onEvent(RoutinesEvent.ProjectToGlass) },
-                        modifier = Modifier.size(40.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    IconButton(onClick = { /* Settings or Rearrange */ }) { 
-                        Icon(Icons.Default.Reorder, null) 
-                    }
                 }
             )
         }

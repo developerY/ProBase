@@ -18,7 +18,8 @@ import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalProjectedApi::class)
 @Composable
-fun RoutinesUiRoute(
+fun RoutineDetailUiRoute(
+    routineId: Long,
     onNavigateTo: (KoColorRoute) -> Unit,
     viewModel: RoutinesViewModel = hiltViewModel()
 ) {
@@ -50,11 +51,10 @@ fun RoutinesUiRoute(
                             }
                             context.startActivity(intent, options.toBundle())
                         } catch (e: Exception) {
-                            Log.e("RoutinesUiRoute", "Projection Launch Failed", e)
+                            Log.e("RoutineDetailUiRoute", "Projection Launch Failed", e)
                             Toast.makeText(context, "Projection Failed: ${e.message}", Toast.LENGTH_LONG).show()
                         }
                     } else {
-                        // Fallback for older API levels - start activity normally
                         try {
                             val intent = Intent(context, GlassesMainActivity::class.java).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -63,7 +63,7 @@ fun RoutinesUiRoute(
                             }
                             context.startActivity(intent)
                         } catch (e: Exception) {
-                            Log.e("RoutinesUiRoute", "Launch Failed", e)
+                            Log.e("RoutineDetailUiRoute", "Launch Failed", e)
                         }
                     }
                 }
@@ -71,8 +71,8 @@ fun RoutinesUiRoute(
         }
     }
 
-    RoutinesScreen(
-        uiState = uiState,
+    RoutineDetailScreen(
+        uiState = RoutineDetailUiState(routineId, uiState),
         onEvent = viewModel::onEvent,
         navTo = onNavigateTo
     )
