@@ -25,12 +25,16 @@ import com.zoewave.probase.kocolor.features.inventory.util.toComposeColor
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+data class ColorVerificationUiState(
+    val items: List<ClothingItem> = emptyList()
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun ColorVerificationRoutePreview() {
     MaterialTheme {
         ColorVerificationRoute(
-            uiState = WardrobeUiState(),
+            uiState = ColorVerificationUiState(),
             onEvent = {},
             navTo = {}
         )
@@ -40,13 +44,13 @@ private fun ColorVerificationRoutePreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColorVerificationRoute(
-    uiState: WardrobeUiState,
+    uiState: ColorVerificationUiState,
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     ColorVerificationScreen(
-        uiState = uiState.items,
-        onEvent = {},
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo
     )
 }
@@ -56,7 +60,9 @@ fun ColorVerificationRoute(
 private fun ColorVerificationScreenPreview() {
     MaterialTheme {
         ColorVerificationScreen(
-            uiState = listOf(ClothingItem(name = "Item", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS)),
+            uiState = ColorVerificationUiState(
+                items = listOf(ClothingItem(name = "Item", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS))
+            ),
             onEvent = {},
             navTo = {}
         )
@@ -66,8 +72,8 @@ private fun ColorVerificationScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColorVerificationScreen(
-    uiState: List<ClothingItem>,
-    onEvent: (Unit) -> Unit,
+    uiState: ColorVerificationUiState,
+    onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
@@ -89,7 +95,7 @@ fun ColorVerificationScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(uiState) { item ->
+            items(uiState.items) { item ->
                 ColorVerificationItem(uiState = item, onEvent = {}, navTo = {})
             }
         }

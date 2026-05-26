@@ -30,14 +30,22 @@ import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import java.text.NumberFormat
 import java.util.Locale
 
+data class WardrobeCategoryCoverUiState(
+    val categoryName: String,
+    val wardrobeUiState: WardrobeUiState
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun WardrobeCategoryCoverScreenPreview() {
     MaterialTheme {
         WardrobeCategoryCoverScreen(
-            uiState = "Tops" to WardrobeUiState(
-                items = listOf(
-                    com.zoewave.probase.kocolor.model.ClothingItem(id = 1, name = "Silk Shirt", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 85.0)
+            uiState = WardrobeCategoryCoverUiState(
+                categoryName = "Tops",
+                wardrobeUiState = WardrobeUiState(
+                    items = listOf(
+                        com.zoewave.probase.kocolor.model.ClothingItem(id = 1, name = "Silk Shirt", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 85.0)
+                    )
                 )
             ),
             onEvent = {},
@@ -49,12 +57,12 @@ private fun WardrobeCategoryCoverScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WardrobeCategoryCoverScreen(
-    uiState: Pair<String, WardrobeUiState>,
+    uiState: WardrobeCategoryCoverUiState,
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val categoryName = uiState.first
-    val state = uiState.second
+    val categoryName = uiState.categoryName
+    val state = uiState.wardrobeUiState
     val items = remember(state.items, categoryName) {
         state.items.filter { it.category.name.contains(categoryName, ignoreCase = true) }
     }
