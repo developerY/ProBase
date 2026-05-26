@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoewave.probase.kocolor.features.routines.ui.components.GlassConnectionCard
+import com.zoewave.probase.kocolor.features.routines.ui.components.GlassConnectionHeaderAction
 import com.zoewave.probase.kocolor.model.*
 
 @Preview(showBackground = true)
@@ -58,7 +58,15 @@ fun RoutinesScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Settings */ }) { Icon(Icons.Default.Settings, null) }
+                    GlassConnectionHeaderAction(
+                        buttonState = uiState.glassButtonState,
+                        onButtonClick = { onEvent(RoutinesEvent.ProjectToGlass) },
+                        modifier = Modifier.size(40.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    IconButton(onClick = { /* Settings or Rearrange */ }) { 
+                        Icon(Icons.Default.Reorder, null) 
+                    }
                 }
             )
         }
@@ -94,13 +102,6 @@ fun RoutinesScreen(
                 }
             }
 
-            item {
-                GlassConnectionCard(
-                    buttonState = uiState.glassButtonState,
-                    onButtonClick = { onEvent(RoutinesEvent.ProjectToGlass) }
-                )
-            }
-            
             item {
                 uiState.eveningRoutine?.let { routine ->
                     HeroRitualCard(
