@@ -7,7 +7,7 @@ import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
-import com.zoewave.probase.kocolor.model.RoutineTime
+import com.zoewave.probase.kocolor.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -30,14 +30,19 @@ class GlassViewModel @Inject constructor(
             val start = date
             val end = start + 86400000L
             routineDao.getRoutinesForDay(start, end).map { routines ->
-                routines.map { it.toModel() }.find { it.time == RoutineTime.MORNING }
+                val models = routines.map { it.toModel() }
+                val currentTime = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+                
+                // Smart select: If it's late (after 3 PM), show Evening, otherwise Morning
+                val targetTime = if (currentTime >= 15) RoutineTime.EVENING else RoutineTime.MORNING
+                models.find { it.time == targetTime } ?: models.firstOrNull()
             }
         },
         _isAiActive,
         _aiAudioLevel
-    ) { morningRoutine, isAiActive, aiLevel ->
+    ) { activeRoutine, isAiActive, aiLevel ->
         GlassUiState(
-            morningRoutine = morningRoutine,
+            morningRoutine = activeRoutine,
             isLoading = false,
             isAiActive = isAiActive,
             aiAudioLevel = aiLevel
@@ -95,11 +100,16 @@ class GlassViewModel @Inject constructor(
     }
 
     private fun toggleStep(stepId: String) {
+        android.util.Log.d("GlassRitual", "Toggling step: $stepId")
         viewModelScope.launch {
-            val routine = uiState.value.morningRoutine ?: return@launch
+            val routine = uiState.value.morningRoutine ?: run {
+                android.util.Log.e("GlassRitual", "Routine is null")
+                return@launch
+            }
             val updatedSteps = routine.steps.map { step ->
                 if (step.id == stepId) {
                     val newCompleted = !step.isCompleted
+                    android.util.Log.d("GlassRitual", "Step ${step.title} -> $newCompleted")
                     if (newCompleted) {
                         step.productIds.forEach { pid -> incrementProductUsage(pid) }
                     }

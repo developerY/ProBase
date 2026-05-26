@@ -1,11 +1,8 @@
 package com.zoewave.probase.features.xr.glass
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -37,8 +33,6 @@ import androidx.xr.projected.ProjectedDisplayController
 import androidx.xr.projected.ProjectedDisplayController.PresentationMode
 import androidx.xr.projected.ProjectedDisplayController.PresentationModeFlags
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
-import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import kotlinx.coroutines.launch
 import java.util.function.Consumer
 
@@ -47,20 +41,6 @@ class GoogleTestGlassesActivity : ComponentActivity() {
 
     private var displayController: ProjectedDisplayController? = null
     private var isVisualUiSupported by mutableStateOf(false)
-    private var areVisualsOn by mutableStateOf(true)
-    private var isPermissionDenied by mutableStateOf(false)
-
-    // Register the permissions launcher using the ProjectedPermissionsResultContract.
-    private val requestPermissionLauncher: ActivityResultLauncher<List<ProjectedPermissionsRequestParams>> =
-        registerForActivityResult(ProjectedPermissionsResultContract()) { results ->
-            if (results[Manifest.permission.CAMERA] == true) {
-                isPermissionDenied = false
-                initializeGlassesFeatures()
-            } else {
-                // Handle permission denial.
-                isPermissionDenied = true
-            }
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,19 +53,13 @@ class GoogleTestGlassesActivity : ComponentActivity() {
             }
         })
 
-        if (hasCameraPermission()) {
-            initializeGlassesFeatures()
-        } else {
-            requestHardwarePermissions()
-        }
+        // Just initialize. Phone app handles permissions.
+        initializeGlassesFeatures()
 
         setContent {
             GlimmerTheme {
                 GoogleTestHomeScreen(
-                    areVisualsOn = areVisualsOn,
                     isVisualUiSupported = isVisualUiSupported,
-                    isPermissionDenied = isPermissionDenied,
-                    onRetryPermission = { requestHardwarePermissions() },
                     onClose = { finish() }
                 )
             }
@@ -94,31 +68,22 @@ class GoogleTestGlassesActivity : ComponentActivity() {
 
     private fun initializeGlassesFeatures() {
         lifecycleScope.launch {
-            // Check device capabilities
-            val projectedDeviceController = ProjectedDeviceController.create(this@GoogleTestGlassesActivity)
-            isVisualUiSupported = projectedDeviceController.capabilities.contains(CAPABILITY_VISUAL_UI)
+            try {
+                // Check device capabilities
+                val projectedDeviceController = ProjectedDeviceController.create(this@GoogleTestGlassesActivity)
+                isVisualUiSupported = projectedDeviceController.capabilities.contains(CAPABILITY_VISUAL_UI)
 
-            val controller = ProjectedDisplayController.create(this@GoogleTestGlassesActivity)
-            displayController = controller
-            val observer = GoogleExampleObserver(
-                controller = controller,
-                onVisualsChanged = { visualsOn -> areVisualsOn = visualsOn }
-            )
-            lifecycle.addObserver(observer)
+                val controller = ProjectedDisplayController.create(this@GoogleTestGlassesActivity)
+                displayController = controller
+                val observer = GoogleExampleObserver(
+                    controller = controller,
+                    onVisualsChanged = { /* unused */ }
+                )
+                lifecycle.addObserver(observer)
+            } catch (e: Exception) {
+                android.util.Log.e("GoogleXRTest", "Init failed", e)
+            }
         }
-    }
-
-    private fun hasCameraPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
-                PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun requestHardwarePermissions() {
-        val params = ProjectedPermissionsRequestParams(
-            permissions = listOf(Manifest.permission.CAMERA),
-            rationale = "Camera access is required to overlay digital content on your physical environment."
-        )
-        requestPermissionLauncher.launch(listOf(params))
     }
 }
 
@@ -146,10 +111,7 @@ class GoogleExampleObserver(
 @OptIn(ExperimentalProjectedApi::class)
 @Composable
 fun GoogleTestHomeScreen(
-    areVisualsOn: Boolean,
     isVisualUiSupported: Boolean,
-    isPermissionDenied: Boolean,
-    onRetryPermission: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -159,15 +121,7 @@ fun GoogleTestHomeScreen(
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        if (isPermissionDenied) {
-            Card(
-                title = { Text("Permissions") },
-                action = { Button(onClick = onClose) { Text("Exit") } }
-            ) {
-                Text("Camera access is needed to use AI glasses features.")
-                Button(onClick = onRetryPermission) { Text("Retry") }
-            }
-        } else if (isVisualUiSupported) {
+        if (isVisualUiSupported) {
             Card(
                 title = { Text("Android XR Test") },
                 action = {

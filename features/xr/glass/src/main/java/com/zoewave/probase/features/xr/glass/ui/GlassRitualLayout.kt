@@ -27,8 +27,6 @@ fun GlassRitualLayout(
     uiState: GlassUiState,
     areVisualsOn: Boolean,
     isVisualUiSupported: Boolean,
-    isPermissionDenied: Boolean,
-    onRetryPermission: () -> Unit,
     onEvent: (GlassUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -38,88 +36,97 @@ fun GlassRitualLayout(
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        if (isPermissionDenied) {
-            Card(
-                title = { Text("Permissions") },
-                action = { Button(onClick = { onEvent(GlassUiEvent.CloseApp) }) { Text("Exit") } }
-            ) {
-                Text("Camera access is needed to use AI glasses features.")
-                Button(onClick = onRetryPermission) { Text("Retry") }
-            }
-        } else if (isVisualUiSupported) {
+        if (isVisualUiSupported) {
             Card(
                 modifier = Modifier.padding(16.dp).fillMaxSize(),
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Text(
                             text = if (areVisualsOn) "Morning Ritual" else "Display Off",
                             style = GlimmerTheme.typography.titleMedium,
-                            color = GlimmerTheme.colors.primary,
-                            modifier = Modifier.weight(1f)
+                            color = GlimmerTheme.colors.primary
                         )
                         if (uiState.isAiActive) {
                             VoiceInputIndicator(
                                 level = { uiState.aiAudioLevel },
-                                indicatorColor = GlimmerTheme.colors.primary
+                                indicatorColor = GlimmerTheme.colors.primary,
+                                modifier = Modifier.size(32.dp)
                             )
                         }
                     }
                 },
                 action = {
-                    Button(onClick = { onEvent(GlassUiEvent.CloseApp) }) {
-                        Text("Exit", style = GlimmerTheme.typography.bodyMedium)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(
+                            onClick = { onEvent(GlassUiEvent.ToggleAi) },
+                            modifier = Modifier.width(140.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = null,
+                                    tint = if (uiState.isAiActive) GlimmerTheme.colors.primary else Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(if (uiState.isAiActive) "Stop Gemini" else "Talk to Gemini")
+                            }
+                        }
+                        Button(onClick = { onEvent(GlassUiEvent.CloseApp) }) {
+                            Text("Exit")
+                        }
                     }
                 }
             ) {
                 if (!areVisualsOn) {
-                    Text("Audio Guidance Mode Active. Please follow the spoken instructions.")
+                    Text("Audio Guidance Mode Active. Gemini is listening for your command.")
                 } else if (uiState.isLoading) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(color = GlimmerTheme.colors.primary)
                     }
+                } else if (uiState.morningRoutine == null) {
+                    Text(
+                        text = "No ritual scheduled. Start one on your phone.", 
+                        style = GlimmerTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
                 } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text("Swipe to scroll, click to toggle:")
-                        
-                        GlimmerLazyColumn(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp),
-                            contentPadding = PaddingValues(top = 16.dp)
-                        ) {
-                            if (uiState.morningRoutine != null) {
-                                uiState.morningRoutine.steps.forEach { step ->
-                                    item {
-                                        ListItem(
-                                            onClick = { 
-                                                android.util.Log.d("KoColorGlass", "ListItem clicked: ${step.title}")
-                                                onEvent(GlassUiEvent.ToggleStep(step.id)) 
-                                            },
-                                            content = {
-                                                Text(
-                                                    text = "${if (step.isCompleted) "✓ " else "○ "}${step.title}",
-                                                    style = GlimmerTheme.typography.bodyLarge,
-                                                    color = Color.White
-                                                )
-                                            }
+                    GlimmerLazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(top = 8.dp)
+                    ) {
+                        uiState.morningRoutine.steps.forEach { step ->
+                            item {
+                                ListItem(
+                                    onClick = { onEvent(GlassUiEvent.ToggleStep(step.id)) },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = if (step.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                                            contentDescription = null,
+                                            tint = if (step.isCompleted) GlimmerTheme.colors.primary else Color.White
                                         )
+                                    },
+                                    content = {
+                                        Text(
+                                            text = step.title,
+                                            style = GlimmerTheme.typography.bodyLarge,
+                                            color = if (step.isCompleted) Color.White.copy(alpha = 0.5f) else Color.White
+                                        )
+                                    },
+                                    supportingLabel = {
+                                        if (step.description.isNotBlank()) {
+                                            Text(
+                                                text = step.description,
+                                                style = GlimmerTheme.typography.bodySmall,
+                                                color = Color.White.copy(alpha = 0.6f)
+                                            )
+                                        }
                                     }
-                                }
-                            } else {
-                                item {
-                                    Text("No routine data found.", color = Color.White)
-                                }
-                            }
-                        }
-                        
-                        Button(
-                            onClick = { onEvent(GlassUiEvent.ToggleAi) },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(20.dp))
-                                Spacer(Modifier.width(8.dp))
-                                Text(if (uiState.isAiActive) "Stop Gemini" else "Talk to Gemini")
+                                )
                             }
                         }
                     }
@@ -160,13 +167,11 @@ private fun GlassRitualLayoutPreview() {
                     date = 0
                 ),
                 isLoading = false,
-                isAiActive = false,
-                aiAudioLevel = 0f
+                isAiActive = true,
+                aiAudioLevel = 0.5f
             ),
             areVisualsOn = true,
             isVisualUiSupported = true,
-            isPermissionDenied = false,
-            onRetryPermission = {},
             onEvent = {}
         )
     }

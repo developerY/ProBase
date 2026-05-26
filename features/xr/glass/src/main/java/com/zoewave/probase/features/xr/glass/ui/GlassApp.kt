@@ -1,7 +1,6 @@
 package com.zoewave.probase.features.xr.glass.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,9 +16,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,31 +26,12 @@ import androidx.xr.glimmer.IconButton
 import androidx.xr.glimmer.Text
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.features.xr.glass.samples.ButtonsSamples
-import com.zoewave.probase.features.xr.glass.samples.CardSamples
-import com.zoewave.probase.features.xr.glass.samples.ColorsSamples
-import com.zoewave.probase.features.xr.glass.samples.DepthEffectLevelsSample
-import com.zoewave.probase.features.xr.glass.samples.GlimmerLazyListSamples
-import com.zoewave.probase.features.xr.glass.samples.GlimmerPagerSamples
-import com.zoewave.probase.features.xr.glass.samples.IconButtonSamples
-import com.zoewave.probase.features.xr.glass.samples.IconSamples
-import com.zoewave.probase.features.xr.glass.samples.IconToggleButtonsSamples
-import com.zoewave.probase.features.xr.glass.samples.IndirectPointerGestureSamples
-import com.zoewave.probase.features.xr.glass.samples.ListItemSamples
-import com.zoewave.probase.features.xr.glass.samples.ShapesSamples
-import com.zoewave.probase.features.xr.glass.samples.StacksSamples
-import com.zoewave.probase.features.xr.glass.samples.SurfaceSamples
-import com.zoewave.probase.features.xr.glass.samples.TitleChipSamples
-import com.zoewave.probase.features.xr.glass.samples.ToggleButtonSamples
-import com.zoewave.probase.features.xr.glass.samples.TypographySamples
-import com.zoewave.probase.features.xr.glass.samples.VoiceInputIndicatorSamples
+import com.zoewave.probase.features.xr.glass.samples.*
 
 @Composable
 fun GlassApp(
     areVisualsOn: Boolean,
     isVisualUiSupported: Boolean,
-    isPermissionDenied: Boolean,
-    onRetryPermission: () -> Unit,
     onClose: () -> Unit,
     onSpeak: (String) -> Unit,
     initialSample: GlimmerSample? = null,
@@ -62,36 +39,30 @@ fun GlassApp(
     demosViewModel: GlassXRDemosViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var currentSample by remember { mutableStateOf<GlimmerSample?>(initialSample) }
+    val activeSampleState by demosViewModel.activeSample.collectAsStateWithLifecycle()
+    
+    // PRIORITY: If we specifically passed "Ritual" via intent, show it.
+    // Otherwise follow the demosViewModel state.
+    val currentSample = initialSample ?: activeSampleState
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         if (currentSample == null) {
             SamplesMenu(
                 onSampleSelected = { 
-                    currentSample = it
                     demosViewModel.updateActiveSample(it)
                 }
             )
         } else {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Navigation Header
-                SampleNavigationHeader(
-                    sample = currentSample!!,
-                    onBack = { 
-                        currentSample = null
-                        demosViewModel.updateActiveSample(null)
-                    },
-                    onPrevious = {
-                        val prev = currentSample!!.previous()
-                        currentSample = prev
-                        demosViewModel.updateActiveSample(prev)
-                    },
-                    onNext = {
-                        val next = currentSample!!.next()
-                        currentSample = next
-                        demosViewModel.updateActiveSample(next)
-                    }
-                )
+                // Hide header for Ritual to provide full-screen immersive ritual experience
+                if (currentSample != GlimmerSample.Ritual) {
+                    SampleNavigationHeader(
+                        sample = currentSample,
+                        onBack = { demosViewModel.updateActiveSample(null) },
+                        onPrevious = { demosViewModel.updateActiveSample(currentSample.previous()) },
+                        onNext = { demosViewModel.updateActiveSample(currentSample.next()) }
+                    )
+                }
 
                 Box(modifier = Modifier.weight(1f)) {
                     when (currentSample) {
@@ -100,13 +71,10 @@ fun GlassApp(
                                 uiState = uiState,
                                 areVisualsOn = areVisualsOn,
                                 isVisualUiSupported = isVisualUiSupported,
-                                isPermissionDenied = isPermissionDenied,
-                                onRetryPermission = onRetryPermission,
                                 onEvent = { event ->
                                     when (event) {
                                         GlassUiEvent.CloseApp -> {
-                                            currentSample = null
-                                            demosViewModel.updateActiveSample(null)
+                                            if (initialSample != null) onClose() else demosViewModel.updateActiveSample(null)
                                         }
                                         is GlassUiEvent.ToggleStep -> {
                                             viewModel.onEvent(event)
@@ -138,7 +106,6 @@ fun GlassApp(
                         GlimmerSample.ToggleButtons -> ToggleButtonSamples()
                         GlimmerSample.Typography -> TypographySamples()
                         GlimmerSample.VoiceIndicator -> VoiceInputIndicatorSamples(level = { uiState.aiAudioLevel })
-                        else -> {}
                     }
                 }
             }
@@ -183,4 +150,3 @@ fun SampleNavigationHeader(
         }
     }
 }
-
