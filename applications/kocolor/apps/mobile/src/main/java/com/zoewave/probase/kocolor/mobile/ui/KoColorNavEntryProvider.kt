@@ -13,26 +13,37 @@ import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
+import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerViewModel
 import com.zoewave.probase.kocolor.features.color.ui.ColorDetailScreen
+import com.zoewave.probase.kocolor.features.color.ui.ColorDetailUiState
 import com.zoewave.probase.kocolor.features.color.ui.ColorUiRoute
 import com.zoewave.probase.kocolor.features.color.ui.ColorViewModel
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverScreen
+import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailScreen
+import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticEditScreen
+import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticEditUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsEvent
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsUiRoute
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsViewModel
 import com.zoewave.probase.kocolor.features.cosmetics.ui.StitchProductBuilder
 import com.zoewave.probase.kocolor.features.cosmetics.ui.VanityLandingScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.ColorVerificationRoute
+import com.zoewave.probase.kocolor.features.inventory.ui.ColorVerificationUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeCategoryCoverUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeDetailScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeDetailUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEditScreen
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEditUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeLandingScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeViewModel
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailScreen
+import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
+import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
@@ -66,9 +77,11 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.Analyzer -> NavEntry(route) {
+            val viewModel: AnalyzerViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
             AnalyzerUiRoute(
-                uiState = Unit,
-                onEvent = {},
+                uiState = state,
+                onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
         }
@@ -90,7 +103,7 @@ fun koColorNavEntryProvider(
             val viewModel: RoutinesViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             RoutineDetailScreen(
-                uiState = route.routineId to state,
+                uiState = RoutineDetailUiState(route.routineId, state),
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
@@ -102,7 +115,7 @@ fun koColorNavEntryProvider(
                 viewModel.onEvent(com.zoewave.probase.kocolor.features.routines.ui.RoutinesEvent.StartEditing(route.routineId))
             }
             RoutineEditorScreen(
-                uiState = Triple(route.stepId, state, onBack),
+                uiState = RoutineEditorUiState(route.stepId, state, onBack),
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
@@ -147,7 +160,7 @@ fun koColorNavEntryProvider(
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             CosmeticCategoryCoverScreen(
-                uiState = route.categoryName to state,
+                uiState = CosmeticCategoryCoverUiState(route.categoryName, state),
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
@@ -169,7 +182,7 @@ fun koColorNavEntryProvider(
             val viewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             WardrobeCategoryCoverScreen(
-                uiState = route.categoryName to state,
+                uiState = WardrobeCategoryCoverUiState(route.categoryName, state),
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
@@ -178,7 +191,7 @@ fun koColorNavEntryProvider(
             val viewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             WardrobeDetailScreen(
-                uiState = route.itemId to state,
+                uiState = WardrobeDetailUiState(route.itemId, state),
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
@@ -187,7 +200,7 @@ fun koColorNavEntryProvider(
             val viewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             WardrobeEditScreen(
-                uiState = route.itemId to state,
+                uiState = WardrobeEditUiState(route.itemId, state),
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
@@ -196,7 +209,7 @@ fun koColorNavEntryProvider(
             val viewModel: WardrobeViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             ColorVerificationRoute(
-                uiState = uiState,
+                uiState = ColorVerificationUiState(uiState.items),
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
@@ -207,7 +220,7 @@ fun koColorNavEntryProvider(
             val analysis = uiState.savedSuggestions.find { it.id == route.suggestionId }
             if (analysis != null) {
                 ColorDetailScreen(
-                    uiState = analysis,
+                    uiState = ColorDetailUiState(analysis),
                     onEvent = colorViewModel::onEvent,
                     navTo = onNavigateTo
                 )
@@ -237,8 +250,9 @@ fun koColorNavEntryProvider(
         is KoColorRoute.CosmeticDetail -> NavEntry(route) {
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val item = state.items.find { it.id == route.itemId }
             CosmeticDetailScreen(
-                uiState = route.itemId to state,
+                uiState = CosmeticDetailUiState(item),
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
@@ -247,7 +261,7 @@ fun koColorNavEntryProvider(
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             CosmeticEditScreen(
-                uiState = route.itemId to state,
+                uiState = CosmeticEditUiState(route.itemId, state.draftItem),
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )

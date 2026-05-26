@@ -71,22 +71,23 @@ import com.zoewave.probase.kocolor.model.Undertone
 @Composable
 private fun AnalyzerUiRoutePreview() {
     MaterialTheme {
-        AnalyzerUiRoute(navTo = {})
+        AnalyzerUiRoute(
+            uiState = AnalyzerScreenUiState(),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 
 @Composable
 fun AnalyzerUiRoute(
-    uiState: Unit = Unit,
-    onEvent: (Unit) -> Unit = {},
+    uiState: AnalyzerScreenUiState,
+    onEvent: (AnalyzerEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val viewModel: AnalyzerViewModel = hiltViewModel()
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
-
     AnalyzerScreen(
-        uiState = state,
-        onEvent = viewModel::onEvent,
+        uiState = uiState,
+        onEvent = onEvent,
         navTo = navTo
     )
 }

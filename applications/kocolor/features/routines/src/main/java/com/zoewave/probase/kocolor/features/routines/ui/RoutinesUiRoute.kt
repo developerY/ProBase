@@ -45,6 +45,7 @@ fun RoutinesUiRoute(
                             val options = ProjectedContext.createProjectedActivityOptions(context)
                             val intent = Intent(context, GlassesMainActivity::class.java).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                putExtra("initial_sample", "Ritual")
                             }
                             context.startActivity(intent, options.toBundle())
                         } catch (e: Exception) {
@@ -56,6 +57,7 @@ fun RoutinesUiRoute(
                         try {
                             val intent = Intent(context, GlassesMainActivity::class.java).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                putExtra("initial_sample", "Ritual")
                             }
                             context.startActivity(intent)
                         } catch (e: Exception) {

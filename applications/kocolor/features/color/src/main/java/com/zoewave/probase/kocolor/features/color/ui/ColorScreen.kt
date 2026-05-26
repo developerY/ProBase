@@ -224,13 +224,18 @@ fun FashionAnalysisCard(
     }
 }
 
+data class ColorDetailUiState(
+    val analysis: SavedAnalysis? = null
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColorDetailScreen(
-    uiState: SavedAnalysis,
+    uiState: ColorDetailUiState,
     onEvent: (ColorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    val analysis = uiState.analysis ?: return
     Scaffold(
         topBar = {
             TopAppBar(
@@ -255,7 +260,7 @@ fun ColorDetailScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                uiState.advice.faceUri?.let {
+                analysis.advice.faceUri?.let {
                     Card(modifier = Modifier.weight(1f).aspectRatio(1f)) {
                         AsyncImage(
                             model = it,
@@ -265,7 +270,7 @@ fun ColorDetailScreen(
                         )
                     }
                 }
-                uiState.advice.clothesUri?.let {
+                analysis.advice.clothesUri?.let {
                     Card(modifier = Modifier.weight(1f).aspectRatio(1f)) {
                         AsyncImage(
                             model = it,
@@ -290,12 +295,12 @@ fun ColorDetailScreen(
                 ) {
                     Column {
                         Text("Seasonal Type", style = MaterialTheme.typography.labelMedium)
-                        Text(uiState.advice.seasonalType.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                        Text(analysis.advice.seasonalType.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     }
                     VerticalDivider(modifier = Modifier.height(40.dp).width(1.dp))
                     Column(horizontalAlignment = Alignment.End) {
                         Text("Undertone", style = MaterialTheme.typography.labelMedium)
-                        Text(uiState.advice.undertone.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                        Text(analysis.advice.undertone.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -312,7 +317,7 @@ fun ColorDetailScreen(
             Spacer(modifier = Modifier.height(8.dp))
             
             MakeupPaletteGraphic(
-                uiState = uiState.advice.recommendedPalette,
+                uiState = analysis.advice.recommendedPalette,
                 onEvent = onEvent,
                 navTo = navTo
             )
@@ -326,7 +331,7 @@ fun ColorDetailScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             
-            uiState.advice.makeupSuggestions.forEach { suggestion ->
+            analysis.advice.makeupSuggestions.forEach { suggestion ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -374,7 +379,7 @@ fun ColorDetailScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             ) {
                 Text(
-                    text = uiState.advice.summary,
+                    text = analysis.advice.summary,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(16.dp)
                 )
@@ -533,16 +538,18 @@ private fun ColorScreenPreview_Populated() {
 private fun ColorDetailScreenPreview() {
     MaterialTheme {
         ColorDetailScreen(
-            uiState = SavedAnalysis(
-                id = 1,
-                timestamp = System.currentTimeMillis(),
-                advice = FashionAdvice(
-                    summary = "Perfect coordination for a night out.",
-                    seasonalType = SeasonalType.WINTER,
-                    undertone = Undertone.COOL,
-                    makeupSuggestions = emptyList(),
-                    outfitSuggestions = emptyList(),
-                    recommendedPalette = listOf("#1A1A1A", "#FFFFFF", "#C0C0C0", "#FF007F", "#4B0082", "#000080")
+            uiState = ColorDetailUiState(
+                analysis = SavedAnalysis(
+                    id = 1,
+                    timestamp = System.currentTimeMillis(),
+                    advice = FashionAdvice(
+                        summary = "Perfect coordination for a night out.",
+                        seasonalType = SeasonalType.WINTER,
+                        undertone = Undertone.COOL,
+                        makeupSuggestions = emptyList(),
+                        outfitSuggestions = emptyList(),
+                        recommendedPalette = listOf("#1A1A1A", "#FFFFFF", "#C0C0C0", "#FF007F", "#4B0082", "#000080")
+                    )
                 )
             ),
             onEvent = {},

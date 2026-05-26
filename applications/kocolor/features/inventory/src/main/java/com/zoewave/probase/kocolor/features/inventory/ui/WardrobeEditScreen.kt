@@ -30,16 +30,24 @@ import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 
+data class WardrobeEditUiState(
+    val itemId: Long,
+    val wardrobeUiState: WardrobeUiState
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun WardrobeEditScreenPreview() {
     MaterialTheme {
         WardrobeEditScreen(
-            uiState = 1L to WardrobeUiState(
-                draftItem = ClothingItem(
-                    id = 1L,
-                    name = "Blazer",
-                    category = ClothingCategory.TOPS
+            uiState = WardrobeEditUiState(
+                itemId = 1L,
+                wardrobeUiState = WardrobeUiState(
+                    draftItem = ClothingItem(
+                        id = 1L,
+                        name = "Blazer",
+                        category = ClothingCategory.TOPS
+                    )
                 )
             ),
             onEvent = {},
@@ -51,12 +59,12 @@ private fun WardrobeEditScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun WardrobeEditScreen(
-    uiState: Pair<Long, WardrobeUiState>,
+    uiState: WardrobeEditUiState,
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val itemId = uiState.first
-    val state = uiState.second
+    val itemId = uiState.itemId
+    val state = uiState.wardrobeUiState
     
     LaunchedEffect(itemId) {
         onEvent(WardrobeEvent.InitializeEdit(itemId))

@@ -39,14 +39,22 @@ private fun isColorDark(color: Color): Boolean {
     return luminance < 0.5
 }
 
+data class WardrobeDetailUiState(
+    val itemId: Long,
+    val wardrobeUiState: WardrobeUiState
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun WardrobeDetailScreenPreview() {
     MaterialTheme {
         WardrobeDetailScreen(
-            uiState = 1L to WardrobeUiState(
-                items = listOf(
-                    ClothingItem(id = 1L, name = "Silk Blouse", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 120.0)
+            uiState = WardrobeDetailUiState(
+                itemId = 1L,
+                wardrobeUiState = WardrobeUiState(
+                    items = listOf(
+                        ClothingItem(id = 1L, name = "Silk Blouse", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 120.0)
+                    )
                 )
             ),
             onEvent = {},
@@ -58,12 +66,12 @@ private fun WardrobeDetailScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WardrobeDetailScreen(
-    uiState: Pair<Long, WardrobeUiState>,
+    uiState: WardrobeDetailUiState,
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val itemId = uiState.first
-    val state = uiState.second
+    val itemId = uiState.itemId
+    val state = uiState.wardrobeUiState
     val item = remember(state.items, itemId) {
         state.items.find { it.id == itemId }
     } ?: return

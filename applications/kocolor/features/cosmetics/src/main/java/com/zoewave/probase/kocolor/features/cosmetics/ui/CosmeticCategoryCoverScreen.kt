@@ -32,14 +32,22 @@ import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import java.text.NumberFormat
 import java.util.Locale
 
+data class CosmeticCategoryCoverUiState(
+    val categoryName: String,
+    val cosmeticsUiState: CosmeticsUiState
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun CosmeticCategoryCoverScreenPreview() {
     MaterialTheme {
         CosmeticCategoryCoverScreen(
-            uiState = "Lips" to CosmeticsUiState(
-                items = listOf(
-                    CosmeticItem(id = 1, name = "Lipstick", brand = "Luxury", category = com.zoewave.probase.kocolor.model.CosmeticCategory.LIPSTICK, price = 35.0)
+            uiState = CosmeticCategoryCoverUiState(
+                categoryName = "Lips",
+                cosmeticsUiState = CosmeticsUiState(
+                    items = listOf(
+                        CosmeticItem(id = 1, name = "Lipstick", brand = "Luxury", category = com.zoewave.probase.kocolor.model.CosmeticCategory.LIPSTICK, price = 35.0)
+                    )
                 )
             ),
             onEvent = {},
@@ -51,12 +59,12 @@ private fun CosmeticCategoryCoverScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CosmeticCategoryCoverScreen(
-    uiState: Pair<String, CosmeticsUiState>,
+    uiState: CosmeticCategoryCoverUiState,
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val categoryName = uiState.first
-    val state = uiState.second
+    val categoryName = uiState.categoryName
+    val state = uiState.cosmeticsUiState
     val items = remember(state.items, categoryName) {
         state.items.filter { it.category.groupName.contains(categoryName, ignoreCase = true) }
     }

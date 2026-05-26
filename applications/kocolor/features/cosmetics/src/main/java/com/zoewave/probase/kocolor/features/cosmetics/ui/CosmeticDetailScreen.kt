@@ -30,20 +30,22 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 
+data class CosmeticDetailUiState(
+    val item: CosmeticItem? = null
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun CosmeticDetailScreenPreview() {
     MaterialTheme {
         CosmeticDetailScreen(
-            uiState = 1L to CosmeticsUiState(
-                items = listOf(
-                    CosmeticItem(
-                        id = 1L,
-                        name = "Foundation",
-                        brand = "Luxury",
-                        category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION,
-                        price = 45.0
-                    )
+            uiState = CosmeticDetailUiState(
+                item = CosmeticItem(
+                    id = 1L,
+                    name = "Foundation",
+                    brand = "Luxury",
+                    category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION,
+                    price = 45.0
                 )
             ),
             onEvent = {},
@@ -55,12 +57,11 @@ private fun CosmeticDetailScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CosmeticDetailScreen(
-    uiState: Pair<Long, CosmeticsUiState>,
+    uiState: CosmeticDetailUiState,
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val itemId = uiState.first
-    val item = uiState.second.items.find { it.id == itemId } ?: return
+    val item = uiState.item ?: return
     val bgColor = item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surface
     val isDark = isColorDark(bgColor)
 
