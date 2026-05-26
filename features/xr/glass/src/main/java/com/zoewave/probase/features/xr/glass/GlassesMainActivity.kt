@@ -88,9 +88,11 @@ class GlassesMainActivity : ComponentActivity() {
         initialSample = intent.getStringExtra("initial_sample")?.let { 
             try { GlimmerSample.valueOf(it) } catch (e: Exception) { null }
         }
+        val requestedTime = intent.getStringExtra("routine_time")
         if (initialSample != null) {
             glassSessionRepository.updateActiveSample(initialSample)
         }
+        glassSessionRepository.updateRequestedRoutineTime(requestedTime)
     }
 
     private fun initializeGlassesFeatures() {

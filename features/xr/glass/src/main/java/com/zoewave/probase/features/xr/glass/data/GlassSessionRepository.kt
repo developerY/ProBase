@@ -15,11 +15,18 @@ class GlassSessionRepository @Inject constructor() {
     private val _activeSample = MutableStateFlow<GlimmerSample?>(null)
     val activeSample: StateFlow<GlimmerSample?> = _activeSample.asStateFlow()
 
+    private val _requestedRoutineTime = MutableStateFlow<String?>(null)
+    val requestedRoutineTime: StateFlow<String?> = _requestedRoutineTime.asStateFlow()
+
     fun updateConnection(connected: Boolean) {
         _isConnected.value = connected
     }
 
     fun updateActiveSample(sample: GlimmerSample?) {
         _activeSample.value = sample
+    }
+
+    fun updateRequestedRoutineTime(time: String?) {
+        _requestedRoutineTime.value = time
     }
 }

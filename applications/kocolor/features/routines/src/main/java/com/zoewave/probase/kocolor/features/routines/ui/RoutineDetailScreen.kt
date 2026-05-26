@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.kocolor.features.routines.ui.components.GlassConnectionHeaderAction
 import com.zoewave.probase.kocolor.model.*
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -78,6 +79,12 @@ fun RoutineDetailScreen(
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                 },
                 actions = {
+                    GlassConnectionHeaderAction(
+                        buttonState = state.glassButtonState,
+                        onButtonClick = { onEvent(RoutinesEvent.ProjectToGlass(routine.time)) },
+                        modifier = Modifier.size(40.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
                     IconButton(onClick = { isReorderMode = !isReorderMode }) {
                         Icon(if (isReorderMode) Icons.Default.Check else Icons.Default.Reorder, null)
                     }
