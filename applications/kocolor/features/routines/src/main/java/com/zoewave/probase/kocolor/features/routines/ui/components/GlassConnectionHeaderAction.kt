@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.CastConnected
-import androidx.compose.material.icons.filled.PermDeviceInformation
-import androidx.compose.material.icons.filled.UsbOff
+import androidx.compose.material.icons.filled.PhonelinkOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -38,8 +38,8 @@ fun GlassConnectionHeaderAction(
 
     val icon = when (buttonState) {
         GlassButtonState.PROJECTING -> Icons.Default.CastConnected
-        GlassButtonState.READY_TO_START -> Icons.Default.PermDeviceInformation
-        GlassButtonState.NO_GLASSES -> Icons.Default.UsbOff
+        GlassButtonState.READY_TO_START -> Icons.Default.Cast
+        GlassButtonState.NO_GLASSES -> Icons.Default.PhonelinkOff
     }
 
     Surface(
