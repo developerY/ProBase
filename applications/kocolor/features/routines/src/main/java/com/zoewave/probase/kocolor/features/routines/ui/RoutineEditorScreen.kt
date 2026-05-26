@@ -279,8 +279,21 @@ private fun StepSummaryRow(uiState: RoutineStep, onEvent: (Unit) -> Unit, navTo:
 @Preview(showBackground = true)
 @Composable
 private fun StepHeroPagePreview() {
+    val sampleProduct = CosmeticItem(
+        id = 1L,
+        name = "Silk Primer",
+        brand = "KoColor",
+        category = CosmeticCategory.PRIMER,
+        amountRemaining = 25.0,
+        amountPerUse = 0.5,
+        volume = "30ml"
+    )
     MaterialTheme {
-        StepHeroPage(uiState = RoutineStep(id = "1", title = "Step", layeringOrder = 0) to emptyList(), onEvent = {}, navTo = {})
+        StepHeroPage(
+            uiState = RoutineStep(id = "1", title = "Prep", layeringOrder = 0, productIds = listOf(1L)) to listOf(sampleProduct),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 
@@ -367,21 +380,43 @@ private fun StepHeroPage(
                 )
                 
                 if (linkedProduct != null) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        shape = RoundedCornerShape(20.dp),
-                        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
-                    ) {
-                        Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Box(modifier = Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
-                                if (linkedProduct.imageUrl != null) AsyncImage(model = linkedProduct.imageUrl, null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(20.dp),
+                            border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+                        ) {
+                            Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Box(modifier = Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
+                                    if (linkedProduct.imageUrl != null) AsyncImage(model = linkedProduct.imageUrl, null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                }
+                                Spacer(Modifier.width(16.dp))
+                                Column {
+                                    Text(text = linkedProduct.brand.uppercase(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
+                                    Text(text = linkedProduct.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+                                    Text(text = linkedProduct.category.displayName, style = MaterialTheme.typography.labelSmall, modifier = Modifier.alpha(0.5f))
+                                }
                             }
-                            Spacer(Modifier.width(16.dp))
-                            Column {
-                                Text(text = linkedProduct.brand.uppercase(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
-                                Text(text = linkedProduct.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
-                                Text(text = linkedProduct.category.displayName, style = MaterialTheme.typography.labelSmall, modifier = Modifier.alpha(0.5f))
-                            }
+                        }
+
+                        // Usage Metrics
+                        val unit = linkedProduct.volume?.filter { it.isLetter() } ?: ""
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            MetricCard(
+                                label = "PER APPLICATION",
+                                value = linkedProduct.amountPerUse?.let { "$it $unit" } ?: "Not set",
+                                icon = Icons.Default.Opacity,
+                                modifier = Modifier.weight(1f)
+                            )
+                            MetricCard(
+                                label = "AMOUNT LEFT",
+                                value = linkedProduct.amountRemaining?.let { "${it.toInt()} $unit" } ?: "Unknown",
+                                icon = Icons.Default.Inventory2,
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
                 } else {
@@ -457,6 +492,28 @@ private fun StepHeroPage(
                 Text("EDIT RITUAL STAGE", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             }
             Spacer(Modifier.height(48.dp))
+        }
+    }
+}
+
+@Composable
+private fun MetricCard(
+    label: String,
+    value: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = Color.White,
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)),
+        modifier = modifier
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Icon(icon, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.height(8.dp))
+            Text(text = value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
         }
     }
 }
