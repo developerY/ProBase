@@ -32,16 +32,24 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.model.*
 
+data class RoutineEditorUiState(
+    val initialStepId: String? = null,
+    val routinesUiState: RoutinesUiState,
+    val onBack: (() -> Unit)? = null
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun RoutineEditorScreenPreview() {
     val routine = BeautyRoutine(id = 1L, title = "Morning", time = RoutineTime.MORNING, steps = emptyList(), date = 0)
     MaterialTheme {
         RoutineEditorScreen(
-            uiState = Triple(null, RoutinesUiState(
-                morningRoutine = routine,
-                activeEditRoutineId = 1L
-            ), null),
+            uiState = RoutineEditorUiState(
+                routinesUiState = RoutinesUiState(
+                    morningRoutine = routine,
+                    activeEditRoutineId = 1L
+                )
+            ),
             onEvent = {},
             navTo = {}
         )
@@ -51,13 +59,13 @@ private fun RoutineEditorScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineEditorScreen(
-    uiState: Triple<String?, RoutinesUiState, (() -> Unit)?>,
+    uiState: RoutineEditorUiState,
     onEvent: (RoutinesEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val initialStepId = uiState.first
-    val state = uiState.second
-    val onBack = uiState.third ?: {}
+    val initialStepId = uiState.initialStepId
+    val state = uiState.routinesUiState
+    val onBack = uiState.onBack ?: {}
     
     val routine = state.activeEditRoutine ?: return
     var editingStepId by remember { mutableStateOf(initialStepId) }

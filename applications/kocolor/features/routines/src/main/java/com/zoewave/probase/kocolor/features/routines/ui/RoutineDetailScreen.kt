@@ -31,13 +31,21 @@ import com.zoewave.probase.kocolor.model.*
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
+data class RoutineDetailUiState(
+    val routineId: Long,
+    val routinesUiState: RoutinesUiState
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun RoutineDetailScreenPreview() {
     MaterialTheme {
         RoutineDetailScreen(
-            uiState = 1L to RoutinesUiState(
-                morningRoutine = BeautyRoutine(id = 1L, title = "Morning", time = RoutineTime.MORNING, steps = emptyList(), date = 0)
+            uiState = RoutineDetailUiState(
+                routineId = 1L,
+                routinesUiState = RoutinesUiState(
+                    morningRoutine = BeautyRoutine(id = 1L, title = "Morning", time = RoutineTime.MORNING, steps = emptyList(), date = 0)
+                )
             ),
             onEvent = {},
             navTo = {}
@@ -48,12 +56,12 @@ private fun RoutineDetailScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineDetailScreen(
-    uiState: Pair<Long, RoutinesUiState>,
+    uiState: RoutineDetailUiState,
     onEvent: (RoutinesEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val routineId = uiState.first
-    val state = uiState.second
+    val routineId = uiState.routineId
+    val state = uiState.routinesUiState
     val routine = if (state.morningRoutine?.id == routineId) state.morningRoutine else state.eveningRoutine
     if (routine == null) return
 
