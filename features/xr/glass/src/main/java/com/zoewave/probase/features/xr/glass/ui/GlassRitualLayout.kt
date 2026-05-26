@@ -46,7 +46,11 @@ fun GlassRitualLayout(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = if (areVisualsOn) "Morning Ritual" else "Display Off",
+                            text = if (areVisualsOn) {
+                                uiState.morningRoutine?.title?.replaceFirstChar { it.uppercase() } ?: "Morning Ritual"
+                            } else {
+                                "Display Off"
+                            },
                             style = GlimmerTheme.typography.titleMedium,
                             color = GlimmerTheme.colors.primary
                         )

@@ -66,6 +66,14 @@ class GlassesMainActivity : ComponentActivity() {
         // Initialize features. Phone app is responsible for pre-requesting permissions.
         initializeGlassesFeatures()
 
+        lifecycleScope.launch {
+            fashionRepository.glassCommands.collect { command ->
+                if (command == "EXIT") {
+                    finish()
+                }
+            }
+        }
+
         setContent {
             GlimmerTheme {
                 GlassApp(
