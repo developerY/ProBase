@@ -32,12 +32,18 @@ import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 
+data class CosmeticEditUiState(
+    val itemId: Long,
+    val draftItem: CosmeticItem
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun CosmeticEditScreenPreview() {
     MaterialTheme {
         CosmeticEditScreen(
-            uiState = 1L to CosmeticsUiState(
+            uiState = CosmeticEditUiState(
+                itemId = 1L,
                 draftItem = CosmeticItem(
                     id = 1L,
                     name = "Blush",
@@ -54,12 +60,12 @@ private fun CosmeticEditScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CosmeticEditScreen(
-    uiState: Pair<Long, CosmeticsUiState>,
+    uiState: CosmeticEditUiState,
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val itemId = uiState.first
-    val state = uiState.second
+    val itemId = uiState.itemId
+    val draft = uiState.draftItem
     
     LaunchedEffect(itemId) {
         if (itemId != 0L) {
@@ -67,7 +73,6 @@ fun CosmeticEditScreen(
         }
     }
 
-    val draft = state.draftItem
     var showCategoryMenu by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
 
