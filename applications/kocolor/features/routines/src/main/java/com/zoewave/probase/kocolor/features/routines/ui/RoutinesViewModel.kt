@@ -166,8 +166,13 @@ class RoutinesViewModel @Inject constructor(
 
     private fun toggleStep(routineId: Long, stepId: String) {
         viewModelScope.launch {
-            val routine = (uiState.value.morningRoutine ?: uiState.value.eveningRoutine)?.takeIf { it.id == routineId }
-                ?: return@launch
+            val morning = uiState.value.morningRoutine
+            val evening = uiState.value.eveningRoutine
+            val routine = when {
+                morning?.id == routineId -> morning
+                evening?.id == routineId -> evening
+                else -> null
+            } ?: return@launch
             
             val updatedSteps = routine.steps.map { step ->
                 if (step.id == stepId) {
