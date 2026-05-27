@@ -4,77 +4,54 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.ashbike.data.repository.bike.BikeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@HiltViewModel // 1. Add this annotation
+@HiltViewModel
 class GlassViewModel @Inject constructor(
-    private val repository: BikeRepository // 2. Inject the repository instance
+    private val repository: BikeRepository
 ) : ViewModel() {
 
-    // UI State for the Glass Screen
-    private val _uiState = MutableStateFlow(GlassUiState())
-    val uiState = _uiState.asStateFlow()
+    private val _currentScreen = MutableStateFlow(ScreenState.HOME)
 
-    init {
-        viewModelScope.launch {
-            // Combine flows from Repository to update UI automatically
-            combine(
-                repository.currentGear,
-                repository.suspensionState,
-                repository.rideInfo, // <--- ADD THIS
-            ) { gear, susp, info ->
-
-                // -------------------------------------------------------------
-                // UPDATE STATE WITH RAW DATA
-                // Formatting logic (e.g. "--") is now handled inside GlassUiState
-                // -------------------------------------------------------------
-                _uiState.value.copy(
-                    // 1. Connection & System
-                    isBikeConnected = info.isBikeConnected,
-                    currentGear = gear,
-                    suspension = susp,
-                    rawBattery = info.batteryLevel, // Pass raw Int?
-
-                    // 2. Sensor Data (Pass Raw Numbers)
-                    rawSpeed = info.currentSpeed,   // Pass Double
-                    rawHeading = info.heading,      // Pass Float
-                    rawMotorPower = info.motorPower?.toDouble(), // Pass Double?
-                    rawHeartRate = info.heartbeat,  // Pass Int?
-
-                    // 3. Trip Stats (Keep as formatted strings if your UIState expects strings for these)
-                    tripDistance = String.format("%.1f", info.currentTripDistance),
-                    calories = info.caloriesBurned.toString(),
-                    rideDuration = info.rideDuration,
-                    averageSpeed = String.format("%.1f", info.averageSpeed)
-                )
-            }.collect { newState ->
-                _uiState.value = newState
-            }
-        }
-    }
+    val uiState: StateFlow<GlassUiState> = combine(
+        repository.currentGear,
+        repository.suspensionState,
+        repository.rideInfo,
+        _currentScreen
+    ) { gear, susp, info, screen ->
+        GlassUiState(
+            isBikeConnected = info.isBikeConnected,
+            currentGear = gear,
+            suspension = susp,
+            rawBattery = info.batteryLevel,
+            rawSpeed = info.currentSpeed,
+            rawHeading = info.heading,
+            rawMotorPower = info.motorPower?.toDouble(),
+            rawHeartRate = info.heartbeat,
+            tripDistance = String.format("%.1f", info.currentTripDistance),
+            calories = info.caloriesBurned.toString(),
+            rideDuration = info.rideDuration,
+            averageSpeed = String.format("%.1f", info.averageSpeed),
+            currentScreen = screen
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = GlassUiState()
+    )
 
     fun onEvent(event: GlassUiEvent) {
-        when(event) {
-            // 4. Call methods on the injected instance
-            GlassUiEvent.GearUp -> { viewModelScope.launch { repository.gearUp() } }
-            GlassUiEvent.GearDown -> { viewModelScope.launch { repository.gearDown() } }
-            GlassUiEvent.ToggleSuspension -> { viewModelScope.launch { repository.toggleSuspension() } }
-
-            // For now, these might be handled by the UI/Activity directly,
-            // or you can add logic here if needed.
-            GlassUiEvent.CloseApp -> { /* handled in UI/Activity */ }
-            is GlassUiEvent.SelectGear -> {
-                // If you want the list to update the gear:
-                // repository.setGear(event.gear)
+        viewModelScope.launch {
+            when (event) {
+                GlassUiEvent.GearUp -> repository.gearUp()
+                GlassUiEvent.GearDown -> repository.gearDown()
+                GlassUiEvent.ToggleSuspension -> repository.toggleSuspension()
+                is GlassUiEvent.SelectGear -> repository.setGear(event.gear)
+                is GlassUiEvent.ChangeScreen -> _currentScreen.value = event.screen
+                else -> { /* Navigation handled in UI */ }
             }
-
-            // Navigation events are handled by the Compose UI layer (GlassApp),
-            // but we list them here to be exhaustive or if we wanted to log them.
-            GlassUiEvent.OpenGearList -> {}
         }
     }
 }

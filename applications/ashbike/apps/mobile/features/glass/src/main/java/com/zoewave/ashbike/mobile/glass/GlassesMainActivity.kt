@@ -87,6 +87,13 @@ class GlassesMainActivity : ComponentActivity() {
 
         initializeGlassesFeatures()
 
+        lifecycle.addObserver(object : androidx.lifecycle.DefaultLifecycleObserver {
+            override fun onDestroy(owner: androidx.lifecycle.LifecycleOwner) {
+                displayController?.close()
+                displayController = null
+            }
+        })
+
         setContent {
             GlimmerTheme {
                 GlassApp(
