@@ -18,6 +18,7 @@ import com.zoewave.probase.kocolor.features.color.ui.ColorDetailScreen
 import com.zoewave.probase.kocolor.features.color.ui.ColorDetailUiState
 import com.zoewave.probase.kocolor.features.color.ui.ColorUiRoute
 import com.zoewave.probase.kocolor.features.color.ui.ColorViewModel
+import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticAnalyticsScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailScreen
@@ -122,6 +123,15 @@ fun koColorNavEntryProvider(
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             VanityLandingScreen(
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.CosmeticAnalytics -> NavEntry(route) {
+            val viewModel: CosmeticsViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            CosmeticAnalyticsScreen(
                 uiState = state,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
