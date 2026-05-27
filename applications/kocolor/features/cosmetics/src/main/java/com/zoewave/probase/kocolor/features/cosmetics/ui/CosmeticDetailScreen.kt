@@ -38,7 +38,7 @@ data class CosmeticDetailUiState(
     val item: CosmeticItem? = null
 )
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Populated")
 @Composable
 private fun CosmeticDetailScreenPreview() {
     MaterialTheme {
@@ -56,6 +56,30 @@ private fun CosmeticDetailScreenPreview() {
                     usageCount = 120,
                     isOpened = true,
                     openedDate = System.currentTimeMillis() - (100L * 24 * 60 * 60 * 1000)
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Not Tracked")
+@Composable
+private fun CosmeticDetailScreen_NotTracked_Preview() {
+    MaterialTheme {
+        CosmeticDetailScreen(
+            uiState = CosmeticDetailUiState(
+                item = CosmeticItem(
+                    id = 2L,
+                    name = "Silk Primer",
+                    brand = "KoColor",
+                    category = com.zoewave.probase.kocolor.model.CosmeticCategory.PRIMER,
+                    price = null,
+                    volume = "30ml",
+                    amountRemaining = null, // Not Tracked -> Gray
+                    amountPerUse = null,
+                    usageCount = 0
                 )
             ),
             onEvent = {},
@@ -213,15 +237,23 @@ fun CosmeticDetailScreen(
                     isExpanded = showStockHealth,
                     onToggle = { showStockHealth = !showStockHealth }
                 ) {
+                    val isTrackingActive = item.amountRemaining != null
                     val fillLevel = item.fillLevel ?: 1.0
-                    val statusColor = when {
-                        fillLevel > 0.5 -> Color(0xFF4CAF50) // Green
-                        fillLevel > 0.2 -> Color(0xFFFFC107) // Yellow
-                        else -> Color(0xFFF44336) // Red
+                    val statusColor = if (!isTrackingActive) {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                    } else {
+                        when {
+                            fillLevel > 0.5 -> Color(0xFF4CAF50) // Green
+                            fillLevel > 0.2 -> Color(0xFFFFC107) // Yellow
+                            else -> Color(0xFFF44336) // Red
+                        }
                     }
                     val unit = item.volume?.filter { it.isLetter() } ?: "units"
                     
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Column(
+                        modifier = Modifier.alpha(if (isTrackingActive) 1f else 0.5f),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -251,7 +283,7 @@ fun CosmeticDetailScreen(
                                     strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                                 )
                                 Text(
-                                    text = "${(fillLevel * 100).toInt()}%",
+                                    text = if (isTrackingActive) "${(fillLevel * 100).toInt()}%" else "---",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = statusColor
@@ -274,25 +306,32 @@ fun CosmeticDetailScreen(
                     isExpanded = showValueAnalysis,
                     onToggle = { showValueAnalysis = !showValueAnalysis }
                 ) {
-                    if (item.costPerUse != null) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(20.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                    val isPriceSet = item.price != null
+                    Column(modifier = Modifier.alpha(if (isPriceSet && item.usageCount > 0) 1f else 0.5f)) {
+                        if (item.costPerUse != null) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(20.dp),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text("Actual Cost Per Use", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                                    Text("$%.2f".format(item.costPerUse), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
+                                Row(
+                                    modifier = Modifier.padding(20.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text("Actual Cost Per Use", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                        Text("$%.2f".format(item.costPerUse), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
+                                    }
+                                    Icon(Icons.Default.TrendingDown, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
                                 }
-                                Icon(Icons.Default.TrendingDown, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
                             }
+                        } else {
+                            Text(
+                                text = if (!isPriceSet) "Price not set for this item." else "Log more uses to calculate your style investment performance.", 
+                                style = MaterialTheme.typography.bodyMedium, 
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
-                    } else {
-                        Text("Log more uses to calculate your style investment performance.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 
@@ -302,12 +341,16 @@ fun CosmeticDetailScreen(
                     isExpanded = showShelfLife,
                     onToggle = { showShelfLife = !showShelfLife }
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    val isExpiryTracked = item.estimatedExpiry != null
+                    Column(
+                        modifier = Modifier.alpha(if (isExpiryTracked) 1f else 0.5f),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         val daysRemaining = item.estimatedExpiry?.let { ((it - System.currentTimeMillis()) / (24 * 60 * 60 * 1000)).toInt() }
                         ProMetricCard(
                             uiState = Quadruple(
                                 "TIME REMAINING",
-                                if (daysRemaining != null) "$daysRemaining Days" else null,
+                                if (daysRemaining != null) "$daysRemaining Days" else "Not Tracked",
                                 Icons.Default.HourglassEmpty,
                                 daysRemaining?.let { (it / 365f).coerceIn(0f, 1f) }
                             ),

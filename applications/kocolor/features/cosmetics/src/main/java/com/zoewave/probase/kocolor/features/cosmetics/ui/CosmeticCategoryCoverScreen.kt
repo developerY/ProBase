@@ -71,6 +71,20 @@ fun CosmeticCategoryCoverScreen(
     
     val totalValue = items.sumOf { it.price ?: 0.0 }
     val mostUsed = items.maxByOrNull { it.usageCount }
+    val leastUsed = items.minByOrNull { it.usageCount }
+    
+    val mostExpensive = items.maxByOrNull { it.price ?: 0.0 }
+    val leastExpensive = items.filter { (it.price ?: 0.0) > 0 }.minByOrNull { it.price ?: 0.0 }
+    
+    val bestValueItem = items.filter { it.costPerUse != null }.minByOrNull { it.costPerUse!! }
+    val lowestRoiItem = items.filter { it.costPerUse != null }.maxByOrNull { it.costPerUse!! }
+
+    val totalUses = items.sumOf { it.usageCount }
+    val avgCostPerUse = items.mapNotNull { it.costPerUse }.let { if (it.isEmpty()) null else it.average() }
+    
+    val now = System.currentTimeMillis()
+    val thirtyDays = 30L * 24 * 60 * 60 * 1000
+    val expiringCount = items.count { it.estimatedExpiry?.let { exp -> (exp - now) in 0..thirtyDays } ?: false }
 
     Scaffold(
         topBar = {
@@ -111,10 +125,39 @@ fun CosmeticCategoryCoverScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(Modifier.height(24.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
-                        CategoryStatCard(uiState = "TOTAL VALUE" to currencyFormatter.format(totalValue), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
-                        CategoryStatCard(uiState = "MOST USED" to (mostUsed?.name ?: "None"), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                    
+                    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+                    
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            CategoryStatCard(uiState = "TOTAL VALUE" to currencyFormatter.format(totalValue), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                            CategoryStatCard(uiState = "ITEMS" to items.size.toString(), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            CategoryStatCard(uiState = "MOST USED" to (mostUsed?.name ?: "None"), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                            CategoryStatCard(uiState = "LEAST USED" to (leastUsed?.name ?: "None"), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            CategoryStatCard(uiState = "MOST EXPENSIVE" to (mostExpensive?.let { currencyFormatter.format(it.price ?: 0.0) } ?: "N/A"), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                            CategoryStatCard(uiState = "LEAST EXPENSIVE" to (leastExpensive?.let { currencyFormatter.format(it.price ?: 0.0) } ?: "N/A"), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            CategoryStatCard(uiState = "BEST VALUE (CPU)" to (bestValueItem?.let { currencyFormatter.format(it.costPerUse ?: 0.0) } ?: "N/A"), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                            CategoryStatCard(uiState = "LOWEST ROI (CPU)" to (lowestRoiItem?.let { currencyFormatter.format(it.costPerUse ?: 0.0) } ?: "N/A"), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            CategoryStatCard(uiState = "AVG COST/USE" to (avgCostPerUse?.let { currencyFormatter.format(it) } ?: "N/A"), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                            CategoryStatCard(uiState = "TOTAL USES" to totalUses.toString(), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                        }
+                        if (expiringCount > 0) {
+                            CategoryStatCard(
+                                uiState = "EXPIRING SOON" to "$expiringCount ITEMS", 
+                                onEvent = {}, 
+                                navTo = {}, 
+                                modifier = Modifier.fillMaxWidth(),
+                                isAlert = true
+                            )
+                        }
                     }
                 }
             }
@@ -134,17 +177,30 @@ fun CosmeticCategoryCoverScreen(
 @Composable
 private fun CategoryStatCardPreview() {
     MaterialTheme {
-        CategoryStatCard(uiState = "Label" to "Value", onEvent = {}, navTo = {})
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            CategoryStatCard(uiState = "NORMAL" to "Value", onEvent = {}, navTo = {})
+            CategoryStatCard(uiState = "ALERT" to "Alert Value", onEvent = {}, navTo = {}, isAlert = true)
+        }
     }
 }
 
 @Composable
-private fun CategoryStatCard(uiState: Pair<String, String>, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit, modifier: Modifier = Modifier) {
+private fun CategoryStatCard(
+    uiState: Pair<String, String>, 
+    onEvent: (Unit) -> Unit, 
+    navTo: (KoColorRoute) -> Unit, 
+    modifier: Modifier = Modifier,
+    isAlert: Boolean = false
+) {
     val title = uiState.first
     val value = uiState.second
+    val backgroundColor = if (isAlert) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) 
+                          else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+    val contentColor = if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+    
     Surface(
         modifier = modifier,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        color = backgroundColor,
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -152,10 +208,17 @@ private fun CategoryStatCard(uiState: Pair<String, String>, onEvent: (Unit) -> U
                 text = title,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Black,
-                modifier = Modifier.alpha(0.5f)
+                modifier = Modifier.alpha(0.5f),
+                color = contentColor
             )
             Spacer(Modifier.height(4.dp))
-            Text(text = value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1)
+            Text(
+                text = value, 
+                style = MaterialTheme.typography.titleMedium, 
+                fontWeight = FontWeight.Bold, 
+                maxLines = 1,
+                color = contentColor
+            )
         }
     }
 }

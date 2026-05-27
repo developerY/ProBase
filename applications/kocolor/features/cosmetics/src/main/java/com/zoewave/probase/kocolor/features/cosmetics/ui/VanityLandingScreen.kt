@@ -51,6 +51,7 @@ fun VanityLandingScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { navTo(KoColorRoute.CosmeticAnalytics) }) { Icon(Icons.Default.Insights, contentDescription = "Analytics") }
                     IconButton(onClick = { /* Search */ }) { Icon(Icons.Default.Search, null) }
                 }
             )
