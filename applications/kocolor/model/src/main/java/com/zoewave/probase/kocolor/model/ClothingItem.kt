@@ -38,5 +38,12 @@ data class ClothingItem(
     val colorTemperature: String? = null, // WARM, COOL, NEUTRAL
     val seasonalPalette: String? = null,  // SPRING, SUMMER, AUTUMN, WINTER
     val contrastLevel: String? = null,    // LOW, MEDIUM, HIGH
-    val koColorGroup: String? = null      // Semantic group
-)
+    val koColorGroup: String? = null,     // Semantic group
+
+    // --- Usage & Performance ---
+    val usageCount: Int = 0
+) {
+    /** Cost per single wear. */
+    val costPerUse: Double?
+        get() = if (price != null && usageCount > 0) price / usageCount else null
+}

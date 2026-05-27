@@ -73,6 +73,17 @@ class WardrobeRepository @Inject constructor(
         }
     }
 
+    suspend fun wearClothingItem(id: Long) = withContext(Dispatchers.IO) {
+        try {
+            clothingDao.getClothingById(id).firstOrNull()?.let { entity ->
+                val model = entity.toModel()
+                clothingDao.insertClothing(model.copy(usageCount = model.usageCount + 1).toEntity())
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to log wear for item: $id", e)
+        }
+    }
+
     suspend fun deleteClothing(id: Long) = withContext(Dispatchers.IO) {
         try {
             clothingDao.deleteClothing(id)

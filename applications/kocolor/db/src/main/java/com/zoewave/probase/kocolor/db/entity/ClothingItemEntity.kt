@@ -26,5 +26,6 @@ data class ClothingItemEntity(
     val colorTemperature: String? = null,
     val seasonalPalette: String? = null,
     val contrastLevel: String? = null,
-    val koColorGroup: String? = null
+    val koColorGroup: String? = null,
+    val usageCount: Int = 0
 )

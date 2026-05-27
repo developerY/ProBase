@@ -1,10 +1,9 @@
-package com.zoewave.probase.kocolor.features.cosmetics.ui
+package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -16,15 +15,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import java.text.NumberFormat
@@ -32,15 +31,15 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CosmeticAnalyticsScreen(
-    uiState: CosmeticsUiState,
-    onEvent: (CosmeticsEvent) -> Unit,
+fun WardrobeAnalyticsScreen(
+    uiState: WardrobeUiState,
+    onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("VANITY INTELLIGENCE", style = MaterialTheme.typography.labelLarge, letterSpacing = 3.sp) },
+                title = { Text("STYLE INTELLIGENCE", style = MaterialTheme.typography.labelLarge, letterSpacing = 3.sp) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -58,13 +57,13 @@ fun CosmeticAnalyticsScreen(
             item {
                 Column {
                     Text(
-                        text = "Your Beauty Blueprint.",
+                        text = "Your Style DNA.",
                         style = MaterialTheme.typography.displaySmall,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Data-driven insights from your curated collection.",
+                        text = "Quantitative analysis of your curated wardrobe.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
@@ -74,17 +73,17 @@ fun CosmeticAnalyticsScreen(
             // 2. High-Level Performance Metrics
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("COLLECTION PERFORMANCE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Text("PORTFOLIO PERFORMANCE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
                         AnalyticsStatCard(
-                            label = "TOTAL USES", 
-                            value = uiState.items.sumOf { it.usageCount }.toString(), 
-                            icon = Icons.Default.History, 
+                            label = "TOTAL VALUE", 
+                            value = currencyFormatter.format(uiState.totalInvestment), 
+                            icon = Icons.Default.MonetizationOn, 
                             modifier = Modifier.weight(1f)
                         )
                         AnalyticsStatCard(
-                            label = "AVG CPU", 
+                            label = "AVG CPW", 
                             value = uiState.items.mapNotNull { it.costPerUse }.let { if (it.isEmpty()) "---" else currencyFormatter.format(it.average()) }, 
                             icon = Icons.AutoMirrored.Filled.TrendingDown, 
                             modifier = Modifier.weight(1f)
@@ -93,32 +92,32 @@ fun CosmeticAnalyticsScreen(
                 }
             }
 
-            // 3. Usage Leaderboard (The "Hero" Products)
+            // 3. Usage Leaderboard (The "Most Worn")
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("USAGE LEADERBOARD", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Text("MOST WORN PIECES", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     val topUsed = uiState.items.filter { it.usageCount > 0 }.sortedByDescending { it.usageCount }.take(5)
                     
                     if (topUsed.isEmpty()) {
-                        Text("No usage data available yet. Start logging your rituals!", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("No wear history logged. Start recording your daily looks!", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             topUsed.forEachIndexed { index, item ->
-                                UsageRankingRow(item = item, rank = index + 1, maxUsage = topUsed.first().usageCount)
+                                WearRankingRow(item = item, rank = index + 1, maxUsage = topUsed.first().usageCount)
                             }
                         }
                     }
                 }
             }
 
-            // 4. Chromatic Core (Color Distribution)
+            // 4. Wardrobe Palette (Chromatic Distribution)
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("CHROMATIC CORE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                    val colorDistribution = uiState.items.mapNotNull { it.colorHex }.groupBy { it }.mapValues { it.value.size }.toList().sortedByDescending { it.second }
+                    Text("WARDROBE PALETTE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    val colorDistribution = uiState.items.mapNotNull { it.colorHex ?: it.dominantHex }.groupBy { it }.mapValues { it.value.size }.toList().sortedByDescending { it.second }
                     
                     if (colorDistribution.isEmpty()) {
-                        Text("Capture more product colors to see your palette.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Capture garment colors to visualize your palette.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else {
                         Row(
                             modifier = Modifier.fillMaxWidth().height(80.dp).clip(RoundedCornerShape(16.dp)),
@@ -135,7 +134,7 @@ fun CosmeticAnalyticsScreen(
                             }
                         }
                         Text(
-                            text = "Your vanity is dominated by ${colorDistribution.size} distinct tones.",
+                            text = "Your style is defined by ${colorDistribution.size} distinct tones.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -143,36 +142,36 @@ fun CosmeticAnalyticsScreen(
                 }
             }
 
-            // 5. Efficiency Analysis (Value Ranking)
+            // 5. Investment vs Utility (Best CPW)
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("STYLE EFFICIENCY (BEST VALUE)", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                    val bestValue = uiState.items.filter { it.costPerUse != null }.sortedBy { it.costPerUse }.take(3)
+                    Text("STYLE EFFICIENCY (COST PER WEAR)", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    val bestValue = uiState.items.filter { it.costPerUse != null }.sortedBy { it.costPerUse }.take(5)
                     
                     if (bestValue.isEmpty()) {
-                        Text("Complete more usage cycles to see performance data.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Log more wear events to calculate wardrobe efficiency.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             bestValue.forEach { item ->
-                                ValueEfficiencyRow(item = item, label = "PER USE")
+                                WardrobeEfficiencyRow(item = item, label = "PER WEAR")
                             }
                         }
                     }
                 }
             }
 
-            // 6. Luxury vs Daily (Price Analysis)
+            // 6. Premium Assets (Highest Price)
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("PORTFOLIO INVESTMENT", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                    val mostExpensive = uiState.items.filter { it.price != null }.sortedByDescending { it.price }.take(3)
+                    Text("PORTFOLIO ASSETS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    val premium = uiState.items.filter { it.price != null }.sortedByDescending { it.price }.take(3)
                     
-                    if (mostExpensive.isEmpty()) {
-                        Text("Add prices to your collection to see investment analytics.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (premium.isEmpty()) {
+                        Text("Add prices to see investment analytics.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            mostExpensive.forEach { item ->
-                                ValueEfficiencyRow(item = item, label = "PRICE", usePrice = true)
+                            premium.forEach { item ->
+                                WardrobeEfficiencyRow(item = item, label = "PRICE", usePrice = true)
                             }
                         }
                     }
@@ -206,7 +205,7 @@ private fun AnalyticsStatCard(
 }
 
 @Composable
-private fun UsageRankingRow(item: CosmeticItem, rank: Int, maxUsage: Int) {
+private fun WearRankingRow(item: ClothingItem, rank: Int, maxUsage: Int) {
     val progress = item.usageCount.toFloat() / maxUsage.coerceAtLeast(1)
     
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -223,13 +222,13 @@ private fun UsageRankingRow(item: CosmeticItem, rank: Int, maxUsage: Int) {
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                Text(text = "${item.brand} · ${item.usageCount} uses", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = "${item.brand ?: "Archive"} · ${item.usageCount} wears", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Box(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(CircleShape)
-                    .background(item.colorHex?.let { parseColor(it) } ?: Color.Gray)
+                    .background(item.colorHex?.let { parseColor(it) } ?: item.dominantHex?.let { parseColor(it) } ?: Color.Gray)
                     .border(1.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
             )
         }
@@ -244,7 +243,7 @@ private fun UsageRankingRow(item: CosmeticItem, rank: Int, maxUsage: Int) {
 }
 
 @Composable
-private fun ValueEfficiencyRow(item: CosmeticItem, label: String, usePrice: Boolean = false) {
+private fun WardrobeEfficiencyRow(item: ClothingItem, label: String, usePrice: Boolean = false) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
     val displayValue = if (usePrice) item.price ?: 0.0 else item.costPerUse ?: 0.0
     
@@ -260,12 +259,12 @@ private fun ValueEfficiencyRow(item: CosmeticItem, label: String, usePrice: Bool
             modifier = Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(item.colorHex?.let { parseColor(it) } ?: Color.Gray)
+                .background(item.colorHex?.let { parseColor(it) } ?: item.dominantHex?.let { parseColor(it) } ?: Color.Gray)
         )
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(text = item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-            Text(text = item.brand, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = item.brand ?: "Archive", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Column(horizontalAlignment = Alignment.End) {
             Text(
@@ -281,14 +280,14 @@ private fun ValueEfficiencyRow(item: CosmeticItem, label: String, usePrice: Bool
 
 @Preview(showBackground = true)
 @Composable
-private fun CosmeticAnalyticsScreenPreview() {
+private fun WardrobeAnalyticsScreenPreview() {
     MaterialTheme {
-        CosmeticAnalyticsScreen(
-            uiState = CosmeticsUiState(
+        WardrobeAnalyticsScreen(
+            uiState = WardrobeUiState(
+                totalInvestment = 2450.0,
                 items = listOf(
-                    CosmeticItem(id = 1, name = "Silk Primer", brand = "KoColor", category = com.zoewave.probase.kocolor.model.CosmeticCategory.PRIMER, usageCount = 45, colorHex = "#F8F0E3", price = 28.0),
-                    CosmeticItem(id = 2, name = "Cool Ivory", brand = "KoColor", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION, usageCount = 120, colorHex = "#FAD4D4", price = 42.0),
-                    CosmeticItem(id = 3, name = "Nude Silk", brand = "KoColor", category = com.zoewave.probase.kocolor.model.CosmeticCategory.LIPSTICK, usageCount = 30, colorHex = "#BC8E8E", price = 32.0)
+                    ClothingItem(id = 1, name = "Silk Blazer", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, usageCount = 12, colorHex = "#F5F5DC", price = 350.0),
+                    ClothingItem(id = 2, name = "Denim Jeans", category = com.zoewave.probase.kocolor.model.ClothingCategory.BOTTOMS, usageCount = 45, colorHex = "#000080", price = 120.0)
                 )
             ),
             onEvent = {},
