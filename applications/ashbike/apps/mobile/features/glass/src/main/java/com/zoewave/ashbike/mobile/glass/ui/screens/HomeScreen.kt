@@ -1,25 +1,19 @@
 package com.zoewave.ashbike.mobile.glass.ui.screens
 
-// Glimmer Imports
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.xr.glimmer.Button
-import androidx.xr.glimmer.Card
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Text
 import androidx.xr.glimmer.surface
 import com.zoewave.ashbike.mobile.glass.R
+import com.zoewave.ashbike.mobile.glass.newui.sections.HeaderBar
 import com.zoewave.ashbike.mobile.glass.ui.GlassUiEvent
 import com.zoewave.ashbike.mobile.glass.ui.GlassUiState
 
@@ -27,44 +21,55 @@ import com.zoewave.ashbike.mobile.glass.ui.GlassUiState
 fun HomeScreen(
     modifier: Modifier = Modifier,
     uiState: GlassUiState,
+    areVisualsOn: Boolean,
     onEvent: (GlassUiEvent) -> Unit
 ) {
-    // 1. Centralized Focus Management
-    val headerFocusRequester = remember { FocusRequester() }
-
     Box(
         modifier = modifier
-            .background(Color.Black)
+            .background(if (areVisualsOn) Color.Black else Color.Transparent)
             .surface()
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Card(
+        Column(
             modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize(),
-            title = {
-                // --- COMPOSABLE 1: HEADER ---
-                HomeHeader(
-                    uiState = uiState,
-                    onGearUp = { onEvent(GlassUiEvent.GearUp) },
-                    onGearDown = { onEvent(GlassUiEvent.GearDown) },
-                    focusRequester = headerFocusRequester
-                )
-            },
-            action = {
-                Button(onClick = { onEvent(GlassUiEvent.CloseApp) }) {
-                    Text(stringResource(R.string.applications_ashbike_apps_mobile_features_glass_exit), style = GlimmerTheme.typography.bodyMedium)
-                }
-            }
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // --- COMPOSABLE 2: MAIN CONTENT (Vertical Stack) ---
-            HomeContent(uiState = uiState)
+            // 1. HEADER
+            HeaderBar(
+                isConnected = uiState.isBikeConnected,
+                gear = uiState.currentGear,
+                batteryZone = uiState.batteryZone,
+                batteryText = uiState.formattedBattery,
+                onGearUp = { onEvent(GlassUiEvent.GearUp) },
+                onGearDown = { onEvent(GlassUiEvent.GearDown) }
+            )
 
-            // Auto-focus logic stays here
-            LaunchedEffect(uiState.isBikeConnected) {
-                if (uiState.isBikeConnected) {
-                    headerFocusRequester.requestFocus()
+            Spacer(Modifier.weight(1f))
+
+            // 2. MAIN BRANDING / WELCOME
+            Text(
+                text = "ASHBIKE",
+                style = GlimmerTheme.typography.titleLarge,
+                color = GlimmerTheme.colors.primary
+            )
+            Text(
+                text = "Ride Ready",
+                style = GlimmerTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.7f)
+            )
+
+            Spacer(Modifier.weight(1f))
+
+            // 3. ACTION BUTTONS
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(onClick = { onEvent(GlassUiEvent.ChangeScreen(com.zoewave.ashbike.mobile.glass.ui.ScreenState.BIKE)) }) {
+                    Text("START RIDE")
+                }
+                Button(onClick = { onEvent(GlassUiEvent.CloseApp) }) {
+                    Text(stringResource(R.string.applications_ashbike_apps_mobile_features_glass_exit))
                 }
             }
         }

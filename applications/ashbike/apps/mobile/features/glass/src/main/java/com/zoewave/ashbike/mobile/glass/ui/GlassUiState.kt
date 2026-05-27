@@ -27,7 +27,7 @@ data class GlassUiState(
     val calories: String = "0",
     val rideDuration: String = "00:00",
     val averageSpeed: String = "0.0",
-    var currentScreen: ScreenState = ScreenState.BIKE
+    val currentScreen: ScreenState = ScreenState.HOME
 ) {
     // =================================================================
     // COMPUTED PROPERTIES (The Logic is Here!)

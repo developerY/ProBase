@@ -32,7 +32,7 @@ class GlassesMainActivity : ComponentActivity() {
     @Inject lateinit var fashionRepository: FashionRepository
     @Inject lateinit var glassSessionRepository: GlassSessionRepository
     @Inject lateinit var firebaseLiveSessionManager: FirebaseLiveSessionManager
-    private lateinit var audioInterface: KoColorAudioInterface
+    private lateinit var audioInterface: GlassAudioInterface
 
     private var displayController: ProjectedDisplayController? = null
     private var isVisualUiSupported by mutableStateOf(false)
@@ -48,7 +48,7 @@ class GlassesMainActivity : ComponentActivity() {
 
         ComposeUiFlags.isInitialFocusOnFocusableAvailable = true
 
-        audioInterface = KoColorAudioInterface(
+        audioInterface = GlassAudioInterface(
             this,
             "Resuming your ritual.",
         )

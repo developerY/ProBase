@@ -1,16 +1,9 @@
 package com.zoewave.ashbike.mobile.glass.newui.elements
 
-// 1. IMPORT GLIMMER ICON
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.BatteryUnknown
-import androidx.compose.material.icons.rounded.BatteryAlert
-import androidx.compose.material.icons.rounded.BatteryFull
-import androidx.compose.material.icons.rounded.BatteryStd
-import androidx.compose.material.icons.rounded.Link
-import androidx.compose.material.icons.rounded.LinkOff
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,7 +15,6 @@ import com.zoewave.ashbike.mobile.glass.ui.BatteryZone
 
 @Composable
 fun BatteryBadge(
-    // Ensure this matches where you defined the Enum (inside GlassUiState or outside)
     zone: BatteryZone,
     level: String,
     modifier: Modifier = Modifier
@@ -35,33 +27,39 @@ fun BatteryBadge(
     }
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        // 2. USE GLIMMER ICON
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = tint,
-            modifier = Modifier.width(16.dp)
+            modifier = Modifier.size(16.dp)
         )
-        Spacer(Modifier.width(4.dp))
-        Text(level, color = tint, style = GlimmerTheme.typography.bodySmall)
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text = level,
+            color = tint,
+            style = GlimmerTheme.typography.caption
+        )
     }
 }
 
 @Composable
 fun ConnectionBadge(active: Boolean, modifier: Modifier = Modifier) {
-    val color = if (active) GlimmerTheme.colors.positive else GlimmerTheme.colors.negative
-    val icon = if (active) Icons.Rounded.Link else Icons.Rounded.LinkOff
-    val text = if (active) "BLE CNX" else "NO BLE"
+    val color = if (active) GlimmerTheme.colors.secondary else GlimmerTheme.colors.outline
+    val icon = if (active) Icons.Rounded.BluetoothConnected else Icons.Rounded.BluetoothDisabled
+    val text = if (active) "CNX" else "DISC"
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        // 3. RESTORED & FIXED ICON
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = color,
-            modifier = Modifier.width(16.dp)
+            modifier = Modifier.size(16.dp)
         )
-        Spacer(Modifier.width(4.dp))
-        Text(text, color = color, style = GlimmerTheme.typography.bodySmall)
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text = text,
+            color = color,
+            style = GlimmerTheme.typography.caption
+        )
     }
 }

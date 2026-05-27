@@ -1,4 +1,4 @@
-package com.zoewave.ashbike.mobile.glass
+package com.zoewave.probase.features.xr.glass
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
@@ -6,11 +6,7 @@ import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 
-/**
- * Interface for Text-To-Speech operations, lifecycle-aware.
- * Handles initialization and queuing of messages if the engine is not yet ready.
- */
-class AudioInterface(
+class GlassAudioInterface(
     context: Context,
     initializationMessage: String,
 ) : DefaultLifecycleObserver {
@@ -20,7 +16,6 @@ class AudioInterface(
     private val pendingMessages = mutableListOf<String>()
 
     init {
-        // Initialize TTS. The constructor returns immediately, and the listener is called when ready.
         tts = TextToSpeech(context.applicationContext) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 isTtsReady = true
@@ -30,14 +25,9 @@ class AudioInterface(
                 Log.e(TAG, "TTS Initialization failed with status: $status")
             }
         }
-        
-        // Queue the initialization message. It will be spoken as soon as TTS is ready.
         speak(initializationMessage)
     }
 
-    /**
-     * Speaks the given text. If TTS is not ready, the message is queued.
-     */
     fun speak(textToSpeak: String) {
         if (textToSpeak.isBlank()) return
 
@@ -83,6 +73,6 @@ class AudioInterface(
     }
 
     companion object {
-        private const val TAG = "AudioInterface"
+        private const val TAG = "GlassAudioInterface"
     }
 }

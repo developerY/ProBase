@@ -21,6 +21,9 @@ android {
 dependencies {
     // --- Internal Modules ---
     implementation(project(":applications:ashbike:model"))
+    implementation(project(":core:data"))
+    api(project(":features:ai:configuration"))
+    api(project(":features:ai:capture"))
 
     // --- Core Android ---
     implementation(libs.androidx.core.ktx)

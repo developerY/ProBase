@@ -10,4 +10,5 @@ sealed interface GlassUiEvent {
     // Navigation / System Actions (Intercepted by GlassApp)
     data object OpenGearList : GlassUiEvent
     data object CloseApp : GlassUiEvent
+    data class ChangeScreen(val screen: ScreenState) : GlassUiEvent
 }

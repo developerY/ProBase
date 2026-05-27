@@ -6,6 +6,9 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.zoewave.ashbike.model.bike.LocationEnergyLevel
+import com.zoewave.probase.core.data.repository.SecureApiKeyRepository
+import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
+import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -20,10 +23,12 @@ private object SettingsPrefsKeys {
     val GPS_ACCURACY = stringPreferencesKey("settings_gps_accuracy")
     val LONG_RIDE_ENABLED =
         booleanPreferencesKey("settings_long_ride_enabled") // Added Long Ride Key
+    val IS_AI_ENABLED = booleanPreferencesKey("is_ai_enabled")
+    val AI_MODEL = stringPreferencesKey("ai_model")
 }
 
 // 2b) Repository contract – your ViewModel only talks to this
-interface AppSettingsRepository {
+interface AppSettingsRepository : AiConfigurationSettings, SmartCaptureSettings {
     val themeFlow: Flow<String>
     val languageFlow: Flow<String>
     val notificationsFlow: Flow<String>
@@ -42,7 +47,8 @@ interface AppSettingsRepository {
 // 2c) DataStore-backed impl
 @Singleton
 class DataStoreAppSettingsRepository @Inject constructor(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    private val secureApiKeyRepository: SecureApiKeyRepository
 ) : AppSettingsRepository {
 
     override val themeFlow: Flow<String> = dataStore.data
@@ -73,6 +79,42 @@ class DataStoreAppSettingsRepository @Inject constructor(
     override val longRideEnabledFlow: Flow<Boolean> =
         dataStore.data // Added Long Ride Flow implementation
             .map { it[SettingsPrefsKeys.LONG_RIDE_ENABLED] ?: false } // Defaulting to false
+
+    // AI Configuration Implementation
+    override val isAiEnabledFlow: Flow<Boolean> = dataStore.data.map {
+        it[SettingsPrefsKeys.IS_AI_ENABLED] ?: false
+    }
+
+    override suspend fun saveAiEnabled(enabled: Boolean) {
+        dataStore.edit { it[SettingsPrefsKeys.IS_AI_ENABLED] = enabled }
+    }
+
+    override val aiModelFlow: Flow<String> = dataStore.data.map {
+        it[SettingsPrefsKeys.AI_MODEL] ?: "gemini-1.5-flash"
+    }
+
+    override suspend fun saveAiModel(model: String) {
+        dataStore.edit { it[SettingsPrefsKeys.AI_MODEL] = model }
+    }
+
+    override fun getGeminiApiKey(): String? = secureApiKeyRepository.getKey()
+
+    override val isGeminiApiKeySetFlow: Flow<Boolean> = secureApiKeyRepository.isKeySetFlow
+
+    override suspend fun saveGeminiApiKey(apiKey: String?) {
+        if (apiKey == null) {
+            secureApiKeyRepository.deleteKey()
+        } else {
+            secureApiKeyRepository.saveKey(apiKey)
+        }
+    }
+
+    // SmartCaptureSettings Implementation
+    override val userApiKeyFlow: Flow<String?> = isGeminiApiKeySetFlow.map { 
+        if (it) getGeminiApiKey() else null 
+    }
+    
+    override val userAiModelFlow: Flow<String> = aiModelFlow
 
     override suspend fun setTheme(theme: String) {
         dataStore.edit { prefs -> prefs[SettingsPrefsKeys.THEME] = theme }
