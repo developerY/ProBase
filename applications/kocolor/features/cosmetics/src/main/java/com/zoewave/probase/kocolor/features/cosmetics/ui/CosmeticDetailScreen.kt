@@ -38,7 +38,7 @@ data class CosmeticDetailUiState(
     val item: CosmeticItem? = null
 )
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Populated")
 @Composable
 private fun CosmeticDetailScreenPreview() {
     MaterialTheme {
@@ -64,6 +64,30 @@ private fun CosmeticDetailScreenPreview() {
     }
 }
 
+@Preview(showBackground = true, name = "Not Tracked")
+@Composable
+private fun CosmeticDetailScreen_NotTracked_Preview() {
+    MaterialTheme {
+        CosmeticDetailScreen(
+            uiState = CosmeticDetailUiState(
+                item = CosmeticItem(
+                    id = 2L,
+                    name = "Silk Primer",
+                    brand = "KoColor",
+                    category = com.zoewave.probase.kocolor.model.CosmeticCategory.PRIMER,
+                    price = null,
+                    volume = "30ml",
+                    amountRemaining = null, // Not Tracked -> Gray
+                    amountPerUse = null,
+                    usageCount = 0
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CosmeticDetailScreen(
@@ -74,10 +98,10 @@ fun CosmeticDetailScreen(
     val item = uiState.item ?: return
     val bgColor = item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surface
     
+    var showProductInfo by remember { mutableStateOf(true) }
     var showStockHealth by remember { mutableStateOf(true) }
     var showShelfLife by remember { mutableStateOf(false) }
     var showValueAnalysis by remember { mutableStateOf(false) }
-    var showProductInfo by remember { mutableStateOf(false) }
     var showApplicationGuide by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -172,33 +196,64 @@ fun CosmeticDetailScreen(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Quick Metrics Row (Always visible)
+                // Quick Metrics Row (Now with 4 items: Category, Price, Usage, Uses)
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    MetricItem(uiState = Triple("Category", item.category.displayName, Icons.Default.Category), onEvent = {}, navTo = {})
-                    MetricItem(uiState = Triple("Price", item.price?.let { "$%.2f".format(it) } ?: "N/A", Icons.Default.Payments), onEvent = {}, navTo = {})
-                    MetricItem(uiState = Triple("Uses", item.usageCount.toString(), Icons.Default.History), onEvent = {}, navTo = {})
+                    MetricItem(uiState = Triple("Category", item.category.displayName, Icons.Default.Category), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                    MetricItem(uiState = Triple("Price", item.price?.let { "$%.2f".format(it) } ?: "N/A", Icons.Default.Payments), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                    
+                    val unit = item.volume?.filter { it.isLetter() } ?: "ml"
+                    val usage = item.amountPerUse ?: item.category.typicalAmountPerUse
+                    MetricItem(uiState = Triple("Usage", "%.2f %s".format(usage, unit), Icons.Default.Opacity), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                    
+                    MetricItem(uiState = Triple("Uses", item.usageCount.toString(), Icons.Default.History), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
                 }
 
                 HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
 
-                // SECTION 1: STOCK HEALTH (The "Amount Used" request)
+                // SECTION 1: PRODUCT METADATA (Always first)
+                ExpandableSection(
+                    title = "Product Metadata",
+                    isExpanded = showProductInfo,
+                    onToggle = { showProductInfo = !showProductInfo }
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        DetailRow(uiState = Triple("Batch Code / SKU", item.batchCode ?: "Not Set", Color.Unspecified), onEvent = {}, navTo = {})
+                        DetailRow(uiState = Triple("Status", if (item.isOpened) "Opened" else "New / Sealed", Color.Unspecified), onEvent = {}, navTo = {})
+                        DetailRow(uiState = Triple("Container Volume", item.volume ?: "Unknown", Color.Unspecified), onEvent = {}, navTo = {})
+                        
+                        item.estimatedExpiry?.let { expiry ->
+                            val daysLeft = ((expiry - System.currentTimeMillis()) / (24 * 60 * 60 * 1000)).toInt()
+                            DetailRow(uiState = Triple("Estimated Expiry", if (daysLeft > 0) "$daysLeft days left" else "Expired", if (daysLeft < 30) Color.Red else MaterialTheme.colorScheme.onSurface), onEvent = {}, navTo = {})
+                        }
+                    }
+                }
+
+                // SECTION 2: STOCK HEALTH
                 ExpandableSection(
                     title = "Stock Health",
                     isExpanded = showStockHealth,
                     onToggle = { showStockHealth = !showStockHealth }
                 ) {
+                    val isTrackingActive = item.amountRemaining != null
                     val fillLevel = item.fillLevel ?: 1.0
-                    val statusColor = when {
-                        fillLevel > 0.5 -> Color(0xFF4CAF50) // Green
-                        fillLevel > 0.2 -> Color(0xFFFFC107) // Yellow
-                        else -> Color(0xFFF44336) // Red
+                    val statusColor = if (!isTrackingActive) {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                    } else {
+                        when {
+                            fillLevel > 0.5 -> Color(0xFF4CAF50) // Green
+                            fillLevel > 0.2 -> Color(0xFFFFC107) // Yellow
+                            else -> Color(0xFFF44336) // Red
+                        }
                     }
                     val unit = item.volume?.filter { it.isLetter() } ?: "units"
                     
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Column(
+                        modifier = Modifier.alpha(if (isTrackingActive) 1f else 0.5f),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -228,7 +283,7 @@ fun CosmeticDetailScreen(
                                     strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                                 )
                                 Text(
-                                    text = "${(fillLevel * 100).toInt()}%",
+                                    text = if (isTrackingActive) "${(fillLevel * 100).toInt()}%" else "---",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = statusColor
@@ -245,46 +300,57 @@ fun CosmeticDetailScreen(
                     }
                 }
 
-                // SECTION 2: VALUE ANALYSIS
+                // SECTION 3: VALUE ANALYSIS
                 ExpandableSection(
                     title = "Value Analysis",
                     isExpanded = showValueAnalysis,
                     onToggle = { showValueAnalysis = !showValueAnalysis }
                 ) {
-                    if (item.costPerUse != null) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(20.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                    val isPriceSet = item.price != null
+                    Column(modifier = Modifier.alpha(if (isPriceSet && item.usageCount > 0) 1f else 0.5f)) {
+                        if (item.costPerUse != null) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(20.dp),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text("Actual Cost Per Use", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                                    Text("$%.2f".format(item.costPerUse), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
+                                Row(
+                                    modifier = Modifier.padding(20.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text("Actual Cost Per Use", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                        Text("$%.2f".format(item.costPerUse), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
+                                    }
+                                    Icon(Icons.Default.TrendingDown, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
                                 }
-                                Icon(Icons.Default.TrendingDown, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
                             }
+                        } else {
+                            Text(
+                                text = if (!isPriceSet) "Price not set for this item." else "Log more uses to calculate your style investment performance.", 
+                                style = MaterialTheme.typography.bodyMedium, 
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
-                    } else {
-                        Text("Log more uses to calculate your style investment performance.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 
-                // SECTION 3: SHELF LIFE
+                // SECTION 4: SHELF LIFE
                 ExpandableSection(
                     title = "Shelf Life",
                     isExpanded = showShelfLife,
                     onToggle = { showShelfLife = !showShelfLife }
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    val isExpiryTracked = item.estimatedExpiry != null
+                    Column(
+                        modifier = Modifier.alpha(if (isExpiryTracked) 1f else 0.5f),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         val daysRemaining = item.estimatedExpiry?.let { ((it - System.currentTimeMillis()) / (24 * 60 * 60 * 1000)).toInt() }
                         ProMetricCard(
                             uiState = Quadruple(
                                 "TIME REMAINING",
-                                if (daysRemaining != null) "$daysRemaining Days" else null,
+                                if (daysRemaining != null) "$daysRemaining Days" else "Not Tracked",
                                 Icons.Default.HourglassEmpty,
                                 daysRemaining?.let { (it / 365f).coerceIn(0f, 1f) }
                             ),
@@ -316,19 +382,6 @@ fun CosmeticDetailScreen(
                                 modifier = Modifier.weight(1f)
                             )
                         }
-                    }
-                }
-
-                // SECTION 4: PRODUCT INFO
-                ExpandableSection(
-                    title = "Product Metadata",
-                    isExpanded = showProductInfo,
-                    onToggle = { showProductInfo = !showProductInfo }
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        DetailRow(uiState = Triple("Batch Code / SKU", item.batchCode ?: "Not Set", Color.Unspecified), onEvent = {}, navTo = {})
-                        DetailRow(uiState = Triple("Status", if (item.isOpened) "Opened" else "New / Sealed", Color.Unspecified), onEvent = {}, navTo = {})
-                        DetailRow(uiState = Triple("Container Volume", item.volume ?: "Unknown", Color.Unspecified), onEvent = {}, navTo = {})
                     }
                 }
 
@@ -601,11 +654,16 @@ private fun MetricItemPreview() {
 }
 
 @Composable
-private fun MetricItem(uiState: Triple<String, String, androidx.compose.ui.graphics.vector.ImageVector>, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+private fun MetricItem(
+    uiState: Triple<String, String, androidx.compose.ui.graphics.vector.ImageVector>, 
+    onEvent: (Unit) -> Unit, 
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val label = uiState.first
     val value = uiState.second
     val icon = uiState.third
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
         Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(text = value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)

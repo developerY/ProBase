@@ -46,9 +46,14 @@ private fun CosmeticEditScreenPreview() {
                 itemId = 1L,
                 draftItem = CosmeticItem(
                     id = 1L,
-                    name = "Blush",
-                    brand = "NARS",
-                    category = com.zoewave.probase.kocolor.model.CosmeticCategory.BLUSH
+                    name = "Cool Ivory",
+                    brand = "KoColor",
+                    category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION,
+                    price = 42.0,
+                    volume = "30ml",
+                    amountPerUse = 0.35,
+                    shadeName = "Cool",
+                    colorHex = "#FAD4D4"
                 )
             ),
             onEvent = {},
@@ -196,8 +201,12 @@ fun CosmeticEditScreen(
                     label = { Text("Total Volume") },
                     placeholder = { Text("e.g. 30ml") },
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    leadingIcon = { Icon(Icons.Default.Inventory2, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary) }
                 )
+                
+                val typicalUsage = draft.category.typicalAmountPerUse
+                val unit = draft.volume?.filter { it.isLetter() } ?: "ml"
                 
                 OutlinedTextField(
                     value = draft.amountPerUse?.toString() ?: "",
@@ -205,7 +214,11 @@ fun CosmeticEditScreen(
                     label = { Text("Amount Usage") },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
-                    suffix = { Text(draft.volume?.filter { it.isLetter() } ?: "ml") }
+                    leadingIcon = { Icon(Icons.Default.Opacity, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary) },
+                    suffix = { Text(unit) },
+                    supportingText = { 
+                        Text("Rec: %.2f %s".format(typicalUsage, unit))
+                    }
                 )
             }
 
