@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -170,12 +171,31 @@ fun WardrobeDetailScreen(
                     modifier = Modifier.weight(1f)
                 )
                 MetricItem(
-                    uiState = Triple("SIZE", item.size ?: "OS", Icons.Default.Straighten),
+                    uiState = Triple("COST / WEAR", item.costPerUse?.let { currencyFormatter.format(it) } ?: "---", Icons.AutoMirrored.Filled.TrendingDown),
+                    onEvent = {},
+                    navTo = {},
+                    modifier = Modifier.weight(1f)
+                )
+                MetricItem(
+                    uiState = Triple("WEARS", item.usageCount.toString(), Icons.Default.History),
                     onEvent = {},
                     navTo = {},
                     modifier = Modifier.weight(1f)
                 )
             }
+
+            // Wear Action
+            Button(
+                onClick = { onEvent(WardrobeEvent.WearItem(item.id)) },
+                modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(Icons.Default.Checkroom, null)
+                Spacer(Modifier.width(12.dp))
+                Text("Log Today's Wear", fontWeight = FontWeight.Bold)
+            }
+
+            Spacer(Modifier.height(32.dp))
 
             // Detail Content
             Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(32.dp)) {

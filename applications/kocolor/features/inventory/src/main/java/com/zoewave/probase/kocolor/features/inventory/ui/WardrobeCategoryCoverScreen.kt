@@ -1,25 +1,32 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,7 +51,8 @@ private fun WardrobeCategoryCoverScreenPreview() {
                 categoryName = "Tops",
                 wardrobeUiState = WardrobeUiState(
                     items = listOf(
-                        com.zoewave.probase.kocolor.model.ClothingItem(id = 1, name = "Silk Shirt", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 85.0)
+                        com.zoewave.probase.kocolor.model.ClothingItem(id = 1, name = "Silk Shirt", brand = "Luxury", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 85.0, usageCount = 12),
+                        com.zoewave.probase.kocolor.model.ClothingItem(id = 2, name = "Cashmere Sweater", brand = "Premium", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 250.0, usageCount = 3)
                     )
                 )
             ),
@@ -68,7 +76,10 @@ fun WardrobeCategoryCoverScreen(
     }
     
     val totalInvestment = items.sumOf { it.price ?: 0.0 }
-    val recentItem = items.maxByOrNull { it.timestamp }
+    val mostWorn = items.maxByOrNull { it.usageCount }
+    val bestValueItem = items.filter { it.costPerUse != null }.minByOrNull { it.costPerUse!! }
+    val premiumPiece = items.maxByOrNull { it.price ?: 0.0 }
+    val avgCostPerWear = items.mapNotNull { it.costPerUse }.let { if (it.isEmpty()) null else it.average() }
 
     Scaffold(
         topBar = {
@@ -78,6 +89,9 @@ fun WardrobeCategoryCoverScreen(
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
+                },
+                actions = {
+                    IconButton(onClick = { navTo(KoColorRoute.WardrobeAnalytics) }) { Icon(Icons.Default.Insights, null) }
                 }
             )
         }
@@ -89,7 +103,7 @@ fun WardrobeCategoryCoverScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Editorial Header
+            // Editorial Header & Intelligence Dashboard
             item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) {
                 Column(modifier = Modifier.padding(bottom = 16.dp)) {
                     Text(
@@ -98,66 +112,155 @@ fun WardrobeCategoryCoverScreen(
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(Modifier.height(24.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
-                        CategoryStatCard(uiState = "TOTAL INVESTMENT" to currencyFormatter.format(totalInvestment), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
-                        CategoryStatCard(uiState = "RECENT ADDITION" to (recentItem?.name ?: "None"), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                    Text(
+                        text = "Strategic performance of your $categoryName curated closet.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                    
+                    Spacer(Modifier.height(32.dp))
+                    
+                    Text("CATEGORY INTELLIGENCE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp, modifier = Modifier.padding(bottom = 16.dp))
+                    
+                    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+                    
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            CategoryStatCard(uiState = "PORTFOLIO VALUE" to currencyFormatter.format(totalInvestment), modifier = Modifier.weight(1f))
+                            CategoryStatCard(uiState = "AVG CPW" to (avgCostPerWear?.let { currencyFormatter.format(it) } ?: "N/A"), modifier = Modifier.weight(1f))
+                        }
+                        
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            RankingStatCard(
+                                title = "MOST WORN",
+                                item = mostWorn,
+                                icon = Icons.Default.Star,
+                                modifier = Modifier.weight(1f)
+                            )
+                            RankingStatCard(
+                                title = "BEST VALUE",
+                                item = bestValueItem,
+                                icon = Icons.Default.Savings,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            RankingStatCard(
+                                title = "PREMIUM PIECE",
+                                item = premiumPiece,
+                                icon = Icons.Default.Diamond,
+                                modifier = Modifier.weight(1f)
+                            )
+                            CategoryStatCard(uiState = "PIECE COUNT" to items.size.toString(), modifier = Modifier.weight(1f))
+                        }
                     }
+                    
+                    Spacer(Modifier.height(32.dp))
+                    Text("ARCHIVE ENTRIES", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                 }
             }
 
             items(items) { item ->
-                ClothingProductGridCard(uiState = item, onEvent = {}, navTo = navTo)
+                ClothingProductGridCard(uiState = item, navTo = navTo)
+            }
+            
+            item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) {
+                Spacer(Modifier.height(80.dp))
             }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-private fun CategoryStatCardPreview() {
-    MaterialTheme {
-        CategoryStatCard(uiState = "Label" to "Value", onEvent = {}, navTo = {})
-    }
-}
-
-@Composable
-private fun CategoryStatCard(uiState: Pair<String, String>, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit, modifier: Modifier = Modifier) {
-    val title = uiState.first
-    val value = uiState.second
+private fun RankingStatCard(
+    title: String,
+    item: ClothingItem?,
+    icon: ImageVector,
+    modifier: Modifier = Modifier
+) {
     Surface(
         modifier = modifier,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-        shape = RoundedCornerShape(16.dp)
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = title, 
-                style = MaterialTheme.typography.labelSmall, 
-                fontWeight = FontWeight.Black, 
-                modifier = Modifier.alpha(0.5f)
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(text = value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    modifier = Modifier.alpha(0.5f)
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            if (item != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clip(CircleShape)
+                            .background(item.colorHex?.let { parseColor(it) } ?: item.dominantHex?.let { parseColor(it) } ?: Color.Gray)
+                            .border(0.5.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = item.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            } else {
+                Text(text = "None yet", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+            }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-private fun ClothingProductGridCardPreview() {
-    MaterialTheme {
-        ClothingProductGridCard(
-            uiState = ClothingItem(id = 1, name = "Item", brand = "Brand", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS),
-            onEvent = {},
-            navTo = {}
-        )
+private fun CategoryStatCard(
+    uiState: Pair<String, String>, 
+    modifier: Modifier = Modifier,
+    isAlert: Boolean = false
+) {
+    val title = uiState.first
+    val value = uiState.second
+    val backgroundColor = if (isAlert) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) 
+                          else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+    val contentColor = if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+    
+    Surface(
+        modifier = modifier,
+        color = backgroundColor,
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Black,
+                modifier = Modifier.alpha(0.5f),
+                color = contentColor
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = value, 
+                style = MaterialTheme.typography.titleMedium, 
+                fontWeight = FontWeight.Bold, 
+                maxLines = 1,
+                color = contentColor
+            )
+        }
     }
 }
 
 @Composable
-private fun ClothingProductGridCard(uiState: ClothingItem, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+private fun ClothingProductGridCard(uiState: ClothingItem, navTo: (KoColorRoute) -> Unit) {
     val item = uiState
     val onClick = { navTo(KoColorRoute.WardrobeDetail(item.id)) }
     Card(

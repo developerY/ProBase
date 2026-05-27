@@ -34,6 +34,7 @@ sealed class WardrobeEvent {
     data class AddItem(val item: ClothingItem) : WardrobeEvent()
     data class UpdateItem(val item: ClothingItem) : WardrobeEvent()
     data class DeleteItem(val id: Long) : WardrobeEvent()
+    data class WearItem(val id: Long) : WardrobeEvent()
     data class UpdateDraft(val item: ClothingItem) : WardrobeEvent()
     data class InitializeEdit(val itemId: Long) : WardrobeEvent()
 }
@@ -144,6 +145,7 @@ class WardrobeViewModel @Inject constructor(
             is WardrobeEvent.AddItem -> addItem(event.item)
             is WardrobeEvent.UpdateItem -> updateItem(event.item)
             is WardrobeEvent.DeleteItem -> deleteItem(event.id)
+            is WardrobeEvent.WearItem -> wearItem(event.id)
             is WardrobeEvent.UpdateDraft -> _draftItem.value = event.item
             is WardrobeEvent.InitializeEdit -> {
                 if (_draftItem.value.id != event.itemId) {
@@ -179,6 +181,12 @@ class WardrobeViewModel @Inject constructor(
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.NonCancellable) {
                 wardrobeRepository.saveClothingItem(item)
             }
+        }
+    }
+
+    private fun wearItem(id: Long) {
+        viewModelScope.launch {
+            wardrobeRepository.wearClothingItem(id)
         }
     }
 

@@ -70,6 +70,7 @@ fun WardrobeLandingScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { navTo(KoColorRoute.WardrobeAnalytics) }) { Icon(Icons.Default.Insights, null) }
                     IconButton(onClick = { /* Search */ }) { Icon(Icons.Default.Search, null) }
                 }
             )
