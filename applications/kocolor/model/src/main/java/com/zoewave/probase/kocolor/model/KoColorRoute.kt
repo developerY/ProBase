@@ -15,6 +15,9 @@ sealed class KoColorRoute {
     
     @Serializable
     data object VanityLanding : KoColorRoute()
+
+    @Serializable
+    data object CosmeticAnalytics : KoColorRoute()
     
     @Serializable
     data object StyleSimulator : KoColorRoute()
