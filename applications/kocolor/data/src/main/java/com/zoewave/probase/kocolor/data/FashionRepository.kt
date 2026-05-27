@@ -13,7 +13,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -32,12 +34,19 @@ class FashionRepository @Inject constructor(
     private val _isGlassSessionActive = MutableStateFlow(false)
     val isGlassSessionActive = _isGlassSessionActive.asStateFlow()
 
+    private val _glassCommands = MutableSharedFlow<String>()
+    val glassCommands = _glassCommands.asSharedFlow()
+
     fun updateGlassConnectionState(isConnected: Boolean) {
         _isGlassConnected.value = isConnected
     }
 
     fun updateGlassSessionState(isActive: Boolean) {
         _isGlassSessionActive.value = isActive
+    }
+
+    suspend fun sendGlassCommand(command: String) {
+        _glassCommands.emit(command)
     }
 
     fun getProfile(): Flow<FashionProfile?> {

@@ -158,7 +158,11 @@ class RoutinesViewModel @Inject constructor(
             is RoutinesEvent.ResetRoutine -> resetRoutine(event.routineId)
             is RoutinesEvent.ProjectToGlass -> {
                 viewModelScope.launch {
-                    _sideEffect.emit(RoutinesSideEffect.LaunchGlassProjection(event.time))
+                    if (uiState.value.glassButtonState == GlassButtonState.PROJECTING) {
+                        fashionRepository.sendGlassCommand("EXIT")
+                    } else {
+                        _sideEffect.emit(RoutinesSideEffect.LaunchGlassProjection(event.time))
+                    }
                 }
             }
         }
