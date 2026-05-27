@@ -147,6 +147,36 @@ enum class CosmeticCategory {
             OTHER -> listOf("Cotton swabs for cleanup", "Brush cleaner", "Micellar water for quick corrections")
             AI_PENDING -> emptyList()
         }
+
+    /** Typical amount used per application (in ml or g). */
+    val typicalAmountPerUse: Double
+        get() = when (this) {
+            PRIMER -> 0.3
+            FOUNDATION -> 0.35
+            CONCEALER -> 0.1
+            BB_CC_CREAM -> 0.4
+            SETTING_PRODUCT -> 0.2
+            BLUSH -> 0.1
+            BRONZER -> 0.1
+            CONTOUR -> 0.1
+            HIGHLIGHTER -> 0.05
+            EYESHADOW -> 0.05
+            EYELINER -> 0.02
+            MASCARA -> 0.1
+            EYEBROW_PRODUCT -> 0.05
+            FALSE_LASHES -> 1.0
+            LIPSTICK -> 0.05
+            LIP_GLOSS -> 0.1
+            LIP_LINER -> 0.02
+            LIP_STAIN_TINT -> 0.05
+            LIP_PLUMPER -> 0.1
+            BRUSHES_SPONGES -> 0.0
+            EYELASH_CURLER -> 0.0
+            ORGANIZERS -> 0.0
+            NAIL_POLISH -> 0.2
+            AI_PENDING -> 0.1
+            OTHER -> 0.1
+        }
 }
 
 @Serializable

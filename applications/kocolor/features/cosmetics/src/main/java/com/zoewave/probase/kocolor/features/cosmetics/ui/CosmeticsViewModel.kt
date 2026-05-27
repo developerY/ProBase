@@ -192,7 +192,14 @@ class CosmeticsViewModel @Inject constructor(
             is CosmeticsEvent.UpdateItem -> updateItem(event.item)
             is CosmeticsEvent.DeleteItem -> deleteItem(event.id)
             is CosmeticsEvent.UseItem -> useItem(event.id)
-            is CosmeticsEvent.UpdateDraft -> _draftItem.value = event.item
+            is CosmeticsEvent.UpdateDraft -> {
+                val updatedItem = if (event.item.category != _draftItem.value.category) {
+                    event.item.copy(amountPerUse = event.item.category.typicalAmountPerUse)
+                } else {
+                    event.item
+                }
+                _draftItem.value = updatedItem
+            }
             is CosmeticsEvent.StartEditing -> _draftItem.value = event.item
             is CosmeticsEvent.InitializeEdit -> {
                 viewModelScope.launch {

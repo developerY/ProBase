@@ -36,7 +36,10 @@ object CosmeticDefaults {
                 usageCount = 120,
                 isOpened = true,
                 openedDate = now - (23 * month),
-                imageUrl = "https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=400&q=80"
+                imageUrl = "https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=400&q=80",
+                volume = "42ml",
+                amountRemaining = 14.7,
+                amountPerUse = 0.35
             ),
             CosmeticItemEntity(
                 name = "Warm Honey", 

@@ -189,6 +189,26 @@ fun CosmeticEditScreen(
                 )
             }
 
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = draft.volume ?: "",
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(volume = it))) },
+                    label = { Text("Total Volume") },
+                    placeholder = { Text("e.g. 30ml") },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                
+                OutlinedTextField(
+                    value = draft.amountPerUse?.toString() ?: "",
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(amountPerUse = it.toDoubleOrNull()))) },
+                    label = { Text("Amount Usage") },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    suffix = { Text(draft.volume?.filter { it.isLetter() } ?: "ml") }
+                )
+            }
+
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(
                     value = draft.shadeName ?: "",

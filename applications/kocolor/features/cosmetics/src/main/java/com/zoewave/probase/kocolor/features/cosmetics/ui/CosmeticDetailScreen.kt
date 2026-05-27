@@ -166,6 +166,11 @@ fun CosmeticDetailScreen(
                 ) {
                     MetricItem(uiState = Triple("Category", item.category.displayName, Icons.Default.Category), onEvent = {}, navTo = {})
                     MetricItem(uiState = Triple("Price", item.price?.let { "$%.2f".format(it) } ?: "N/A", Icons.Default.Payments), onEvent = {}, navTo = {})
+                    
+                    val unit = item.volume?.filter { it.isLetter() } ?: "ml"
+                    val usage = item.amountPerUse ?: item.category.typicalAmountPerUse
+                    MetricItem(uiState = Triple("Usage", "%.2f %s".format(usage, unit), Icons.Default.Opacity), onEvent = {}, navTo = {})
+                    
                     MetricItem(uiState = Triple("Uses", item.usageCount.toString(), Icons.Default.History), onEvent = {}, navTo = {})
                 }
 
