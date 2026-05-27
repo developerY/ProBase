@@ -1,34 +1,25 @@
 package com.zoewave.ashbike.mobile.glass.newui.sections
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AvTimer
-import androidx.compose.material.icons.rounded.LocalFireDepartment
-import androidx.compose.material.icons.rounded.Speed
-import androidx.compose.material.icons.rounded.Straighten
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Card
+import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Icon
-import androidx.xr.glimmer.ListItem
 import androidx.xr.glimmer.Text
-import androidx.xr.glimmer.list.GlimmerLazyColumn
-import com.zoewave.ashbike.mobile.glass.R
 
 @Composable
 fun SummaryStatCard(
     label: String,
     value: String,
     icon: ImageVector,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    accentColor: Color = GlimmerTheme.colors.secondary
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -37,15 +28,15 @@ fun SummaryStatCard(
         Row(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Start
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = GlimmerTheme.colors.secondary,
+                tint = accentColor,
                 modifier = Modifier.size(32.dp)
             )
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.width(20.dp))
             Column {
                 Text(
                     text = value,
@@ -63,97 +54,40 @@ fun SummaryStatCard(
 }
 
 @Composable
-fun StatsBoard(
-    distance: String,
-    duration: String,
-    avgSpeed: String,
-    calories: String,
-    modifier: Modifier = Modifier,
-    listFocusRequester: FocusRequester? = null
+fun DualStatCard(
+    label1: String, value1: String, icon1: ImageVector,
+    label2: String, value2: String, icon2: ImageVector,
+    modifier: Modifier = Modifier
 ) {
-    // Card(modifier = modifier) {
-        // CORRECT: Use GlimmerLazyColumn instead of LazyColumn
-        GlimmerLazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(if (listFocusRequester != null) Modifier.focusRequester(listFocusRequester) else Modifier),
-            // REDUCE PADDING: Was 8.dp, change to 4.dp or 2.dp
-            contentPadding = PaddingValues(2.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        onClick = {}
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Item 1: Distance
-            item {
-                GlimmerStatItem(
-                    icon = Icons.Rounded.Straighten,
-                    label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_distance),
-                    value = "$distance km",
-                    accent = GlimmerTheme.colors.secondary
-                )
-            }
-            // Item 2: Duration
-            item {
-                GlimmerStatItem(
-                    icon = Icons.Rounded.AvTimer,
-                    label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_duration),
-                    value = duration,
-                    accent = GlimmerTheme.colors.secondary
-                )
-            }
-            // Item 3: Avg Speed
-            item {
-                GlimmerStatItem(
-                    icon = Icons.Rounded.Speed,
-                    label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_avg_speed),
-                    value = "$avgSpeed mph",
-                    accent = GlimmerTheme.colors.secondary
-                )
-            }
-            // Item 4: Calories
-            item {
-                GlimmerStatItem(
-                    icon = Icons.Rounded.LocalFireDepartment,
-                    label = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_calories),
-                    value = calories,
-                    accent = GlimmerTheme.colors.negative
-                )
-            }
+            MiniStat(label = label1, value = value1, icon = icon1)
+            Spacer(Modifier.width(16.dp))
+            MiniStat(label = label2, value = value2, icon = icon2)
         }
-    // }
+    }
 }
 
-// Helper wrapper to map your data to the official ListItem
 @Composable
-private fun GlimmerStatItem(
-    icon: ImageVector,
-    label: String,
-    value: String,
-    accent: Color
-) {
-    // Using the 'Focusable' overload (no onClick needed for read-only)
-    ListItem(
-        // LEADING ICON
-        leadingIcon = {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = accent,
-                //modifier = Modifier.size(24.dp)
-            )
-        },
-        // SUPPORTING LABEL (The descriptor, e.g. "DISTANCE")
-        supportingLabel = {
-            Text(
-                text = label,
-                style = GlimmerTheme.typography.bodySmall,
-                color = GlimmerTheme.colors.outline
-            )
-        },
-        // CONTENT (The main value, e.g. "12.5 km")
-        content = {
-            Text(
-                text = value,
-                style = GlimmerTheme.typography.bodyLarge
-            )
+private fun MiniStat(label: String, value: String, icon: ImageVector) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = GlimmerTheme.colors.secondary,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(Modifier.width(8.dp))
+        Column {
+            Text(text = value, style = GlimmerTheme.typography.bodyLarge, color = Color.White)
+            Text(text = label.uppercase(), style = GlimmerTheme.typography.caption, color = GlimmerTheme.colors.outline)
         }
-    )
+    }
 }

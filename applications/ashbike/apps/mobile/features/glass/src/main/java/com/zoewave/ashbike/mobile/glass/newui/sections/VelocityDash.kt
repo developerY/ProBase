@@ -1,11 +1,6 @@
 package com.zoewave.ashbike.mobile.glass.newui.sections
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.runtime.Composable
@@ -28,16 +23,16 @@ fun VelocityDash(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        onClick = {} // Enable focus feedback
+        onClick = {} // Enable focus
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. SPEED (Primary Data)
+            // 1. SPEED
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_speed).uppercase(),
@@ -47,16 +42,21 @@ fun VelocityDash(
                 Text(
                     text = speed,
                     style = GlimmerTheme.typography.titleLarge,
-                    color = GlimmerTheme.colors.secondary // Matches screenshot's blue
+                    color = GlimmerTheme.colors.secondary
+                )
+                Text(
+                    text = "MPH",
+                    style = GlimmerTheme.typography.caption,
+                    color = GlimmerTheme.colors.outline
                 )
             }
 
-            // 2. HEADING (Secondary Data)
+            // 2. HEADING
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     imageVector = Icons.Rounded.Explore,
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(32.dp),
                     tint = GlimmerTheme.colors.secondary
                 )
                 Text(
