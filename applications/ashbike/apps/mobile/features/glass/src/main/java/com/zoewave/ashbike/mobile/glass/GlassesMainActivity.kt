@@ -7,33 +7,45 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import kotlin.OptIn
 import androidx.xr.glimmer.GlimmerTheme
+import androidx.xr.projected.ProjectedDeviceController
+import androidx.xr.projected.ProjectedDeviceController.Capability.Companion.CAPABILITY_VISUAL_UI
+import androidx.xr.projected.ProjectedDisplayController
+import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
 import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import com.zoewave.ashbike.data.repository.bike.BikeRepository
 import com.zoewave.ashbike.mobile.glass.audio.VoiceGearController
 import com.zoewave.ashbike.mobile.glass.ui.GlassApp
 import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
+import com.zoewave.probase.features.xr.glass.GlassAudioInterface
+import com.zoewave.probase.features.xr.glass.GlassesLifecycleObserver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+@OptIn(ExperimentalProjectedApi::class)
 @AndroidEntryPoint // <--- Required for Hilt injection
 class GlassesMainActivity : ComponentActivity() {
 
     // Inject the shared repository instance
     @Inject lateinit var repository: BikeRepository
     @Inject lateinit var firebaseLiveSessionManager: FirebaseLiveSessionManager
-    private lateinit var audioInterface: AudioInterface
+    private lateinit var audioInterface: GlassAudioInterface
     private lateinit var voiceGearController: VoiceGearController
+
+    private var displayController: ProjectedDisplayController? = null
+    private var isVisualUiSupported by mutableStateOf(false)
+    private var areVisualsOn by mutableStateOf(true)
 
     @OptIn(ExperimentalProjectedApi::class)
     private val requestPermissionLauncher =
@@ -52,7 +64,7 @@ class GlassesMainActivity : ComponentActivity() {
         // Recommended for XR glasses to handle initial focus correctly
         ComposeUiFlags.isInitialFocusOnFocusableAvailable = true
 
-        audioInterface = AudioInterface(
+        audioInterface = GlassAudioInterface(
             this,
             getString(R.string.applications_ashbike_apps_mobile_features_glass_hello_ai_glasses),
         )
@@ -73,15 +85,14 @@ class GlassesMainActivity : ComponentActivity() {
 
         checkAndRequestAudioPermission()
 
+        initializeGlassesFeatures()
+
         setContent {
             GlimmerTheme {
                 GlassApp(
+                    areVisualsOn = areVisualsOn,
+                    isVisualUiSupported = isVisualUiSupported,
                     onClose = {
-
-                        /*audioInterface.speak("Goodbye!")
-                        // Delay slightly or ensure speak finishes if possible, then finish
-                        finish()*/
-
                         // 2. LAUNCH COROUTINE: Handle the "Goodbye" delay
                         lifecycleScope.launch {
                             audioInterface.speak("Goodbye!")
@@ -90,6 +101,28 @@ class GlassesMainActivity : ComponentActivity() {
                         }
                     }
                 )
+            }
+        }
+    }
+
+    private fun initializeGlassesFeatures() {
+        lifecycleScope.launch {
+            try {
+                val projectedDeviceController = ProjectedDeviceController.create(this@GlassesMainActivity)
+                val connected = projectedDeviceController.capabilities.isNotEmpty()
+                isVisualUiSupported = projectedDeviceController.capabilities.contains(CAPABILITY_VISUAL_UI)
+                repository.updateGlassConnectionState(connected)
+
+                val controller = ProjectedDisplayController.create(this@GlassesMainActivity)
+                displayController = controller
+                val observer = GlassesLifecycleObserver(
+                    controller = controller,
+                    onVisualsChanged = { visualsOn -> areVisualsOn = visualsOn }
+                )
+                lifecycle.addObserver(observer)
+            } catch (e: Exception) {
+                Log.e("GlassesMain", "Init failed", e)
+                repository.updateGlassConnectionState(false)
             }
         }
     }

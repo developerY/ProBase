@@ -38,6 +38,8 @@ import kotlinx.coroutines.delay
 fun AshGlassLayout(
     modifier: Modifier = Modifier,
     uiState: GlassUiState,
+    areVisualsOn: Boolean,
+    isVisualUiSupported: Boolean,
     onEvent: (GlassUiEvent) -> Unit
 ) {
     // New Focus Requester for the Gear controls
@@ -46,7 +48,7 @@ fun AshGlassLayout(
 
     Box(
         modifier = modifier
-            .background(Color.Black) // MANDATORY for additive displays
+            .background(if (areVisualsOn) Color.Black else Color.Transparent) // MANDATORY for additive displays
             .surface()
             .fillMaxSize()
             .onFocusChanged {

@@ -27,6 +27,7 @@ import com.zoewave.ashbike.mobile.glass.ui.GlassUiState
 fun HomeScreen(
     modifier: Modifier = Modifier,
     uiState: GlassUiState,
+    areVisualsOn: Boolean,
     onEvent: (GlassUiEvent) -> Unit
 ) {
     // 1. Centralized Focus Management
@@ -34,7 +35,7 @@ fun HomeScreen(
 
     Box(
         modifier = modifier
-            .background(Color.Black)
+            .background(if (areVisualsOn) Color.Black else Color.Transparent)
             .surface()
             .fillMaxSize(),
         contentAlignment = Alignment.Center

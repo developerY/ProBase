@@ -100,6 +100,8 @@ dependencies {
     implementation(project(":applications:ashbike:database"))
 
     implementation(project(":features:places"))
+    implementation(project(":features:ai:configuration"))
+    implementation(project(":features:ai:capture"))
     /* Shared Features (Assuming these paths exist in your monorepo)
     implementation(project(":feature:listings"))
     implementation(project(":feature:camera"))

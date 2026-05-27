@@ -16,6 +16,8 @@ enum class ScreenState {
 
 @Composable
 fun GlassApp(
+    areVisualsOn: Boolean,
+    isVisualUiSupported: Boolean,
     onClose: () -> Unit,
     viewModel: GlassViewModel = hiltViewModel(),
 ) {
@@ -28,6 +30,7 @@ fun GlassApp(
         ScreenState.HOME -> {
             HomeScreen(
                 uiState = uiState,
+                areVisualsOn = areVisualsOn,
                 onEvent = { event ->
                     // ROUTING LOGIC:
                     when (event) {
@@ -44,6 +47,8 @@ fun GlassApp(
         ScreenState.BIKE -> {
             AshGlassLayout(
                 uiState = uiState,
+                areVisualsOn = areVisualsOn,
+                isVisualUiSupported = isVisualUiSupported,
                 onEvent = { event ->
                     // ROUTING LOGIC:
                     when (event) {

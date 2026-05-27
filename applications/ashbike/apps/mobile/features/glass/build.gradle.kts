@@ -22,6 +22,7 @@ dependencies {
     // Use the AshBike-specific data module (contains BikeRepository)
     implementation(project(":applications:ashbike:data"))
     implementation(project(":applications:ashbike:model"))
+    implementation(project(":features:xr:glass"))
 
     // --- 2. Android XR / Glass (Glimmer) ---
     // Keeping these as they appear to be specific XR libraries in your catalog

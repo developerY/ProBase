@@ -8,12 +8,15 @@ import com.zoewave.probase.ashbike.database.repository.AppSettingsRepository
 import com.zoewave.probase.ashbike.database.repository.DataStoreAppSettingsRepository
 import com.zoewave.probase.ashbike.database.repository.DataStoreUserProfileRepository
 import com.zoewave.probase.ashbike.database.repository.UserProfileRepository
+import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
+import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Named
 import javax.inject.Singleton
 
 // TOP-LEVEL: the actual file-backed DataStore<Preferences>
@@ -40,6 +43,20 @@ abstract class RepositoryModule {
     abstract fun bindAppSettingsRepository(
         impl: DataStoreAppSettingsRepository
     ): AppSettingsRepository
+
+    @Binds
+    @Singleton
+    @Named("AshBike")
+    abstract fun bindAiConfigurationSettings(
+        impl: DataStoreAppSettingsRepository
+    ): AiConfigurationSettings
+
+    @Binds
+    @Singleton
+    @Named("AshBike")
+    abstract fun bindSmartCaptureSettings(
+        impl: DataStoreAppSettingsRepository
+    ): SmartCaptureSettings
 
     @Binds
     @Singleton
