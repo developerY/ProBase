@@ -74,10 +74,10 @@ fun CosmeticDetailScreen(
     val item = uiState.item ?: return
     val bgColor = item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surface
     
+    var showProductInfo by remember { mutableStateOf(true) }
     var showStockHealth by remember { mutableStateOf(true) }
     var showShelfLife by remember { mutableStateOf(false) }
     var showValueAnalysis by remember { mutableStateOf(false) }
-    var showProductInfo by remember { mutableStateOf(false) }
     var showApplicationGuide by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -172,19 +172,42 @@ fun CosmeticDetailScreen(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Quick Metrics Row (Always visible)
+                // Quick Metrics Row (Now with 4 items: Category, Price, Usage, Uses)
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    MetricItem(uiState = Triple("Category", item.category.displayName, Icons.Default.Category), onEvent = {}, navTo = {})
-                    MetricItem(uiState = Triple("Price", item.price?.let { "$%.2f".format(it) } ?: "N/A", Icons.Default.Payments), onEvent = {}, navTo = {})
-                    MetricItem(uiState = Triple("Uses", item.usageCount.toString(), Icons.Default.History), onEvent = {}, navTo = {})
+                    MetricItem(uiState = Triple("Category", item.category.displayName, Icons.Default.Category), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                    MetricItem(uiState = Triple("Price", item.price?.let { "$%.2f".format(it) } ?: "N/A", Icons.Default.Payments), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                    
+                    val unit = item.volume?.filter { it.isLetter() } ?: "ml"
+                    val usage = item.amountPerUse ?: item.category.typicalAmountPerUse
+                    MetricItem(uiState = Triple("Usage", "%.2f %s".format(usage, unit), Icons.Default.Opacity), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                    
+                    MetricItem(uiState = Triple("Uses", item.usageCount.toString(), Icons.Default.History), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
                 }
 
                 HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
 
-                // SECTION 1: STOCK HEALTH (The "Amount Used" request)
+                // SECTION 1: PRODUCT METADATA (Always first)
+                ExpandableSection(
+                    title = "Product Metadata",
+                    isExpanded = showProductInfo,
+                    onToggle = { showProductInfo = !showProductInfo }
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        DetailRow(uiState = Triple("Batch Code / SKU", item.batchCode ?: "Not Set", Color.Unspecified), onEvent = {}, navTo = {})
+                        DetailRow(uiState = Triple("Status", if (item.isOpened) "Opened" else "New / Sealed", Color.Unspecified), onEvent = {}, navTo = {})
+                        DetailRow(uiState = Triple("Container Volume", item.volume ?: "Unknown", Color.Unspecified), onEvent = {}, navTo = {})
+                        
+                        item.estimatedExpiry?.let { expiry ->
+                            val daysLeft = ((expiry - System.currentTimeMillis()) / (24 * 60 * 60 * 1000)).toInt()
+                            DetailRow(uiState = Triple("Estimated Expiry", if (daysLeft > 0) "$daysLeft days left" else "Expired", if (daysLeft < 30) Color.Red else MaterialTheme.colorScheme.onSurface), onEvent = {}, navTo = {})
+                        }
+                    }
+                }
+
+                // SECTION 2: STOCK HEALTH
                 ExpandableSection(
                     title = "Stock Health",
                     isExpanded = showStockHealth,
@@ -245,7 +268,7 @@ fun CosmeticDetailScreen(
                     }
                 }
 
-                // SECTION 2: VALUE ANALYSIS
+                // SECTION 3: VALUE ANALYSIS
                 ExpandableSection(
                     title = "Value Analysis",
                     isExpanded = showValueAnalysis,
@@ -273,7 +296,7 @@ fun CosmeticDetailScreen(
                     }
                 }
 
-                // SECTION 3: SHELF LIFE
+                // SECTION 4: SHELF LIFE
                 ExpandableSection(
                     title = "Shelf Life",
                     isExpanded = showShelfLife,
@@ -316,19 +339,6 @@ fun CosmeticDetailScreen(
                                 modifier = Modifier.weight(1f)
                             )
                         }
-                    }
-                }
-
-                // SECTION 4: PRODUCT INFO
-                ExpandableSection(
-                    title = "Product Metadata",
-                    isExpanded = showProductInfo,
-                    onToggle = { showProductInfo = !showProductInfo }
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        DetailRow(uiState = Triple("Batch Code / SKU", item.batchCode ?: "Not Set", Color.Unspecified), onEvent = {}, navTo = {})
-                        DetailRow(uiState = Triple("Status", if (item.isOpened) "Opened" else "New / Sealed", Color.Unspecified), onEvent = {}, navTo = {})
-                        DetailRow(uiState = Triple("Container Volume", item.volume ?: "Unknown", Color.Unspecified), onEvent = {}, navTo = {})
                     }
                 }
 
@@ -601,11 +611,16 @@ private fun MetricItemPreview() {
 }
 
 @Composable
-private fun MetricItem(uiState: Triple<String, String, androidx.compose.ui.graphics.vector.ImageVector>, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+private fun MetricItem(
+    uiState: Triple<String, String, androidx.compose.ui.graphics.vector.ImageVector>, 
+    onEvent: (Unit) -> Unit, 
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val label = uiState.first
     val value = uiState.second
     val icon = uiState.third
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
         Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(text = value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
