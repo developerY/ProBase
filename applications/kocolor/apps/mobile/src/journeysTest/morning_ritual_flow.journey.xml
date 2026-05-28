@@ -10,8 +10,8 @@
         <action>Verify that 'Wake Up' is the first step in the ritual list.</action>
         <action>Tap the checkmark next to 'Wake Up' to mark it as completed.</action>
         <action>Verify that the progress indicator at the top updates to reflect 1 completed step.</action>
-        <action>Tap the 'Project to Glass' icon in the top right corner to initiate wearable display sync.</action>
-        <action>Verify that the 'Projecting Active' state is visually indicated.</action>
+        <!--action>Tap the 'Project to Glass' icon in the top right corner to initiate wearable display sync.</action>
+        <action>Verify that the 'Projecting Active' state is visually indicated.</action-->
         <action>Tap the checkmark next to 'Hydrate' to complete the next step.</action>
         <action>Tap the back button to return to the main rituals list.</action>
     </actions>
