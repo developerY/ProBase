@@ -29,6 +29,24 @@ android {
     buildFeatures {
         buildConfig = true
     }
+
+    testOptions {
+        suites {
+            create("journeysTest") {
+                targets {
+                    create("default")
+                }
+                useJunitEngine {
+                    inputs += listOf(com.android.build.api.dsl.AgpTestSuiteInputParameters.TESTED_APKS)
+                    includeEngines += listOf("journeys-test-engine")
+                    enginesDependencies(libs.junit.platform.launcher)
+                    enginesDependencies(libs.junit.platform.engine)
+                    enginesDependencies(libs.journeys.junit.engine)
+                }
+                targetVariants += listOf("debug")
+            }
+        }
+    }
 }
 
 dependencies {
@@ -39,7 +57,6 @@ dependencies {
     
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:db"))
-    implementation(project(":applications:kocolor:data"))
     implementation(project(":applications:kocolor:data"))
     
     implementation(project(":applications:kocolor:apps:mobile:core"))
