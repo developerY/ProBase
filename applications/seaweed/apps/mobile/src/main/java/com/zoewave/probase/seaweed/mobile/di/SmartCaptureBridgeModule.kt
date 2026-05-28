@@ -1,19 +1,20 @@
 package com.zoewave.probase.seaweed.mobile.di
 
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
-import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Named
 import javax.inject.Singleton
 
-/*@Module
+@Module
 @InstallIn(SingletonComponent::class)
-abstract class SmartCaptureBridgeModule {
+object SmartCaptureBridgeModule {
 
-    @Binds
+    @Provides
     @Singleton
-    abstract fun bindSmartCaptureSettings(
-        impl: RealSmartCaptureSettings
-    ): SmartCaptureSettings
-}*/
+    fun provideDefaultSmartCaptureSettings(
+        @Named("Seaweed") impl: SmartCaptureSettings
+    ): SmartCaptureSettings = impl
+}
