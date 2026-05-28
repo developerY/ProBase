@@ -35,7 +35,10 @@ class VoiceGearController(
         
         scope.launch {
             if (speechRecognizer == null) {
-                speechRecognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(context).apply {
+                // Use attribution context for XR hardware access tracking
+                val attributionContext = context.createAttributionContext("xr_projected")
+                
+                speechRecognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(attributionContext).apply {
                     setRecognitionListener(createRecognitionListener())
                 }
             }
