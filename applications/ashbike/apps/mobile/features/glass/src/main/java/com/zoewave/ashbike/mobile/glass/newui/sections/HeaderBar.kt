@@ -1,6 +1,7 @@
 package com.zoewave.ashbike.mobile.glass.newui.sections
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -33,18 +34,23 @@ fun HeaderBar(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().height(48.dp)
     ) {
         if (isConnected) {
-            // MODE: CONTROLS
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // GEAR INDICATOR (Focusable display)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(GlimmerTheme.shapes.small)
+                    .focusable()
+                    .padding(horizontal = 4.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.applications_ashbike_apps_mobile_features_glass_gear, gear).uppercase(),
                     color = GlimmerTheme.colors.positive,
-                    style = GlimmerTheme.typography.titleLarge
+                    style = GlimmerTheme.typography.titleMedium
                 )
                 Spacer(Modifier.width(12.dp))
-                // Gear Dots (Visual representation of range)
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     repeat(3) { index ->
                         Box(
@@ -59,6 +65,7 @@ fun HeaderBar(
             
             Spacer(Modifier.width(24.dp))
             
+            // ACTION BUTTONS (Naturally focusable)
             Row {
                 Button(onClick = onGearDown, modifier = Modifier.size(40.dp)) {
                     Icon(Icons.Rounded.Remove, contentDescription = "Down")
@@ -68,19 +75,35 @@ fun HeaderBar(
                     Icon(Icons.Rounded.Add, contentDescription = "Up")
                 }
             }
+        } else {
+            // BRANDING (Focusable branding area)
+            Text(
+                text = "ASHBIKE",
+                style = GlimmerTheme.typography.titleMedium,
+                color = GlimmerTheme.colors.primary,
+                modifier = Modifier
+                    .clip(GlimmerTheme.shapes.small)
+                    .focusable()
+                    .padding(horizontal = 4.dp)
+            )
         }
 
         Spacer(Modifier.weight(1f))
 
-        // STATUS COLUMN
-        if (isConnected) {
-            Column(horizontalAlignment = Alignment.End) {
-                ConnectionBadge(active = isConnected)
-                Spacer(modifier = Modifier.height(4.dp))
+        // STATUS BADGES (Focusable status area)
+        Column(
+            horizontalAlignment = Alignment.End,
+            modifier = Modifier
+                .clip(GlimmerTheme.shapes.small)
+                .focusable()
+                .padding(horizontal = 4.dp)
+        ) {
+            ConnectionBadge(active = isConnected)
+            if (isConnected) {
+                Spacer(modifier = Modifier.height(2.dp))
                 BatteryBadge(
                     zone = batteryZone,
-                    level = batteryText,
-                    modifier = Modifier.padding(end = 8.dp)
+                    level = batteryText
                 )
             }
         }

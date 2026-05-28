@@ -28,6 +28,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
 
+    <attribution android:tag="xr_projected" android:label="@string/applications_ashbike_apps_mobile_glass_app_label" />
+
     <!-- android:dataExtractionRules="@xml/data_extraction_rules" -->
     <!-- android:enableOnBackInvokedCallback="true" -->
     <application

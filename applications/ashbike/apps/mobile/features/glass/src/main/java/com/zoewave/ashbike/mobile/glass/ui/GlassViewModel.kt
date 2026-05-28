@@ -13,7 +13,7 @@ class GlassViewModel @Inject constructor(
     private val repository: BikeRepository
 ) : ViewModel() {
 
-    private val _currentScreen = MutableStateFlow(ScreenState.HOME)
+    private val _currentScreen = MutableStateFlow(ScreenState.BIKE)
 
     val uiState: StateFlow<GlassUiState> = combine(
         repository.currentGear,
@@ -39,7 +39,7 @@ class GlassViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = GlassUiState()
+        initialValue = GlassUiState(currentScreen = ScreenState.BIKE)
     )
 
     fun onEvent(event: GlassUiEvent) {

@@ -3,7 +3,7 @@ package com.zoewave.ashbike.mobile.glass.newui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Speed
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,9 +17,9 @@ import androidx.xr.glimmer.stack.VerticalStack
 import androidx.xr.glimmer.surface
 import com.zoewave.ashbike.mobile.glass.R
 import com.zoewave.ashbike.mobile.glass.newui.sections.HeaderBar
-import com.zoewave.ashbike.mobile.glass.newui.sections.StatsBoard
 import com.zoewave.ashbike.mobile.glass.newui.sections.VelocityDash
 import com.zoewave.ashbike.mobile.glass.newui.sections.SummaryStatCard
+import com.zoewave.ashbike.mobile.glass.newui.sections.DualStatCard
 import com.zoewave.ashbike.mobile.glass.ui.GlassUiEvent
 import com.zoewave.ashbike.mobile.glass.ui.GlassUiState
 
@@ -55,13 +55,13 @@ fun AshGlassLayout(
 
             Spacer(Modifier.height(16.dp))
 
-            // 2. MAIN CONTENT: STACKED CARDS (One at a time focus)
+            // 2. MAIN CONTENT: IMMERSIVE STACK
             VerticalStack(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
             ) {
-                // Item A: Velocity Hero
+                // Item 1: SPEED & HEADING (Focus on current performance)
                 item {
                     VelocityDash(
                         speed = uiState.formattedSpeed,
@@ -70,7 +70,7 @@ fun AshGlassLayout(
                     )
                 }
 
-                // Item B: Avg Speed Hero (Matches Screenshot)
+                // Item 2: AVG SPEED (Glanceable History)
                 item {
                     SummaryStatCard(
                         label = "AVG SPEED",
@@ -80,13 +80,22 @@ fun AshGlassLayout(
                     )
                 }
 
-                // Item C: All Stats Board
+                // Item 3: DISTANCE & DURATION (Trip Progress)
                 item {
-                    StatsBoard(
-                        distance = uiState.tripDistance,
-                        duration = uiState.rideDuration,
-                        avgSpeed = uiState.averageSpeed,
-                        calories = uiState.calories,
+                    DualStatCard(
+                        label1 = "DIST", value1 = "${uiState.tripDistance} mi", icon1 = Icons.Rounded.Straighten,
+                        label2 = "TIME", value2 = uiState.rideDuration, icon2 = Icons.Rounded.AvTimer,
+                        modifier = Modifier.itemDecoration(GlimmerTheme.shapes.medium)
+                    )
+                }
+
+                // Item 4: CALORIES (Energy Burned)
+                item {
+                    SummaryStatCard(
+                        label = "CALORIES",
+                        value = uiState.calories,
+                        icon = Icons.Rounded.LocalFireDepartment,
+                        accentColor = GlimmerTheme.colors.positive,
                         modifier = Modifier.itemDecoration(GlimmerTheme.shapes.medium)
                     )
                 }
@@ -94,7 +103,7 @@ fun AshGlassLayout(
 
             Spacer(Modifier.height(16.dp))
 
-            // 3. EXIT BUTTON
+            // 3. EXIT BUTTON (Centered at bottom)
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Button(onClick = { onEvent(GlassUiEvent.CloseApp) }) {
                     Text(stringResource(R.string.applications_ashbike_apps_mobile_features_glass_exit))

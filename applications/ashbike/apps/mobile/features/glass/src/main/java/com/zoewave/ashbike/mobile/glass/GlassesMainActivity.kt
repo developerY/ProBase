@@ -136,7 +136,9 @@ class GlassesMainActivity : ComponentActivity() {
 
     private fun checkAndRequestAudioPermission() {
         val permission = Manifest.permission.RECORD_AUDIO
-        val permissionStatus = ContextCompat.checkSelfPermission(this, permission)
+        // Use attribution context for XR hardware access tracking
+        val attributionContext = createAttributionContext("xr_projected")
+        val permissionStatus = ContextCompat.checkSelfPermission(attributionContext, permission)
 
         if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
             onPermissionGranted()
