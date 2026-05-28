@@ -1,20 +1,20 @@
 package com.zoewave.probase.seaweed.mobile.di
 
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
-import com.zoewave.probase.seaweed.data.UserSettingsRepository
-import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Named
 import javax.inject.Singleton
 
-/*@Module
+@Module
 @InstallIn(SingletonComponent::class)
-abstract class AiConfigurationBridgeModule {
+object AiConfigurationBridgeModule {
 
-    @Binds
+    @Provides
     @Singleton
-    abstract fun bindAiConfigurationSettings(
-        impl: UserSettingsRepository
-    ): AiConfigurationSettings
-}*/
+    fun provideDefaultAiSettings(
+        @Named("Seaweed") impl: AiConfigurationSettings
+    ): AiConfigurationSettings = impl
+}
