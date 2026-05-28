@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<journey name="Front Page Flow">
+    <description>Tests the main home screen of the KoColor app.</description>
+    <actions xml:space="preserve">
+        <action>Do not start the app</action>
+        <action>KoColor app is running</action>
+        <action>Verify that the 'Luxury Brand Logo' is visible at the top of the screen.</action>
+        <action>Check if 'Radiant Morning' or 'Deep Restoration' header is displayed based on current time.</action>
+        <action>Verify that 'The Vanity' section is visible if there are cosmetic items.</action>
+        <action>Tap the 'Settings' icon in the top right corner to open app settings.</action>
+        <action>Verify that the 'Settings' screen is displayed.</action>
+        <action>Tap the back button to return to the home screen.</action>
+    </actions>
+</journey>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<journey name="Morning Ritual Flow">
+    <description>Tests the morning ritual flow.</description>
+    <actions xml:space="preserve">
+        <action>Do not start App</action>
+        <action>Test applications.kocolor.apps.mobile</action>
+        <action>Kolor app is running</action>
+        <action>Verify that 'Your Morning Ritual' card is visible on the home screen.</action>
+        <action>Tap on the 'Your Morning Ritual' card to open the ritual details.</action>
+        <action>Verify that 'Wake Up' is the first step in the ritual list.</action>
+        <action>Tap the checkmark next to 'Wake Up' to mark it as completed.</action>
+        <action>Verify that the progress indicator at the top updates to reflect 1 completed step.</action>
+        <action>Tap the 'Project to Glass' icon in the top right corner to initiate wearable display sync.</action>
+        <action>Verify that the 'Projecting Active' state is visually indicated.</action>
+        <action>Tap the checkmark next to 'Hydrate' to complete the next step.</action>
+        <action>Tap the back button to return to the main rituals list.</action>
+    </actions>
+</journey>

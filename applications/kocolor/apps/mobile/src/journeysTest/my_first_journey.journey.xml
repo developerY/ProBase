@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<journey name="My first Journey">
+    <description>Try it</description>
+    <actions xml:space="preserve">
+        <action>Is the app running</action>
+        <action>Click on the start button</action>
+    </actions>
+</journey>
