@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<journey name="My first Journey">
+    <description>just another one</description>
+    <actions xml:space="preserve">
+        <action>click("button_id")</action>
+        <action>assertVisible("result_text")</action>
+    </actions>
+</journey>
