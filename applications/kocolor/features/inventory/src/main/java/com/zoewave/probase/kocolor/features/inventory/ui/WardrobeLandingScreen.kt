@@ -128,20 +128,20 @@ fun WardrobeLandingScreen(
                     
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         val sections = listOf(
-                            "Tops" to (Icons.Default.DryCleaning to Color(0xFFFDEEF4)),
-                            "Bottoms" to (Icons.AutoMirrored.Filled.Label to Color(0xFFE8F1FD)),
-                            "Shoes" to (Icons.Default.IceSkating to Color(0xFFFEECEB)),
-                            "Accessories" to (Icons.Default.Watch to Color(0xFFF3EBFD))
+                            "Tops" to (Color(0xFFF7F2EB) to "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&q=80"),
+                            "Bottoms" to (Color(0xFFF9F6F0) to "https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?w=400&q=80"),
+                            "Shoes" to (Color(0xFFE8F1FD) to "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80"),
+                            "Accessories" to (Color(0xFFF3EBFD) to "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80")
                         )
                         
                         sections.forEach { (name, props) ->
-                            val (icon, color) = props
+                            val (bgColor, placeholderUrl) = props
                             val metadata = uiState.categoriesMetadata.entries.find { it.key.equals(name, ignoreCase = true) }?.value
-                            CategoryHeroCard(
+                            AtelierWardrobeCard(
                                 name = name,
-                                icon = icon,
                                 metadata = metadata,
-                                baseColor = color,
+                                baseColor = bgColor,
+                                placeholderUrl = placeholderUrl,
                                 navTo = navTo,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -236,22 +236,22 @@ data class Quadruple<out A, out B, out C, out D>(
 @Composable
 private fun CategoryHeroCardPreview() {
     MaterialTheme {
-        CategoryHeroCard(
+        AtelierWardrobeCard(
             name = "Tops",
-            icon = Icons.Default.Info,
             metadata = null,
             baseColor = Color.Blue,
+            placeholderUrl = "",
             navTo = {}
         )
     }
 }
 
 @Composable
-private fun CategoryHeroCard(
+private fun AtelierWardrobeCard(
     name: String,
-    icon: ImageVector,
     metadata: CategoryMetadata?,
     baseColor: Color,
+    placeholderUrl: String,
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -265,65 +265,92 @@ private fun CategoryHeroCard(
     Card(
         onClick = { navTo(KoColorRoute.WardrobeCategoryCover(categoryName = name)) },
         modifier = modifier.height(IntrinsicSize.Min),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = baseColor.copy(alpha = 0.6f)),
-        border = BorderStroke(1.dp, baseColor.copy(alpha = 0.8f))
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = baseColor),
+        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
-        Column(modifier = Modifier.padding(24.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 1. Professional Imagery
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.White.copy(alpha = 0.5f))
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(
-                        color = Color.White.copy(alpha = 0.5f),
-                        shape = CircleShape,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(icon, null, modifier = Modifier.size(24.dp), tint = Color.Black)
-                        }
-                    }
-                    Spacer(Modifier.width(16.dp))
-                    Column {
-                        Text(text = name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
-                        Text(text = "$count Pieces", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, modifier = Modifier.alpha(0.7f))
-                    }
-                }
-
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(text = currencyFormatter.format(totalValue), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
-                    Text(text = "Total Investment", style = MaterialTheme.typography.labelSmall, modifier = Modifier.alpha(0.5f), fontWeight = FontWeight.Bold)
-                }
+                AsyncImage(
+                    model = metadata?.representativeImageUrl ?: placeholderUrl,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.width(24.dp))
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
-                    Text(text = "Average Utility", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                    Text(text = "${averageUsage.toInt()} Wears", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
-                }
-                
-                val maxWears = 50.0 // Normalizing against a high utility item
-                val progress = (averageUsage / maxWears).coerceIn(0.0, 1.0)
-                
-                LinearProgressIndicator(
-                    progress = { progress.toFloat() },
-                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = Color.White.copy(alpha = 0.2f),
-                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
-                )
-                
-                if (leadingBrand != null) {
+            // 2. Data Content
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column {
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.displaySmall.copy(fontSize = 28.sp),
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Serif,
+                            color = Color.Black
+                        )
+                        Text(
+                            text = "$count Pieces",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.alpha(0.6f)
+                        )
+                    }
+
                     Text(
-                        text = "Leading Brand: $leadingBrand",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 4.dp).alpha(0.6f)
+                        text = currencyFormatter.format(totalValue),
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Serif,
+                        color = Color.Black
                     )
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                // Utility Status Bar
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(text = "Average Utility", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.alpha(0.6f))
+                        Text(text = "${averageUsage.toInt()} Wears", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFF6B705C))
+                    }
+                    
+                    val maxWears = 50.0 
+                    val progress = (averageUsage / maxWears).coerceIn(0.0, 1.0)
+                    val statusColor = Color(0xFF6B705C) 
+
+                    LinearProgressIndicator(
+                        progress = { progress.toFloat() },
+                        modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
+                        color = statusColor,
+                        trackColor = statusColor.copy(alpha = 0.1f),
+                        strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                    )
+                    
+                    if (leadingBrand != null) {
+                        Text(
+                            text = "Leading Brand: $leadingBrand",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(top = 4.dp).alpha(0.6f)
+                        )
+                    }
                 }
             }
         }
