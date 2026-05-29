@@ -77,6 +77,8 @@ fun WardrobeCategoryCoverScreen(
     
     val totalInvestment = items.sumOf { it.price ?: 0.0 }
     val mostWorn = items.maxByOrNull { it.usageCount }
+    val leastWorn = items.minByOrNull { it.usageCount }
+    
     val bestValueItem = items.filter { it.costPerUse != null }.minByOrNull { it.costPerUse!! }
     val premiumPiece = items.maxByOrNull { it.price ?: 0.0 }
     val avgCostPerWear = items.mapNotNull { it.costPerUse }.let { if (it.isEmpty()) null else it.average() }
@@ -152,7 +154,32 @@ fun WardrobeCategoryCoverScreen(
                                 icon = Icons.Default.Diamond,
                                 modifier = Modifier.weight(1f)
                             )
-                            CategoryStatCard(uiState = "PIECE COUNT" to items.size.toString(), modifier = Modifier.weight(1f))
+                            RankingStatCard(
+                                title = "LEAST WORN",
+                                item = leastWorn,
+                                icon = Icons.Default.History,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        // Educational Insight
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.AutoAwesome, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.width(12.dp))
+                                val insight = when(categoryName.lowercase()) {
+                                    "tops" -> "Sustainability: Choose natural fibers like silk for better cost-per-wear longevity."
+                                    "bottoms" -> "Style Note: Darker tones in your bottoms provide a solid foundation for varied pairings."
+                                    "shoes" -> "Expert Tip: Rotating your footwear extends the life of the materials."
+                                    "accessories" -> "Investment: High-quality accessories are the easiest way to elevate a standard look."
+                                    else -> "Wardrobe Data: You've maximized your investment in 20% of this collection."
+                                }
+                                Text(text = insight, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                            }
                         }
                     }
                     
