@@ -1,13 +1,15 @@
-package com.zoewave.probase.kocolor.data.engine
+package com.zoewave.probase.kocolor.features.color.util
 
 import android.graphics.Bitmap
 import androidx.palette.graphics.Palette
-import com.zoewave.probase.kocolor.data.util.ColorScience
+import com.zoewave.probase.kocolor.features.color.util.ColorScienceUtils.toHexString
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Local processing framework for extracting dominant color signatures from garments.
  */
+@Singleton
 class WardrobeAnalyzer @Inject constructor() {
 
     /**
@@ -16,22 +18,22 @@ class WardrobeAnalyzer @Inject constructor() {
     fun extractColorSignature(bitmap: Bitmap): GarmentColorSignature {
         val palette = Palette.from(bitmap).generate()
         
-        val dominant = palette.dominantSwatch?.rgb?.toHex() ?: "#FFFFFF"
-        val vibrant = palette.vibrantSwatch?.rgb?.toHex()
-        val muted = palette.mutedSwatch?.rgb?.toHex()
+        val dominant = palette.dominantSwatch?.rgb?.toHexString() ?: "#FFFFFF"
+        val vibrant = palette.vibrantSwatch?.rgb?.toHexString()
+        val muted = palette.mutedSwatch?.rgb?.toHexString()
         
         // Extract up to 5 prominent colors for a rich signature
         val secondaryColors = palette.swatches
             .sortedByDescending { it.population }
             .take(5)
-            .map { it.rgb.toHex() }
+            .map { it.rgb.toHexString() }
 
         return GarmentColorSignature(
             dominantHex = dominant,
             vibrantHex = vibrant,
             mutedHex = muted,
             secondaryPalette = secondaryColors,
-            allSwatches = palette.swatches.map { it.rgb.toHex() }
+            allSwatches = palette.swatches.map { it.rgb.toHexString() }
         )
     }
 
@@ -39,7 +41,7 @@ class WardrobeAnalyzer @Inject constructor() {
         if (swatches.size < 2) return "LOW"
         
         val brightnesses = swatches.map { hex ->
-            val rgb = ColorScience.hexToRgb(hex)
+            val rgb = ColorScienceUtils.hexToRgb(hex)
             if (rgb != null) {
                 (rgb.first * 0.299 + rgb.second * 0.587 + rgb.third * 0.114) / 255.0
             } else 0.0
@@ -55,8 +57,6 @@ class WardrobeAnalyzer @Inject constructor() {
             else -> "LOW"
         }
     }
-
-    private fun Int.toHex(): String = String.format("#%06X", 0xFFFFFF and this)
 }
 
 /**

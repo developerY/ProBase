@@ -180,6 +180,7 @@
             <option value="$PROJECT_DIR$/features/health/cgm" />
             <option value="$PROJECT_DIR$/features/health/core" />
             <option value="$PROJECT_DIR$/features/nav3" />
+            <option value="$PROJECT_DIR$/features/obf" />
             <option value="$PROJECT_DIR$/features/payment" />
             <option value="$PROJECT_DIR$/features/payment/googlepay" />
             <option value="$PROJECT_DIR$/features/payment/stripe" />

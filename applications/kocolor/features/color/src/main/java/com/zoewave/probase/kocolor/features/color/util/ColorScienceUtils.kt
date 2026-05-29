@@ -1,9 +1,9 @@
-package com.zoewave.probase.kocolor.data.util
+package com.zoewave.probase.kocolor.features.color.util
 
 import kotlin.math.max
 import kotlin.math.min
 
-object ColorScience {
+object ColorScienceUtils {
 
     data class Hsl(val h: Float, val s: Float, val l: Float)
 
@@ -57,4 +57,6 @@ object ColorScience {
             else -> if (hsl.l > 0.5f) "SUMMER" else "WINTER"
         }
     }
+
+    fun Int.toHexString(): String = String.format("#%06X", 0xFFFFFF and this)
 }

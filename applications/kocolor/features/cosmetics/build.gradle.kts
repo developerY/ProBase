@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":applications:kocolor:features:analyzer"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:graphics"))
+    implementation(project(":features:obf"))
 
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.activity.compose)

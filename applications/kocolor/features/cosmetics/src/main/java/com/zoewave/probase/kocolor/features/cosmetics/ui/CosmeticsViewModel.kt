@@ -8,10 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
+import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
-import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
-import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.kocolor.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -76,7 +75,7 @@ sealed class CosmeticsEvent {
 @HiltViewModel
 class CosmeticsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val cosmeticDao: CosmeticDao,
+    private val cosmeticRepository: CosmeticInventoryRepository,
     private val sessionRepository: FashionSessionRepository,
     private val analyzerEngine: AnalyzerEngine,
     @Named("KoColor") private val aiSettings: AiConfigurationSettings
@@ -96,7 +95,7 @@ class CosmeticsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            cosmeticDao.getAllCosmetics().first().let {
+            cosmeticRepository.getAllCosmetics().first().let {
                 if (it.isEmpty()) {
                     initializeDefaultCosmetics()
                 }
@@ -114,12 +113,12 @@ class CosmeticsViewModel @Inject constructor(
 
     private suspend fun initializeDefaultCosmetics() {
         for (item in CosmeticDefaults.getDefaultCosmetics()) {
-            cosmeticDao.insertCosmetic(item)
+            cosmeticRepository.saveCosmeticItem(item.toModel())
         }
     }
 
     val uiState: StateFlow<CosmeticsUiState> = combine(
-        cosmeticDao.getAllCosmetics(),
+        cosmeticRepository.getAllCosmetics(),
         sessionRepository.capturedItemUri,
         _isAnalyzing,
         _aiResult,
@@ -128,7 +127,7 @@ class CosmeticsViewModel @Inject constructor(
         _sortOption,
         _categoryFilter
     ) { array ->
-        val entities = array[0] as List<CosmeticItemEntity>
+        val models = array[0] as List<CosmeticItem>
         val capturedUri = array[1] as String?
         val analyzing = array[2] as Boolean
         val aiResult = array[3] as CosmeticItem?
@@ -137,8 +136,7 @@ class CosmeticsViewModel @Inject constructor(
         val sort = array[6] as SortOption
         val filter = array[7] as String?
 
-        val models = entities.map { it.toModel() }
-        val groupStats = entities.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
+        val groupStats = models.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         
         val categoryMetadata = models.groupBy { it.macroCategory.displayName }.mapValues { (name, items) ->
             val macro = items.firstOrNull()?.macroCategory
@@ -223,8 +221,10 @@ class CosmeticsViewModel @Inject constructor(
             is CosmeticsEvent.StartEditing -> _draftItem.value = event.item
             is CosmeticsEvent.InitializeEdit -> {
                 viewModelScope.launch {
-                    cosmeticDao.getCosmeticById(event.itemId).first()?.let { entity ->
-                        _draftItem.value = entity.toModel()
+                    cosmeticRepository.getAllCosmetics().map { items -> 
+                        items.find { it.id == event.itemId } 
+                    }.filterNotNull().first().let { model ->
+                        _draftItem.value = model
                     }
                 }
             }
@@ -248,7 +248,23 @@ class CosmeticsViewModel @Inject constructor(
             is CosmeticsEvent.UpdateSortOption -> _sortOption.value = event.option
             CosmeticsEvent.ScanWithGemini -> scanWithGemini()
             CosmeticsEvent.ClearCapturedImage -> sessionRepository.setCapturedItemUri(null)
-            is CosmeticsEvent.HandleScanResult -> _draftItem.value = _draftItem.value.copy(batchCode = event.code)
+            is CosmeticsEvent.HandleScanResult -> fetchObfProduct(event.code)
+        }
+    }
+
+    private fun fetchObfProduct(code: String) {
+        viewModelScope.launch {
+            _isAnalyzing.value = true
+            val result = cosmeticRepository.fetchProductByBarcode(code)
+            result.onSuccess { obfItem ->
+                _draftItem.value = obfItem.copy(
+                    imageUrl = _draftItem.value.imageUrl ?: obfItem.imageUrl
+                )
+            }.onFailure {
+                // Fallback to just setting the code if OBF fetch fails
+                _draftItem.value = _draftItem.value.copy(batchCode = code)
+            }
+            _isAnalyzing.value = false
         }
     }
 
@@ -260,13 +276,13 @@ class CosmeticsViewModel @Inject constructor(
                 isOpened = true,
                 openedDate = item.openedDate ?: System.currentTimeMillis()
             )
-            cosmeticDao.updateCosmetic(updated.toEntity())
+            cosmeticRepository.saveCosmeticItem(updated)
         }
     }
 
     private fun updateItem(item: CosmeticItem) {
         viewModelScope.launch {
-            cosmeticDao.updateCosmetic(item.toEntity())
+            cosmeticRepository.saveCosmeticItem(item)
         }
     }
 
@@ -309,13 +325,13 @@ class CosmeticsViewModel @Inject constructor(
 
     private fun addItem(item: CosmeticItem) {
         viewModelScope.launch {
-            cosmeticDao.insertCosmetic(item.toEntity())
+            cosmeticRepository.saveCosmeticItem(item)
         }
     }
 
     private fun deleteItem(id: Long) {
         viewModelScope.launch {
-            cosmeticDao.deleteCosmetic(id)
+            cosmeticRepository.deleteCosmeticItem(id)
         }
     }
 }
