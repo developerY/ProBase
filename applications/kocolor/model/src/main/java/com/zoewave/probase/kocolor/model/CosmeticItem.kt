@@ -3,13 +3,13 @@ package com.zoewave.probase.kocolor.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class MacroCategory(val displayName: String) {
-    PREP("Skincare & Prep"),
-    COMPLEXION("Complexion"),
-    DIMENSION("Color & Dimension"),
-    EYES("Eyes & Brows"),
-    LIPS("Lips"),
-    TOOLS("Tools & Hygiene")
+enum class MacroCategory(val displayName: String, val description: String) {
+    PREP("Skincare & Prep", "Everything applied before pigment."),
+    COMPLEXION("Complexion", "Products that unify the skin tone."),
+    DIMENSION("Color & Dimension", "Products that bring life, shadow, and light."),
+    EYES("Eyes & Brows", "All definition for the upper face."),
+    LIPS("Lips", "All color and care for the mouth."),
+    TOOLS("Tools & Hygiene", "Brushes, sponges, and maintenance.")
 }
 
 @Serializable
