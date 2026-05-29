@@ -14,6 +14,15 @@ enum class ClothingCategory {
             ACCESSORIES -> "Accessories"
             OTHER -> "Other"
         }
+
+    val description: String
+        get() = when (this) {
+            TOPS -> "Strategic foundational pieces for your upper silhouette."
+            BOTTOMS -> "Structural elements that define your architectural base."
+            SHOES -> "Performance-driven anchors for your daily ensemble."
+            ACCESSORIES -> "Curated enhancements to amplify your style DNA."
+            OTHER -> "Miscellaneous archive entries."
+        }
 }
 
 @Serializable
