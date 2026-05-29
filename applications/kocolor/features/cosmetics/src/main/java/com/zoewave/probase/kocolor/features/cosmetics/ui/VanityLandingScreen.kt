@@ -12,9 +12,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -38,6 +39,12 @@ fun VanityLandingScreen(
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    var showTaxonomyInfo by remember { mutableStateOf(false) }
+
+    if (showTaxonomyInfo) {
+        ProfessionalTaxonomyDialog(onDismiss = { showTaxonomyInfo = false })
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -48,6 +55,7 @@ fun VanityLandingScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showTaxonomyInfo = true }) { Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = "Information") }
                     IconButton(onClick = { navTo(KoColorRoute.CosmeticAnalytics) }) { Icon(Icons.Default.Insights, contentDescription = "Analytics") }
                     IconButton(onClick = { /* Search */ }) { Icon(Icons.Default.Search, null) }
                 }
@@ -336,6 +344,141 @@ private fun RecentProductCard(
 
 private fun parseColor(hex: String): Color {
     return try { Color(android.graphics.Color.parseColor(hex)) } catch (e: Exception) { Color.Gray }
+}
+
+@Composable
+private fun ProfessionalTaxonomyDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { 
+            Text(
+                "Professional Taxonomy", 
+                style = MaterialTheme.typography.headlineMedium, 
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold
+            ) 
+        },
+        text = {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                item {
+                    TaxonomySection(
+                        level = "Level 1",
+                        title = "Macro Categories (The UI Layer)",
+                        description = "Top-level intuitive 'buckets' for body-zone mapping.",
+                        items = listOf(
+                            "Skincare & Prep" to "Applied before pigment.",
+                            "Complexion (Base)" to "Unifies skin tone.",
+                            "Color & Dimension" to "Life, shadow, and light.",
+                            "Eyes & Brows" to "Upper face definition.",
+                            "Lips" to "Color and care.",
+                            "Tools & Hygiene" to "Application and sanitization."
+                        )
+                    )
+                }
+                
+                item {
+                    TaxonomySection(
+                        level = "Level 2",
+                        title = "Micro Categories (Product Type)",
+                        description = "Specific product types ensuring a clean, technical database.",
+                        items = listOf(
+                            "Skincare" to "Cleanser, Toner, Serum, SPF, Primer.",
+                            "Complexion" to "Foundation, Concealer, Setting Powder.",
+                            "Dimension" to "Blush, Bronzer, Contour, Highlighter.",
+                            "Eyes" to "Eyeshadow, Eyeliner, Mascara, Brow Gel.",
+                            "Lips" to "Lipstick, Gloss, Liner, Stain, Balm."
+                        )
+                    )
+                }
+
+                item {
+                    TaxonomySection(
+                        level = "Level 3",
+                        title = "Professional Facets (The Engine Layer)",
+                        description = "Expert-status attributes for algorithmic synergy and filtering.",
+                        items = listOf(
+                            "Formulation" to "Liquid, Cream, Powder, Gel, Balm.",
+                            "Chemistry" to "Water, Silicone, or Oil bases (Critical for layering).",
+                            "Finish" to "Matte, Satin, Radiant, Metallic, Glitter.",
+                            "Coverage" to "Sheer, Light, Medium, Full, Buildable.",
+                            "Temperature" to "Warm, Cool, Neutral, Olive (Engine alignment)."
+                        )
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Understand", fontWeight = FontWeight.Bold)
+            }
+        },
+        shape = RoundedCornerShape(28.dp),
+        containerColor = Color(0xFFF9F6F0)
+    )
+}
+
+@Composable
+private fun TaxonomySection(
+    level: String,
+    title: String,
+    description: String,
+    items: List<Pair<String, String>>
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column {
+            Text(
+                text = level.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.alpha(0.7f)
+            )
+        }
+
+        Surface(
+            color = Color.White.copy(alpha = 0.5f),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items.forEach { (label, detail) ->
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = "•",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Column {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = detail,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.alpha(0.7f)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)
