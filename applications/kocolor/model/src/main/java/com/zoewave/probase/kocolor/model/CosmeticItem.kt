@@ -3,180 +3,141 @@ package com.zoewave.probase.kocolor.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class CosmeticCategory {
-    // Face (Base & Coverage)
-    /** Preps skin and extends makeup wear. */
-    PRIMER,
-    /** Evens out skin tone (liquid, powder, cream). */
-    FOUNDATION,
-    /** Covers imperfections and brightens under-eyes. */
-    CONCEALER,
-    /** Lighter alternatives for coverage and skincare benefits. */
-    BB_CC_CREAM,
-    /** Locks makeup in place. */
-    SETTING_PRODUCT,
+enum class MacroCategory(val displayName: String) {
+    PREP("Skincare & Prep"),
+    COMPLEXION("Complexion"),
+    DIMENSION("Color & Dimension"),
+    EYES("Eyes & Brows"),
+    LIPS("Lips"),
+    TOOLS("Tools & Hygiene")
+}
 
-    // Cheeks (Color & Dimension)
-    /** Adds color to the cheeks (powder, cream, liquid). */
-    BLUSH,
-    /** Adds warmth for a sun-kissed look. */
-    BRONZER,
-    /** Creates shadows for sculpting. */
-    CONTOUR,
-    /** Adds radiance to high points of the face. */
-    HIGHLIGHTER,
-
-    // Eyes (Definition)
-    /** Adds color and depth to eyelids. */
-    EYESHADOW,
-    /** Defines the lash line. */
-    EYELINER,
-    /** Volumizes, lengthens, or darkens lashes. */
-    MASCARA,
-    /** Pencils, gels, and powders to fill and shape brows. */
-    EYEBROW_PRODUCT,
-    /** Adds volume and length. */
-    FALSE_LASHES,
-
-    // Lips (Color & Texture)
-    /** Provides pigmented color (matte, satin, cream). */
-    LIPSTICK,
-    /** Adds shine. */
-    LIP_GLOSS,
-    /** Defines and prevents bleeding. */
-    LIP_LINER,
-    /** Provides long-lasting sheer color. */
-    LIP_STAIN_TINT,
-    /** Temporarily increases lip volume. */
-    LIP_PLUMPER,
-
-    // Tools & Accessories
-    /** For application and blending. */
-    BRUSHES_SPONGES,
-    /** Curls lashes. */
-    EYELASH_CURLER,
-    /** For storage. */
-    ORGANIZERS,
-
-    // AI Assisted
-    /** Item captured by camera, awaiting analysis. */
-    AI_PENDING,
-
-    // Others
-    NAIL_POLISH,
-    OTHER;
-
-    val groupName: String
-        get() = when (this) {
-            PRIMER, FOUNDATION, CONCEALER, BB_CC_CREAM, SETTING_PRODUCT -> "Face (Base & Coverage)"
-            BLUSH, BRONZER, CONTOUR, HIGHLIGHTER -> "Cheeks (Color & Dimension)"
-            EYESHADOW, EYELINER, MASCARA, EYEBROW_PRODUCT, FALSE_LASHES -> "Eyes (Definition)"
-            LIPSTICK, LIP_GLOSS, LIP_LINER, LIP_STAIN_TINT, LIP_PLUMPER -> "Lips (Color & Texture)"
-            BRUSHES_SPONGES, EYELASH_CURLER, ORGANIZERS, AI_PENDING, NAIL_POLISH, OTHER -> "Tools & Accessories"
-        }
+@Serializable
+enum class MicroCategory(val macro: MacroCategory) {
+    // Prep
+    CLEANSER(MacroCategory.PREP),
+    TONER(MacroCategory.PREP),
+    SERUM(MacroCategory.PREP),
+    MOISTURIZER(MacroCategory.PREP),
+    SPF(MacroCategory.PREP),
+    PRIMER(MacroCategory.PREP),
+    
+    // Complexion
+    FOUNDATION(MacroCategory.COMPLEXION),
+    BB_CC_CREAM(MacroCategory.COMPLEXION),
+    CONCEALER(MacroCategory.COMPLEXION),
+    COLOR_CORRECTOR(MacroCategory.COMPLEXION),
+    SETTING_POWDER(MacroCategory.COMPLEXION),
+    SETTING_SPRAY(MacroCategory.COMPLEXION),
+    
+    // Dimension
+    BLUSH(MacroCategory.DIMENSION),
+    BRONZER(MacroCategory.DIMENSION),
+    CONTOUR(MacroCategory.DIMENSION),
+    HIGHLIGHTER(MacroCategory.DIMENSION),
+    FRECKLE_TINT(MacroCategory.DIMENSION),
+    
+    // Eyes
+    EYESHADOW(MacroCategory.EYES),
+    EYELINER(MacroCategory.EYES),
+    MASCARA(MacroCategory.EYES),
+    LASH_PRIMER(MacroCategory.EYES),
+    BROW_PENCIL(MacroCategory.EYES),
+    BROW_GEL(MacroCategory.EYES),
+    FALSE_LASHES(MacroCategory.EYES),
+    
+    // Lips
+    LIPSTICK(MacroCategory.LIPS),
+    LIP_GLOSS(MacroCategory.LIPS),
+    LIP_LINER(MacroCategory.LIPS),
+    LIP_TINT_STAIN(MacroCategory.LIPS),
+    LIP_BALM(MacroCategory.LIPS),
+    LIP_PLUMPER(MacroCategory.LIPS),
+    
+    // Tools
+    BRUSHES(MacroCategory.TOOLS),
+    SPONGES(MacroCategory.TOOLS),
+    EYELASH_CURLER(MacroCategory.TOOLS),
+    ORGANIZERS(MacroCategory.TOOLS),
+    OTHER(MacroCategory.TOOLS),
+    
+    // AI Pending
+    AI_PENDING(MacroCategory.TOOLS);
 
     val displayName: String
         get() = when (this) {
             BB_CC_CREAM -> "BB/CC Cream"
-            SETTING_PRODUCT -> "Setting Powder/Spray"
-            EYEBROW_PRODUCT -> "Eyebrow Product"
+            COLOR_CORRECTOR -> "Color Corrector"
+            SETTING_POWDER -> "Setting Powder"
+            SETTING_SPRAY -> "Setting Spray"
+            FRECKLE_TINT -> "Freckle Tint"
+            LASH_PRIMER -> "Lash Primer"
+            BROW_PENCIL -> "Brow Pencil"
+            BROW_GEL -> "Brow Gel"
             FALSE_LASHES -> "False Lashes"
-            BRUSHES_SPONGES -> "Brushes & Sponges"
-            EYELASH_CURLER -> "Eyelash Curler"
-            LIP_STAIN_TINT -> "Lip Stain/Tint"
+            LIP_TINT_STAIN -> "Lip Tint/Stain"
+            LIP_BALM -> "Lip Balm"
             LIP_PLUMPER -> "Lip Plumper"
             AI_PENDING -> "New Capture"
-            NAIL_POLISH -> "Nail Polish"
             else -> name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
-        }
-
-    val description: String
-        get() = when (this) {
-            PRIMER -> "Preps skin and extends makeup wear."
-            FOUNDATION -> "Evens out skin tone (liquid, powder, cream)."
-            CONCEALER -> "Covers imperfections and brightens under-eyes."
-            BB_CC_CREAM -> "Lighter alternatives for coverage and skincare benefits."
-            SETTING_PRODUCT -> "Locks makeup in place."
-            BLUSH -> "Adds color to the cheeks (powder, cream, liquid)."
-            BRONZER -> "Adds warmth for a sun-kissed look."
-            CONTOUR -> "Creates shadows for sculpting."
-            HIGHLIGHTER -> "Adds radiance to high points of the face."
-            EYESHADOW -> "Adds color and depth to eyelids."
-            EYELINER -> "Defines the lash line."
-            MASCARA -> "Volumizes, lengthens, or darkens lashes."
-            EYEBROW_PRODUCT -> "Pencils, gels, and powders to fill and shape brows."
-            FALSE_LASHES -> "Adds volume and length."
-            LIPSTICK -> "Provides pigmented color (matte, satin, cream)."
-            LIP_GLOSS -> "Adds shine."
-            LIP_LINER -> "Defines and prevents bleeding."
-            LIP_STAIN_TINT -> "Provides long-lasting sheer color."
-            LIP_PLUMPER -> "Temporarily increases lip volume."
-            BRUSHES_SPONGES -> "For application and blending."
-            EYELASH_CURLER -> "Curls lashes."
-            ORGANIZERS -> "For storage."
-            AI_PENDING -> "Awaiting Gemini analysis."
-            NAIL_POLISH -> "Adds color to your nails."
-            OTHER -> "Other beauty essentials."
-        }
-
-    val suggestions: List<String>
-        get() = when (this) {
-            PRIMER -> listOf("Hydrating primers for dry skin", "Mattifying primers for oily skin", "Color-correcting primers to cancel redness")
-            FOUNDATION -> listOf("Liquid for a natural finish", "Powder for oily skin", "Full coverage for formal events")
-            CONCEALER -> listOf("Peach tones for dark circles", "Green tones for redness", "Use a shade lighter to brighten under-eyes")
-            BB_CC_CREAM -> listOf("Perfect for 'no-makeup' days", "Combines skincare and coverage", "Usually contains SPF")
-            SETTING_PRODUCT -> listOf("Spray for a dewy finish", "Loose powder for the T-zone", "Pressed powder for touch-ups")
-            BLUSH -> listOf("Peach for warm undertones", "Rose for cool undertones", "Cream blush for a dewy glow")
-            BRONZER -> listOf("Apply where the sun naturally hits", "Matte for subtle warmth", "Shimmer for a glow")
-            CONTOUR -> listOf("Cool-toned shades for shadows", "Apply under cheekbones and jawline", "Blend well to avoid harsh lines")
-            HIGHLIGHTER -> listOf("Apply to high points (cheekbones, brow bone)", "Liquid for subtle glow", "Powder for intense shine")
-            EYESHADOW -> listOf("Neutral palettes for everyday", "Shimmers for center of the lid", "Darker shades for the outer corner")
-            EYELINER -> listOf("Liquid for precise wings", "Pencil for smoky looks", "Gel for long-lasting wear")
-            MASCARA -> listOf("Wiggle at the base for volume", "Waterproof for long events", "Brown for a softer look")
-            EYEBROW_PRODUCT -> listOf("Gel for quick grooming", "Pencil for hair-like strokes", "Powder for a soft, natural look")
-            FALSE_LASHES -> listOf("Trim to fit your eye shape", "Use a thin layer of glue", "Wait 30s for glue to get tacky")
-            LIPSTICK -> listOf("Matte for long wear", "Satin for comfort", "Nude for everyday versatility")
-            LIP_GLOSS -> listOf("Use alone or over lipstick", "Clear for shine", "Plumping for a fuller look")
-            LIP_LINER -> listOf("Prevents feathering", "Outline then fill for longevity", "Pick a shade close to your natural lip color")
-            LIP_STAIN_TINT -> listOf("Great for gradient lips", "Very long-lasting", "Feels weightless on lips")
-            LIP_PLUMPER -> listOf("Expect a slight tingle", "Apply before gloss", "Hydrating formulas are best")
-            BRUSHES_SPONGES -> listOf("Dampen sponges for seamless blending", "Synthetic for creams", "Natural hair for powders")
-            EYELASH_CURLER -> listOf("Curl before mascara", "Pulse 3 times for a lift", "Replace pads every 3-6 months")
-            ORGANIZERS -> listOf("Clear acrylic for visibility", "Stackable to save space", "Keep brushes vertical")
-            NAIL_POLISH -> listOf("Use base coat to prevent staining", "Two thin coats are better than one thick", "Top coat for shine and durability")
-            OTHER -> listOf("Cotton swabs for cleanup", "Brush cleaner", "Micellar water for quick corrections")
-            AI_PENDING -> emptyList()
         }
 
     /** Typical amount used per application (in ml or g). */
     val typicalAmountPerUse: Double
         get() = when (this) {
+            CLEANSER -> 1.0
+            TONER -> 0.5
+            SERUM -> 0.2
+            MOISTURIZER -> 0.5
+            SPF -> 1.2
             PRIMER -> 0.3
             FOUNDATION -> 0.35
-            CONCEALER -> 0.1
             BB_CC_CREAM -> 0.4
-            SETTING_PRODUCT -> 0.2
+            CONCEALER -> 0.1
+            COLOR_CORRECTOR -> 0.05
+            SETTING_POWDER -> 0.1
+            SETTING_SPRAY -> 0.2
             BLUSH -> 0.1
             BRONZER -> 0.1
             CONTOUR -> 0.1
             HIGHLIGHTER -> 0.05
+            FRECKLE_TINT -> 0.02
             EYESHADOW -> 0.05
             EYELINER -> 0.02
             MASCARA -> 0.1
-            EYEBROW_PRODUCT -> 0.05
+            LASH_PRIMER -> 0.05
+            BROW_PENCIL -> 0.02
+            BROW_GEL -> 0.03
             FALSE_LASHES -> 1.0
             LIPSTICK -> 0.05
             LIP_GLOSS -> 0.1
             LIP_LINER -> 0.02
-            LIP_STAIN_TINT -> 0.05
+            LIP_TINT_STAIN -> 0.05
+            LIP_BALM -> 0.1
             LIP_PLUMPER -> 0.1
-            BRUSHES_SPONGES -> 0.0
-            EYELASH_CURLER -> 0.0
-            ORGANIZERS -> 0.0
-            NAIL_POLISH -> 0.2
-            AI_PENDING -> 0.1
+            BRUSHES, SPONGES, EYELASH_CURLER, ORGANIZERS, AI_PENDING -> 0.0
             OTHER -> 0.1
         }
+}
+
+@Serializable
+enum class Formulation { 
+    LIQUID, CREAM, POWDER, GEL, BALM, PENCIL, SPRAY, STICK, OTHER, UNKNOWN 
+}
+
+@Serializable
+enum class ChemistryBase { 
+    WATER, SILICONE, OIL, ALCOHOL, WAX, UNKNOWN 
+}
+
+@Serializable
+enum class Finish { 
+    MATTE, SATIN, NATURAL, DEWY, RADIANT, METALLIC, GLITTER, SHEEN, GLOSSY, UNKNOWN 
+}
+
+@Serializable
+enum class Coverage { 
+    SHEER, LIGHT, MEDIUM, FULL, BUILDABLE, NOT_APPLICABLE 
 }
 
 @Serializable
@@ -184,7 +145,15 @@ data class CosmeticItem(
     val id: Long = 0,
     val name: String,
     val brand: String,
-    val category: CosmeticCategory,
+    val macroCategory: MacroCategory,
+    val microCategory: MicroCategory,
+    
+    // Professional Metadata
+    val formulation: Formulation = Formulation.UNKNOWN,
+    val chemistryBase: ChemistryBase = ChemistryBase.UNKNOWN,
+    val finish: Finish = Finish.UNKNOWN,
+    val coverage: Coverage = Coverage.NOT_APPLICABLE,
+    
     val colorHex: String? = null,
     val shadeName: String? = null,
     val imageUrl: String? = null,

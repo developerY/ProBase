@@ -3,40 +3,38 @@ package com.zoewave.probase.kocolor.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class RoutineTime {
-    MORNING, EVENING, OTHER;
-
-    val biologicalObjective: String
-        get() = when (this) {
-            MORNING -> "Defense & Protection"
-            EVENING -> "Repair & Regeneration"
-            OTHER -> "Specialized Care"
-        }
-
-    val objectiveDescription: String
-        get() = when (this) {
-            MORNING -> "Focus on UV defense, pollution protection, and oxidative stress reduction."
-            EVENING -> "Focus on repair, regeneration, and collagen synthesis."
-            OTHER -> "Targeted treatment for specific skin needs."
-        }
-}
-
-@Serializable
 data class RoutineStep(
     val id: String = java.util.UUID.randomUUID().toString(),
     val title: String,
     val description: String = "",
     val isCompleted: Boolean = false,
     val isRecommended: Boolean = false,
-    /** Recommended layering order (e.g., 1 for Cleansing, 2 for Toning). */
+    val productIds: List<Long> = emptyList(),
     val layeringOrder: Int = 0,
-    /** Minimum wait time in minutes before proceeding to the next step or sleep. */
     val minWaitMinutes: Int = 0,
-    /** Product category linked to this step. */
-    val category: CosmeticCategory? = null,
-    /** IDs of actual inventory products linked to this step. */
-    val productIds: List<Long> = emptyList()
+    
+    // Professional Metadata
+    val microCategory: MicroCategory? = null,
+    val chemistryConflictWarning: String? = null
 )
+
+@Serializable
+enum class RoutineTime {
+    MORNING, EVENING, OTHER;
+
+    val displayName: String
+        get() = name.lowercase().replaceFirstChar { it.uppercase() }
+
+    val formattedName: String
+        get() = name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
+
+    val biologicalObjective: String
+        get() = when (this) {
+            MORNING -> "Protection & Preparation"
+            EVENING -> "Restoration & Repair"
+            OTHER -> "Maintenance"
+        }
+}
 
 @Serializable
 data class BeautyRoutine(
@@ -44,9 +42,10 @@ data class BeautyRoutine(
     val title: String,
     val time: RoutineTime,
     val steps: List<RoutineStep>,
-    val date: Long, // Timestamp
-    /** Biological objective of this routine (e.g., "Circadian Alignment"). */
+    val date: Long,
+    val lastUpdated: Long = System.currentTimeMillis(),
+    
+    // Professional Attributes
     val biologicalObjective: String? = null,
-    /** External factors influencing this routine (e.g., "High UV Index", "Low Sleep"). */
     val contextFactors: List<String> = emptyList()
 )
