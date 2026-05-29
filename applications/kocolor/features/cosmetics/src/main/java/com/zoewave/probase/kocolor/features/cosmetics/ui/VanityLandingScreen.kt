@@ -121,27 +121,17 @@ fun VanityLandingScreen(
                             "Lips" to (Icons.Default.Favorite to Color(0xFFFFEBEE))
                         )
                         
-                        sections.chunked(2).forEach { rowSections ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                rowSections.forEach { (name, props) ->
-                                    val (icon, color) = props
-                                    val metadata = uiState.categoriesMetadata.entries.find { it.key.contains(name, ignoreCase = true) }?.value
-                                    CategoryHeroCard(
-                                        name = name,
-                                        icon = icon,
-                                        metadata = metadata,
-                                        baseColor = color,
-                                        navTo = navTo,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                                if (rowSections.size == 1) {
-                                    Spacer(Modifier.weight(1f))
-                                }
-                            }
+                        sections.forEach { (name, props) ->
+                            val (icon, color) = props
+                            val metadata = uiState.categoriesMetadata.entries.find { it.key.contains(name, ignoreCase = true) }?.value
+                            CategoryHeroCard(
+                                name = name,
+                                icon = icon,
+                                metadata = metadata,
+                                baseColor = color,
+                                navTo = navTo,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
                 }
@@ -192,30 +182,77 @@ private fun CategoryHeroCard(
 ) {
     val count = metadata?.itemCount ?: 0
     val totalValue = metadata?.totalValue ?: 0.0
-    val imageUrl = metadata?.representativeImageUrl
-    val itemColor = metadata?.representativeColorHex?.let { parseColor(it) }
+    val leadingBrand = metadata?.leadingBrand
+    val averageFill = metadata?.averageFillLevel ?: 1.0
+    
+    val currencyFormatter = java.text.NumberFormat.getCurrencyInstance(java.util.Locale.US)
 
     Card(
         onClick = { navTo(KoColorRoute.CosmeticCategoryCover(name)) },
-        modifier = modifier.height(160.dp),
-        shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = baseColor.copy(alpha = 0.4f)),
-        border = BorderStroke(1.dp, baseColor.copy(alpha = 0.6f))
+        modifier = modifier.height(IntrinsicSize.Min),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = baseColor.copy(alpha = 0.6f)),
+        border = BorderStroke(1.dp, baseColor.copy(alpha = 0.8f))
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (imageUrl != null) {
-                AsyncImage(model = imageUrl, contentDescription = null, modifier = Modifier.fillMaxSize().alpha(0.2f), contentScale = ContentScale.Crop)
-            } else if (itemColor != null) {
-                Box(modifier = Modifier.fillMaxSize().background(itemColor).alpha(0.1f))
+        Column(modifier = Modifier.padding(24.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        color = Color.White.copy(alpha = 0.5f),
+                        shape = CircleShape,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(icon, null, modifier = Modifier.size(24.dp), tint = Color.Black)
+                        }
+                    }
+                    Spacer(Modifier.width(16.dp))
+                    Column {
+                        val displayName = if (name.contains("(")) name.substringBefore("(").trim() else name
+                        Text(text = displayName, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+                        Text(text = "$count Items", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, modifier = Modifier.alpha(0.7f))
+                    }
+                }
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(text = currencyFormatter.format(totalValue), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+                    Text(text = "Total Value", style = MaterialTheme.typography.labelSmall, modifier = Modifier.alpha(0.5f), fontWeight = FontWeight.Bold)
+                }
             }
 
-            Column(modifier = Modifier.padding(24.dp).fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
-                Surface(color = Color.White.copy(alpha = 0.8f), shape = CircleShape, modifier = Modifier.size(40.dp)) {
-                    Box(contentAlignment = Alignment.Center) { Icon(icon, null, modifier = Modifier.size(20.dp), tint = Color.Black) }
+            Spacer(Modifier.height(20.dp))
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+                    Text(text = "Stock Status", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    Text(text = "${(averageFill * 100).toInt()}%", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                 }
-                Column {
-                    Text(text = name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text(text = "$count ITEMS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, modifier = Modifier.alpha(0.5f))
+                
+                val statusColor = when {
+                    averageFill > 0.5 -> Color(0xFF4CAF50)
+                    averageFill > 0.2 -> Color(0xFFFFC107)
+                    else -> Color(0xFFF44336)
+                }
+
+                LinearProgressIndicator(
+                    progress = { averageFill.toFloat() },
+                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+                    color = statusColor,
+                    trackColor = Color.White.copy(alpha = 0.2f),
+                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
+                
+                if (leadingBrand != null) {
+                    Text(
+                        text = "Leading Brand: $leadingBrand",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 4.dp).alpha(0.6f)
+                    )
                 }
             }
         }
