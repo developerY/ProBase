@@ -19,7 +19,8 @@ data class CategoryMetadata(
     val representativeImageUrl: String? = null,
     val representativeColorHex: String? = null,
     val leadingBrand: String? = null,
-    val averageUsage: Double? = null
+    val averageUsage: Double? = null,
+    val description: String? = null
 )
 
 data class WardrobeUiState(
@@ -121,7 +122,8 @@ class WardrobeViewModel @Inject constructor(
         val totalInvestment = models.sumOf { it.price ?: 0.0 }
         val itemsByCategory = models.groupBy { it.category.name }.mapValues { it.value.size }
         
-        val categoryMetadata = models.groupBy { it.category.name }.mapValues { (_, items) ->
+        val categoryMetadata = models.groupBy { it.category.name }.mapValues { (name, items) ->
+            val cat = items.firstOrNull()?.category
             val representativeItem = items.filter { it.imageUrl != null }.maxByOrNull { it.timestamp } ?: items.maxByOrNull { it.timestamp }
             val brands = items.mapNotNull { it.brand }.groupBy { it }.mapValues { it.value.size }
             val leadingBrand = brands.maxByOrNull { it.value }?.key
@@ -134,7 +136,8 @@ class WardrobeViewModel @Inject constructor(
                 representativeImageUrl = representativeItem?.imageUrl,
                 representativeColorHex = representativeItem?.colorHex,
                 leadingBrand = leadingBrand,
-                averageUsage = averageUsage
+                averageUsage = averageUsage,
+                description = cat?.description
             )
         }
 

@@ -259,39 +259,46 @@ private fun AtelierWardrobeCard(
     val totalValue = metadata?.totalValue ?: 0.0
     val leadingBrand = metadata?.leadingBrand
     val averageUsage = metadata?.averageUsage ?: 0.0
+    val description = metadata?.description ?: "Strategic curated wardrobe collection."
     
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
 
     Card(
         onClick = { navTo(KoColorRoute.WardrobeCategoryCover(categoryName = name)) },
-        modifier = modifier.height(IntrinsicSize.Min),
-        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.height(180.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = baseColor),
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 1. Professional Imagery
+        Box(modifier = Modifier.fillMaxSize()) {
+            // 1. Background Imagery
+            AsyncImage(
+                model = metadata?.representativeImageUrl ?: placeholderUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize().alpha(0.4f),
+                contentScale = ContentScale.Crop
+            )
+
+            // 2. Readability Scrim
             Box(
                 modifier = Modifier
-                    .size(100.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White.copy(alpha = 0.5f))
+                    .fillMaxSize()
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(baseColor, baseColor.copy(alpha = 0.6f), Color.Transparent),
+                            startX = 0f,
+                            endX = 1000f
+                        )
+                    )
+            )
+
+            // 3. Data Content
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                AsyncImage(
-                    model = metadata?.representativeImageUrl ?: placeholderUrl,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            Spacer(Modifier.width(24.dp))
-
-            // 2. Data Content
-            Column(modifier = Modifier.weight(1f)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -300,17 +307,26 @@ private fun AtelierWardrobeCard(
                     Column {
                         Text(
                             text = name,
-                            style = MaterialTheme.typography.displaySmall.copy(fontSize = 28.sp),
+                            style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Serif,
                             color = Color.Black
                         )
-                        Text(
-                            text = "$count Pieces",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.alpha(0.6f)
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "$count Pieces",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.alpha(0.8f)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = "|  $description",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.alpha(0.6f)
+                            )
+                        }
                     }
 
                     Text(
@@ -322,12 +338,17 @@ private fun AtelierWardrobeCard(
                     )
                 }
 
-                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.alpha(0.6f).padding(top = 2.dp),
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                )
 
                 // Utility Status Bar
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "Average Utility", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.alpha(0.6f))
+                        Text(text = "Average Utility", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.alpha(0.8f))
                         Text(text = "${averageUsage.toInt()} Wears", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFF6B705C))
                     }
                     
@@ -337,9 +358,9 @@ private fun AtelierWardrobeCard(
 
                     LinearProgressIndicator(
                         progress = { progress.toFloat() },
-                        modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
+                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
                         color = statusColor,
-                        trackColor = statusColor.copy(alpha = 0.1f),
+                        trackColor = Color.White.copy(alpha = 0.3f),
                         strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                     )
                     
@@ -347,8 +368,8 @@ private fun AtelierWardrobeCard(
                         Text(
                             text = "Leading Brand: $leadingBrand",
                             style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(top = 4.dp).alpha(0.6f)
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.alpha(0.8f)
                         )
                     }
                 }
