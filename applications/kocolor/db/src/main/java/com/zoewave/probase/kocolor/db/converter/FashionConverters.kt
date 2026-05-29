@@ -2,10 +2,16 @@ package com.zoewave.probase.kocolor.db.converter
 
 import androidx.room3.TypeConverter
 import com.zoewave.probase.kocolor.db.entity.InventoryType
+import com.zoewave.probase.kocolor.model.ChemistryBase
 import com.zoewave.probase.kocolor.model.ClothingCategory
-import com.zoewave.probase.kocolor.model.CosmeticCategory
+import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.kocolor.model.Coverage
 import com.zoewave.probase.kocolor.model.FashionAdvice
+import com.zoewave.probase.kocolor.model.Finish
+import com.zoewave.probase.kocolor.model.Formulation
 import com.zoewave.probase.kocolor.model.InventoryMetadata
+import com.zoewave.probase.kocolor.model.MacroCategory
+import com.zoewave.probase.kocolor.model.MicroCategory
 import com.zoewave.probase.kocolor.model.RoutineStep
 import com.zoewave.probase.kocolor.model.RoutineTime
 import com.zoewave.probase.kocolor.model.SeasonalType
@@ -65,10 +71,40 @@ class FashionConverters {
     fun toRoutineTime(value: String): RoutineTime = try { RoutineTime.valueOf(value) } catch (e: Exception) { RoutineTime.OTHER }
 
     @TypeConverter
-    fun fromCosmeticCategory(value: CosmeticCategory): String = value.name
+    fun fromMacroCategory(value: MacroCategory): String = value.name
 
     @TypeConverter
-    fun toCosmeticCategory(value: String): CosmeticCategory = try { CosmeticCategory.valueOf(value) } catch (e: Exception) { CosmeticCategory.OTHER }
+    fun toMacroCategory(value: String): MacroCategory = try { MacroCategory.valueOf(value) } catch (e: Exception) { MacroCategory.TOOLS }
+
+    @TypeConverter
+    fun fromMicroCategory(value: MicroCategory): String = value.name
+
+    @TypeConverter
+    fun toMicroCategory(value: String): MicroCategory = try { MicroCategory.valueOf(value) } catch (e: Exception) { MicroCategory.OTHER }
+
+    @TypeConverter
+    fun fromFormulation(value: Formulation): String = value.name
+
+    @TypeConverter
+    fun toFormulation(value: String): Formulation = try { Formulation.valueOf(value) } catch (e: Exception) { Formulation.UNKNOWN }
+
+    @TypeConverter
+    fun fromChemistryBase(value: ChemistryBase): String = value.name
+
+    @TypeConverter
+    fun toChemistryBase(value: String): ChemistryBase = try { ChemistryBase.valueOf(value) } catch (e: Exception) { ChemistryBase.UNKNOWN }
+
+    @TypeConverter
+    fun fromFinish(value: Finish): String = value.name
+
+    @TypeConverter
+    fun toFinish(value: String): Finish = try { Finish.valueOf(value) } catch (e: Exception) { Finish.UNKNOWN }
+
+    @TypeConverter
+    fun fromCoverage(value: Coverage): String = value.name
+
+    @TypeConverter
+    fun toCoverage(value: String): Coverage = try { Coverage.valueOf(value) } catch (e: Exception) { Coverage.NOT_APPLICABLE }
 
     @TypeConverter
     fun fromClothingCategory(value: ClothingCategory): String = value.name

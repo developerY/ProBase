@@ -30,8 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.KoColorRoute
+import com.zoewave.probase.kocolor.model.*
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import java.text.NumberFormat
 import java.util.Locale
@@ -50,9 +49,9 @@ private fun CosmeticCategoryCoverScreenPreview() {
                 categoryName = "Face",
                 cosmeticsUiState = CosmeticsUiState(
                     items = listOf(
-                        CosmeticItem(id = 1, name = "Silk Primer", brand = "KoColor", category = com.zoewave.probase.kocolor.model.CosmeticCategory.PRIMER, usageCount = 45, price = 28.0, colorHex = "#F8F0E3"),
-                        CosmeticItem(id = 2, name = "Cool Ivory", brand = "KoColor", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION, usageCount = 120, price = 42.0, colorHex = "#FAD4D4"),
-                        CosmeticItem(id = 3, name = "Neutral Beige", brand = "KoColor", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION, usageCount = 5, price = 38.0, colorHex = "#EAD4B4")
+                        CosmeticItem(id = 1, name = "Silk Primer", brand = "KoColor", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.PRIMER, usageCount = 45, price = 28.0, colorHex = "#F8F0E3"),
+                        CosmeticItem(id = 2, name = "Cool Ivory", brand = "KoColor", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, usageCount = 120, price = 42.0, colorHex = "#FAD4D4"),
+                        CosmeticItem(id = 3, name = "Neutral Beige", brand = "KoColor", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, usageCount = 5, price = 38.0, colorHex = "#EAD4B4")
                     )
                 )
             ),
@@ -72,7 +71,7 @@ fun CosmeticCategoryCoverScreen(
     val categoryName = uiState.categoryName
     val state = uiState.cosmeticsUiState
     val items = remember(state.items, categoryName) {
-        state.items.filter { it.category.groupName.contains(categoryName, ignoreCase = true) }
+        state.items.filter { it.macroCategory.displayName.contains(categoryName, ignoreCase = true) }
     }
     
     val totalValue = items.sumOf { it.price ?: 0.0 }
@@ -172,6 +171,26 @@ fun CosmeticCategoryCoverScreen(
                                 icon = Icons.Default.History,
                                 modifier = Modifier.weight(1f)
                             )
+                        }
+
+                        // NEW: Educational Insight
+                        Surface(
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.AutoAwesome, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.width(12.dp))
+                                val insight = when(categoryName.lowercase()) {
+                                    "face" -> "Pro Tip: Layer liquids before powders to prevent pilling."
+                                    "eyes" -> "Expert Tip: Use a primer to increase pigment longevity."
+                                    "lips" -> "Artist Note: Exfoliate before applying matte stains."
+                                    "cheeks" -> "Styling: Apply blush slightly higher for a lifted look."
+                                    else -> "Data Insight: You use these items in 40% of your rituals."
+                                }
+                                Text(text = insight, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                            }
                         }
                     }
                     

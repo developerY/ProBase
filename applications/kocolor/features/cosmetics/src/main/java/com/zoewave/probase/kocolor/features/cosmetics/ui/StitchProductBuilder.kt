@@ -26,9 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.kocolor.model.CosmeticCategory
+import com.zoewave.probase.kocolor.model.*
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.util.toHex
@@ -58,14 +56,10 @@ fun StitchProductBuilder(
     var currentStep by remember { mutableStateOf(1) }
     val draft = uiState.draftItem
     
-    val bgColor = draft.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surface
-    val isDark = if (draft.colorHex != null) isColorDark(bgColor) else false
-    val contentColor = if (isDark) Color.White else Color.Black
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = { 
                     Column {
                         Text("New Discovery", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
@@ -147,7 +141,7 @@ fun StitchProductBuilder(
 @Composable
 private fun CaptureStepPreview() {
     MaterialTheme {
-        val dummyItem = CosmeticItem(name = "", brand = "", category = CosmeticCategory.AI_PENDING)
+        val dummyItem = CosmeticItem(name = "", brand = "", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION)
         CaptureStep(
             uiState = dummyItem to CosmeticsUiState(),
             onEvent = {},
@@ -163,7 +157,6 @@ private fun CaptureStep(
     navTo: (KoColorRoute) -> Unit
 ) {
     val draft = uiState.first
-    val onNext = { onEvent(Unit) }
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Text("First, let's see it.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         
@@ -183,13 +176,6 @@ private fun CaptureStep(
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
-                    Surface(
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-                        color = Color.Black.copy(alpha = 0.6f),
-                        shape = CircleShape
-                    ) {
-                        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.padding(12.dp), tint = Color.White)
-                    }
                 } else {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
@@ -202,26 +188,13 @@ private fun CaptureStep(
 
         if (draft.imageUrl != null) {
             Button(
-                onClick = onNext,
+                onClick = { onEvent(Unit) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text("Looks Good", fontWeight = FontWeight.Bold)
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ColorStepPreview() {
-    MaterialTheme {
-        val dummyItem = CosmeticItem(name = "", brand = "", category = CosmeticCategory.AI_PENDING)
-        ColorStep(
-            uiState = dummyItem to CosmeticsUiState(),
-            onEvent = {},
-            navTo = {}
-        )
     }
 }
 
@@ -232,8 +205,6 @@ private fun ColorStep(
     navTo: (KoColorRoute) -> Unit
 ) {
     val draft = uiState.first
-    val onNext = { onEvent(Unit) }
-    
     var showColorPicker by remember { mutableStateOf(false) }
 
     if (showColorPicker) {
@@ -257,7 +228,7 @@ private fun ColorStep(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(160.dp)
                 .clip(RoundedCornerShape(32.dp))
                 .background(bgColor)
                 .clickable { showColorPicker = true },
@@ -271,41 +242,13 @@ private fun ColorStep(
             )
         }
 
-        Text("Gemini AI is analyzing the color profile...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            listOf("#FAD4D4", "#F8F0E3", "#F0C080", "#E0AC69").forEach { hex ->
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                        .background(parseColor(hex))
-                        .border(if (draft.colorHex == hex) 4.dp else 0.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                        .clickable { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = hex))) }
-                )
-            }
-        }
-
         Button(
-            onClick = onNext,
+            onClick = { onEvent(Unit) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
             Text("Continue", fontWeight = FontWeight.Bold)
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun MetadataStepPreview() {
-    MaterialTheme {
-        val dummyItem = CosmeticItem(name = "", brand = "", category = CosmeticCategory.AI_PENDING)
-        MetadataStep(
-            uiState = dummyItem to CosmeticsUiState(),
-            onEvent = {},
-            navTo = {}
-        )
     }
 }
 
@@ -316,7 +259,12 @@ private fun MetadataStep(
     navTo: (KoColorRoute) -> Unit
 ) {
     val draft = uiState.first
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    val scrollState = rememberScrollState()
+    
+    Column(
+        modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         Text("Final details.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         
         OutlinedTextField(
@@ -335,65 +283,64 @@ private fun MetadataStep(
             shape = RoundedCornerShape(16.dp)
         )
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(
-                value = draft.price?.toString() ?: "",
-                onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(price = it.toDoubleOrNull()))) },
-                label = { Text("Price") },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(16.dp),
-                prefix = { Text("$") }
-            )
-            OutlinedTextField(
-                value = draft.batchCode ?: "",
-                onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
-                label = { Text("Batch / SKU") },
-                modifier = Modifier.weight(1.2f),
-                shape = RoundedCornerShape(16.dp),
-                trailingIcon = {
-                    IconButton(onClick = { navTo(KoColorRoute.BarcodeScanner) }) {
-                        Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan Barcode")
-                    }
-                }
-            )
+        // Taxonomy: Progressive Disclosure
+        TaxonomySelector(draft, onEvent)
+
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun TaxonomySelector(draft: CosmeticItem, onEvent: (CosmeticsEvent) -> Unit) {
+    var showMacro by remember { mutableStateOf(false) }
+    var showMicro by remember { mutableStateOf(false) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("Categorization", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+        
+        // Level 1: Macro
+        OutlinedButton(
+            onClick = { showMacro = true },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(draft.macroCategory.displayName)
+                Icon(Icons.Default.ArrowDropDown, null)
+            }
         }
         
-        // Category Selection
-        var showMenu by remember { mutableStateOf(false) }
-        Box {
-            OutlinedButton(
-                onClick = { showMenu = true },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(draft.category.displayName)
-                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+        // Level 2: Micro
+        OutlinedButton(
+            onClick = { showMicro = true },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(draft.microCategory.displayName)
+                Icon(Icons.Default.ArrowDropDown, null)
             }
-            DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                val filter = uiState.second.categoryFilter
-                
-                // Debug log (won't show in production but helps during development if I could see logs)
-                // android.util.Log.d("StitchBuilder", "Current filter: $filter")
+        }
+    }
 
-                val availableCategories = if (!filter.isNullOrBlank()) {
-                    CosmeticCategory.entries.filter { 
-                        it.groupName.contains(filter, ignoreCase = true) || 
-                        it.name.contains(filter, ignoreCase = true)
-                    }
-                } else {
-                    CosmeticCategory.entries.filter { it != CosmeticCategory.AI_PENDING }
-                }
+    DropdownMenu(expanded = showMacro, onDismissRequest = { showMacro = false }) {
+        MacroCategory.entries.forEach { cat ->
+            DropdownMenuItem(text = { Text(cat.displayName) }, onClick = {
+                onEvent(CosmeticsEvent.UpdateDraft(draft.copy(
+                    macroCategory = cat,
+                    microCategory = MicroCategory.entries.first { it.macro == cat }
+                )))
+                showMacro = false
+            })
+        }
+    }
 
-                availableCategories.forEach { cat ->
-                    DropdownMenuItem(
-                        text = { Text(cat.displayName) }, 
-                        onClick = { 
-                            onEvent(CosmeticsEvent.UpdateDraft(draft.copy(category = cat)))
-                            showMenu = false
-                        }
-                    )
-                }
-            }
+    DropdownMenu(expanded = showMicro, onDismissRequest = { showMicro = false }) {
+        MicroCategory.entries.filter { it.macro == draft.macroCategory }.forEach { cat ->
+            DropdownMenuItem(text = { Text(cat.displayName) }, onClick = {
+                onEvent(CosmeticsEvent.UpdateDraft(draft.copy(microCategory = cat)))
+                showMicro = false
+            })
         }
     }
 }

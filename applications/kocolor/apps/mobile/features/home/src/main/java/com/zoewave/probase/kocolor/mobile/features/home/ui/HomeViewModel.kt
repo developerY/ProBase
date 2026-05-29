@@ -1,38 +1,49 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.HydrationRecord
+import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.data.service.health.HealthSessionManager
+import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherCondition
+import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherUiState
+import com.zoewave.probase.features.health.core.SkinInsight
+import com.zoewave.probase.features.health.core.WellnessCorrelationEngine
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
+import com.zoewave.probase.kocolor.db.data.ClothingDefaults
+import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
-import com.zoewave.probase.kocolor.db.data.ClothingDefaults
-import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
-import com.zoewave.probase.kocolor.model.*
-import com.zoewave.probase.features.health.core.WellnessCorrelationEngine
-import com.zoewave.probase.features.health.core.SkinInsight
-import com.zoewave.probase.core.data.service.health.HealthSessionManager
-import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.permission.HealthPermission
-import androidx.health.connect.client.records.SleepSessionRecord
-import androidx.health.connect.client.records.HydrationRecord
+import com.zoewave.probase.kocolor.model.BeautyRoutine
+import com.zoewave.probase.kocolor.model.ClothingItem
+import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.kocolor.model.FashionProfile
+import com.zoewave.probase.kocolor.model.RoutineTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.Calendar
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import java.util.Calendar
 import javax.inject.Inject
-
-import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherUiState
-import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherCondition
-import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 
 data class HomeUiState(
     val fashionProfile: FashionProfile? = null,
@@ -168,7 +179,7 @@ class HomeViewModel @Inject constructor(
         val (hasPerms, healthData) = healthInfo
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val cosmeticsByGroup = cosmetics.groupBy { it.category.groupName }.mapValues { it.value.size }
+        val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         val clothingByCategory = clothing.groupBy { it.category.name }.mapValues { it.value.size }
 
         val totalVanityValue = cosmetics.sumOf { it.price ?: 0.0 }
@@ -330,7 +341,12 @@ class HomeViewModel @Inject constructor(
         id = id,
         name = name,
         brand = brand,
-        category = category,
+        macroCategory = macroCategory,
+        microCategory = microCategory,
+        formulation = formulation,
+        chemistryBase = chemistryBase,
+        finish = finish,
+        coverage = coverage,
         colorHex = colorHex,
         shadeName = shadeName,
         imageUrl = imageUrl,

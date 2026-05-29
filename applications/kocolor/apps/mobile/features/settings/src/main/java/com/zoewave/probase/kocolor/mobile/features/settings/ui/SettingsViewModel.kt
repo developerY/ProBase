@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
-import com.zoewave.probase.kocolor.model.CosmeticCategory
+import com.zoewave.probase.kocolor.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -106,7 +106,7 @@ class SettingsViewModel @Inject constructor(
             val colors = listOf("#FF0000", "#FFC0CB", "#800020", "#C71585", "#DB7093", "#FFA07A", "#FF7F50")
             
             repeat(50) { i ->
-                val category = CosmeticCategory.entries.toTypedArray().random()
+                val micro = MicroCategory.entries.toTypedArray().random()
                 val brand = brands.random()
                 val name = "${brand} ${productSuffixes.random()} ${i + 1}"
                 
@@ -114,7 +114,8 @@ class SettingsViewModel @Inject constructor(
                     CosmeticItemEntity(
                         name = name,
                         brand = brand,
-                        category = category,
+                        macroCategory = micro.macro,
+                        microCategory = micro,
                         colorHex = colors.random(),
                         shadeName = "Shade ${i + 1}",
                         timestamp = System.currentTimeMillis() - (i * 1000 * 60 * 60) // Different times

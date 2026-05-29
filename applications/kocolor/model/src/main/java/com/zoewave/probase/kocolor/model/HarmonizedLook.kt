@@ -1,7 +1,8 @@
-package com.probase.kocolor.model
+package com.zoewave.probase.kocolor.model
 
-import com.zoewave.probase.kocolor.model.ClothingItem
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class HarmonizedLook(
     val targetGarment: ClothingItem,
     val recommendedLip: CosmeticItem?,

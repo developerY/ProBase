@@ -1,7 +1,6 @@
 package com.zoewave.probase.kocolor.features.analyzer.data
 
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.CosmeticCategory
+import com.zoewave.probase.kocolor.model.*
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,29 +14,36 @@ data class InteractionResult(
 
 /**
  * Engine for analyzing how different cosmetic/skincare products interact when used together.
+ * Focuses on professional chemistry-based compatibility and layering.
  */
 @Singleton
 class InteractionEngine @Inject constructor() {
 
     /**
      * Checks if two products are compatible to be layered in a single routine.
+     * Professionals look for "Chemical Conflict" (e.g. Water over Silicone).
      */
     fun checkCompatibility(item1: CosmeticItem, item2: CosmeticItem): InteractionResult {
-        // High-level categorical interaction rules
-        val cat1 = item1.category
-        val cat2 = item2.category
-        
-        // Example: Vitamin C + Retinol (Simulated via categories for now)
-        if ((cat1 == CosmeticCategory.FOUNDATION && cat2 == CosmeticCategory.PRIMER) ||
-            (cat1 == CosmeticCategory.PRIMER && cat2 == CosmeticCategory.FOUNDATION)) {
+        // 1. Chemistry Compatibility Pass
+        if (item1.chemistryBase == ChemistryBase.SILICONE && item2.chemistryBase == ChemistryBase.WATER) {
             return InteractionResult(
-                isCompatible = true,
-                suggestion = "Perfect pair: Primer ensures smooth foundation application."
+                isCompatible = false,
+                warning = "Potential Pilling: Water-based ${item2.name} over Silicone-based ${item1.name} may separate.",
+                suggestion = "Try a Silicone-based foundation or a Water-based primer instead."
             )
         }
+
+        // 2. High-level categorical interaction rules
+        val cat1 = item1.microCategory
+        val cat2 = item2.microCategory
         
-        // Example: Chemical Exfoliants + Retinoids
-        // In a real implementation, we would check ingredient analysis tags.
+        if ((cat1 == MicroCategory.FOUNDATION && cat2 == MicroCategory.PRIMER) ||
+            (cat1 == MicroCategory.PRIMER && cat2 == MicroCategory.FOUNDATION)) {
+            return InteractionResult(
+                isCompatible = true,
+                suggestion = "Professional pairing confirmed."
+            )
+        }
         
         return InteractionResult(isCompatible = true)
     }
@@ -46,27 +52,34 @@ class InteractionEngine @Inject constructor() {
      * Recommends the optimal layering order for a list of products.
      */
     fun determineLayeringOrder(items: List<CosmeticItem>): List<CosmeticItem> {
-        return items.sortedBy { getLayeringWeight(it.category) }
+        return items.sortedBy { getLayeringWeight(it.microCategory) }
     }
 
-    private fun getLayeringWeight(category: CosmeticCategory): Int {
+    private fun getLayeringWeight(category: MicroCategory): Int {
         return when (category) {
-            CosmeticCategory.PRIMER -> 10
-            CosmeticCategory.FOUNDATION -> 20
-            CosmeticCategory.CONCEALER -> 30
-            CosmeticCategory.BB_CC_CREAM -> 20
-            CosmeticCategory.SETTING_PRODUCT -> 100
-            CosmeticCategory.BLUSH -> 40
-            CosmeticCategory.BRONZER -> 45
-            CosmeticCategory.CONTOUR -> 50
-            CosmeticCategory.HIGHLIGHTER -> 60
-            CosmeticCategory.EYESHADOW -> 70
-            CosmeticCategory.EYELINER -> 80
-            CosmeticCategory.MASCARA -> 90
-            CosmeticCategory.EYEBROW_PRODUCT -> 75
-            CosmeticCategory.LIPSTICK -> 110
-            CosmeticCategory.LIP_GLOSS -> 120
-            CosmeticCategory.LIP_LINER -> 105
+            MicroCategory.CLEANSER -> 0
+            MicroCategory.TONER -> 5
+            MicroCategory.SERUM -> 10
+            MicroCategory.MOISTURIZER -> 15
+            MicroCategory.SPF -> 20
+            MicroCategory.PRIMER -> 25
+            MicroCategory.FOUNDATION -> 30
+            MicroCategory.BB_CC_CREAM -> 30
+            MicroCategory.CONCEALER -> 35
+            MicroCategory.BLUSH -> 40
+            MicroCategory.BRONZER -> 45
+            MicroCategory.CONTOUR -> 50
+            MicroCategory.HIGHLIGHTER -> 60
+            MicroCategory.EYESHADOW -> 70
+            MicroCategory.EYELINER -> 80
+            MicroCategory.MASCARA -> 90
+            MicroCategory.BROW_PENCIL -> 75
+            MicroCategory.BROW_GEL -> 76
+            MicroCategory.LIPSTICK -> 110
+            MicroCategory.LIP_GLOSS -> 120
+            MicroCategory.LIP_LINER -> 105
+            MicroCategory.SETTING_POWDER -> 150
+            MicroCategory.SETTING_SPRAY -> 160
             else -> 1000
         }
     }

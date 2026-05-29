@@ -20,8 +20,8 @@ interface CosmeticDao {
     @Query("SELECT * FROM cosmetic_items ORDER BY CASE WHEN expiryDate IS NULL THEN 1 ELSE 0 END, expiryDate ASC")
     fun getAllCosmeticsFEFO(): Flow<List<CosmeticItemEntity>>
 
-    @Query("SELECT * FROM cosmetic_items WHERE category = :category ORDER BY timestamp DESC")
-    fun getCosmeticsByCategory(category: String): Flow<List<CosmeticItemEntity>>
+    @Query("SELECT * FROM cosmetic_items WHERE microCategory = :microCategory ORDER BY timestamp DESC")
+    fun getCosmeticsByMicroCategory(microCategory: String): Flow<List<CosmeticItemEntity>>
 
     @Query("SELECT * FROM cosmetic_items WHERE id = :id")
     fun getCosmeticById(id: Long): Flow<CosmeticItemEntity?>

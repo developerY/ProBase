@@ -24,8 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.KoColorRoute
+import com.zoewave.probase.kocolor.model.*
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import java.text.NumberFormat
 import java.util.Locale
@@ -93,7 +92,7 @@ fun CosmeticAnalyticsScreen(
                 }
             }
 
-            // 3. Usage Leaderboard (The "Hero" Products)
+            // 3. Usage Leaderboard
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text("USAGE LEADERBOARD", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
@@ -111,7 +110,7 @@ fun CosmeticAnalyticsScreen(
                 }
             }
 
-            // 4. Chromatic Core (Color Distribution)
+            // 4. Chromatic Core
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text("CHROMATIC CORE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
@@ -134,16 +133,11 @@ fun CosmeticAnalyticsScreen(
                                 )
                             }
                         }
-                        Text(
-                            text = "Your vanity is dominated by ${colorDistribution.size} distinct tones.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
                 }
             }
 
-            // 5. Efficiency Analysis (Value Ranking)
+            // 5. Efficiency Analysis
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text("STYLE EFFICIENCY (BEST VALUE)", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
@@ -155,24 +149,6 @@ fun CosmeticAnalyticsScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             bestValue.forEach { item ->
                                 ValueEfficiencyRow(item = item, label = "PER USE")
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 6. Luxury vs Daily (Price Analysis)
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("PORTFOLIO INVESTMENT", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                    val mostExpensive = uiState.items.filter { it.price != null }.sortedByDescending { it.price }.take(3)
-                    
-                    if (mostExpensive.isEmpty()) {
-                        Text("Add prices to your collection to see investment analytics.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    } else {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            mostExpensive.forEach { item ->
-                                ValueEfficiencyRow(item = item, label = "PRICE", usePrice = true)
                             }
                         }
                     }
@@ -286,9 +262,26 @@ private fun CosmeticAnalyticsScreenPreview() {
         CosmeticAnalyticsScreen(
             uiState = CosmeticsUiState(
                 items = listOf(
-                    CosmeticItem(id = 1, name = "Silk Primer", brand = "KoColor", category = com.zoewave.probase.kocolor.model.CosmeticCategory.PRIMER, usageCount = 45, colorHex = "#F8F0E3", price = 28.0),
-                    CosmeticItem(id = 2, name = "Cool Ivory", brand = "KoColor", category = com.zoewave.probase.kocolor.model.CosmeticCategory.FOUNDATION, usageCount = 120, colorHex = "#FAD4D4", price = 42.0),
-                    CosmeticItem(id = 3, name = "Nude Silk", brand = "KoColor", category = com.zoewave.probase.kocolor.model.CosmeticCategory.LIPSTICK, usageCount = 30, colorHex = "#BC8E8E", price = 32.0)
+                    CosmeticItem(
+                        id = 1, 
+                        name = "Silk Primer", 
+                        brand = "KoColor", 
+                        macroCategory = MacroCategory.PREP,
+                        microCategory = MicroCategory.PRIMER,
+                        usageCount = 45, 
+                        colorHex = "#F8F0E3", 
+                        price = 28.0
+                    ),
+                    CosmeticItem(
+                        id = 2, 
+                        name = "Cool Ivory", 
+                        brand = "KoColor", 
+                        macroCategory = MacroCategory.COMPLEXION,
+                        microCategory = MicroCategory.FOUNDATION,
+                        usageCount = 120, 
+                        colorHex = "#FAD4D4", 
+                        price = 42.0
+                    )
                 )
             ),
             onEvent = {},
