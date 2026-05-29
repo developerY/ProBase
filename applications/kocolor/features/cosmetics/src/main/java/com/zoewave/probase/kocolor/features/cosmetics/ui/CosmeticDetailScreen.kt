@@ -2,23 +2,58 @@ package com.zoewave.probase.kocolor.features.cosmetics.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.NotificationsNone
+import androidx.compose.material.icons.filled.Recycling
+import androidx.compose.material.icons.filled.Science
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -29,13 +64,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.kocolor.model.*
-import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
-import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
+import com.zoewave.probase.kocolor.model.ChemistryBase
+import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.kocolor.model.Coverage
+import com.zoewave.probase.kocolor.model.Finish
+import com.zoewave.probase.kocolor.model.Formulation
+import com.zoewave.probase.kocolor.model.KoColorRoute
+import com.zoewave.probase.kocolor.model.MacroCategory
+import com.zoewave.probase.kocolor.model.MicroCategory
 
 data class CosmeticDetailUiState(
-    val item: CosmeticItem? = null
+    val item: CosmeticItem? = null,
+    // Usage Insights
+    val usageFrequencyPerWeek: Double = 3.5,
+    val estimatedDaysRemaining: Int? = 45,
+    val colorCompatibility: List<String> = listOf("#FBF8F5", "#E6A68A", "#2C2420") // Seasonal coordination
 )
 
 @Preview(showBackground = true, name = "Populated")
@@ -102,338 +146,301 @@ fun CosmeticDetailScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     val item = uiState.item ?: return
-    val bgColor = item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surface
-    
-    var showProductInfo by remember { mutableStateOf(true) }
-    var showProfessionalFacets by remember { mutableStateOf(true) }
-    var showStockHealth by remember { mutableStateOf(false) }
-    var showValueAnalysis by remember { mutableStateOf(false) }
-    var showApplicationGuide by remember { mutableStateOf(false) }
+    val atelierBrown = Color(0xFF8B5E3C)
+    val statusColor = if ((item.fillLevel ?: 1.0) > 0.1) Color(0xFF4CAF50) else Color.Gray
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = { Text("Product Details", style = MaterialTheme.typography.titleMedium, fontFamily = FontFamily.Serif) },
+            CenterAlignedTopAppBar(
+                title = { 
+                    Text(
+                        "Atelier", 
+                        style = MaterialTheme.typography.titleLarge, 
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold,
+                        color = atelierBrown
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
                 },
                 actions = {
-                    IconButton(onClick = { 
-                        onEvent(CosmeticsEvent.StartEditing(item))
-                        navTo(KoColorRoute.CosmeticEdit(item.id))
-                    }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    IconButton(onClick = { /* Notifications */ }) {
+                        Icon(Icons.Default.NotificationsNone, contentDescription = "Notifications")
                     }
                 }
             )
         }
     ) { padding ->
+        val expandedStates = remember { 
+            mutableStateMapOf<String, Boolean>().apply {
+                put("Value Analysis", true)
+                put("Color Hue Map", true)
+                put("Professional Facets", false)
+                put("Product Lifecycle", false)
+                put("Usage & Stock", true)
+                put("Application Guide", false)
+                put("Ingredient Analysis", false)
+                put("Sustainability", false)
+                put("Coordination", false)
+            }
+        }
+
         Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .background(Color.White)
         ) {
-            // 1. Hero Visual
-            Box(
+            // 1. Header Information
+            Column(modifier = Modifier.padding(24.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Surface(
+                        color = Color(0xFFF5F5F5),
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = item.microCategory.displayName,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray
+                        )
+                    }
+                    Surface(
+                        color = statusColor.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            Icon(Icons.Default.CheckCircle, null, modifier = Modifier.size(12.dp), tint = statusColor)
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = if ((item.fillLevel ?: 1.0) > 0.1) "In Stock" else "Low Stock",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = statusColor,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.displaySmall,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2C2420)
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                Text(
+                    text = "SKU: ${item.batchCode ?: "N/A"} • Launched: Q3 2023",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+
+                Spacer(Modifier.height(24.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    OutlinedButton(
+                        onClick = { 
+                            onEvent(CosmeticsEvent.StartEditing(item))
+                            navTo(KoColorRoute.CosmeticEdit(item.id))
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(4.dp),
+                        border = BorderStroke(1.dp, Color.Black)
+                    ) {
+                        Text("Edit Product", color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
+                    Button(
+                        onClick = { /* Export */ },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(4.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = atelierBrown)
+                    ) {
+                        Text("Export Report", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
+            // 2. Product Image Section
+            Surface(
                 modifier = Modifier
+                    .padding(horizontal = 24.dp, vertical = 8.dp)
                     .fillMaxWidth()
-                    .height(340.dp)
+                    .aspectRatio(1f),
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
+                color = Color(0xFFFBF8F5)
             ) {
-                if (item.imageUrl != null) {
-                    Column(modifier = Modifier.fillMaxSize()) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(24.dp)) {
+                    if (item.imageUrl != null) {
                         AsyncImage(
                             model = item.imageUrl,
                             contentDescription = item.name,
-                            modifier = Modifier.fillMaxWidth().weight(1f),
-                            contentScale = ContentScale.Crop
+                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Fit
                         )
-                        Box(modifier = Modifier.fillMaxWidth().height(80.dp).background(bgColor))
-                    }
-                } else {
-                    Box(modifier = Modifier.fillMaxSize().background(bgColor))
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)),
-                                startY = 500f
-                            )
-                        )
-                )
-
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(24.dp)
-                ) {
-                    Text(
-                        text = item.brand.uppercase(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.8f),
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 2.sp
-                    )
-                    Text(
-                        text = item.name,
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = Color.White,
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold
-                    )
-                    if (!item.shadeName.isNullOrBlank()) {
-                        Text(
-                            text = item.shadeName!!,
-                            style = MaterialTheme.typography.titleSmall,
-                            color = Color.White.copy(alpha = 0.9f)
-                        )
+                    } else {
+                        Icon(Icons.Default.Image, null, modifier = Modifier.size(100.dp), tint = Color.LightGray)
                     }
                 }
             }
 
-            // 2. Expandable Body
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Spacer(Modifier.height(16.dp))
+
+            // 3. Expandable Sections
+            AtelierExpandableSection(
+                title = "Value Analysis",
+                isExpanded = expandedStates["Value Analysis"] == true,
+                onToggle = { expandedStates["Value Analysis"] = it }
             ) {
-                // Quick Metrics Row
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                ValueAnalysisSection(item)
+            }
+
+            item.colorHex?.let { colorHex ->
+                AtelierExpandableSection(
+                    title = "Color Hue Map",
+                    isExpanded = expandedStates["Color Hue Map"] == true,
+                    onToggle = { expandedStates["Color Hue Map"] = it }
                 ) {
-                    MetricItem(uiState = Triple("Micro", item.microCategory.displayName, Icons.Default.Category), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
-                    MetricItem(uiState = Triple("Price", item.price?.let { "$%.2f".format(it) } ?: "N/A", Icons.Default.Payments), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
-                    
-                    val unit = item.volume?.filter { it.isLetter() } ?: "ml"
-                    val usage = item.amountPerUse ?: item.microCategory.typicalAmountPerUse
-                    MetricItem(uiState = Triple("Usage", "%.2f %s".format(usage, unit), Icons.Default.Opacity), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
-                    
-                    MetricItem(uiState = Triple("Uses", item.usageCount.toString(), Icons.Default.History), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                    ColorHueMapSection(colorHex, item.shadeName, uiState.colorCompatibility)
                 }
+            }
+            
+            AtelierExpandableSection(
+                title = "Professional Facets",
+                isExpanded = expandedStates["Professional Facets"] == true,
+                onToggle = { expandedStates["Professional Facets"] = it }
+            ) {
+                ProfessionalFacetsSection(item)
+            }
 
-                HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+            AtelierExpandableSection(
+                title = "Product Lifecycle",
+                isExpanded = expandedStates["Product Lifecycle"] == true,
+                onToggle = { expandedStates["Product Lifecycle"] = it }
+            ) {
+                ProductDatesSection(item)
+            }
 
-                // SECTION 1: PRODUCT METADATA
-                ExpandableSection(
-                    title = "Product Metadata",
-                    isExpanded = showProductInfo,
-                    onToggle = { showProductInfo = !showProductInfo }
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        DetailRow(uiState = Triple("Macro Category", item.macroCategory.displayName, Color.Unspecified), onEvent = {}, navTo = {})
-                        DetailRow(uiState = Triple("Batch Code / SKU", item.batchCode ?: "Not Set", Color.Unspecified), onEvent = {}, navTo = {})
-                        DetailRow(uiState = Triple("Status", if (item.isOpened) "Opened" else "New / Sealed", Color.Unspecified), onEvent = {}, navTo = {})
-                        DetailRow(uiState = Triple("Container Volume", item.volume ?: "Unknown", Color.Unspecified), onEvent = {}, navTo = {})
-                        
-                        item.estimatedExpiry?.let { expiry ->
-                            val daysLeft = ((expiry - System.currentTimeMillis()) / (24 * 60 * 60 * 1000)).toInt()
-                            DetailRow(uiState = Triple("Estimated Expiry", if (daysLeft > 0) "$daysLeft days left" else "Expired", if (daysLeft < 30) Color.Red else MaterialTheme.colorScheme.onSurface), onEvent = {}, navTo = {})
-                        }
-                    }
-                }
+            AtelierExpandableSection(
+                title = "Usage & Stock",
+                isExpanded = expandedStates["Usage & Stock"] == true,
+                onToggle = { expandedStates["Usage & Stock"] = it }
+            ) {
+                UsageStockSection(item, uiState)
+            }
 
-                // SECTION 2: PROFESSIONAL FACETS
-                ExpandableSection(
-                    title = "Professional Facets",
-                    isExpanded = showProfessionalFacets,
-                    onToggle = { showProfessionalFacets = !showProfessionalFacets }
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        DetailRow(uiState = Triple("Formulation", item.formulation.name.lowercase().replaceFirstChar { it.uppercase() }, Color.Unspecified), onEvent = {}, navTo = {})
-                        DetailRow(uiState = Triple("Chemistry Base", item.chemistryBase.name.lowercase().replaceFirstChar { it.uppercase() }, Color.Unspecified), onEvent = {}, navTo = {})
-                        DetailRow(uiState = Triple("Finish", item.finish.name.lowercase().replaceFirstChar { it.uppercase() }, Color.Unspecified), onEvent = {}, navTo = {})
-                        DetailRow(uiState = Triple("Coverage", item.coverage.name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }, Color.Unspecified), onEvent = {}, navTo = {})
-                    }
-                }
+            AtelierExpandableSection(
+                title = "Ingredient Analysis",
+                isExpanded = expandedStates["Ingredient Analysis"] == true,
+                onToggle = { expandedStates["Ingredient Analysis"] = it }
+            ) {
+                IngredientAnalysisSection()
+            }
 
-                // SECTION 3: STOCK HEALTH
-                ExpandableSection(
-                    title = "Stock Health",
-                    isExpanded = showStockHealth,
-                    onToggle = { showStockHealth = !showStockHealth }
-                ) {
-                    val isTrackingActive = item.amountRemaining != null
-                    val fillLevel = item.fillLevel ?: 1.0
-                    val statusColor = if (!isTrackingActive) {
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                    } else {
-                        when {
-                            fillLevel > 0.5 -> Color(0xFF4CAF50) // Green
-                            fillLevel > 0.2 -> Color(0xFFFFC107) // Yellow
-                            else -> Color(0xFFF44336) // Red
-                        }
-                    }
-                    val unit = item.volume?.filter { it.isLetter() } ?: "units"
-                    
-                    Column(
-                        modifier = Modifier.alpha(if (isTrackingActive) 1f else 0.5f),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column {
-                                Text("AMOUNT REMAINING", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), fontWeight = FontWeight.Bold)
-                                Text(
-                                    text = item.amountRemaining?.let { "%.1f %s".format(it, unit) } ?: "Not Tracked",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Black
-                                )
-                                Text(
-                                    text = "%.2f %s per use".format(item.amountPerUse ?: item.microCategory.typicalAmountPerUse, unit),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                                )
-                            }
-                            
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(64.dp)) {
-                                CircularProgressIndicator(
-                                    progress = { fillLevel.toFloat() },
-                                    modifier = Modifier.fillMaxSize(),
-                                    color = statusColor,
-                                    trackColor = statusColor.copy(alpha = 0.1f),
-                                    strokeWidth = 6.dp,
-                                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
-                                )
-                                Text(
-                                    text = if (isTrackingActive) "${(fillLevel * 100).toInt()}%" else "---",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = statusColor
-                                )
-                            }
-                        }
-                        
-                        LinearProgressIndicator(
-                            progress = { fillLevel.toFloat() },
-                            modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
-                            color = statusColor,
-                            trackColor = statusColor.copy(alpha = 0.1f)
-                        )
-                    }
-                }
+            AtelierExpandableSection(
+                title = "Application Guide",
+                isExpanded = expandedStates["Application Guide"] == true,
+                onToggle = { expandedStates["Application Guide"] = it }
+            ) {
+                ApplicationGuideSection(item, atelierBrown)
+            }
 
-                // SECTION 4: VALUE ANALYSIS
-                ExpandableSection(
-                    title = "Value Analysis",
-                    isExpanded = showValueAnalysis,
-                    onToggle = { showValueAnalysis = !showValueAnalysis }
-                ) {
-                    if (item.costPerUse != null) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(20.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text("Actual Cost Per Use", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                                    Text("$%.2f".format(item.costPerUse), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
-                                }
-                                Icon(Icons.Default.TrendingDown, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
-                            }
-                        }
-                    } else {
-                        Text("Complete more usage cycles to calculate performance data.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
+            AtelierExpandableSection(
+                title = "Sustainability",
+                isExpanded = expandedStates["Sustainability"] == true,
+                onToggle = { expandedStates["Sustainability"] = it }
+            ) {
+                SustainabilitySection()
+            }
 
-                // SECTION 5: APPLICATION GUIDE
-                ExpandableSection(
-                    title = "Application Guide",
-                    isExpanded = showApplicationGuide,
-                    onToggle = { showApplicationGuide = !showApplicationGuide }
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        ProInsightCard(
-                            uiState = Triple("Instructions", item.instructions, Icons.Default.Opacity),
-                            onEvent = {},
-                            navTo = {}
-                        )
+            AtelierExpandableSection(
+                title = "Coordination",
+                isExpanded = expandedStates["Coordination"] == true,
+                onToggle = { expandedStates["Coordination"] = it }
+            ) {
+                CoordinationSection()
+            }
 
-                        ProInsightCard(
-                            uiState = Triple("Personal Notes", item.notes, Icons.Default.StickyNote2),
-                            onEvent = {},
-                            navTo = {}
-                        )
-                    }
-                }
+            Spacer(modifier = Modifier.height(32.dp))
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Action Buttons
+            // Action Buttons
+            Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(
                     onClick = { onEvent(CosmeticsEvent.UseItem(item.id)) },
-                    modifier = Modifier.fillMaxWidth().height(60.dp),
-                    shape = RoundedCornerShape(16.dp)
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = atelierBrown)
                 ) {
-                    Icon(Icons.Default.AutoAwesome, contentDescription = null)
-                    Spacer(Modifier.width(12.dp))
-                    Text("Log Today's Use", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                }
-
-                OutlinedButton(
-                    onClick = { /* Add to Routine */ },
-                    modifier = Modifier.fillMaxWidth().height(60.dp).padding(top = 8.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                ) {
-                    Text("Add to Beauty Routine", style = MaterialTheme.typography.titleMedium)
+                    Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Log Today's Usage", fontWeight = FontWeight.Bold)
                 }
                 
-                Spacer(modifier = Modifier.height(48.dp))
+                OutlinedButton(
+                    onClick = { /* Finish */ },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.1f))
+                ) {
+                    Text("Mark as Finished", color = Color.Black)
+                }
             }
+
+            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }
 
 @Composable
-private fun ExpandableSection(
+private fun AtelierExpandableSection(
     title: String,
     isExpanded: Boolean,
-    onToggle: () -> Unit,
+    onToggle: (Boolean) -> Unit,
     content: @Composable () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp), color = Color(0xFFF0F0F0))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onToggle() }
-                .padding(vertical = 12.dp),
+                .clickable { onToggle(!isExpanded) }
+                .padding(horizontal = 24.dp, vertical = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = title.uppercase(),
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.sp),
                 fontWeight = FontWeight.Black,
-                letterSpacing = 2.sp,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                color = if (isExpanded) Color(0xFF8B5E3C) else Color(0xFF2C2420)
             )
             Icon(
                 imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                contentDescription = if (isExpanded) "Collapse" else "Expand",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                contentDescription = null,
+                tint = Color.Gray,
+                modifier = Modifier.size(20.dp)
             )
         }
         
         AnimatedVisibility(
             visible = isExpanded,
-            enter = expandVertically(),
-            exit = shrinkVertically()
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
         ) {
-            Box(modifier = Modifier.padding(bottom = 16.dp)) {
+            Box(modifier = Modifier.padding(bottom = 24.dp)) {
                 content()
             }
         }
@@ -441,76 +448,295 @@ private fun ExpandableSection(
 }
 
 @Composable
-private fun MetricItem(
-    uiState: Triple<String, String, androidx.compose.ui.graphics.vector.ImageVector>, 
-    onEvent: (Unit) -> Unit, 
-    navTo: (KoColorRoute) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val label = uiState.first
-    val value = uiState.second
-    val icon = uiState.third
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(text = value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
-private fun DetailRow(uiState: Triple<String, String, Color>, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
-    val label = uiState.first
-    val value = uiState.second
-    val valueColor = uiState.third
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = valueColor)
-    }
-}
-
-@Composable
-private fun ProInsightCard(
-    uiState: Triple<String, String?, androidx.compose.ui.graphics.vector.ImageVector>,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
-    val title = uiState.first
-    val content = uiState.second
-    val icon = uiState.third
-    val isAvailable = !content.isNullOrBlank()
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    icon, 
-                    contentDescription = null, 
-                    modifier = Modifier.size(16.dp), 
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = if (isAvailable) 1f else 0.2f)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = title, 
-                    style = MaterialTheme.typography.labelLarge, 
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (isAvailable) 1f else 0.3f)
-                )
+private fun ApplicationGuideSection(item: CosmeticItem, atelierBrown: Color) {
+    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+        Text(
+            text = item.instructions ?: "No manufacturer instructions provided.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray,
+            lineHeight = 22.sp
+        )
+        item.notes?.let { notes ->
+            if (notes.isNotBlank()) {
+                Spacer(Modifier.height(16.dp))
+                Surface(
+                    color = Color(0xFFFBF8F5),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("PERSONAL NOTES", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = atelierBrown)
+                        Spacer(Modifier.height(8.dp))
+                        Text(notes, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = content ?: "No $title details provided.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isAvailable) 0.8f else 0.2f),
-                lineHeight = 22.sp
-            )
         }
     }
 }
+
+@Composable
+private fun IngredientAnalysisSection() {
+    Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        DetailMetricRow("Hero Ingredient", "Hyaluronic Acid")
+        DetailMetricRow("Skin Compatibility", "Sensitive, Dry")
+        DetailMetricRow("Fragrance", "None / Unscented")
+        
+        Surface(
+            color = Color(0xFFE8F1FD),
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Science, null, modifier = Modifier.size(16.dp), tint = Color(0xFF1976D2))
+                Spacer(Modifier.width(8.dp))
+                Text("Dermatologically tested and non-comedogenic.", style = MaterialTheme.typography.labelSmall, color = Color(0xFF1976D2))
+            }
+        }
+    }
+}
+
+@Composable
+private fun SustainabilitySection() {
+    Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        DetailMetricRow("Primary Material", "Glass (Recyclable)")
+        DetailMetricRow("Cap Material", "PCR Plastic")
+        
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Icon(Icons.Default.Recycling, "Recyclable", tint = Color(0xFF4CAF50))
+            Icon(Icons.Default.Eco, "Clean Beauty", tint = Color(0xFF4CAF50))
+        }
+    }
+}
+
+@Composable
+private fun CoordinationSection() {
+    Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("WORKS WELL WITH", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("Silk Primer", "Radiance Mist", "Daily SPF").forEach { product ->
+                Surface(
+                    color = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, Color(0xFFF0F0F0))
+                ) {
+                    Text(
+                        text = product,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ValueAnalysisSection(item: CosmeticItem) {
+    val remainingValue = (item.fillLevel ?: 1.0) * (item.price ?: 0.0)
+    Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        DetailMetricRow("Retail Investment", "$%.2f".format(item.price ?: 0.0))
+        DetailMetricRow("Actual Cost Per Use", item.costPerUse?.let { "$%.2f".format(it) } ?: "---")
+        DetailMetricRow("Remaining Value", "$%.2f".format(remainingValue), valueColor = Color(0xFF8B5E3C))
+    }
+}
+
+@Composable
+private fun ColorHueMapSection(colorHex: String, shadeName: String?, compatibility: List<String>) {
+    val color = parseColor(colorHex)
+    val hsv = remember(colorHex) {
+        val hsv = FloatArray(3)
+        android.graphics.Color.colorToHSV(android.graphics.Color.parseColor(colorHex), hsv)
+        hsv
+    }
+
+    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+        Text(
+            text = "Color Hue Map",
+            style = MaterialTheme.typography.headlineSmall,
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF2C2420)
+        )
+        
+        Spacer(Modifier.height(24.dp))
+        
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(color)
+                    .border(1.dp, Color.Black.copy(alpha = 0.05f), CircleShape)
+            )
+            
+            Spacer(Modifier.width(20.dp))
+            
+            Column {
+                Text(text = shadeName ?: "Custom Tone", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(
+                    text = "Hue: ${hsv[0].toInt()}° • Saturation: ${(hsv[1] * 100).toInt()}%",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+            }
+        }
+        
+        Spacer(Modifier.height(24.dp))
+        
+        // Hue Spectrum
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(12.dp)
+                .clip(CircleShape)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
+                    )
+                )
+        ) {
+            val bias = hsv[0] / 360f
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = (bias * 320).dp) // Approximate mapping
+                    .size(16.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .border(2.dp, Color.Black, CircleShape)
+            )
+        }
+        
+        Spacer(Modifier.height(24.dp))
+        
+        Text("COORDINATION PALETTE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            compatibility.forEach { hex ->
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(parseColor(hex))
+                        .border(0.5.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(8.dp))
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProfessionalFacetsSection(item: CosmeticItem) {
+    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+        Text(
+            text = "Professional Facets",
+            style = MaterialTheme.typography.headlineSmall,
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF2C2420)
+        )
+        
+        Spacer(Modifier.height(24.dp))
+        
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            DetailMetricRow("Formulation", item.formulation.name.lowercase().replaceFirstChar { it.uppercase() })
+            DetailMetricRow("Chemistry Base", item.chemistryBase.name.lowercase().replaceFirstChar { it.uppercase() })
+            DetailMetricRow("Finish", item.finish.name.lowercase().replaceFirstChar { it.uppercase() })
+            DetailMetricRow("Coverage", item.coverage.name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() })
+        }
+    }
+}
+
+@Composable
+private fun UsageStockSection(item: CosmeticItem, uiState: CosmeticDetailUiState) {
+    val fillLevel = item.fillLevel ?: 1.0
+    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+        Text(
+            text = "Usage & Stock Health",
+            style = MaterialTheme.typography.headlineSmall,
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF2C2420)
+        )
+        
+        Spacer(Modifier.height(24.dp))
+        
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Column {
+                Text("TOTAL USES", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                Text("${item.usageCount}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Light, fontFamily = FontFamily.Serif)
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Text("EST. DAYS LEFT", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                Text("${uiState.estimatedDaysRemaining ?: "---"}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Light, fontFamily = FontFamily.Serif)
+            }
+        }
+        
+        Spacer(Modifier.height(24.dp))
+        
+        ShareProgressBar("Stock Remaining", fillLevel)
+        Text(
+            text = "Based on your average of ${uiState.usageFrequencyPerWeek} uses per week.",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Gray,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+    }
+}
+
+@Composable
+private fun ProductDatesSection(item: CosmeticItem) {
+    val dateFormatter = remember { java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()) }
+    
+    fun formatLong(timestamp: Long?): String = timestamp?.let { dateFormatter.format(java.util.Date(it)) } ?: "Not Set"
+
+    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+        Text(
+            text = "Product Lifecycle",
+            style = MaterialTheme.typography.headlineSmall,
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF2C2420)
+        )
+        
+        Spacer(Modifier.height(24.dp))
+        
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            DetailMetricRow("Added to Collection", formatLong(item.timestamp))
+            DetailMetricRow("First Opened", formatLong(item.openedDate))
+            DetailMetricRow("Estimated Expiry", formatLong(item.estimatedExpiry), valueColor = if ((item.estimatedExpiry ?: Long.MAX_VALUE) < System.currentTimeMillis()) Color.Red else Color.Black)
+            
+            // Note: CosmeticItem doesn't have a specific "last used" timestamp, 
+            // but we can infer it from usageCount or future feature additions.
+            // For now, using placeholders if fields are missing in model.
+        }
+    }
+}
+
+@Composable
+private fun DetailMetricRow(label: String, value: String, valueColor: Color = Color.Black) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, color = Color.Gray, style = MaterialTheme.typography.bodyLarge)
+        Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Light, fontFamily = FontFamily.Serif, color = valueColor)
+    }
+}
+
+@Composable
+private fun ShareProgressBar(label: String, share: Double) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(label, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+            Text("%.1f%%".format(share * 100), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+        }
+        LinearProgressIndicator(
+            progress = { share.toFloat() },
+            modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
+            color = Color(0xFF8B5E3C),
+            trackColor = Color(0xFFF0F0F0)
+        )
+    }
+}
+
+
+
