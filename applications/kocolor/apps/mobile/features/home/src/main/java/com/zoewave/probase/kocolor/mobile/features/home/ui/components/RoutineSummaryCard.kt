@@ -18,18 +18,6 @@ import com.zoewave.probase.kocolor.model.BeautyRoutine
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.RoutineTime
 
-@Preview(showBackground = true)
-@Composable
-private fun RoutineSummaryCardPreview() {
-    MaterialTheme {
-        RoutineSummaryCard(
-            uiState = BeautyRoutine(title = "Routine", time = RoutineTime.MORNING, steps = emptyList(), date = 0) to true,
-            onEvent = {},
-            navTo = {}
-        )
-    }
-}
-
 @Composable
 fun RoutineSummaryCard(
     uiState: Pair<BeautyRoutine, Boolean>,
