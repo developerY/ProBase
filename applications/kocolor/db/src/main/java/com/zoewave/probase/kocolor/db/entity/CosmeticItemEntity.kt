@@ -2,14 +2,22 @@ package com.zoewave.probase.kocolor.db.entity
 
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
-import com.zoewave.probase.kocolor.model.CosmeticCategory
+import com.zoewave.probase.kocolor.model.*
 
 @Entity(tableName = "cosmetic_items")
 data class CosmeticItemEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     val brand: String,
-    val category: CosmeticCategory,
+    val macroCategory: MacroCategory,
+    val microCategory: MicroCategory,
+    
+    // Professional Metadata
+    val formulation: Formulation = Formulation.UNKNOWN,
+    val chemistryBase: ChemistryBase = ChemistryBase.UNKNOWN,
+    val finish: Finish = Finish.UNKNOWN,
+    val coverage: Coverage = Coverage.NOT_APPLICABLE,
+    
     val colorHex: String? = null,
     val shadeName: String? = null,
     val imageUrl: String? = null,
