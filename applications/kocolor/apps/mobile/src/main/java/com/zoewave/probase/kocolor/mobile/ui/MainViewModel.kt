@@ -87,6 +87,10 @@ class MainViewModel @Inject constructor(
         sessionRepository.setCapturedItemUri(uri)
     }
 
+    fun onColorCaptured(uri: String) {
+        sessionRepository.setCapturedItemUri(uri) // Reusing for simplicity or can have dedicated field
+    }
+
     fun onCodeScanned(code: String) {
         sessionRepository.setLastScannedCode(code)
     }

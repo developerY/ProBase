@@ -42,9 +42,7 @@ import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEditUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeLandingScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeViewModel
-import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailUiRoute
-import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
@@ -67,6 +65,7 @@ fun koColorNavEntryProvider(
     onShoesCaptured: (String) -> Unit,
     onClothesCaptured: (String) -> Unit,
     onInventoryItemCaptured: (String) -> Unit,
+    onColorCaptured: (String) -> Unit,
     onCodeScanned: (String) -> Unit
 ): NavEntry<KoColorRoute> {
     return when (route) {
@@ -74,6 +73,15 @@ fun koColorNavEntryProvider(
             val viewModel: HomeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             HomeUiRoute(
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.ColorSearch -> NavEntry(route) {
+            val viewModel: com.zoewave.probase.kocolor.features.color.ui.ColorSearchViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            com.zoewave.probase.kocolor.features.color.ui.ColorSearchScreen(
                 uiState = state,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
@@ -369,6 +377,7 @@ fun koColorNavEntryProvider(
                             "shoes" -> onShoesCaptured(uri)
                             "clothes" -> onClothesCaptured(uri)
                             "inventory_item" -> onInventoryItemCaptured(uri)
+                            "color_scan" -> onColorCaptured(uri)
                         }
                         onBack()
                     } else {

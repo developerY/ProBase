@@ -59,4 +59,79 @@ object ColorScienceUtils {
     }
 
     fun Int.toHexString(): String = String.format("#%06X", 0xFFFFFF and this)
+
+    /**
+     * Calculates the distance between two colors in RGB space.
+     */
+    fun calculateDistance(hex1: String, hex2: String): Double {
+        val rgb1 = hexToRgb(hex1) ?: return Double.MAX_VALUE
+        val rgb2 = hexToRgb(hex2) ?: return Double.MAX_VALUE
+        
+        return kotlin.math.sqrt(
+            Math.pow((rgb1.first - rgb2.first).toDouble(), 2.0) +
+            Math.pow((rgb1.second - rgb2.second).toDouble(), 2.0) +
+            Math.pow((rgb1.third - rgb2.third).toDouble(), 2.0)
+        )
+    }
+
+    /**
+     * Returns the complementary color of a given hex color.
+     */
+    fun getComplementary(hex: String): String {
+        val rgb = hexToRgb(hex) ?: return "#FFFFFF"
+        val compR = 255 - rgb.first
+        val compG = 255 - rgb.second
+        val compB = 255 - rgb.third
+        return String.format("#%02X%02X%02X", compR, compG, compB)
+    }
+
+    /**
+     * Returns a list of hex colors representing the analogous harmony.
+     */
+    fun getAnalogous(hex: String): List<String> {
+        val hsv = FloatArray(3)
+        android.graphics.Color.colorToHSV(android.graphics.Color.parseColor(hex), hsv)
+        
+        val h1 = (hsv[0] + 30) % 360
+        val h2 = (hsv[0] + 330) % 360
+        
+        return listOf(
+            hsvToHex(h1, hsv[1], hsv[2]),
+            hsvToHex(h2, hsv[1], hsv[2])
+        )
+    }
+
+    /**
+     * Returns a list of hex colors representing the triadic harmony.
+     */
+    fun getTriadic(hex: String): List<String> {
+        val hsv = FloatArray(3)
+        android.graphics.Color.colorToHSV(android.graphics.Color.parseColor(hex), hsv)
+        
+        val h1 = (hsv[0] + 120) % 360
+        val h2 = (hsv[0] + 240) % 360
+        
+        return listOf(
+            hsvToHex(h1, hsv[1], hsv[2]),
+            hsvToHex(h2, hsv[1], hsv[2])
+        )
+    }
+
+    /**
+     * Returns a list of hex colors representing the monochromatic harmony.
+     */
+    fun getMonochromatic(hex: String): List<String> {
+        val hsv = FloatArray(3)
+        android.graphics.Color.colorToHSV(android.graphics.Color.parseColor(hex), hsv)
+        
+        return listOf(
+            hsvToHex(hsv[0], (hsv[1] * 0.7f).coerceIn(0f, 1f), (hsv[2] * 0.7f).coerceIn(0f, 1f)),
+            hsvToHex(hsv[0], (hsv[1] * 0.3f).coerceIn(0f, 1f), (hsv[2] * 1.2f).coerceIn(0f, 1f))
+        )
+    }
+
+    private fun hsvToHex(h: Float, s: Float, v: Float): String {
+        val argb = android.graphics.Color.HSVToColor(floatArrayOf(h, s, v))
+        return String.format("#%06X", 0xFFFFFF and argb)
+    }
 }
