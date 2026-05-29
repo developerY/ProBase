@@ -165,6 +165,15 @@ fun koColorNavEntryProvider(
                 navTo = onNavigateTo
             )
         }
+        is KoColorRoute.InventoryManagement -> NavEntry(route) {
+            val viewModel: CosmeticsViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            com.zoewave.probase.kocolor.features.cosmetics.ui.InventoryManagementScreen(
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo
+            )
+        }
         is KoColorRoute.Cosmetics -> NavEntry(route) {
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
