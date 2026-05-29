@@ -192,39 +192,53 @@ private fun AtelierCategoryCard(
     val totalValue = metadata?.totalValue ?: 0.0
     val leadingBrand = metadata?.leadingBrand
     val averageFill = metadata?.averageFillLevel ?: 1.0
+    val description = metadata?.description ?: when {
+        name.contains("Skincare", ignoreCase = true) -> "Everything applied before pigment."
+        name.contains("Complexion", ignoreCase = true) -> "Products that unify the skin tone."
+        name.contains("Dimension", ignoreCase = true) -> "Products that bring life, shadow, and light."
+        name.contains("Eyes", ignoreCase = true) -> "All definition for the upper face."
+        name.contains("Lips", ignoreCase = true) -> "All color and care for the mouth."
+        else -> "Professional curated category."
+    }
     
     val currencyFormatter = java.text.NumberFormat.getCurrencyInstance(java.util.Locale.US)
 
     Card(
         onClick = { navTo(KoColorRoute.CosmeticCategoryCover(name)) },
-        modifier = modifier.height(IntrinsicSize.Min),
-        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.height(180.dp), // Increased height for background aesthetic
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = baseColor),
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 1. Professional Imagery
+        Box(modifier = Modifier.fillMaxSize()) {
+            // 1. Background Imagery (The "Aesthetic")
+            AsyncImage(
+                model = metadata?.representativeImageUrl ?: placeholderUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize().alpha(0.4f), // Subdued background
+                contentScale = ContentScale.Crop
+            )
+            
+            // 2. Readability Scrim
             Box(
                 modifier = Modifier
-                    .size(100.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White.copy(alpha = 0.5f))
+                    .fillMaxSize()
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(baseColor, baseColor.copy(alpha = 0.6f), Color.Transparent),
+                            startX = 0f,
+                            endX = 1000f
+                        )
+                    )
+            )
+
+            // 3. Data Content
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                AsyncImage(
-                    model = metadata?.representativeImageUrl ?: placeholderUrl,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            Spacer(Modifier.width(24.dp))
-
-            // 2. Data Content
-            Column(modifier = Modifier.weight(1f)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -234,7 +248,7 @@ private fun AtelierCategoryCard(
                         val displayName = if (name.contains("&")) name.substringBefore("&").trim() else name
                         Text(
                             text = displayName,
-                            style = MaterialTheme.typography.displaySmall.copy(fontSize = 28.sp),
+                            style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Serif,
                             color = Color.Black
@@ -243,7 +257,7 @@ private fun AtelierCategoryCard(
                             text = "$count Items",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium,
-                            modifier = Modifier.alpha(0.6f)
+                            modifier = Modifier.alpha(0.8f)
                         )
                     }
 
@@ -256,22 +270,20 @@ private fun AtelierCategoryCard(
                     )
                 }
 
-                Spacer(Modifier.height(12.dp))
-
                 // Stock Status Bar
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "Stock Status", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.alpha(0.6f))
+                        Text(text = "Stock Status", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.alpha(0.8f))
                         Text(text = "${(averageFill * 100).toInt()}%", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFF6B705C))
                     }
                     
-                    val statusColor = Color(0xFF6B705C) // Using the muted olive from the image for consistency
+                    val statusColor = Color(0xFF6B705C) 
 
                     LinearProgressIndicator(
                         progress = { averageFill.toFloat() },
-                        modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
+                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
                         color = statusColor,
-                        trackColor = statusColor.copy(alpha = 0.1f),
+                        trackColor = Color.White.copy(alpha = 0.3f),
                         strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                     )
                     
@@ -279,8 +291,8 @@ private fun AtelierCategoryCard(
                         Text(
                             text = "Leading Brand: $leadingBrand",
                             style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(top = 4.dp).alpha(0.6f)
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.alpha(0.8f)
                         )
                     }
                 }
