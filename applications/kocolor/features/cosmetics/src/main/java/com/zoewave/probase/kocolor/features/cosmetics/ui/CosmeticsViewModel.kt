@@ -29,7 +29,9 @@ data class CategoryMetadata(
     val itemCount: Int = 0,
     val totalValue: Double = 0.0,
     val representativeImageUrl: String? = null,
-    val representativeColorHex: String? = null
+    val representativeColorHex: String? = null,
+    val leadingBrand: String? = null,
+    val averageFillLevel: Double? = null
 )
 
 data class CosmeticsUiState(
@@ -139,11 +141,18 @@ class CosmeticsViewModel @Inject constructor(
         
         val categoryMetadata = models.groupBy { it.macroCategory.displayName }.mapValues { (_, items) ->
             val representativeItem = items.filter { it.imageUrl != null }.maxByOrNull { it.usageCount } ?: items.maxByOrNull { it.usageCount }
+            val brands = items.map { it.brand }.groupBy { it }.mapValues { it.value.size }
+            val leadingBrand = brands.maxByOrNull { it.value }?.key
+            val fillLevels = items.mapNotNull { it.fillLevel }
+            val averageFill = if (fillLevels.isEmpty()) null else fillLevels.average()
+
             CategoryMetadata(
                 itemCount = items.size,
                 totalValue = items.sumOf { it.price ?: 0.0 },
                 representativeImageUrl = representativeItem?.imageUrl,
-                representativeColorHex = representativeItem?.colorHex
+                representativeColorHex = representativeItem?.colorHex,
+                leadingBrand = leadingBrand,
+                averageFillLevel = averageFill
             )
         }
         val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
