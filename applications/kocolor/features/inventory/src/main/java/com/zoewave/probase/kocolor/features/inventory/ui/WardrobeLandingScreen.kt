@@ -134,25 +134,17 @@ fun WardrobeLandingScreen(
                             "Accessories" to (Icons.Default.Watch to Color(0xFFF3EBFD))
                         )
                         
-                        sections.chunked(2).forEach { rowSections ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                rowSections.forEach { (name, props) ->
-                                    val (icon, color) = props
-                                    val metadata = uiState.categoriesMetadata.entries.find { it.key.equals(name, ignoreCase = true) }?.value
-                                    CategoryHeroCard(
-                                        uiState = Quadruple(name, icon, metadata, color),
-                                        onEvent = {},
-                                        navTo = navTo,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                                if (rowSections.size == 1) {
-                                    Spacer(Modifier.weight(1f))
-                                }
-                            }
+                        sections.forEach { (name, props) ->
+                            val (icon, color) = props
+                            val metadata = uiState.categoriesMetadata.entries.find { it.key.equals(name, ignoreCase = true) }?.value
+                            CategoryHeroCard(
+                                name = name,
+                                icon = icon,
+                                metadata = metadata,
+                                baseColor = color,
+                                navTo = navTo,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
                 }
@@ -244,97 +236,93 @@ data class Quadruple<out A, out B, out C, out D>(
 @Composable
 private fun CategoryHeroCardPreview() {
     MaterialTheme {
-        CategoryHeroCard(uiState = Quadruple("Tops", Icons.Default.Info, null, Color.Blue), onEvent = {}, navTo = {})
+        CategoryHeroCard(
+            name = "Tops",
+            icon = Icons.Default.Info,
+            metadata = null,
+            baseColor = Color.Blue,
+            navTo = {}
+        )
     }
 }
 
 @Composable
 private fun CategoryHeroCard(
-    uiState: Quadruple<String, ImageVector, CategoryMetadata?, Color>,
-    onEvent: (Unit) -> Unit,
+    name: String,
+    icon: ImageVector,
+    metadata: CategoryMetadata?,
+    baseColor: Color,
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val (name, icon, metadata, baseColor) = uiState
     val count = metadata?.itemCount ?: 0
     val totalValue = metadata?.totalValue ?: 0.0
-    val imageUrl = metadata?.representativeImageUrl
-    val itemColor = metadata?.representativeColorHex?.let { parseColor(it) }
+    val leadingBrand = metadata?.leadingBrand
+    val averageUsage = metadata?.averageUsage ?: 0.0
+    
+    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
 
     Card(
         onClick = { navTo(KoColorRoute.WardrobeCategoryCover(categoryName = name)) },
-        modifier = modifier.height(160.dp),
-        shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = baseColor.copy(alpha = 0.4f)),
-        border = BorderStroke(1.dp, baseColor.copy(alpha = 0.6f))
+        modifier = modifier.height(IntrinsicSize.Min),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = baseColor.copy(alpha = 0.6f)),
+        border = BorderStroke(1.dp, baseColor.copy(alpha = 0.8f))
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Background Image/Color
-            if (imageUrl != null) {
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize().alpha(0.2f),
-                    contentScale = ContentScale.Crop
-                )
-            } else if (itemColor != null) {
-                Box(modifier = Modifier.fillMaxSize().background(itemColor).alpha(0.1f))
-            }
-
-            // Ambient Icon Watermark
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .offset(x = 24.dp, y = 24.dp)
-                    .size(140.dp)
-                    .alpha(0.05f),
-                tint = Color.Black
-            )
-
-            Column(
-                modifier = Modifier.padding(24.dp).fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
+        Column(modifier = Modifier.padding(24.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(
-                        color = Color.White.copy(alpha = 0.8f),
+                        color = Color.White.copy(alpha = 0.5f),
                         shape = CircleShape,
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.size(48.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Icon(icon, null, modifier = Modifier.size(20.dp), tint = Color.Black)
+                            Icon(icon, null, modifier = Modifier.size(24.dp), tint = Color.Black)
                         }
                     }
-
-                    if (totalValue > 0) {
-                        Text(
-                            text = "$${"%,.2f".format(totalValue)}",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                    Spacer(Modifier.width(16.dp))
+                    Column {
+                        Text(text = name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+                        Text(text = "$count Pieces", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, modifier = Modifier.alpha(0.7f))
                     }
                 }
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(text = currencyFormatter.format(totalValue), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+                    Text(text = "Total Investment", style = MaterialTheme.typography.labelSmall, modifier = Modifier.alpha(0.5f), fontWeight = FontWeight.Bold)
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+                    Text(text = "Average Utility", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    Text(text = "${averageUsage.toInt()} Wears", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+                }
                 
-                Column {
+                val maxWears = 50.0 // Normalizing against a high utility item
+                val progress = (averageUsage / maxWears).coerceIn(0.0, 1.0)
+                
+                LinearProgressIndicator(
+                    progress = { progress.toFloat() },
+                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = Color.White.copy(alpha = 0.2f),
+                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
+                
+                if (leadingBrand != null) {
                     Text(
-                        text = name,
-                        style = MaterialTheme.typography.headlineSmall,
+                        text = "Leading Brand: $leadingBrand",
+                        style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Serif
-                    )
-                    Text(
-                        text = "$count PIECES",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        modifier = Modifier.alpha(0.5f),
-                        letterSpacing = 1.sp
+                        modifier = Modifier.padding(top = 4.dp).alpha(0.6f)
                     )
                 }
             }

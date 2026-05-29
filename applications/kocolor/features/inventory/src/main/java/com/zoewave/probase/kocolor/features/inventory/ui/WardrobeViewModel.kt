@@ -17,7 +17,9 @@ data class CategoryMetadata(
     val itemCount: Int = 0,
     val totalValue: Double = 0.0,
     val representativeImageUrl: String? = null,
-    val representativeColorHex: String? = null
+    val representativeColorHex: String? = null,
+    val leadingBrand: String? = null,
+    val averageUsage: Double? = null
 )
 
 data class WardrobeUiState(
@@ -121,11 +123,18 @@ class WardrobeViewModel @Inject constructor(
         
         val categoryMetadata = models.groupBy { it.category.name }.mapValues { (_, items) ->
             val representativeItem = items.filter { it.imageUrl != null }.maxByOrNull { it.timestamp } ?: items.maxByOrNull { it.timestamp }
+            val brands = items.mapNotNull { it.brand }.groupBy { it }.mapValues { it.value.size }
+            val leadingBrand = brands.maxByOrNull { it.value }?.key
+            val usages = items.map { it.usageCount }
+            val averageUsage = if (usages.isEmpty()) null else usages.average()
+
             CategoryMetadata(
                 itemCount = items.size,
                 totalValue = items.sumOf { it.price ?: 0.0 },
                 representativeImageUrl = representativeItem?.imageUrl,
-                representativeColorHex = representativeItem?.colorHex
+                representativeColorHex = representativeItem?.colorHex,
+                leadingBrand = leadingBrand,
+                averageUsage = averageUsage
             )
         }
 
