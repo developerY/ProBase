@@ -1,6 +1,11 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,7 +16,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -71,6 +85,7 @@ fun CosmeticEditScreen(
 ) {
     val itemId = uiState.itemId
     val draft = uiState.draftItem
+    val atelierBrown = Color(0xFF8B5E3C)
     
     LaunchedEffect(itemId) {
         if (itemId != 0L) {
@@ -86,6 +101,39 @@ fun CosmeticEditScreen(
     var showCoverageMenu by remember { mutableStateOf(false) }
     
     var showColorPicker by remember { mutableStateOf(false) }
+    var showDatePickerTarget by remember { mutableStateOf<String?>(null) }
+
+    val expandedSections = remember { 
+        mutableStateMapOf<String, Boolean>().apply {
+            put("Category", true)
+            put("Facets", true)
+            put("Physical", true)
+            put("Economics", true)
+            put("Lifecycle", true)
+            put("Insights", true)
+        }
+    }
+
+    if (showDatePickerTarget != null) {
+        val initialDate = when(showDatePickerTarget) {
+            "OPENED" -> draft.openedDate
+            "EXPIRY" -> draft.expiryDate
+            else -> null
+        }
+        AtelierDatePicker(
+            initialDate = initialDate ?: System.currentTimeMillis(),
+            onDateSelected = { date ->
+                val updated = when(showDatePickerTarget) {
+                    "OPENED" -> draft.copy(openedDate = date, isOpened = true)
+                    "EXPIRY" -> draft.copy(expiryDate = date)
+                    else -> draft
+                }
+                onEvent(CosmeticsEvent.UpdateDraft(updated))
+                showDatePickerTarget = null
+            },
+            onDismiss = { showDatePickerTarget = null }
+        )
+    }
 
     if (showColorPicker) {
         val colorHex = draft.colorHex ?: ""
@@ -104,10 +152,18 @@ fun CosmeticEditScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Professional Edit", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
+                title = { 
+                    Text(
+                        "Professional Edit", 
+                        style = MaterialTheme.typography.titleLarge, 
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold,
+                        color = atelierBrown
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.Close, contentDescription = "Close")
                     }
                 },
                 actions = {
@@ -115,7 +171,7 @@ fun CosmeticEditScreen(
                         onEvent(CosmeticsEvent.UpdateItem(draft))
                         navTo(KoColorRoute.Back)
                     }) {
-                        Text("Save", fontWeight = FontWeight.Bold)
+                        Text("Save", fontWeight = FontWeight.Bold, color = atelierBrown)
                     }
                 }
             )
@@ -126,235 +182,353 @@ fun CosmeticEditScreen(
                 .padding(padding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+                .background(Color.White)
         ) {
-            // 1. Photo Section
-            Card(
+            // 1. Hero Image Selection
+            Surface(
                 modifier = Modifier
+                    .padding(24.dp)
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .aspectRatio(1.5f)
                     .clickable { navTo(KoColorRoute.Camera("inventory_item")) },
-                shape = RoundedCornerShape(24.dp)
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
+                color = Color(0xFFFBF8F5)
             ) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(contentAlignment = Alignment.Center) {
                     if (draft.imageUrl != null) {
                         AsyncImage(
                             model = draft.imageUrl,
                             contentDescription = "Product Image",
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Fit
                         )
                     } else {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
-                            Text("Product Photo", style = MaterialTheme.typography.labelLarge)
+                            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(40.dp), tint = atelierBrown.copy(alpha = 0.5f))
+                            Spacer(Modifier.height(8.dp))
+                            Text("Product Photo", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                         }
                     }
                 }
             }
 
-            // 2. Identity
-            OutlinedTextField(
-                value = draft.name,
-                onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(name = it))) },
-                label = { Text("Product Name") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
-            )
-
-            OutlinedTextField(
-                value = draft.brand,
-                onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(brand = it))) },
-                label = { Text("Brand") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
-            )
-
-            // 3. Taxonomy (Progressive Disclosure)
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("TAXONOMY", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                
-                // Macro Selection
-                ProfessionalDropdown(
-                    label = "Macro Category",
-                    value = draft.macroCategory.displayName,
-                    onClick = { showMacroMenu = true }
+            // 2. Core Identity
+            Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                AtelierTextField(
+                    value = draft.name,
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(name = it))) },
+                    label = "PRODUCT NAME",
+                    placeholder = "e.g. Luminous Silk Foundation"
                 )
-                
-                // Micro Selection (Disclosure)
-                ProfessionalDropdown(
-                    label = "Micro Category",
-                    value = draft.microCategory.displayName,
-                    onClick = { showMicroMenu = true }
+
+                AtelierTextField(
+                    value = draft.brand,
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(brand = it))) },
+                    label = "BRAND",
+                    placeholder = "e.g. Giorgio Armani"
+                )
+
+                AtelierTextField(
+                    value = draft.batchCode ?: "",
+                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
+                    label = "SKU / BATCH CODE",
+                    placeholder = "e.g. RF-092-LUM"
                 )
             }
 
-            // 4. Professional Facets
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("PROFESSIONAL FACETS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            // 3. Category & Facets
+            EditExpandableSection(
+                title = "Category & Taxonomy",
+                isExpanded = expandedSections["Category"] == true,
+                onToggle = { expandedSections["Category"] = it }
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     ProfessionalDropdown(
-                        label = "Formulation",
-                        value = draft.formulation.name.lowercase().replaceFirstChar { it.uppercase() },
-                        onClick = { showFormulationMenu = true },
-                        modifier = Modifier.weight(1f)
+                        label = "Macro Category",
+                        value = draft.macroCategory.displayName,
+                        onClick = { showMacroMenu = true }
                     )
                     ProfessionalDropdown(
-                        label = "Chemistry",
-                        value = draft.chemistryBase.name.lowercase().replaceFirstChar { it.uppercase() },
-                        onClick = { showChemistryMenu = true },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    ProfessionalDropdown(
-                        label = "Finish",
-                        value = draft.finish.name.lowercase().replaceFirstChar { it.uppercase() },
-                        onClick = { showFinishMenu = true },
-                        modifier = Modifier.weight(1f)
-                    )
-                    ProfessionalDropdown(
-                        label = "Coverage",
-                        value = draft.coverage.name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() },
-                        onClick = { showCoverageMenu = true },
-                        modifier = Modifier.weight(1f)
+                        label = "Micro Category",
+                        value = draft.microCategory.displayName,
+                        onClick = { showMicroMenu = true }
                     )
                 }
             }
 
-            // 5. Physical Properties
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(
-                    value = draft.shadeName ?: "",
-                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(shadeName = it))) },
-                    label = { Text("Shade Name") },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                
-                val colorHex = draft.colorHex ?: "#CCCCCC"
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .padding(top = 8.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(parseColor(colorHex))
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
-                        .clickable { showColorPicker = true }
-                )
+            EditExpandableSection(
+                title = "Professional Facets",
+                isExpanded = expandedSections["Facets"] == true,
+                onToggle = { expandedSections["Facets"] = it }
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        ProfessionalDropdown(label = "Formulation", value = draft.formulation.name.lowercase().capitalize(), onClick = { showFormulationMenu = true }, modifier = Modifier.weight(1f))
+                        ProfessionalDropdown(label = "Chemistry", value = draft.chemistryBase.name.lowercase().capitalize(), onClick = { showChemistryMenu = true }, modifier = Modifier.weight(1f))
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        ProfessionalDropdown(label = "Finish", value = draft.finish.name.lowercase().capitalize(), onClick = { showFinishMenu = true }, modifier = Modifier.weight(1f))
+                        ProfessionalDropdown(label = "Coverage", value = draft.coverage.name.lowercase().replace("_", " ").capitalize(), onClick = { showCoverageMenu = true }, modifier = Modifier.weight(1f))
+                    }
+                }
             }
 
-            // 6. Economics & Usage
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                OutlinedTextField(
-                    value = draft.price?.toString() ?: "",
-                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(price = it.toDoubleOrNull()))) },
-                    label = { Text("Price ($)") },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                OutlinedTextField(
-                    value = draft.volume ?: "",
-                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(volume = it))) },
-                    label = { Text("Volume") },
-                    placeholder = { Text("e.g. 30ml") },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp)
-                )
+            // 4. Physical & Color
+            EditExpandableSection(
+                title = "Physical & Color",
+                isExpanded = expandedSections["Physical"] == true,
+                onToggle = { expandedSections["Physical"] = it }
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    AtelierTextField(
+                        value = draft.shadeName ?: "",
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(shadeName = it))) },
+                        label = "SHADE NAME",
+                        placeholder = "e.g. 4.5 Medium Warm"
+                    )
+                    
+                    Column {
+                        Text("PRODUCT COLOR", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(8.dp))
+                        Surface(
+                            onClick = { showColorPicker = true },
+                            shape = RoundedCornerShape(8.dp),
+                            color = draft.colorHex?.let { parseColor(it) } ?: Color.White,
+                            border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                            modifier = Modifier.size(56.dp)
+                        ) { }
+                    }
+                }
             }
-            
-            OutlinedTextField(
-                value = draft.amountPerUse?.toString() ?: "",
-                onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(amountPerUse = it.toDoubleOrNull()))) },
-                label = { Text("Amount Per Use") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                supportingText = { Text("Rec: %.2f".format(draft.microCategory.typicalAmountPerUse)) }
-            )
 
-            // 7. Notes
-            OutlinedTextField(
-                value = draft.notes ?: "",
-                onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(notes = it))) },
-                label = { Text("Artist Notes") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                minLines = 3
-            )
+            // 5. Inventory & Economics
+            EditExpandableSection(
+                title = "Inventory & Economics",
+                isExpanded = expandedSections["Economics"] == true,
+                onToggle = { expandedSections["Economics"] = it }
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        AtelierTextField(
+                            value = draft.price?.toString() ?: "",
+                            onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(price = it.toDoubleOrNull()))) },
+                            label = "UNIT PRICE ($)",
+                            modifier = Modifier.weight(1f)
+                        )
+                        AtelierTextField(
+                            value = draft.volume ?: "",
+                            onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(volume = it))) },
+                            label = "TOTAL VOLUME",
+                            placeholder = "30ml",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        AtelierTextField(
+                            value = draft.amountRemaining?.toString() ?: "",
+                            onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(amountRemaining = it.toDoubleOrNull()))) },
+                            label = "REMAINING (ml/g)",
+                            modifier = Modifier.weight(1f)
+                        )
+                        AtelierTextField(
+                            value = draft.amountPerUse?.toString() ?: "",
+                            onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(amountPerUse = it.toDoubleOrNull()))) },
+                            label = "AMOUNT PER USE",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            // 6. Lifecycle Dates
+            EditExpandableSection(
+                title = "Product Lifecycle",
+                isExpanded = expandedSections["Lifecycle"] == true,
+                onToggle = { expandedSections["Lifecycle"] = it }
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    DatePickerButton(
+                        label = "DATE OPENED",
+                        timestamp = draft.openedDate,
+                        onClick = { showDatePickerTarget = "OPENED" }
+                    )
+                    DatePickerButton(
+                        label = "HARD EXPIRY DATE",
+                        timestamp = draft.expiryDate,
+                        onClick = { showDatePickerTarget = "EXPIRY" }
+                    )
+                    
+                    AtelierTextField(
+                        value = draft.paoMonths?.toString() ?: "",
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(paoMonths = it.toIntOrNull()))) },
+                        label = "PAO (MONTHS AFTER OPENING)",
+                        placeholder = "e.g. 12"
+                    )
+                }
+            }
 
-            // --- Dropdown Menus ---
+            // 7. Insights
+            EditExpandableSection(
+                title = "Artist Insights",
+                isExpanded = expandedSections["Insights"] == true,
+                onToggle = { expandedSections["Insights"] = it }
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    AtelierTextField(
+                        value = draft.instructions ?: "",
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(instructions = it))) },
+                        label = "APPLICATION INSTRUCTIONS",
+                        placeholder = "How to apply for best results...",
+                        minLines = 3
+                    )
+                    AtelierTextField(
+                        value = draft.notes ?: "",
+                        onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(notes = it))) },
+                        label = "PERSONAL ARTIST NOTES",
+                        placeholder = "Shade matches, skin reactions, etc.",
+                        minLines = 3
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(100.dp))
+
+            // --- Menus ---
             
             DropdownMenu(expanded = showMacroMenu, onDismissRequest = { showMacroMenu = false }) {
                 MacroCategory.entries.forEach { cat ->
-                    DropdownMenuItem(
-                        text = { Text(cat.displayName) },
-                        onClick = {
-                            onEvent(CosmeticsEvent.UpdateDraft(draft.copy(
-                                macroCategory = cat,
-                                microCategory = MicroCategory.entries.first { it.macro == cat }
-                            )))
-                            showMacroMenu = false
-                        }
-                    )
+                    DropdownMenuItem(text = { Text(cat.displayName) }, onClick = {
+                        onEvent(CosmeticsEvent.UpdateDraft(draft.copy(
+                            macroCategory = cat,
+                            microCategory = MicroCategory.entries.first { it.macro == cat }
+                        )))
+                        showMacroMenu = false
+                    })
                 }
             }
             
             DropdownMenu(expanded = showMicroMenu, onDismissRequest = { showMicroMenu = false }) {
                 MicroCategory.entries.filter { it.macro == draft.macroCategory }.forEach { cat ->
-                    DropdownMenuItem(
-                        text = { Text(cat.displayName) },
-                        onClick = {
-                            onEvent(CosmeticsEvent.UpdateDraft(draft.copy(
-                                microCategory = cat,
-                                amountPerUse = cat.typicalAmountPerUse
-                            )))
-                            showMicroMenu = false
-                        }
-                    )
-                }
-            }
-            
-            DropdownMenu(expanded = showFormulationMenu, onDismissRequest = { showFormulationMenu = false }) {
-                Formulation.entries.forEach { f ->
-                    DropdownMenuItem(text = { Text(f.name.lowercase().replaceFirstChar { it.uppercase() }) }, onClick = {
-                        onEvent(CosmeticsEvent.UpdateDraft(draft.copy(formulation = f)))
-                        showFormulationMenu = false
+                    DropdownMenuItem(text = { Text(cat.displayName) }, onClick = {
+                        onEvent(CosmeticsEvent.UpdateDraft(draft.copy(microCategory = cat, amountPerUse = cat.typicalAmountPerUse)))
+                        showMicroMenu = false
                     })
                 }
             }
-            
-            DropdownMenu(expanded = showChemistryMenu, onDismissRequest = { showChemistryMenu = false }) {
-                ChemistryBase.entries.forEach { c ->
-                    DropdownMenuItem(text = { Text(c.name.lowercase().replaceFirstChar { it.uppercase() }) }, onClick = {
-                        onEvent(CosmeticsEvent.UpdateDraft(draft.copy(chemistryBase = c)))
-                        showChemistryMenu = false
-                    })
-                }
-            }
-            
-            DropdownMenu(expanded = showFinishMenu, onDismissRequest = { showFinishMenu = false }) {
-                Finish.entries.forEach { f ->
-                    DropdownMenuItem(text = { Text(f.name.lowercase().replaceFirstChar { it.uppercase() }) }, onClick = {
-                        onEvent(CosmeticsEvent.UpdateDraft(draft.copy(finish = f)))
-                        showFinishMenu = false
-                    })
-                }
-            }
-            
-            DropdownMenu(expanded = showCoverageMenu, onDismissRequest = { showCoverageMenu = false }) {
-                Coverage.entries.forEach { c ->
-                    DropdownMenuItem(text = { Text(c.name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }) }, onClick = {
-                        onEvent(CosmeticsEvent.UpdateDraft(draft.copy(coverage = c)))
-                        showCoverageMenu = false
-                    })
-                }
+
+            FormulationMenu(expanded = showFormulationMenu, onDismiss = { showFormulationMenu = false }, onSelect = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(formulation = it))) })
+            ChemistryMenu(expanded = showChemistryMenu, onDismiss = { showChemistryMenu = false }, onSelect = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(chemistryBase = it))) })
+            FinishMenu(expanded = showFinishMenu, onDismiss = { showFinishMenu = false }, onSelect = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(finish = it))) })
+            CoverageMenu(expanded = showCoverageMenu, onDismiss = { showCoverageMenu = false }, onSelect = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(coverage = it))) })
+        }
+    }
+}
+
+@Composable
+private fun EditExpandableSection(
+    title: String,
+    isExpanded: Boolean,
+    onToggle: (Boolean) -> Unit,
+    content: @Composable () -> Unit
+) {
+    Column {
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp), color = Color(0xFFF0F0F0))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onToggle(!isExpanded) }
+                .padding(horizontal = 24.dp, vertical = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = title.uppercase(), style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.sp), fontWeight = FontWeight.Black)
+            Icon(imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp))
+        }
+        AnimatedVisibility(visible = isExpanded, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
+            Box(modifier = Modifier.padding(bottom = 24.dp)) {
+                content()
             }
         }
+    }
+}
+
+@Composable
+private fun AtelierTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    placeholder: String = "",
+    minLines: Int = 1
+) {
+    Column(modifier = modifier) {
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text(placeholder, fontSize = 14.sp, color = Color.LightGray) },
+            shape = RoundedCornerShape(8.dp),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedIndicatorColor = Color(0xFFE0E0E0),
+                unfocusedIndicatorColor = Color(0xFFF0F0F0)
+            ),
+            minLines = minLines
+        )
+    }
+}
+
+@Composable
+private fun DatePickerButton(
+    label: String,
+    timestamp: Long?,
+    onClick: () -> Unit
+) {
+    val dateText = timestamp?.let { 
+        java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(it))
+    } ?: "Not Set"
+    
+    Column {
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        Surface(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
+            color = Color.White
+        ) {
+            Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(dateText, style = MaterialTheme.typography.bodyLarge)
+                Icon(Icons.Default.CalendarMonth, null, tint = Color.Gray)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AtelierDatePicker(
+    initialDate: Long,
+    onDateSelected: (Long) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val state = rememberDatePickerState(initialSelectedDateMillis = initialDate)
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = { state.selectedDateMillis?.let { onDateSelected(it) } }) { Text("OK") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    ) {
+        DatePicker(state = state)
     }
 }
 
@@ -362,25 +536,45 @@ fun CosmeticEditScreen(
 private fun ProfessionalDropdown(
     label: String,
     value: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     Column(modifier = modifier) {
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
         Surface(
             onClick = onClick,
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-            shape = RoundedCornerShape(12.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
+            color = Color.White
         ) {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = value, style = MaterialTheme.typography.bodyLarge)
-                Icon(Icons.Default.ArrowDropDown, null)
+            Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(value, style = MaterialTheme.typography.bodyLarge)
+                Icon(Icons.Default.ArrowDropDown, null, tint = Color.Gray)
             }
         }
     }
 }
+
+@Composable private fun FormulationMenu(expanded: Boolean, onDismiss: () -> Unit, onSelect: (Formulation) -> Unit) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        Formulation.entries.forEach { f -> DropdownMenuItem(text = { Text(f.name.lowercase().capitalize()) }, onClick = { onSelect(f); onDismiss() }) }
+    }
+}
+@Composable private fun ChemistryMenu(expanded: Boolean, onDismiss: () -> Unit, onSelect: (ChemistryBase) -> Unit) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        ChemistryBase.entries.forEach { c -> DropdownMenuItem(text = { Text(c.name.lowercase().capitalize()) }, onClick = { onSelect(c); onDismiss() }) }
+    }
+}
+@Composable private fun FinishMenu(expanded: Boolean, onDismiss: () -> Unit, onSelect: (Finish) -> Unit) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        Finish.entries.forEach { f -> DropdownMenuItem(text = { Text(f.name.lowercase().capitalize()) }, onClick = { onSelect(f); onDismiss() }) }
+    }
+}
+@Composable private fun CoverageMenu(expanded: Boolean, onDismiss: () -> Unit, onSelect: (Coverage) -> Unit) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        Coverage.entries.forEach { c -> DropdownMenuItem(text = { Text(c.name.lowercase().replace("_", " ").capitalize()) }, onClick = { onSelect(c); onDismiss() }) }
+    }
+}
+
+private fun String.capitalize() = this.replaceFirstChar { it.uppercase() }
