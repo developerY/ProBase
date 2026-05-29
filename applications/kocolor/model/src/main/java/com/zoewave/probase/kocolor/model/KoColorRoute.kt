@@ -4,6 +4,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Insights
+import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
@@ -36,6 +38,9 @@ sealed class KoColorRoute {
 
     @Serializable
     data class RoutineEditor(val routineId: Long, val stepId: String? = null) : KoColorRoute()
+
+    @Serializable
+    data object InventoryManagement : KoColorRoute()
 
     @Serializable
     data class Cosmetics(val filter: String? = null) : KoColorRoute()
@@ -109,6 +114,8 @@ sealed class KoColorRoute {
     val icon: ImageVector?
         get() = when (this) {
             Home -> Icons.Default.Home
+            InventoryManagement -> Icons.Default.Inventory
+            CosmeticAnalytics -> Icons.Default.Insights
             Color -> Icons.Default.ColorLens
             Routines -> Icons.Default.Face
             Settings -> Icons.Default.Settings
@@ -118,6 +125,8 @@ sealed class KoColorRoute {
     val label: String?
         get() = when (this) {
             Home -> "Main"
+            InventoryManagement -> "Inventory"
+            CosmeticAnalytics -> "Analytics"
             Color -> "Color"
             Routines -> "Routines"
             Settings -> "Settings"
@@ -127,6 +136,7 @@ sealed class KoColorRoute {
 
 val topLevelRoutes = listOf(
     KoColorRoute.Home,
-    KoColorRoute.Color,
+    KoColorRoute.InventoryManagement,
+    KoColorRoute.CosmeticAnalytics,
     KoColorRoute.Settings
 )
