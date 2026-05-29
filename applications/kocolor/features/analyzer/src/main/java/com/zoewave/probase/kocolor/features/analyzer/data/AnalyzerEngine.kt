@@ -4,11 +4,7 @@ import android.graphics.Bitmap
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
-import com.zoewave.probase.kocolor.model.FashionAdvice
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.CosmeticCategory
-import com.zoewave.probase.kocolor.model.SeasonalType
-import com.zoewave.probase.kocolor.model.Undertone
+import com.zoewave.probase.kocolor.model.*
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -127,14 +123,14 @@ class AnalyzerEngine @Inject constructor() {
             text("""
                 Identify this cosmetic product from the image. 
                 Extract the product name, brand, shade name (if visible), and the most prominent color (as a HEX code).
-                Also, categorize the product into one of the following categories:
-                ${CosmeticCategory.entries.filter { it != CosmeticCategory.AI_PENDING }.joinToString(", ") { it.name }}
+                Also, categorize the product into one of the following micro-categories:
+                ${MicroCategory.entries.filter { it != MicroCategory.AI_PENDING }.joinToString(", ") { it.name }}
                 
                 Respond ONLY with a valid JSON object matching this exact schema:
                 {
                   "name": "string",
                   "brand": "string",
-                  "category": "string (one of the enum values provided)",
+                  "microCategory": "string (one of the enum values provided)",
                   "shadeName": "string",
                   "colorHex": "#HEX",
                   "notes": "string (brief description of product features)"
@@ -149,10 +145,13 @@ class AnalyzerEngine @Inject constructor() {
             val finalJson = "{$cleanedJson}"
             
             val result = json.decodeFromString<CosmeticItemJson>(finalJson)
+            val micro = try { MicroCategory.valueOf(result.microCategory) } catch (e: Exception) { MicroCategory.OTHER }
+            
             CosmeticItem(
                 name = result.name,
                 brand = result.brand,
-                category = CosmeticCategory.valueOf(result.category),
+                macroCategory = micro.macro,
+                microCategory = micro,
                 colorHex = result.colorHex,
                 shadeName = result.shadeName,
                 notes = result.notes
@@ -167,7 +166,7 @@ class AnalyzerEngine @Inject constructor() {
 private data class CosmeticItemJson(
     val name: String,
     val brand: String,
-    val category: String,
+    val microCategory: String,
     val shadeName: String? = null,
     val colorHex: String? = null,
     val notes: String? = null
