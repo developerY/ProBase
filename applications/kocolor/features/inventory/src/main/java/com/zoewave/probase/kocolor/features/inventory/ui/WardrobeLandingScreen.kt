@@ -23,12 +23,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Checkroom
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -40,7 +40,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -98,7 +103,6 @@ fun WardrobeLandingScreen(
                 actions = {
                     IconButton(onClick = { navTo(KoColorRoute.Wardrobe) }) { Icon(Icons.Default.Inventory2, contentDescription = "Inventory") }
                     IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { Icon(Icons.Default.Search, contentDescription = "Search") }
-                    IconButton(onClick = { navTo(KoColorRoute.WardrobeAnalytics) }) { Icon(Icons.Default.Insights, contentDescription = "Analytics") }
                 }
             )
         }
@@ -132,26 +136,65 @@ fun WardrobeLandingScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     SummaryStatCard(
-                        uiState = Triple("TOTAL PIECES", uiState.totalItems.toString(), Icons.Default.Checkroom),
-                        onEvent = {},
-                        navTo = {},
-                        modifier = Modifier.weight(1f)
+                        label = "TOTAL PIECES",
+                        value = uiState.totalItems.toString(),
+                        icon = Icons.Default.Checkroom,
+                        modifier = Modifier.weight(1f),
+                        onClick = { navTo(KoColorRoute.WardrobeAnalytics) }
                     )
                     
                     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
                     SummaryStatCard(
-                        uiState = Triple("TOTAL VALUE", currencyFormatter.format(uiState.totalInvestment), Icons.Default.MonetizationOn),
-                        onEvent = {},
-                        navTo = {},
-                        modifier = Modifier.weight(1f)
+                        label = "TOTAL VALUE",
+                        value = currencyFormatter.format(uiState.totalInvestment),
+                        icon = Icons.Default.MonetizationOn,
+                        modifier = Modifier.weight(1f),
+                        onClick = { navTo(KoColorRoute.Wardrobe) }
                     )
                 }
             }
 
             // 3. Verticals Hero Cards
             item {
+                var showTaxonomyInfo by remember { mutableStateOf(false) }
+                if (showTaxonomyInfo) {
+                    WardrobeTaxonomyDialog(onDismiss = { showTaxonomyInfo = false })
+                }
+
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                    Text("VERTICALS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "VERTICALS",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+                        
+                        Surface(
+                            onClick = { showTaxonomyInfo = true },
+                            shape = CircleShape,
+                            color = Color.White,
+                            border = BorderStroke(1.dp, Color(0xFFD4AF37)),
+                            shadowElevation = 4.dp,
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = "i",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontFamily = FontFamily.Serif,
+                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = Color(0xFF2C2420)
+                                )
+                            }
+                        }
+                    }
                     
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         val sections = listOf(
@@ -212,42 +255,181 @@ fun WardrobeLandingScreen(
     }
 }
 
-@Preview(showBackground = true)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SummaryStatCardPreview() {
-    MaterialTheme {
-        SummaryStatCard(uiState = Triple("Label", "Value", Icons.Default.Info), onEvent = {}, navTo = {})
+private fun SummaryStatCard(
+    label: String,
+    value: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val isValue = label.contains("VALUE")
+    val charcoal = Color(0xFF2C2420)
+    
+    val valueBrush = if (isValue) {
+        Brush.linearGradient(listOf(Color(0xFF1B5E20), Color(0xFF4CAF50), Color(0xFF1B5E20)))
+    } else {
+        null
+    }
+
+    val actionBg = if (isValue) {
+        Brush.linearGradient(listOf(Color(0xFF003300), Color(0xFF006600), Color(0xFF003300)))
+    } else {
+        Brush.linearGradient(listOf(
+            Color(0xFFA0C4FF), Color(0xFFBDB2FF), Color(0xFFFFADAD), 
+            Color(0xFFFFD6A5), Color(0xFFFDFFB6), Color(0xFFCAFFBF)
+        ))
+    }
+    
+    val actionText = if (isValue) "VIEW INVENTORY" else "VIEW INTELLIGENCE"
+    val actionContentColor = if (isValue) Color.White else charcoal.copy(alpha = 0.8f)
+
+    Card(
+        modifier = modifier.aspectRatio(0.85f),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFBFBFB)),
+        border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
+        onClick = onClick,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = charcoal.copy(alpha = 0.4f)
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                if (valueBrush != null) {
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontSize = isValue.let { if (value.length > 6) 38.sp else 64.sp }, // Handle large currency values
+                            fontFamily = FontFamily.Serif,
+                            brush = valueBrush
+                        ),
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                } else {
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontSize = 64.sp,
+                            fontFamily = FontFamily.Serif
+                        ),
+                        fontWeight = FontWeight.Bold,
+                        color = charcoal
+                    )
+                }
+                
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        letterSpacing = 2.sp,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 10.sp
+                    ),
+                    color = charcoal.copy(alpha = 0.5f)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(actionBg)
+                    .padding(12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    color = Color.Transparent,
+                    border = BorderStroke(1.dp, actionContentColor.copy(alpha = 0.3f)),
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = actionText,
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                            fontWeight = FontWeight.Black,
+                            color = actionContentColor,
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(10.dp),
+                            tint = actionContentColor
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun SummaryStatCard(
-    uiState: Triple<String, String, ImageVector>,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val (label, value, icon) = uiState
-    val color = if (label.contains("VALUE")) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
-    Surface(
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Surface(
-                color = color.copy(alpha = 0.1f),
-                shape = CircleShape,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, null, modifier = Modifier.size(20.dp), tint = color)
+fun WardrobeTaxonomyDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Wardrobe Architecture", style = MaterialTheme.typography.headlineMedium, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+        text = {
+            LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                item {
+                    TaxonomySection(
+                        level = "Level 1",
+                        title = "Archive Verticals",
+                        description = "Body-zone mapping for intuitive archival retrieval.",
+                        items = listOf("Tops" to "Blazers, Shirts, Knitwear.", "Bottoms" to "Trousers, Skirts, Denim.", "Shoes" to "Heels, Flats, Sneakers.", "Accessories" to "Bags, Belts, Jewelry.")
+                    )
                 }
             }
-            Spacer(Modifier.height(16.dp))
-            Text(text = value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
-            Text(text = label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Understand", fontWeight = FontWeight.Bold) } },
+        shape = RoundedCornerShape(28.dp),
+        containerColor = Color(0xFFF9F6F0)
+    )
+}
+
+@Composable
+private fun TaxonomySection(level: String, title: String, description: String, items: List<Pair<String, String>>) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column {
+            Text(text = level.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+            Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(text = description, style = MaterialTheme.typography.bodySmall, modifier = Modifier.alpha(0.7f))
+        }
+        Surface(color = Color.White.copy(alpha = 0.5f), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items.forEach { (label, detail) ->
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(text = "•", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                        Column {
+                            Text(text = label, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                            Text(text = detail, style = MaterialTheme.typography.bodySmall, modifier = Modifier.alpha(0.7f))
+                        }
+                    }
+                }
+            }
         }
     }
 }

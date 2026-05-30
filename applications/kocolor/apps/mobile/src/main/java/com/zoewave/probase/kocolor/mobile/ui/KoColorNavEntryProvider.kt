@@ -178,7 +178,6 @@ fun koColorNavEntryProvider(
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             WardrobeAnalyticsScreen(
                 uiState = state,
-                onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
         }

@@ -11,7 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,7 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,9 +32,14 @@ import java.util.Locale
 @Composable
 fun WardrobeAnalyticsScreen(
     uiState: WardrobeUiState,
-    onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    var showTaxonomyInfo by remember { mutableStateOf(false) }
+
+    if (showTaxonomyInfo) {
+        WardrobeTaxonomyDialog(onDismiss = { showTaxonomyInfo = false })
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -43,6 +47,19 @@ fun WardrobeAnalyticsScreen(
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showTaxonomyInfo = true }) {
+                        Text(
+                            text = "i",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontFamily = FontFamily.Serif,
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             )
@@ -57,13 +74,13 @@ fun WardrobeAnalyticsScreen(
             item {
                 Column {
                     Text(
-                        text = "Your Style DNA.",
+                        text = "Style DNA.",
                         style = MaterialTheme.typography.displaySmall,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Quantitative analysis of your curated wardrobe.",
+                        text = "Quantitative analysis of the curated wardrobe.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
@@ -92,7 +109,7 @@ fun WardrobeAnalyticsScreen(
                 }
             }
 
-            // 3. Usage Leaderboard (The "Most Worn")
+            // 3. Usage Leaderboard
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text("MOST WORN PIECES", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
@@ -110,7 +127,7 @@ fun WardrobeAnalyticsScreen(
                 }
             }
 
-            // 4. Wardrobe Palette (Chromatic Distribution)
+            // 4. Wardrobe Palette
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text("WARDROBE PALETTE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
@@ -133,19 +150,14 @@ fun WardrobeAnalyticsScreen(
                                 )
                             }
                         }
-                        Text(
-                            text = "Your style is defined by ${colorDistribution.size} distinct tones.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
                 }
             }
 
-            // 5. Investment vs Utility (Best CPW)
+            // 5. Efficiency Analysis
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("STYLE EFFICIENCY (COST PER WEAR)", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Text("STYLE EFFICIENCY", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     val bestValue = uiState.items.filter { it.costPerUse != null }.sortedBy { it.costPerUse }.take(5)
                     
                     if (bestValue.isEmpty()) {
@@ -154,24 +166,6 @@ fun WardrobeAnalyticsScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             bestValue.forEach { item ->
                                 WardrobeEfficiencyRow(item = item, label = "PER WEAR")
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 6. Premium Assets (Highest Price)
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("PORTFOLIO ASSETS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                    val premium = uiState.items.filter { it.price != null }.sortedByDescending { it.price }.take(3)
-                    
-                    if (premium.isEmpty()) {
-                        Text("Add prices to see investment analytics.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    } else {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            premium.forEach { item ->
-                                WardrobeEfficiencyRow(item = item, label = "PRICE", usePrice = true)
                             }
                         }
                     }
@@ -290,7 +284,6 @@ private fun WardrobeAnalyticsScreenPreview() {
                     ClothingItem(id = 2, name = "Denim Jeans", category = com.zoewave.probase.kocolor.model.ClothingCategory.BOTTOMS, usageCount = 45, colorHex = "#000080", price = 120.0)
                 )
             ),
-            onEvent = {},
             navTo = {}
         )
     }
