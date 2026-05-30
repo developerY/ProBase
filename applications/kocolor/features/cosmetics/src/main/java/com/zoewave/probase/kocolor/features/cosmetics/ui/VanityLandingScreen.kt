@@ -90,8 +90,9 @@ fun VanityLandingScreen(
                 },
                 actions = {
                     IconButton(onClick = { showTaxonomyInfo = true }) { Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = "Information") }
+                    IconButton(onClick = { navTo(KoColorRoute.InventoryManagement) }) { Icon(Icons.Default.Inventory2, contentDescription = "Inventory") }
+                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { Icon(Icons.Default.Search, contentDescription = "Search") }
                     IconButton(onClick = { navTo(KoColorRoute.CosmeticAnalytics) }) { Icon(Icons.Default.Insights, contentDescription = "Analytics") }
-                    IconButton(onClick = { /* Search */ }) { Icon(Icons.Default.Search, null) }
                 }
             )
         },
