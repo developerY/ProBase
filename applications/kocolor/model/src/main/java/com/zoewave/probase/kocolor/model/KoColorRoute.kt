@@ -15,6 +15,9 @@ import kotlinx.serialization.Serializable
 sealed class KoColorRoute {
     @Serializable
     data object Home : KoColorRoute()
+
+    @Serializable
+    data object CollectionHub : KoColorRoute()
     
     @Serializable
     data object VanityLanding : KoColorRoute()

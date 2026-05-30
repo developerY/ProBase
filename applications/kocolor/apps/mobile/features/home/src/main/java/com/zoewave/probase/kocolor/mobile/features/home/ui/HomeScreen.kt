@@ -148,20 +148,11 @@ fun HomeScreen(
                 }
             }
 
-            if (uiState.totalCosmetics > 0) {
+            if (uiState.totalCosmetics > 0 || uiState.totalClothing > 0) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        SectionTitle(uiState = SectionTitleUiState("The Vanity", "${uiState.totalCosmetics} items tracked"), onEvent = {}, navTo = {})
-                        InventoryDashboard(uiState = uiState, onEvent = {}, navTo = navTo)
-                    }
-                }
-            }
-
-            if (uiState.totalClothing > 0) {
-                item {
-                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        SectionTitle(uiState = SectionTitleUiState("The Wardrobe", "${uiState.totalClothing} pieces curated"), onEvent = {}, navTo = {})
-                        WardrobeDashboard(uiState = uiState, onEvent = {}, navTo = navTo)
+                        SectionTitle(uiState = SectionTitleUiState("The Hub", "Unified styling archive"), onEvent = {}, navTo = {})
+                        CollectionHubCard(uiState = uiState, onEvent = {}, navTo = navTo)
                     }
                 }
             }

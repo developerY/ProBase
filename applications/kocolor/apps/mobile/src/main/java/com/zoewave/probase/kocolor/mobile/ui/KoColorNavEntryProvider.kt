@@ -78,6 +78,15 @@ fun koColorNavEntryProvider(
                 navTo = onNavigateTo
             )
         }
+        is KoColorRoute.CollectionHub -> NavEntry(route) {
+            val viewModel: HomeViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionHubScreen(
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo
+            )
+        }
         is KoColorRoute.ColorSearch -> NavEntry(route) {
             val viewModel: com.zoewave.probase.kocolor.features.color.ui.ColorSearchViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
