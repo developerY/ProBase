@@ -181,42 +181,39 @@ fun HeroRitualCard(
                     modifier = Modifier.padding(28.dp).fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
+                    // 1. TOP: Title
+                    Text(
+                        text = if (isMorning) "Morning Ritual" else "Evening Ritual",
+                        style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    
+                    // 2. MIDDLE: Progress label and circle
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
+                        Surface(
+                            color = Color.Black.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
                             Text(
-                                text = if (isMorning) "Morning Ritual" else "Evening Ritual",
-                                style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
-                                fontFamily = FontFamily.Serif,
-                                fontWeight = FontWeight.Bold,
+                                text = if (isMorning) "CURRENT RITUAL" else "EVENING RITUAL",
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.sp,
                                 color = Color.Black
                             )
-                            
-                            Spacer(Modifier.height(12.dp))
-                            
-                            Surface(
-                                color = Color.Black.copy(alpha = 0.1f),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text(
-                                    text = if (isMorning) "CURRENT RITUAL" else "EVENING RITUAL",
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.sp,
-                                    color = Color.Black
-                                )
-                            }
                         }
                         
                         Box(
                             contentAlignment = Alignment.Center, 
                             modifier = Modifier
-                                .size(80.dp)
-                                .padding(top = 4.dp)
+                                .size(84.dp)
                                 .clickable(onClick = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) })
                         ) {
                             CircularProgressIndicator(
@@ -249,6 +246,7 @@ fun HeroRitualCard(
                         }
                     }
 
+                    // 3. BOTTOM: Duration and rest
                     Column {
                         Text(
                             text = "15 mins duration",
