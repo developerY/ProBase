@@ -2,7 +2,6 @@ package com.zoewave.probase.kocolor.features.routines.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -154,6 +153,10 @@ fun HeroRitualCard(
 ) {
     val routine = uiState
     val isMorning = routine.time == RoutineTime.MORNING
+    val completedCount = routine.steps.count { it.isCompleted }
+    val totalCount = routine.steps.size
+    val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
+
     val accentColor = if (isMorning) Color(0xFF6B705C) else Color(0xFF457B9D)
     val bgBrush = if (isMorning) {
         Brush.verticalGradient(listOf(Color(0xFFF1F3F0), Color.White))
@@ -163,7 +166,7 @@ fun HeroRitualCard(
 
     Card(
         onClick = { navTo(KoColorRoute.RoutineDetail(routine.id)) },
-        modifier = Modifier.fillMaxWidth().height(240.dp),
+        modifier = Modifier.fillMaxWidth().height(260.dp),
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(1.dp, accentColor.copy(alpha = 0.1f))
@@ -172,86 +175,81 @@ fun HeroRitualCard(
             AsyncImage(
                 model = if (isMorning) R.drawable.morning_routine_bg else R.drawable.night_routine_bg,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize().alpha(0.4f),
+                modifier = Modifier.fillMaxSize().alpha(0.45f),
                 contentScale = androidx.compose.ui.layout.ContentScale.Crop
             )
             
-            Box(modifier = Modifier.fillMaxSize().background(bgBrush, alpha = 0.2f).padding(24.dp)) {
-                Column(verticalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxSize()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = if (isMorning) Icons.Default.LightMode else Icons.Default.NightsStay,
-                                    contentDescription = null,
-                                    tint = accentColor,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(Modifier.width(8.dp))
+            Box(modifier = Modifier.fillMaxSize().background(bgBrush, alpha = 0.3f)) {
+                Column(
+                    modifier = Modifier.padding(28.dp).fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(
+                            text = if (isMorning) "Your Morning\nRitual" else "Your Evening\nRitual",
+                            style = MaterialTheme.typography.displaySmall,
+                            fontFamily = FontFamily.Serif,
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 36.sp,
+                            color = Color.Black
+                        )
+                        
+                        Spacer(Modifier.height(16.dp))
+                        
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                color = Color.Black.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
                                 Text(
                                     text = if (isMorning) "CURRENT RITUAL" else "EVENING RITUAL",
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = accentColor,
                                     fontWeight = FontWeight.Black,
-                                    letterSpacing = 2.sp
+                                    letterSpacing = 1.sp,
+                                    color = Color.Black
                                 )
                             }
-                            Text(
-                                text = if (isMorning) "Your Morning Ritual" else "Your Evening Ritual",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontFamily = FontFamily.Serif,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-
-                        Box(
-                            contentAlignment = Alignment.Center, 
-                            modifier = Modifier
-                                .size(54.dp)
-                                .clickable(onClick = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) })
-                        ) {
-                            CircularProgressIndicator(
-                                progress = { 1f },
-                                modifier = Modifier.fillMaxSize(),
-                                color = accentColor.copy(alpha = 0.1f),
-                                strokeWidth = 3.dp
-                            )
-                            val completedCount = routine.steps.count { it.isCompleted }
-                            val totalCount = routine.steps.size
-                            val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
                             
-                            CircularProgressIndicator(
-                                progress = { progress },
-                                modifier = Modifier.fillMaxSize(),
-                                color = accentColor,
-                                strokeWidth = 3.dp,
-                                strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
-                            )
+                            Spacer(Modifier.width(16.dp))
                             
-                            if (progress > 0.99f && totalCount > 0) {
-                                Icon(Icons.Default.Refresh, null, tint = accentColor, modifier = Modifier.size(16.dp))
-                            } else {
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp)) {
+                                CircularProgressIndicator(
+                                    progress = { 1f },
+                                    modifier = Modifier.fillMaxSize(),
+                                    color = Color.Black.copy(alpha = 0.05f),
+                                    strokeWidth = 4.dp
+                                )
+                                CircularProgressIndicator(
+                                    progress = { progress },
+                                    modifier = Modifier.fillMaxSize(),
+                                    color = accentColor,
+                                    strokeWidth = 4.dp,
+                                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                                )
                                 Text(
                                     text = "$completedCount/$totalCount",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                                    fontWeight = FontWeight.Black,
-                                    color = accentColor
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black
                                 )
                             }
                         }
                     }
-                    
-                    Text(
-                        text = if (isMorning) "Prepare for a balanced day ahead." 
-                               else "Every step is an act of self-love.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                        modifier = Modifier.fillMaxWidth()
-                    )
+
+                    Column {
+                        Text(
+                            text = "15 mins duration",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                        Text(
+                            text = if (isMorning) "Prepare for a balanced day ahead." else "Every step is an act of self-love.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Black.copy(alpha = 0.7f)
+                        )
+                    }
                 }
             }
         }
