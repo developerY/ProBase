@@ -91,9 +91,9 @@ fun InventoryManagementScreen(
                 Icon(Icons.Default.Add, contentDescription = "Add Product")
             }
         },
-        bottomBar = {
+        /* bottomBar = {
             MockBottomNavigation(atelierBrown)
-        }
+        }*/
     ) { padding ->
         Column(
             modifier = Modifier
