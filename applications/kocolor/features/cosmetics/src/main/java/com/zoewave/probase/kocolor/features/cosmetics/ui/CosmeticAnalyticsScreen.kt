@@ -55,19 +55,6 @@ fun CosmeticAnalyticsScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                actions = {
-                    IconButton(onClick = { showTaxonomyInfo = true }) {
-                        Text(
-                            text = "i",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontFamily = FontFamily.Serif,
-                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
             )
         }
     ) { padding ->
