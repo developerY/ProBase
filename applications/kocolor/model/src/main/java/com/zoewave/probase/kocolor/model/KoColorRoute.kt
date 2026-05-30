@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.model
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Inventory
@@ -121,11 +122,7 @@ sealed class KoColorRoute {
     val icon: ImageVector?
         get() = when (this) {
             Home -> Icons.Default.Home
-            ColorSearch -> Icons.Default.Search
-            InventoryManagement -> Icons.Default.Inventory
-            CosmeticAnalytics -> Icons.Default.Insights
-            Color -> Icons.Default.ColorLens
-            Routines -> Icons.Default.Face
+            CollectionHub -> Icons.Default.AutoAwesome
             Settings -> Icons.Default.Settings
             else -> null
         }
@@ -133,11 +130,7 @@ sealed class KoColorRoute {
     val label: String?
         get() = when (this) {
             Home -> "Home"
-            ColorSearch -> "Search"
-            InventoryManagement -> "Inventory"
-            CosmeticAnalytics -> "Analytics"
-            Color -> "Color"
-            Routines -> "Routines"
+            CollectionHub -> "Collection"
             Settings -> "Settings"
             else -> null
         }
@@ -145,8 +138,6 @@ sealed class KoColorRoute {
 
 val topLevelRoutes = listOf(
     KoColorRoute.Home,
-    KoColorRoute.ColorSearch,
-    KoColorRoute.InventoryManagement,
-    KoColorRoute.CosmeticAnalytics,
+    KoColorRoute.CollectionHub,
     KoColorRoute.Settings
 )

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Insights
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -95,8 +96,9 @@ fun WardrobeLandingScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { navTo(KoColorRoute.WardrobeAnalytics) }) { Icon(Icons.Default.Insights, null) }
-                    IconButton(onClick = { /* Search */ }) { Icon(Icons.Default.Search, null) }
+                    IconButton(onClick = { navTo(KoColorRoute.Wardrobe) }) { Icon(Icons.Default.Inventory2, contentDescription = "Inventory") }
+                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { Icon(Icons.Default.Search, contentDescription = "Search") }
+                    IconButton(onClick = { navTo(KoColorRoute.WardrobeAnalytics) }) { Icon(Icons.Default.Insights, contentDescription = "Analytics") }
                 }
             )
         }
