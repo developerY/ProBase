@@ -51,6 +51,9 @@ sealed class KoColorRoute {
     data object InventoryManagement : KoColorRoute()
 
     @Serializable
+    data object ExpiringSoon : KoColorRoute()
+
+    @Serializable
     data class Cosmetics(val filter: String? = null) : KoColorRoute()
 
     @Serializable

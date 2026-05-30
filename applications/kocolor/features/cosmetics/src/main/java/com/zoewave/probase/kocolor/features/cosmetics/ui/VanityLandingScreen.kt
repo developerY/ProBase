@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,26 +23,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Insights
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -89,10 +76,8 @@ fun VanityLandingScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showTaxonomyInfo = true }) { Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = "Information") }
                     IconButton(onClick = { navTo(KoColorRoute.InventoryManagement) }) { Icon(Icons.Default.Inventory2, contentDescription = "Inventory") }
                     IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { Icon(Icons.Default.Search, contentDescription = "Search") }
-                    IconButton(onClick = { navTo(KoColorRoute.CosmeticAnalytics) }) { Icon(Icons.Default.Insights, contentDescription = "Analytics") }
                 }
             )
         },
@@ -139,13 +124,15 @@ fun VanityLandingScreen(
                         label = "TOTAL PRODUCTS",
                         value = uiState.totalCosmetics.toString(),
                         icon = Icons.Default.Inventory2,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        onClick = { navTo(KoColorRoute.CosmeticAnalytics) }
                     )
                     SummaryStatCard(
                         label = "EXPIRING SOON",
                         value = uiState.expiringCosmeticsCount.toString(),
-                        icon = Icons.Default.Warning,
-                        modifier = Modifier.weight(1f)
+                        icon = Icons.Default.ErrorOutline,
+                        modifier = Modifier.weight(1f),
+                        onClick = { navTo(KoColorRoute.ExpiringSoon) }
                     )
                 }
             }
@@ -377,27 +364,138 @@ private fun VanityCategoryCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SummaryStatCard(
     label: String,
     value: String,
     icon: ImageVector,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
-    val color = if (label.contains("EXPIRING")) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    val isExpiring = label.contains("EXPIRING")
+    
+    val serifFont = FontFamily.Serif
+    val charcoal = Color(0xFF2C2420)
+    
+    // Metallic/Bronze gradient for the expiring number
+    val valueBrush = if (isExpiring) {
+        Brush.linearGradient(listOf(Color(0xFF8E5431), Color(0xFFD4AF37), Color(0xFF8E5431)))
+    } else {
+        null
+    }
+
+    val actionBg = if (isExpiring) {
+        Brush.linearGradient(listOf(Color(0xFF4A0000), Color(0xFF8B0000), Color(0xFF4A0000)))
+    } else {
+        Brush.linearGradient(listOf(
+            Color(0xFFA0C4FF), Color(0xFFBDB2FF), Color(0xFFFFADAD), 
+            Color(0xFFFFD6A5), Color(0xFFFDFFB6), Color(0xFFCAFFBF)
+        ))
+    }
+    
+    val actionText = if (isExpiring) "VIEW ITEMS" else "VIEW BLUEPRINT"
+    val actionContentColor = if (isExpiring) Color.White else charcoal.copy(alpha = 0.8f)
+
     Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        modifier = modifier.aspectRatio(0.85f),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFBFBFB)),
+        border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
+        onClick = onClick,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Surface(color = color.copy(alpha = 0.1f), shape = RoundedCornerShape(12.dp), modifier = Modifier.size(40.dp)) {
-                Box(contentAlignment = Alignment.Center) { Icon(icon, null, modifier = Modifier.size(20.dp), tint = color) }
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Main Content Area
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = charcoal.copy(alpha = 0.4f)
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                if (valueBrush != null) {
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontSize = 72.sp,
+                            fontFamily = serifFont,
+                            brush = valueBrush
+                        ),
+                        fontWeight = FontWeight.Bold
+                    )
+                } else {
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontSize = 72.sp,
+                            fontFamily = serifFont
+                        ),
+                        fontWeight = FontWeight.Bold,
+                        color = charcoal
+                    )
+                }
+                
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        letterSpacing = 2.sp,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 10.sp
+                    ),
+                    color = charcoal.copy(alpha = 0.5f)
+                )
             }
-            Spacer(Modifier.height(16.dp))
-            Text(text = value, style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold)
-            Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+            // Luxury Action Footer
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(actionBg)
+                    .padding(12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    color = Color.Transparent,
+                    border = BorderStroke(1.dp, actionContentColor.copy(alpha = 0.3f)),
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = actionText,
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                            fontWeight = FontWeight.Black,
+                            color = actionContentColor,
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(10.dp),
+                            tint = actionContentColor
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -435,7 +533,7 @@ private fun parseColor(hex: String): Color {
 }
 
 @Composable
-private fun ProfessionalTaxonomyDialog(onDismiss: () -> Unit) {
+fun ProfessionalTaxonomyDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { 

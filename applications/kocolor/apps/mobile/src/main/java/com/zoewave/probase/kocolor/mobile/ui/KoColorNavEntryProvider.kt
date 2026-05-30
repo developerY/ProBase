@@ -191,6 +191,15 @@ fun koColorNavEntryProvider(
                 navTo = onNavigateTo
             )
         }
+        is KoColorRoute.ExpiringSoon -> NavEntry(route) {
+            val viewModel: CosmeticsViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            com.zoewave.probase.kocolor.features.cosmetics.ui.ExpiringCosmeticsScreen(
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo
+            )
+        }
         is KoColorRoute.Cosmetics -> NavEntry(route) {
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()

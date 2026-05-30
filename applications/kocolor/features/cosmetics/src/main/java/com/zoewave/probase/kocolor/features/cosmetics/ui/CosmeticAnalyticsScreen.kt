@@ -13,6 +13,10 @@ import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +40,12 @@ fun CosmeticAnalyticsScreen(
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    var showTaxonomyInfo by remember { mutableStateOf(false) }
+
+    if (showTaxonomyInfo) {
+        ProfessionalTaxonomyDialog(onDismiss = { showTaxonomyInfo = false })
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -43,6 +53,19 @@ fun CosmeticAnalyticsScreen(
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showTaxonomyInfo = true }) {
+                        Text(
+                            text = "i",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontFamily = FontFamily.Serif,
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             )
@@ -57,13 +80,13 @@ fun CosmeticAnalyticsScreen(
             item {
                 Column {
                     Text(
-                        text = "Your Beauty Blueprint.",
+                        text = "Beauty Blueprint.",
                         style = MaterialTheme.typography.displaySmall,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Data-driven insights from your curated collection.",
+                        text = "Data-driven insights from the curated collection.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
