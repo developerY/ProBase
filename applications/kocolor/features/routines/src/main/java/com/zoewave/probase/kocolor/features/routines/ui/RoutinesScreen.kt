@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.routines.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,14 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.NightsStay
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -99,7 +96,7 @@ fun RoutinesScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Your daily acts of mindful care.",
+                        text = "Daily acts of mindful care.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
@@ -184,19 +181,22 @@ fun HeroRitualCard(
                     modifier = Modifier.padding(28.dp).fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column {
-                        Text(
-                            text = if (isMorning) "Your Morning\nRitual" else "Your Evening\nRitual",
-                            style = MaterialTheme.typography.displaySmall,
-                            fontFamily = FontFamily.Serif,
-                            fontWeight = FontWeight.Bold,
-                            lineHeight = 36.sp,
-                            color = Color.Black
-                        )
-                        
-                        Spacer(Modifier.height(16.dp))
-                        
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = if (isMorning) "Morning Ritual" else "Evening Ritual",
+                                style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
+                                fontFamily = FontFamily.Serif,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                            
+                            Spacer(Modifier.height(12.dp))
+                            
                             Surface(
                                 color = Color.Black.copy(alpha = 0.1f),
                                 shape = RoundedCornerShape(12.dp)
@@ -210,28 +210,40 @@ fun HeroRitualCard(
                                     color = Color.Black
                                 )
                             }
-                            
-                            Spacer(Modifier.width(16.dp))
-                            
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp)) {
-                                CircularProgressIndicator(
-                                    progress = { 1f },
-                                    modifier = Modifier.fillMaxSize(),
-                                    color = Color.Black.copy(alpha = 0.05f),
-                                    strokeWidth = 4.dp
-                                )
-                                CircularProgressIndicator(
-                                    progress = { progress },
-                                    modifier = Modifier.fillMaxSize(),
-                                    color = accentColor,
-                                    strokeWidth = 4.dp,
-                                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
-                                )
+                        }
+                        
+                        Box(
+                            contentAlignment = Alignment.Center, 
+                            modifier = Modifier
+                                .size(80.dp)
+                                .padding(top = 4.dp)
+                                .clickable(onClick = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) })
+                        ) {
+                            CircularProgressIndicator(
+                                progress = { 1f },
+                                modifier = Modifier.fillMaxSize(),
+                                color = Color.Black.copy(alpha = 0.05f),
+                                strokeWidth = 6.dp
+                            )
+                            CircularProgressIndicator(
+                                progress = { progress },
+                                modifier = Modifier.fillMaxSize(),
+                                color = accentColor,
+                                strokeWidth = 6.dp,
+                                strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                            )
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = "$completedCount/$totalCount",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Black,
                                     color = Color.Black
+                                )
+                                Text(
+                                    text = "DONE",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black.copy(alpha = 0.5f)
                                 )
                             }
                         }

@@ -78,7 +78,7 @@ fun CollectionHubScreen(
                     Icon(Icons.Default.Search, null, tint = Color.Gray)
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        text = "Search your entire collection",
+                        text = "Search entire collection",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Gray,
                         modifier = Modifier.weight(1f)

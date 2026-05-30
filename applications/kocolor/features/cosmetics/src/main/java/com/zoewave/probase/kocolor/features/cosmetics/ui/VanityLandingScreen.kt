@@ -121,7 +121,7 @@ fun VanityLandingScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Here is a glance at your collection today.",
+                        text = "Here is a glance at the collection today.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
