@@ -57,6 +57,9 @@ sealed class KoColorRoute {
     data class CollectionDetail(val collectionId: Long) : KoColorRoute()
 
     @Serializable
+    data class Stitch(val id: Long = 0, val isCopy: Boolean = false) : KoColorRoute()
+
+    @Serializable
     data class Cosmetics(val filter: String? = null) : KoColorRoute()
 
     @Serializable

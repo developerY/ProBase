@@ -30,6 +30,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -135,7 +138,10 @@ fun ColorScreen(
                 items(uiState.savedSuggestions) { analysis ->
                     ColorHistoryCard(
                         analysis = analysis,
-                        onClick = { navTo(KoColorRoute.CollectionDetail(analysis.id)) }
+                        onClick = { navTo(KoColorRoute.CollectionDetail(analysis.id)) },
+                        onEditClick = { navTo(KoColorRoute.Stitch(analysis.id, isCopy = false)) },
+                        onCopyClick = { navTo(KoColorRoute.Stitch(analysis.id, isCopy = true)) },
+                        onDeleteClick = { onEvent(ColorEvent.DeleteCollection(analysis.id)) }
                     )
                 }
             }
@@ -146,7 +152,10 @@ fun ColorScreen(
 @Composable
 private fun ColorHistoryCard(
     analysis: SavedAnalysis,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onCopyClick: () -> Unit,
+    onDeleteClick: () -> Unit
 ) {
     val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy - HH:mm", Locale.getDefault()) }
     val dateStr = dateFormat.format(Date(analysis.timestamp))
@@ -160,29 +169,44 @@ private fun ColorHistoryCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            // 1. Top Bar: Date and Season
+            // 1. Top Bar: Date, Season and Actions
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = dateStr,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.Gray
-                )
-                Surface(
-                    color = Color(0xFFEADDFF),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
+                Column {
                     Text(
-                        text = analysis.advice.seasonalType.name,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6750A4),
-                        letterSpacing = 1.sp
+                        text = dateStr,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.Gray
                     )
+                    Surface(
+                        color = Color(0xFFEADDFF),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Text(
+                            text = analysis.advice.seasonalType.name,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF6750A4),
+                            letterSpacing = 1.sp
+                        )
+                    }
+                }
+                
+                Row {
+                    IconButton(onClick = onCopyClick) {
+                        Icon(Icons.Default.ContentCopy, "Copy", modifier = Modifier.size(18.dp), tint = Color.Gray)
+                    }
+                    IconButton(onClick = onEditClick) {
+                        Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(18.dp), tint = Color.Gray)
+                    }
+                    IconButton(onClick = onDeleteClick) {
+                        Icon(Icons.Default.DeleteOutline, "Delete", modifier = Modifier.size(18.dp), tint = Color.Gray)
+                    }
                 }
             }
 
@@ -215,14 +239,22 @@ private fun ColorHistoryCard(
 
                 Spacer(Modifier.width(16.dp))
 
-                Text(
-                    text = analysis.advice.summary,
-                    style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
-                    maxLines = 5,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(0.55f),
-                    color = Color(0xFF2C2420)
-                )
+                Column(modifier = Modifier.weight(0.55f)) {
+                    Text(
+                        text = analysis.advice.title ?: "Curated Look",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = analysis.advice.summary,
+                        style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis,
+                        color = Color(0xFF2C2420)
+                    )
+                }
             }
 
             Spacer(Modifier.height(16.dp))
@@ -522,7 +554,10 @@ private fun ColorHistoryCardPreview() {
                     recommendedPalette = listOf("#0047AB", "#FFFFFF", "#708090", "#C77398", "#3D2B1F")
                 )
             ),
-            onClick = {}
+            onClick = {},
+            onEditClick = {},
+            onCopyClick = {},
+            onDeleteClick = {}
         )
     }
 }

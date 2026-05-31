@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ColorUiState(
@@ -16,7 +17,7 @@ data class ColorUiState(
 )
 
 sealed class ColorEvent {
-    // Events can be added here
+    data class DeleteCollection(val id: Long) : ColorEvent()
 }
 
 @HiltViewModel
@@ -33,6 +34,12 @@ class ColorViewModel @Inject constructor(
         )
 
     fun onEvent(event: ColorEvent) {
-        // Handle events
+        when (event) {
+            is ColorEvent.DeleteCollection -> {
+                viewModelScope.launch {
+                    fashionRepository.deleteSuggestion(event.id)
+                }
+            }
+        }
     }
 }

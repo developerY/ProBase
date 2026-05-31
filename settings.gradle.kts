@@ -158,6 +158,7 @@ include(":applications:kocolor:apps:mobile:core")
 include(":applications:kocolor:apps:mobile:features:home")
 include(":applications:kocolor:apps:mobile:features:settings")
 include(":applications:kocolor:apps:mobile:features:color")
+include(":applications:kocolor:apps:mobile:features:stitch")
 
 // --- GotMind Product Line ---
 include(":applications:gotmind:model")
