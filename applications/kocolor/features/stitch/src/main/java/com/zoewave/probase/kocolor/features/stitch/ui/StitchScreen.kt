@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.mobile.features.stitch.ui
+package com.zoewave.probase.kocolor.features.stitch.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn

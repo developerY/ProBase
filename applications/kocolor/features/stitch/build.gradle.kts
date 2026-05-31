@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.zoewave.probase.kocolor.mobile.features.stitch"
+    namespace = "com.zoewave.probase.kocolor.features.stitch"
 }
 
 dependencies {
