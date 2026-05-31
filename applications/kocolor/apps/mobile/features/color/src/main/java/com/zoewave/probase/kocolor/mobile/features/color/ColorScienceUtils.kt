@@ -1,4 +1,4 @@
-package com.probase.kocolor.features.color
+package com.zoewave.probase.kocolor.mobile.features.color
 
 import android.graphics.Color
 import kotlin.math.max

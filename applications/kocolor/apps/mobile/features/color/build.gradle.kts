@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.zoewave.probase.kocolor.features.color"
+    namespace = "com.zoewave.probase.kocolor.mobile.features.color"
 }
 
 dependencies {

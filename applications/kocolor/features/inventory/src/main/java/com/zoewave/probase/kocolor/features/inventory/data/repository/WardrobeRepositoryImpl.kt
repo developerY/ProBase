@@ -9,7 +9,7 @@ import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
-import com.zoewave.probase.kocolor.features.color.domain.engine.WardrobeColorEngine
+import com.zoewave.probase.kocolor.mobile.features.color.domain.engine.WardrobeColorEngine
 import com.zoewave.probase.kocolor.model.ClothingItem
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

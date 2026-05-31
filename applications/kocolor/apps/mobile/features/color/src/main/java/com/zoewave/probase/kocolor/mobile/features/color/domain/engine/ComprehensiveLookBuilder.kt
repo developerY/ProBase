@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.color.domain.engine
+package com.zoewave.probase.kocolor.mobile.features.color.domain.engine
 
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.CosmeticItem

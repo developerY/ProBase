@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.color.ui
+package com.zoewave.probase.kocolor.mobile.features.color.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

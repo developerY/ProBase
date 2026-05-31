@@ -1,11 +1,11 @@
-package com.zoewave.probase.kocolor.features.color.ui
+package com.zoewave.probase.kocolor.mobile.features.color.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
-import com.zoewave.probase.kocolor.features.color.util.ColorScienceUtils
+import com.zoewave.probase.kocolor.mobile.features.color.util.ColorScienceUtils
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.CosmeticItem
 import dagger.hilt.android.lifecycle.HiltViewModel

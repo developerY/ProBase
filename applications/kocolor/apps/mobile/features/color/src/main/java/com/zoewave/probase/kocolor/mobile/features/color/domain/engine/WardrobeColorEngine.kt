@@ -1,8 +1,8 @@
-package com.zoewave.probase.kocolor.features.color.domain.engine
+package com.zoewave.probase.kocolor.mobile.features.color.domain.engine
 
 import android.graphics.Bitmap
-import com.zoewave.probase.kocolor.features.color.util.ColorScienceUtils
-import com.zoewave.probase.kocolor.features.color.util.WardrobeAnalyzer
+import com.zoewave.probase.kocolor.mobile.features.color.util.ColorScienceUtils
+import com.zoewave.probase.kocolor.mobile.features.color.util.WardrobeAnalyzer
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.SeasonalType
 import com.zoewave.probase.kocolor.model.Undertone

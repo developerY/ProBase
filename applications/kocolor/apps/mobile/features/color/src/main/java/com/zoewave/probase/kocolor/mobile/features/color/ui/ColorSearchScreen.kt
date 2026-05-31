@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.color.ui
+package com.zoewave.probase.kocolor.mobile.features.color.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -179,7 +179,7 @@ fun ColorSearchScreen(
                         )
                         Text("HEX: ${uiState.selectedColorHex.uppercase()}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         
-                        val rgb = com.zoewave.probase.kocolor.features.color.util.ColorScienceUtils.hexToRgb(uiState.selectedColorHex)
+                        val rgb = com.zoewave.probase.kocolor.mobile.features.color.util.ColorScienceUtils.hexToRgb(uiState.selectedColorHex)
                         if (rgb != null) {
                             Text("RGB: ${rgb.first}, ${rgb.second}, ${rgb.third}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         }

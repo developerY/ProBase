@@ -87,13 +87,13 @@
             <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile/core" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile/features" />
+            <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile/features/color" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile/features/home" />
             <option value="$PROJECT_DIR$/applications/kocolor/apps/mobile/features/settings" />
             <option value="$PROJECT_DIR$/applications/kocolor/data" />
             <option value="$PROJECT_DIR$/applications/kocolor/db" />
             <option value="$PROJECT_DIR$/applications/kocolor/features" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/analyzer" />
-            <option value="$PROJECT_DIR$/applications/kocolor/features/color" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/cosmetics" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/inventory" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/routines" />

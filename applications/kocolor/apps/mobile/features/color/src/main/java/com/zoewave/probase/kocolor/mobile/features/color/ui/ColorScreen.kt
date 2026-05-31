@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.features.color.ui
+package com.zoewave.probase.kocolor.mobile.features.color.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -40,12 +40,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,9 +49,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -102,10 +101,19 @@ fun ColorScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Fashion History") }
+            CenterAlignedTopAppBar(
+                title = { 
+                    Text(
+                        "Color Analysis History", 
+                        fontFamily = FontFamily.Serif, 
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    ) 
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
-        }
+        },
+        containerColor = Color(0xFFF9F6F0) // Cream background
     ) { padding ->
         if (uiState.savedSuggestions.isEmpty()) {
             Box(
@@ -121,14 +129,13 @@ fun ColorScreen(
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                contentPadding = PaddingValues(20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 items(uiState.savedSuggestions) { analysis ->
-                    FashionAnalysisCard(
-                        uiState = analysis,
-                        onEvent = onEvent,
-                        navTo = navTo
+                    ColorHistoryCard(
+                        analysis = analysis,
+                        onClick = { navTo(KoColorRoute.CollectionDetail(analysis.id)) }
                     )
                 }
             }
@@ -137,83 +144,98 @@ fun ColorScreen(
 }
 
 @Composable
-fun FashionAnalysisCard(
-    uiState: SavedAnalysis,
-    onEvent: (ColorEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+private fun ColorHistoryCard(
+    analysis: SavedAnalysis,
+    onClick: () -> Unit
 ) {
-    val date = SimpleDateFormat("MMM dd, yyyy - HH:mm", Locale.getDefault()).format(Date(uiState.timestamp))
-    
+    val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy - HH:mm", Locale.getDefault()) }
+    val dateStr = dateFormat.format(Date(analysis.timestamp))
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navTo(KoColorRoute.ColorDetail(uiState.id)) },
+            .clickable { onClick() },
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            // 1. Top Bar: Date and Season
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = date, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Badge(containerColor = MaterialTheme.colorScheme.primaryContainer) {
-                    Text(uiState.advice.seasonalType.name)
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Image previews if available
-                if (uiState.advice.faceUri != null || uiState.advice.clothesUri != null) {
-                    Row(
-                        modifier = Modifier.height(80.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        uiState.advice.faceUri?.let {
-                            AsyncImage(
-                                model = it,
-                                contentDescription = "Face",
-                                modifier = Modifier.size(80.dp).clip(RoundedCornerShape(4.dp)),
-                                contentScale = ContentScale.Crop
-                            )
-                        }
-                        uiState.advice.clothesUri?.let {
-                            AsyncImage(
-                                model = it,
-                                contentDescription = "Clothes",
-                                modifier = Modifier.size(80.dp).clip(RoundedCornerShape(4.dp)),
-                                contentScale = ContentScale.Crop
-                            )
-                        }
-                    }
-                }
-                
-                Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = dateStr,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray
+                )
+                Surface(
+                    color = Color(0xFFEADDFF),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
                     Text(
-                        text = uiState.advice.summary,
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 3,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        text = analysis.advice.seasonalType.name,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF6750A4),
+                        letterSpacing = 1.sp
                     )
                 }
             }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Mini palette preview
+
+            Spacer(Modifier.height(16.dp))
+
+            // 2. Middle Content: Images + Summary
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.weight(0.45f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    analysis.advice.faceUri?.let {
+                        AsyncImage(
+                            model = it,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(72.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    analysis.advice.clothesUri?.let {
+                        AsyncImage(
+                            model = it,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(72.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+
+                Spacer(Modifier.width(16.dp))
+
+                Text(
+                    text = analysis.advice.summary,
+                    style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
+                    maxLines = 5,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(0.55f),
+                    color = Color(0xFF2C2420)
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // 3. Palette Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                uiState.advice.recommendedPalette.take(6).forEach { hex ->
+                analysis.advice.recommendedPalette.take(5).forEach { hex ->
                     Box(
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(28.dp)
                             .clip(CircleShape)
                             .background(parseColor(hex))
                             .border(0.5.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
@@ -485,23 +507,22 @@ private fun MakeupPaletteGraphicPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun FashionAnalysisCardPreview() {
+private fun ColorHistoryCardPreview() {
     MaterialTheme {
-        FashionAnalysisCard(
-            uiState = SavedAnalysis(
+        ColorHistoryCard(
+            analysis = SavedAnalysis(
                 id = 1,
                 timestamp = System.currentTimeMillis(),
                 advice = FashionAdvice(
-                    summary = "Summary",
+                    summary = "Your features—cool-toned skin, dark hair, and clear eyes—align perfectly with a Deep Winter palette.",
                     seasonalType = SeasonalType.WINTER,
                     undertone = Undertone.COOL,
                     makeupSuggestions = emptyList(),
                     outfitSuggestions = emptyList(),
-                    recommendedPalette = listOf("#FF0000")
+                    recommendedPalette = listOf("#0047AB", "#FFFFFF", "#708090", "#C77398", "#3D2B1F")
                 )
             ),
-            onEvent = {},
-            navTo = {}
+            onClick = {}
         )
     }
 }

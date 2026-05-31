@@ -1,8 +1,8 @@
-package com.zoewave.probase.kocolor.features.color.util
+package com.zoewave.probase.kocolor.mobile.features.color.util
 
 import android.graphics.Bitmap
 import androidx.palette.graphics.Palette
-import com.zoewave.probase.kocolor.features.color.util.ColorScienceUtils.toHexString
+import com.zoewave.probase.kocolor.mobile.features.color.util.ColorScienceUtils.toHexString
 import javax.inject.Inject
 import javax.inject.Singleton
 
