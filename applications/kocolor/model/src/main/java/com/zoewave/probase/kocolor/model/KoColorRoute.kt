@@ -128,7 +128,7 @@ sealed class KoColorRoute {
     val icon: ImageVector?
         get() = when (this) {
             Home -> Icons.Default.Home
-            CollectionHub -> Icons.Default.AutoAwesome
+            Color -> Icons.Default.AutoAwesome
             Settings -> Icons.Default.Settings
             else -> null
         }
@@ -136,7 +136,7 @@ sealed class KoColorRoute {
     val label: String?
         get() = when (this) {
             Home -> "Home"
-            CollectionHub -> "Collection"
+            Color -> "Collection"
             Settings -> "Settings"
             else -> null
         }
@@ -144,6 +144,6 @@ sealed class KoColorRoute {
 
 val topLevelRoutes = listOf(
     KoColorRoute.Home,
-    KoColorRoute.CollectionHub,
+    KoColorRoute.Color,
     KoColorRoute.Settings
 )
