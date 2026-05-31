@@ -52,6 +52,7 @@ data class OutfitSuggestion(
 
 @Serializable
 data class FashionAdvice(
+    val title: String? = null,
     val summary: String,
     val seasonalType: SeasonalType,
     val undertone: Undertone,
