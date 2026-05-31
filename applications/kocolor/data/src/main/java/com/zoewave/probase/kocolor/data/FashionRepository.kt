@@ -91,4 +91,15 @@ class FashionRepository @Inject constructor(
             Log.e(TAG, "Failed to save suggestion", e)
         }
     }
+
+    suspend fun deleteSuggestion(id: Long) = withContext(Dispatchers.IO) {
+        try {
+            val entity = savedSuggestionDao.getSuggestionById(id)
+            if (entity != null) {
+                savedSuggestionDao.deleteSuggestion(entity)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to delete suggestion", e)
+        }
+    }
 }
