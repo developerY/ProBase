@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
@@ -198,20 +199,20 @@ fun WardrobeLandingScreen(
                     
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         val sections = listOf(
-                            "Tops" to (Color(0xFFF7F2EB) to "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&q=80"),
-                            "Bottoms" to (Color(0xFFF9F6F0) to "https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?w=400&q=80"),
+                            "Tops" to (Color(0xFFF7F2EB) to R.drawable.tops),
+                            "Bottoms" to (Color(0xFFF9F6F0) to R.drawable.bottom),
                             "Shoes" to (Color(0xFFE8F1FD) to "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80"),
                             "Accessories" to (Color(0xFFF3EBFD) to "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80")
                         )
                         
                         sections.forEach { (name, props) ->
-                            val (bgColor, placeholderUrl) = props
+                            val (bgColor, imageModel) = props
                             val metadata = uiState.categoriesMetadata.entries.find { it.key.equals(name, ignoreCase = true) }?.value
                             AtelierWardrobeCard(
                                 name = name,
                                 metadata = metadata,
                                 baseColor = bgColor,
-                                placeholderUrl = placeholderUrl,
+                                imageModel = imageModel,
                                 navTo = navTo,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -285,15 +286,21 @@ private fun SummaryStatCard(
     val actionText = if (isValue) "VIEW INVENTORY" else "VIEW INTELLIGENCE"
     val actionContentColor = if (isValue) Color.White else charcoal.copy(alpha = 0.8f)
 
+    val glassBg = if (isValue) {
+        Brush.verticalGradient(listOf(Color.White, Color(0xFFF1F8F1)))
+    } else {
+        Brush.verticalGradient(listOf(Color.White, Color(0xFFF8F9FF)))
+    }
+
     Card(
         modifier = modifier.aspectRatio(0.85f),
         shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFBFBFB)),
-        border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
         onClick = onClick,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().background(glassBg)) {
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -358,12 +365,12 @@ private fun SummaryStatCard(
                 contentAlignment = Alignment.Center
             ) {
                 Surface(
-                    color = Color.Transparent,
-                    border = BorderStroke(1.dp, actionContentColor.copy(alpha = 0.3f)),
-                    shape = RoundedCornerShape(4.dp)
+                    color = Color.White.copy(alpha = if (isValue) 0.12f else 0.45f), // Frosted Glass Effect
+                    border = BorderStroke(0.5.dp, actionContentColor.copy(alpha = 0.2f)),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
@@ -371,7 +378,7 @@ private fun SummaryStatCard(
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
                             fontWeight = FontWeight.Black,
                             color = actionContentColor,
-                            letterSpacing = 1.sp
+                            letterSpacing = 1.2.sp
                         )
                         Spacer(Modifier.width(8.dp))
                         Icon(
@@ -449,7 +456,7 @@ private fun CategoryHeroCardPreview() {
             name = "Tops",
             metadata = null,
             baseColor = Color.Blue,
-            placeholderUrl = "",
+            imageModel = "",
             navTo = {}
         )
     }
@@ -460,7 +467,7 @@ private fun AtelierWardrobeCard(
     name: String,
     metadata: CategoryMetadata?,
     baseColor: Color,
-    placeholderUrl: String,
+    imageModel: Any,
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -480,9 +487,9 @@ private fun AtelierWardrobeCard(
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // 1. Background Imagery
+            // 1. Background Imagery (Definitive vertical asset)
             AsyncImage(
-                model = metadata?.representativeImageUrl ?: placeholderUrl,
+                model = imageModel,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize().alpha(0.4f),
                 contentScale = ContentScale.Crop
