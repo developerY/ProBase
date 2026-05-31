@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
@@ -198,20 +199,20 @@ fun WardrobeLandingScreen(
                     
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         val sections = listOf(
-                            "Tops" to (Color(0xFFF7F2EB) to "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&q=80"),
-                            "Bottoms" to (Color(0xFFF9F6F0) to "https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?w=400&q=80"),
+                            "Tops" to (Color(0xFFF7F2EB) to R.drawable.tops),
+                            "Bottoms" to (Color(0xFFF9F6F0) to R.drawable.bottom),
                             "Shoes" to (Color(0xFFE8F1FD) to "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80"),
                             "Accessories" to (Color(0xFFF3EBFD) to "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80")
                         )
                         
                         sections.forEach { (name, props) ->
-                            val (bgColor, placeholderUrl) = props
+                            val (bgColor, imageModel) = props
                             val metadata = uiState.categoriesMetadata.entries.find { it.key.equals(name, ignoreCase = true) }?.value
                             AtelierWardrobeCard(
                                 name = name,
                                 metadata = metadata,
                                 baseColor = bgColor,
-                                placeholderUrl = placeholderUrl,
+                                imageModel = imageModel,
                                 navTo = navTo,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -291,7 +292,7 @@ private fun SummaryStatCard(
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFBFBFB)),
         border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
         onClick = onClick,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -449,7 +450,7 @@ private fun CategoryHeroCardPreview() {
             name = "Tops",
             metadata = null,
             baseColor = Color.Blue,
-            placeholderUrl = "",
+            imageModel = "",
             navTo = {}
         )
     }
@@ -460,7 +461,7 @@ private fun AtelierWardrobeCard(
     name: String,
     metadata: CategoryMetadata?,
     baseColor: Color,
-    placeholderUrl: String,
+    imageModel: Any,
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -480,9 +481,9 @@ private fun AtelierWardrobeCard(
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // 1. Background Imagery
+            // 1. Background Imagery (Definitive vertical asset)
             AsyncImage(
-                model = metadata?.representativeImageUrl ?: placeholderUrl,
+                model = imageModel,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize().alpha(0.4f),
                 contentScale = ContentScale.Crop

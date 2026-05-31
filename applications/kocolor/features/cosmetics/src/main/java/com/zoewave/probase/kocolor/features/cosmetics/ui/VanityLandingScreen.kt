@@ -447,7 +447,7 @@ private fun SummaryStatCard(
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFBFBFB)),
         border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
         onClick = onClick,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Main Content Area
