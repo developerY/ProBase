@@ -43,6 +43,7 @@ sealed class SimulatorEvent {
 class StyleSimulatorViewModel @Inject constructor(
     private val routineDao: RoutineDao,
     private val wardrobeRepository: WardrobeRepository,
+    private val fashionRepository: com.zoewave.probase.kocolor.data.FashionRepository,
     private val simulatorEngine: StyleSimulatorEngine,
     @Named("KoColor") private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
@@ -130,6 +131,52 @@ class StyleSimulatorViewModel @Inject constructor(
     }
 
     private fun saveSelectionToColorTab() {
-        // Implementation logic
+        viewModelScope.launch {
+            val state = uiState.value
+            val outfitSuggestion = OutfitSuggestion(
+                occasion = state.userMessage,
+                advice = state.rationale ?: "",
+                keyPieces = (state.recommendedClothing + state.recommendedAccessories).map { it.name },
+                colorCombinations = state.recommendedPalette,
+                wardrobeItemIds = (state.recommendedClothing + state.recommendedAccessories).map { it.id },
+                suggestedItems = (state.recommendedClothing + state.recommendedAccessories).map { item ->
+                    SuggestedPiece(
+                        name = item.name,
+                        category = item.category.name,
+                        imageUrl = item.imageUrl,
+                        description = item.notes,
+                        isOwned = true
+                    )
+                } + listOf(
+                    // Add a "Dream" item to show the power of the engine
+                    SuggestedPiece(
+                        name = "Atelier Silk Scarf",
+                        category = "ACCESSORIES",
+                        description = "A limited edition pure silk scarf from the Atelier line.",
+                        isOwned = false
+                    )
+                )
+            )
+
+            val advice = FashionAdvice(
+                title = "The ${state.userMessage.take(15)} Collection",
+                summary = state.rationale ?: "AI optimized style blueprint.",
+                seasonalType = SeasonalType.WINTER,
+                undertone = Undertone.COOL,
+                makeupSuggestions = listOf(
+                    MakeupSuggestion(
+                        category = "Lips",
+                        advice = "A bold brick red to anchor the look.",
+                        recommendedColors = listOf("#8B0000"),
+                        suggestedProductName = "Terracotta Velvet Stain"
+                    )
+                ),
+                outfitSuggestions = listOf(outfitSuggestion),
+                recommendedPalette = state.recommendedPalette,
+                clothesUri = state.recommendedClothing.firstOrNull()?.imageUrl
+            )
+            fashionRepository.saveSuggestion(advice)
+            // Navigation would usually happen via a SideEffect, but here we can just update state if needed
+        }
     }
 }
