@@ -40,7 +40,7 @@ sealed class StitchEvent {
     data object ClearPickingTarget : StitchEvent()
     
     data class RemoveMakeupSuggestion(val index: Int) : StitchEvent()
-    data class RemoveOutfitSuggestion(val index: Int) : StitchEvent()
+    data class RemoveOutfitItem(val outfitIndex: Int, val itemIndex: Int) : StitchEvent()
     data object AddMakeupSlot : StitchEvent()
     data object AddOutfitSlot : StitchEvent()
 }
@@ -78,7 +78,7 @@ class StitchViewModel @Inject constructor(
             StitchEvent.ClearPickingTarget -> _uiState.update { it.copy(pickingTarget = null) }
             is StitchEvent.OnItemSelected -> handleItemSelected(event.item)
             is StitchEvent.RemoveMakeupSuggestion -> removeMakeup(event.index)
-            is StitchEvent.RemoveOutfitSuggestion -> removeOutfit(event.index)
+            is StitchEvent.RemoveOutfitItem -> removeOutfitItem(event.outfitIndex, event.itemIndex)
             StitchEvent.AddMakeupSlot -> addMakeupSlot()
             StitchEvent.AddOutfitSlot -> addOutfitSlot()
         }
@@ -187,20 +187,49 @@ class StitchViewModel @Inject constructor(
         }
     }
 
-    private fun removeOutfit(index: Int) {
+    private fun removeOutfitItem(outfitIndex: Int, itemIndex: Int) {
         updateDraft { advice ->
-            val newList = advice.outfitSuggestions.toMutableList()
-            if (index in newList.indices) newList.removeAt(index)
-            advice.copy(outfitSuggestions = newList)
+            val outfits = advice.outfitSuggestions.toMutableList()
+            if (outfitIndex in outfits.indices) {
+                val outfit = outfits[outfitIndex]
+                val suggestedItems = outfit.suggestedItems.toMutableList()
+                val itemIds = outfit.wardrobeItemIds.toMutableList()
+                
+                if (itemIndex in suggestedItems.indices) {
+                    suggestedItems.removeAt(itemIndex)
+                    // Also try to remove from IDs if they match (simplified)
+                    if (itemIndex in itemIds.indices) itemIds.removeAt(itemIndex)
+                }
+                
+                outfits[outfitIndex] = outfit.copy(
+                    suggestedItems = suggestedItems,
+                    wardrobeItemIds = itemIds
+                )
+            }
+            advice.copy(outfitSuggestions = outfits)
         }
     }
 
     private fun addMakeupSlot() {
-        // Just triggers the picker usually, or adds a placeholder
+        updateDraft { advice ->
+            val makeups = advice.makeupSuggestions.toMutableList()
+            makeups.add(MakeupSuggestion(category = "LIPS", advice = "Suggested.", recommendedColors = emptyList()))
+            advice.copy(makeupSuggestions = makeups)
+        }
     }
 
     private fun addOutfitSlot() {
-        // Just triggers the picker usually
+        updateDraft { advice ->
+            val outfits = advice.outfitSuggestions.toMutableList()
+            if (outfits.isEmpty()) {
+                outfits.add(OutfitSuggestion(occasion = "New Look", advice = "", keyPieces = emptyList(), colorCombinations = emptyList()))
+            }
+            val firstOutfit = outfits[0]
+            val suggestedItems = firstOutfit.suggestedItems.toMutableList()
+            suggestedItems.add(SuggestedPiece(name = "New Item", category = "TOPS", isOwned = false))
+            outfits[0] = firstOutfit.copy(suggestedItems = suggestedItems)
+            advice.copy(outfitSuggestions = outfits)
+        }
     }
 
     private fun saveCollection() {
