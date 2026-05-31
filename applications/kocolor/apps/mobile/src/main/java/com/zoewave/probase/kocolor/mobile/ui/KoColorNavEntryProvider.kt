@@ -16,6 +16,8 @@ import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerViewModel
 import com.zoewave.probase.kocolor.features.color.ui.ColorDetailScreen
 import com.zoewave.probase.kocolor.features.color.ui.ColorDetailUiState
+import com.zoewave.probase.kocolor.features.color.ui.ColorSearchScreen
+import com.zoewave.probase.kocolor.features.color.ui.ColorSearchViewModel
 import com.zoewave.probase.kocolor.features.color.ui.ColorUiRoute
 import com.zoewave.probase.kocolor.features.color.ui.ColorViewModel
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticAnalyticsScreen
@@ -28,6 +30,7 @@ import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticEditUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsEvent
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsUiRoute
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsViewModel
+import com.zoewave.probase.kocolor.features.cosmetics.ui.InventoryManagementScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.StitchProductBuilder
 import com.zoewave.probase.kocolor.features.cosmetics.ui.VanityLandingScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.ColorVerificationRoute
@@ -49,6 +52,8 @@ import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
 import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
+import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionDetailScreen
+import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionHubScreen
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeViewModel
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.components.SettingsUiRoute
@@ -81,16 +86,27 @@ fun koColorNavEntryProvider(
         is KoColorRoute.CollectionHub -> NavEntry(route) {
             val viewModel: HomeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionHubScreen(
+            CollectionHubScreen(
                 uiState = state,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
         }
-        is KoColorRoute.ColorSearch -> NavEntry(route) {
-            val viewModel: com.zoewave.probase.kocolor.features.color.ui.ColorSearchViewModel = hiltViewModel()
+        is KoColorRoute.CollectionDetail -> NavEntry(route) {
+            val viewModel: HomeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            com.zoewave.probase.kocolor.features.color.ui.ColorSearchScreen(
+            val analysis = state.savedSuggestions.find { it.id == route.collectionId }
+            if (analysis != null) {
+                CollectionDetailScreen(
+                    analysis = analysis,
+                    navTo = onNavigateTo
+                )
+            }
+        }
+        is KoColorRoute.ColorSearch -> NavEntry(route) {
+            val viewModel: ColorSearchViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            ColorSearchScreen(
                 uiState = state,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
@@ -184,7 +200,7 @@ fun koColorNavEntryProvider(
         is KoColorRoute.InventoryManagement -> NavEntry(route) {
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            com.zoewave.probase.kocolor.features.cosmetics.ui.InventoryManagementScreen(
+            InventoryManagementScreen(
                 uiState = state,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo

@@ -66,7 +66,8 @@ data class HomeUiState(
     val hydrationLiters: Double = 0.0,
     val hydrationGoalLiters: Double = 2.0,
     val isHealthPermissionGranted: Boolean = false,
-    val weather: LayeredWeatherUiState? = null
+    val weather: LayeredWeatherUiState? = null,
+    val savedSuggestions: List<com.zoewave.probase.kocolor.model.SavedAnalysis> = emptyList()
 )
 
 sealed class HomeEvent {
@@ -167,7 +168,8 @@ class HomeViewModel @Inject constructor(
             } else {
                 flowOf(false to Triple(null as Float?, null as String?, 0.0))
             }
-        }
+        },
+        fashionRepository.getSavedSuggestions()
     ) { array ->
         val profile = array[0] as FashionProfile?
         val routines = array[1] as List<RoutineEntity>
@@ -177,6 +179,7 @@ class HomeViewModel @Inject constructor(
         val weather = array[5] as LayeredWeatherUiState?
         val healthInfo = array[6] as Pair<Boolean, Triple<Float?, String?, Double>>
         val (hasPerms, healthData) = healthInfo
+        val savedSuggestions = array[7] as List<com.zoewave.probase.kocolor.model.SavedAnalysis>
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
@@ -220,7 +223,8 @@ class HomeViewModel @Inject constructor(
             lastNightSleepDuration = healthData.second,
             hydrationLiters = healthData.third,
             isHealthPermissionGranted = hasPerms,
-            weather = weather
+            weather = weather,
+            savedSuggestions = savedSuggestions
         )
     }.stateIn(
         scope = viewModelScope,

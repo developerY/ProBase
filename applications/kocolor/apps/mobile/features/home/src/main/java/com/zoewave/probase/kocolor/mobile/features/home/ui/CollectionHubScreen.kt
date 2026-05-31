@@ -1,19 +1,11 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,21 +16,13 @@ import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -129,6 +113,7 @@ fun CollectionHubScreen(
                         value = uiState.totalVanityValue,
                         imageModel = R.drawable.vanity_white_background,
                         icon = Icons.Default.Face,
+                        breakdown = uiState.cosmeticsByGroup,
                         onClick = { navTo(KoColorRoute.VanityLanding) }
                     )
                 }
@@ -142,7 +127,129 @@ fun CollectionHubScreen(
                         value = uiState.totalWardrobeValue,
                         imageModel = R.drawable.wardrobe_background,
                         icon = Icons.Default.Checkroom,
+                        breakdown = uiState.clothingByCategory,
                         onClick = { navTo(KoColorRoute.WardrobeLanding) }
+                    )
+                }
+
+                if (uiState.savedSuggestions.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "BLUEPRINT HISTORY",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 2.sp,
+                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                        )
+                    }
+
+                    items(uiState.savedSuggestions) { analysis ->
+                        CuratedCollectionCard(
+                            analysis = analysis,
+                            onClick = { navTo(KoColorRoute.CollectionDetail(analysis.id)) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CuratedCollectionCard(
+    analysis: com.zoewave.probase.kocolor.model.SavedAnalysis,
+    onClick: () -> Unit
+) {
+    val dateFormat = remember { java.text.SimpleDateFormat("MMM dd, yyyy - HH:mm", java.util.Locale.getDefault()) }
+    val dateStr = dateFormat.format(java.util.Date(analysis.timestamp))
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F2F8)) // Soft Lavender Gray
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = dateStr,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray
+                )
+                Text(
+                    text = analysis.advice.seasonalType.name,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            Row(verticalAlignment = Alignment.Top) {
+                // Feature Images
+                Row(modifier = Modifier.weight(0.4f), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    analysis.advice.faceUri?.let {
+                        AsyncImage(
+                            model = it,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    analysis.advice.hairUri?.let {
+                        AsyncImage(
+                            model = it,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+
+                Spacer(Modifier.width(12.dp))
+
+                Text(
+                    text = analysis.advice.title ?: "Curated Look",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = analysis.advice.summary,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 3,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(0.6f),
+                    color = Color.DarkGray
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            // Palette
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                analysis.advice.recommendedPalette.take(5).forEach { hex ->
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .background(com.zoewave.probase.features.graphics.colorpicker.util.parseColor(hex))
+                            .border(0.5.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
                     )
                 }
             }
@@ -159,6 +266,7 @@ private fun ArchiveVerticalCard(
     value: Double,
     imageModel: Any,
     icon: ImageVector,
+    breakdown: Map<String, Int> = emptyMap(),
     onClick: () -> Unit
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
@@ -166,7 +274,7 @@ private fun ArchiveVerticalCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(240.dp)
+            .height(IntrinsicSize.Min)
             .clickable { onClick() },
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -176,13 +284,13 @@ private fun ArchiveVerticalCard(
             AsyncImage(
                 model = imageModel,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize().alpha(0.2f),
+                modifier = Modifier.matchParentSize().alpha(0.15f),
                 contentScale = ContentScale.Crop
             )
 
             Column(
-                modifier = Modifier.padding(28.dp).fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.padding(28.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -210,6 +318,30 @@ private fun ArchiveVerticalCard(
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(icon, null, modifier = Modifier.size(24.dp))
+                        }
+                    }
+                }
+
+                // More Info: Breakdown
+                if (breakdown.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        breakdown.entries.sortedByDescending { it.value }.take(3).forEach { (cat, num) ->
+                            Column {
+                                Text(
+                                    text = num.toString(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Black
+                                )
+                                Text(
+                                    text = cat.uppercase(),
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                                    color = Color.Gray,
+                                    maxLines = 1
+                                )
+                            }
                         }
                     }
                 }
