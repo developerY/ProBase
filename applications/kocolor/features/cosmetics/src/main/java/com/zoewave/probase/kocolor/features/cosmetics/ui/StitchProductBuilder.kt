@@ -163,12 +163,11 @@ private fun CaptureStep(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(320.dp)
-                .clickable { navTo(KoColorRoute.Camera("inventory_item")) },
+                .height(320.dp),
             shape = RoundedCornerShape(32.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
         ) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.fillMaxSize()) {
                 if (draft.imageUrl != null) {
                     AsyncImage(
                         model = draft.imageUrl,
@@ -176,11 +175,46 @@ private fun CaptureStep(
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
+                    
+                    // Re-capture overlay
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp)
+                    ) {
+                        SmallFloatingActionButton(
+                            onClick = { navTo(KoColorRoute.Camera("inventory_item")) },
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ) {
+                            Icon(Icons.Default.Refresh, "Retake")
+                        }
+                    }
                 } else {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
-                        Spacer(Modifier.height(12.dp))
-                        Text("Capture Product", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.clickable { navTo(KoColorRoute.Camera("inventory_item")) }
+                        ) {
+                            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.height(12.dp))
+                            Text("Capture Image", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        }
+
+                        VerticalDivider(modifier = Modifier.height(80.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.clickable { navTo(KoColorRoute.BarcodeScanner) }
+                        ) {
+                            Icon(Icons.Default.QrCodeScanner, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.height(12.dp))
+                            Text("Scan Barcode", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
