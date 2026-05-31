@@ -441,15 +441,21 @@ private fun SummaryStatCard(
     val actionText = if (isExpiring) "VIEW ITEMS" else "VIEW BLUEPRINT"
     val actionContentColor = if (isExpiring) Color.White else charcoal.copy(alpha = 0.8f)
 
+    val glassBg = if (isExpiring) {
+        Brush.verticalGradient(listOf(Color.White, Color(0xFFFFF0F0)))
+    } else {
+        Brush.verticalGradient(listOf(Color.White, Color(0xFFF5F7FF)))
+    }
+
     Card(
         modifier = modifier.aspectRatio(0.85f),
         shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFBFBFB)),
-        border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
         onClick = onClick,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().background(glassBg)) {
             // Main Content Area
             Column(
                 modifier = Modifier
@@ -515,12 +521,12 @@ private fun SummaryStatCard(
                 contentAlignment = Alignment.Center
             ) {
                 Surface(
-                    color = Color.Transparent,
-                    border = BorderStroke(1.dp, actionContentColor.copy(alpha = 0.3f)),
-                    shape = RoundedCornerShape(4.dp)
+                    color = Color.White.copy(alpha = if (isExpiring) 0.12f else 0.45f), // Frosted Glass Effect
+                    border = BorderStroke(0.5.dp, actionContentColor.copy(alpha = 0.2f)),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
@@ -528,7 +534,7 @@ private fun SummaryStatCard(
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
                             fontWeight = FontWeight.Black,
                             color = actionContentColor,
-                            letterSpacing = 1.sp
+                            letterSpacing = 1.2.sp
                         )
                         Spacer(Modifier.width(8.dp))
                         Icon(
