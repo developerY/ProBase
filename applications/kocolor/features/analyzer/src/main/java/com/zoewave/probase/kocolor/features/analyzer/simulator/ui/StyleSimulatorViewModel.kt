@@ -39,6 +39,10 @@ sealed class SimulatorEvent {
     data object Reset : SimulatorEvent()
 }
 
+sealed class SimulatorEffect {
+    data object NavigateToHistory : SimulatorEffect()
+}
+
 @HiltViewModel
 class StyleSimulatorViewModel @Inject constructor(
     private val routineDao: RoutineDao,
@@ -50,6 +54,9 @@ class StyleSimulatorViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(StyleSimulatorUiState())
     val uiState: StateFlow<StyleSimulatorUiState> = _uiState.asStateFlow()
+
+    private val _effect = kotlinx.coroutines.channels.Channel<SimulatorEffect>()
+    val effect = _effect.receiveAsFlow()
 
     init {
         checkRoutineStatus()
@@ -176,7 +183,7 @@ class StyleSimulatorViewModel @Inject constructor(
                 clothesUri = state.recommendedClothing.firstOrNull()?.imageUrl
             )
             fashionRepository.saveSuggestion(advice)
-            // Navigation would usually happen via a SideEffect, but here we can just update state if needed
+            _effect.send(SimulatorEffect.NavigateToHistory)
         }
     }
 }

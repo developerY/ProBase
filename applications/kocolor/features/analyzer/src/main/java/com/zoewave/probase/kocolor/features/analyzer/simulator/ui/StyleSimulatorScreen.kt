@@ -35,9 +35,20 @@ import com.zoewave.probase.kocolor.model.*
 @Composable
 fun StyleSimulatorScreen(
     uiState: StyleSimulatorUiState,
+    effect: kotlinx.coroutines.flow.Flow<SimulatorEffect>? = null,
     onEvent: (SimulatorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    if (effect != null) {
+        LaunchedEffect(Unit) {
+            effect.collect { simulatorEffect ->
+                when (simulatorEffect) {
+                    SimulatorEffect.NavigateToHistory -> navTo(KoColorRoute.Color)
+                }
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -369,6 +380,7 @@ private fun StyleSimulatorScreenPreview() {
             recommendedPalette = listOf("#F4D03F", "#16A085", "#2C3E50"),
             recommendedClothing = listOf(ClothingItem(name = "Silk Evening Shirt", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, brand = "ZoeWave"))
         ),
+        effect = null,
         onEvent = {},
         navTo = {}
     )

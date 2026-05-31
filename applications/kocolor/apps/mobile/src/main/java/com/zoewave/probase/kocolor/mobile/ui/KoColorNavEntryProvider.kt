@@ -176,6 +176,7 @@ fun koColorNavEntryProvider(
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             StyleSimulatorScreen(
                 uiState = state,
+                effect = viewModel.effect,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
