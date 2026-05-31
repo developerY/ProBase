@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.mobile.features.stitch.ui
+package com.zoewave.probase.kocolor.features.stitch.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -127,14 +127,14 @@ fun StitchScreen(
                             imageUrl = item.imageUrl,
                             isOwned = item.isOwned,
                             onPickClick = { onEvent(StitchEvent.RequestPickItem(PickingTarget.Outfit(outfitIdx, itemIdx))) },
-                            onRemoveClick = { /* Logic for removing from list */ }
+                            onRemoveClick = { onEvent(StitchEvent.RemoveOutfitItem(outfitIdx, itemIdx)) }
                         )
                     }
                 }
 
                 item {
                     OutlinedButton(
-                        onClick = { /* Add outfit slot */ },
+                        onClick = { onEvent(StitchEvent.AddOutfitSlot) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {

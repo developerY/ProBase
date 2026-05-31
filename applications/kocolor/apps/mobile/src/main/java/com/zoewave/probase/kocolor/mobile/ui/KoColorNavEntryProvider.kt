@@ -93,14 +93,14 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.Stitch -> NavEntry(route) {
-            val viewModel: com.zoewave.probase.kocolor.mobile.features.stitch.ui.StitchViewModel = hiltViewModel()
+            val viewModel: com.zoewave.probase.kocolor.features.stitch.ui.StitchViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             
             androidx.compose.runtime.LaunchedEffect(route.id, route.isCopy) {
-                viewModel.onEvent(com.zoewave.probase.kocolor.mobile.features.stitch.ui.StitchEvent.Initialize(route.id, route.isCopy))
+                viewModel.onEvent(com.zoewave.probase.kocolor.features.stitch.ui.StitchEvent.Initialize(route.id, route.isCopy))
             }
             
-            com.zoewave.probase.kocolor.mobile.features.stitch.ui.StitchScreen(
+            com.zoewave.probase.kocolor.features.stitch.ui.StitchScreen(
                 uiState = state,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
