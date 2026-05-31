@@ -39,7 +39,10 @@ data class ColorPalette(
 data class MakeupSuggestion(
     val category: String, // Foundation, Lip, Eye, etc.
     val advice: String,
-    val recommendedColors: List<String>
+    val recommendedColors: List<String>,
+    val productId: Long? = null,
+    val suggestedProductName: String? = null,
+    val suggestedProductImageUrl: String? = null
 )
 
 @Serializable
@@ -47,7 +50,18 @@ data class OutfitSuggestion(
     val occasion: String,
     val advice: String,
     val keyPieces: List<String>,
-    val colorCombinations: List<String>
+    val colorCombinations: List<String>,
+    val wardrobeItemIds: List<Long> = emptyList(),
+    val suggestedItems: List<SuggestedPiece> = emptyList()
+)
+
+@Serializable
+data class SuggestedPiece(
+    val name: String,
+    val category: String,
+    val imageUrl: String? = null,
+    val description: String? = null,
+    val isOwned: Boolean = false
 )
 
 @Serializable

@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -186,19 +187,16 @@ fun CollectionDetailScreen(
                 }
             }
 
-            items(advice.outfitSuggestions) { _ ->
-                // Mocking Wardrobe items as in image for demo purposes
-                VerticalCollectionItem(
-                    title = "Champagne Silk Midi",
-                    description = "Bias-cut for a fluid, skin-skimming silhouette. 100% Mulberry silk.",
-                    imageModel = "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=200&q=80"
-                )
-                Spacer(Modifier.height(16.dp))
-                VerticalCollectionItem(
-                    title = "Rose Gold Link Choker",
-                    description = "Heavyweight interlocking links. Adds architectural interest.",
-                    imageModel = "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=200&q=80"
-                )
+            advice.outfitSuggestions.forEach { outfit ->
+                items(outfit.suggestedItems) { suggested ->
+                    VerticalCollectionItem(
+                        title = suggested.name,
+                        description = suggested.description ?: "Professional selected piece for this look.",
+                        imageModel = suggested.imageUrl ?: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=200&q=80",
+                        isOwned = suggested.isOwned
+                    )
+                    Spacer(Modifier.height(16.dp))
+                }
             }
 
             // 5. The Vanity
@@ -214,19 +212,14 @@ fun CollectionDetailScreen(
                 }
             }
 
-            items(advice.makeupSuggestions) { _ ->
-                // Mocking Vanity items as in image for demo purposes
+            items(advice.makeupSuggestions) { makeup ->
                 VerticalCollectionItem(
-                    title = "Terracotta Velvet Stain",
-                    description = "A weightless, matte wash of warm brick color for a diffused lip.",
-                    imageModel = "https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=200&q=80"
+                    title = makeup.suggestedProductName ?: makeup.category,
+                    description = makeup.advice,
+                    imageModel = makeup.suggestedProductImageUrl ?: "https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=200&q=80",
+                    isOwned = makeup.productId != null
                 )
                 Spacer(Modifier.height(16.dp))
-                VerticalCollectionItem(
-                    title = "Gilded Bronze Pigment",
-                    description = "High-impact, micro-fine shimmer for a subtle evening wash.",
-                    imageModel = "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=200&q=80"
-                )
             }
             
             item { Spacer(Modifier.height(48.dp)) }
@@ -238,10 +231,13 @@ fun CollectionDetailScreen(
 private fun VerticalCollectionItem(
     title: String,
     description: String,
-    imageModel: Any
+    imageModel: Any,
+    isOwned: Boolean = true
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(if (isOwned) 1f else 0.4f),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
@@ -249,28 +245,56 @@ private fun VerticalCollectionItem(
             modifier = Modifier.size(80.dp),
             color = Color(0xFFF7F7F7)
         ) {
-            AsyncImage(
-                model = imageModel,
-                contentDescription = title,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
+            Box(contentAlignment = Alignment.Center) {
+                AsyncImage(
+                    model = imageModel,
+                    contentDescription = title,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                if (!isOwned) {
+                    Surface(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Lock, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        }
+                    }
+                }
+            }
         }
         
         Spacer(Modifier.width(20.dp))
         
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Bold
+                )
+                if (!isOwned) {
+                    Spacer(Modifier.width(8.dp))
+                    Surface(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = "SUGGESTED",
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 7.sp),
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                }
+            }
             Spacer(Modifier.height(4.dp))
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray,
+                color = if (isOwned) Color.Gray else Color.Gray.copy(alpha = 0.6f),
                 lineHeight = 18.sp
             )
         }
