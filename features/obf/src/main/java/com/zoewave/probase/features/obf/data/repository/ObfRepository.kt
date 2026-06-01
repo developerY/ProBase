@@ -18,11 +18,13 @@ class ObfRepository @Inject constructor(
      * and returns a partial CosmeticItem ready for user confirmation.
      */
     suspend fun fetchProductByBarcode(barcode: String): Result<CosmeticItem> = withContext(Dispatchers.IO) {
+        android.util.Log.d("ObfRepo", "fetchProductByBarcode: Querying API for $barcode")
         try {
             val response = api.getProductByBarcode(barcode)
             
             if (response.isSuccessful && response.body()?.status == 1) {
                 val obfProduct = response.body()?.product ?: return@withContext Result.failure(Exception("Product data is missing."))
+                android.util.Log.d("ObfRepo", "fetchProductByBarcode: SUCCESS. Found ${obfProduct.productName} by ${obfProduct.brands}")
                 
                 // Map OBF taxonomy to KoColor strict enums
                 val resolvedMicroCategory = ObfTaxonomyMapper.extractMicroCategory(obfProduct.categoriesTags)
@@ -50,9 +52,11 @@ class ObfRepository @Inject constructor(
                 
                 Result.success(draftItem)
             } else {
+                android.util.Log.w("ObfRepo", "fetchProductByBarcode: API returned success=false or status != 1 for $barcode. Status: ${response.body()?.status}")
                 Result.failure(Exception("Product not found in Open Beauty Facts database."))
             }
         } catch (e: Exception) {
+            android.util.Log.e("ObfRepo", "fetchProductByBarcode: EXCEPTION for $barcode", e)
             Result.failure(e)
         }
     }

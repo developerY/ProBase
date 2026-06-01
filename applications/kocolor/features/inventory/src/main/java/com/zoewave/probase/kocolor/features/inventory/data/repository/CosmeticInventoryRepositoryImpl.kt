@@ -24,6 +24,7 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun fetchProductByBarcode(barcode: String): Result<CosmeticItem> {
+        android.util.Log.d("CosmeticRepo", "fetchProductByBarcode: Fetching $barcode from OBF")
         return obfRepository.fetchProductByBarcode(barcode)
     }
 

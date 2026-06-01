@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.cosmetics.ui
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,7 +55,7 @@ fun StitchProductBuilder(
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    var currentStep by remember { mutableStateOf(1) }
+    var currentStep by rememberSaveable { mutableIntStateOf(1) }
     val draft = uiState.draftItem
     
     Scaffold(
@@ -63,7 +65,7 @@ fun StitchProductBuilder(
                 title = { 
                     Column {
                         Text("New Discovery", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
-                        Text("Step $currentStep of 3", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                        Text("Step $currentStep of 2", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                     }
                 },
                 navigationIcon = {
@@ -74,7 +76,7 @@ fun StitchProductBuilder(
                     }
                 },
                 actions = {
-                    if (currentStep == 3) {
+                    if (currentStep == 2) {
                         TextButton(onClick = { 
                             onEvent(CosmeticsEvent.AddItem(draft))
                             navTo(KoColorRoute.Back)
@@ -94,7 +96,7 @@ fun StitchProductBuilder(
         ) {
             // Step Progress Bar
             LinearProgressIndicator(
-                progress = { currentStep / 3f },
+                progress = { currentStep / 2f },
                 modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant
@@ -110,23 +112,19 @@ fun StitchProductBuilder(
                     } else {
                         slideInHorizontally { -it } + fadeIn() togetherWith slideOutHorizontally { it } + fadeOut()
                     }.using(SizeTransform(clip = false))
-                }
+                },
+                label = "discovery_flow"
             ) { step ->
                 when (step) {
                     1 -> CaptureStep(
                         uiState = draft to uiState,
-                        onEvent = { currentStep = 2 },
+                        onEvent = { 
+                            currentStep = 2 
+                            onEvent(CosmeticsEvent.ScanWithGemini) // Trigger AI if available
+                        },
                         navTo = navTo
                     )
-                    2 -> ColorStep(
-                        uiState = draft to uiState,
-                        onEvent = { event ->
-                            if (event is Unit) currentStep = 3
-                            else if (event is CosmeticsEvent) onEvent(event)
-                        },
-                        navTo = {}
-                    )
-                    3 -> MetadataStep(
+                    2 -> MetadataStep(
                         uiState = draft to uiState,
                         onEvent = onEvent,
                         navTo = navTo
@@ -163,11 +161,12 @@ private fun CaptureStep(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(320.dp),
+                .height(320.dp)
+                .clickable { navTo(KoColorRoute.Camera("inventory_item")) },
             shape = RoundedCornerShape(32.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 if (draft.imageUrl != null) {
                     AsyncImage(
                         model = draft.imageUrl,
@@ -175,46 +174,16 @@ private fun CaptureStep(
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
-                    
-                    // Re-capture overlay
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(16.dp)
-                    ) {
-                        SmallFloatingActionButton(
-                            onClick = { navTo(KoColorRoute.Camera("inventory_item")) },
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ) {
-                            Icon(Icons.Default.Refresh, "Retake")
-                        }
-                    }
                 } else {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.clickable { navTo(KoColorRoute.Camera("inventory_item")) }
-                        ) {
-                            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.height(12.dp))
-                            Text("Capture Image", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        }
-
-                        VerticalDivider(modifier = Modifier.height(80.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.clickable { navTo(KoColorRoute.BarcodeScanner) }
-                        ) {
-                            Icon(Icons.Default.QrCodeScanner, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.height(12.dp))
-                            Text("Scan Barcode", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.CameraAlt, 
+                            contentDescription = null, 
+                            modifier = Modifier.size(64.dp), 
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Text("Capture Image", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -301,12 +270,68 @@ private fun MetadataStep(
     ) {
         Text("Final details.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         
+        // Scan Status Message
+        uiState.second.scanStatus?.let { status ->
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = status,
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+
+        // Barcode Entry Section
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+        ) {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedTextField(
+                    value = draft.batchCode ?: "",
+                    onValueChange = { onEvent(CosmeticsEvent.HandleScanResult(it)) },
+                    label = { Text("Barcode") },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedContainerColor = Color.White,
+                        focusedContainerColor = Color.White
+                    )
+                )
+                IconButton(
+                    onClick = { navTo(KoColorRoute.BarcodeScanner) },
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.primary)
+                ) {
+                    Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan", tint = Color.White)
+                }
+            }
+        }
+
+        // Color Section (Integrated from previous step)
+        ColorSection(draft, onEvent)
+
         OutlinedTextField(
             value = draft.name,
             onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(name = it))) },
             label = { Text("Product Name") },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(12.dp)
         )
 
         OutlinedTextField(
@@ -314,13 +339,56 @@ private fun MetadataStep(
             onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(brand = it))) },
             label = { Text("Brand") },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(12.dp)
         )
 
         // Taxonomy: Progressive Disclosure
         TaxonomySelector(draft, onEvent)
 
         Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun ColorSection(draft: CosmeticItem, onEvent: (CosmeticsEvent) -> Unit) {
+    var showColorPicker by remember { mutableStateOf(false) }
+
+    if (showColorPicker) {
+        val colorHex = draft.colorHex ?: ""
+        ColorPickerDialog(
+            initialColor = try { parseColor(colorHex) } catch (e: Exception) { Color.Gray },
+            onColorSelected = { 
+                onEvent(CosmeticsEvent.UpdateDraft(draft.copy(colorHex = it.toHex()))) 
+                showColorPicker = false
+            },
+            onDismissRequest = { showColorPicker = false },
+            title = "Pick Product Color"
+        )
+    }
+
+    val bgColor = draft.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.primary
+    
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Product Essence", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .clickable { showColorPicker = true },
+            shape = RoundedCornerShape(12.dp),
+            color = bgColor,
+            border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.1f))
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = draft.shadeName ?: "TAP TO SELECT COLOR",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isColorDark(bgColor)) Color.White else Color.Black,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
+            }
+        }
     }
 }
 

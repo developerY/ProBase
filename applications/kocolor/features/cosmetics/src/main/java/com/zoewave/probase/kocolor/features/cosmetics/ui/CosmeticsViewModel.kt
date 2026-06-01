@@ -15,6 +15,7 @@ import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.kocolor.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -53,7 +54,8 @@ data class CosmeticsUiState(
     val expiringCosmeticsCount: Int = 0,
     val cosmeticsByGroup: Map<String, Int> = emptyMap(),
     val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap(),
-    val categoryFilter: String? = null
+    val categoryFilter: String? = null,
+    val scanStatus: String? = null
 )
 
 sealed class CosmeticsEvent {
@@ -92,6 +94,7 @@ class CosmeticsViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     private val _sortOption = MutableStateFlow(SortOption.NEWEST)
     private val _categoryFilter = MutableStateFlow<String?>(null)
+    private val _scanStatus = MutableStateFlow<String?>(null)
 
     init {
         viewModelScope.launch {
@@ -105,7 +108,7 @@ class CosmeticsViewModel @Inject constructor(
         sessionRepository.lastScannedCode
             .filterNotNull()
             .onEach { code ->
-                _draftItem.value = _draftItem.value.copy(batchCode = code)
+                fetchObfProduct(code)
                 sessionRepository.setLastScannedCode(null) // Consume it
             }
             .launchIn(viewModelScope)
@@ -125,7 +128,8 @@ class CosmeticsViewModel @Inject constructor(
         _draftItem,
         _searchQuery,
         _sortOption,
-        _categoryFilter
+        _categoryFilter,
+        _scanStatus
     ) { array ->
         val models = array[0] as List<CosmeticItem>
         val capturedUri = array[1] as String?
@@ -135,6 +139,7 @@ class CosmeticsViewModel @Inject constructor(
         val query = array[5] as String
         val sort = array[6] as SortOption
         val filter = array[7] as String?
+        val scanStatus = array[8] as String?
 
         val groupStats = models.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         
@@ -192,7 +197,8 @@ class CosmeticsViewModel @Inject constructor(
             expiringCosmeticsCount = expiringCount,
             cosmeticsByGroup = groupStats,
             categoriesMetadata = categoryMetadata,
-            categoryFilter = filter
+            categoryFilter = filter,
+            scanStatus = scanStatus
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CosmeticsUiState())
 
@@ -253,18 +259,32 @@ class CosmeticsViewModel @Inject constructor(
     }
 
     private fun fetchObfProduct(code: String) {
+        android.util.Log.d("CosmeticsVM", "fetchObfProduct: Searching for barcode $code")
         viewModelScope.launch {
             _isAnalyzing.value = true
+            _scanStatus.value = "Searching OBF database..."
+            
             val result = cosmeticRepository.fetchProductByBarcode(code)
+            
             result.onSuccess { obfItem ->
+                android.util.Log.d("CosmeticsVM", "fetchObfProduct: SUCCESS. Found ${obfItem.name}")
+                _scanStatus.value = "Product found: ${obfItem.name}"
                 _draftItem.value = obfItem.copy(
                     imageUrl = _draftItem.value.imageUrl ?: obfItem.imageUrl
                 )
-            }.onFailure {
+            }.onFailure { error ->
+                android.util.Log.e("CosmeticsVM", "fetchObfProduct: FAILURE. Code $code not found or error: ${error.message}")
+                _scanStatus.value = "Product not found in OBF database."
                 // Fallback to just setting the code if OBF fetch fails
                 _draftItem.value = _draftItem.value.copy(batchCode = code)
             }
             _isAnalyzing.value = false
+            
+            // Clear status after some time
+            delay(3000)
+            if (_scanStatus.value?.startsWith("Searching") == false) {
+                _scanStatus.value = null
+            }
         }
     }
 
