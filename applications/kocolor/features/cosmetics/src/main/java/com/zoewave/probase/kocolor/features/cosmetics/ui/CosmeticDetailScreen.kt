@@ -35,7 +35,9 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Recycling
-import androidx.compose.material.icons.filled.Science
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -79,7 +81,8 @@ data class CosmeticDetailUiState(
     // Usage Insights
     val usageFrequencyPerWeek: Double = 3.5,
     val estimatedDaysRemaining: Int? = 45,
-    val colorCompatibility: List<String> = listOf("#FBF8F5", "#E6A68A", "#2C2420") // Seasonal coordination
+    val colorCompatibility: List<String> = listOf("#FBF8F5", "#E6A68A", "#2C2420"), // Seasonal coordination
+    val bioSyncMessage: String? = "✨ High Synergy Today: Your hydration markers are low (0.0L); this Hyaluronic Acid will compensate."
 )
 
 @Preview(showBackground = true, name = "Populated")
@@ -240,6 +243,22 @@ fun CosmeticDetailScreen(
                     color = Color(0xFF2C2420)
                 )
 
+                item.ritualPlacement?.let { placement ->
+                    Spacer(Modifier.height(8.dp))
+                    Surface(
+                        color = atelierBrown.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = "Assigned to: $placement",
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = atelierBrown,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
                 Spacer(Modifier.height(8.dp))
 
                 Text(
@@ -319,6 +338,14 @@ fun CosmeticDetailScreen(
             }
             
             AtelierExpandableSection(
+                title = "Application Guide",
+                isExpanded = expandedStates["Application Guide"] == true,
+                onToggle = { expandedStates["Application Guide"] = it }
+            ) {
+                ApplicationGuideSection(item, atelierBrown)
+            }
+
+            AtelierExpandableSection(
                 title = "Professional Facets",
                 isExpanded = expandedStates["Professional Facets"] == true,
                 onToggle = { expandedStates["Professional Facets"] = it }
@@ -347,23 +374,15 @@ fun CosmeticDetailScreen(
                 isExpanded = expandedStates["Ingredient Analysis"] == true,
                 onToggle = { expandedStates["Ingredient Analysis"] = it }
             ) {
-                IngredientAnalysisSection(item)
+                IngredientAnalysisSection(item, uiState.bioSyncMessage)
             }
 
             AtelierExpandableSection(
-                title = "Application Guide",
-                isExpanded = expandedStates["Application Guide"] == true,
-                onToggle = { expandedStates["Application Guide"] = it }
-            ) {
-                ApplicationGuideSection(item, atelierBrown)
-            }
-
-            AtelierExpandableSection(
-                title = "Sustainability",
+                title = "Sustainability & Eco-Impact",
                 isExpanded = expandedStates["Sustainability"] == true,
                 onToggle = { expandedStates["Sustainability"] = it }
             ) {
-                SustainabilitySection()
+                SustainabilitySection(item)
             }
 
             AtelierExpandableSection(
@@ -476,12 +495,54 @@ private fun ApplicationGuideSection(item: CosmeticItem, atelierBrown: Color) {
 }
 
 @Composable
-private fun IngredientAnalysisSection(item: CosmeticItem) {
+private fun IngredientAnalysisSection(item: CosmeticItem, bioSyncMessage: String?) {
     Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         DetailMetricRow("Hero Ingredient", item.heroIngredient ?: "Analyzing...")
-        DetailMetricRow("Skin Compatibility", item.skinCompatibility ?: "Universal")
+        
+        bioSyncMessage?.let { msg ->
+            Surface(
+                color = Color(0xFFF0F7F0),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = msg,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF2E7D32),
+                    modifier = Modifier.padding(12.dp),
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        } ?: DetailMetricRow("Skin Compatibility", item.skinCompatibility ?: "Universal")
+
         DetailMetricRow("Fragrance", if (item.containsFragrance == true) "Contains Fragrance" else "None / Unscented")
         
+        if (item.allergens.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Text("ALLERGEN ALERTS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFFD32F2F))
+            Surface(
+                color = Color(0xFFFFF0F0),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Warning, null, modifier = Modifier.size(16.dp), tint = Color(0xFFD32F2F))
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Contains: ${item.allergens.joinToString(", ")}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFFD32F2F)
+                    )
+                }
+            }
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.CheckCircle, null, modifier = Modifier.size(16.dp), tint = Color(0xFF4CAF50))
+                Spacer(Modifier.width(8.dp))
+                Text("Free of common allergens", style = MaterialTheme.typography.bodySmall, color = Color(0xFF4CAF50))
+            }
+        }
+
         if (item.ingredients.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
             Text("FULL INGREDIENTS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
@@ -499,30 +560,44 @@ private fun IngredientAnalysisSection(item: CosmeticItem) {
                 )
             }
         }
-
-        Surface(
-            color = Color(0xFFE8F1FD),
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Science, null, modifier = Modifier.size(16.dp), tint = Color(0xFF1976D2))
-                Spacer(Modifier.width(8.dp))
-                Text("Dermatologically tested and non-comedogenic.", style = MaterialTheme.typography.labelSmall, color = Color(0xFF1976D2))
-            }
-        }
     }
 }
 
 @Composable
-private fun SustainabilitySection() {
+private fun SustainabilitySection(item: CosmeticItem) {
     Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        DetailMetricRow("Primary Material", "Glass (Recyclable)")
-        DetailMetricRow("Cap Material", "PCR Plastic")
+        item.ecoScore?.let { score ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    color = when(score) {
+                        "A" -> Color(0xFF4CAF50)
+                        "B" -> Color(0xFF8BC34A)
+                        "C" -> Color(0xFFFFEB3B)
+                        "D" -> Color(0xFFFF9800)
+                        else -> Color(0xFFF44336)
+                    },
+                    shape = CircleShape,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(score, color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                    }
+                }
+                Spacer(Modifier.width(16.dp))
+                Column {
+                    Text("ECO-SCORE: $score", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+                    Text("Overall environmental footprint.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                }
+            }
+        }
+
+        DetailMetricRow("Recyclable", if (item.recyclingInstructions != null) "Yes" else "Likely")
+        DetailMetricRow("Vegan", if (item.isVegan == true) "Certified" else if (item.isVegan == false) "No" else "Likely")
+        DetailMetricRow("Cruelty-Free", if (item.isCrueltyFree == true) "Yes" else "Analyzing...")
         
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Icon(Icons.Default.Recycling, "Recyclable", tint = Color(0xFF4CAF50))
-            Icon(Icons.Default.Eco, "Clean Beauty", tint = Color(0xFF4CAF50))
+            if (item.isVegan != false) Icon(Icons.Default.Eco, "Clean Beauty", tint = Color(0xFF4CAF50))
         }
     }
 }
@@ -694,6 +769,21 @@ private fun UsageStockSection(item: CosmeticItem, uiState: CosmeticDetailUiState
         Spacer(Modifier.height(24.dp))
         
         ShareProgressBar("Stock Remaining", fillLevel)
+        
+        if (fillLevel < 0.2) {
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = { /* Add to Shopping List */ },
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+            ) {
+                Icon(Icons.Default.ShoppingCart, null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Add to Shopping List", fontWeight = FontWeight.Bold)
+            }
+        }
+
         Text(
             text = "Based on your average of ${uiState.usageFrequencyPerWeek} uses per week.",
             style = MaterialTheme.typography.bodySmall,

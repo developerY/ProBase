@@ -256,7 +256,17 @@ data class CosmeticItem(
     val heroIngredient: String? = null,
     val skinCompatibility: String? = null,
     val containsFragrance: Boolean? = null,
-    val ingredients: List<String> = emptyList()
+    val ingredients: List<String> = emptyList(),
+    val allergens: List<String> = emptyList(),
+    
+    // --- Sustainability & Eco-Impact ---
+    val ecoScore: String? = null, // A, B, C, D, E
+    val isVegan: Boolean? = null,
+    val isCrueltyFree: Boolean? = null,
+    val recyclingInstructions: String? = null,
+    
+    // --- Ritual Context ---
+    val ritualPlacement: String? = null // e.g. "Morning Routine (Step 2)"
 ) {
     /** 
      * Calculated estimated expiration based on PAO and opened date. 

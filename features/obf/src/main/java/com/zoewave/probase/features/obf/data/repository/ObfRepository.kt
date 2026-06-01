@@ -38,9 +38,10 @@ class ObfRepository @Inject constructor(
                 val resolvedFormulation = ObfTaxonomyMapper.extractFormulation(obfProduct.keywords)
                 val resolvedChemistry = ObfTaxonomyMapper.extractChemistryBase(ingredientList)
 
-                // 4. Ingredient Highlights
+                // 4. Ingredient Highlights & Allergens
                 val heroIngredient = ingredientList.firstOrNull()?.replaceFirstChar { it.uppercase() }
                 val hasFragrance = ingredientList.any { it.contains("parfum") || it.contains("fragrance") }
+                val allergens = ObfTaxonomyMapper.extractAllergens(obfProduct.allergensTags)
 
                 val draftItem = CosmeticItem(
                     batchCode = barcode,
@@ -54,6 +55,10 @@ class ObfRepository @Inject constructor(
                     heroIngredient = heroIngredient,
                     containsFragrance = hasFragrance,
                     ingredients = ingredientList,
+                    allergens = allergens,
+                    ecoScore = obfProduct.ecoScore?.uppercase(),
+                    isVegan = ObfTaxonomyMapper.isVegan(obfProduct.analysisTags),
+                    isCrueltyFree = ObfTaxonomyMapper.isCrueltyFree(obfProduct.keywords),
                     imageUrl = obfProduct.imageUrl,
                     volume = obfProduct.volume
                 )

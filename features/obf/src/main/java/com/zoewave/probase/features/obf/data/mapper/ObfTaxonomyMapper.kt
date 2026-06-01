@@ -142,4 +142,28 @@ object ObfTaxonomyMapper {
             else -> com.zoewave.probase.kocolor.model.ChemistryBase.UNKNOWN
         }
     }
+
+    /**
+     * Translates allergen tags into human-readable strings.
+     */
+    fun extractAllergens(tags: List<String>?): List<String> {
+        if (tags == null) return emptyList()
+        return tags.map { it.replace("en:", "").replace("-", " ").replaceFirstChar { c -> c.uppercase() } }
+    }
+
+    /**
+     * Checks if the product is vegan based on analysis tags.
+     */
+    fun isVegan(tags: List<String>?): Boolean? {
+        if (tags == null) return null
+        return tags.any { it.contains("vegan") }
+    }
+
+    /**
+     * Checks if the product is cruelty-free.
+     */
+    fun isCrueltyFree(keywords: List<String>?): Boolean? {
+        if (keywords == null) return null
+        return keywords.any { it.lowercase().contains("cruelty-free") || it.lowercase().contains("not-tested-on-animals") }
+    }
 }
