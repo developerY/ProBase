@@ -347,7 +347,7 @@ fun CosmeticDetailScreen(
                 isExpanded = expandedStates["Ingredient Analysis"] == true,
                 onToggle = { expandedStates["Ingredient Analysis"] = it }
             ) {
-                IngredientAnalysisSection()
+                IngredientAnalysisSection(item)
             }
 
             AtelierExpandableSection(
@@ -476,12 +476,30 @@ private fun ApplicationGuideSection(item: CosmeticItem, atelierBrown: Color) {
 }
 
 @Composable
-private fun IngredientAnalysisSection() {
+private fun IngredientAnalysisSection(item: CosmeticItem) {
     Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        DetailMetricRow("Hero Ingredient", "Hyaluronic Acid")
-        DetailMetricRow("Skin Compatibility", "Sensitive, Dry")
-        DetailMetricRow("Fragrance", "None / Unscented")
+        DetailMetricRow("Hero Ingredient", item.heroIngredient ?: "Analyzing...")
+        DetailMetricRow("Skin Compatibility", item.skinCompatibility ?: "Universal")
+        DetailMetricRow("Fragrance", if (item.containsFragrance == true) "Contains Fragrance" else "None / Unscented")
         
+        if (item.ingredients.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Text("FULL INGREDIENTS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
+            Surface(
+                color = Color(0xFFFBF8F5),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = item.ingredients.joinToString(", "),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.DarkGray,
+                    modifier = Modifier.padding(16.dp),
+                    lineHeight = 18.sp
+                )
+            }
+        }
+
         Surface(
             color = Color(0xFFE8F1FD),
             shape = RoundedCornerShape(8.dp),

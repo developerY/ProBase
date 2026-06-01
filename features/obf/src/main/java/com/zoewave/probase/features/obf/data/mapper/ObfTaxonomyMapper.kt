@@ -93,4 +93,53 @@ object ObfTaxonomyMapper {
             .map { it.trim().lowercase() }
             .filter { it.isNotEmpty() }
     }
+
+    /**
+     * Heuristically determines the Finish from product keywords.
+     */
+    fun extractFinish(keywords: List<String>?): com.zoewave.probase.kocolor.model.Finish {
+        if (keywords == null) return com.zoewave.probase.kocolor.model.Finish.UNKNOWN
+        val k = keywords.map { it.lowercase() }
+        return when {
+            k.contains("matte") || k.contains("ultramatte") -> com.zoewave.probase.kocolor.model.Finish.MATTE
+            k.contains("satin") -> com.zoewave.probase.kocolor.model.Finish.SATIN
+            k.contains("glossy") || k.contains("brillant") -> com.zoewave.probase.kocolor.model.Finish.GLOSSY
+            k.contains("dewy") || k.contains("radiant") || k.contains("éclat") -> com.zoewave.probase.kocolor.model.Finish.RADIANT
+            k.contains("metallic") -> com.zoewave.probase.kocolor.model.Finish.METALLIC
+            k.contains("glitter") -> com.zoewave.probase.kocolor.model.Finish.GLITTER
+            else -> com.zoewave.probase.kocolor.model.Finish.NATURAL
+        }
+    }
+
+    /**
+     * Heuristically determines the Formulation from product keywords.
+     */
+    fun extractFormulation(keywords: List<String>?): com.zoewave.probase.kocolor.model.Formulation {
+        if (keywords == null) return com.zoewave.probase.kocolor.model.Formulation.UNKNOWN
+        val k = keywords.map { it.lowercase() }
+        return when {
+            k.contains("liquid") || k.contains("liquide") || k.contains("ink") -> com.zoewave.probase.kocolor.model.Formulation.LIQUID
+            k.contains("powder") || k.contains("poudre") -> com.zoewave.probase.kocolor.model.Formulation.POWDER
+            k.contains("cream") || k.contains("crème") -> com.zoewave.probase.kocolor.model.Formulation.CREAM
+            k.contains("stick") -> com.zoewave.probase.kocolor.model.Formulation.STICK
+            k.contains("balm") || k.contains("baume") -> com.zoewave.probase.kocolor.model.Formulation.BALM
+            k.contains("gel") -> com.zoewave.probase.kocolor.model.Formulation.GEL
+            k.contains("spray") -> com.zoewave.probase.kocolor.model.Formulation.SPRAY
+            else -> com.zoewave.probase.kocolor.model.Formulation.UNKNOWN
+        }
+    }
+
+    /**
+     * Determines Chemistry Base based on top ingredients.
+     */
+    fun extractChemistryBase(ingredients: List<String>): com.zoewave.probase.kocolor.model.ChemistryBase {
+        val top = ingredients.firstOrNull()?.lowercase() ?: return com.zoewave.probase.kocolor.model.ChemistryBase.UNKNOWN
+        return when {
+            top.contains("water") || top.contains("aqua") -> com.zoewave.probase.kocolor.model.ChemistryBase.WATER
+            top.contains("dimethicone") || top.contains("siloxane") || top.contains("silicone") -> com.zoewave.probase.kocolor.model.ChemistryBase.SILICONE
+            top.contains("oil") || top.contains("huile") -> com.zoewave.probase.kocolor.model.ChemistryBase.OIL
+            top.contains("wax") || top.contains("cire") -> com.zoewave.probase.kocolor.model.ChemistryBase.WAX
+            else -> com.zoewave.probase.kocolor.model.ChemistryBase.UNKNOWN
+        }
+    }
 }
