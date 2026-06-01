@@ -1,19 +1,35 @@
 ## Sections 
 
+* **Value Analysis**
+* **Professional Facets**
+* **Product Lifecycle**
+* **Usage & Stock Health**
+* **Ingredient Analysis**
+* **Application Guide**
+* **Coordination**
+
+
+Here are the 8 distinct sections from the product page, based exactly on the headers and components shown in your screenshots:
+
+1. **Header / Hero Section:** The top-level component featuring the primary product image, title, stock status badge, SKU, launch date, and utility buttons (Edit Product / Export Report).
+2. **Value Analysis & Color Hue Map:** The financial tracking (Retail Investment, Actual Cost Per Use, Remaining Value) paired with the visual color extraction data (Hue, Saturation, and Coordination Palette).
+3. **Professional Facets:** The physical and chemical properties of the product, including Formulation, Chemistry Base, Finish, and Coverage.
+4. **Product Lifecycle:** The timeline tracking dates for when the item was Added to Collection, First Opened, and Estimated Expiry.
+5. **Usage & Stock Health:** The telemetry data showing Total Uses, Estimated Days Left, and a dynamic Stock Remaining progress bar.
+6. **Ingredient Analysis:** The formulation breakdown highlighting the Hero Ingredient, Skin Compatibility, Fragrance status, and safety badges (e.g., dermatologically tested).
+7. **Application Guide:** The designated space for manufacturer instructions or specific usage steps.
+8. **Coordination:** The recommendation engine block ("Works Well With") showing complementary products like Radiance Mist and Daily SPF.
+
 Here is the exact list of the screens you provided in the previous message, referenced verbatim by their file names:
 
-"Silk Primer" showing the primary product image, "In Stock" badge, and the Edit/Export buttons.
-"Value Analysis" and "Color Hue Map" section, detailing the Retail Investment, Cost Per Use, and the UI for the extracted color data.
-"Professional Facets" section displaying the product's Formulation (Liquid), Chemistry Base (Silicone), and Finish (Satin).
-"Product Lifecycle" section showing the localized dates for when the item was added, opened, and when it is expected to expire.
-Usage & Stock Health" section featuring the Total Uses count, Estimated Days Left, and the Stock Remaining percentage bar.
-The "Ingredient Analysis" section highlighting the Hero Ingredient (Hyaluronic Acid), Skin Compatibility, and Fragrance status, along with the blue dermatologist banner.
-The "Application Guide" section, currently showing that no manufacturer instructions are provided.
-The "Coordination" section displaying the "Works Well With" recommendation chips (Silk Primer, Radiance Mist, Daily SPF).
-
-
-
-
+* **"Silk Primer"** showing the primary product image, "In Stock" badge, and the Edit/Export buttons.
+* **Value Analysis** and **Color Hue Map** section, detailing the Retail Investment, Cost Per Use, and the UI for the extracted color data.
+* **Professional Facets** section displaying the product's Formulation (Liquid), Chemistry Base (Silicone), and Finish (Satin).
+* **Product Lifecycle** section showing the localized dates for when the item was added, opened, and when it is expected to expire.
+* **Usage & Stock Health** section featuring the Total Uses count, Estimated Days Left, and the Stock Remaining percentage bar.
+* The **Ingredient Analysis** section highlighting the Hero Ingredient (Hyaluronic Acid), Skin Compatibility, and Fragrance status, along with the blue dermatologist banner.
+* The **Application Guide** section, currently showing that no manufacturer instructions are provided.
+* The **Coordination** section displaying the **Works Well With** recommendation chips (Silk Primer, Radiance Mist, Daily SPF).
 
 This is where the architecture you have built truly shines. You are taking a raw, crowdsourced supply-chain database (Open Beauty Facts) and translating it into a premium, highly editorial user experience.
 
