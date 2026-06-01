@@ -9,6 +9,11 @@ enum class MacroCategory(val displayName: String, val description: String) {
     DIMENSION("Color & Dimension", "Products that bring life, shadow, and light."),
     EYES("Eyes & Brows", "All definition for the upper face."),
     LIPS("Lips", "All color and care for the mouth."),
+    HAIR("Haircare", "Cleanse, treat, and style."),
+    HYGIENE("Hygiene & Bath", "Daily body care and sanitization."),
+    ORAL("Oral Care", "Smile preservation and hygiene."),
+    FRAGRANCE("Fragrances", "Olfactory signatures."),
+    GROOMING("Grooming & Shaving", "Precision care and hair removal."),
     TOOLS("Tools & Hygiene", "Brushes, sponges, and maintenance.")
 }
 
@@ -21,6 +26,10 @@ enum class MicroCategory(val macro: MacroCategory) {
     MOISTURIZER(MacroCategory.PREP),
     SPF(MacroCategory.PREP),
     PRIMER(MacroCategory.PREP),
+    FACE_MASK(MacroCategory.PREP),
+    EXFOLIANT(MacroCategory.PREP),
+    EYE_CARE(MacroCategory.PREP),
+    LIP_CARE(MacroCategory.PREP),
     
     // Complexion
     FOUNDATION(MacroCategory.COMPLEXION),
@@ -28,6 +37,7 @@ enum class MicroCategory(val macro: MacroCategory) {
     CONCEALER(MacroCategory.COMPLEXION),
     COLOR_CORRECTOR(MacroCategory.COMPLEXION),
     SETTING_POWDER(MacroCategory.COMPLEXION),
+    FACE_POWDER(MacroCategory.COMPLEXION),
     SETTING_SPRAY(MacroCategory.COMPLEXION),
     
     // Dimension
@@ -54,6 +64,47 @@ enum class MicroCategory(val macro: MacroCategory) {
     LIP_BALM(MacroCategory.LIPS),
     LIP_PLUMPER(MacroCategory.LIPS),
     
+    // Hair
+    SHAMPOO(MacroCategory.HAIR),
+    CONDITIONER(MacroCategory.HAIR),
+    HAIR_MASK(MacroCategory.HAIR),
+    HAIR_COLOR(MacroCategory.HAIR),
+    HAIR_STYLING(MacroCategory.HAIR),
+    HAIR_SPRAY(MacroCategory.HAIR),
+    SCALP_TREATMENT(MacroCategory.HAIR),
+    
+    // Hygiene
+    SOAP(MacroCategory.HYGIENE),
+    SHOWER_GEL(MacroCategory.HYGIENE),
+    BATH_PRODUCT(MacroCategory.HYGIENE),
+    DEODORANT(MacroCategory.HYGIENE),
+    ANTIPERSPIRANT(MacroCategory.HYGIENE),
+    INTIMATE_HYGIENE(MacroCategory.HYGIENE),
+    COTTON_PRODUCT(MacroCategory.HYGIENE),
+    
+    // Oral
+    TOOTHPASTE(MacroCategory.ORAL),
+    MOUTHWASH(MacroCategory.ORAL),
+    TOOTHBRUSH(MacroCategory.ORAL),
+    DENTAL_FLOSS(MacroCategory.ORAL),
+    
+    // Fragrance
+    PERFUME(MacroCategory.FRAGRANCE),
+    EAU_DE_PARFUM(MacroCategory.FRAGRANCE),
+    EAU_DE_TOILETTE(MacroCategory.FRAGRANCE),
+    COLOGNE(MacroCategory.FRAGRANCE),
+    BODY_MIST(MacroCategory.FRAGRANCE),
+    
+    // Grooming
+    SHAVING_CREAM(MacroCategory.GROOMING),
+    AFTERSHAVE(MacroCategory.GROOMING),
+    BEARD_CARE(MacroCategory.GROOMING),
+    RAZOR(MacroCategory.GROOMING),
+    
+    // Hands & Nails
+    HAND_CREAM(MacroCategory.HYGIENE),
+    NAIL_POLISH(MacroCategory.TOOLS),
+    
     // Tools
     BRUSHES(MacroCategory.TOOLS),
     SPONGES(MacroCategory.TOOLS),
@@ -66,18 +117,39 @@ enum class MicroCategory(val macro: MacroCategory) {
 
     val displayName: String
         get() = when (this) {
-            BB_CC_CREAM -> "BB/CC Cream"
-            COLOR_CORRECTOR -> "Color Corrector"
-            SETTING_POWDER -> "Setting Powder"
-            SETTING_SPRAY -> "Setting Spray"
-            FRECKLE_TINT -> "Freckle Tint"
-            LASH_PRIMER -> "Lash Primer"
-            BROW_PENCIL -> "Brow Pencil"
             BROW_GEL -> "Brow Gel"
             FALSE_LASHES -> "False Lashes"
             LIP_TINT_STAIN -> "Lip Tint/Stain"
             LIP_BALM -> "Lip Balm"
             LIP_PLUMPER -> "Lip Plumper"
+            BB_CC_CREAM -> "BB/CC Cream"
+            COLOR_CORRECTOR -> "Color Corrector"
+            SETTING_POWDER -> "Setting Powder"
+            FACE_POWDER -> "Face Powder"
+            SETTING_SPRAY -> "Setting Spray"
+            FRECKLE_TINT -> "Freckle Tint"
+            LASH_PRIMER -> "Lash Primer"
+            BROW_PENCIL -> "Brow Pencil"
+            FACE_MASK -> "Face Mask"
+            EYE_CARE -> "Eye Care"
+            LIP_CARE -> "Lip Care"
+            HAIR_MASK -> "Hair Mask"
+            HAIR_COLOR -> "Hair Coloring"
+            HAIR_STYLING -> "Hair Styling"
+            HAIR_SPRAY -> "Hair Spray"
+            SCALP_TREATMENT -> "Scalp Treatment"
+            SHOWER_GEL -> "Shower Gel"
+            BATH_PRODUCT -> "Bath Product"
+            INTIMATE_HYGIENE -> "Intimate Hygiene"
+            COTTON_PRODUCT -> "Cotton Pad/Swab"
+            DENTAL_FLOSS -> "Dental Floss"
+            EAU_DE_PARFUM -> "Eau de Parfum"
+            EAU_DE_TOILETTE -> "Eau de Toilette"
+            BODY_MIST -> "Body Mist"
+            SHAVING_CREAM -> "Shaving Cream/Foam"
+            BEARD_CARE -> "Beard Care"
+            HAND_CREAM -> "Hand Cream"
+            NAIL_POLISH -> "Nail Polish"
             AI_PENDING -> "New Capture"
             else -> name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
         }
@@ -85,37 +157,30 @@ enum class MicroCategory(val macro: MacroCategory) {
     /** Typical amount used per application (in ml or g). */
     val typicalAmountPerUse: Double
         get() = when (this) {
-            CLEANSER -> 1.0
-            TONER -> 0.5
-            SERUM -> 0.2
-            MOISTURIZER -> 0.5
+            CLEANSER, SHAMPOO, CONDITIONER, SHOWER_GEL -> 5.0
+            TONER, MOUTHWASH -> 2.0
+            SERUM, EYE_CARE, SCALP_TREATMENT -> 0.3
+            MOISTURIZER, FACE_MASK, HAIR_MASK, HAIR_COLOR, HAIR_STYLING, HAND_CREAM -> 1.5
             SPF -> 1.2
-            PRIMER -> 0.3
-            FOUNDATION -> 0.35
-            BB_CC_CREAM -> 0.4
-            CONCEALER -> 0.1
-            COLOR_CORRECTOR -> 0.05
-            SETTING_POWDER -> 0.1
-            SETTING_SPRAY -> 0.2
-            BLUSH -> 0.1
-            BRONZER -> 0.1
-            CONTOUR -> 0.1
-            HIGHLIGHTER -> 0.05
-            FRECKLE_TINT -> 0.02
-            EYESHADOW -> 0.05
-            EYELINER -> 0.02
-            MASCARA -> 0.1
-            LASH_PRIMER -> 0.05
-            BROW_PENCIL -> 0.02
-            BROW_GEL -> 0.03
+            PRIMER, FOUNDATION -> 0.4
+            BB_CC_CREAM -> 0.5
+            CONCEALER, COLOR_CORRECTOR -> 0.1
+            SETTING_POWDER, FACE_POWDER -> 0.2
+            SETTING_SPRAY, HAIR_SPRAY, BODY_MIST -> 0.5
+            BLUSH, BRONZER, CONTOUR -> 0.15
+            HIGHLIGHTER, FRECKLE_TINT -> 0.05
+            EYESHADOW, EYELINER, BROW_PENCIL, BROW_GEL -> 0.02
+            MASCARA, LASH_PRIMER -> 0.05
+            LIPSTICK, LIP_LINER, LIP_TINT_STAIN -> 0.05
+            LIP_GLOSS, LIP_BALM, LIP_PLUMPER, LIP_CARE -> 0.1
             FALSE_LASHES -> 1.0
-            LIPSTICK -> 0.05
-            LIP_GLOSS -> 0.1
-            LIP_LINER -> 0.02
-            LIP_TINT_STAIN -> 0.05
-            LIP_BALM -> 0.1
-            LIP_PLUMPER -> 0.1
-            BRUSHES, SPONGES, EYELASH_CURLER, ORGANIZERS, AI_PENDING -> 0.0
+            BRUSHES, SPONGES, EYELASH_CURLER, ORGANIZERS, AI_PENDING, TOOTHBRUSH, RAZOR, NAIL_POLISH -> 0.0
+            SOAP, BATH_PRODUCT, DEODORANT, ANTIPERSPIRANT, INTIMATE_HYGIENE, COTTON_PRODUCT -> 1.0
+            TOOTHPASTE -> 0.5
+            DENTAL_FLOSS -> 0.2
+            PERFUME, EAU_DE_PARFUM, EAU_DE_TOILETTE, COLOGNE -> 0.1
+            SHAVING_CREAM, AFTERSHAVE, BEARD_CARE -> 1.0
+            EXFOLIANT -> 2.0
             OTHER -> 0.1
         }
 }
