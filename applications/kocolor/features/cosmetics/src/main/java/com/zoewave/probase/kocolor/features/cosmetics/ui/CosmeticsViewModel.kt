@@ -15,6 +15,7 @@ import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.kocolor.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -53,7 +54,10 @@ data class CosmeticsUiState(
     val expiringCosmeticsCount: Int = 0,
     val cosmeticsByGroup: Map<String, Int> = emptyMap(),
     val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap(),
-    val categoryFilter: String? = null
+    val categoryFilter: String? = null,
+    val scanStatus: String? = null,
+    val isScanSuccessful: Boolean = false,
+    val lastScanFailed: Boolean = false
 )
 
 sealed class CosmeticsEvent {
@@ -70,6 +74,7 @@ sealed class CosmeticsEvent {
     data class InitializeEdit(val itemId: Long) : CosmeticsEvent()
     data class InitializeAdd(val categoryFilter: String?) : CosmeticsEvent()
     data class HandleScanResult(val code: String) : CosmeticsEvent()
+    data object ResetScanState : CosmeticsEvent()
 }
 
 @HiltViewModel
@@ -83,15 +88,12 @@ class CosmeticsViewModel @Inject constructor(
 
     private val _isAnalyzing = MutableStateFlow(false)
     private val _aiResult = MutableStateFlow<CosmeticItem?>(null)
-    private val _draftItem = MutableStateFlow(CosmeticItem(
-        name = "", 
-        brand = "", 
-        macroCategory = MacroCategory.COMPLEXION, 
-        microCategory = MicroCategory.FOUNDATION
-    ))
     private val _searchQuery = MutableStateFlow("")
     private val _sortOption = MutableStateFlow(SortOption.NEWEST)
     private val _categoryFilter = MutableStateFlow<String?>(null)
+    private val _scanStatus = MutableStateFlow<String?>(null)
+    private val _isScanSuccessful = MutableStateFlow(false)
+    private val _lastScanFailed = MutableStateFlow(false)
 
     init {
         viewModelScope.launch {
@@ -102,11 +104,32 @@ class CosmeticsViewModel @Inject constructor(
             }
         }
 
+        // Initialize session draft if empty
+        if (sessionRepository.cosmeticDraft.value == null) {
+            sessionRepository.setCosmeticDraft(CosmeticItem(
+                name = "", 
+                brand = "", 
+                macroCategory = MacroCategory.COMPLEXION, 
+                microCategory = MicroCategory.FOUNDATION
+            ))
+        }
+
+        // Auto-lookup on barcode scan
         sessionRepository.lastScannedCode
             .filterNotNull()
             .onEach { code ->
-                _draftItem.value = _draftItem.value.copy(batchCode = code)
-                sessionRepository.setLastScannedCode(null) // Consume it
+                updateSessionDraft { it.copy(batchCode = code) }
+                fetchObfProduct(code)
+                sessionRepository.setLastScannedCode(null)
+            }
+            .launchIn(viewModelScope)
+            
+        // Auto-update on image capture
+        sessionRepository.capturedItemUri
+            .filterNotNull()
+            .onEach { uri ->
+                updateSessionDraft { it.copy(imageUrl = uri) }
+                scanWithGemini()
             }
             .launchIn(viewModelScope)
     }
@@ -119,22 +142,26 @@ class CosmeticsViewModel @Inject constructor(
 
     val uiState: StateFlow<CosmeticsUiState> = combine(
         cosmeticRepository.getAllCosmetics(),
-        sessionRepository.capturedItemUri,
         _isAnalyzing,
         _aiResult,
-        _draftItem,
+        sessionRepository.cosmeticDraft.filterNotNull(),
         _searchQuery,
         _sortOption,
-        _categoryFilter
+        _categoryFilter,
+        _scanStatus,
+        _isScanSuccessful,
+        _lastScanFailed
     ) { array ->
         val models = array[0] as List<CosmeticItem>
-        val capturedUri = array[1] as String?
-        val analyzing = array[2] as Boolean
-        val aiResult = array[3] as CosmeticItem?
-        val draft = array[4] as CosmeticItem
-        val query = array[5] as String
-        val sort = array[6] as SortOption
-        val filter = array[7] as String?
+        val analyzing = array[1] as Boolean
+        val aiResult = array[2] as CosmeticItem?
+        val draft = array[3] as CosmeticItem
+        val query = array[4] as String
+        val sort = array[5] as SortOption
+        val filter = array[6] as String?
+        val scanStatus = array[7] as String?
+        val scanSuccessful = array[8] as Boolean
+        val scanFailed = array[9] as Boolean
 
         val groupStats = models.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         
@@ -182,89 +209,133 @@ class CosmeticsViewModel @Inject constructor(
             items = models,
             filteredItems = filtered,
             isLoading = false,
-            capturedImageUri = capturedUri,
+            capturedImageUri = draft.imageUrl,
             isAnalyzing = analyzing,
             aiResult = aiResult,
-            draftItem = draft.copy(imageUrl = capturedUri ?: draft.imageUrl),
+            draftItem = draft,
             searchQuery = query,
             sortOption = sort,
             totalCosmetics = models.size,
             expiringCosmeticsCount = expiringCount,
             cosmeticsByGroup = groupStats,
             categoriesMetadata = categoryMetadata,
-            categoryFilter = filter
+            categoryFilter = filter,
+            scanStatus = scanStatus,
+            isScanSuccessful = scanSuccessful,
+            lastScanFailed = scanFailed
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CosmeticsUiState())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, CosmeticsUiState())
 
     fun onEvent(event: CosmeticsEvent) {
         when (event) {
             is CosmeticsEvent.AddItem -> {
                 addItem(event.item)
-                _draftItem.value = CosmeticItem(
+                sessionRepository.setCosmeticDraft(CosmeticItem(
                     name = "", 
                     brand = "", 
                     macroCategory = MacroCategory.COMPLEXION, 
                     microCategory = MicroCategory.FOUNDATION
-                )
+                ))
             }
             is CosmeticsEvent.UpdateItem -> updateItem(event.item)
             is CosmeticsEvent.DeleteItem -> deleteItem(event.id)
             is CosmeticsEvent.UseItem -> useItem(event.id)
             is CosmeticsEvent.UpdateDraft -> {
-                val updatedItem = if (event.item.microCategory != _draftItem.value.microCategory) {
+                val current = sessionRepository.cosmeticDraft.value
+                val updatedItem = if (event.item.microCategory != (current?.microCategory ?: MicroCategory.FOUNDATION)) {
                     event.item.copy(amountPerUse = event.item.microCategory.typicalAmountPerUse)
                 } else {
                     event.item
                 }
-                _draftItem.value = updatedItem
+                sessionRepository.setCosmeticDraft(updatedItem)
             }
-            is CosmeticsEvent.StartEditing -> _draftItem.value = event.item
+            is CosmeticsEvent.StartEditing -> sessionRepository.setCosmeticDraft(event.item)
             is CosmeticsEvent.InitializeEdit -> {
                 viewModelScope.launch {
                     cosmeticRepository.getAllCosmetics().map { items -> 
                         items.find { it.id == event.itemId } 
                     }.filterNotNull().first().let { model ->
-                        _draftItem.value = model
+                        sessionRepository.setCosmeticDraft(model)
                     }
                 }
             }
             is CosmeticsEvent.InitializeAdd -> {
                 _categoryFilter.value = event.categoryFilter
+                
+                val currentDraft = sessionRepository.cosmeticDraft.value
+                val isEmpty = currentDraft == null || (currentDraft.name.isBlank() && 
+                             currentDraft.brand.isBlank() && 
+                             currentDraft.imageUrl == null && 
+                             currentDraft.batchCode == null)
+                
+                if (!isEmpty || _isAnalyzing.value || _isScanSuccessful.value) return
+                
                 val macro = MacroCategory.entries.firstOrNull { 
                     it.displayName.contains(event.categoryFilter ?: "", ignoreCase = true) 
                 } ?: MacroCategory.COMPLEXION
                 
                 val micro = MicroCategory.entries.firstOrNull { it.macro == macro } ?: MicroCategory.FOUNDATION
                 
-                _draftItem.value = CosmeticItem(
+                sessionRepository.setCosmeticDraft(CosmeticItem(
                     name = "", 
                     brand = "", 
                     macroCategory = macro, 
                     microCategory = micro,
                     amountPerUse = micro.typicalAmountPerUse
-                )
+                ))
             }
             is CosmeticsEvent.UpdateSearchQuery -> _searchQuery.value = event.query
             is CosmeticsEvent.UpdateSortOption -> _sortOption.value = event.option
             CosmeticsEvent.ScanWithGemini -> scanWithGemini()
             CosmeticsEvent.ClearCapturedImage -> sessionRepository.setCapturedItemUri(null)
             is CosmeticsEvent.HandleScanResult -> fetchObfProduct(event.code)
+            CosmeticsEvent.ResetScanState -> {
+                _isScanSuccessful.value = false
+                _lastScanFailed.value = false
+                _scanStatus.value = null
+            }
         }
+    }
+
+    private fun updateSessionDraft(block: (CosmeticItem) -> CosmeticItem) {
+        val current = sessionRepository.cosmeticDraft.value ?: return
+        sessionRepository.setCosmeticDraft(block(current))
     }
 
     private fun fetchObfProduct(code: String) {
         viewModelScope.launch {
             _isAnalyzing.value = true
+            _scanStatus.value = "Searching OBF database..."
+            _lastScanFailed.value = false
+            
+            updateSessionDraft { it.copy(batchCode = code) }
+            
             val result = cosmeticRepository.fetchProductByBarcode(code)
+            
             result.onSuccess { obfItem ->
-                _draftItem.value = obfItem.copy(
-                    imageUrl = _draftItem.value.imageUrl ?: obfItem.imageUrl
-                )
+                _scanStatus.value = "Product found: ${obfItem.name}"
+                
+                updateSessionDraft { current ->
+                    current.copy(
+                        batchCode = code,
+                        name = obfItem.name.takeIf { it.isNotBlank() && it != "Unknown Product" } ?: current.name,
+                        brand = obfItem.brand.takeIf { it.isNotBlank() && it != "Unknown Brand" } ?: current.brand,
+                        macroCategory = if (obfItem.macroCategory != MacroCategory.TOOLS) obfItem.macroCategory else current.macroCategory,
+                        microCategory = if (obfItem.microCategory != MicroCategory.AI_PENDING) obfItem.microCategory else current.microCategory,
+                        notes = obfItem.notes ?: current.notes,
+                        volume = obfItem.volume ?: current.volume,
+                        imageUrl = current.imageUrl ?: obfItem.imageUrl
+                    )
+                }
+                _isScanSuccessful.value = true
             }.onFailure {
-                // Fallback to just setting the code if OBF fetch fails
-                _draftItem.value = _draftItem.value.copy(batchCode = code)
+                _scanStatus.value = "Product not found in OBF database."
+                _lastScanFailed.value = true
             }
             _isAnalyzing.value = false
+            
+            delay(3000)
+            _scanStatus.value = null
         }
     }
 
@@ -287,7 +358,7 @@ class CosmeticsViewModel @Inject constructor(
     }
 
     private fun scanWithGemini() {
-        val uri = uiState.value.capturedImageUri ?: return
+        val uri = sessionRepository.cosmeticDraft.value?.imageUrl ?: return
         viewModelScope.launch {
             _isAnalyzing.value = true
             _aiResult.value = null
@@ -302,11 +373,18 @@ class CosmeticsViewModel @Inject constructor(
                         apiKey = apiKey
                     )
                     _aiResult.value = result
-                    // Note: Auto-fill logic here might need to map Gemini categories to our new taxonomy
-                    result?.let {
-                        // Assuming AnalyzerEngine provides a model that needs to be mapped
-                        // For now we keep existing simple copy if types match, or fix mapping
-                        // In a real pro app, we'd have a mapping layer for Gemini outputs
+                    
+                    result?.let { aiItem ->
+                        updateSessionDraft { current ->
+                            current.copy(
+                                name = if (current.name.isBlank()) aiItem.name else current.name,
+                                brand = if (current.brand.isBlank()) aiItem.brand else current.brand,
+                                macroCategory = if (aiItem.macroCategory != MacroCategory.TOOLS) aiItem.macroCategory else current.macroCategory,
+                                microCategory = if (aiItem.microCategory != MicroCategory.AI_PENDING) aiItem.microCategory else current.microCategory,
+                                colorHex = current.colorHex ?: aiItem.colorHex,
+                                shadeName = current.shadeName ?: aiItem.shadeName
+                            )
+                        }
                     }
                 }
             }
