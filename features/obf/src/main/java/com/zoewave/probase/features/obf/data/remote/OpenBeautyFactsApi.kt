@@ -18,7 +18,8 @@ data class ObfProduct(
     @SerializedName("categories_tags") val categoriesTags: List<String>?,
     @SerializedName("ingredients_text") val ingredientsText: String?,
     @SerializedName("image_front_url") val imageUrl: String?,
-    @SerializedName("quantity") val volume: String?
+    @SerializedName("quantity") val volume: String?,
+    @SerializedName("_keywords") val keywords: List<String>?
 )
 
 // 2. Retrofit API Interface

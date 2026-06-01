@@ -26,27 +26,35 @@ class ObfRepository @Inject constructor(
                 val obfProduct = response.body()?.product ?: return@withContext Result.failure(Exception("Product data is missing."))
                 android.util.Log.d("ObfRepo", "fetchProductByBarcode: SUCCESS. Found ${obfProduct.productName} by ${obfProduct.brands}")
                 
-                // Map OBF taxonomy to KoColor strict enums
+                // 1. Map OBF taxonomy to KoColor strict enums
                 val resolvedMicroCategory = ObfTaxonomyMapper.extractMicroCategory(obfProduct.categoriesTags)
                 val resolvedMacroCategory = resolvedMicroCategory.macro // Inherited automatically
-                
-                // Join ingredients for the notes or instructions if needed, 
-                // but the blueprint uses it as a list for the Conflict Engine.
-                // CosmeticItem currently doesn't have an ingredients list field, only notes.
-                // We'll put it in notes for now, or instructions.
+
+                // 2. Fragment technical details
                 val ingredientList = ObfTaxonomyMapper.parseIngredients(obfProduct.ingredientsText)
-                val ingredientNotes = if (ingredientList.isNotEmpty()) {
-                    "Ingredients: ${ingredientList.joinToString(", ")}"
-                } else null
+                
+                // 3. Heuristics for Professional Facets
+                val resolvedFinish = ObfTaxonomyMapper.extractFinish(obfProduct.keywords)
+                val resolvedFormulation = ObfTaxonomyMapper.extractFormulation(obfProduct.keywords)
+                val resolvedChemistry = ObfTaxonomyMapper.extractChemistryBase(ingredientList)
+
+                // 4. Ingredient Highlights
+                val heroIngredient = ingredientList.firstOrNull()?.replaceFirstChar { it.uppercase() }
+                val hasFragrance = ingredientList.any { it.contains("parfum") || it.contains("fragrance") }
 
                 val draftItem = CosmeticItem(
-                    batchCode = barcode, // Use barcode as the batch code / SKU
-                    brand = obfProduct.brands ?: "Unknown Brand",
+                    batchCode = barcode,
+                    brand = obfProduct.brands?.split(",")?.firstOrNull()?.trim() ?: "Unknown Brand",
                     name = obfProduct.productName ?: "Unknown Product",
                     macroCategory = resolvedMacroCategory,
                     microCategory = resolvedMicroCategory,
+                    formulation = resolvedFormulation,
+                    finish = resolvedFinish,
+                    chemistryBase = resolvedChemistry,
+                    heroIngredient = heroIngredient,
+                    containsFragrance = hasFragrance,
+                    ingredients = ingredientList,
                     imageUrl = obfProduct.imageUrl,
-                    notes = ingredientNotes,
                     volume = obfProduct.volume
                 )
                 

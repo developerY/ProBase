@@ -250,7 +250,13 @@ data class CosmeticItem(
     /** Total amount remaining (same unit as volume). */
     val amountRemaining: Double? = null,
     /** Amount consumed per single usage event. */
-    val amountPerUse: Double? = null
+    val amountPerUse: Double? = null,
+    
+    // --- Algorithmic & AI Insights ---
+    val heroIngredient: String? = null,
+    val skinCompatibility: String? = null,
+    val containsFragrance: Boolean? = null,
+    val ingredients: List<String> = emptyList()
 ) {
     /** 
      * Calculated estimated expiration based on PAO and opened date. 
