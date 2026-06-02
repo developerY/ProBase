@@ -19,6 +19,7 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -71,7 +72,7 @@ dependencies {
     implementation(project(":applications:kocolor:features:inventory"))
     implementation(project(":applications:kocolor:features:routines"))
     implementation(project(":applications:kocolor:features:cosmetics"))
-    implementation(project(":features:fda"))
+    implementation(project(":applications:kocolor:features:fda"))
     implementation(project(":features:xr:ar:naillab"))
     implementation(project(":features:xr:ar:facelab"))
     

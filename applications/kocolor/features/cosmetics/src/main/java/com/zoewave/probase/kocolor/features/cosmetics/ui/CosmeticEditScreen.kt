@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Image
@@ -102,6 +103,33 @@ fun CosmeticEditScreen(
     
     var showColorPicker by remember { mutableStateOf(false) }
     var showDatePickerTarget by remember { mutableStateOf<String?>(null) }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            confirmButton = {
+                TextButton(
+                    onClick = { 
+                        onEvent(CosmeticsEvent.DeleteItem(itemId))
+                        showDeleteConfirmation = false
+                        navTo(KoColorRoute.Back)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
+                ) {
+                    Text("Delete", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text("Cancel")
+                }
+            },
+            title = { Text("Delete Product?") },
+            text = { Text("Are you sure you want to permanently remove ${draft.name} from your collection?") },
+            shape = RoundedCornerShape(24.dp)
+        )
+    }
 
     val expandedSections = remember { 
         mutableStateMapOf<String, Boolean>().apply {
@@ -167,11 +195,14 @@ fun CosmeticEditScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = {
+                    IconButton(onClick = { showDeleteConfirmation = true }) {
+                        Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = Color.Gray)
+                    }
+                    IconButton(onClick = {
                         onEvent(CosmeticsEvent.UpdateItem(draft))
                         navTo(KoColorRoute.Back)
                     }) {
-                        Text("Save", fontWeight = FontWeight.Bold, color = atelierBrown)
+                        Icon(Icons.Default.Save, contentDescription = "Save", tint = atelierBrown)
                     }
                 }
             )

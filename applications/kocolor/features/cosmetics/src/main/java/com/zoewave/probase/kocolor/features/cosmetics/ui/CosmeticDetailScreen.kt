@@ -29,8 +29,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Image
@@ -132,33 +132,6 @@ fun CosmeticDetailScreen(
     val item = uiState.item ?: return
     val atelierBrown = Color(0xFF8B5E3C)
     val statusColor = if ((item.fillLevel ?: 1.0) > 0.1) Color(0xFF4CAF50) else Color.Gray
-    var showDeleteConfirmation by remember { mutableStateOf(false) }
-
-    if (showDeleteConfirmation) {
-        AlertDialog(
-            onDismissRequest = { showDeleteConfirmation = false },
-            confirmButton = {
-                TextButton(
-                    onClick = { 
-                        onEvent(CosmeticsEvent.DeleteItem(item.id))
-                        showDeleteConfirmation = false
-                        navTo(KoColorRoute.Back)
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
-                ) {
-                    Text("Delete", fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text("Cancel")
-                }
-            },
-            title = { Text("Delete Product?") },
-            text = { Text("Are you sure you want to permanently remove ${item.name} from your collection?") },
-            shape = RoundedCornerShape(24.dp)
-        )
-    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -179,8 +152,11 @@ fun CosmeticDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showDeleteConfirmation = true }) {
-                        Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = Color.Gray)
+                    IconButton(onClick = { 
+                        onEvent(CosmeticsEvent.StartEditing(item))
+                        navTo(KoColorRoute.CosmeticEdit(item.id))
+                    }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Gray)
                     }
                 }
             )
@@ -337,30 +313,6 @@ fun CosmeticDetailScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
-
-                Spacer(Modifier.height(24.dp))
-
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    OutlinedButton(
-                        onClick = { 
-                            onEvent(CosmeticsEvent.StartEditing(item))
-                            navTo(KoColorRoute.CosmeticEdit(item.id))
-                        },
-                        modifier = Modifier.weight(1f).height(48.dp),
-                        shape = RoundedCornerShape(4.dp),
-                        border = BorderStroke(1.dp, Color.Black)
-                    ) {
-                        Text("Edit Product", color = Color.Black, fontWeight = FontWeight.Bold)
-                    }
-                    Button(
-                        onClick = { /* Export */ },
-                        modifier = Modifier.weight(1f).height(48.dp),
-                        shape = RoundedCornerShape(4.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = atelierBrown)
-                    ) {
-                        Text("Export Report", color = Color.White, fontWeight = FontWeight.Bold)
-                    }
-                }
             }
 
             // 2. Product Image Section
