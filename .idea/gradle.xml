@@ -95,6 +95,7 @@
             <option value="$PROJECT_DIR$/applications/kocolor/features" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/analyzer" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/cosmetics" />
+            <option value="$PROJECT_DIR$/applications/kocolor/features/fda" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/inventory" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/routines" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/stitch" />
@@ -176,7 +177,6 @@
             <option value="$PROJECT_DIR$/features/calendar" />
             <option value="$PROJECT_DIR$/features/camera" />
             <option value="$PROJECT_DIR$/features/compliance" />
-            <option value="$PROJECT_DIR$/features/fda" />
             <option value="$PROJECT_DIR$/features/graphics" />
             <option value="$PROJECT_DIR$/features/health" />
             <option value="$PROJECT_DIR$/features/health/cgm" />
