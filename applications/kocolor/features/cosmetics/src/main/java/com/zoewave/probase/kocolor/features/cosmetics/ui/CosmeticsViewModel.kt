@@ -333,7 +333,19 @@ class CosmeticsViewModel @Inject constructor(
                         microCategory = if (obfItem.microCategory != MicroCategory.AI_PENDING) obfItem.microCategory else current.microCategory,
                         notes = obfItem.notes ?: current.notes,
                         volume = obfItem.volume ?: current.volume,
-                        imageUrl = current.imageUrl ?: obfItem.imageUrl
+                        imageUrl = current.imageUrl ?: obfItem.imageUrl,
+                        
+                        // Carry over derived facets & ingredients
+                        formulation = obfItem.formulation,
+                        finish = obfItem.finish,
+                        chemistryBase = obfItem.chemistryBase,
+                        heroIngredient = obfItem.heroIngredient,
+                        ingredients = obfItem.ingredients,
+                        allergens = obfItem.allergens,
+                        containsFragrance = obfItem.containsFragrance,
+                        ecoScore = obfItem.ecoScore,
+                        isVegan = obfItem.isVegan,
+                        isCrueltyFree = obfItem.isCrueltyFree
                     )
                 }
                 
@@ -412,7 +424,14 @@ class CosmeticsViewModel @Inject constructor(
                                 macroCategory = if (aiItem.macroCategory != MacroCategory.TOOLS) aiItem.macroCategory else current.macroCategory,
                                 microCategory = if (aiItem.microCategory != MicroCategory.AI_PENDING) aiItem.microCategory else current.microCategory,
                                 colorHex = current.colorHex ?: aiItem.colorHex,
-                                shadeName = current.shadeName ?: aiItem.shadeName
+                                shadeName = current.shadeName ?: aiItem.shadeName,
+                                
+                                // Carry over AI discovered facets
+                                heroIngredient = aiItem.heroIngredient ?: current.heroIngredient,
+                                ingredients = aiItem.ingredients.takeIf { it.isNotEmpty() } ?: current.ingredients,
+                                containsFragrance = aiItem.containsFragrance ?: current.containsFragrance,
+                                formulation = if (aiItem.formulation != Formulation.UNKNOWN) aiItem.formulation else current.formulation,
+                                finish = if (aiItem.finish != Finish.UNKNOWN) aiItem.finish else current.finish
                             )
                         }
                     }
