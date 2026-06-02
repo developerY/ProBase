@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.zoewave.probase.features.fda" >
+
+    <uses-sdk android:minSdkVersion="34" />
+
+</manifest>
