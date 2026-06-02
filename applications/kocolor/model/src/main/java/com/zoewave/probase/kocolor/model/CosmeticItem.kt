@@ -266,7 +266,15 @@ data class CosmeticItem(
     val recyclingInstructions: String? = null,
     
     // --- Ritual Context ---
-    val ritualPlacement: String? = null // e.g. "Morning Routine (Step 2)"
+    val ritualPlacement: String? = null, // e.g. "Morning Routine (Step 2)"
+
+    // --- FDA & Clinical Safety ---
+    val fdaRecallStatus: String? = null,
+    val fdaAdverseEventCount: Int = 0,
+    val fdaClinicalWarnings: List<String> = emptyList(),
+    val fdaTopReactions: List<String> = emptyList(),
+    val fdaActiveIngredients: List<String> = emptyList(),
+    val isFdaChecked: Boolean = false
 ) {
     /** 
      * Calculated estimated expiration based on PAO and opened date. 

@@ -26,18 +26,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Recycling
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -51,14 +52,19 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -116,31 +122,6 @@ private fun CosmeticDetailScreenPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Not Tracked")
-@Composable
-private fun CosmeticDetailScreen_NotTracked_Preview() {
-    MaterialTheme {
-        CosmeticDetailScreen(
-            uiState = CosmeticDetailUiState(
-                item = CosmeticItem(
-                    id = 2L,
-                    name = "Silk Primer",
-                    brand = "KoColor",
-                    macroCategory = MacroCategory.PREP,
-                    microCategory = MicroCategory.PRIMER,
-                    price = null,
-                    volume = "30ml",
-                    amountRemaining = null,
-                    amountPerUse = null,
-                    usageCount = 0
-                )
-            ),
-            onEvent = {},
-            navTo = {}
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CosmeticDetailScreen(
@@ -151,6 +132,33 @@ fun CosmeticDetailScreen(
     val item = uiState.item ?: return
     val atelierBrown = Color(0xFF8B5E3C)
     val statusColor = if ((item.fillLevel ?: 1.0) > 0.1) Color(0xFF4CAF50) else Color.Gray
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            confirmButton = {
+                TextButton(
+                    onClick = { 
+                        onEvent(CosmeticsEvent.DeleteItem(item.id))
+                        showDeleteConfirmation = false
+                        navTo(KoColorRoute.Back)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
+                ) {
+                    Text("Delete", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text("Cancel")
+                }
+            },
+            title = { Text("Delete Product?") },
+            text = { Text("Are you sure you want to permanently remove ${item.name} from your collection?") },
+            shape = RoundedCornerShape(24.dp)
+        )
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -167,12 +175,12 @@ fun CosmeticDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Notifications */ }) {
-                        Icon(Icons.Default.NotificationsNone, contentDescription = "Notifications")
+                    IconButton(onClick = { showDeleteConfirmation = true }) {
+                        Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = Color.Gray)
                     }
                 }
             )
@@ -180,14 +188,13 @@ fun CosmeticDetailScreen(
     ) { padding ->
         val expandedStates = remember { 
             mutableStateMapOf<String, Boolean>().apply {
-                put("Value Analysis", true)
-                put("Color Hue Map", true)
+                put("Clinical Safety", true)
+                put("Ingredient Analysis", false)
+                put("Sustainability", false)
+                put("Application Guide", false)
                 put("Professional Facets", false)
                 put("Product Lifecycle", false)
                 put("Usage & Stock", true)
-                put("Application Guide", false)
-                put("Ingredient Analysis", false)
-                put("Sustainability", false)
                 put("Coordination", false)
             }
         }
@@ -199,9 +206,39 @@ fun CosmeticDetailScreen(
                 .verticalScroll(rememberScrollState())
                 .background(Color.White)
         ) {
+            // 0. Recall Banner (High Priority)
+            item.fdaRecallStatus?.let { status ->
+                Surface(
+                    color = Color(0xFFD32F2F),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.Warning, null, tint = Color.White, modifier = Modifier.size(24.dp))
+                        Spacer(Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                "ACTIVE FDA RECALL",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Black,
+                                color = Color.White,
+                                letterSpacing = 2.sp
+                            )
+                            Text(
+                                "Status: $status. Discontinue use immediately.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+
             // 1. Header Information
             Column(modifier = Modifier.padding(24.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Surface(
                         color = Color(0xFFF5F5F5),
                         shape = RoundedCornerShape(4.dp)
@@ -213,6 +250,40 @@ fun CosmeticDetailScreen(
                             color = Color.Gray
                         )
                     }
+
+                    // FDA Clinical Safety Badge (Green/Red/Gray Indicator)
+                    val fdaStatusColor = when {
+                        !item.isFdaChecked -> Color.Gray // Not checked yet
+                        item.fdaRecallStatus != null -> Color(0xFFD32F2F) // Red for Recall
+                        item.fdaAdverseEventCount > 10 -> Color(0xFFFF9800) // Orange for High Events
+                        else -> Color(0xFF4CAF50) // Green for Checked & Safe
+                    }
+                    
+                    Surface(
+                        color = fdaStatusColor.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(4.dp),
+                        border = BorderStroke(0.5.dp, fdaStatusColor.copy(alpha = 0.5f))
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (item.fdaRecallStatus != null) Icons.Default.Warning else Icons.Default.VerifiedUser,
+                                contentDescription = null,
+                                modifier = Modifier.size(12.dp),
+                                tint = fdaStatusColor
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = "FDA",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = fdaStatusColor,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
+                    }
+                    
                     Surface(
                         color = statusColor.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(4.dp)
@@ -337,6 +408,31 @@ fun CosmeticDetailScreen(
                 }
             }
             
+            // CLINICAL SAFETY (High Priority, Expanded by default)
+            AtelierExpandableSection(
+                title = "Clinical Safety",
+                isExpanded = expandedStates["Clinical Safety"] == true,
+                onToggle = { expandedStates["Clinical Safety"] = it }
+            ) {
+                ClinicalSafetySection(item)
+            }
+
+            AtelierExpandableSection(
+                title = "Ingredient Analysis",
+                isExpanded = expandedStates["Ingredient Analysis"] == true,
+                onToggle = { expandedStates["Ingredient Analysis"] = it }
+            ) {
+                IngredientAnalysisSection(item, uiState.bioSyncMessage)
+            }
+
+            AtelierExpandableSection(
+                title = "Sustainability & Eco-Impact",
+                isExpanded = expandedStates["Sustainability"] == true,
+                onToggle = { expandedStates["Sustainability"] = it }
+            ) {
+                SustainabilitySection(item)
+            }
+
             AtelierExpandableSection(
                 title = "Application Guide",
                 isExpanded = expandedStates["Application Guide"] == true,
@@ -367,22 +463,6 @@ fun CosmeticDetailScreen(
                 onToggle = { expandedStates["Usage & Stock"] = it }
             ) {
                 UsageStockSection(item, uiState)
-            }
-
-            AtelierExpandableSection(
-                title = "Ingredient Analysis",
-                isExpanded = expandedStates["Ingredient Analysis"] == true,
-                onToggle = { expandedStates["Ingredient Analysis"] = it }
-            ) {
-                IngredientAnalysisSection(item, uiState.bioSyncMessage)
-            }
-
-            AtelierExpandableSection(
-                title = "Sustainability & Eco-Impact",
-                isExpanded = expandedStates["Sustainability"] == true,
-                onToggle = { expandedStates["Sustainability"] = it }
-            ) {
-                SustainabilitySection(item)
             }
 
             AtelierExpandableSection(
@@ -489,6 +569,93 @@ private fun ApplicationGuideSection(item: CosmeticItem, atelierBrown: Color) {
                         Text(notes, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ClinicalSafetySection(item: CosmeticItem) {
+    Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        when {
+            !item.isFdaChecked -> {
+                Surface(
+                    color = Color(0xFFF5F5F5),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.VerifiedUser, null, modifier = Modifier.size(20.dp), tint = Color.Gray)
+                        Spacer(Modifier.width(12.dp))
+                        Text("FDA Safety check pending...", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    }
+                }
+            }
+            item.fdaRecallStatus != null -> {
+                WarningBanner(
+                    title = "ACTIVE FDA RECALL",
+                    subtitle = "This product has been flagged by the FDA: ${item.fdaRecallStatus}. Discontinue use.",
+                    icon = Icons.Default.Warning
+                )
+            }
+            item.fdaAdverseEventCount > 0 -> {
+                WarningBanner(
+                    title = "${item.fdaAdverseEventCount} Adverse Events Reported",
+                    subtitle = "Reported reactions: ${item.fdaTopReactions.take(3).joinToString(", ")}",
+                    icon = Icons.Default.Warning
+                )
+            }
+            else -> {
+                Surface(
+                    color = Color(0xFFF0F7F0),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.VerifiedUser, null, modifier = Modifier.size(20.dp), tint = Color(0xFF2E7D32))
+                        Spacer(Modifier.width(12.dp))
+                        Text("No adverse events reported to the FDA.", style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E7D32))
+                    }
+                }
+            }
+        }
+
+        if (item.fdaActiveIngredients.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Text("OTC ACTIVE INGREDIENTS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
+            item.fdaActiveIngredients.forEach { ingredient ->
+                DetailMetricRow("Active", ingredient)
+            }
+        }
+
+        if (item.fdaClinicalWarnings.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Text("FDA CLINICAL WARNINGS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
+            item.fdaClinicalWarnings.take(2).forEach { warning ->
+                Text(
+                    text = "• $warning",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.DarkGray,
+                    lineHeight = 18.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun WarningBanner(title: String, subtitle: String, icon: ImageVector) {
+    Surface(
+        color = Color(0xFFFFF0F0),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
+            Icon(icon, null, modifier = Modifier.size(24.dp), tint = Color(0xFFD32F2F))
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = Color(0xFFD32F2F))
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Color(0xFFD32F2F))
             }
         }
     }

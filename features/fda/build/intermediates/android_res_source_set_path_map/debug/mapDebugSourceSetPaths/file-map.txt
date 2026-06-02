@@ -1,0 +1,9 @@
+com.zoewave.probase.features.fda-pngs-0 /Users/developer/AndroidStudioProjects/ProBase/features/fda/build/generated/res/pngs/debug
+com.zoewave.probase.features.fda-updated_navigation_xml-1 /Users/developer/AndroidStudioProjects/ProBase/features/fda/build/generated/updated_navigation_xml/debug
+com.zoewave.probase.features.fda-mergeDebugResources-2 /Users/developer/AndroidStudioProjects/ProBase/features/fda/build/intermediates/incremental/debug/mergeDebugResources/merged.dir
+com.zoewave.probase.features.fda-mergeDebugResources-3 /Users/developer/AndroidStudioProjects/ProBase/features/fda/build/intermediates/incremental/debug/mergeDebugResources/stripped.dir
+com.zoewave.probase.features.fda-debug-4 /Users/developer/AndroidStudioProjects/ProBase/features/fda/build/intermediates/merged_res/debug/mergeDebugResources
+com.zoewave.probase.features.fda-debug-5 /Users/developer/AndroidStudioProjects/ProBase/features/fda/build/intermediates/packaged_res/debug/packageDebugResources
+com.zoewave.probase.features.fda-debug-6 /Users/developer/AndroidStudioProjects/ProBase/features/fda/src/debug/res
+com.zoewave.probase.features.fda-main-7 /Users/developer/AndroidStudioProjects/ProBase/features/fda/src/main/res
+gradleHome-0 /Users/developer/.gradle

@@ -13,6 +13,7 @@ import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.features.fda.data.repository.FdaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -75,6 +76,7 @@ sealed class CosmeticsEvent {
     data class InitializeAdd(val categoryFilter: String?) : CosmeticsEvent()
     data class HandleScanResult(val code: String) : CosmeticsEvent()
     data object ResetScanState : CosmeticsEvent()
+    data object CancelDiscovery : CosmeticsEvent()
 }
 
 @HiltViewModel
@@ -82,6 +84,7 @@ class CosmeticsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val cosmeticRepository: CosmeticInventoryRepository,
     private val sessionRepository: FashionSessionRepository,
+    private val fdaRepository: FdaRepository,
     private val analyzerEngine: AnalyzerEngine,
     @Named("KoColor") private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
@@ -294,6 +297,12 @@ class CosmeticsViewModel @Inject constructor(
                 _lastScanFailed.value = false
                 _scanStatus.value = null
             }
+            CosmeticsEvent.CancelDiscovery -> {
+                sessionRepository.reset()
+                _isScanSuccessful.value = false
+                _lastScanFailed.value = false
+                _scanStatus.value = null
+            }
         }
     }
 
@@ -327,6 +336,27 @@ class CosmeticsViewModel @Inject constructor(
                         imageUrl = current.imageUrl ?: obfItem.imageUrl
                     )
                 }
+                
+                // ASYNC CLINICAL SAFETY FETCH (FDA)
+                viewModelScope.launch {
+                    val draft = sessionRepository.cosmeticDraft.value ?: return@launch
+                    val recall = fdaRepository.getRecalls(draft.brand, draft.name)
+                    val eventCount = fdaRepository.getAdverseEventsCount(draft.brand, draft.name)
+                    val topReactions = fdaRepository.getTopReactions(draft.brand, draft.name)
+                    val label = fdaRepository.getDrugLabel(code)
+
+                    updateSessionDraft { current ->
+                        current.copy(
+                            fdaRecallStatus = recall?.status,
+                            fdaAdverseEventCount = eventCount,
+                            fdaTopReactions = topReactions,
+                            fdaClinicalWarnings = label?.warnings ?: emptyList(),
+                            fdaActiveIngredients = label?.active_ingredient ?: emptyList(),
+                            isFdaChecked = true
+                        )
+                    }
+                }
+                
                 _isScanSuccessful.value = true
             }.onFailure {
                 _scanStatus.value = "Product not found in OBF database."
