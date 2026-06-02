@@ -44,3 +44,23 @@ We updated the `InitializeAdd` logic to be "lazy." It now intelligently detects 
 *   **Architectural Cleanliness**: The complex logic of discovery (AI + Barcode + Manual Entry) is now isolated from the transient lifecycle of a single screen.
 
 **Outcome:** The discovery flow is now high-performance and technically robust, providing the fast, automated experience required for the **Atelier** professional archive.
+
+## The Teardown: Preventing State Leaks
+While the Singleton pattern solves state loss, it introduces the risk of **stale state** if a user abandons a draft. We implemented a two-tier safety net to ensure every new discovery starts with a clean slate.
+
+### 1. Explicit Session Reset
+We added a `CancelDiscovery` event that triggers `sessionRepository.reset()`. This is explicitly called when:
+- The user taps the **Close (X)** button in the header.
+- The user successfully adds a product to the inventory (post-save cleanup).
+
+### 2. The Compose BackHandler (Safety Net)
+To catch users who abandon the form via the system back-swipe gesture, we implemented the `BackHandler` API directly in the `StitchProductBuilder`. 
+
+```kotlin
+BackHandler {
+    onEvent(CosmeticsEvent.CancelDiscovery)
+    navTo(KoColorRoute.Back)
+}
+```
+
+This ensures that even if the user doesn't hit a "Cancel" button, the temporary singleton state is formally destroyed, preventing "ghost drafts" from appearing the next time the screen is opened.

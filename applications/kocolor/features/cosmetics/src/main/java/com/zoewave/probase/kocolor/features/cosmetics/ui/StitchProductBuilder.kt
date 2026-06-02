@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +46,11 @@ fun StitchProductBuilder(
     val scrollState = rememberScrollState()
     var showColorPicker by remember { mutableStateOf(false) }
 
+    BackHandler {
+        onEvent(CosmeticsEvent.CancelDiscovery)
+        navTo(KoColorRoute.Back)
+    }
+
     if (showColorPicker) {
         val colorHex = draft.colorHex ?: ""
         ColorPickerDialog(
@@ -66,21 +73,15 @@ fun StitchProductBuilder(
         return
     }
 
-    if (uiState.isScanSuccessful) {
-        ValidateItemScreen(
-            uiState = uiState,
-            onEvent = onEvent,
-            navTo = navTo
-        )
-        return
-    }
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Add to Collection", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif, color = Color(0xFF8B5E3C)) },
                 navigationIcon = {
-                    IconButton(onClick = { navTo(KoColorRoute.Back) }) {
+                    IconButton(onClick = { 
+                        onEvent(CosmeticsEvent.CancelDiscovery)
+                        navTo(KoColorRoute.Back) 
+                    }) {
                         Icon(Icons.Default.Close, contentDescription = "Close")
                     }
                 }
@@ -348,10 +349,6 @@ private fun CategoryIconItem(
     }
 }
 
-// ------------------------------------------------------------------------------------------------
-// LEGACY CODE (Kept for future reference as requested)
-// ------------------------------------------------------------------------------------------------
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ValidateItemScreen(
@@ -564,4 +561,3 @@ private fun TaxonomyDropdown(
         }
     }
 }
-
