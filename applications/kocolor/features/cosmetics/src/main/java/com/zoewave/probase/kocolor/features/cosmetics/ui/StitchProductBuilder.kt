@@ -135,10 +135,27 @@ fun StitchProductBuilder(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     trailingIcon = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (uiState.lastScanFailed) {
-                                Icon(Icons.Default.Error, null, tint = Color.Red, modifier = Modifier.padding(end = 8.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 4.dp)) {
+                            // Status Indicator Icon
+                            when {
+                                uiState.isAnalyzing -> {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = Color(0xFF2196F3) // Blue
+                                    )
+                                }
+                                uiState.lastScanFailed -> {
+                                    Icon(Icons.Default.Error, null, tint = Color.Red, modifier = Modifier.size(20.dp))
+                                }
+                                !draft.batchCode.isNullOrBlank() -> {
+                                    Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF4CAF50), modifier = Modifier.size(20.dp))
+                                }
+                                else -> {
+                                    Icon(Icons.Default.QrCode, null, tint = Color.Gray, modifier = Modifier.size(20.dp))
+                                }
                             }
+
                             IconButton(onClick = { navTo(KoColorRoute.BarcodeScanner) }) {
                                 Icon(Icons.Default.QrCodeScanner, null, tint = Color(0xFF8B5E3C))
                             }
