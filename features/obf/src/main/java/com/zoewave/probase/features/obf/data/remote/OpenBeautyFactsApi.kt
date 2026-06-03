@@ -17,6 +17,7 @@ data class ObfProduct(
     @SerializedName("brands") val brands: String?,
     @SerializedName("categories_tags") val categoriesTags: List<String>?,
     @SerializedName("ingredients_text") val ingredientsText: String?,
+    @SerializedName("ingredients_tags") val ingredientsTags: List<String>?,
     @SerializedName("image_front_url") val imageUrl: String?,
     @SerializedName("quantity") val volume: String?,
     @SerializedName("_keywords") val keywords: List<String>?,

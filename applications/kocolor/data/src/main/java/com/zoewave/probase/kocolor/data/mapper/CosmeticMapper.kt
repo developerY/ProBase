@@ -28,7 +28,31 @@ fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     amountPerUse = amountPerUse,
     isOpened = isOpened,
     isFinished = isFinished,
-    isArchived = isArchived
+    isArchived = isArchived,
+    
+    // Algorithmic Insights
+    heroIngredient = heroIngredient,
+    skinCompatibility = skinCompatibility,
+    containsFragrance = containsFragrance,
+    ingredients = ingredients,
+    allergens = allergens,
+    
+    // Sustainability
+    ecoScore = ecoScore,
+    isVegan = isVegan,
+    isCrueltyFree = isCrueltyFree,
+    recyclingInstructions = recyclingInstructions,
+    
+    // Context
+    ritualPlacement = ritualPlacement,
+    
+    // FDA Safety
+    fdaRecallStatus = fdaRecallStatus,
+    fdaAdverseEventCount = fdaAdverseEventCount,
+    fdaClinicalWarnings = fdaClinicalWarnings,
+    fdaTopReactions = fdaTopReactions,
+    fdaActiveIngredients = fdaActiveIngredients,
+    isFdaChecked = isFdaChecked
 )
 
 fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
@@ -56,5 +80,29 @@ fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
     amountPerUse = amountPerUse,
     isOpened = isOpened,
     isFinished = isFinished,
-    isArchived = isArchived
+    isArchived = isArchived,
+    
+    // Algorithmic Insights
+    heroIngredient = heroIngredient,
+    skinCompatibility = skinCompatibility,
+    containsFragrance = containsFragrance,
+    ingredients = ingredients,
+    allergens = allergens,
+    
+    // Sustainability
+    ecoScore = ecoScore,
+    isVegan = isVegan,
+    isCrueltyFree = isCrueltyFree,
+    recyclingInstructions = recyclingInstructions,
+    
+    // Context
+    ritualPlacement = ritualPlacement,
+    
+    // FDA Safety
+    fdaRecallStatus = fdaRecallStatus,
+    fdaAdverseEventCount = fdaAdverseEventCount,
+    fdaClinicalWarnings = fdaClinicalWarnings,
+    fdaTopReactions = fdaTopReactions,
+    fdaActiveIngredients = fdaActiveIngredients,
+    isFdaChecked = isFdaChecked
 )

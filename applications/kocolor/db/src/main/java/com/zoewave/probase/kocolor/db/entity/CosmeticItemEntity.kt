@@ -39,5 +39,29 @@ data class CosmeticItemEntity(
     val isArchived: Boolean = false,
     val usageCount: Int = 0,
     val amountRemaining: Double? = null,
-    val amountPerUse: Double? = null
+    val amountPerUse: Double? = null,
+    
+    // --- Algorithmic & AI Insights ---
+    val heroIngredient: String? = null,
+    val skinCompatibility: String? = null,
+    val containsFragrance: Boolean? = null,
+    val ingredients: List<String> = emptyList(),
+    val allergens: List<String> = emptyList(),
+    
+    // --- Sustainability & Eco-Impact ---
+    val ecoScore: String? = null,
+    val isVegan: Boolean? = null,
+    val isCrueltyFree: Boolean? = null,
+    val recyclingInstructions: String? = null,
+    
+    // --- Ritual Context ---
+    val ritualPlacement: String? = null,
+
+    // --- FDA & Clinical Safety ---
+    val fdaRecallStatus: String? = null,
+    val fdaAdverseEventCount: Int = 0,
+    val fdaClinicalWarnings: List<String> = emptyList(),
+    val fdaTopReactions: List<String> = emptyList(),
+    val fdaActiveIngredients: List<String> = emptyList(),
+    val isFdaChecked: Boolean = false
 )

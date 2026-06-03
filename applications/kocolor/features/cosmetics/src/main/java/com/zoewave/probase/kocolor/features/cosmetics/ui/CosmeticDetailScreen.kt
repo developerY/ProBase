@@ -615,8 +615,12 @@ private fun WarningBanner(title: String, subtitle: String, icon: ImageVector) {
 
 @Composable
 private fun IngredientAnalysisSection(item: CosmeticItem, bioSyncMessage: String?) {
+    val resolvedHero = item.heroIngredient 
+        ?: item.ingredients.firstOrNull()?.replaceFirstChar { it.uppercase() }
+        ?: "Analyzing..."
+
     Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        DetailMetricRow("Hero Ingredient", item.heroIngredient ?: "Analyzing...")
+        DetailMetricRow("Hero Ingredient", resolvedHero)
         
         bioSyncMessage?.let { msg ->
             Surface(
