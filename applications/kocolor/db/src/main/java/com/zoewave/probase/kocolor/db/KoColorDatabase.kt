@@ -26,7 +26,7 @@ import com.zoewave.probase.kocolor.db.entity.SavedSuggestionEntity
         CosmeticItemEntity::class,
         ClothingItemEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(FashionConverters::class)

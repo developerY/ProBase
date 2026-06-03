@@ -31,7 +31,14 @@ class ObfRepository @Inject constructor(
                 val resolvedMacroCategory = resolvedMicroCategory.macro // Inherited automatically
 
                 // 2. Fragment technical details
-                val ingredientList = ObfTaxonomyMapper.parseIngredients(obfProduct.ingredientsText)
+                var ingredientList = ObfTaxonomyMapper.parseIngredients(obfProduct.ingredientsText)
+                
+                // Fallback to ingredients_tags if text is missing
+                if (ingredientList.isEmpty() && !obfProduct.ingredientsTags.isNullOrEmpty()) {
+                    ingredientList = obfProduct.ingredientsTags.map { 
+                        it.replace("en:", "").replace("-", " ").replaceFirstChar { c -> c.uppercase() } 
+                    }
+                }
                 
                 // 3. Heuristics for Professional Facets
                 val resolvedFinish = ObfTaxonomyMapper.extractFinish(obfProduct.keywords)
