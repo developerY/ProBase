@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_kocolor_features_stitch_editor_title">Blueprint Editor</string>
+    <string name="applications_kocolor_features_stitch_back">Back</string>
+    <string name="applications_kocolor_features_stitch_save">SAVE</string>
+    <string name="applications_kocolor_features_stitch_collection_title">Collection Title</string>
+    <string name="applications_kocolor_features_stitch_stylist_rationale">Stylist Rationale</string>
+    <string name="applications_kocolor_features_stitch_wardrobe_section">THE WARDROBE</string>
+    <string name="applications_kocolor_features_stitch_add_wardrobe_piece">Add Wardrobe Piece</string>
+    <string name="applications_kocolor_features_stitch_vanity_section">THE VANITY</string>
+    <string name="applications_kocolor_features_stitch_add_vanity_product">Add Vanity Product</string>
+    <string name="applications_kocolor_features_stitch_delete_collection">Delete Collection</string>
+    <string name="applications_kocolor_features_stitch_suggested_piece">Suggested Piece</string>
+    <string name="applications_kocolor_features_stitch_change_item">Change Item</string>
+    <string name="applications_kocolor_features_stitch_remove_slot">Remove Slot</string>
+    <string name="applications_kocolor_features_stitch_select_cosmetic">Select Cosmetic</string>
+    <string name="applications_kocolor_features_stitch_select_garment">Select Garment</string>
+    <string name="applications_kocolor_features_stitch_archive">Archive</string>
+</resources>

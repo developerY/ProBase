@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_kocolor_features_analyzer_title">Fashion Analyzer</string>
+    <string name="applications_kocolor_features_analyzer_back">Back</string>
+    <string name="applications_kocolor_features_analyzer_loading">Gemini is analyzing your style...</string>
+    <string name="applications_kocolor_features_analyzer_try_again">Try Again</string>
+    <string name="applications_kocolor_features_analyzer_capture_instruction">Capture up to 4 images for a holistic style analysis</string>
+    <string name="applications_kocolor_features_analyzer_face_label">Your Face</string>
+    <string name="applications_kocolor_features_analyzer_hair_label">Your Hair</string>
+    <string name="applications_kocolor_features_analyzer_shoes_label">Your Shoes</string>
+    <string name="applications_kocolor_features_analyzer_clothes_label">Your Clothes</string>
+    <string name="applications_kocolor_features_analyzer_analyze_action">Analyze My Look</string>
+    <string name="applications_kocolor_features_analyzer_select_occasion">Select Occasion</string>
+    <string name="applications_kocolor_features_analyzer_occasion_work">Work</string>
+    <string name="applications_kocolor_features_analyzer_occasion_date_night">Date Night</string>
+    <string name="applications_kocolor_features_analyzer_occasion_outdoor_sport">Outdoor/Sport</string>
+    <string name="applications_kocolor_features_analyzer_occasion_formal">Formal</string>
+    <string name="applications_kocolor_features_analyzer_style_location">Style Location</string>
+    <string name="applications_kocolor_features_analyzer_location_placeholder">City, Style Capital...</string>
+    <string name="applications_kocolor_features_analyzer_local_context_label">Local Context</string>
+    <string name="applications_kocolor_features_analyzer_detect_location">Detect Location</string>
+    <string name="applications_kocolor_features_analyzer_ai_location_desc">AI will tailor your palette to local fashion trends.</string>
+    <string name="applications_kocolor_features_analyzer_capture_title_format">Capture %1$s</string>
+    <string name="applications_kocolor_features_analyzer_choose_source">Choose a photo source</string>
+    <string name="applications_kocolor_features_analyzer_camera">Camera</string>
+    <string name="applications_kocolor_features_analyzer_gallery">Gallery</string>
+    <string name="applications_kocolor_features_analyzer_result_title">Style Analysis Result</string>
+    <string name="applications_kocolor_features_analyzer_seasonal_type_format">Seasonal Type: %1$s</string>
+    <string name="applications_kocolor_features_analyzer_undertone_format">Undertone: %1$s</string>
+    <string name="applications_kocolor_features_analyzer_recommended_palette">Recommended Makeup &amp; Nail Palette</string>
+    <string name="applications_kocolor_features_analyzer_makeup_nail_suggestions">Makeup &amp; Nail Suggestions</string>
+    <string name="applications_kocolor_features_analyzer_experience">Experience</string>
+    <string name="applications_kocolor_features_analyzer_discard">Discard</string>
+    <string name="applications_kocolor_features_analyzer_save_analysis">Save Analysis</string>
+
+    <string name="applications_kocolor_features_analyzer_simulator_title">STYLE SIMULATOR</string>
+    <string name="applications_kocolor_features_analyzer_simulator_intent_title">Define Your Intent.</string>
+    <string name="applications_kocolor_features_analyzer_simulator_intent_placeholder">e.g. A crisp look for high-stakes negotiation.</string>
+    <string name="applications_kocolor_features_analyzer_simulator_begin_action">Begin Simulation</string>
+    <string name="applications_kocolor_features_analyzer_simulator_reading_bio">Reading Bio-Markers...</string>
+    <string name="applications_kocolor_features_analyzer_simulator_syncing_rituals">Syncing Daily Rituals...</string>
+    <string name="applications_kocolor_features_analyzer_simulator_architecting_style">Architecting Style...</string>
+    <string name="applications_kocolor_features_analyzer_simulator_magic">Magic...</string>
+    <string name="applications_kocolor_features_analyzer_simulator_synthesizing">Synthesizing your physical context with your stated intent.</string>
+    <string name="applications_kocolor_features_analyzer_simulator_blueprint">Your Blueprint.</string>
+    <string name="applications_kocolor_features_analyzer_simulator_local_calc">BEST-EFFORT LOCAL CALCULATION</string>
+    <string name="applications_kocolor_features_analyzer_simulator_ai_optimized">OPTIMIZED BY GEMINI AI</string>
+    <string name="applications_kocolor_features_analyzer_simulator_chromatic_core">CHROMATIC CORE</string>
+    <string name="applications_kocolor_features_analyzer_simulator_vault_selections">VAULT SELECTIONS</string>
+    <string name="applications_kocolor_features_analyzer_simulator_lock_palette">Lock Selection to Palette</string>
+    <string name="applications_kocolor_features_analyzer_simulator_bespoke">Bespoke</string>
+</resources>

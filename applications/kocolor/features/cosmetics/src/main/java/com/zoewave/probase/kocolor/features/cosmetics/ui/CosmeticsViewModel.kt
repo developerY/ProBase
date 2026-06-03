@@ -14,6 +14,7 @@ import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.kocolor.model.*
 import com.zoewave.probase.kocolor.features.fda.data.repository.FdaRepository
+import com.zoewave.probase.kocolor.features.cosmetics.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -312,7 +313,7 @@ class CosmeticsViewModel @Inject constructor(
     private fun fetchObfProduct(code: String) {
         viewModelScope.launch {
             _isAnalyzing.value = true
-            _scanStatus.value = "Searching OBF database..."
+            _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_searching_obf)
             _lastScanFailed.value = false
             
             updateSessionDraft { it.copy(batchCode = code) }
@@ -320,13 +321,13 @@ class CosmeticsViewModel @Inject constructor(
             val result = cosmeticRepository.fetchProductByBarcode(code)
             
             result.onSuccess { obfItem ->
-                _scanStatus.value = "Product found: ${obfItem.name}"
+                _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_product_found_format, obfItem.name)
                 
                 updateSessionDraft { current ->
                     current.copy(
                         batchCode = code,
-                        name = obfItem.name.takeIf { it.isNotBlank() && it != "Unknown Product" } ?: current.name,
-                        brand = obfItem.brand.takeIf { it.isNotBlank() && it != "Unknown Brand" } ?: current.brand,
+                        name = obfItem.name.takeIf { it.isNotBlank() && it != context.getString(R.string.applications_kocolor_features_cosmetics_unknown_product) } ?: current.name,
+                        brand = obfItem.brand.takeIf { it.isNotBlank() && it != context.getString(R.string.applications_kocolor_features_cosmetics_unknown_brand) } ?: current.brand,
                         macroCategory = if (obfItem.macroCategory != MacroCategory.TOOLS) obfItem.macroCategory else current.macroCategory,
                         microCategory = if (obfItem.microCategory != MicroCategory.AI_PENDING) obfItem.microCategory else current.microCategory,
                         notes = obfItem.notes ?: current.notes,
@@ -369,7 +370,7 @@ class CosmeticsViewModel @Inject constructor(
                 
                 _isScanSuccessful.value = true
             }.onFailure {
-                _scanStatus.value = "Product not found in OBF database."
+                _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_product_not_found_obf)
                 _lastScanFailed.value = true
             }
             _isAnalyzing.value = false

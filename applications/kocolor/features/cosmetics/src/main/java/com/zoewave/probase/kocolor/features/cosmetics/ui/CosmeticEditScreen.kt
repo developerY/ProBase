@@ -41,6 +41,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.compose.ui.res.stringResource
+import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.model.*
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
@@ -117,16 +119,16 @@ fun CosmeticEditScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
                 ) {
-                    Text("Delete", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_delete_button), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_cancel))
                 }
             },
-            title = { Text("Delete Product?") },
-            text = { Text("Are you sure you want to permanently remove ${draft.name} from your collection?") },
+            title = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_delete_confirm_title)) },
+            text = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_delete_confirm_message, draft.name)) },
             shape = RoundedCornerShape(24.dp)
         )
     }
@@ -172,7 +174,7 @@ fun CosmeticEditScreen(
                 showColorPicker = false
             },
             onDismissRequest = { showColorPicker = false },
-            title = "Pick Product Color"
+            title = stringResource(R.string.applications_kocolor_features_cosmetics_pick_color_title)
         )
     }
 
@@ -182,7 +184,7 @@ fun CosmeticEditScreen(
             CenterAlignedTopAppBar(
                 title = { 
                     Text(
-                        "Professional Edit", 
+                        stringResource(R.string.applications_kocolor_features_cosmetics_edit_screen_title), 
                         style = MaterialTheme.typography.titleLarge, 
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
@@ -191,18 +193,18 @@ fun CosmeticEditScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_close_desc))
                     }
                 },
                 actions = {
                     IconButton(onClick = { showDeleteConfirmation = true }) {
-                        Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = Color.Gray)
+                        Icon(Icons.Default.DeleteOutline, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_delete_desc), tint = Color.Gray)
                     }
                     IconButton(onClick = {
                         onEvent(CosmeticsEvent.UpdateItem(draft))
                         navTo(KoColorRoute.Back)
                     }) {
-                        Icon(Icons.Default.Save, contentDescription = "Save", tint = atelierBrown)
+                        Icon(Icons.Default.Save, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_save_desc), tint = atelierBrown)
                     }
                 }
             )
@@ -230,7 +232,7 @@ fun CosmeticEditScreen(
                     if (draft.imageUrl != null) {
                         AsyncImage(
                             model = draft.imageUrl,
-                            contentDescription = "Product Image",
+                            contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_product_image_desc),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Fit
                         )
@@ -238,7 +240,7 @@ fun CosmeticEditScreen(
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(40.dp), tint = atelierBrown.copy(alpha = 0.5f))
                             Spacer(Modifier.height(8.dp))
-                            Text("Product Photo", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                            Text(stringResource(R.string.applications_kocolor_features_cosmetics_product_photo), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                         }
                     }
                 }
@@ -249,39 +251,39 @@ fun CosmeticEditScreen(
                 AtelierTextField(
                     value = draft.name,
                     onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(name = it))) },
-                    label = "PRODUCT NAME",
-                    placeholder = "e.g. Luminous Silk Foundation"
+                    label = stringResource(R.string.applications_kocolor_features_cosmetics_product_name_label),
+                    placeholder = stringResource(R.string.applications_kocolor_features_cosmetics_product_name_placeholder)
                 )
 
                 AtelierTextField(
                     value = draft.brand,
                     onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(brand = it))) },
-                    label = "BRAND",
-                    placeholder = "e.g. Giorgio Armani"
+                    label = stringResource(R.string.applications_kocolor_features_cosmetics_brand_label),
+                    placeholder = stringResource(R.string.applications_kocolor_features_cosmetics_brand_placeholder)
                 )
 
                 AtelierTextField(
                     value = draft.batchCode ?: "",
                     onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
-                    label = "SKU / BATCH CODE",
-                    placeholder = "e.g. RF-092-LUM"
+                    label = stringResource(R.string.applications_kocolor_features_cosmetics_sku_label),
+                    placeholder = stringResource(R.string.applications_kocolor_features_cosmetics_sku_placeholder)
                 )
             }
 
             // 3. Category & Facets
             EditExpandableSection(
-                title = "Category & Taxonomy",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_category_taxonomy_title),
                 isExpanded = expandedSections["Category"] == true,
                 onToggle = { expandedSections["Category"] = it }
             ) {
                 Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     ProfessionalDropdown(
-                        label = "Macro Category",
+                        label = stringResource(R.string.applications_kocolor_features_cosmetics_macro_category_label),
                         value = draft.macroCategory.displayName,
                         onClick = { showMacroMenu = true }
                     )
                     ProfessionalDropdown(
-                        label = "Micro Category",
+                        label = stringResource(R.string.applications_kocolor_features_cosmetics_micro_category_label),
                         value = draft.microCategory.displayName,
                         onClick = { showMicroMenu = true }
                     )
@@ -289,25 +291,25 @@ fun CosmeticEditScreen(
             }
 
             EditExpandableSection(
-                title = "Professional Facets",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_professional_facets_title),
                 isExpanded = expandedSections["Facets"] == true,
                 onToggle = { expandedSections["Facets"] = it }
             ) {
                 Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        ProfessionalDropdown(label = "Formulation", value = draft.formulation.name.lowercase().capitalize(), onClick = { showFormulationMenu = true }, modifier = Modifier.weight(1f))
-                        ProfessionalDropdown(label = "Chemistry", value = draft.chemistryBase.name.lowercase().capitalize(), onClick = { showChemistryMenu = true }, modifier = Modifier.weight(1f))
+                        ProfessionalDropdown(label = stringResource(R.string.applications_kocolor_features_cosmetics_formulation_label), value = draft.formulation.name.lowercase().capitalize(), onClick = { showFormulationMenu = true }, modifier = Modifier.weight(1f))
+                        ProfessionalDropdown(label = stringResource(R.string.applications_kocolor_features_cosmetics_chemistry_label), value = draft.chemistryBase.name.lowercase().capitalize(), onClick = { showChemistryMenu = true }, modifier = Modifier.weight(1f))
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        ProfessionalDropdown(label = "Finish", value = draft.finish.name.lowercase().capitalize(), onClick = { showFinishMenu = true }, modifier = Modifier.weight(1f))
-                        ProfessionalDropdown(label = "Coverage", value = draft.coverage.name.lowercase().replace("_", " ").capitalize(), onClick = { showCoverageMenu = true }, modifier = Modifier.weight(1f))
+                        ProfessionalDropdown(label = stringResource(R.string.applications_kocolor_features_cosmetics_finish_label), value = draft.finish.name.lowercase().capitalize(), onClick = { showFinishMenu = true }, modifier = Modifier.weight(1f))
+                        ProfessionalDropdown(label = stringResource(R.string.applications_kocolor_features_cosmetics_coverage_label), value = draft.coverage.name.lowercase().replace("_", " ").capitalize(), onClick = { showCoverageMenu = true }, modifier = Modifier.weight(1f))
                     }
                 }
             }
 
             // 4. Physical & Color
             EditExpandableSection(
-                title = "Physical & Color",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_physical_color_title),
                 isExpanded = expandedSections["Physical"] == true,
                 onToggle = { expandedSections["Physical"] = it }
             ) {
@@ -315,12 +317,12 @@ fun CosmeticEditScreen(
                     AtelierTextField(
                         value = draft.shadeName ?: "",
                         onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(shadeName = it))) },
-                        label = "SHADE NAME",
-                        placeholder = "e.g. 4.5 Medium Warm"
+                        label = stringResource(R.string.applications_kocolor_features_cosmetics_shade_name_label),
+                        placeholder = stringResource(R.string.applications_kocolor_features_cosmetics_shade_placeholder)
                     )
                     
                     Column {
-                        Text("PRODUCT COLOR", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.applications_kocolor_features_cosmetics_product_color), style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(8.dp))
                         Surface(
                             onClick = { showColorPicker = true },
@@ -335,7 +337,7 @@ fun CosmeticEditScreen(
 
             // 5. Inventory & Economics
             EditExpandableSection(
-                title = "Inventory & Economics",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_economics_title),
                 isExpanded = expandedSections["Economics"] == true,
                 onToggle = { expandedSections["Economics"] = it }
             ) {
@@ -344,14 +346,14 @@ fun CosmeticEditScreen(
                         AtelierTextField(
                             value = draft.price?.toString() ?: "",
                             onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(price = it.toDoubleOrNull()))) },
-                            label = "UNIT PRICE ($)",
+                            label = stringResource(R.string.applications_kocolor_features_cosmetics_unit_price_label),
                             modifier = Modifier.weight(1f)
                         )
                         AtelierTextField(
                             value = draft.volume ?: "",
                             onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(volume = it))) },
-                            label = "TOTAL VOLUME",
-                            placeholder = "30ml",
+                            label = stringResource(R.string.applications_kocolor_features_cosmetics_total_volume_label),
+                            placeholder = stringResource(R.string.applications_kocolor_features_cosmetics_volume_placeholder),
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -360,13 +362,13 @@ fun CosmeticEditScreen(
                         AtelierTextField(
                             value = draft.amountRemaining?.toString() ?: "",
                             onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(amountRemaining = it.toDoubleOrNull()))) },
-                            label = "REMAINING (ml/g)",
+                            label = stringResource(R.string.applications_kocolor_features_cosmetics_remaining_label),
                             modifier = Modifier.weight(1f)
                         )
                         AtelierTextField(
                             value = draft.amountPerUse?.toString() ?: "",
                             onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(amountPerUse = it.toDoubleOrNull()))) },
-                            label = "AMOUNT PER USE",
+                            label = stringResource(R.string.applications_kocolor_features_cosmetics_amount_per_use_label),
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -375,18 +377,18 @@ fun CosmeticEditScreen(
 
             // 6. Lifecycle Dates
             EditExpandableSection(
-                title = "Product Lifecycle",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_product_lifecycle_title),
                 isExpanded = expandedSections["Lifecycle"] == true,
                 onToggle = { expandedSections["Lifecycle"] = it }
             ) {
                 Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     DatePickerButton(
-                        label = "DATE OPENED",
+                        label = stringResource(R.string.applications_kocolor_features_cosmetics_date_opened_label),
                         timestamp = draft.openedDate,
                         onClick = { showDatePickerTarget = "OPENED" }
                     )
                     DatePickerButton(
-                        label = "HARD EXPIRY DATE",
+                        label = stringResource(R.string.applications_kocolor_features_cosmetics_expiry_date_label),
                         timestamp = draft.expiryDate,
                         onClick = { showDatePickerTarget = "EXPIRY" }
                     )
@@ -394,15 +396,15 @@ fun CosmeticEditScreen(
                     AtelierTextField(
                         value = draft.paoMonths?.toString() ?: "",
                         onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(paoMonths = it.toIntOrNull()))) },
-                        label = "PAO (MONTHS AFTER OPENING)",
-                        placeholder = "e.g. 12"
+                        label = stringResource(R.string.applications_kocolor_features_cosmetics_pao_label),
+                        placeholder = stringResource(R.string.applications_kocolor_features_cosmetics_pao_placeholder)
                     )
                 }
             }
 
             // 7. Insights
             EditExpandableSection(
-                title = "Artist Insights",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_artist_insights_title),
                 isExpanded = expandedSections["Insights"] == true,
                 onToggle = { expandedSections["Insights"] = it }
             ) {
@@ -410,15 +412,15 @@ fun CosmeticEditScreen(
                     AtelierTextField(
                         value = draft.instructions ?: "",
                         onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(instructions = it))) },
-                        label = "APPLICATION INSTRUCTIONS",
-                        placeholder = "How to apply for best results...",
+                        label = stringResource(R.string.applications_kocolor_features_cosmetics_instructions_label),
+                        placeholder = stringResource(R.string.applications_kocolor_features_cosmetics_instructions_placeholder),
                         minLines = 3
                     )
                     AtelierTextField(
                         value = draft.notes ?: "",
                         onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(notes = it))) },
-                        label = "PERSONAL ARTIST NOTES",
-                        placeholder = "Shade matches, skin reactions, etc.",
+                        label = stringResource(R.string.applications_kocolor_features_cosmetics_personal_notes_label),
+                        placeholder = stringResource(R.string.applications_kocolor_features_cosmetics_notes_placeholder),
                         minLines = 3
                     )
                 }
@@ -522,7 +524,7 @@ private fun DatePickerButton(
 ) {
     val dateText = timestamp?.let { 
         java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(it))
-    } ?: "Not Set"
+    } ?: stringResource(R.string.applications_kocolor_features_cosmetics_not_set)
     
     Column {
         Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
@@ -553,10 +555,10 @@ private fun AtelierDatePicker(
     DatePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = { state.selectedDateMillis?.let { onDateSelected(it) } }) { Text("OK") }
+            TextButton(onClick = { state.selectedDateMillis?.let { onDateSelected(it) } }) { Text(stringResource(R.string.applications_kocolor_features_cosmetics_ok)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.applications_kocolor_features_cosmetics_cancel)) }
         }
     ) {
         DatePicker(state = state)

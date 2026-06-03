@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":applications:kocolor:db"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:camera"))
+    implementation(project(":features:graphics"))
 
     implementation(libs.google.generative.ai)
     implementation(libs.google.play.services.maps)

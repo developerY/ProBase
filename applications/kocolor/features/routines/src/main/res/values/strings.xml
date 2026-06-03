@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_kocolor_features_routines_title">GLOW RITUALS</string>
+    <string name="applications_kocolor_features_routines_back">Back</string>
+    <string name="applications_kocolor_features_routines_serene_rituals">Serene Rituals.</string>
+    <string name="applications_kocolor_features_routines_serene_rituals_desc">Daily acts of mindful care.</string>
+    <string name="applications_kocolor_features_routines_morning_ritual">Morning Ritual</string>
+    <string name="applications_kocolor_features_routines_evening_ritual">Evening Ritual</string>
+    <string name="applications_kocolor_features_routines_current_ritual">CURRENT RITUAL</string>
+    <string name="applications_kocolor_features_routines_evening_ritual_label">EVENING RITUAL</string>
+    <string name="applications_kocolor_features_routines_progress_format">%1$d/%2$d</string>
+    <string name="applications_kocolor_features_routines_done">DONE</string>
+    <string name="applications_kocolor_features_routines_duration_format">%1$d mins duration</string>
+    <string name="applications_kocolor_features_routines_morning_desc">Prepare for a balanced day ahead.</string>
+    <string name="applications_kocolor_features_routines_evening_desc">Every step is an act of self-love.</string>
+    <string name="applications_kocolor_features_routines_daily_insight">Daily Insight</string>
+    <string name="applications_kocolor_features_routines_insight_quote">\"Patience is the foundation of every lasting ritual.\"</string>
+    <string name="applications_kocolor_features_routines_view_progress">VIEW PROGRESS</string>
+    <string name="applications_kocolor_features_routines_save">Save</string>
+</resources>

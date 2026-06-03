@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_kocolor_features_inventory_wardrobe_title">The Wardrobe</string>
+    <string name="applications_kocolor_features_inventory_back">Back</string>
+    <string name="applications_kocolor_features_inventory_test_colors">Test Colors</string>
+    <string name="applications_kocolor_features_inventory_add">Add</string>
+    <string name="applications_kocolor_features_inventory_new_essential">New Essential</string>
+    <string name="applications_kocolor_features_inventory_empty_collection">Your collection is ready to be curated.</string>
+    <string name="applications_kocolor_features_inventory_curated_pieces_format">%1$d curated pieces</string>
+    <string name="applications_kocolor_features_inventory_brand_default">KOCOLOR</string>
+
+    <string name="applications_kocolor_features_inventory_style_intelligence">STYLE INTELLIGENCE</string>
+    <string name="applications_kocolor_features_inventory_style_dna">Style DNA.</string>
+    <string name="applications_kocolor_features_inventory_style_dna_desc">Quantitative analysis of the curated wardrobe.</string>
+    <string name="applications_kocolor_features_inventory_portfolio_performance">PORTFOLIO PERFORMANCE</string>
+    <string name="applications_kocolor_features_inventory_total_value">TOTAL VALUE</string>
+    <string name="applications_kocolor_features_inventory_avg_cpw">AVG CPW</string>
+    <string name="applications_kocolor_features_inventory_most_worn">MOST WORN PIECES</string>
+    <string name="applications_kocolor_features_inventory_no_wear_history">No wear history logged. Start recording your daily looks!</string>
+    <string name="applications_kocolor_features_inventory_wardrobe_palette">WARDROBE PALETTE</string>
+    <string name="applications_kocolor_features_inventory_palette_prompt">Capture garment colors to visualize your palette.</string>
+    <string name="applications_kocolor_features_inventory_style_efficiency">STYLE EFFICIENCY</string>
+    <string name="applications_kocolor_features_inventory_efficiency_prompt">Log more wear events to calculate wardrobe efficiency.</string>
+    <string name="applications_kocolor_features_inventory_per_wear">PER WEAR</string>
+    <string name="applications_kocolor_features_inventory_brand_wears_format">%1$s · %2$d wears</string>
+    <string name="applications_kocolor_features_inventory_archive">Archive</string>
+
+    <string name="applications_kocolor_features_inventory_garment_details">Garment Details</string>
+    <string name="applications_kocolor_features_inventory_edit">Edit</string>
+    <string name="applications_kocolor_features_inventory_investment">INVESTMENT</string>
+    <string name="applications_kocolor_features_inventory_cost_per_wear">COST / WEAR</string>
+    <string name="applications_kocolor_features_inventory_wears">WEARS</string>
+    <string name="applications_kocolor_features_inventory_log_wear">Log Today\'s Wear</string>
+    <string name="applications_kocolor_features_inventory_composition">Composition</string>
+    <string name="applications_kocolor_features_inventory_material">Material</string>
+    <string name="applications_kocolor_features_inventory_unknown">Unknown</string>
+    <string name="applications_kocolor_features_inventory_archive_notes">Archive Notes</string>
+    <string name="applications_kocolor_features_inventory_no_notes">No notes provided.</string>
+
+    <string name="applications_kocolor_features_inventory_save">Save</string>
+    <string name="applications_kocolor_features_inventory_garment_photo">Garment Photo</string>
+    <string name="applications_kocolor_features_inventory_take_photo">Take Product Photo</string>
+    <string name="applications_kocolor_features_inventory_representative_color">Representative Color</string>
+    <string name="applications_kocolor_features_inventory_tweak_hue">Tweak the extracted dominant hue</string>
+    <string name="applications_kocolor_features_inventory_garment_name">Garment Name</string>
+    <string name="applications_kocolor_features_inventory_brand">Brand</string>
+    <string name="applications_kocolor_features_inventory_price">Price ($)</string>
+    <string name="applications_kocolor_features_inventory_size">Size</string>
+    <string name="applications_kocolor_features_inventory_material_composition">Material Composition</string>
+    <string name="applications_kocolor_features_inventory_curators_notes">Curator\'s Notes</string>
+    <string name="applications_kocolor_features_inventory_not_available">N/A</string>
+
+    <string name="applications_kocolor_features_inventory_style_archive_title">Style Archive</string>
+    <string name="applications_kocolor_features_inventory_curated_closet_title">Curated Closet.</string>
+    <string name="applications_kocolor_features_inventory_closet_desc">A professional look at style investments.</string>
+    <string name="applications_kocolor_features_inventory_total_pieces_label">TOTAL PIECES</string>
+    <string name="applications_kocolor_features_inventory_total_value_label">TOTAL VALUE</string>
+    <string name="applications_kocolor_features_inventory_verticals_label">VERTICALS</string>
+    <string name="applications_kocolor_features_inventory_recently_added">RECENTLY ADDED</string>
+    <string name="applications_kocolor_features_inventory_see_all">See All</string>
+</resources>

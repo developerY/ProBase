@@ -9,10 +9,39 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.kocolor.features.cosmetics.R
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CosmeticProductCard
+import com.zoewave.probase.kocolor.model.CosmeticItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import com.zoewave.probase.kocolor.model.MacroCategory
+import com.zoewave.probase.kocolor.model.MicroCategory
+
+@Preview(showBackground = true)
+@Composable
+private fun ExpiringCosmeticsScreenPreview() {
+    MaterialTheme {
+        ExpiringCosmeticsScreen(
+            uiState = CosmeticsUiState(
+                items = listOf(
+                    CosmeticItem(
+                        name = "Sample", 
+                        brand = "Brand", 
+                        macroCategory = MacroCategory.COMPLEXION, 
+                        microCategory = MicroCategory.FOUNDATION,
+                        expiryDate = System.currentTimeMillis() + 10L * 24 * 60 * 60 * 1000
+                    )
+                )
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,10 +64,10 @@ fun ExpiringCosmeticsScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("EXPIRING SOON", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_expiring_soon), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_back))
                     }
                 }
             )
@@ -46,7 +75,7 @@ fun ExpiringCosmeticsScreen(
     ) { padding ->
         if (expiringItems.isEmpty()) {
             Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                Text("No products expiring in the next 30 days.", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.applications_kocolor_features_cosmetics_no_usage_data), style = MaterialTheme.typography.bodyLarge) 
             }
         } else {
             LazyColumn(

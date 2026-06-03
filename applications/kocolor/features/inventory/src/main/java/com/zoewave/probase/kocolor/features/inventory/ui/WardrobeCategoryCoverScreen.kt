@@ -1,8 +1,5 @@
 package com.zoewave.probase.kocolor.features.inventory.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -11,31 +8,24 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import com.zoewave.probase.kocolor.features.inventory.ui.components.CategoryStatCard
+import com.zoewave.probase.kocolor.features.inventory.ui.components.ClothingProductGridCard
+import com.zoewave.probase.kocolor.features.inventory.ui.components.RankingStatCard
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import java.text.NumberFormat
-import java.util.Locale
+import java.util.*
 
 data class WardrobeCategoryCoverUiState(
     val categoryName: String,
@@ -51,8 +41,8 @@ private fun WardrobeCategoryCoverScreenPreview() {
                 categoryName = "Tops",
                 wardrobeUiState = WardrobeUiState(
                     items = listOf(
-                        com.zoewave.probase.kocolor.model.ClothingItem(id = 1, name = "Silk Shirt", brand = "Luxury", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 85.0, usageCount = 12),
-                        com.zoewave.probase.kocolor.model.ClothingItem(id = 2, name = "Cashmere Sweater", brand = "Premium", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 250.0, usageCount = 3)
+                        ClothingItem(id = 1, name = "Silk Shirt", brand = "Luxury", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 85.0, usageCount = 12),
+                        ClothingItem(id = 2, name = "Cashmere Sweater", brand = "Premium", category = com.zoewave.probase.kocolor.model.ClothingCategory.TOPS, price = 250.0, usageCount = 3)
                     )
                 )
             ),
@@ -194,142 +184,6 @@ fun WardrobeCategoryCoverScreen(
             
             item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) {
                 Spacer(Modifier.height(80.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun RankingStatCard(
-    title: String,
-    item: ClothingItem?,
-    icon: ImageVector,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-        shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Black,
-                    modifier = Modifier.alpha(0.5f)
-                )
-            }
-            Spacer(Modifier.height(8.dp))
-            if (item != null) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .clip(CircleShape)
-                            .background(item.colorHex?.let { parseColor(it) } ?: item.dominantHex?.let { parseColor(it) } ?: Color.Gray)
-                            .border(0.5.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = item.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            } else {
-                Text(text = "None yet", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
-            }
-        }
-    }
-}
-
-@Composable
-private fun CategoryStatCard(
-    uiState: Pair<String, String>, 
-    modifier: Modifier = Modifier,
-    isAlert: Boolean = false
-) {
-    val title = uiState.first
-    val value = uiState.second
-    val backgroundColor = if (isAlert) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) 
-                          else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    val contentColor = if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-    
-    Surface(
-        modifier = modifier,
-        color = backgroundColor,
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Black,
-                modifier = Modifier.alpha(0.5f),
-                color = contentColor
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = value, 
-                style = MaterialTheme.typography.titleMedium, 
-                fontWeight = FontWeight.Bold, 
-                maxLines = 1,
-                color = contentColor
-            )
-        }
-    }
-}
-
-@Composable
-private fun ClothingProductGridCard(uiState: ClothingItem, navTo: (KoColorRoute) -> Unit) {
-    val item = uiState
-    val onClick = { navTo(KoColorRoute.WardrobeDetail(item.id)) }
-    Card(
-        modifier = Modifier.fillMaxWidth().aspectRatio(0.75f).clickable { onClick() },
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (item.imageUrl != null) {
-                AsyncImage(
-                    model = item.imageUrl,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-
-                // Representative Color Badge
-                val itemColor = item.dominantHex?.let { parseColor(it) } 
-                    ?: item.colorHex?.let { parseColor(it) } 
-                    ?: Color.White
-                
-                Surface(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .size(20.dp)
-                        .align(Alignment.TopEnd),
-                    color = itemColor,
-                    shape = androidx.compose.foundation.shape.CircleShape,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
-                ) {}
-            } else {
-                val itemColor = item.dominantHex?.let { parseColor(it) } 
-                    ?: item.colorHex?.let { parseColor(it) } 
-                    ?: MaterialTheme.colorScheme.surfaceVariant
-                Box(modifier = Modifier.fillMaxSize().background(itemColor))
-            }
-
-            // Scrim
-            Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f)), startY = 200f)))
-            
-            Column(modifier = Modifier.align(Alignment.BottomStart).padding(12.dp)) {
-                Text(text = item.brand ?: "", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f), fontWeight = FontWeight.Black)
-                Text(text = item.name, style = MaterialTheme.typography.bodyMedium, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
             }
         }
     }
