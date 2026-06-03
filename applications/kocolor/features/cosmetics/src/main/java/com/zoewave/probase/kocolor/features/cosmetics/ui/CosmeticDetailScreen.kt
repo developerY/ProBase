@@ -38,7 +38,6 @@ import androidx.compose.material.icons.filled.Recycling
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -52,13 +51,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,6 +61,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -73,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.model.ChemistryBase
 import com.zoewave.probase.kocolor.model.CosmeticItem
 import com.zoewave.probase.kocolor.model.Coverage
@@ -139,7 +136,7 @@ fun CosmeticDetailScreen(
             CenterAlignedTopAppBar(
                 title = { 
                     Text(
-                        "Atelier", 
+                        stringResource(R.string.applications_kocolor_features_cosmetics_atelier), 
                         style = MaterialTheme.typography.titleLarge, 
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
@@ -148,7 +145,7 @@ fun CosmeticDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_back))
                     }
                 },
                 actions = {
@@ -156,7 +153,7 @@ fun CosmeticDetailScreen(
                         onEvent(CosmeticsEvent.StartEditing(item))
                         navTo(KoColorRoute.CosmeticEdit(item.id))
                     }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Gray)
+                        Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_edit), tint = Color.Gray)
                     }
                 }
             )
@@ -196,14 +193,14 @@ fun CosmeticDetailScreen(
                         Spacer(Modifier.width(16.dp))
                         Column {
                             Text(
-                                "ACTIVE FDA RECALL",
+                                stringResource(R.string.applications_kocolor_features_cosmetics_active_fda_recall),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Black,
                                 color = Color.White,
                                 letterSpacing = 2.sp
                             )
                             Text(
-                                "Status: $status. Discontinue use immediately.",
+                                stringResource(R.string.applications_kocolor_features_cosmetics_fda_recall_status_format, status),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.White
                             )
@@ -252,7 +249,7 @@ fun CosmeticDetailScreen(
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
-                                text = "FDA",
+                                text = stringResource(R.string.applications_kocolor_features_cosmetics_fda_label),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = fdaStatusColor,
                                 fontWeight = FontWeight.Black
@@ -271,7 +268,7 @@ fun CosmeticDetailScreen(
                             Icon(Icons.Default.CheckCircle, null, modifier = Modifier.size(12.dp), tint = statusColor)
                             Spacer(Modifier.width(4.dp))
                             Text(
-                                text = if ((item.fillLevel ?: 1.0) > 0.1) "In Stock" else "Low Stock",
+                                text = if ((item.fillLevel ?: 1.0) > 0.1) stringResource(R.string.applications_kocolor_features_cosmetics_in_stock) else stringResource(R.string.applications_kocolor_features_cosmetics_low_stock),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = statusColor,
                                 fontWeight = FontWeight.Bold
@@ -297,7 +294,7 @@ fun CosmeticDetailScreen(
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Text(
-                            text = "Assigned to: $placement",
+                            text = stringResource(R.string.applications_kocolor_features_cosmetics_assigned_to_format, placement),
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelSmall,
                             color = atelierBrown,
@@ -309,7 +306,7 @@ fun CosmeticDetailScreen(
                 Spacer(Modifier.height(8.dp))
 
                 Text(
-                    text = "SKU: ${item.batchCode ?: "N/A"} • Launched: Q3 2023",
+                    text = stringResource(R.string.applications_kocolor_features_cosmetics_sku_launched_format, item.batchCode ?: stringResource(R.string.applications_kocolor_features_cosmetics_not_available), "Q3 2023"),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
@@ -343,7 +340,7 @@ fun CosmeticDetailScreen(
 
             // 3. Expandable Sections
             AtelierExpandableSection(
-                title = "Value Analysis",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_value_analysis),
                 isExpanded = expandedStates["Value Analysis"] == true,
                 onToggle = { expandedStates["Value Analysis"] = it }
             ) {
@@ -352,7 +349,7 @@ fun CosmeticDetailScreen(
 
             item.colorHex?.let { colorHex ->
                 AtelierExpandableSection(
-                    title = "Color Hue Map",
+                    title = stringResource(R.string.applications_kocolor_features_cosmetics_color_hue_map),
                     isExpanded = expandedStates["Color Hue Map"] == true,
                     onToggle = { expandedStates["Color Hue Map"] = it }
                 ) {
@@ -362,7 +359,7 @@ fun CosmeticDetailScreen(
             
             // CLINICAL SAFETY (High Priority, Expanded by default)
             AtelierExpandableSection(
-                title = "Clinical Safety",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_clinical_safety),
                 isExpanded = expandedStates["Clinical Safety"] == true,
                 onToggle = { expandedStates["Clinical Safety"] = it }
             ) {
@@ -370,7 +367,7 @@ fun CosmeticDetailScreen(
             }
 
             AtelierExpandableSection(
-                title = "Ingredient Analysis",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_ingredient_analysis),
                 isExpanded = expandedStates["Ingredient Analysis"] == true,
                 onToggle = { expandedStates["Ingredient Analysis"] = it }
             ) {
@@ -378,7 +375,7 @@ fun CosmeticDetailScreen(
             }
 
             AtelierExpandableSection(
-                title = "Sustainability & Eco-Impact",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_sustainability_eco_impact),
                 isExpanded = expandedStates["Sustainability"] == true,
                 onToggle = { expandedStates["Sustainability"] = it }
             ) {
@@ -386,7 +383,7 @@ fun CosmeticDetailScreen(
             }
 
             AtelierExpandableSection(
-                title = "Application Guide",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_application_guide),
                 isExpanded = expandedStates["Application Guide"] == true,
                 onToggle = { expandedStates["Application Guide"] = it }
             ) {
@@ -394,7 +391,7 @@ fun CosmeticDetailScreen(
             }
 
             AtelierExpandableSection(
-                title = "Professional Facets",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_professional_facets),
                 isExpanded = expandedStates["Professional Facets"] == true,
                 onToggle = { expandedStates["Professional Facets"] = it }
             ) {
@@ -402,7 +399,7 @@ fun CosmeticDetailScreen(
             }
 
             AtelierExpandableSection(
-                title = "Product Lifecycle",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_product_lifecycle),
                 isExpanded = expandedStates["Product Lifecycle"] == true,
                 onToggle = { expandedStates["Product Lifecycle"] = it }
             ) {
@@ -410,7 +407,7 @@ fun CosmeticDetailScreen(
             }
 
             AtelierExpandableSection(
-                title = "Usage & Stock",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_usage_stock),
                 isExpanded = expandedStates["Usage & Stock"] == true,
                 onToggle = { expandedStates["Usage & Stock"] = it }
             ) {
@@ -418,7 +415,7 @@ fun CosmeticDetailScreen(
             }
 
             AtelierExpandableSection(
-                title = "Coordination",
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_coordination),
                 isExpanded = expandedStates["Coordination"] == true,
                 onToggle = { expandedStates["Coordination"] = it }
             ) {
@@ -437,7 +434,7 @@ fun CosmeticDetailScreen(
                 ) {
                     Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Log Today's Usage", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_log_usage), fontWeight = FontWeight.Bold)
                 }
                 
                 OutlinedButton(
@@ -446,7 +443,7 @@ fun CosmeticDetailScreen(
                     shape = RoundedCornerShape(8.dp),
                     border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.1f))
                 ) {
-                    Text("Mark as Finished", color = Color.Black)
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_mark_finished), color = Color.Black)
                 }
             }
 
@@ -502,7 +499,7 @@ private fun AtelierExpandableSection(
 private fun ApplicationGuideSection(item: CosmeticItem, atelierBrown: Color) {
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
         Text(
-            text = item.instructions ?: "No manufacturer instructions provided.",
+            text = item.instructions ?: stringResource(R.string.applications_kocolor_features_cosmetics_no_instructions),
             style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray,
             lineHeight = 22.sp
@@ -516,7 +513,7 @@ private fun ApplicationGuideSection(item: CosmeticItem, atelierBrown: Color) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("PERSONAL NOTES", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = atelierBrown)
+                        Text(stringResource(R.string.applications_kocolor_features_cosmetics_personal_notes), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = atelierBrown)
                         Spacer(Modifier.height(8.dp))
                         Text(notes, style = MaterialTheme.typography.bodyMedium)
                     }
@@ -539,21 +536,21 @@ private fun ClinicalSafetySection(item: CosmeticItem) {
                     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.VerifiedUser, null, modifier = Modifier.size(20.dp), tint = Color.Gray)
                         Spacer(Modifier.width(12.dp))
-                        Text("FDA Safety check pending...", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        Text(stringResource(R.string.applications_kocolor_features_cosmetics_fda_pending), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     }
                 }
             }
             item.fdaRecallStatus != null -> {
                 WarningBanner(
-                    title = "ACTIVE FDA RECALL",
-                    subtitle = "This product has been flagged by the FDA: ${item.fdaRecallStatus}. Discontinue use.",
+                    title = stringResource(R.string.applications_kocolor_features_cosmetics_active_fda_recall),
+                    subtitle = stringResource(R.string.applications_kocolor_features_cosmetics_fda_recall_message_format, item.fdaRecallStatus ?: ""),
                     icon = Icons.Default.Warning
                 )
             }
             item.fdaAdverseEventCount > 0 -> {
                 WarningBanner(
-                    title = "${item.fdaAdverseEventCount} Adverse Events Reported",
-                    subtitle = "Reported reactions: ${item.fdaTopReactions.take(3).joinToString(", ")}",
+                    title = stringResource(R.string.applications_kocolor_features_cosmetics_adverse_events_reported_format, item.fdaAdverseEventCount),
+                    subtitle = stringResource(R.string.applications_kocolor_features_cosmetics_reported_reactions_format, item.fdaTopReactions.take(3).joinToString(", ")),
                     icon = Icons.Default.Warning
                 )
             }
@@ -566,7 +563,7 @@ private fun ClinicalSafetySection(item: CosmeticItem) {
                     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.VerifiedUser, null, modifier = Modifier.size(20.dp), tint = Color(0xFF2E7D32))
                         Spacer(Modifier.width(12.dp))
-                        Text("No adverse events reported to the FDA.", style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E7D32))
+                        Text(stringResource(R.string.applications_kocolor_features_cosmetics_fda_clean), style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E7D32))
                     }
                 }
             }
@@ -574,18 +571,18 @@ private fun ClinicalSafetySection(item: CosmeticItem) {
 
         if (item.fdaActiveIngredients.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
-            Text("OTC ACTIVE INGREDIENTS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
+            Text(stringResource(R.string.applications_kocolor_features_cosmetics_otc_ingredients), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
             item.fdaActiveIngredients.forEach { ingredient ->
-                DetailMetricRow("Active", ingredient)
+                DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_active_label), ingredient)
             }
         }
 
         if (item.fdaClinicalWarnings.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
-            Text("FDA CLINICAL WARNINGS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
+            Text(stringResource(R.string.applications_kocolor_features_cosmetics_fda_warnings), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
             item.fdaClinicalWarnings.take(2).forEach { warning ->
                 Text(
-                    text = "• $warning",
+                    text = stringResource(R.string.applications_kocolor_features_cosmetics_warning_bullet_format, warning),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.DarkGray,
                     lineHeight = 18.sp
@@ -617,10 +614,10 @@ private fun WarningBanner(title: String, subtitle: String, icon: ImageVector) {
 private fun IngredientAnalysisSection(item: CosmeticItem, bioSyncMessage: String?) {
     val resolvedHero = item.heroIngredient 
         ?: item.ingredients.firstOrNull()?.replaceFirstChar { it.uppercase() }
-        ?: "Analyzing..."
+        ?: stringResource(R.string.applications_kocolor_features_cosmetics_analyzing)
 
     Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        DetailMetricRow("Hero Ingredient", resolvedHero)
+        DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_hero_ingredient), resolvedHero)
         
         bioSyncMessage?.let { msg ->
             Surface(
@@ -636,13 +633,13 @@ private fun IngredientAnalysisSection(item: CosmeticItem, bioSyncMessage: String
                     fontWeight = FontWeight.Medium
                 )
             }
-        } ?: DetailMetricRow("Skin Compatibility", item.skinCompatibility ?: "Universal")
+        } ?: DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_skin_compatibility), item.skinCompatibility ?: stringResource(R.string.applications_kocolor_features_cosmetics_universal))
 
-        DetailMetricRow("Fragrance", if (item.containsFragrance == true) "Contains Fragrance" else "None / Unscented")
+        DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_fragrance), if (item.containsFragrance == true) stringResource(R.string.applications_kocolor_features_cosmetics_contains_fragrance) else stringResource(R.string.applications_kocolor_features_cosmetics_none_unscented))
         
         if (item.allergens.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
-            Text("ALLERGEN ALERTS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFFD32F2F))
+            Text(stringResource(R.string.applications_kocolor_features_cosmetics_allergen_alerts), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFFD32F2F))
             Surface(
                 color = Color(0xFFFFF0F0),
                 shape = RoundedCornerShape(12.dp),
@@ -652,7 +649,7 @@ private fun IngredientAnalysisSection(item: CosmeticItem, bioSyncMessage: String
                     Icon(Icons.Default.Warning, null, modifier = Modifier.size(16.dp), tint = Color(0xFFD32F2F))
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "Contains: ${item.allergens.joinToString(", ")}",
+                        text = stringResource(R.string.applications_kocolor_features_cosmetics_contains_allergens_format, item.allergens.joinToString(", ")),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFFD32F2F)
                     )
@@ -662,13 +659,13 @@ private fun IngredientAnalysisSection(item: CosmeticItem, bioSyncMessage: String
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.CheckCircle, null, modifier = Modifier.size(16.dp), tint = Color(0xFF4CAF50))
                 Spacer(Modifier.width(8.dp))
-                Text("Free of common allergens", style = MaterialTheme.typography.bodySmall, color = Color(0xFF4CAF50))
+                Text(stringResource(R.string.applications_kocolor_features_cosmetics_no_allergens), style = MaterialTheme.typography.bodySmall, color = Color(0xFF4CAF50))
             }
         }
 
         if (item.ingredients.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
-            Text("FULL INGREDIENTS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
+            Text(stringResource(R.string.applications_kocolor_features_cosmetics_full_ingredients), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
             Surface(
                 color = Color(0xFFFBF8F5),
                 shape = RoundedCornerShape(12.dp),
@@ -708,19 +705,19 @@ private fun SustainabilitySection(item: CosmeticItem) {
                 }
                 Spacer(Modifier.width(16.dp))
                 Column {
-                    Text("ECO-SCORE: $score", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
-                    Text("Overall environmental footprint.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_ecoscore_label, score), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_eco_description), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
             }
         }
 
-        DetailMetricRow("Recyclable", if (item.recyclingInstructions != null) "Yes" else "Likely")
-        DetailMetricRow("Vegan", if (item.isVegan == true) "Certified" else if (item.isVegan == false) "No" else "Likely")
-        DetailMetricRow("Cruelty-Free", if (item.isCrueltyFree == true) "Yes" else "Analyzing...")
+        DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_recyclable), if (item.recyclingInstructions != null) stringResource(R.string.applications_kocolor_features_cosmetics_yes) else stringResource(R.string.applications_kocolor_features_cosmetics_likely))
+        DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_vegan), if (item.isVegan == true) stringResource(R.string.applications_kocolor_features_cosmetics_certified) else if (item.isVegan == false) stringResource(R.string.applications_kocolor_features_cosmetics_no) else stringResource(R.string.applications_kocolor_features_cosmetics_likely))
+        DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_cruelty_free), if (item.isCrueltyFree == true) stringResource(R.string.applications_kocolor_features_cosmetics_yes) else stringResource(R.string.applications_kocolor_features_cosmetics_analyzing))
         
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Icon(Icons.Default.Recycling, "Recyclable", tint = Color(0xFF4CAF50))
-            if (item.isVegan != false) Icon(Icons.Default.Eco, "Clean Beauty", tint = Color(0xFF4CAF50))
+            Icon(Icons.Default.Recycling, stringResource(R.string.applications_kocolor_features_cosmetics_recyclable), tint = Color(0xFF4CAF50))
+            if (item.isVegan != false) Icon(Icons.Default.Eco, stringResource(R.string.applications_kocolor_features_cosmetics_clean_beauty), tint = Color(0xFF4CAF50))
         }
     }
 }
@@ -728,7 +725,7 @@ private fun SustainabilitySection(item: CosmeticItem) {
 @Composable
 private fun CoordinationSection() {
     Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("WORKS WELL WITH", style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.applications_kocolor_features_cosmetics_works_well_with), style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("Silk Primer", "Radiance Mist", "Daily SPF").forEach { product ->
                 Surface(
@@ -751,9 +748,9 @@ private fun CoordinationSection() {
 private fun ValueAnalysisSection(item: CosmeticItem) {
     val remainingValue = (item.fillLevel ?: 1.0) * (item.price ?: 0.0)
     Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        DetailMetricRow("Retail Investment", "$%.2f".format(item.price ?: 0.0))
-        DetailMetricRow("Actual Cost Per Use", item.costPerUse?.let { "$%.2f".format(it) } ?: "---")
-        DetailMetricRow("Remaining Value", "$%.2f".format(remainingValue), valueColor = Color(0xFF8B5E3C))
+        DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_retail_investment), "$%.2f".format(item.price ?: 0.0))
+        DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_actual_cost_per_use), item.costPerUse?.let { "$%.2f".format(it) } ?: stringResource(R.string.applications_kocolor_features_cosmetics_not_available))
+        DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_remaining_value), "$%.2f".format(remainingValue), valueColor = Color(0xFF8B5E3C))
     }
 }
 
@@ -768,7 +765,7 @@ private fun ColorHueMapSection(colorHex: String, shadeName: String?, compatibili
 
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
         Text(
-            text = "Color Hue Map",
+            text = stringResource(R.string.applications_kocolor_features_cosmetics_color_hue_map),
             style = MaterialTheme.typography.headlineSmall,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
@@ -789,9 +786,9 @@ private fun ColorHueMapSection(colorHex: String, shadeName: String?, compatibili
             Spacer(Modifier.width(20.dp))
             
             Column {
-                Text(text = shadeName ?: "Custom Tone", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(text = shadeName ?: stringResource(R.string.applications_kocolor_features_cosmetics_custom_tone), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Text(
-                    text = "Hue: ${hsv[0].toInt()}° • Saturation: ${(hsv[1] * 100).toInt()}%",
+                    text = stringResource(R.string.applications_kocolor_features_cosmetics_hue_sat_format, hsv[0].toInt(), (hsv[1] * 100).toInt()),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
@@ -826,7 +823,7 @@ private fun ColorHueMapSection(colorHex: String, shadeName: String?, compatibili
         
         Spacer(Modifier.height(24.dp))
         
-        Text("COORDINATION PALETTE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
+        Text(stringResource(R.string.applications_kocolor_features_cosmetics_coordination_palette), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray)
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             compatibility.forEach { hex ->
@@ -846,7 +843,7 @@ private fun ColorHueMapSection(colorHex: String, shadeName: String?, compatibili
 private fun ProfessionalFacetsSection(item: CosmeticItem) {
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
         Text(
-            text = "Professional Facets",
+            text = stringResource(R.string.applications_kocolor_features_cosmetics_professional_facets),
             style = MaterialTheme.typography.headlineSmall,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
@@ -856,10 +853,10 @@ private fun ProfessionalFacetsSection(item: CosmeticItem) {
         Spacer(Modifier.height(24.dp))
         
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            DetailMetricRow("Formulation", item.formulation.name.lowercase().replaceFirstChar { it.uppercase() })
-            DetailMetricRow("Chemistry Base", item.chemistryBase.name.lowercase().replaceFirstChar { it.uppercase() })
-            DetailMetricRow("Finish", item.finish.name.lowercase().replaceFirstChar { it.uppercase() })
-            DetailMetricRow("Coverage", item.coverage.name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() })
+            DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_formulation), item.formulation.name.lowercase().replaceFirstChar { it.uppercase() })
+            DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_chemistry_base), item.chemistryBase.name.lowercase().replaceFirstChar { it.uppercase() })
+            DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_finish), item.finish.name.lowercase().replaceFirstChar { it.uppercase() })
+            DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_coverage), item.coverage.name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() })
         }
     }
 }
@@ -869,7 +866,7 @@ private fun UsageStockSection(item: CosmeticItem, uiState: CosmeticDetailUiState
     val fillLevel = item.fillLevel ?: 1.0
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
         Text(
-            text = "Usage & Stock Health",
+            text = stringResource(R.string.applications_kocolor_features_cosmetics_usage_stock_health),
             style = MaterialTheme.typography.headlineSmall,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
@@ -880,18 +877,18 @@ private fun UsageStockSection(item: CosmeticItem, uiState: CosmeticDetailUiState
         
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column {
-                Text("TOTAL USES", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                Text(stringResource(R.string.applications_kocolor_features_cosmetics_total_uses), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                 Text("${item.usageCount}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Light, fontFamily = FontFamily.Serif)
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("EST. DAYS LEFT", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                Text("${uiState.estimatedDaysRemaining ?: "---"}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Light, fontFamily = FontFamily.Serif)
+                Text(stringResource(R.string.applications_kocolor_features_cosmetics_est_days_left), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                Text("${uiState.estimatedDaysRemaining ?: stringResource(R.string.applications_kocolor_features_cosmetics_not_available)}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Light, fontFamily = FontFamily.Serif)
             }
         }
         
         Spacer(Modifier.height(24.dp))
         
-        ShareProgressBar("Stock Remaining", fillLevel)
+        ShareProgressBar(stringResource(R.string.applications_kocolor_features_cosmetics_stock_remaining), fillLevel)
         
         if (fillLevel < 0.2) {
             Spacer(Modifier.height(16.dp))
@@ -903,12 +900,12 @@ private fun UsageStockSection(item: CosmeticItem, uiState: CosmeticDetailUiState
             ) {
                 Icon(Icons.Default.ShoppingCart, null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Add to Shopping List", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.applications_kocolor_features_cosmetics_add_to_shopping_list), fontWeight = FontWeight.Bold)
             }
         }
 
         Text(
-            text = "Based on your average of ${uiState.usageFrequencyPerWeek} uses per week.",
+            text = stringResource(R.string.applications_kocolor_features_cosmetics_usage_frequency_desc_format, uiState.usageFrequencyPerWeek),
             style = MaterialTheme.typography.bodySmall,
             color = Color.Gray,
             modifier = Modifier.padding(top = 8.dp)
@@ -919,12 +916,12 @@ private fun UsageStockSection(item: CosmeticItem, uiState: CosmeticDetailUiState
 @Composable
 private fun ProductDatesSection(item: CosmeticItem) {
     val dateFormatter = remember { java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()) }
-    
-    fun formatLong(timestamp: Long?): String = timestamp?.let { dateFormatter.format(java.util.Date(it)) } ?: "Not Set"
+    val notSet = stringResource(R.string.applications_kocolor_features_cosmetics_not_set)
+    fun formatLong(timestamp: Long?): String = timestamp?.let { dateFormatter.format(java.util.Date(it)) } ?: notSet
 
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
         Text(
-            text = "Product Lifecycle",
+            text = stringResource(R.string.applications_kocolor_features_cosmetics_product_lifecycle),
             style = MaterialTheme.typography.headlineSmall,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
@@ -934,9 +931,9 @@ private fun ProductDatesSection(item: CosmeticItem) {
         Spacer(Modifier.height(24.dp))
         
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            DetailMetricRow("Added to Collection", formatLong(item.timestamp))
-            DetailMetricRow("First Opened", formatLong(item.openedDate))
-            DetailMetricRow("Estimated Expiry", formatLong(item.estimatedExpiry), valueColor = if ((item.estimatedExpiry ?: Long.MAX_VALUE) < System.currentTimeMillis()) Color.Red else Color.Black)
+            DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_added_to_collection), formatLong(item.timestamp))
+            DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_first_opened), formatLong(item.openedDate))
+            DetailMetricRow(stringResource(R.string.applications_kocolor_features_cosmetics_estimated_expiry), formatLong(item.estimatedExpiry), valueColor = if ((item.estimatedExpiry ?: Long.MAX_VALUE) < System.currentTimeMillis()) Color.Red else Color.Black)
             
             // Note: CosmeticItem doesn't have a specific "last used" timestamp, 
             // but we can infer it from usageCount or future feature additions.
@@ -958,7 +955,7 @@ private fun ShareProgressBar(label: String, share: Double) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(label, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
-            Text("%.1f%%".format(share * 100), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.applications_kocolor_features_cosmetics_stock_remaining_format, share * 100), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
         }
         LinearProgressIndicator(
             progress = { share.toFloat() },

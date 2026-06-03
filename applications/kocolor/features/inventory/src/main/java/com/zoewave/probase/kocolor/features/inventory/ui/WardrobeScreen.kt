@@ -26,11 +26,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.features.inventory.util.toComposeColor
 import com.zoewave.probase.kocolor.model.ClothingCategory
 import com.zoewave.probase.kocolor.model.ClothingItem
@@ -73,30 +75,32 @@ fun WardrobeScreen(
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("The Wardrobe", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
+                title = { Text(stringResource(R.string.applications_kocolor_features_inventory_wardrobe_title), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_inventory_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { navTo(KoColorRoute.WardrobeColorVerification) }) {
-                        Icon(Icons.Default.Palette, contentDescription = "Test Colors")
+                        Icon(Icons.Default.Palette, contentDescription = stringResource(R.string.applications_kocolor_features_inventory_test_colors))
                     }
                     IconButton(onClick = { 
+                        val newEssential = context.getString(R.string.applications_kocolor_features_inventory_new_essential)
                         // We could add a proper "Add" route later
                         onEvent(WardrobeEvent.AddItem(
                             ClothingItem(
-                                name = "New Essential",
+                                name = newEssential,
                                 category = ClothingCategory.TOPS,
                                 colorHex = "#FFFFFF"
                             )
                         ))
                     }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add")
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_inventory_add))
                     }
                 }
             )
@@ -108,7 +112,7 @@ fun WardrobeScreen(
             }
         } else if (uiState.items.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("Your collection is ready to be curated.", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.applications_kocolor_features_inventory_empty_collection), style = MaterialTheme.typography.bodyLarge)
             }
         } else {
             val filteredItems = uiState.items
@@ -134,7 +138,7 @@ fun WardrobeScreen(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "${items.size} curated pieces",
+                                text = stringResource(R.string.applications_kocolor_features_inventory_curated_pieces_format, items.size),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                             )
@@ -228,7 +232,7 @@ fun WardrobeCard(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = uiState.brand?.uppercase() ?: "KOCOLOR",
+                    text = uiState.brand?.uppercase() ?: stringResource(R.string.applications_kocolor_features_inventory_brand_default),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White.copy(alpha = 0.7f),
                     fontWeight = FontWeight.Black,

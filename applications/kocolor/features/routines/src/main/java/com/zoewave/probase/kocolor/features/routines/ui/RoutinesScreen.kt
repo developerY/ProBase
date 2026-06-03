@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -73,10 +74,10 @@ fun RoutinesScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("GLOW RITUALS", style = MaterialTheme.typography.labelLarge, letterSpacing = 3.sp) },
+                title = { Text(stringResource(R.string.applications_kocolor_features_routines_title), style = MaterialTheme.typography.labelLarge, letterSpacing = 3.sp) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Home) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_routines_back))
                     }
                 }
             )
@@ -90,13 +91,13 @@ fun RoutinesScreen(
             item {
                 Column {
                     Text(
-                        text = "Serene Rituals.",
+                        text = stringResource(R.string.applications_kocolor_features_routines_serene_rituals),
                         style = MaterialTheme.typography.headlineLarge,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Daily acts of mindful care.",
+                        text = stringResource(R.string.applications_kocolor_features_routines_serene_rituals_desc),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
@@ -183,7 +184,7 @@ fun HeroRitualCard(
                 ) {
                     // 1. TOP: Title
                     Text(
-                        text = if (isMorning) "Morning Ritual" else "Evening Ritual",
+                        text = if (isMorning) stringResource(R.string.applications_kocolor_features_routines_morning_ritual) else stringResource(R.string.applications_kocolor_features_routines_evening_ritual),
                         style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
@@ -201,7 +202,7 @@ fun HeroRitualCard(
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                text = if (isMorning) "CURRENT RITUAL" else "EVENING RITUAL",
+                                text = if (isMorning) stringResource(R.string.applications_kocolor_features_routines_current_ritual) else stringResource(R.string.applications_kocolor_features_routines_evening_ritual_label),
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Black,
@@ -231,13 +232,13 @@ fun HeroRitualCard(
                             )
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = "$completedCount/$totalCount",
+                                    text = stringResource(R.string.applications_kocolor_features_routines_progress_format, completedCount, totalCount),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Black,
                                     color = Color.Black
                                 )
                                 Text(
-                                    text = "DONE",
+                                    text = stringResource(R.string.applications_kocolor_features_routines_done),
                                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Black.copy(alpha = 0.5f)
@@ -249,13 +250,13 @@ fun HeroRitualCard(
                     // 3. BOTTOM: Duration and rest
                     Column {
                         Text(
-                            text = "15 mins duration",
+                            text = stringResource(R.string.applications_kocolor_features_routines_duration_format, 15),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black
                         )
                         Text(
-                            text = if (isMorning) "Prepare for a balanced day ahead." else "Every step is an act of self-love.",
+                            text = if (isMorning) stringResource(R.string.applications_kocolor_features_routines_morning_desc) else stringResource(R.string.applications_kocolor_features_routines_evening_desc),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Black.copy(alpha = 0.7f)
                         )
@@ -287,7 +288,7 @@ fun DailyInsightBanner(
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             Text(
-                text = "Daily Insight",
+                text = stringResource(R.string.applications_kocolor_features_routines_daily_insight),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color(0xFF8B5E3C),
                 fontWeight = FontWeight.Black,
@@ -295,7 +296,7 @@ fun DailyInsightBanner(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "\"Patience is the foundation of every lasting ritual.\"",
+                text = stringResource(R.string.applications_kocolor_features_routines_insight_quote),
                 style = MaterialTheme.typography.bodyLarge,
                 fontFamily = FontFamily.Serif,
                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
@@ -308,7 +309,7 @@ fun DailyInsightBanner(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B5E57)),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("VIEW PROGRESS", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.applications_kocolor_features_routines_view_progress), fontWeight = FontWeight.Bold)
             }
         }
     }

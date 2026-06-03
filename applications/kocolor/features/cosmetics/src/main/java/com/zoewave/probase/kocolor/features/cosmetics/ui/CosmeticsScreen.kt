@@ -25,11 +25,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.model.*
 
 @Preview(showBackground = true)
@@ -69,19 +71,19 @@ fun CosmeticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Inventory", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
+                title = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_inventory_title), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { navTo(KoColorRoute.CosmeticAdd()) }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add")
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add))
                     }
                     Box {
                         IconButton(onClick = { showSortMenu = true }) {
-                            Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
+                            Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_sort))
                         }
                         DropdownMenu(
                             expanded = showSortMenu,
@@ -108,7 +110,7 @@ fun CosmeticsScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { navTo(KoColorRoute.CosmeticAdd()) }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Item")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add_item))
             }
         }
     ) { padding ->
@@ -120,7 +122,7 @@ fun CosmeticsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Search by name, brand, or category...") },
+                placeholder = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_search_placeholder)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp)
@@ -221,7 +223,7 @@ fun GroupSectionCard(
             
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
-                Text(text = "$itemCount items", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = stringResource(R.string.applications_kocolor_features_cosmetics_item_count_format, itemCount), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             
             Icon(
@@ -311,15 +313,15 @@ fun CosmeticProductCard(
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Column {
-                    Text("COST / USE", style = MaterialTheme.typography.labelSmall, color = contentColor.copy(alpha = 0.6f))
-                    Text(text = uiState.costPerUse?.let { "$%.2f".format(it) } ?: "N/A", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_cost_per_use_label), style = MaterialTheme.typography.labelSmall, color = contentColor.copy(alpha = 0.6f))
+                    Text(text = uiState.costPerUse?.let { "$%.2f".format(it) } ?: stringResource(R.string.applications_kocolor_features_cosmetics_not_available), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                 }
                 Button(
                     onClick = { onEvent(CosmeticsEvent.UseItem(uiState.id)) },
                     colors = ButtonDefaults.buttonColors(containerColor = contentColor.copy(alpha = 0.2f), contentColor = contentColor),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("USE", fontWeight = FontWeight.Black)
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_use_action), fontWeight = FontWeight.Black)
                 }
             }
         }

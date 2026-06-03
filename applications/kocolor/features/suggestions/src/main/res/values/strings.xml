@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_kocolor_features_suggestions_title">Personal Suggestions</string>
+    <string name="applications_kocolor_features_suggestions_back">Back</string>
+    <string name="applications_kocolor_features_suggestions_no_profile">No fashion profile found. Please analyze your style first.</string>
+    <string name="applications_kocolor_features_suggestions_summary">Summary</string>
+    <string name="applications_kocolor_features_suggestions_outfit_suggestions">Outfit Suggestions</string>
+    <string name="applications_kocolor_features_suggestions_key_pieces_format">Key pieces: %1$s</string>
+    <string name="applications_kocolor_features_suggestions_makeup_suggestions">Makeup Suggestions</string>
+</resources>

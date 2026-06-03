@@ -28,6 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.model.*
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import java.text.NumberFormat
@@ -49,10 +51,10 @@ fun CosmeticAnalyticsScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("VANITY INTELLIGENCE", style = MaterialTheme.typography.labelLarge, letterSpacing = 3.sp) },
+                title = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_analytics_title), style = MaterialTheme.typography.labelLarge, letterSpacing = 3.sp) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_back))
                     }
                 },
             )
@@ -67,13 +69,13 @@ fun CosmeticAnalyticsScreen(
             item {
                 Column {
                     Text(
-                        text = "Beauty Blueprint.",
+                        text = stringResource(R.string.applications_kocolor_features_cosmetics_beauty_blueprint),
                         style = MaterialTheme.typography.displaySmall,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Data-driven insights from the curated collection.",
+                        text = stringResource(R.string.applications_kocolor_features_cosmetics_data_insights_desc),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
@@ -83,18 +85,18 @@ fun CosmeticAnalyticsScreen(
             // 2. High-Level Performance Metrics
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("COLLECTION PERFORMANCE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_performance_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
                         AnalyticsStatCard(
-                            label = "TOTAL USES", 
+                            label = stringResource(R.string.applications_kocolor_features_cosmetics_total_uses), 
                             value = uiState.items.sumOf { it.usageCount }.toString(), 
                             icon = Icons.Default.History, 
                             modifier = Modifier.weight(1f)
                         )
                         AnalyticsStatCard(
-                            label = "AVG CPU", 
-                            value = uiState.items.mapNotNull { it.costPerUse }.let { if (it.isEmpty()) "---" else currencyFormatter.format(it.average()) }, 
+                            label = stringResource(R.string.applications_kocolor_features_cosmetics_avg_cpu), 
+                            value = uiState.items.mapNotNull { it.costPerUse }.let { if (it.isEmpty()) stringResource(R.string.applications_kocolor_features_cosmetics_not_available) else currencyFormatter.format(it.average()) }, 
                             icon = Icons.AutoMirrored.Filled.TrendingDown, 
                             modifier = Modifier.weight(1f)
                         )
@@ -105,11 +107,11 @@ fun CosmeticAnalyticsScreen(
             // 3. Usage Leaderboard
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("USAGE LEADERBOARD", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_usage_leaderboard), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     val topUsed = uiState.items.filter { it.usageCount > 0 }.sortedByDescending { it.usageCount }.take(5)
                     
                     if (topUsed.isEmpty()) {
-                        Text("No usage data available yet. Start logging your rituals!", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.applications_kocolor_features_cosmetics_no_usage_data), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             topUsed.forEachIndexed { index, item ->
@@ -123,11 +125,11 @@ fun CosmeticAnalyticsScreen(
             // 4. Chromatic Core
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("CHROMATIC CORE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_chromatic_core), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     val colorDistribution = uiState.items.mapNotNull { it.colorHex }.groupBy { it }.mapValues { it.value.size }.toList().sortedByDescending { it.second }
                     
                     if (colorDistribution.isEmpty()) {
-                        Text("Capture more product colors to see your palette.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.applications_kocolor_features_cosmetics_capture_colors_prompt), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else {
                         Row(
                             modifier = Modifier.fillMaxWidth().height(80.dp).clip(RoundedCornerShape(16.dp)),
@@ -150,15 +152,15 @@ fun CosmeticAnalyticsScreen(
             // 5. Efficiency Analysis
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("STYLE EFFICIENCY (BEST VALUE)", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_style_efficiency), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     val bestValue = uiState.items.filter { it.costPerUse != null }.sortedBy { it.costPerUse }.take(3)
                     
                     if (bestValue.isEmpty()) {
-                        Text("Complete more usage cycles to see performance data.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.applications_kocolor_features_cosmetics_complete_cycles_prompt), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             bestValue.forEach { item ->
-                                ValueEfficiencyRow(item = item, label = "PER USE")
+                                ValueEfficiencyRow(item = item, label = stringResource(R.string.applications_kocolor_features_cosmetics_per_use))
                             }
                         }
                     }
@@ -209,7 +211,7 @@ private fun UsageRankingRow(item: CosmeticItem, rank: Int, maxUsage: Int) {
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                Text(text = "${item.brand} · ${item.usageCount} uses", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = stringResource(R.string.applications_kocolor_features_cosmetics_brand_uses_format, item.brand, item.usageCount), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Box(
                 modifier = Modifier

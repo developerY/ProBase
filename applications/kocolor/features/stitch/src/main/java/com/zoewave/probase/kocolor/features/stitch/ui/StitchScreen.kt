@@ -49,11 +49,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.kocolor.features.stitch.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,10 +70,10 @@ fun StitchScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Blueprint Editor", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
+                title = { Text(stringResource(R.string.applications_kocolor_features_stitch_editor_title), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_stitch_back))
                     }
                 },
                 actions = {
@@ -79,7 +81,7 @@ fun StitchScreen(
                         onEvent(StitchEvent.SaveCollection)
                         navTo(KoColorRoute.Back)
                     }) {
-                        Text("SAVE", fontWeight = FontWeight.Black)
+                        Text(stringResource(R.string.applications_kocolor_features_stitch_save), fontWeight = FontWeight.Black)
                     }
                 }
             )
@@ -97,7 +99,7 @@ fun StitchScreen(
                         OutlinedTextField(
                             value = advice.title ?: "",
                             onValueChange = { onEvent(StitchEvent.UpdateTitle(it)) },
-                            label = { Text("Collection Title") },
+                            label = { Text(stringResource(R.string.applications_kocolor_features_stitch_collection_title)) },
                             modifier = Modifier.fillMaxWidth(),
                             textStyle = MaterialTheme.typography.headlineSmall.copy(fontFamily = FontFamily.Serif),
                             shape = RoundedCornerShape(16.dp)
@@ -105,7 +107,7 @@ fun StitchScreen(
                         OutlinedTextField(
                             value = advice.summary,
                             onValueChange = { onEvent(StitchEvent.UpdateSummary(it)) },
-                            label = { Text("Stylist Rationale") },
+                            label = { Text(stringResource(R.string.applications_kocolor_features_stitch_stylist_rationale)) },
                             modifier = Modifier.fillMaxWidth(),
                             minLines = 3,
                             shape = RoundedCornerShape(16.dp)
@@ -115,7 +117,7 @@ fun StitchScreen(
 
                 // 2. The Wardrobe (Outfit) Section
                 item {
-                    SectionHeader("THE WARDROBE", Icons.Default.Checkroom)
+                    SectionHeader(stringResource(R.string.applications_kocolor_features_stitch_wardrobe_section), Icons.Default.Checkroom)
                 }
 
                 advice.outfitSuggestions.forEachIndexed { outfitIdx, outfit ->
@@ -140,13 +142,13 @@ fun StitchScreen(
                     ) {
                         Icon(Icons.Default.Add, null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Add Wardrobe Piece")
+                        Text(stringResource(R.string.applications_kocolor_features_stitch_add_wardrobe_piece))
                     }
                 }
 
                 // 3. The Vanity Section
                 item {
-                    SectionHeader("THE VANITY", Icons.Default.Face)
+                    SectionHeader(stringResource(R.string.applications_kocolor_features_stitch_vanity_section), Icons.Default.Face)
                 }
 
                 items(advice.makeupSuggestions.size) { index ->
@@ -169,7 +171,7 @@ fun StitchScreen(
                     ) {
                         Icon(Icons.Default.Add, null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Add Vanity Product")
+                        Text(stringResource(R.string.applications_kocolor_features_stitch_add_vanity_product))
                     }
                 }
 
@@ -185,7 +187,7 @@ fun StitchScreen(
                         ) {
                             Icon(Icons.Default.Delete, null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Delete Collection")
+                            Text(stringResource(R.string.applications_kocolor_features_stitch_delete_collection))
                         }
                     }
                 }
@@ -259,15 +261,15 @@ private fun StitchItemRow(
                 Text(text = category.uppercase(), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                 Text(text = title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                 if (!isOwned) {
-                    Text("Suggested Piece", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.applications_kocolor_features_stitch_suggested_piece), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                 }
             }
             
             IconButton(onClick = onPickClick) {
-                Icon(Icons.Default.SwapHoriz, "Change Item", tint = MaterialTheme.colorScheme.primary)
+                Icon(Icons.Default.SwapHoriz, stringResource(R.string.applications_kocolor_features_stitch_change_item), tint = MaterialTheme.colorScheme.primary)
             }
             IconButton(onClick = onRemoveClick) {
-                Icon(Icons.Default.Close, "Remove Slot", modifier = Modifier.size(20.dp), tint = Color.Gray)
+                Icon(Icons.Default.Close, stringResource(R.string.applications_kocolor_features_stitch_remove_slot), modifier = Modifier.size(20.dp), tint = Color.Gray)
             }
         }
     }
@@ -288,7 +290,7 @@ private fun StitchItemPickerOverlay(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             CenterAlignedTopAppBar(
-                title = { Text(if (isMakeup) "Select Cosmetic" else "Select Garment", style = MaterialTheme.typography.titleMedium) },
+                title = { Text(if (isMakeup) stringResource(R.string.applications_kocolor_features_stitch_select_cosmetic) else stringResource(R.string.applications_kocolor_features_stitch_select_garment), style = MaterialTheme.typography.titleMedium) },
                 navigationIcon = {
                     IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, null) }
                 }
@@ -305,7 +307,7 @@ private fun StitchItemPickerOverlay(
                     }
                 } else {
                     items(uiState.allWardrobe) { item ->
-                        PickerItemRow(item.name, item.brand ?: "Archive", item.imageUrl, item.category.name) { onItemSelected(item) }
+                        PickerItemRow(item.name, item.brand ?: stringResource(R.string.applications_kocolor_features_stitch_archive), item.imageUrl, item.category.name) { onItemSelected(item) }
                     }
                 }
             }

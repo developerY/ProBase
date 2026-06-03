@@ -25,10 +25,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.kocolor.features.suggestions.R
 import com.zoewave.probase.kocolor.model.FashionAdvice
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
@@ -72,10 +74,10 @@ fun SuggestionsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Personal Suggestions") },
+                title = { Text(stringResource(R.string.applications_kocolor_features_suggestions_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_suggestions_back))
                     }
                 }
             )
@@ -120,7 +122,7 @@ fun NoProfileState(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("No fashion profile found. Please analyze your style first.", textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        Text(stringResource(R.string.applications_kocolor_features_suggestions_no_profile), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }
 
@@ -136,11 +138,11 @@ fun SuggestionsList(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text("Summary", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.applications_kocolor_features_suggestions_summary), style = MaterialTheme.typography.titleMedium)
             Text(uiState.summary, style = MaterialTheme.typography.bodyMedium)
         }
         item {
-            Text("Outfit Suggestions", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.applications_kocolor_features_suggestions_outfit_suggestions), style = MaterialTheme.typography.titleMedium)
         }
         items(uiState.outfitSuggestions) { outfit ->
             Card(modifier = Modifier.fillMaxWidth()) {
@@ -148,13 +150,13 @@ fun SuggestionsList(
                     Text(outfit.occasion, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                     Text(outfit.advice)
                     if (outfit.keyPieces.isNotEmpty()) {
-                        Text("Key pieces: ${outfit.keyPieces.joinToString(", ")}", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.applications_kocolor_features_suggestions_key_pieces_format, outfit.keyPieces.joinToString(", ")), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
         }
         item {
-            Text("Makeup Suggestions", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.applications_kocolor_features_suggestions_makeup_suggestions), style = MaterialTheme.typography.titleMedium)
         }
         items(uiState.makeupSuggestions) { makeup ->
             Card(modifier = Modifier.fillMaxWidth()) {

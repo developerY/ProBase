@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_kocolor_features_analyzer_title">Fashion Analyzer</string>
+    <string name="applications_kocolor_features_analyzer_back">Back</string>
+    <string name="applications_kocolor_features_analyzer_loading">Gemini is analyzing your style...</string>
+    <string name="applications_kocolor_features_analyzer_try_again">Try Again</string>
+    <string name="applications_kocolor_features_analyzer_capture_instruction">Capture up to 4 images for a holistic style analysis</string>
+    <string name="applications_kocolor_features_analyzer_face_label">Your Face</string>
+    <string name="applications_kocolor_features_analyzer_hair_label">Your Hair</string>
+    <string name="applications_kocolor_features_analyzer_shoes_label">Your Shoes</string>
+    <string name="applications_kocolor_features_analyzer_clothes_label">Your Clothes</string>
+    <string name="applications_kocolor_features_analyzer_analyze_action">Analyze My Look</string>
+    <string name="applications_kocolor_features_analyzer_select_occasion">Select Occasion</string>
+    <string name="applications_kocolor_features_analyzer_occasion_work">Work</string>
+    <string name="applications_kocolor_features_analyzer_occasion_date_night">Date Night</string>
+    <string name="applications_kocolor_features_analyzer_occasion_outdoor_sport">Outdoor/Sport</string>
+    <string name="applications_kocolor_features_analyzer_occasion_formal">Formal</string>
+    <string name="applications_kocolor_features_analyzer_style_location">Style Location</string>
+    <string name="applications_kocolor_features_analyzer_location_placeholder">City, Style Capital...</string>
+    <string name="applications_kocolor_features_analyzer_local_context_label">Local Context</string>
+    <string name="applications_kocolor_features_analyzer_detect_location">Detect Location</string>
+    <string name="applications_kocolor_features_analyzer_ai_location_desc">AI will tailor your palette to local fashion trends.</string>
+    <string name="applications_kocolor_features_analyzer_capture_title_format">Capture %1$s</string>
+    <string name="applications_kocolor_features_analyzer_choose_source">Choose a photo source</string>
+    <string name="applications_kocolor_features_analyzer_camera">Camera</string>
+    <string name="applications_kocolor_features_analyzer_gallery">Gallery</string>
+    <string name="applications_kocolor_features_analyzer_result_title">Style Analysis Result</string>
+    <string name="applications_kocolor_features_analyzer_seasonal_type_format">Seasonal Type: %1$s</string>
+    <string name="applications_kocolor_features_analyzer_undertone_format">Undertone: %1$s</string>
+    <string name="applications_kocolor_features_analyzer_recommended_palette">Recommended Makeup &amp; Nail Palette</string>
+    <string name="applications_kocolor_features_analyzer_makeup_nail_suggestions">Makeup &amp; Nail Suggestions</string>
+    <string name="applications_kocolor_features_analyzer_experience">Experience</string>
+    <string name="applications_kocolor_features_analyzer_discard">Discard</string>
+    <string name="applications_kocolor_features_analyzer_save_analysis">Save Analysis</string>
+</resources>

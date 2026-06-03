@@ -57,11 +57,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.model.FashionAdvice
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.SeasonalType
@@ -102,10 +104,10 @@ fun AnalyzerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Fashion Analyzer") },
+                title = { Text(stringResource(R.string.applications_kocolor_features_analyzer_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_analyzer_back))
                     }
                 }
             )
@@ -128,7 +130,7 @@ fun AnalyzerScreen(
                     ) {
                         CircularProgressIndicator()
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("Gemini is analyzing your style...")
+                        Text(stringResource(R.string.applications_kocolor_features_analyzer_loading))
                     }
                 }
                 is AnalyzerUiState.Success -> {
@@ -153,7 +155,7 @@ fun AnalyzerScreen(
                     ) {
                         Text(state.message, color = MaterialTheme.colorScheme.error)
                         Button(onClick = { onEvent(AnalyzerEvent.OnResetClicked) }, modifier = Modifier.padding(top = 16.dp)) {
-                            Text("Try Again")
+                            Text(stringResource(R.string.applications_kocolor_features_analyzer_try_again))
                         }
                     }
                 }
@@ -189,7 +191,7 @@ fun StyleCaptureState(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            "Capture up to 4 images for a holistic style analysis",
+            stringResource(R.string.applications_kocolor_features_analyzer_capture_instruction),
             style = MaterialTheme.typography.titleMedium,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
@@ -200,24 +202,24 @@ fun StyleCaptureState(
         ) {
             Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 StyleCaptureSlot(
-                    uiState = "Your Face" to uiState.faceUri,
+                    uiState = stringResource(R.string.applications_kocolor_features_analyzer_face_label) to uiState.faceUri,
                     onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("face")) }
                 )
                 StyleCaptureSlot(
-                    uiState = "Your Hair" to uiState.hairUri,
+                    uiState = stringResource(R.string.applications_kocolor_features_analyzer_hair_label) to uiState.hairUri,
                     onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("hair")) }
                 )
             }
             Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 StyleCaptureSlot(
-                    uiState = "Your Shoes" to uiState.shoesUri,
+                    uiState = stringResource(R.string.applications_kocolor_features_analyzer_shoes_label) to uiState.shoesUri,
                     onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("shoes")) }
                 )
                 StyleCaptureSlot(
-                    uiState = "Your Clothes" to uiState.clothesUri,
+                    uiState = stringResource(R.string.applications_kocolor_features_analyzer_clothes_label) to uiState.clothesUri,
                     onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("clothes")) }
                 )
@@ -245,7 +247,7 @@ fun StyleCaptureState(
         ) {
             Icon(Icons.Default.AutoAwesome, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Analyze My Look")
+            Text(stringResource(R.string.applications_kocolor_features_analyzer_analyze_action))
         }
     }
 }
@@ -268,10 +270,15 @@ fun OccasionFilter(
     onEvent: (AnalyzerEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val occasions = listOf("Work", "Date Night", "Outdoor/Sport", "Formal")
+    val occasions = listOf(
+        stringResource(R.string.applications_kocolor_features_analyzer_occasion_work),
+        stringResource(R.string.applications_kocolor_features_analyzer_occasion_date_night),
+        stringResource(R.string.applications_kocolor_features_analyzer_occasion_outdoor_sport),
+        stringResource(R.string.applications_kocolor_features_analyzer_occasion_formal)
+    )
     
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text("Select Occasion", style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.applications_kocolor_features_analyzer_select_occasion), style = MaterialTheme.typography.labelMedium)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -310,7 +317,7 @@ fun LocationInput(
     val (locationName, isLocating) = uiState
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text("Style Location", style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.applications_kocolor_features_analyzer_style_location), style = MaterialTheme.typography.labelMedium)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -322,22 +329,22 @@ fun LocationInput(
                 value = locationName ?: "",
                 onValueChange = { onEvent(AnalyzerEvent.OnLocationChanged(it.takeIf { it.isNotBlank() })) },
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("City, Style Capital...") },
-                label = { Text("Local Context") },
+                placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_location_placeholder)) },
+                label = { Text(stringResource(R.string.applications_kocolor_features_analyzer_local_context_label)) },
                 singleLine = true,
                 trailingIcon = {
                     if (isLocating) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                     } else {
                         IconButton(onClick = { onEvent(AnalyzerEvent.OnDetectLocationClicked) }) {
-                            Icon(Icons.Default.MyLocation, contentDescription = "Detect Location")
+                            Icon(Icons.Default.MyLocation, contentDescription = stringResource(R.string.applications_kocolor_features_analyzer_detect_location))
                         }
                     }
                 }
             )
         }
         Text(
-            "AI will tailor your palette to local fashion trends.",
+            stringResource(R.string.applications_kocolor_features_analyzer_ai_location_desc),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -416,8 +423,8 @@ fun StyleCaptureSlot(
     if (showOptions) {
         AlertDialog(
             onDismissRequest = { showOptions = false },
-            title = { Text("Capture $title") },
-            text = { Text("Choose a photo source") },
+            title = { Text(stringResource(R.string.applications_kocolor_features_analyzer_capture_title_format, title)) },
+            text = { Text(stringResource(R.string.applications_kocolor_features_analyzer_choose_source)) },
             confirmButton = {
                 TextButton(onClick = {
                     showOptions = false
@@ -425,7 +432,7 @@ fun StyleCaptureSlot(
                 }) {
                     Icon(Icons.Default.CameraAlt, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Camera")
+                    Text(stringResource(R.string.applications_kocolor_features_analyzer_camera))
                 }
             },
             dismissButton = {
@@ -435,7 +442,7 @@ fun StyleCaptureSlot(
                 }) {
                     Icon(Icons.Default.PhotoLibrary, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Gallery")
+                    Text(stringResource(R.string.applications_kocolor_features_analyzer_gallery))
                 }
             }
         )
@@ -485,7 +492,7 @@ fun AnalysisResultScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text("Style Analysis Result", style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(R.string.applications_kocolor_features_analyzer_result_title), style = MaterialTheme.typography.headlineSmall)
         }
         item {
             Card(
@@ -493,15 +500,15 @@ fun AnalysisResultScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Seasonal Type: ${uiState.seasonalType}", style = MaterialTheme.typography.titleMedium)
-                    Text("Undertone: ${uiState.undertone}", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.applications_kocolor_features_analyzer_seasonal_type_format, uiState.seasonalType), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.applications_kocolor_features_analyzer_undertone_format, uiState.undertone), style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(uiState.summary)
                 }
             }
         }
         item {
-            Text("Recommended Makeup & Nail Palette", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.applications_kocolor_features_analyzer_recommended_palette), style = MaterialTheme.typography.titleMedium)
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -517,7 +524,7 @@ fun AnalysisResultScreen(
             }
         }
         item {
-            Text("Makeup & Nail Suggestions", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.applications_kocolor_features_analyzer_makeup_nail_suggestions), style = MaterialTheme.typography.titleMedium)
         }
         items(uiState.makeupSuggestions) { suggestion ->
             Card(modifier = Modifier.fillMaxWidth()) {
@@ -549,7 +556,7 @@ fun AnalysisResultScreen(
                         ) {
                             Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Experience", style = MaterialTheme.typography.labelSmall)
+                            Text(stringResource(R.string.applications_kocolor_features_analyzer_experience), style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
@@ -561,12 +568,12 @@ fun AnalysisResultScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedButton(onClick = { onEvent(AnalyzerEvent.OnResetClicked) }, modifier = Modifier.weight(1f)) {
-                    Text("Discard")
+                    Text(stringResource(R.string.applications_kocolor_features_analyzer_discard))
                 }
                 Button(onClick = { onEvent(AnalyzerEvent.OnSaveClicked(uiState)) }, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Default.Check, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Save Analysis")
+                    Text(stringResource(R.string.applications_kocolor_features_analyzer_save_analysis))
                 }
             }
         }

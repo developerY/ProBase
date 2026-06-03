@@ -10,6 +10,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -18,6 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.zoewave.probase.kocolor.mobile.R
 import com.zoewave.probase.kocolor.mobile.core.ui.theme.KoColorTheme
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.topLevelRoutes
@@ -42,11 +44,17 @@ fun KoColorMainScreen(
         NavigationSuiteScaffold(
             navigationSuiteItems = {
                 topLevelRoutes.forEach { route ->
+                    val labelId = when (route) {
+                        is KoColorRoute.Home -> R.string.applications_kocolor_apps_mobile_nav_home
+                        is KoColorRoute.Color -> R.string.applications_kocolor_apps_mobile_nav_collection
+                        is KoColorRoute.Settings -> R.string.applications_kocolor_apps_mobile_nav_settings
+                        else -> null
+                    }
                     item(
                         selected = uiState.currentTab::class == route::class,
                         onClick = { viewModel.navigateTo(route) },
-                        icon = { route.icon?.let { Icon(it, contentDescription = route.label) } },
-                        label = { route.label?.let { Text(it) } }
+                        icon = { route.icon?.let { Icon(it, contentDescription = labelId?.let { stringResource(it) }) } },
+                        label = { labelId?.let { Text(stringResource(it)) } }
                     )
                 }
             },

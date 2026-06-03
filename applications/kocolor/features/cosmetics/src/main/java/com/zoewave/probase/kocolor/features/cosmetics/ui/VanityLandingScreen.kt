@@ -55,12 +55,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.model.CosmeticItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.MacroCategory
@@ -82,15 +84,15 @@ fun VanityLandingScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Glow Archive", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
+                title = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_glow_archive), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_back))
                     }
                 },
                 actions = {
-                    IconButton(onClick = { navTo(KoColorRoute.InventoryManagement) }) { Icon(Icons.Default.Inventory2, contentDescription = "Inventory") }
-                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { Icon(Icons.Default.Search, contentDescription = "Search") }
+                    IconButton(onClick = { navTo(KoColorRoute.InventoryManagement) }) { Icon(Icons.Default.Inventory2, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_title)) }
+                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_filter)) }
                 }
             )
         },
@@ -101,7 +103,7 @@ fun VanityLandingScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Product")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add_item))
             }
         }
     ) { padding ->
@@ -114,13 +116,13 @@ fun VanityLandingScreen(
             item {
                 Column {
                     Text(
-                        text = "Good morning, Beautiful.",
+                        text = stringResource(R.string.applications_kocolor_features_cosmetics_welcome_header),
                         style = MaterialTheme.typography.headlineLarge,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Here is a glance at the collection today.",
+                        text = stringResource(R.string.applications_kocolor_features_cosmetics_welcome_desc),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
@@ -134,14 +136,14 @@ fun VanityLandingScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     SummaryStatCard(
-                        label = "TOTAL PRODUCTS",
+                        label = stringResource(R.string.applications_kocolor_features_cosmetics_total_products),
                         value = uiState.totalCosmetics.toString(),
                         icon = Icons.Default.Inventory2,
                         modifier = Modifier.weight(1f),
                         onClick = { navTo(KoColorRoute.CosmeticAnalytics) }
                     )
                     SummaryStatCard(
-                        label = "EXPIRING SOON",
+                        label = stringResource(R.string.applications_kocolor_features_cosmetics_expiring_soon),
                         value = uiState.expiringCosmeticsCount.toString(),
                         icon = Icons.Default.ErrorOutline,
                         modifier = Modifier.weight(1f),
@@ -159,7 +161,7 @@ fun VanityLandingScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "CATEGORIES",
+                            text = stringResource(R.string.applications_kocolor_features_cosmetics_categories),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
@@ -219,9 +221,9 @@ fun VanityLandingScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("RECENTLY ADDED", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                        Text(stringResource(R.string.applications_kocolor_features_cosmetics_recently_added), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                         Text(
-                            "See All",
+                            stringResource(R.string.applications_kocolor_features_cosmetics_see_all),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.clickable { navTo(KoColorRoute.Cosmetics()) }
@@ -323,7 +325,7 @@ private fun VanityCategoryCard(
                         )
                         Spacer(Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            val itemsText = if (count == 1) "1 Item" else "$count Items"
+                            val itemsText = if (count == 1) stringResource(R.string.applications_kocolor_features_cosmetics_item_singular) else stringResource(R.string.applications_kocolor_features_cosmetics_items_plural_format, count)
                             Text(
                                 text = itemsText,
                                 style = MaterialTheme.typography.bodyLarge,
@@ -355,7 +357,7 @@ private fun VanityCategoryCard(
                             color = Color.Black
                         )
                         Text(
-                            text = "TOTAL VALUE",
+                            text = stringResource(R.string.applications_kocolor_features_cosmetics_total_value),
                             style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.5.sp),
                             fontWeight = FontWeight.Black,
                             modifier = Modifier.alpha(0.4f)
@@ -371,7 +373,7 @@ private fun VanityCategoryCard(
                         verticalAlignment = Alignment.Bottom
                     ) {
                         Text(
-                            text = "STOCK STATUS", 
+                            text = stringResource(R.string.applications_kocolor_features_cosmetics_stock_status), 
                             style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 0.5.sp), 
                             fontWeight = FontWeight.Black, 
                             modifier = Modifier.alpha(0.6f)
@@ -396,7 +398,7 @@ private fun VanityCategoryCard(
                     
                     if (leadingBrand != null) {
                         Text(
-                            text = "LEADING BRAND: ${leadingBrand.uppercase()}",
+                            text = stringResource(R.string.applications_kocolor_features_cosmetics_leading_brand_format, leadingBrand.uppercase()),
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.alpha(0.6f)
@@ -438,7 +440,7 @@ private fun SummaryStatCard(
         ))
     }
     
-    val actionText = if (isExpiring) "VIEW ITEMS" else "VIEW BLUEPRINT"
+    val actionText = if (isExpiring) stringResource(R.string.applications_kocolor_features_cosmetics_view_items) else stringResource(R.string.applications_kocolor_features_cosmetics_view_blueprint)
     val actionContentColor = if (isExpiring) Color.White else charcoal.copy(alpha = 0.8f)
 
     val glassBg = if (isExpiring) {
@@ -588,7 +590,7 @@ fun ProfessionalTaxonomyDialog(onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         title = { 
             Text(
-                "Professional Taxonomy", 
+                stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_title), 
                 style = MaterialTheme.typography.headlineMedium, 
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.Bold
@@ -601,7 +603,7 @@ fun ProfessionalTaxonomyDialog(onDismiss: () -> Unit) {
             ) {
                 item {
                     TaxonomySection(
-                        level = "Level 1",
+                        level = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_level_format, "1"),
                         title = "Macro Categories (The UI Layer)",
                         description = "Top-level intuitive 'buckets' for body-zone mapping.",
                         items = listOf(
@@ -617,7 +619,7 @@ fun ProfessionalTaxonomyDialog(onDismiss: () -> Unit) {
                 
                 item {
                     TaxonomySection(
-                        level = "Level 2",
+                        level = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_level_format, "2"),
                         title = "Micro Categories (Product Type)",
                         description = "Specific product types ensuring a clean, technical database.",
                         items = listOf(
@@ -632,7 +634,7 @@ fun ProfessionalTaxonomyDialog(onDismiss: () -> Unit) {
 
                 item {
                     TaxonomySection(
-                        level = "Level 3",
+                        level = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_level_format, "3"),
                         title = "Professional Facets (The Engine Layer)",
                         description = "Expert-status attributes for algorithmic synergy and filtering.",
                         items = listOf(
@@ -648,7 +650,7 @@ fun ProfessionalTaxonomyDialog(onDismiss: () -> Unit) {
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Understand", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.applications_kocolor_features_cosmetics_understand), fontWeight = FontWeight.Bold)
             }
         },
         shape = RoundedCornerShape(28.dp),
