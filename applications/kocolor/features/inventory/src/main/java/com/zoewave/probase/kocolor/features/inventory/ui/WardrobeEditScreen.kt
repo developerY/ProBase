@@ -18,17 +18,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
+import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
+import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.model.ClothingCategory
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
-import com.zoewave.probase.features.graphics.colorpicker.util.toHex
-import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
-import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 
 data class WardrobeEditUiState(
     val itemId: Long,
@@ -82,17 +84,17 @@ fun WardrobeEditScreen(
                 showColorPicker = false
             },
             onDismissRequest = { showColorPicker = false },
-            title = "Edit Representative Color"
+            title = stringResource(R.string.applications_kocolor_features_inventory_representative_color)
         )
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Garment", style = MaterialTheme.typography.titleLarge) },
+                title = { Text(stringResource(R.string.applications_kocolor_features_inventory_edit), style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_inventory_back))
                     }
                 },
                 actions = {
@@ -103,7 +105,7 @@ fun WardrobeEditScreen(
                         },
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Save")
+                        Text(stringResource(R.string.applications_kocolor_features_inventory_save))
                     }
                 }
             )
@@ -130,7 +132,7 @@ fun WardrobeEditScreen(
                     if (draft.imageUrl != null) {
                         AsyncImage(
                             model = draft.imageUrl,
-                            contentDescription = "Garment Photo",
+                            contentDescription = stringResource(R.string.applications_kocolor_features_inventory_garment_photo),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
@@ -150,7 +152,7 @@ fun WardrobeEditScreen(
                                 tint = MaterialTheme.colorScheme.primary
                             )
                             Spacer(Modifier.height(8.dp))
-                            Text("Take Product Photo", style = MaterialTheme.typography.labelLarge)
+                            Text(stringResource(R.string.applications_kocolor_features_inventory_take_photo), style = MaterialTheme.typography.labelLarge)
                         }
                     }
                 }
@@ -163,8 +165,8 @@ fun WardrobeEditScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Representative Color", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
-                    Text("Tweak the extracted dominant hue", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                    Text(stringResource(R.string.applications_kocolor_features_inventory_representative_color), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+                    Text(stringResource(R.string.applications_kocolor_features_inventory_tweak_hue), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
                 }
                 
                 val itemColorHex = draft.dominantHex ?: draft.colorHex ?: "#CCCCCC"
@@ -187,7 +189,7 @@ fun WardrobeEditScreen(
             OutlinedTextField(
                 value = draft.name,
                 onValueChange = { onEvent(WardrobeEvent.UpdateDraft(draft.copy(name = it))) },
-                label = { Text("Garment Name") },
+                label = { Text(stringResource(R.string.applications_kocolor_features_inventory_garment_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             )
@@ -195,7 +197,7 @@ fun WardrobeEditScreen(
             OutlinedTextField(
                 value = draft.brand ?: "",
                 onValueChange = { onEvent(WardrobeEvent.UpdateDraft(draft.copy(brand = it))) },
-                label = { Text("Brand") },
+                label = { Text(stringResource(R.string.applications_kocolor_features_inventory_brand)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             )
@@ -204,7 +206,7 @@ fun WardrobeEditScreen(
                 OutlinedTextField(
                     value = draft.price?.toString() ?: "",
                     onValueChange = { onEvent(WardrobeEvent.UpdateDraft(draft.copy(price = it.toDoubleOrNull()))) },
-                    label = { Text("Price ($)") },
+                    label = { Text(stringResource(R.string.applications_kocolor_features_inventory_price)) },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp)
                 )
@@ -212,7 +214,7 @@ fun WardrobeEditScreen(
                 OutlinedTextField(
                     value = draft.size ?: "",
                     onValueChange = { onEvent(WardrobeEvent.UpdateDraft(draft.copy(size = it))) },
-                    label = { Text("Size") },
+                    label = { Text(stringResource(R.string.applications_kocolor_features_inventory_size)) },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp)
                 )
@@ -238,7 +240,7 @@ fun WardrobeEditScreen(
             OutlinedTextField(
                 value = draft.material ?: "",
                 onValueChange = { onEvent(WardrobeEvent.UpdateDraft(draft.copy(material = it))) },
-                label = { Text("Material Composition") },
+                label = { Text(stringResource(R.string.applications_kocolor_features_inventory_material_composition)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             )
@@ -246,7 +248,7 @@ fun WardrobeEditScreen(
             OutlinedTextField(
                 value = draft.notes ?: "",
                 onValueChange = { onEvent(WardrobeEvent.UpdateDraft(draft.copy(notes = it))) },
-                label = { Text("Curator's Notes") },
+                label = { Text(stringResource(R.string.applications_kocolor_features_inventory_curators_notes)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 minLines = 3
