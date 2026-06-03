@@ -1,8 +1,5 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -17,21 +14,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CategoryStatCard
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CosmeticProductGridCard
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.RankingStatCard
 import com.zoewave.probase.kocolor.model.*
-import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -173,7 +165,7 @@ fun CosmeticCategoryCoverScreen(
                             )
                         }
 
-                        // NEW: Educational Insight
+                        // Educational Insight
                         Surface(
                             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
                             shape = RoundedCornerShape(16.dp),
@@ -208,127 +200,6 @@ fun CosmeticCategoryCoverScreen(
             
             item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) {
                 Spacer(Modifier.height(80.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun RankingStatCard(
-    title: String,
-    item: CosmeticItem?,
-    icon: ImageVector,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-        shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Black,
-                    modifier = Modifier.alpha(0.5f)
-                )
-            }
-            Spacer(Modifier.height(8.dp))
-            if (item != null) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .clip(CircleShape)
-                            .background(item.colorHex?.let { parseColor(it) } ?: Color.Gray)
-                            .border(0.5.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = item.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            } else {
-                Text(text = "None yet", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
-            }
-        }
-    }
-}
-
-@Composable
-private fun CategoryStatCard(
-    uiState: Pair<String, String>, 
-    modifier: Modifier = Modifier,
-    isAlert: Boolean = false
-) {
-    val title = uiState.first
-    val value = uiState.second
-    val backgroundColor = if (isAlert) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) 
-                          else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    val contentColor = if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-    
-    Surface(
-        modifier = modifier,
-        color = backgroundColor,
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Black,
-                modifier = Modifier.alpha(0.5f),
-                color = contentColor
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = value, 
-                style = MaterialTheme.typography.titleMedium, 
-                fontWeight = FontWeight.Bold, 
-                maxLines = 1,
-                color = contentColor
-            )
-        }
-    }
-}
-
-@Composable
-private fun CosmeticProductGridCard(
-    uiState: CosmeticItem,
-    navTo: (KoColorRoute) -> Unit
-) {
-    val item = uiState
-    val onClick = { navTo(KoColorRoute.CosmeticDetail(item.id)) }
-    Card(
-        modifier = Modifier.fillMaxWidth().aspectRatio(0.75f).clickable { onClick() },
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (item.imageUrl != null) {
-                AsyncImage(
-                    model = item.imageUrl,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(modifier = Modifier.fillMaxSize().background(item.colorHex?.let { parseColor(it) } ?: MaterialTheme.colorScheme.surfaceVariant))
-            }
-
-            // Scrim
-            Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f)), startY = 200f)))
-            
-            Column(modifier = Modifier.align(Alignment.BottomStart).padding(12.dp)) {
-                Text(text = item.brand, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f), fontWeight = FontWeight.Black)
-                Text(text = item.name, style = MaterialTheme.typography.bodyMedium, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
             }
         }
     }
