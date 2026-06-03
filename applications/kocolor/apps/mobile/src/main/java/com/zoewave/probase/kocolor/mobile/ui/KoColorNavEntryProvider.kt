@@ -14,12 +14,6 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulator
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerViewModel
-import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailScreen
-import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailUiState
-import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorSearchScreen
-import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorSearchViewModel
-import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorUiRoute
-import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorViewModel
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticAnalyticsScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverUiState
@@ -50,8 +44,13 @@ import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
-import com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
+import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailScreen
+import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailUiState
+import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorSearchScreen
+import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorSearchViewModel
+import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorUiRoute
+import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorViewModel
 import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionDetailScreen
 import com.zoewave.probase.kocolor.mobile.features.home.ui.CollectionHubScreen
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
@@ -310,9 +309,18 @@ fun koColorNavEntryProvider(
             }
         }
         is KoColorRoute.Suggestions -> NavEntry(route) {
-            SuggestionsUiRoute(
-                uiState = Unit,
-                onEvent = {},
+            val viewModel: com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            
+            androidx.compose.runtime.LaunchedEffect(state.fashionProfile) {
+                if (state.fashionProfile != null && state.loadingState is com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsLoadingState.Idle) {
+                    viewModel.getSuggestions()
+                }
+            }
+
+            com.zoewave.probase.kocolor.features.suggestions.ui.SuggestionsUiRoute(
+                uiState = state,
+                onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
         }
