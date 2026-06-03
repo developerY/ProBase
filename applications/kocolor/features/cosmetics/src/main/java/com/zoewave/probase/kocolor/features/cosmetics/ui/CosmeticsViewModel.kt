@@ -233,12 +233,10 @@ class CosmeticsViewModel @Inject constructor(
         when (event) {
             is CosmeticsEvent.AddItem -> {
                 addItem(event.item)
-                sessionRepository.setCosmeticDraft(CosmeticItem(
-                    name = "", 
-                    brand = "", 
-                    macroCategory = MacroCategory.COMPLEXION, 
-                    microCategory = MicroCategory.FOUNDATION
-                ))
+                sessionRepository.reset()
+                _isScanSuccessful.value = false
+                _lastScanFailed.value = false
+                _scanStatus.value = null
             }
             is CosmeticsEvent.UpdateItem -> updateItem(event.item)
             is CosmeticsEvent.DeleteItem -> deleteItem(event.id)
