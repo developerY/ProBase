@@ -126,7 +126,7 @@ fun SpeedAndProgressCard(
                         .size(48.dp)
                 ) {
                     weather?.let {
-                        _root_ide_package_.com.zoewave.probase.features.weather.ui.components.combine.WindDirectionDialWithSpeed(
+                        WindDirectionDialWithSpeed(
                             degree = it.windDegree,
                             speed = it.windSpeed
                         )

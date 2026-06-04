@@ -17,6 +17,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        Assert.assertEquals("com.zoewave.probase.feature.weather.test", appContext.packageName)
+        Assert.assertEquals("com.zoewave.probase.features.weather.test", appContext.packageName)
     }
 }

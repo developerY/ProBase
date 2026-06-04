@@ -21,4 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 # Rules from missing_rules.txt for ashbike app (feature.weather module classes)
--keep class com.zoewave.probase.feature.weather.** { *; }
+-keep class com.zoewave.probase.features.weather.** { *; }
