@@ -7,8 +7,8 @@ import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
-import com.zoewave.probase.kocolor.features.weather.ui.components.layered.LayeredWeatherCondition
-import com.zoewave.probase.kocolor.features.weather.ui.components.layered.LayeredWeatherUiState
+import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherCondition
+import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.features.health.core.WellnessCorrelationEngine
 import com.zoewave.probase.kocolor.data.FashionRepository

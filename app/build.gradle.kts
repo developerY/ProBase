@@ -48,7 +48,7 @@ dependencies {
     implementation(project(":features:nav3"))
     implementation(project(":features:health"))
     implementation(project(":features:ble"))
-    implementation(project(":applications:kocolor:features:weather"))
+    implementation(project(":features:weather"))
     implementation(project(":features:readers:nfc"))
     implementation(project(":features:readers:qrscanner"))
     implementation(project(":features:readers:barcode"))

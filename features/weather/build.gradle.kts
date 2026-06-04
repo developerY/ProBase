@@ -7,7 +7,7 @@ plugins {
 
 android {
     // 2. Updated Namespace for Zoewave
-    namespace = "com.zoewave.probase.ashbike.features.weather"
+    namespace = "com.zoewave.probase.features.weather"
 }
 
 dependencies {
