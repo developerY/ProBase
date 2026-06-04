@@ -11,7 +11,7 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import com.zoewave.probase.feature.weather.ui.WeatherUiRoute
+import com.zoewave.probase.kocolor.features.weather.ui.WeatherUiRoute
 import com.zoewave.probase.features.ble.ui.BluetoothLeRoute
 import com.zoewave.probase.features.calendar.ui.CalendarUiRoute
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
