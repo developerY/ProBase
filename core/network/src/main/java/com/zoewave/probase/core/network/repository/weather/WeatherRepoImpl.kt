@@ -1,6 +1,7 @@
 package com.zoewave.probase.core.network.repository.weather
 
 import android.util.Log
+import com.zoewave.probase.core.model.weather.EnvironmentalContext
 import com.zoewave.probase.core.model.weather.OpenWeatherResponse
 import javax.inject.Inject
 
@@ -56,5 +57,13 @@ class WeatherRepoImpl @Inject constructor(
             name = "",
             cod = 0
         )*/
+    }
+
+    override suspend fun getEnvironmentalContext(
+        lat: Double,
+        lon: Double
+    ): EnvironmentalContext? {
+        Log.d("WeatherRepoImpl", "getEnvironmentalContext: $lat, $lon")
+        return openFetchEnvironmentalContext(lat, lon)
     }
 }
