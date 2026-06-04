@@ -10,8 +10,11 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:model"))
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
+    implementation(project(":core:network"))
+    implementation(project(":core:data"))
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:db"))
     implementation(project(":applications:kocolor:data"))

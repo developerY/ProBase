@@ -14,6 +14,7 @@ import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.kocolor.model.*
 import com.zoewave.probase.kocolor.features.fda.data.repository.FdaRepository
+import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -59,7 +60,8 @@ data class CosmeticsUiState(
     val categoryFilter: String? = null,
     val scanStatus: String? = null,
     val isScanSuccessful: Boolean = false,
-    val lastScanFailed: Boolean = false
+    val lastScanFailed: Boolean = false,
+    val uvIndex: Double = 0.0
 )
 
 sealed class CosmeticsEvent {
@@ -86,6 +88,7 @@ class CosmeticsViewModel @Inject constructor(
     private val cosmeticRepository: CosmeticInventoryRepository,
     private val sessionRepository: FashionSessionRepository,
     private val fdaRepository: FdaRepository,
+    private val weatherRepo: WeatherRepo,
     private val analyzerEngine: AnalyzerEngine,
     @Named("KoColor") private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
@@ -98,8 +101,10 @@ class CosmeticsViewModel @Inject constructor(
     private val _scanStatus = MutableStateFlow<String?>(null)
     private val _isScanSuccessful = MutableStateFlow(false)
     private val _lastScanFailed = MutableStateFlow(false)
+    private val _uvIndex = MutableStateFlow(0.0)
 
     init {
+        fetchWeather()
         viewModelScope.launch {
             cosmeticRepository.getAllCosmetics().first().let {
                 if (it.isEmpty()) {
@@ -154,7 +159,8 @@ class CosmeticsViewModel @Inject constructor(
         _categoryFilter,
         _scanStatus,
         _isScanSuccessful,
-        _lastScanFailed
+        _lastScanFailed,
+        _uvIndex
     ) { array ->
         val models = array[0] as List<CosmeticItem>
         val analyzing = array[1] as Boolean
@@ -166,6 +172,7 @@ class CosmeticsViewModel @Inject constructor(
         val scanStatus = array[7] as String?
         val scanSuccessful = array[8] as Boolean
         val scanFailed = array[9] as Boolean
+        val uvVal = array[10] as Double
 
         val groupStats = models.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         
@@ -226,7 +233,8 @@ class CosmeticsViewModel @Inject constructor(
             categoryFilter = filter,
             scanStatus = scanStatus,
             isScanSuccessful = scanSuccessful,
-            lastScanFailed = scanFailed
+            lastScanFailed = scanFailed,
+            uvIndex = uvVal
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, CosmeticsUiState())
 
@@ -458,6 +466,23 @@ class CosmeticsViewModel @Inject constructor(
     private fun deleteItem(id: Long) {
         viewModelScope.launch {
             cosmeticRepository.deleteCosmeticItem(id)
+        }
+    }
+
+    private fun fetchWeather() {
+        viewModelScope.launch {
+            try {
+                val city = "Santa Barbara, US"
+                val weather = weatherRepo.openCurrentWeatherByCity(city)
+                val lat = weather?.coord?.lat
+                val lon = weather?.coord?.lon
+                if (lat != null && lon != null) {
+                    val env = weatherRepo.getEnvironmentalContext(lat, lon)
+                    _uvIndex.value = env?.uvIndex ?: 0.0
+                }
+            } catch (e: Exception) {
+                // Ignore
+            }
         }
     }
 }

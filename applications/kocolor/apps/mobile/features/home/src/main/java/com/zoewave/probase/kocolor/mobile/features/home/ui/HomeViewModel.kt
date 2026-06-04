@@ -262,8 +262,19 @@ class HomeViewModel @Inject constructor(
     private fun fetchWeather() {
         viewModelScope.launch {
             try {
-                val response = weatherRepo.openCurrentWeatherByCity("Santa Barbara, US")
-                if (response != null) {
+                // Using hardcoded location for now as per project context
+                val city = "Santa Barbara, US"
+                val response = weatherRepo.openCurrentWeatherByCity(city)
+                
+                // Get coords from OpenWeather response to hit Open-Meteo
+                val lat = response?.coord?.lat
+                val lon = response?.coord?.lon
+                
+                val envContext = if (lat != null && lon != null) {
+                    weatherRepo.getEnvironmentalContext(lat, lon)
+                } else null
+
+                if (response != null && envContext != null) {
                     val conditions = mutableListOf<LayeredWeatherCondition>()
                     val main = response.weather.firstOrNull()?.main ?: ""
                     when {
@@ -276,12 +287,19 @@ class HomeViewModel @Inject constructor(
                     
                     _weather.value = LayeredWeatherUiState(
                         temperature = response.main.temp,
-                        uvIndex = 5.0, // Mock UV index
+                        uvIndex = envContext.uvIndex,
                         conditions = conditions
                     )
+
+                    // Environmental Trigger Logic
+                    if (envContext.uvIndex > 3.0) {
+                        _beautyTip.value = "☀️ High UV detected. Prioritize SPF in your ritual today."
+                    } else if (envContext.humidity < 30.0) {
+                        _beautyTip.value = "💧 Low humidity. Use a humectant to retain moisture."
+                    }
                 }
             } catch (e: Exception) {
-                // handle error
+                android.util.Log.e("HomeViewModel", "Error fetching weather", e)
             }
         }
     }
