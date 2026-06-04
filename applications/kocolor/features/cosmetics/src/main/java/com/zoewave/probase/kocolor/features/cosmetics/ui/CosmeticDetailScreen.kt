@@ -33,7 +33,8 @@ data class CosmeticDetailUiState(
     val usageFrequencyPerWeek: Double = 3.5,
     val estimatedDaysRemaining: Int? = 45,
     val colorCompatibility: List<String> = listOf("#FBF8F5", "#E6A68A", "#2C2420"), 
-    val bioSyncMessage: String? = "✨ High Synergy Today: Your hydration markers are low (0.0L); this Hyaluronic Acid will compensate."
+    val bioSyncMessage: String? = "✨ High Synergy Today: Your hydration markers are low (0.0L); this Hyaluronic Acid will compensate.",
+    val uvIndex: Double = 0.0
 )
 
 @Preview(showBackground = true, name = "Populated")
@@ -366,7 +367,7 @@ fun CosmeticDetailScreen(
                 isExpanded = expandedStates["Coordination"] == true,
                 onToggle = { expandedStates["Coordination"] = it }
             ) {
-                CoordinationSection()
+                CoordinationSection(uvIndex = uiState.uvIndex)
             }
 
             Spacer(modifier = Modifier.height(32.dp))

@@ -304,23 +304,38 @@ fun SustainabilitySection(item: CosmeticItem) {
 }
 
 @Composable
-fun CoordinationSection() {
+fun CoordinationSection(uvIndex: Double = 0.0) {
+    val isHighUv = uvIndex > 3.0
     Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(stringResource(R.string.applications_kocolor_features_cosmetics_works_well_with), style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf("Silk Primer", "Radiance Mist", "Daily SPF").forEach { product ->
+            val products = mutableListOf("Silk Primer", "Radiance Mist")
+            if (isHighUv) products.add(0, "Daily SPF 50+") else products.add("Daily SPF")
+            
+            products.forEach { product ->
+                val isElevated = isHighUv && product.contains("SPF 50+")
                 Surface(
-                    color = Color.White,
+                    color = if (isElevated) MaterialTheme.colorScheme.primaryContainer else Color.White,
                     shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, Color(0xFFF0F0F0))
+                    border = BorderStroke(1.dp, if (isElevated) MaterialTheme.colorScheme.primary else Color(0xFFF0F0F0))
                 ) {
                     Text(
                         text = product,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        style = MaterialTheme.typography.labelSmall
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isElevated) MaterialTheme.colorScheme.onPrimaryContainer else Color.Black
                     )
                 }
             }
+        }
+        
+        if (isHighUv) {
+            Text(
+                text = "☀️ UV Index is high. Elevated SPF protection is recommended.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+            )
         }
     }
 }

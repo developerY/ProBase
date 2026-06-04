@@ -2,6 +2,7 @@ package com.zoewave.probase.core.network.repository.weather
 
 import com.zoewave.probase.core.model.weather.Clouds
 import com.zoewave.probase.core.model.weather.Coord
+import com.zoewave.probase.core.model.weather.EnvironmentalContext
 import com.zoewave.probase.core.model.weather.Main
 import com.zoewave.probase.core.model.weather.OpenWeatherResponse
 import com.zoewave.probase.core.model.weather.Rain
@@ -27,6 +28,19 @@ class DemoWeatherRepoImpl @Inject constructor() : WeatherRepo {
     ): OpenWeatherResponse {
         // Return a demo response for the given coords
         return demoResponse(lat = lat, lon = lon, name = "Demoville")
+    }
+
+    override suspend fun getEnvironmentalContext(
+        lat: Double,
+        lon: Double
+    ): EnvironmentalContext? {
+        return EnvironmentalContext(
+            temperature = 18.5,
+            humidity = 82.0,
+            uvIndex = 1.0,
+            isDay = true,
+            weatherCode = 1
+        )
     }
 
     private fun demoResponse(lat: Double, lon: Double, name: String) = OpenWeatherResponse(
