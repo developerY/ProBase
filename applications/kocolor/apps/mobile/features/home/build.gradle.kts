@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.coil.compose)
+    implementation(libs.google.play.services.maps)
 
     implementation(libs.kotlinx.collections.immutable)
 }
