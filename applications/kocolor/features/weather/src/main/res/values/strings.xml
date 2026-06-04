@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="features_weather_title">Current Weather</string>
+    <string name="features_weather_action_fetch">Fetch Weather</string>
+    <string name="features_weather_cd_sunny">Sunny</string>
+    <string name="features_weather_temp_c_format">%1$.1f&#176;C</string>
+</resources>
