@@ -57,9 +57,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoewave.probase.kocolor.features.weather.ui.components.layered.LayeredWeatherInfoIcon
-import com.zoewave.probase.kocolor.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.features.health.core.SkinInsight
+import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CollectionHubCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
@@ -196,7 +195,7 @@ data class HomeHeaderUiState(
     val fashionProfile: FashionProfile?,
     val isDaytime: Boolean,
     val beautyTip: String,
-    val weather: LayeredWeatherUiState? = null
+    val weather: com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState? = null
 )
 
 @Preview(showBackground = true)
@@ -264,7 +263,7 @@ fun HomeHeader(
             }
 
             uiState.weather?.let {
-                LayeredWeatherInfoIcon(
+                _root_ide_package_.com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherInfoIcon(
                     uiState = it,
                     modifier = Modifier
                         .size(80.dp)
