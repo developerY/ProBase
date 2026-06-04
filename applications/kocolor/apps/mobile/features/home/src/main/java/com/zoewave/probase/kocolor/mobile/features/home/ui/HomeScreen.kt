@@ -57,8 +57,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherInfoIcon
-import com.zoewave.probase.feature.weather.ui.components.layered.LayeredWeatherUiState
+import com.zoewave.probase.kocolor.features.weather.ui.components.layered.LayeredWeatherInfoIcon
+import com.zoewave.probase.kocolor.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CollectionHubCard
