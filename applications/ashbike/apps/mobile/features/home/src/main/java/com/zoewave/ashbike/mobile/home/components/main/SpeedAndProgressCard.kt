@@ -38,7 +38,7 @@ import com.zoewave.ashbike.mobile.home.components.dials.weather.WeatherBadgeWith
 import com.zoewave.ashbike.mobile.home.ui.HomeEvent
 import com.zoewave.ashbike.mobile.home.ui.HomeUiState
 import com.zoewave.probase.ashbike.features.main.navigation.AshBikeDestination
-import com.zoewave.probase.feature.weather.ui.components.combine.WindDirectionDialWithSpeed
+import com.zoewave.probase.features.weather.ui.components.combine.WindDirectionDialWithSpeed
 
 @Composable
 fun SpeedAndProgressCard(
@@ -126,7 +126,10 @@ fun SpeedAndProgressCard(
                         .size(48.dp)
                 ) {
                     weather?.let {
-                        WindDirectionDialWithSpeed(degree = it.windDegree, speed = it.windSpeed)
+                        _root_ide_package_.com.zoewave.probase.features.weather.ui.components.combine.WindDirectionDialWithSpeed(
+                            degree = it.windDegree,
+                            speed = it.windSpeed
+                        )
                     }
                 }
             }
