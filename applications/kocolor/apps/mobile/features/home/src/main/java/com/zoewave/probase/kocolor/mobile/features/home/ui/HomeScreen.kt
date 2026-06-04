@@ -134,7 +134,7 @@ fun HomeScreen(
         ) {
             item {
                 HomeHeader(
-                    uiState = HomeHeaderUiState(uiState.fashionProfile, uiState.isDaytime, uiState.beautyTip, uiState.weather),
+                    uiState = HomeHeaderUiState(uiState.fashionProfile, uiState.isDaytime, uiState.beautyTip, uiState.weather, uiState.locationName),
                     onEvent = {},
                     navTo = {}
                 )
@@ -196,7 +196,8 @@ data class HomeHeaderUiState(
     val fashionProfile: FashionProfile?,
     val isDaytime: Boolean,
     val beautyTip: String,
-    val weather: com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState? = null
+    val weather: LayeredWeatherUiState? = null,
+    val locationName: String? = null
 )
 
 @Preview(showBackground = true)
@@ -235,6 +236,16 @@ fun HomeHeader(
             verticalAlignment = Alignment.Top
         ) {
             Column(modifier = Modifier.weight(1f)) {
+                uiState.locationName?.let {
+                    Text(
+                        text = it.uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.primary,
+                        letterSpacing = 1.sp,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
                 Text(
                     text = if (uiState.isDaytime) stringResource(R.string.applications_kocolor_apps_mobile_radiant_morning) else stringResource(R.string.applications_kocolor_apps_mobile_deep_restoration),
                     style = MaterialTheme.typography.headlineLarge,

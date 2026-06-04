@@ -67,6 +67,7 @@ data class HomeUiState(
     val hydrationGoalLiters: Double = 2.0,
     val isHealthPermissionGranted: Boolean = false,
     val weather: LayeredWeatherUiState? = null,
+    val locationName: String? = null,
     val savedSuggestions: List<com.zoewave.probase.kocolor.model.SavedAnalysis> = emptyList()
 )
 
@@ -85,7 +86,8 @@ class HomeViewModel @Inject constructor(
     private val clothingDao: ClothingDao,
     private val wellnessEngine: WellnessCorrelationEngine,
     private val healthSessionManager: HealthSessionManager,
-    private val weatherRepo: com.zoewave.probase.core.network.repository.weather.WeatherRepo
+    private val weatherRepo: com.zoewave.probase.core.network.repository.weather.WeatherRepo,
+    private val locationRepository: com.zoewave.probase.core.data.repository.travel.LocationRepository
 ) : ViewModel() {
 
     private val _currentDate = MutableStateFlow(Calendar.getInstance().apply {
@@ -104,6 +106,7 @@ class HomeViewModel @Inject constructor(
     )
 
     private val _weather = MutableStateFlow<LayeredWeatherUiState?>(null)
+    private val _locationName = MutableStateFlow<String?>(null)
 
     init {
         fetchWeather()
@@ -150,6 +153,7 @@ class HomeViewModel @Inject constructor(
         clothingDao.getAllClothing(),
         _beautyTip,
         _weather,
+        _locationName,
         healthSessionManager.availability.flatMapLatest { availability ->
             if (availability == HealthConnectClient.SDK_AVAILABLE) {
                 flow {
@@ -177,9 +181,10 @@ class HomeViewModel @Inject constructor(
         val clothing = array[3] as List<ClothingItemEntity>
         val tip = array[4] as String
         val weather = array[5] as LayeredWeatherUiState?
-        val healthInfo = array[6] as Pair<Boolean, Triple<Float?, String?, Double>>
+        val locationName = array[6] as String?
+        val healthInfo = array[7] as Pair<Boolean, Triple<Float?, String?, Double>>
         val (hasPerms, healthData) = healthInfo
-        val savedSuggestions = array[7] as List<com.zoewave.probase.kocolor.model.SavedAnalysis>
+        val savedSuggestions = array[8] as List<com.zoewave.probase.kocolor.model.SavedAnalysis>
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
@@ -224,6 +229,7 @@ class HomeViewModel @Inject constructor(
             hydrationLiters = healthData.third,
             isHealthPermissionGranted = hasPerms,
             weather = weather,
+            locationName = locationName,
             savedSuggestions = savedSuggestions
         )
     }.stateIn(
@@ -262,40 +268,41 @@ class HomeViewModel @Inject constructor(
     private fun fetchWeather() {
         viewModelScope.launch {
             try {
-                // Using hardcoded location for now as per project context
-                val city = "Santa Barbara, US"
-                val response = weatherRepo.openCurrentWeatherByCity(city)
+                // 1. Get GPS coordinates
+                locationRepository.updateLocation()
+                val latLng = locationRepository.currentLocation.first { it != null }
                 
-                // Get coords from OpenWeather response to hit Open-Meteo
-                val lat = response?.coord?.lat
-                val lon = response?.coord?.lon
-                
-                val envContext = if (lat != null && lon != null) {
-                    weatherRepo.getEnvironmentalContext(lat, lon)
-                } else null
-
-                if (response != null && envContext != null) {
-                    val conditions = mutableListOf<LayeredWeatherCondition>()
-                    val main = response.weather.firstOrNull()?.main ?: ""
-                    when {
-                        main.contains("Cloud", true) -> conditions.add(LayeredWeatherCondition.CLOUDY)
-                        main.contains("Rain", true) -> conditions.add(LayeredWeatherCondition.RAINY)
-                        main.contains("Thunder", true) -> conditions.add(LayeredWeatherCondition.THUNDER)
-                        else -> conditions.add(LayeredWeatherCondition.SUNNY)
-                    }
-                    if (response.wind.speed > 5.0) conditions.add(LayeredWeatherCondition.WINDY)
+                if (latLng != null) {
+                    // 2. Fetch weather by coords
+                    val response = weatherRepo.openCurrentWeatherByCoords(latLng.latitude, latLng.longitude)
+                    _locationName.value = response?.name
                     
-                    _weather.value = LayeredWeatherUiState(
-                        temperature = response.main.temp,
-                        uvIndex = envContext.uvIndex,
-                        conditions = conditions
-                    )
+                    // 3. Get environmental context (UV, humidity)
+                    val envContext = weatherRepo.getEnvironmentalContext(latLng.latitude, latLng.longitude)
 
-                    // Environmental Trigger Logic
-                    if (envContext.uvIndex > 3.0) {
-                        _beautyTip.value = "☀️ High UV detected. Prioritize SPF in your ritual today."
-                    } else if (envContext.humidity < 30.0) {
-                        _beautyTip.value = "💧 Low humidity. Use a humectant to retain moisture."
+                    if (response != null && envContext != null) {
+                        val conditions = mutableListOf<LayeredWeatherCondition>()
+                        val main = response.weather.firstOrNull()?.main ?: ""
+                        when {
+                            main.contains("Cloud", true) -> conditions.add(LayeredWeatherCondition.CLOUDY)
+                            main.contains("Rain", true) -> conditions.add(LayeredWeatherCondition.RAINY)
+                            main.contains("Thunder", true) -> conditions.add(LayeredWeatherCondition.THUNDER)
+                            else -> conditions.add(LayeredWeatherCondition.SUNNY)
+                        }
+                        if (response.wind.speed > 5.0) conditions.add(LayeredWeatherCondition.WINDY)
+                        
+                        _weather.value = LayeredWeatherUiState(
+                            temperature = response.main.temp,
+                            uvIndex = envContext.uvIndex,
+                            conditions = conditions
+                        )
+
+                        // Environmental Trigger Logic
+                        if (envContext.uvIndex > 3.0) {
+                            _beautyTip.value = "☀️ High UV detected. Prioritize SPF in your ritual today."
+                        } else if (envContext.humidity < 30.0) {
+                            _beautyTip.value = "💧 Low humidity. Use a humectant to retain moisture."
+                        }
                     }
                 }
             } catch (e: Exception) {
