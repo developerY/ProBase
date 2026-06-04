@@ -1,6 +1,3 @@
-package com.zoewave.probase.features.weather.usecase
-
-
 import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 import javax.inject.Inject
 
@@ -9,13 +6,18 @@ class GetCurrentWeatherUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(city: String): WeatherInfo {
         val response = weatherRepo.openCurrentWeatherByCity(city)
-        // Map the API response to our domain model.
+        val envContext = response?.coord?.let { 
+            weatherRepo.getEnvironmentalContext(it.lat, it.lon)
+        }
+        
         return WeatherInfo(
             temperature = response?.main?.temp,
             condition = response?.weather?.firstOrNull()?.main ?: "Clear",
             location = "${response?.name}, ${response?.sys?.country}",
             windDegree = response?.wind?.deg,
-            windSpeed = response?.wind?.speed?.toFloat()
+            windSpeed = response?.wind?.speed?.toFloat(),
+            uvIndex = envContext?.uvIndex,
+            humidity = envContext?.humidity
         )
     }
 }
@@ -26,6 +28,7 @@ data class WeatherInfo(
     val location: String?,
     val windDegree: Int?,
     val windSpeed: Float?,
-    // Add other properties as needed
+    val uvIndex: Double?,
+    val humidity: Double?
 )
 

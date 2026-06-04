@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CidrRootsConfiguration">
     <excludeRoots>
@@ -9,6 +10,7 @@
       <file path="$PROJECT_DIR$/applications/rxlogic/docs" />
       <file path="$PROJECT_DIR$/features/health/docs" />
       <file path="$PROJECT_DIR$/features/payment/Docs" />
+      <file path="$PROJECT_DIR$/features/weather/docs" />
       <file path="$PROJECT_DIR$/features/xr/doc" />
       <file path="$PROJECT_DIR$/features/xr/glass/docs" />
     </excludeRoots>
