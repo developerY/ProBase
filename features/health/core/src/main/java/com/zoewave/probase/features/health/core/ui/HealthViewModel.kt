@@ -43,6 +43,7 @@ sealed interface HealthSideEffect {
 @HiltViewModel
 class HealthViewModel @Inject constructor(
     val healthSessionManager: HealthSessionManager,
+    private val wellnessEngine: com.zoewave.probase.features.health.core.WellnessCorrelationEngine,
     private val syncRideUseCase: SyncRideUseCase,
     private val bleRepository: BluetoothLeRepository
 ) : ViewModel() {
@@ -244,6 +245,19 @@ class HealthViewModel @Inject constructor(
                     val bleState = bleRepository.gattConnectionState.value
                     val bleChars = bleRepository.gattCharacteristicList.value
 
+                    // Get today's stats for alerts
+                    val today = java.time.LocalDate.now().toString()
+                    val todayHydration = hydrationMap[today] ?: 0.0
+                    val lastNightSleep = sleepSessions.firstOrNull()?.duration?.toHours()?.toFloat() ?: 8f
+
+                    val alerts = wellnessEngine.analyzeTriggers(
+                        sleepHours = lastNightSleep,
+                        sugarIntake = "Medium", // Placeholder
+                        stressLevel = 5 // Placeholder
+                    )
+                    
+                    val latestHR = healthSessionManager.readLatestHeartRateSample()?.beatsPerMinute
+
                     _uiState.value = HealthUiState.Success(
                         sessions = sessions,
                         sleepSessions = sleepSessions,
@@ -251,6 +265,10 @@ class HealthViewModel @Inject constructor(
                         weeklyDistance = distMap,
                         weeklyCalories = calMap,
                         weeklyHydration = hydrationMap,
+                        alerts = alerts,
+                        latestHeartRate = latestHR,
+                        todaySteps = stepsMap[today] ?: 0L,
+                        todayCalories = calMap[today] ?: 0.0,
                         bleConnectionState = bleState,
                         trackerMetrics = bleChars.associate { it.description to it.value }
                     )

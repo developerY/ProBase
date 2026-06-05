@@ -19,6 +19,10 @@ sealed interface HealthUiState {
         val weeklyDistance: Map<String, Double> = emptyMap(), // Meters
         val weeklyCalories: Map<String, Double> = emptyMap(), // Kcal
         val weeklyHydration: Map<String, Double> = emptyMap(), // Liters
+        val alerts: List<com.zoewave.probase.features.health.core.SkinInsight> = emptyList(),
+        val latestHeartRate: Long? = null,
+        val todaySteps: Long = 0,
+        val todayCalories: Double = 0.0,
         val bleConnectionState: GattConnectionState = GattConnectionState.Disconnected,
         val trackerMetrics: Map<String, String> = emptyMap()
     ) : HealthUiState
