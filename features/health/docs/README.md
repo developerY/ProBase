@@ -160,3 +160,6 @@ linked in the blog post.
 Sources:  
 cite0†Android Developers Blog  
 cite24†Beta documentation on Health Connect Jetpack SDK
+
+DB
+https://guides.lib.udel.edu/fashion/databases

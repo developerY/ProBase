@@ -25,6 +25,8 @@ class MainViewModel @Inject constructor(
     private val sessionRepository: FashionSessionRepository
 ) : ViewModel() {
 
+    val hydrationGoalFlow = settings.hydrationGoalFlow
+
     private val _backStack = MutableStateFlow<PersistentList<KoColorRoute>>(persistentListOf(KoColorRoute.Home))
 
     val uiState: StateFlow<MainUiState> = combine(

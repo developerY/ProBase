@@ -18,6 +18,8 @@ sealed interface HealthEvent {
 
     data class LogHydration(val volumeLiters: Double) : HealthEvent
 
+    data class UpdateHydrationGoal(val goal: Double) : HealthEvent
+
     data object SyncTracker : HealthEvent // <--- NEW
 
     /** Insert a prepared list of Health Connect Record objects */

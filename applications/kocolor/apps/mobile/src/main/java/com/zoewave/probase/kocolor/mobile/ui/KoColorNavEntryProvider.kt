@@ -369,6 +369,14 @@ fun koColorNavEntryProvider(
         is KoColorRoute.Health -> NavEntry(route) {
             val viewModel: com.zoewave.probase.features.health.core.ui.HealthViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
+            
+            val mainViewModel: com.zoewave.probase.kocolor.mobile.ui.MainViewModel = hiltViewModel()
+            val hydrationGoal by mainViewModel.hydrationGoalFlow.collectAsStateWithLifecycle(2.7)
+
+            androidx.compose.runtime.LaunchedEffect(hydrationGoal) {
+                viewModel.onEvent(com.zoewave.probase.features.health.core.ui.HealthEvent.UpdateHydrationGoal(hydrationGoal))
+            }
+            
             HealthUiRoute(
                 uiState = state,
                 onEvent = viewModel::onEvent,

@@ -29,6 +29,7 @@ class KoColorSettings @Inject constructor(
         val AI_MODEL = stringPreferencesKey("ai_model")
         val APP_THEME = stringPreferencesKey("app_theme")
         val COLOR_PALETTE = stringPreferencesKey("color_palette")
+        val HYDRATION_GOAL = androidx.datastore.preferences.core.doublePreferencesKey("hydration_goal")
     }
 
     val appThemeFlow: Flow<String> = context.dataStore.data.map { preferences ->
@@ -48,6 +49,16 @@ class KoColorSettings @Inject constructor(
     suspend fun saveColorPalette(palette: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.COLOR_PALETTE] = palette
+        }
+    }
+
+    val hydrationGoalFlow: Flow<Double> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HYDRATION_GOAL] ?: 2.7 // Updated default as requested
+    }
+
+    suspend fun saveHydrationGoal(goal: Double) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.HYDRATION_GOAL] = goal
         }
     }
 

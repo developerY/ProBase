@@ -23,6 +23,7 @@ sealed interface HealthUiState {
         val latestHeartRate: Long? = null,
         val todaySteps: Long = 0,
         val todayCalories: Double = 0.0,
+        val hydrationGoal: Double = 2.0,
         val bleConnectionState: GattConnectionState = GattConnectionState.Disconnected,
         val trackerMetrics: Map<String, String> = emptyMap()
     ) : HealthUiState
