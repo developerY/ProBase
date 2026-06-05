@@ -75,6 +75,7 @@ sealed class HomeEvent {
     data class ToggleStep(val routine: BeautyRoutine, val stepId: String) : HomeEvent()
     data object RefreshTip : HomeEvent()
     data class LogHydration(val volumeLiters: Double) : HomeEvent()
+    data object RefreshWeather : HomeEvent()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -268,45 +269,65 @@ class HomeViewModel @Inject constructor(
     private fun fetchWeather() {
         viewModelScope.launch {
             try {
-                // 1. Get GPS coordinates
-                locationRepository.updateLocation()
-                val latLng = locationRepository.currentLocation.first { it != null }
+                // 1. Attempt to get GPS coordinates with a 5s timeout
+                val latLng = kotlinx.coroutines.withTimeoutOrNull(5000) {
+                    locationRepository.updateLocation()
+                    locationRepository.currentLocation.first { it != null }
+                }
                 
                 if (latLng != null) {
-                    // 2. Fetch weather by coords
+                    // 2. Fetch weather by real coords
                     val response = weatherRepo.openCurrentWeatherByCoords(latLng.latitude, latLng.longitude)
                     _locationName.value = response?.name
                     
                     // 3. Get environmental context (UV, humidity)
                     val envContext = weatherRepo.getEnvironmentalContext(latLng.latitude, latLng.longitude)
 
-                    if (response != null && envContext != null) {
-                        val conditions = mutableListOf<LayeredWeatherCondition>()
-                        val main = response.weather.firstOrNull()?.main ?: ""
-                        when {
-                            main.contains("Cloud", true) -> conditions.add(LayeredWeatherCondition.CLOUDY)
-                            main.contains("Rain", true) -> conditions.add(LayeredWeatherCondition.RAINY)
-                            main.contains("Thunder", true) -> conditions.add(LayeredWeatherCondition.THUNDER)
-                            else -> conditions.add(LayeredWeatherCondition.SUNNY)
-                        }
-                        if (response.wind.speed > 5.0) conditions.add(LayeredWeatherCondition.WINDY)
-                        
-                        _weather.value = LayeredWeatherUiState(
-                            temperature = response.main.temp,
-                            uvIndex = envContext.uvIndex,
-                            conditions = conditions
-                        )
-
-                        // Environmental Trigger Logic
-                        if (envContext.uvIndex > 3.0) {
-                            _beautyTip.value = "☀️ High UV detected. Prioritize SPF in your ritual today."
-                        } else if (envContext.humidity < 30.0) {
-                            _beautyTip.value = "💧 Low humidity. Use a humectant to retain moisture."
-                        }
+                    updateWeatherState(response, envContext)
+                } else {
+                    // 4. Fallback to Santa Barbara if GPS fails or times out
+                    android.util.Log.d("HomeViewModel", "GPS timeout/unavailable. Falling back to Santa Barbara.")
+                    val fallbackCity = "Santa Barbara, US"
+                    val response = weatherRepo.openCurrentWeatherByCity(fallbackCity)
+                    _locationName.value = response?.name ?: "Santa Barbara"
+                    
+                    val envContext = response?.coord?.let { 
+                        weatherRepo.getEnvironmentalContext(it.lat, it.lon)
                     }
+                    updateWeatherState(response, envContext)
                 }
             } catch (e: Exception) {
                 android.util.Log.e("HomeViewModel", "Error fetching weather", e)
+            }
+        }
+    }
+
+    private fun updateWeatherState(
+        response: com.zoewave.probase.core.model.weather.OpenWeatherResponse?,
+        envContext: com.zoewave.probase.core.model.weather.EnvironmentalContext?
+    ) {
+        if (response != null && envContext != null) {
+            val conditions = mutableListOf<LayeredWeatherCondition>()
+            val main = response.weather.firstOrNull()?.main ?: ""
+            when {
+                main.contains("Cloud", true) -> conditions.add(LayeredWeatherCondition.CLOUDY)
+                main.contains("Rain", true) -> conditions.add(LayeredWeatherCondition.RAINY)
+                main.contains("Thunder", true) -> conditions.add(LayeredWeatherCondition.THUNDER)
+                else -> conditions.add(LayeredWeatherCondition.SUNNY)
+            }
+            if (response.wind.speed > 5.0) conditions.add(LayeredWeatherCondition.WINDY)
+            
+            _weather.value = LayeredWeatherUiState(
+                temperature = response.main.temp,
+                uvIndex = envContext.uvIndex,
+                conditions = conditions
+            )
+
+            // Environmental Trigger Logic
+            if (envContext.uvIndex > 3.0) {
+                _beautyTip.value = "☀️ High UV detected. Prioritize SPF in your ritual today."
+            } else if (envContext.humidity < 30.0) {
+                _beautyTip.value = "💧 Low humidity. Use a humectant to retain moisture."
             }
         }
     }
@@ -340,6 +361,7 @@ class HomeViewModel @Inject constructor(
                     healthSessionManager.insertHydration(event.volumeLiters)
                 }
             }
+            HomeEvent.RefreshWeather -> fetchWeather()
         }
     }
 
