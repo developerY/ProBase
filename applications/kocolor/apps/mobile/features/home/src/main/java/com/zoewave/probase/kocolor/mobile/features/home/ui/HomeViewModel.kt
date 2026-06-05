@@ -107,7 +107,6 @@ class HomeViewModel @Inject constructor(
     )
 
     private val _weather = MutableStateFlow<LayeredWeatherUiState?>(null)
-    private val _locationName = MutableStateFlow<String?>(null)
 
     init {
         fetchWeather()
@@ -154,7 +153,6 @@ class HomeViewModel @Inject constructor(
         clothingDao.getAllClothing(),
         _beautyTip,
         _weather,
-        _locationName,
         healthSessionManager.availability.flatMapLatest { availability ->
             if (availability == HealthConnectClient.SDK_AVAILABLE) {
                 flow {
@@ -182,10 +180,9 @@ class HomeViewModel @Inject constructor(
         val clothing = array[3] as List<ClothingItemEntity>
         val tip = array[4] as String
         val weather = array[5] as LayeredWeatherUiState?
-        val locationName = array[6] as String?
-        val healthInfo = array[7] as Pair<Boolean, Triple<Float?, String?, Double>>
+        val healthInfo = array[6] as Pair<Boolean, Triple<Float?, String?, Double>>
         val (hasPerms, healthData) = healthInfo
-        val savedSuggestions = array[8] as List<com.zoewave.probase.kocolor.model.SavedAnalysis>
+        val savedSuggestions = array[7] as List<com.zoewave.probase.kocolor.model.SavedAnalysis>
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
@@ -230,7 +227,7 @@ class HomeViewModel @Inject constructor(
             hydrationLiters = healthData.third,
             isHealthPermissionGranted = hasPerms,
             weather = weather,
-            locationName = locationName,
+            locationName = weather?.locationName,
             savedSuggestions = savedSuggestions
         )
     }.stateIn(
@@ -278,7 +275,6 @@ class HomeViewModel @Inject constructor(
                 if (latLng != null) {
                     // 2. Fetch weather by real coords
                     val response = weatherRepo.openCurrentWeatherByCoords(latLng.latitude, latLng.longitude)
-                    _locationName.value = response?.name
                     
                     // 3. Get environmental context (UV, humidity)
                     val envContext = weatherRepo.getEnvironmentalContext(latLng.latitude, latLng.longitude)
@@ -289,7 +285,6 @@ class HomeViewModel @Inject constructor(
                     android.util.Log.d("HomeViewModel", "GPS timeout/unavailable. Falling back to Santa Barbara.")
                     val fallbackCity = "Santa Barbara, US"
                     val response = weatherRepo.openCurrentWeatherByCity(fallbackCity)
-                    _locationName.value = response?.name ?: "Santa Barbara"
                     
                     val envContext = response?.coord?.let { 
                         weatherRepo.getEnvironmentalContext(it.lat, it.lon)
@@ -320,7 +315,8 @@ class HomeViewModel @Inject constructor(
             _weather.value = LayeredWeatherUiState(
                 temperature = response.main.temp,
                 uvIndex = envContext.uvIndex,
-                conditions = conditions
+                conditions = conditions,
+                locationName = response.name
             )
 
             // Environmental Trigger Logic
