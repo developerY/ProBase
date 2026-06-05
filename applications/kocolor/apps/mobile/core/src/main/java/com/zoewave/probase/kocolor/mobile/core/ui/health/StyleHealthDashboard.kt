@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.mobile.core.ui.health
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.*
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -27,8 +28,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -59,7 +62,6 @@ fun StyleHealthDashboard(
 
     Column(
         modifier = modifier
-            .fillMaxSize()
             .background(Color(0xFFF9F7F2))
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp),
@@ -208,12 +210,12 @@ fun StyleHealthDashboard(
 
 @Composable
 private fun SummaryCard(
+    modifier: Modifier = Modifier,
     icon: ImageVector,
     label: String,
     value: String,
     detail: String,
-    iconColor: Color = Color.Black,
-    modifier: Modifier = Modifier
+    iconColor: Color = Color.Black
 ) {
     Card(
         modifier = modifier.height(130.dp),
@@ -295,48 +297,62 @@ private fun HydrationVisualRefined(
     val progress = (current / goal).coerceIn(0.0, 1.0).toFloat()
     
     Card(
-        modifier = Modifier.fillMaxWidth().height(480.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(520.dp),
         shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp, 
+            Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.6f), Color.White.copy(alpha = 0.1f)))
+        )
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Wavy Background
+            // Procedural Liquid Engine
             WavyBackground(progress = progress)
             
             Column(
                 modifier = Modifier.fillMaxSize().padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
-                Text("Hydration", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
+                Text(
+                    text = "Hydration", 
+                    style = MaterialTheme.typography.titleLarge, 
+                    fontFamily = FontFamily.Serif,
+                    color = Color(0xFF2C2420).copy(alpha = 0.7f)
+                )
                 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "%.1fL".format(current),
-                        style = MaterialTheme.typography.displayLarge,
+                        style = MaterialTheme.typography.displayLarge.copy(fontSize = 72.sp),
                         fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Serif
+                        fontFamily = FontFamily.Serif,
+                        color = Color(0xFF1A1A1A)
                     )
                     Text(
                         text = "of %.1fL goal".format(goal),
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color.Gray
+                        color = Color.Gray,
+                        letterSpacing = 1.sp
                     )
                 }
 
+                // Frosted Glass Interaction Controls
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // Utility Bar
                     Surface(
                         modifier = Modifier
                             .size(width = 80.dp, height = 40.dp)
                             .clip(RoundedCornerShape(20.dp))
                             .clickable { /* History */ },
-                        color = Color.White.copy(alpha = 0.6f),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
+                        color = Color.White.copy(alpha = 0.3f),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
                     ) {
                         Row(
                             modifier = Modifier.fillMaxSize(),
@@ -366,21 +382,22 @@ private fun HydrationVisualRefined(
                         )
                     }
 
+                    // Large Specular Custom Button
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp)
-                            .clip(RoundedCornerShape(28.dp))
+                            .height(60.dp)
+                            .clip(RoundedCornerShape(30.dp))
                             .clickable { /* Custom */ },
-                        color = Color.White.copy(alpha = 0.6f),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
+                        color = Color.White.copy(alpha = 0.3f),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.6f))
                     ) {
                         Row(
                             modifier = Modifier.fillMaxSize(),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Rounded.EditNote, null, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Rounded.EditNote, null, modifier = Modifier.size(20.dp), tint = Color.Black.copy(alpha = 0.6f))
                             Spacer(Modifier.width(8.dp))
                             Text("+ Custom Amount", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
                         }
@@ -401,21 +418,29 @@ private fun HydrationButton(
 ) {
     Surface(
         modifier = modifier
-            .height(72.dp)
-            .clip(RoundedCornerShape(36.dp))
+            .height(80.dp)
+            .clip(RoundedCornerShape(40.dp))
             .clickable { onClick() },
-        color = Color.White.copy(alpha = 0.6f),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
+        color = Color.White.copy(alpha = 0.35f),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.7f))
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(icon, null, modifier = Modifier.size(24.dp), tint = Color.Black.copy(alpha = 0.7f))
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, null, modifier = Modifier.size(20.dp), tint = Color.Black.copy(alpha = 0.6f))
+            }
             Spacer(Modifier.width(12.dp))
             Column {
                 Text(label, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
-                Text(subLabel, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                Text(subLabel.uppercase(), style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp), color = Color.Gray, letterSpacing = 1.sp)
             }
         }
     }
@@ -423,24 +448,78 @@ private fun HydrationButton(
 
 @Composable
 private fun WavyBackground(progress: Float) {
-    Canvas(modifier = Modifier.fillMaxSize().alpha(0.15f)) {
-        val path = Path()
+    val infiniteTransition = rememberInfiniteTransition(label = "water_flow")
+    val phase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = (2 * Math.PI).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "wave_phase"
+    )
+
+    Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
         val height = size.height
         val width = size.width
-        val waveHeight = 15.dp.toPx()
         val baseLine = height * (1f - progress)
 
-        path.moveTo(0f, baseLine)
-        for (x in 0..width.toInt() step 20) {
-            val y = baseLine + Math.sin((x / width * 3 * Math.PI) + 0).toFloat() * waveHeight
-            path.lineTo(x.toFloat(), y)
+        // 1. Background Liquid Depth
+        drawWaterLayer(
+            width = width,
+            height = height,
+            baseLine = baseLine,
+            phase = phase,
+            waveHeight = 12.dp.toPx(),
+            frequency = 1.2f,
+            brush = Brush.verticalGradient(listOf(Color(0xFFBBDEFB), Color(0xFF64B5F6)))
+        )
+
+        // 2. Mid-level Refraction
+        drawWaterLayer(
+            width = width,
+            height = height,
+            baseLine = baseLine,
+            phase = -phase * 0.7f,
+            waveHeight = 16.dp.toPx(),
+            frequency = 0.8f,
+            brush = Brush.verticalGradient(listOf(Color(0x8090CAF9), Color(0x802196F3)))
+        )
+
+        // 3. Specular Surface Edge
+        val surfacePath = Path()
+        surfacePath.moveTo(0f, baseLine)
+        for (x in 0..width.toInt() step 5) {
+            val y = baseLine + Math.sin((x / width * 2.0 * Math.PI) + phase).toFloat() * 10.dp.toPx()
+            surfacePath.lineTo(x.toFloat(), y)
         }
-        path.lineTo(width, height)
-        path.lineTo(0f, height)
-        path.close()
-        
-        drawPath(path, color = Color(0xFF2196F3))
+        drawPath(
+            path = surfacePath,
+            color = Color.White.copy(alpha = 0.4f),
+            style = Stroke(width = 3.dp.toPx())
+        )
     }
+}
+
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawWaterLayer(
+    width: Float,
+    height: Float,
+    baseLine: Float,
+    phase: Float,
+    waveHeight: Float,
+    frequency: Float,
+    brush: Brush
+) {
+    val path = Path()
+    path.moveTo(0f, baseLine)
+    for (x in 0..width.toInt() step 10) {
+        val y = baseLine + Math.sin((x / width * frequency * Math.PI) + phase).toFloat() * waveHeight
+        path.lineTo(x.toFloat(), y)
+    }
+    path.lineTo(width, height)
+    path.lineTo(0f, height)
+    path.close()
+    drawPath(path, brush = brush)
 }
 
 @Composable
