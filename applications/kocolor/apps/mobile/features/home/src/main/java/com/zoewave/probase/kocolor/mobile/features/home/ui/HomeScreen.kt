@@ -48,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -157,24 +158,34 @@ fun HomeScreen(
         ) {
             item {
                 HomeHeader(
-                    uiState = HomeHeaderUiState(uiState.fashionProfile, uiState.isDaytime, uiState.beautyTip, uiState.weather, uiState.locationName),
+                    uiState = HomeHeaderUiState(uiState.fashionProfile, uiState.isDaytime, uiState.beautyTip, uiState.weather, uiState.locationName, uiState.headerBackgroundUrl),
                     onEvent = {},
                     navTo = {}
                 )
             }
 
             item {
-                WellnessInsightsSection(
-                    uiState = WellnessInsightsUiState(
-                        uiState.wellnessInsights,
-                        uiState.lastNightSleepDuration,
-                        uiState.hydrationLiters,
-                        uiState.hydrationGoalLiters,
-                        uiState.isHealthPermissionGranted
-                    ),
-                    onEvent = {},
-                    navTo = navTo
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    WellnessInsightsSection(
+                        uiState = WellnessInsightsUiState(
+                            uiState.wellnessInsights,
+                            uiState.lastNightSleepDuration,
+                            uiState.hydrationLiters,
+                            uiState.hydrationGoalLiters,
+                            uiState.isHealthPermissionGranted
+                        ),
+                        onEvent = {},
+                        navTo = navTo,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
             item {
@@ -220,7 +231,8 @@ data class HomeHeaderUiState(
     val isDaytime: Boolean,
     val beautyTip: String,
     val weather: LayeredWeatherUiState? = null,
-    val locationName: String? = null
+    val locationName: String? = null,
+    val backgroundUrl: String? = null
 )
 
 @Preview(showBackground = true)
@@ -251,46 +263,76 @@ fun HomeHeader(
             .clip(expressiveShape)
             .background(Brush.linearGradient(colors = gradientColors))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), expressiveShape)
-            .padding(32.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
+        // Frosted Glass Background Image
+        uiState.backgroundUrl?.let { url ->
+            coil.compose.AsyncImage(
+                model = url,
+                contentDescription = null,
+                modifier = Modifier
+                    .matchParentSize()
+                    .alpha(0.4f)
+                    .blur(16.dp), // Frosted glass effect
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+            )
+        }
+
+        Column(
+            modifier = Modifier.padding(32.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            // Top Section: Header + Weather Card - Now Centered Vertically
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = if (uiState.isDaytime) stringResource(R.string.applications_kocolor_apps_mobile_radiant_morning) else stringResource(R.string.applications_kocolor_apps_mobile_deep_restoration),
-                    style = MaterialTheme.typography.headlineLarge,
+                    style = MaterialTheme.typography.headlineMedium,
                     fontFamily = FontFamily.Serif,
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
                 )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alpha(0.8f)) {
-                    Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = uiState.beautyTip, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Serif, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
-                }
 
-                if (uiState.fashionProfile != null) {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(color = MaterialTheme.colorScheme.primary, shape = CircleShape) {
-                            Text(text = uiState.fashionProfile.seasonalType.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(text = stringResource(R.string.applications_kocolor_apps_mobile_undertone_format, uiState.fashionProfile.undertone.name.lowercase().replaceFirstChar { it.uppercase() }), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
+                LayeredWeatherSquareCard(
+                    uiState = uiState.weather?.copy(locationName = uiState.locationName),
+                    modifier = Modifier.padding(start = 16.dp)
+                )
             }
 
-            LayeredWeatherSquareCard(
-                uiState = uiState.weather?.copy(locationName = uiState.locationName),
-                modifier = Modifier.offset(x = 16.dp, y = (-16).dp)
-            )
+            // Bottom Section: The Phrase
+            Row(
+                modifier = Modifier.fillMaxWidth().alpha(0.9f),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp).padding(top = 4.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = uiState.beautyTip,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = FontFamily.Serif,
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                    lineHeight = 28.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            if (uiState.fashionProfile != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(color = MaterialTheme.colorScheme.primary, shape = CircleShape) {
+                        Text(text = uiState.fashionProfile.seasonalType.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = stringResource(R.string.applications_kocolor_apps_mobile_undertone_format, uiState.fashionProfile.undertone.name.lowercase().replaceFirstChar { it.uppercase() }), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
     }
 }
@@ -319,9 +361,10 @@ private fun WellnessInsightsSectionPreview() {
 fun WellnessInsightsSection(
     uiState: WellnessInsightsUiState,
     onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionTitle(uiState = SectionTitleUiState(stringResource(R.string.applications_kocolor_apps_mobile_bio_markers), stringResource(R.string.applications_kocolor_apps_mobile_style_inside_out)), onEvent = {}, navTo = {})
         
         ElevatedCard(

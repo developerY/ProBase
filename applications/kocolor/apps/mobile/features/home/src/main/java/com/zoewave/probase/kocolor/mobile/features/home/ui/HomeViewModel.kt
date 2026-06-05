@@ -68,6 +68,7 @@ data class HomeUiState(
     val isHealthPermissionGranted: Boolean = false,
     val weather: LayeredWeatherUiState? = null,
     val locationName: String? = null,
+    val headerBackgroundUrl: String? = null,
     val savedSuggestions: List<com.zoewave.probase.kocolor.model.SavedAnalysis> = emptyList()
 )
 
@@ -107,6 +108,7 @@ class HomeViewModel @Inject constructor(
     )
 
     private val _weather = MutableStateFlow<LayeredWeatherUiState?>(null)
+    private val _headerBackgroundUrl = MutableStateFlow<String?>(null)
 
     init {
         fetchWeather()
@@ -153,6 +155,7 @@ class HomeViewModel @Inject constructor(
         clothingDao.getAllClothing(),
         _beautyTip,
         _weather,
+        _headerBackgroundUrl,
         healthSessionManager.availability.flatMapLatest { availability ->
             if (availability == HealthConnectClient.SDK_AVAILABLE) {
                 flow {
@@ -180,9 +183,10 @@ class HomeViewModel @Inject constructor(
         val clothing = array[3] as List<ClothingItemEntity>
         val tip = array[4] as String
         val weather = array[5] as LayeredWeatherUiState?
-        val healthInfo = array[6] as Pair<Boolean, Triple<Float?, String?, Double>>
+        val headerBg = array[6] as String?
+        val healthInfo = array[7] as Pair<Boolean, Triple<Float?, String?, Double>>
         val (hasPerms, healthData) = healthInfo
-        val savedSuggestions = array[7] as List<com.zoewave.probase.kocolor.model.SavedAnalysis>
+        val savedSuggestions = array[8] as List<com.zoewave.probase.kocolor.model.SavedAnalysis>
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
@@ -228,6 +232,7 @@ class HomeViewModel @Inject constructor(
             isHealthPermissionGranted = hasPerms,
             weather = weather,
             locationName = weather?.locationName,
+            headerBackgroundUrl = headerBg,
             savedSuggestions = savedSuggestions
         )
     }.stateIn(
@@ -318,6 +323,18 @@ class HomeViewModel @Inject constructor(
                 conditions = conditions,
                 locationName = response.name
             )
+
+            // Dynamic Unsplash Background
+            val weatherKeyword = when {
+                conditions.contains(LayeredWeatherCondition.THUNDER) -> "storm"
+                conditions.contains(LayeredWeatherCondition.RAINY) -> "rainy"
+                conditions.contains(LayeredWeatherCondition.CLOUDY) -> "cloudy"
+                conditions.contains(LayeredWeatherCondition.SUNNY) -> "sunny"
+                else -> "nature"
+            }
+            // Using Source Unsplash redirect for efficiency as requested
+            // Note: In production we'd use Unsplash API and cached IDs
+            _headerBackgroundUrl.value = "https://images.unsplash.com/featured/?skincare,weather,$weatherKeyword"
 
             // Environmental Trigger Logic
             if (envContext.uvIndex > 3.0) {

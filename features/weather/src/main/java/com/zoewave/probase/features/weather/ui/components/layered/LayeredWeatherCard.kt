@@ -65,14 +65,14 @@ fun LayeredWeatherInfoIcon(
             modifier = Modifier.fillMaxSize()
         )
 
-        // High-density info badge
+        // High-density info badge - Made smaller and more elegant
         Surface(
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
             shape = CircleShape,
-            shadowElevation = 4.dp,
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+            shadowElevation = 2.dp,
+            border = androidx.compose.foundation.BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
             modifier = Modifier
-                .size(42.dp)
+                .size(32.dp) // Reduced from 36.dp
                 .align(Alignment.Center)
         ) {
             Column(
@@ -82,17 +82,17 @@ fun LayeredWeatherInfoIcon(
             ) {
                 Text(
                     text = "${uiState.temperature.toInt()}°",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                     fontWeight = FontWeight.Black,
-                    lineHeight = 12.sp,
+                    lineHeight = 10.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "UV ${uiState.uvIndex.toInt()}",
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 6.sp),
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    lineHeight = 10.sp
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                    lineHeight = 7.sp
                 )
             }
         }
@@ -175,19 +175,19 @@ fun WeatherLayeredIcon(
                 LayeredWeatherCondition.WINDY -> Color(0xFF81D4FA)
             }
             
-            // Layering logic with offsets
+            // Layering logic with offsets - Cleaned up to be more centered
             val offset = when (condition) {
-                LayeredWeatherCondition.SUNNY -> IntOffset(-10, -10)
-                LayeredWeatherCondition.CLOUDY -> IntOffset(10, 5)
-                LayeredWeatherCondition.RAINY -> IntOffset(5, 25)
-                LayeredWeatherCondition.THUNDER -> IntOffset(15, 20)
-                LayeredWeatherCondition.WINDY -> IntOffset(-20, 15)
+                LayeredWeatherCondition.SUNNY -> IntOffset(0, 0)
+                LayeredWeatherCondition.CLOUDY -> IntOffset(0, 0)
+                LayeredWeatherCondition.RAINY -> IntOffset(0, 0)
+                LayeredWeatherCondition.THUNDER -> IntOffset(0, 0)
+                LayeredWeatherCondition.WINDY -> IntOffset(0, 0)
             }
 
             val size = when (condition) {
-                LayeredWeatherCondition.SUNNY -> 56.dp
-                LayeredWeatherCondition.CLOUDY -> 52.dp
-                else -> 40.dp
+                LayeredWeatherCondition.SUNNY -> 72.dp // Increased from 56.dp
+                LayeredWeatherCondition.CLOUDY -> 68.dp // Increased from 52.dp
+                else -> 52.dp // Increased from 40.dp
             }
 
             Icon(
@@ -271,14 +271,14 @@ fun LayeredWeatherSquareCard(
             if (uiState != null) {
                 LayeredWeatherInfoIcon(
                     uiState = uiState,
-                    modifier = Modifier.size(72.dp)
+                    modifier = Modifier.size(80.dp) // Maintain consistent size for the icon group
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = (uiState.locationName ?: "Unknown").uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                     fontWeight = FontWeight.Black,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                     letterSpacing = 1.sp,
                     maxLines = 1
                 )
@@ -295,10 +295,10 @@ fun LayeredWeatherSquareCard(
                         modifier = Modifier.size(40.dp)
                     )
                 }
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = "LOCATING...",
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                     fontWeight = FontWeight.Black,
                     color = Color.Gray.copy(alpha = 0.5f),
                     letterSpacing = 1.sp
