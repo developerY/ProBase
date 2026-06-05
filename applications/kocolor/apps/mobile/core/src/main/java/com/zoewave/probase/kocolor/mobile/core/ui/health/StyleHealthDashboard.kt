@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -126,20 +125,22 @@ fun StyleHealthDashboard(
                 color = Color(0xFF2196F3)
             )
             SummaryMetricItem(
-                icon = Icons.Default.AutoAwesome,
+                icon = Icons.Default.Favorite,
                 label = "Vitals",
-                value = "${uiState.alerts.size} Alerts",
-                color = Color(0xFFF44336)
+                value = if (uiState.latestHeartRate != null) "Normal" else "Syncing...",
+                color = if (uiState.latestHeartRate != null) Color(0xFF4CAF50) else Color.Gray
             )
         }
 
-        // 2. Vitals & Alerts Card
-        VitalsAlertsCard(
-            alerts = uiState.alerts,
-            latestHeartRate = uiState.latestHeartRate
-        )
+        // 2. Active Alerts Section (Only shows if there are alerts)
+        if (uiState.alerts.isNotEmpty()) {
+            AlertsSection(alerts = uiState.alerts)
+        }
 
-        // 3. Premium Hydration Visualization
+        // 3. Vitals Card
+        VitalsCard(latestHeartRate = uiState.latestHeartRate)
+
+        // 4. Premium Hydration Visualization
         HydrationVisual(
             current = hydration,
             goal = hydrationGoal,
@@ -366,14 +367,9 @@ private fun SummaryMetricItem(
 }
 
 @Composable
-private fun VitalsAlertsCard(
-    alerts: List<com.zoewave.probase.features.health.core.SkinInsight>,
-    latestHeartRate: Long?
-) {
-    var isExpanded by remember { mutableStateOf(false) }
-
+private fun VitalsCard(latestHeartRate: Long?) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable { isExpanded = !isExpanded },
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF44336).copy(alpha = 0.05f))
     ) {
@@ -390,51 +386,49 @@ private fun VitalsAlertsCard(
                 }
                 Spacer(Modifier.width(16.dp))
                 Column {
-                    Text("Vitals & Alerts", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text("Vitals", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(
-                        text = if (latestHeartRate != null) "Heart Rate: $latestHeartRate bpm" else "Syncing vitals...",
+                        text = if (latestHeartRate != null) "Normal" else "Syncing vitals...",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (latestHeartRate != null) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-                Spacer(Modifier.weight(1f))
-                if (alerts.isNotEmpty()) {
-                    Surface(
-                        color = Color(0xFFF44336),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = "${alerts.size}",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
                 }
             }
 
-            AnimatedVisibility(visible = isExpanded && alerts.isNotEmpty()) {
-                Column(
-                    modifier = Modifier.padding(top = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    alerts.forEach { insight ->
-                        Surface(
-                            color = Color.White,
-                            shape = RoundedCornerShape(16.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF44336).copy(alpha = 0.1f))
-                        ) {
-                            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
-                                Icon(Icons.Default.Lightbulb, null, tint = Color(0xFFFFC107), modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(12.dp))
-                                Column {
-                                    Text(insight.trigger, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFFF44336))
-                                    Text(insight.manifestation, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
-                                    Text(insight.recommendation, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                                }
-                            }
-                        }
+            if (latestHeartRate != null) {
+                Spacer(Modifier.height(24.dp))
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(text = latestHeartRate.toString(), style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Black)
+                    Text(text = " bpm", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(bottom = 8.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AlertsSection(alerts: List<com.zoewave.probase.features.health.core.SkinInsight>) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text(
+            text = "ACTIVE ALERTS",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 2.sp,
+            color = Color(0xFFF44336)
+        )
+        alerts.forEach { insight ->
+            Surface(
+                color = Color(0xFFF44336).copy(alpha = 0.05f),
+                shape = RoundedCornerShape(24.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF44336).copy(alpha = 0.1f))
+            ) {
+                Row(modifier = Modifier.padding(24.dp), verticalAlignment = Alignment.Top) {
+                    Icon(Icons.Default.Lightbulb, null, tint = Color(0xFFFFC107), modifier = Modifier.size(24.dp))
+                    Spacer(Modifier.width(16.dp))
+                    Column {
+                        Text(insight.trigger, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFFF44336))
+                        Text(insight.manifestation, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(insight.recommendation, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                     }
                 }
             }
