@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,7 +43,8 @@ enum class LayeredWeatherCondition {
 data class LayeredWeatherUiState(
     val temperature: Double = 22.0,
     val uvIndex: Double = 4.5,
-    val conditions: List<LayeredWeatherCondition> = listOf(LayeredWeatherCondition.SUNNY)
+    val conditions: List<LayeredWeatherCondition> = listOf(LayeredWeatherCondition.SUNNY),
+    val locationName: String? = null
 )
 
 @Composable
@@ -65,14 +65,14 @@ fun LayeredWeatherInfoIcon(
             modifier = Modifier.fillMaxSize()
         )
 
-        // High-density info badge
+        // High-density info badge - Made smaller and more elegant
         Surface(
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
             shape = CircleShape,
-            shadowElevation = 4.dp,
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+            shadowElevation = 2.dp,
+            border = androidx.compose.foundation.BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
             modifier = Modifier
-                .size(42.dp)
+                .size(32.dp) // Reduced from 36.dp
                 .align(Alignment.Center)
         ) {
             Column(
@@ -82,17 +82,17 @@ fun LayeredWeatherInfoIcon(
             ) {
                 Text(
                     text = "${uiState.temperature.toInt()}°",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                     fontWeight = FontWeight.Black,
-                    lineHeight = 12.sp,
+                    lineHeight = 10.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "UV ${uiState.uvIndex.toInt()}",
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 6.sp),
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    lineHeight = 10.sp
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                    lineHeight = 7.sp
                 )
             }
         }
@@ -175,19 +175,19 @@ fun WeatherLayeredIcon(
                 LayeredWeatherCondition.WINDY -> Color(0xFF81D4FA)
             }
             
-            // Layering logic with offsets
+            // Layering logic with offsets - Cleaned up to be more centered
             val offset = when (condition) {
-                LayeredWeatherCondition.SUNNY -> IntOffset(-10, -10)
-                LayeredWeatherCondition.CLOUDY -> IntOffset(10, 5)
-                LayeredWeatherCondition.RAINY -> IntOffset(5, 25)
-                LayeredWeatherCondition.THUNDER -> IntOffset(15, 20)
-                LayeredWeatherCondition.WINDY -> IntOffset(-20, 15)
+                LayeredWeatherCondition.SUNNY -> IntOffset(0, 0)
+                LayeredWeatherCondition.CLOUDY -> IntOffset(0, 0)
+                LayeredWeatherCondition.RAINY -> IntOffset(0, 0)
+                LayeredWeatherCondition.THUNDER -> IntOffset(0, 0)
+                LayeredWeatherCondition.WINDY -> IntOffset(0, 0)
             }
 
             val size = when (condition) {
-                LayeredWeatherCondition.SUNNY -> 56.dp
-                LayeredWeatherCondition.CLOUDY -> 52.dp
-                else -> 40.dp
+                LayeredWeatherCondition.SUNNY -> 72.dp // Increased from 56.dp
+                LayeredWeatherCondition.CLOUDY -> 68.dp // Increased from 52.dp
+                else -> 52.dp // Increased from 40.dp
             }
 
             Icon(
@@ -244,6 +244,84 @@ private fun LayeredWeatherCardPreview() {
                     conditions = listOf(LayeredWeatherCondition.CLOUDY, LayeredWeatherCondition.RAINY, LayeredWeatherCondition.THUNDER)
                 )
             )
+        }
+    }
+}
+
+/**
+ * A square version of the weather card with the icon overlay centered and the city name underneath.
+ */
+@Composable
+fun LayeredWeatherSquareCard(
+    uiState: LayeredWeatherUiState?,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.size(140.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (uiState != null) {
+                LayeredWeatherInfoIcon(
+                    uiState = uiState,
+                    modifier = Modifier.size(80.dp) // Maintain consistent size for the icon group
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = (uiState.locationName ?: "Unknown").uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                    letterSpacing = 1.sp,
+                    maxLines = 1
+                )
+            } else {
+                // Loading / Unavailable state
+                Box(
+                    modifier = Modifier.size(72.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Cloud,
+                        contentDescription = null,
+                        tint = Color.Gray.copy(alpha = 0.3f),
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "LOCATING...",
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    fontWeight = FontWeight.Black,
+                    color = Color.Gray.copy(alpha = 0.5f),
+                    letterSpacing = 1.sp
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LayeredWeatherSquareCardPreview() {
+    MaterialTheme {
+        Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            LayeredWeatherSquareCard(
+                uiState = LayeredWeatherUiState(
+                    locationName = "Manhattan",
+                    temperature = 24.0,
+                    uvIndex = 0.0,
+                    conditions = listOf(LayeredWeatherCondition.CLOUDY)
+                )
+            )
+            LayeredWeatherSquareCard(uiState = null)
         }
     }
 }

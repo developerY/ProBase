@@ -68,6 +68,7 @@ data class HomeUiState(
     val isHealthPermissionGranted: Boolean = false,
     val weather: LayeredWeatherUiState? = null,
     val locationName: String? = null,
+    val headerBackgroundUrl: String? = null,
     val savedSuggestions: List<com.zoewave.probase.kocolor.model.SavedAnalysis> = emptyList()
 )
 
@@ -107,7 +108,7 @@ class HomeViewModel @Inject constructor(
     )
 
     private val _weather = MutableStateFlow<LayeredWeatherUiState?>(null)
-    private val _locationName = MutableStateFlow<String?>(null)
+    private val _headerBackgroundUrl = MutableStateFlow<String?>(null)
 
     init {
         fetchWeather()
@@ -154,7 +155,7 @@ class HomeViewModel @Inject constructor(
         clothingDao.getAllClothing(),
         _beautyTip,
         _weather,
-        _locationName,
+        _headerBackgroundUrl,
         healthSessionManager.availability.flatMapLatest { availability ->
             if (availability == HealthConnectClient.SDK_AVAILABLE) {
                 flow {
@@ -182,7 +183,7 @@ class HomeViewModel @Inject constructor(
         val clothing = array[3] as List<ClothingItemEntity>
         val tip = array[4] as String
         val weather = array[5] as LayeredWeatherUiState?
-        val locationName = array[6] as String?
+        val headerBg = array[6] as String?
         val healthInfo = array[7] as Pair<Boolean, Triple<Float?, String?, Double>>
         val (hasPerms, healthData) = healthInfo
         val savedSuggestions = array[8] as List<com.zoewave.probase.kocolor.model.SavedAnalysis>
@@ -230,7 +231,8 @@ class HomeViewModel @Inject constructor(
             hydrationLiters = healthData.third,
             isHealthPermissionGranted = hasPerms,
             weather = weather,
-            locationName = locationName,
+            locationName = weather?.locationName,
+            headerBackgroundUrl = headerBg,
             savedSuggestions = savedSuggestions
         )
     }.stateIn(
@@ -278,7 +280,6 @@ class HomeViewModel @Inject constructor(
                 if (latLng != null) {
                     // 2. Fetch weather by real coords
                     val response = weatherRepo.openCurrentWeatherByCoords(latLng.latitude, latLng.longitude)
-                    _locationName.value = response?.name
                     
                     // 3. Get environmental context (UV, humidity)
                     val envContext = weatherRepo.getEnvironmentalContext(latLng.latitude, latLng.longitude)
@@ -289,7 +290,6 @@ class HomeViewModel @Inject constructor(
                     android.util.Log.d("HomeViewModel", "GPS timeout/unavailable. Falling back to Santa Barbara.")
                     val fallbackCity = "Santa Barbara, US"
                     val response = weatherRepo.openCurrentWeatherByCity(fallbackCity)
-                    _locationName.value = response?.name ?: "Santa Barbara"
                     
                     val envContext = response?.coord?.let { 
                         weatherRepo.getEnvironmentalContext(it.lat, it.lon)
@@ -320,8 +320,21 @@ class HomeViewModel @Inject constructor(
             _weather.value = LayeredWeatherUiState(
                 temperature = response.main.temp,
                 uvIndex = envContext.uvIndex,
-                conditions = conditions
+                conditions = conditions,
+                locationName = response.name
             )
+
+            // Dynamic Unsplash Background
+            val weatherKeyword = when {
+                conditions.contains(LayeredWeatherCondition.THUNDER) -> "storm"
+                conditions.contains(LayeredWeatherCondition.RAINY) -> "rainy"
+                conditions.contains(LayeredWeatherCondition.CLOUDY) -> "cloudy"
+                conditions.contains(LayeredWeatherCondition.SUNNY) -> "sunny"
+                else -> "nature"
+            }
+            // Using Source Unsplash redirect for efficiency as requested
+            // Note: In production we'd use Unsplash API and cached IDs
+            _headerBackgroundUrl.value = "https://images.unsplash.com/featured/?skincare,weather,$weatherKeyword"
 
             // Environmental Trigger Logic
             if (envContext.uvIndex > 3.0) {
