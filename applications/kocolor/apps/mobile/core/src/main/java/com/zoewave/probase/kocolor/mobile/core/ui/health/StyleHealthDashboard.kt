@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,14 +22,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -46,6 +49,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -76,24 +80,82 @@ fun StyleHealthDashboard(
         modifier = modifier.padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
-        Text(
-            text = "Style Foundation",
-            style = MaterialTheme.typography.headlineMedium,
-            fontFamily = FontFamily.Serif,
-            fontWeight = FontWeight.Bold
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "Bio-Markers",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "STYLE FROM THE INSIDE OUT",
+                    style = MaterialTheme.typography.labelSmall,
+                    letterSpacing = 2.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
+            
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+        }
+
+        // 1. High-Level Metrics Summary Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            SummaryMetricItem(
+                icon = Icons.Default.Bedtime,
+                label = "Sleep",
+                value = lastSleep?.let { "${it.duration?.toHours()}h ${it.duration?.toMinutes()?.rem(60)}m" } ?: "--",
+                color = Color(0xFF9C27B0)
+            )
+            SummaryMetricItem(
+                icon = Icons.Default.WaterDrop,
+                label = "Hydration",
+                value = "%.1fL".format(hydration),
+                color = Color(0xFF2196F3)
+            )
+            SummaryMetricItem(
+                icon = Icons.Default.AutoAwesome,
+                label = "Vitals",
+                value = "${uiState.alerts.size} Alerts",
+                color = Color(0xFFF44336)
+            )
+        }
+
+        // 2. Vitals & Alerts Card
+        VitalsAlertsCard(
+            alerts = uiState.alerts,
+            latestHeartRate = uiState.latestHeartRate
         )
 
-        // 1. Premium Hydration Visualization
+        // 3. Premium Hydration Visualization
         HydrationVisual(
             current = hydration,
             goal = hydrationGoal,
             onAdd = { onEvent(HealthEvent.LogHydration(it)) }
         )
 
-        // 2. Beautiful Sleep Section
+        // 4. Beautiful Sleep Section
         SleepVisual(sleepData = lastSleep)
         
-        // 3. Element Tracker Section with Hide/Show
+        // 5. Activity Dashboard
+        ActivityMetricsSection(
+            steps = uiState.todaySteps,
+            calories = uiState.todayCalories
+        )
+
+        // 6. Element Tracker Section with Hide/Show
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(
                 modifier = Modifier
@@ -140,8 +202,19 @@ private fun StyleHealthDashboardPreview() {
         StyleHealthDashboard(
             uiState = HealthUiState.Success(
                 sessions = emptyList(),
-                weeklyHydration = mapOf(LocalDate.now().toString() to 1.2),
-                sleepSessions = emptyList()
+                weeklyHydration = mapOf(LocalDate.now().toString() to 1.5),
+                sleepSessions = emptyList(),
+                alerts = listOf(
+                    com.zoewave.probase.features.health.core.SkinInsight(
+                        trigger = "Low Humidity",
+                        manifestation = "Dryness & Tightness",
+                        recommendation = "Use a rich moisturizer today.",
+                        severity = 0.8f
+                    )
+                ),
+                latestHeartRate = 72,
+                todaySteps = 8420,
+                todayCalories = 320.0
             ),
             onEvent = {},
             navTo = {}
@@ -265,6 +338,137 @@ private fun SleepVisual(sleepData: SleepSessionData?) {
             } else {
                 Text("No data synced for last night.", style = MaterialTheme.typography.bodyMedium)
             }
+        }
+    }
+}
+
+@Composable
+private fun SummaryMetricItem(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    color: Color
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Surface(
+            color = color.copy(alpha = 0.1f),
+            shape = CircleShape,
+            modifier = Modifier.size(56.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(icon, null, tint = color, modifier = Modifier.size(24.dp))
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(label, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+        Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
+    }
+}
+
+@Composable
+private fun VitalsAlertsCard(
+    alerts: List<com.zoewave.probase.features.health.core.SkinInsight>,
+    latestHeartRate: Long?
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable { isExpanded = !isExpanded },
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF44336).copy(alpha = 0.05f))
+    ) {
+        Column(modifier = Modifier.padding(24.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    color = Color(0xFFF44336).copy(alpha = 0.1f),
+                    shape = CircleShape,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.Favorite, null, tint = Color(0xFFF44336))
+                    }
+                }
+                Spacer(Modifier.width(16.dp))
+                Column {
+                    Text("Vitals & Alerts", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = if (latestHeartRate != null) "Heart Rate: $latestHeartRate bpm" else "Syncing vitals...",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                if (alerts.isNotEmpty()) {
+                    Surface(
+                        color = Color(0xFFF44336),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = "${alerts.size}",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            AnimatedVisibility(visible = isExpanded && alerts.isNotEmpty()) {
+                Column(
+                    modifier = Modifier.padding(top = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    alerts.forEach { insight ->
+                        Surface(
+                            color = Color.White,
+                            shape = RoundedCornerShape(16.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF44336).copy(alpha = 0.1f))
+                        ) {
+                            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
+                                Icon(Icons.Default.Lightbulb, null, tint = Color(0xFFFFC107), modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(12.dp))
+                                Column {
+                                    Text(insight.trigger, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFFF44336))
+                                    Text(insight.manifestation, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                                    Text(insight.recommendation, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActivityMetricsSection(steps: Long, calories: Double) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        ActivityCard(
+            label = "STEPS",
+            value = "$steps",
+            modifier = Modifier.weight(1f)
+        )
+        ActivityCard(
+            label = "CALORIES",
+            value = "${calories.toInt()} kcal",
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun ActivityCard(label: String, value: String, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(label, style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(4.dp))
+            Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
         }
     }
 }

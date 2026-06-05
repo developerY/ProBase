@@ -386,7 +386,7 @@ fun WellnessInsightsSection(
                         VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                         BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.WaterDrop, stringResource(R.string.applications_kocolor_apps_mobile_hydration), stringResource(R.string.applications_kocolor_apps_mobile_hydration_format, uiState.hydrationLiters), Color(0xFF2196F3)), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
                         VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.AutoAwesome, stringResource(R.string.applications_kocolor_apps_mobile_vitals), if (uiState.insights.isEmpty()) stringResource(R.string.applications_kocolor_apps_mobile_optimal) else stringResource(R.string.applications_kocolor_apps_mobile_alerts_format, uiState.insights.size), if (uiState.insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.AutoAwesome, stringResource(R.string.applications_kocolor_apps_mobile_vitals), if (uiState.insights.isEmpty()) stringResource(R.string.applications_kocolor_apps_mobile_optimal) else "${uiState.insights.size} Alerts", if (uiState.insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
                     }
                 }
             }
