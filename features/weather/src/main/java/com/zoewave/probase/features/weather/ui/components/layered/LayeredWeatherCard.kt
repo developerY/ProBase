@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -243,6 +244,84 @@ private fun LayeredWeatherCardPreview() {
                     conditions = listOf(LayeredWeatherCondition.CLOUDY, LayeredWeatherCondition.RAINY, LayeredWeatherCondition.THUNDER)
                 )
             )
+        }
+    }
+}
+
+/**
+ * A square version of the weather card with the icon overlay centered and the city name underneath.
+ */
+@Composable
+fun LayeredWeatherSquareCard(
+    uiState: LayeredWeatherUiState?,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.size(140.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (uiState != null) {
+                LayeredWeatherInfoIcon(
+                    uiState = uiState,
+                    modifier = Modifier.size(72.dp)
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = (uiState.locationName ?: "Unknown").uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                    letterSpacing = 1.sp,
+                    maxLines = 1
+                )
+            } else {
+                // Loading / Unavailable state
+                Box(
+                    modifier = Modifier.size(72.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Cloud,
+                        contentDescription = null,
+                        tint = Color.Gray.copy(alpha = 0.3f),
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "LOCATING...",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    color = Color.Gray.copy(alpha = 0.5f),
+                    letterSpacing = 1.sp
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LayeredWeatherSquareCardPreview() {
+    MaterialTheme {
+        Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            LayeredWeatherSquareCard(
+                uiState = LayeredWeatherUiState(
+                    locationName = "Manhattan",
+                    temperature = 24.0,
+                    uvIndex = 0.0,
+                    conditions = listOf(LayeredWeatherCondition.CLOUDY)
+                )
+            )
+            LayeredWeatherSquareCard(uiState = null)
         }
     }
 }

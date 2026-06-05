@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
@@ -62,7 +60,7 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.zoewave.probase.features.health.core.SkinInsight
-import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherInfoIcon
+import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherLocationBadge
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CollectionHubCard
@@ -254,67 +252,34 @@ fun HomeHeader(
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), expressiveShape)
             .padding(32.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = (uiState.locationName ?: "Locating...").uppercase(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Black,
-                    color = MaterialTheme.colorScheme.primary,
-                    letterSpacing = 1.sp,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                Text(
-                    text = if (uiState.isDaytime) stringResource(R.string.applications_kocolor_apps_mobile_radiant_morning) else stringResource(R.string.applications_kocolor_apps_mobile_deep_restoration),
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alpha(0.8f)) {
-                    Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = uiState.beautyTip, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Serif, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
-                }
+        Column {
+            LayeredWeatherLocationBadge(uiState = uiState.weather?.copy(locationName = uiState.locationName))
 
-                if (uiState.fashionProfile != null) {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(color = MaterialTheme.colorScheme.primary, shape = CircleShape) {
-                            Text(text = uiState.fashionProfile.seasonalType.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(text = stringResource(R.string.applications_kocolor_apps_mobile_undertone_format, uiState.fashionProfile.undertone.name.lowercase().replaceFirstChar { it.uppercase() }), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
+            Text(
+                text = if (uiState.isDaytime) stringResource(R.string.applications_kocolor_apps_mobile_radiant_morning) else stringResource(R.string.applications_kocolor_apps_mobile_deep_restoration),
+                style = MaterialTheme.typography.headlineLarge,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alpha(0.8f)) {
+                Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = uiState.beautyTip, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Serif, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
             }
 
-            uiState.weather?.let {
-                LayeredWeatherInfoIcon(
-                    uiState = it,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .offset(x = 16.dp, y = (-16).dp)
-                )
-            } ?: Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .offset(x = 16.dp, y = (-16).dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CloudQueue,
-                    contentDescription = "Weather unavailable",
-                    tint = Color.Gray.copy(alpha = 0.5f),
-                    modifier = Modifier.size(48.dp)
-                )
+            if (uiState.fashionProfile != null) {
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(color = MaterialTheme.colorScheme.primary, shape = CircleShape) {
+                        Text(text = uiState.fashionProfile.seasonalType.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = stringResource(R.string.applications_kocolor_apps_mobile_undertone_format, uiState.fashionProfile.undertone.name.lowercase().replaceFirstChar { it.uppercase() }), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
         }
     }
