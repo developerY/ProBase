@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
@@ -43,6 +44,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +59,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherInfoIcon
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
@@ -97,7 +101,7 @@ fun HomeUiRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
@@ -105,6 +109,26 @@ fun HomeScreen(
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val locationPermissionsState = rememberMultiplePermissionsState(
+        listOf(
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+        )
+    )
+
+    LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
+        if (locationPermissionsState.allPermissionsGranted) {
+            onEvent(HomeEvent.RefreshWeather)
+        }
+    }
+
+    // Explicitly request permissions on first launch if not already granted
+    LaunchedEffect(Unit) {
+        if (!locationPermissionsState.allPermissionsGranted) {
+            locationPermissionsState.launchMultiplePermissionRequest()
+        }
+    }
+
     val backgroundColor by animateColorAsState(
         targetValue = if (uiState.isDaytime) MaterialTheme.colorScheme.surface
         else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -280,6 +304,18 @@ fun HomeHeader(
                     modifier = Modifier
                         .size(80.dp)
                         .offset(x = 16.dp, y = (-16).dp)
+                )
+            } ?: Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .offset(x = 16.dp, y = (-16).dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CloudQueue,
+                    contentDescription = "Weather unavailable",
+                    tint = Color.Gray.copy(alpha = 0.5f),
+                    modifier = Modifier.size(48.dp)
                 )
             }
         }

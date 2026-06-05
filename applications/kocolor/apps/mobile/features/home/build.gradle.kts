@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.coil.compose)
     implementation(libs.google.play.services.maps)
+    implementation(libs.google.accompanist.permissions)
 
     implementation(libs.kotlinx.collections.immutable)
 }
