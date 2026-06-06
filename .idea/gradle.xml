@@ -55,7 +55,6 @@
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile" />
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features" />
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/home" />
-            <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/hydration" />
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/input" />
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/nutrition" />
             <option value="$PROJECT_DIR$/applications/goswift/apps/mobile/features/settings" />
@@ -184,6 +183,7 @@
             <option value="$PROJECT_DIR$/features/health" />
             <option value="$PROJECT_DIR$/features/health/cgm" />
             <option value="$PROJECT_DIR$/features/health/core" />
+            <option value="$PROJECT_DIR$/features/health/hydration" />
             <option value="$PROJECT_DIR$/features/nav3" />
             <option value="$PROJECT_DIR$/features/obf" />
             <option value="$PROJECT_DIR$/features/payment" />
