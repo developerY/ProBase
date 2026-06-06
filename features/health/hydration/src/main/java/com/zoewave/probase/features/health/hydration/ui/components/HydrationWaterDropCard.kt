@@ -1,5 +1,6 @@
 package com.zoewave.probase.features.health.hydration.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -27,40 +29,51 @@ fun HydrationWaterDropCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .height(480.dp) // Large visual section
             .clickable { onClick() },
         shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF2196F3).copy(alpha = 0.05f))
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
-        Column(
-            modifier = Modifier.padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            Text(
-                text = "Hydration",
-                style = MaterialTheme.typography.titleLarge,
-                fontFamily = FontFamily.Serif,
-                color = Color(0xFF2C2420).copy(alpha = 0.7f)
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Gradient Background from Spectacular Image
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF81D4FA).copy(alpha = 0.4f), Color(0xFFE1F5FE).copy(alpha = 0.2f))
+                        )
+                    )
             )
 
-            // Optimized Water Drop for Summary View
-            WaterDropVisual(
-                progress = progress,
-                modifier = Modifier.size(160.dp)
-            )
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
-                    text = "%.1fL".format(currentLiters),
-                    style = MaterialTheme.typography.displayMedium,
+                    text = "Current Progress",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontFamily = FontFamily.Serif,
+                    color = Color.Black.copy(alpha = 0.7f)
+                )
+
+                Spacer(Modifier.height(32.dp))
+
+                // Optimized Water Drop for Summary View
+                WaterDropVisual(
+                    progress = progress,
+                    modifier = Modifier.size(220.dp)
+                )
+
+                Spacer(Modifier.height(32.dp))
+
+                Text(
+                    text = "${(progress * 100).toInt()}%",
+                    style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Serif,
-                    color = Color(0xFF1A1A1A)
-                )
-                Text(
-                    text = "of %.1fL goal".format(targetLiters),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.Gray
+                    color = Color.Black.copy(alpha = 0.8f)
                 )
             }
         }
