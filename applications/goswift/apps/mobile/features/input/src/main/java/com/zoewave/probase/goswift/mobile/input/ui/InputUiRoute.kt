@@ -10,8 +10,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
-import com.zoewave.probase.goswift.mobile.hydration.ui.HydrationScreen
-import com.zoewave.probase.goswift.mobile.hydration.ui.HydrationViewModel
+import com.zoewave.probase.features.health.hydration.ui.HydrationScreen
+import com.zoewave.probase.features.health.hydration.ui.HydrationViewModel
+import com.zoewave.probase.features.health.hydration.ui.HydrationUiEvent
+import com.zoewave.probase.features.health.hydration.ui.HydrationUiState
 import com.zoewave.probase.goswift.mobile.nutrition.ui.NutritionScreen
 import com.zoewave.probase.goswift.mobile.nutrition.ui.NutritionViewModel
 import com.zoewave.probase.goswift.mobile.shots.ui.ShotsScreen
@@ -61,6 +63,7 @@ fun InputUiRoute(
                 HydrationScreen(
                     uiState = hydrationUiState,
                     onEvent = hydrationViewModel::onEvent,
+                    onNavigateToSettings = { navTo(GoSwiftDestination.Settings) },
                     modifier = Modifier.weight(1f)
                 )
             }

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="applications_goswift_apps_mobile_features_hydration_title">Intelligent Hydration</string>
-    <string name="applications_goswift_apps_mobile_features_hydration_quick_log">Quick Log</string>
-    <string name="applications_goswift_apps_mobile_features_hydration_recent_logs">Recent Logs</string>
-    <string name="applications_goswift_apps_mobile_features_hydration_daily_progress">Daily Progress</string>
-    <string name="applications_goswift_apps_mobile_features_hydration_progress_format">%1$.2fL / %2$.2fL</string>
-    <string name="applications_goswift_apps_mobile_features_hydration_ml_format">%1$d ml</string>
-</resources>

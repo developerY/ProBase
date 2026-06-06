@@ -19,7 +19,7 @@ dependencies {
     implementation(project(":applications:goswift:model"))
     implementation(project(":applications:goswift:features:main"))
     implementation(project(":applications:goswift:apps:mobile:features:shots"))
-    implementation(project(":applications:goswift:apps:mobile:features:hydration"))
+    implementation(project(":features:health:hydration"))
     implementation(project(":applications:goswift:apps:mobile:features:nutrition"))
     
     implementation(libs.androidx.compose.material3)

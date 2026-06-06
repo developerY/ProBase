@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import com.zoewave.probase.goswift.features.main.navigation.GoSwiftDestination
 import com.zoewave.probase.goswift.mobile.home.ui.HomeUiRoute
-import com.zoewave.probase.goswift.mobile.hydration.ui.HydrationUiRoute
+import com.zoewave.probase.features.health.hydration.ui.HydrationUiRoute
 import com.zoewave.probase.goswift.mobile.input.ui.InputUiRoute
 import com.zoewave.probase.goswift.mobile.settings.ui.SettingsUiRoute
 import com.zoewave.probase.goswift.mobile.shots.ui.AddShotUiRoute
@@ -51,7 +51,7 @@ fun goSwiftNavEntryProvider(
             GoSwiftDestination.Hydration -> {
                 HydrationUiRoute(
                     modifier = Modifier.fillMaxSize(),
-                    navTo = navigateTo
+                    onNavigateToSettings = { navigateTo(GoSwiftDestination.Settings) }
                 )
             }
         }
