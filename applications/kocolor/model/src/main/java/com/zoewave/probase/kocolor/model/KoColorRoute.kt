@@ -90,7 +90,7 @@ sealed class KoColorRoute {
     data object Suggestions : KoColorRoute()
     
     @Serializable
-    data object Settings : KoColorRoute()
+    data class Settings(val section: String? = null) : KoColorRoute()
 
     @Serializable
     data object Health : KoColorRoute()
@@ -132,7 +132,7 @@ sealed class KoColorRoute {
         get() = when (this) {
             Home -> Icons.Default.Home
             Color -> Icons.Default.AutoAwesome
-            Settings -> Icons.Default.Settings
+            is Settings -> Icons.Default.Settings
             else -> null
         }
 
@@ -140,7 +140,7 @@ sealed class KoColorRoute {
         get() = when (this) {
             Home -> "Home"
             Color -> "Collection"
-            Settings -> "Settings"
+            is Settings -> "Settings"
             else -> null
         }
 }
@@ -148,5 +148,5 @@ sealed class KoColorRoute {
 val topLevelRoutes = listOf(
     KoColorRoute.Home,
     KoColorRoute.Color,
-    KoColorRoute.Settings
+    KoColorRoute.Settings()
 )

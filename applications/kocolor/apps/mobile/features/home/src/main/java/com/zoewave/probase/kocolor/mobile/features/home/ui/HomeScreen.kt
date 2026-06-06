@@ -141,7 +141,7 @@ fun HomeScreen(
             CenterAlignedTopAppBar(
                 title = { LuxuryBrandLogo(uiState = Unit, onEvent = {}, navTo = {}) },
                 actions = {
-                    IconButton(onClick = { navTo(KoColorRoute.Settings) }) {
+                    IconButton(onClick = { navTo(KoColorRoute.Settings()) }) {
                         Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_settings), tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },

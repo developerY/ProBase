@@ -359,6 +359,14 @@ fun koColorNavEntryProvider(
         }
         is KoColorRoute.Settings -> NavEntry(route) {
             val viewModel: com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsViewModel = hiltViewModel()
+            
+            androidx.compose.runtime.LaunchedEffect(route.section) {
+                val section = route.section
+                if (section != null) {
+                    viewModel.onEvent(com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsEvent.InitializeWithSection(section))
+                }
+            }
+
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             SettingsUiRoute(
                 uiState = state,
