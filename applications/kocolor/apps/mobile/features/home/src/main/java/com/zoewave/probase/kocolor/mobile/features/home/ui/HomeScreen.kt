@@ -49,16 +49,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.zoewave.probase.features.health.core.SkinInsight
@@ -70,6 +74,7 @@ import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBran
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryCard
 import com.zoewave.probase.kocolor.model.FashionProfile
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(showBackground = true)
@@ -221,6 +226,10 @@ fun HomeScreen(
                 }
             }
             
+            item {
+                BoutiqueCard(modifier = Modifier.padding(top = 16.dp))
+            }
+            
             item { Spacer(modifier = Modifier.height(48.dp)) }
         }
     }
@@ -273,7 +282,7 @@ fun HomeHeader(
                     .matchParentSize()
                     .alpha(0.4f)
                     .blur(16.dp), // Frosted glass effect
-                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                contentScale = ContentScale.Crop
             )
         }
 
@@ -477,5 +486,82 @@ fun SectionTitle(uiState: SectionTitleUiState, onEvent: (Unit) -> Unit, navTo: (
 private fun HomeScreenPreview_Default() {
     MaterialTheme {
         HomeScreen(uiState = HomeUiState(), onEvent = {}, navTo = {})
+    }
+}
+
+@Composable
+fun BoutiqueCard(modifier: Modifier = Modifier) {
+    val uriHandler = LocalUriHandler.current
+    ElevatedCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(440.dp)
+            .clickable { uriHandler.openUri("https://www.kocolor.com") },
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            AsyncImage(
+                model = "https://images.unsplash.com/photo-1594122230689-45899d9e6f69?auto=format&fit=crop&q=80&w=800",
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+            
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                color = Color.White.copy(alpha = 0.9f),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "THE ART OF COLOR",
+                        style = MaterialTheme.typography.labelSmall,
+                        letterSpacing = 2.sp,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "KoColor Boutique",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1A1A)
+                    )
+                    Text(
+                        text = "Curated Collections for the Professional Stylist.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.DarkGray
+                    )
+                    
+                    Spacer(Modifier.height(16.dp))
+                    
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "ENTER THE ATELIER",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF8D6E63)
+                        )
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = Color(0xFF8D6E63),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
