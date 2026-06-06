@@ -143,21 +143,22 @@ fun StyleHealthDashboard(
             }
         }
 
-        // 2. Active Alerts Section
-        if (uiState.alerts.isNotEmpty()) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = "Active Alerts",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Bold
-                )
-                AlertsSectionRefined(alerts = uiState.alerts)
-            }
+        // 2. Active Alerts Section - Always persistent
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Active Alerts",
+                style = MaterialTheme.typography.titleLarge,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold
+            )
+            AlertsSectionRefined(alerts = uiState.alerts)
         }
+
+        // 3. Vitals Section - Always persistent
+        VitalsCard(latestHeartRate = uiState.latestHeartRate)
 
         // 4. Hydration Section with Water Drop - Clicking navigates to detail page
         HydrationWaterDropCard(
@@ -263,40 +264,119 @@ private fun SummaryCard(
 }
 
 @Composable
+private fun VitalsCard(latestHeartRate: Long?) {
+    Card(
+        modifier = Modifier.fillMaxWidth().alpha(if (latestHeartRate == null) 0.6f else 1.0f),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF44336).copy(alpha = 0.05f))
+    ) {
+        Column(modifier = Modifier.padding(24.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    color = Color(0xFFF44336).copy(alpha = 0.1f),
+                    shape = CircleShape,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(Icons.Rounded.Favorite, null, tint = Color(0xFFF44336))
+                    }
+                }
+                Spacer(Modifier.width(16.dp))
+                Column {
+                    Text("Vitals", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = if (latestHeartRate != null) "Normal" else "Waiting for sync...",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (latestHeartRate != null) Color(0xFF4CAF50) else Color.Gray
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                    text = latestHeartRate?.toString() ?: "--", 
+                    style = MaterialTheme.typography.displayMedium, 
+                    fontWeight = FontWeight.Black,
+                    color = if (latestHeartRate != null) Color.Black else Color.Gray
+                )
+                Text(
+                    text = " bpm", 
+                    style = MaterialTheme.typography.headlineSmall, 
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    color = Color.Gray
+                )
+            }
+            if (latestHeartRate == null) {
+                Text(
+                    text = "Connect your wearable to see real-time biometrics.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray.copy(alpha = 0.8f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun AlertsSectionRefined(alerts: List<com.zoewave.probase.features.health.core.SkinInsight>) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        alerts.forEach { insight ->
+        if (alerts.isEmpty()) {
+            // Placeholder for "No Alerts"
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().alpha(0.6f),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFD32F2F).copy(alpha = 0.1f))
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.Gray.copy(alpha = 0.1f))
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min)
+                Row(modifier = Modifier.padding(24.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Lightbulb, 
+                        contentDescription = null, 
+                        tint = Color.Gray, 
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(Modifier.width(16.dp))
+                    Column {
+                        Text("All Systems Stable", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+                        Text("No active skin health alerts detected.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    }
+                }
+            }
+        } else {
+            alerts.forEach { insight ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFD32F2F).copy(alpha = 0.1f))
                 ) {
-                    // Left Accent Border
-                    Box(modifier = Modifier.width(4.dp).fillMaxHeight().background(Color(0xFFD32F2F)))
-                    
-                    Row(modifier = Modifier.padding(24.dp), verticalAlignment = Alignment.Top) {
-                        Surface(
-                            color = Color(0xFFD32F2F).copy(alpha = 0.05f),
-                            shape = CircleShape,
-                            modifier = Modifier.size(40.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Default.Lightbulb, null, tint = Color(0xFFFFC107), modifier = Modifier.size(20.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min)
+                    ) {
+                        // Left Accent Border
+                        Box(modifier = Modifier.width(4.dp).fillMaxHeight().background(Color(0xFFD32F2F)))
+                        
+                        Row(modifier = Modifier.padding(24.dp), verticalAlignment = Alignment.Top) {
+                            Surface(
+                                color = Color(0xFFD32F2F).copy(alpha = 0.05f),
+                                shape = CircleShape,
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Default.Lightbulb, null, tint = Color(0xFFFFC107), modifier = Modifier.size(20.dp))
+                                }
                             }
-                        }
-                        Spacer(Modifier.width(16.dp))
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(insight.trigger, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
-                            HorizontalDivider(modifier = Modifier.alpha(0.1f))
-                            Text("BEAUTY IMPACT", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray, letterSpacing = 1.sp)
-                            Text(insight.manifestation, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
-                            Text(insight.recommendation, style = MaterialTheme.typography.bodyMedium, color = Color.Gray, lineHeight = 22.sp)
+                            Spacer(Modifier.width(16.dp))
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(insight.trigger, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+                                HorizontalDivider(modifier = Modifier.alpha(0.1f))
+                                Text("BEAUTY IMPACT", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color.Gray, letterSpacing = 1.sp)
+                                Text(insight.manifestation, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+                                Text(insight.recommendation, style = MaterialTheme.typography.bodyMedium, color = Color.Gray, lineHeight = 22.sp)
+                            }
                         }
                     }
                 }
@@ -334,8 +414,9 @@ private fun ActivityCardRefined(
     unit: String,
     modifier: Modifier = Modifier
 ) {
+    val hasData = value != "0" && value != "0.0" && value != "--"
     Card(
-        modifier = modifier.aspectRatio(1f),
+        modifier = modifier.aspectRatio(1f).alpha(if (hasData) 1f else 0.7f),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black.copy(alpha = 0.08f))
@@ -362,12 +443,12 @@ private fun ActivityCardRefined(
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Serif,
-                        color = Color(0xFF2C2420),
+                        color = if (hasData) Color(0xFF2C2420) else Color.Gray,
                         maxLines = 1,
                         overflow = TextOverflow.Visible
                     )
                     Text(
-                        text = unit.lowercase(),
+                        text = if (hasData) unit.lowercase() else "no data",
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.Gray,
                         letterSpacing = 1.sp
