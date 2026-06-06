@@ -1,37 +1,38 @@
-# Implementation Plan - Frosted Glass Hydration UI
+# Implementation Plan - Glass Silhouette & Goal Navigation
 
-I will refine the Hydration tracking component to simulate the aesthetic of "water inside a frosted glass," using procedural gradients, layered wave paths, and advanced Compose graphics modifiers.
+I will further refine the Hydration component by morphing the container into a realistic "glass" shape and adding a direct navigation link to settings for goal management.
 
 ## 1. Research & Design Analysis
-- **Frosted Effect**: Requires a semi-transparent surface with a subtle white border and high-gloss specular highlights.
-- **Liquid Physics**: Instead of a single flat wave, I will use layered `Path` animations with varying frequencies and opacities to create depth.
-- **Color Palette**: Transition from a static blue to a `Brush.verticalGradient` representing deep water to a clear surface.
+- **Glass Silhouette**: A standard drinking glass often has a slightly tapered base and curved shoulders. I will implement a custom `Shape` that provides this specific profile.
+- **Goal Navigation**: The "of L goal" text should be actionable, encouraging users to personalize their targets.
 
 ## 2. Technical Steps
 
 ### UI Refinement (`StyleHealthDashboard.kt`)
-- [ ] **Container Refactor**:
-    - Update the `HydrationVisualRefined` card to use a `Box` with a `Brush.linearGradient` background (Light Blue -> White).
-    - Apply a white inner border to simulate the glass edge.
-- [ ] **Liquid "Water" Engine**:
-    - Refactor `WavyBackground` to draw **multiple overlapping paths**.
-    - Implement a `verticalGradient` on the water path itself.
-    - Add a "gloss" layer—a thin, high-opacity white path at the top of the water level to simulate light hitting the surface.
-- [ ] **Frosted Buttons**:
-    - Update `HydrationButton` and other utility buttons to use a more pronounced "Glassmorphism" effect.
-    - Combine `Color.White.copy(alpha = 0.2f)` with a `1.dp` solid white border and a subtle shadow.
+- [ ] **Custom `GlassShape`**:
+    - Implement a `GenericShape` that:
+        - Maintains wide straight edges at the top.
+        - Gently tapers inward towards the base.
+        - Has rounded corners on the bottom for a "weighted glass" feel.
+- [ ] **Hydration Container Update**:
+    - Apply the `GlassShape` to the `HydrationVisualRefined` card.
+    - Adjust the `WavyBackground` to ensure the liquid clipping matches the new tapered silhouette.
+- [ ] **Interactive Goal Link**:
+    - Wrap the goal text (`"of %.1fL goal"`) in a `TextButton` or a clickable `Box`.
+    - Style it with a subtle underline or a "Settings" chevron to indicate interactivity.
+    - Trigger `navTo(KoColorRoute.Settings)` on click.
 
 ## 3. Visual Standards
-- **Wave Geometry**: Sinusoidal paths with a "shimmer" effect achieved by offsetting the X-phase of the wave over time (if possible) or by stacking static paths with different periods.
-- **Transparency**: Maintain a high-alpha "clean" look consistent with the Atelier design language.
+- **Clarity**: The "glass" shape must be distinct but subtle enough to not distract from the primary data.
+- **Accessibility**: The navigation link must have a sufficient touch target size.
 
 ## 4. Verification
-- [ ] Ensure the liquid level matches the `current / goal` progress accurately.
-- [ ] Verify that text is perfectly sharp and legible against the new complex background.
+- [ ] Verify the "Glass" silhouette renders correctly on various screen sizes.
+- [ ] Test the navigation from the goal text to the Settings screen.
 - [ ] Build and run `:applications:kocolor:apps:mobile`.
 
 ---
 <!-- feedback_request -->
-I've planned a procedural "liquid engine" for your hydration card that uses layered gradients and wave paths to create that "water in a glass" look without needing static assets.
+I've updated the plan to include the tapered glass shape and the settings navigation. This will make the hydration tracking both more metaphorical and more functional.
 
-**Should I proceed with the liquid engine implementation?**
+**Should I proceed with the glass shape and navigation updates?**

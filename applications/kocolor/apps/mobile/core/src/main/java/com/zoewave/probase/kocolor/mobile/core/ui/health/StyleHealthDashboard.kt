@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -146,7 +147,8 @@ fun StyleHealthDashboard(
         HydrationVisualRefined(
             current = hydration,
             goal = hydrationGoal,
-            onAdd = { onEvent(HealthEvent.LogHydration(it)) }
+            onAdd = { onEvent(HealthEvent.LogHydration(it)) },
+            onNavigateToSettings = { navTo(KoColorRoute.Settings) }
         )
 
         // 4. Activity Section
@@ -292,22 +294,35 @@ private fun AlertsSectionRefined(alerts: List<com.zoewave.probase.features.healt
 private fun HydrationVisualRefined(
     current: Double,
     goal: Double,
-    onAdd: (Double) -> Unit
+    onAdd: (Double) -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     val progress = (current / goal).coerceIn(0.0, 1.0).toFloat()
     
+    // Custom Glass Shape with subtle bottom taper
+    val glassShape = remember {
+        GenericShape { size, _ ->
+            val taper = size.width * 0.08f
+            moveTo(0f, 0f)
+            lineTo(size.width, 0f)
+            lineTo(size.width - taper, size.height)
+            lineTo(taper, size.height)
+            close()
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(520.dp),
-        shape = RoundedCornerShape(32.dp),
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomStart = 48.dp, bottomEnd = 48.dp), // More glass-like
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
         border = androidx.compose.foundation.BorderStroke(
             1.dp, 
             Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.6f), Color.White.copy(alpha = 0.1f)))
         )
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().clip(glassShape)) { // Clip liquid to glass shape
             // Procedural Liquid Engine
             WavyBackground(progress = progress)
             
@@ -331,12 +346,32 @@ private fun HydrationVisualRefined(
                         fontFamily = FontFamily.Serif,
                         color = Color(0xFF1A1A1A)
                     )
-                    Text(
-                        text = "of %.1fL goal".format(goal),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Color.Gray,
-                        letterSpacing = 1.sp
-                    )
+                    
+                    Surface(
+                        onClick = onNavigateToSettings,
+                        color = Color.Transparent,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "of %.1fL goal".format(goal),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                                letterSpacing = 1.sp,
+                                textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Rounded.Settings,
+                                contentDescription = null,
+                                modifier = Modifier.size(12.dp),
+                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            )
+                        }
+                    }
                 }
 
                 // Frosted Glass Interaction Controls
