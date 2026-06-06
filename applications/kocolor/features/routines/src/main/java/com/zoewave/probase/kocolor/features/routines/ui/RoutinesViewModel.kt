@@ -89,6 +89,20 @@ class RoutinesViewModel @Inject constructor(
 
         val models = modelList.map { it.toModel() }
         
+        // AUTO-SYNC: Update "Wake Up" content to the new spectacular protocol if old content is detected
+        models.forEach { routine ->
+            if (routine.time == RoutineTime.MORNING) {
+                val wakeUpStep = routine.steps.find { it.id == "m1" }
+                if (wakeUpStep != null && (wakeUpStep.title == "Wake Up" || wakeUpStep.description.startsWith("No snooze"))) {
+                    viewModelScope.launch {
+                        val newWakeUp = RoutineDefaults.getMorningRoutine().first { it.id == "m1" }
+                        val updatedSteps = routine.steps.map { if (it.id == "m1") newWakeUp else it }
+                        routineDao.updateRoutine(routine.copy(steps = updatedSteps).toEntity())
+                    }
+                }
+            }
+        }
+
         val btnState = when {
             !isGlassConnectedVal -> GlassButtonState.NO_GLASSES
             isGlassSessionActiveVal -> GlassButtonState.PROJECTING

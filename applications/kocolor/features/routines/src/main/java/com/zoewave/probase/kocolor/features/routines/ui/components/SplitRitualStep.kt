@@ -99,7 +99,7 @@ fun SplitRitualStep(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clickable(onClick = { navTo(KoColorRoute.Back) }) 
+                    .clickable(onClick = { navTo(KoColorRoute.Home) }) // Trigger parent navigation lambda
                     .padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
