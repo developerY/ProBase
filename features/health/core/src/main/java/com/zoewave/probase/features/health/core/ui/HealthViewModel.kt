@@ -52,6 +52,8 @@ class HealthViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<HealthUiState>(HealthUiState.Uninitialized)
     val uiState = _uiState.asStateFlow()
 
+    private val _hydrationGoal = MutableStateFlow(2.7)
+
     private val _sideEffect = MutableSharedFlow<HealthSideEffect>()
     val sideEffect = _sideEffect.asSharedFlow()
 
@@ -128,6 +130,7 @@ class HealthViewModel @Inject constructor(
             }
             is HealthEvent.DeleteSession -> deleteSession(event.uid)
             is HealthEvent.LogHydration -> logHydration(event.volumeLiters)
+            is HealthEvent.UpdateHydrationGoal -> updateHydrationGoal(event.goal)
             HealthEvent.SyncTracker -> {
                 viewModelScope.launch {
                     bleRepository.startScan(scanAll = false)
@@ -137,6 +140,11 @@ class HealthViewModel @Inject constructor(
     }
 
     // --- Private Actions ---
+
+    private fun updateHydrationGoal(goal: Double) {
+        _hydrationGoal.value = goal
+        initialLoad()
+    }
 
     private fun logHydration(liters: Double) {
         viewModelScope.launch {
@@ -269,6 +277,7 @@ class HealthViewModel @Inject constructor(
                         latestHeartRate = latestHR,
                         todaySteps = stepsMap[today] ?: 0L,
                         todayCalories = calMap[today] ?: 0.0,
+                        hydrationGoal = _hydrationGoal.value,
                         bleConnectionState = bleState,
                         trackerMetrics = bleChars.associate { it.description to it.value }
                     )

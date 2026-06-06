@@ -89,7 +89,8 @@ class HomeViewModel @Inject constructor(
     private val wellnessEngine: WellnessCorrelationEngine,
     private val healthSessionManager: HealthSessionManager,
     private val weatherRepo: com.zoewave.probase.core.network.repository.weather.WeatherRepo,
-    private val locationRepository: com.zoewave.probase.core.data.repository.travel.LocationRepository
+    private val locationRepository: com.zoewave.probase.core.data.repository.travel.LocationRepository,
+    private val koColorSettings: com.zoewave.probase.kocolor.db.KoColorSettings
 ) : ViewModel() {
 
     private val _currentDate = MutableStateFlow(Calendar.getInstance().apply {
@@ -150,6 +151,7 @@ class HomeViewModel @Inject constructor(
 
     val uiState: StateFlow<HomeUiState> = combine(
         fashionRepository.getProfile(),
+        koColorSettings.hydrationGoalFlow,
         _routines,
         cosmeticDao.getAllCosmetics(),
         clothingDao.getAllClothing(),
@@ -178,15 +180,16 @@ class HomeViewModel @Inject constructor(
         fashionRepository.getSavedSuggestions()
     ) { array ->
         val profile = array[0] as FashionProfile?
-        val routines = array[1] as List<RoutineEntity>
-        val cosmetics = array[2] as List<CosmeticItemEntity>
-        val clothing = array[3] as List<ClothingItemEntity>
-        val tip = array[4] as String
-        val weather = array[5] as LayeredWeatherUiState?
-        val headerBg = array[6] as String?
-        val healthInfo = array[7] as Pair<Boolean, Triple<Float?, String?, Double>>
+        val hydrationGoal = array[1] as Double
+        val routines = array[2] as List<RoutineEntity>
+        val cosmetics = array[3] as List<CosmeticItemEntity>
+        val clothing = array[4] as List<ClothingItemEntity>
+        val tip = array[5] as String
+        val weather = array[6] as LayeredWeatherUiState?
+        val headerBg = array[7] as String?
+        val healthInfo = array[8] as Pair<Boolean, Triple<Float?, String?, Double>>
         val (hasPerms, healthData) = healthInfo
-        val savedSuggestions = array[8] as List<com.zoewave.probase.kocolor.model.SavedAnalysis>
+        val savedSuggestions = array[9] as List<com.zoewave.probase.kocolor.model.SavedAnalysis>
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
@@ -229,6 +232,7 @@ class HomeViewModel @Inject constructor(
             wellnessInsights = insights,
             lastNightSleepDuration = healthData.second,
             hydrationLiters = healthData.third,
+            hydrationGoalLiters = hydrationGoal,
             isHealthPermissionGranted = hasPerms,
             weather = weather,
             locationName = weather?.locationName,

@@ -21,8 +21,11 @@ data class SettingsUiState(
     val isThemeExpanded: Boolean = false,
     val isPaletteExpanded: Boolean = false,
     val isHealthExpanded: Boolean = false,
+    val isAppSettingsExpanded: Boolean = false,
+    val isHydrationExpanded: Boolean = false,
     val currentTheme: String = "SYSTEM",
-    val currentPalette: String = "CLASSIC"
+    val currentPalette: String = "CLASSIC",
+    val hydrationGoal: Double = 2.7
 )
 
 sealed class SettingsEvent {
@@ -31,9 +34,13 @@ sealed class SettingsEvent {
     data class OnThemeExpandedToggled(val expanded: Boolean) : SettingsEvent()
     data class OnPaletteExpandedToggled(val expanded: Boolean) : SettingsEvent()
     data class OnHealthExpandedToggled(val expanded: Boolean) : SettingsEvent()
+    data class OnAppSettingsExpandedToggled(val expanded: Boolean) : SettingsEvent()
+    data class OnHydrationExpandedToggled(val expanded: Boolean) : SettingsEvent()
     data class OnThemeSelected(val theme: String) : SettingsEvent()
     data class OnPaletteSelected(val palette: String) : SettingsEvent()
+    data class OnHydrationGoalChanged(val goal: Double) : SettingsEvent()
     data object OnGenerateSampleCosmetics : SettingsEvent()
+    data class InitializeWithSection(val section: String) : SettingsEvent()
 }
 
 @HiltViewModel
@@ -43,22 +50,26 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _expandState = MutableStateFlow(
-        listOf(false, false, false, false, false) // AI, About, Theme, Palette, Health
+        listOf(false, false, false, false, false, false, false) // AI, About, Theme, Palette, Health, AppSettings, Hydration
     )
 
     val uiState: StateFlow<SettingsUiState> = combine(
         _expandState,
         koSettings.appThemeFlow,
-        koSettings.colorPaletteFlow
-    ) { expands, theme, palette ->
+        koSettings.colorPaletteFlow,
+        koSettings.hydrationGoalFlow
+    ) { expands, theme, palette, hydrationGoal ->
         SettingsUiState(
             isAiExpanded = expands[0],
             isAboutExpanded = expands[1],
             isThemeExpanded = expands[2],
             isPaletteExpanded = expands[3],
             isHealthExpanded = expands[4],
+            isAppSettingsExpanded = expands[5],
+            isHydrationExpanded = expands[6],
             currentTheme = theme,
-            currentPalette = palette
+            currentPalette = palette,
+            hydrationGoal = hydrationGoal
         )
     }.stateIn(
         scope = viewModelScope,
@@ -83,6 +94,12 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.OnHealthExpandedToggled -> {
                 _expandState.value = _expandState.value.toMutableList().apply { this[4] = event.expanded }
             }
+            is SettingsEvent.OnAppSettingsExpandedToggled -> {
+                _expandState.value = _expandState.value.toMutableList().apply { this[5] = event.expanded }
+            }
+            is SettingsEvent.OnHydrationExpandedToggled -> {
+                _expandState.value = _expandState.value.toMutableList().apply { this[6] = event.expanded }
+            }
             is SettingsEvent.OnThemeSelected -> {
                 viewModelScope.launch {
                     koSettings.saveAppTheme(event.theme)
@@ -93,8 +110,18 @@ class SettingsViewModel @Inject constructor(
                     koSettings.saveColorPalette(event.palette)
                 }
             }
+            is SettingsEvent.OnHydrationGoalChanged -> {
+                viewModelScope.launch {
+                    koSettings.saveHydrationGoal(event.goal)
+                }
+            }
             SettingsEvent.OnGenerateSampleCosmetics -> {
                 generateSampleItems()
+            }
+            is SettingsEvent.InitializeWithSection -> {
+                if (event.section == "Hydration") {
+                    _expandState.value = listOf(false, false, false, false, false, true, true)
+                }
             }
         }
     }
