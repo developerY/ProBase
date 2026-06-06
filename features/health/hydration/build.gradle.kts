@@ -2,10 +2,11 @@ plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.library.compose")
     id("composetemplate.android.hilt")
+    id("composetemplate.kotlin.serialization")
 }
 
 android {
-    namespace = "com.zoewave.probase.goswift.mobile.hydration"
+    namespace = "com.zoewave.probase.features.health.hydration"
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -16,14 +17,15 @@ android {
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
-    implementation(project(":applications:goswift:model"))
-    implementation(project(":applications:goswift:data"))
-    implementation(project(":applications:goswift:features:main"))
+    implementation(project(":core:model"))
+    implementation(project(":core:data"))
+    
     implementation(libs.androidx.health.connect.client)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.coil.compose)
 
     // --- Testing ---
     testImplementation(libs.junit)

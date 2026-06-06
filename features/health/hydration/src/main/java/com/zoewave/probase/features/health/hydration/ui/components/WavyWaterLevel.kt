@@ -1,4 +1,4 @@
-package com.zoewave.probase.goswift.mobile.hydration.ui.components
+package com.zoewave.probase.features.health.hydration.ui.components
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas

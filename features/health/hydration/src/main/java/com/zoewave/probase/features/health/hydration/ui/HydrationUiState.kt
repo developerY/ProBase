@@ -1,7 +1,9 @@
-package com.zoewave.probase.goswift.mobile.hydration.ui
+package com.zoewave.probase.features.health.hydration.ui
+
+import androidx.health.connect.client.records.Record
 
 sealed interface HydrationUiState {
-    object Loading : HydrationUiState
+    data object Loading : HydrationUiState
     data class Success(
         val dailyTotalLiters: Double,
         val targetLiters: Double,
@@ -17,5 +19,5 @@ data class HydrationLog(
 
 sealed interface HydrationUiEvent {
     data class AddWater(val liters: Double) : HydrationUiEvent
-    object Refresh : HydrationUiEvent
+    data object Refresh : HydrationUiEvent
 }

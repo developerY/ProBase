@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":applications:kocolor:model"))
     implementation(project(":core:model"))
     implementation(project(":features:health:core"))
+    implementation(project(":features:health:hydration"))
 
     implementation(libs.androidx.health.connect.client)
     implementation(libs.kotlinx.serialization.json)
