@@ -90,7 +90,7 @@ fun RoutineEditorScreen(
                     }
                 },
                 actions = {
-                    if (selectionStage == ProductSelectionStage.HeroPage || selectionStage == ProductSelectionStage.MainForm) {
+                    if (selectionStage == ProductSelectionStage.MainForm) {
                         TextButton(onClick = { 
                             if (newStepDraft != null) {
                                 onEvent(RoutinesEvent.UpdateRoutine(routine.copy(steps = routine.steps + newStepDraft!!)))

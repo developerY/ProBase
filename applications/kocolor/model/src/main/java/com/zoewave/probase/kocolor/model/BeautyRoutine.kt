@@ -13,6 +13,10 @@ data class RoutineStep(
     val layeringOrder: Int = 0,
     val minWaitMinutes: Int = 0,
     
+    // Knowledge & Content
+    val subtitle: String? = null,
+    val actionLabel: String? = null,
+    
     // Professional Metadata
     val microCategory: MicroCategory? = null,
     val chemistryConflictWarning: String? = null
