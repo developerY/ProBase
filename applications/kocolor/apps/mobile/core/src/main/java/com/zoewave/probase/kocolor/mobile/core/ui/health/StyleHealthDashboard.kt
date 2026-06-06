@@ -46,11 +46,15 @@ import androidx.compose.material.icons.rounded.LocalFireDepartment
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material.icons.rounded.WineBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -331,11 +335,13 @@ private fun HydrationVisualRefined(
     onNavigateToSettings: () -> Unit
 ) {
     val progress = (current / goal).coerceIn(0.0, 1.0).toFloat()
+    var showCustomSlider by remember { mutableStateOf(false) }
+    var customAmount by remember { mutableStateOf(250f) }
     
     // Custom Glass Shape with subtle bottom taper
     val glassShape = remember {
         GenericShape { size, _ ->
-            val taper = size.width * 0.08f
+            val taper = size.width * 0.12f
             moveTo(0f, 0f)
             lineTo(size.width, 0f)
             lineTo(size.width - taper, size.height)
@@ -344,23 +350,24 @@ private fun HydrationVisualRefined(
         }
     }
 
+    // Outer Container - Card with Glass Silhouette
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(520.dp),
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomStart = 48.dp, bottomEnd = 48.dp), // More glass-like
+            .height(if (showCustomSlider) 620.dp else 520.dp),
+        shape = glassShape, 
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
         border = androidx.compose.foundation.BorderStroke(
-            1.dp, 
-            Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.6f), Color.White.copy(alpha = 0.1f)))
+            1.5.dp, 
+            Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.8f), Color.White.copy(alpha = 0.2f)))
         )
     ) {
-        Box(modifier = Modifier.fillMaxSize().clip(glassShape)) { // Clip liquid to glass shape
-            // Procedural Liquid Engine
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Procedural Liquid Engine - Clipped to glass silhouette
             WavyBackground(progress = progress)
             
             Column(
-                modifier = Modifier.fillMaxSize().padding(32.dp),
+                modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp, vertical = 48.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
@@ -413,26 +420,7 @@ private fun HydrationVisualRefined(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Utility Bar
-                    Surface(
-                        modifier = Modifier
-                            .size(width = 80.dp, height = 40.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .clickable { /* History */ },
-                        color = Color.White.copy(alpha = 0.3f),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.AutoMirrored.Rounded.List, null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Icon(Icons.Default.Add, null, modifier = Modifier.size(14.dp))
-                        }
-                    }
-
+                    // Quick Add Row
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         HydrationButton(
                             label = "+250ml",
@@ -450,24 +438,81 @@ private fun HydrationVisualRefined(
                         )
                     }
 
-                    // Large Specular Custom Button
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(60.dp)
-                            .clip(RoundedCornerShape(30.dp))
-                            .clickable { /* Custom */ },
-                        color = Color.White.copy(alpha = 0.3f),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.6f))
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
+                    // Custom Amount Toggle Section
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(60.dp)
+                                .clip(RoundedCornerShape(30.dp))
+                                .clickable { showCustomSlider = !showCustomSlider },
+                            color = Color.White.copy(alpha = 0.3f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.6f))
                         ) {
-                            Icon(Icons.Rounded.EditNote, null, modifier = Modifier.size(20.dp), tint = Color.Black.copy(alpha = 0.6f))
-                            Spacer(Modifier.width(8.dp))
-                            Text("+ Custom Amount", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = if (showCustomSlider) Icons.Default.KeyboardArrowUp else Icons.Rounded.EditNote, 
+                                    null, 
+                                    modifier = Modifier.size(20.dp), 
+                                    tint = Color.Black.copy(alpha = 0.6f)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = if (showCustomSlider) "Cancel" else "+ Custom Amount", 
+                                    fontWeight = FontWeight.Bold, 
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                        }
+
+                        AnimatedVisibility(
+                            visible = showCustomSlider,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(top = 16.dp)
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(Color.White.copy(alpha = 0.2f))
+                                    .padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "${customAmount.toInt()} ml",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Black,
+                                    fontFamily = FontFamily.Serif
+                                )
+                                Slider(
+                                    value = customAmount,
+                                    onValueChange = { customAmount = it },
+                                    valueRange = 50f..1000f,
+                                    steps = 19,
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = MaterialTheme.colorScheme.primary,
+                                        activeTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                                        inactiveTrackColor = Color.White.copy(alpha = 0.3f)
+                                    )
+                                )
+                                Spacer(Modifier.height(16.dp))
+                                Button(
+                                    onClick = { 
+                                        onAdd(customAmount.toDouble() / 1000.0)
+                                        showCustomSlider = false 
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(20.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))
+                                ) {
+                                    Text("Log Amount", fontWeight = FontWeight.Bold)
+                                }
+                            }
                         }
                     }
                 }
