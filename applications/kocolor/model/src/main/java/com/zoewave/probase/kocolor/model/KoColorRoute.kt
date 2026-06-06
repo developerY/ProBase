@@ -96,6 +96,9 @@ sealed class KoColorRoute {
     data object Health : KoColorRoute()
 
     @Serializable
+    data object Hydration : KoColorRoute()
+
+    @Serializable
     data object Back : KoColorRoute()
 
     @Serializable

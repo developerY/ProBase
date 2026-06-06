@@ -392,6 +392,14 @@ fun koColorNavEntryProvider(
                 sideEffects = viewModel.sideEffect
             )
         }
+        is KoColorRoute.Hydration -> NavEntry(route) {
+            val mainViewModel: com.zoewave.probase.kocolor.mobile.ui.MainViewModel = hiltViewModel()
+            val hydrationGoal by mainViewModel.hydrationGoalFlow.collectAsStateWithLifecycle(2.7)
+            
+            com.zoewave.probase.features.health.hydration.ui.HydrationUiRoute(
+                onNavigateToSettings = { onNavigateTo(KoColorRoute.Settings("Hydration")) }
+            )
+        }
         is KoColorRoute.NailLab -> NavEntry(route) {
             com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute(
                 uiState = route.colorHex to route.finish,
