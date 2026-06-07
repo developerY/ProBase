@@ -1,20 +1,35 @@
 package com.zoewave.probase.kocolor.features.routines.ui
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.NightsStay
-import androidx.compose.material.icons.filled.Reorder
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,9 +48,10 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.routines.ui.components.DailyInsightSmall
 import com.zoewave.probase.kocolor.features.routines.ui.components.GlassConnectionHeaderAction
 import com.zoewave.probase.kocolor.features.routines.ui.components.SplitRitualStep
-import com.zoewave.probase.kocolor.model.*
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyListState
+import com.zoewave.probase.kocolor.model.BeautyRoutine
+import com.zoewave.probase.kocolor.model.KoColorRoute
+import com.zoewave.probase.kocolor.model.RoutineStep
+import com.zoewave.probase.kocolor.model.RoutineTime
 
 data class RoutineDetailUiState(
     val routineId: Long,
@@ -74,7 +90,6 @@ fun RoutineDetailScreen(
     val isMorning = routine.time == RoutineTime.MORNING
     val accentColor = if (isMorning) Color(0xFF6B705C) else Color(0xFF457B9D)
 
-    var isReorderMode by remember { mutableStateOf(false) }
     var selectedInfoStep by remember { mutableStateOf<RoutineStep?>(null) }
 
     if (selectedInfoStep != null) {
@@ -126,42 +141,12 @@ fun RoutineDetailScreen(
                         onButtonClick = { onEvent(RoutinesEvent.ProjectToGlass(routine.time)) },
                         modifier = Modifier.size(40.dp)
                     )
-                    Spacer(Modifier.width(8.dp))
-                    IconButton(onClick = { isReorderMode = !isReorderMode }) {
-                        Icon(if (isReorderMode) Icons.Default.Check else Icons.Default.Reorder, null)
-                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
-        },
-        floatingActionButton = {
-            if (!isReorderMode) {
-                LargeFloatingActionButton(
-                    onClick = { navTo(KoColorRoute.RoutineEditor(routineId, "new_step")) },
-                    shape = CircleShape,
-                    containerColor = accentColor,
-                    contentColor = Color.White,
-                    modifier = Modifier.padding(bottom = 16.dp, end = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Ritual Stage",
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-            }
         }
     ) { padding ->
-        val lazyListState = rememberLazyListState()
-        val reorderableState = rememberReorderableLazyListState(
-            lazyListState = lazyListState,
-            onMove = { from, to ->
-                onEvent(RoutinesEvent.ReorderSteps(routineId, from.index - 1, to.index - 1))
-            }
-        )
-
         LazyColumn(
-            state = lazyListState,
             modifier = Modifier.padding(padding).fillMaxSize(),
             contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -238,21 +223,15 @@ fun RoutineDetailScreen(
             }
 
             itemsIndexed(routine.steps, key = { _, step -> step.id }) { index, step ->
-                ReorderableItem(reorderableState, key = step.id) { isDragging ->
-                    val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
-                    
-                    val linkedProduct = state.allProducts.find { step.productIds.contains(it.id) }
-                    
-                    SplitRitualStep(
-                        uiState = Triple(step, linkedProduct, isReorderMode),
-                        onEvent = { onEvent(RoutinesEvent.ToggleStep(routine.id, step.id)) },
-                        onInfoClick = { selectedInfoStep = it },
-                        navTo = { navTo(KoColorRoute.RoutineEditor(routineId, step.id)) },
-                        modifier = Modifier
-                            .shadow(elevation)
-                            .then(if (isReorderMode) Modifier.draggableHandle() else Modifier)
-                    )
-                }
+                val linkedProduct = state.allProducts.find { step.productIds.contains(it.id) }
+                
+                SplitRitualStep(
+                    uiState = Triple(step, linkedProduct, false),
+                    onEvent = { onEvent(RoutinesEvent.ToggleStep(routine.id, step.id)) },
+                    onInfoClick = { selectedInfoStep = it },
+                    navTo = { navTo(KoColorRoute.RoutineEditor(routineId, step.id)) },
+                    modifier = Modifier.shadow(0.dp)
+                )
             }
             
             item { DailyInsightSmall(uiState = Unit, onEvent = {}, navTo = {}) }
