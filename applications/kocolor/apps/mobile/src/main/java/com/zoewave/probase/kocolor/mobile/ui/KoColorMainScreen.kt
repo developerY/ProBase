@@ -84,6 +84,7 @@ fun KoColorMainScreen(
                         onShoesCaptured = viewModel::onShoesCaptured,
                         onClothesCaptured = viewModel::onClothesCaptured,
                         onInventoryItemCaptured = viewModel::onInventoryItemCaptured,
+                        onRitualStepCaptured = viewModel::onRitualStepCaptured,
                         onColorCaptured = viewModel::onColorCaptured,
                         onCodeScanned = viewModel::onCodeScanned
                     )

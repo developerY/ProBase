@@ -69,6 +69,7 @@ fun koColorNavEntryProvider(
     onShoesCaptured: (String) -> Unit,
     onClothesCaptured: (String) -> Unit,
     onInventoryItemCaptured: (String) -> Unit,
+    onRitualStepCaptured: (Long, String, String) -> Unit,
     onColorCaptured: (String) -> Unit,
     onCodeScanned: (String) -> Unit
 ): NavEntry<KoColorRoute> {
@@ -458,6 +459,16 @@ fun koColorNavEntryProvider(
                             "clothes" -> onClothesCaptured(uri)
                             "inventory_item" -> onInventoryItemCaptured(uri)
                             "color_scan" -> onColorCaptured(uri)
+                            else -> {
+                                if (route.target.startsWith("ritual_step:")) {
+                                    val parts = route.target.split(":")
+                                    if (parts.size == 3) {
+                                        val routineId = parts[1].toLongOrNull() ?: 0L
+                                        val stepId = parts[2]
+                                        onRitualStepCaptured(routineId, stepId, uri)
+                                    }
+                                }
+                            }
                         }
                         onBack()
                     } else {
