@@ -1,6 +1,7 @@
 package com.zoewave.probase.features.weather.ui.components.atelier
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -28,7 +29,8 @@ import kotlin.math.sin
 @Composable
 fun AtelierUVGaugeCard(
     uvIndex: Double,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     val level = uvIndex.toInt()
     val levelText = when {
@@ -45,7 +47,10 @@ fun AtelierUVGaugeCard(
     }
 
     Card(
-        modifier = modifier.fillMaxWidth().height(260.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(260.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f)),
         border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))

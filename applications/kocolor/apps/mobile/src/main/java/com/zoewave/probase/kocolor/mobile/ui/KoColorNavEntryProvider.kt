@@ -403,7 +403,13 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.Weather -> NavEntry(route) {
-            WeatherUiRoute(onBack = onBack)
+            WeatherUiRoute(
+                onBack = onBack,
+                onNavigateToSunIntelligence = { onNavigateTo(KoColorRoute.SunIntelligence) }
+            )
+        }
+        is KoColorRoute.SunIntelligence -> NavEntry(route) {
+            com.zoewave.probase.features.weather.ui.sun.SunIntelligenceScreen(onBack = onBack)
         }
         is KoColorRoute.NailLab -> NavEntry(route) {
             com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute(
