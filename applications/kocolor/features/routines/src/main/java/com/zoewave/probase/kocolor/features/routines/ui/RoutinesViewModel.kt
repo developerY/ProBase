@@ -41,6 +41,9 @@ sealed class RoutinesEvent {
     data class ReorderSteps(val routineId: Long, val fromIndex: Int, val toIndex: Int) : RoutinesEvent()
     data class ResetRoutine(val routineId: Long) : RoutinesEvent()
     data class ProjectToGlass(val time: RoutineTime) : RoutinesEvent()
+    data class UpdateStepNote(val routineId: Long, val stepId: String, val note: String) : RoutinesEvent()
+    data class AddStepPhoto(val routineId: Long, val stepId: String, val uri: String) : RoutinesEvent()
+    data class RemoveStepPhoto(val routineId: Long, val stepId: String, val uri: String) : RoutinesEvent()
 }
 
 sealed class RoutinesSideEffect {
@@ -165,6 +168,9 @@ class RoutinesViewModel @Inject constructor(
                     }
                 }
             }
+            is RoutinesEvent.UpdateStepNote -> updateStepNote(event.routineId, event.stepId, event.note)
+            is RoutinesEvent.AddStepPhoto -> addStepPhoto(event.routineId, event.stepId, event.uri)
+            is RoutinesEvent.RemoveStepPhoto -> removeStepPhoto(event.routineId, event.stepId, event.uri)
         }
     }
 
@@ -266,5 +272,34 @@ class RoutinesViewModel @Inject constructor(
             val resetSteps = routine.steps.map { it.copy(isCompleted = false) }
             routineDao.updateRoutine(routine.copy(steps = resetSteps).toEntity())
         }
+    }
+
+    private fun updateStepNote(routineId: Long, stepId: String, note: String) {
+        val routine = getRoutine(routineId) ?: return
+        val updatedSteps = routine.steps.map {
+            if (it.id == stepId) it.copy(notes = note) else it
+        }
+        updateRoutine(routine.copy(steps = updatedSteps))
+    }
+
+    private fun addStepPhoto(routineId: Long, stepId: String, uri: String) {
+        val routine = getRoutine(routineId) ?: return
+        val updatedSteps = routine.steps.map {
+            if (it.id == stepId) it.copy(photoUris = it.photoUris + uri) else it
+        }
+        updateRoutine(routine.copy(steps = updatedSteps))
+    }
+
+    private fun removeStepPhoto(routineId: Long, stepId: String, uri: String) {
+        val routine = getRoutine(routineId) ?: return
+        val updatedSteps = routine.steps.map {
+            if (it.id == stepId) it.copy(photoUris = it.photoUris - uri) else it
+        }
+        updateRoutine(routine.copy(steps = updatedSteps))
+    }
+
+    private fun getRoutine(routineId: Long): BeautyRoutine? {
+        return if (uiState.value.morningRoutine?.id == routineId) uiState.value.morningRoutine 
+               else uiState.value.eveningRoutine?.takeIf { it.id == routineId }
     }
 }
