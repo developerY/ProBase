@@ -10,8 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,7 +49,7 @@ fun RoutineSummaryCard(
     val cardColor = if (isDaytime) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) else MaterialTheme.colorScheme.surfaceVariant
 
     Surface(
-        modifier = Modifier.fillMaxWidth().clickable { navTo(KoColorRoute.Routines) },
+        modifier = Modifier.fillMaxWidth().clickable { navTo(KoColorRoute.RoutineDetail(routine.id)) },
         shape = RoundedCornerShape(32.dp),
         color = cardColor
     ) {
@@ -72,6 +78,22 @@ fun RoutineSummaryCard(
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
+
+                    // 1b. TOP RIGHT: General Routines List Gateway
+                    Surface(
+                        color = Color.Black.copy(alpha = 0.1f),
+                        shape = CircleShape,
+                        onClick = { navTo(KoColorRoute.Routines) }
+                    ) {
+                        Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Rounded.Layers,
+                                contentDescription = "General Rituals",
+                                tint = Color.Black.copy(alpha = 0.7f),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
                 }
                 
                 // 2. MIDDLE: Progress label and circle
