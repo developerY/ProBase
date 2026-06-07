@@ -29,9 +29,9 @@ dependencies {
     // implementation(libs.androidx.lifecycle.viewmodel.android)
 
     // --- 3. UI & Compose ---
-    // Note: 'library.compose' plugin adds the BOM and basic tooling.
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.coil.compose)
 
     // Legacy Material (Only keep if you strictly need old XML views or Theme.MaterialComponents)
     // implementation(libs.material.legacy)
