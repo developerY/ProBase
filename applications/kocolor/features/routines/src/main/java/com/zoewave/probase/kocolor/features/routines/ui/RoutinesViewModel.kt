@@ -70,13 +70,15 @@ class RoutinesViewModel @Inject constructor(
                 if (entities.isEmpty()) {
                     initializeDay(date)
                 } else {
-                    // AUTO-SYNC: Ensure Morning Ritual stages follow the new 10-stage protocol
+                    // AUTO-SYNC: Ensure Morning Ritual stages follow the new scientifically optimized protocol
                     entities.forEach { entity ->
                         if (entity.time == RoutineTime.MORNING) {
                             val newMorningProtocol = RoutineDefaults.getMorningRoutine()
                             val needsUpdate = entity.steps.any { legacyStep ->
                                 val match = newMorningProtocol.find { it.id == legacyStep.id }
-                                match != null && (legacyStep.title != match.title || legacyStep.subtitle != match.subtitle)
+                                match != null && (legacyStep.title != match.title || 
+                                                 legacyStep.subtitle != match.subtitle || 
+                                                 legacyStep.description.length != match.description.length)
                             }
 
                             if (needsUpdate || entity.steps.size < 10) {
@@ -112,7 +114,7 @@ class RoutinesViewModel @Inject constructor(
         val isGlassSessionActiveVal = array[6] as Boolean
 
         val models = modelList.map { it.toModel() }
-
+        
         val btnState = when {
             !isGlassConnectedVal -> GlassButtonState.NO_GLASSES
             isGlassSessionActiveVal -> GlassButtonState.PROJECTING

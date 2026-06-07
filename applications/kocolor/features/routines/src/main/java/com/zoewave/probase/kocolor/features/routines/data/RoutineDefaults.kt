@@ -7,9 +7,10 @@ object RoutineDefaults {
     fun getMorningRoutine(): List<RoutineStep> = listOf(
         RoutineStep(
             id = "m1", 
-            title = "Stage 1: Wake Up & Anchor", 
+            title = "Wake Up & Anchor", 
             subtitle = "Psychological Initialization",
-            description = "The way you wake up dictates the neurocognitive trajectory of your entire day. Instead of a passive wake-up, claim immediate psychological control by adopting the South Korean \"God-Saeng\" mindset. This involves pursuing continuous self-development and taking micro-control over your daily habits. Use this moment to review your daily plan or set a single micro-goal; documenting this early-morning victory generates an immediate dopaminergic reward that builds consistency."
+            description = "The way you wake up dictates the neurocognitive trajectory of your entire day. Instead of a passive wake-up—where you might immediately fall into reactive habits like checking social media or emails—this step is about claiming immediate psychological control.\n\nThis approach is heavily inspired by the South Korean \"God-Saeng\" (갓생) movement, a cultural shift towards living a highly diligent, exemplary, and hyper-focused life. It serves as a proactive alternative to the YOLO (You Only Live Once) mindset by focusing on continuous self-development and micro-control over daily habits. A core part of this is the \"Miracle Morning\" practice, where individuals often wake before 6:00 AM to secure an immediate psychological victory before external demands begin.",
+            actionLabel = "Don't just turn off your alarm. Use this moment to review your \"Daily Insight\" or set a single, immediate micro-goal. In the God-Saeng lifestyle, practitioners often use \"datafied visibility\"—such as logging their wake-up time or sharing a \"proof shot\". By checking off this very first action in the app, you trigger an immediate dopamine release that reinforces your self-efficacy and executive function for the complex steps ahead."
         ),
         RoutineStep(
             id = "m2", 
