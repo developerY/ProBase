@@ -116,7 +116,6 @@ fun RoutineEditorScreen(
                     ProductSelectionStage.HeroPage -> StepHeroPage(
                         uiState = Triple(activeStep, state.allProducts, routine.id), 
                         onEvent = onEvent,
-                        onEditStage = { selectionStage = ProductSelectionStage.MainForm },
                         navTo = navTo
                     )
                     ProductSelectionStage.MainForm -> EditStepForm(uiState = activeStep to state.allProducts, onEvent = { event ->

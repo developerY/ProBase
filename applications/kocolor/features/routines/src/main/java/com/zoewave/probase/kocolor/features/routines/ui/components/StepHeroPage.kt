@@ -41,7 +41,6 @@ import java.time.format.DateTimeFormatter
 fun StepHeroPage(
     uiState: Triple<RoutineStep, List<CosmeticItem>, Long>, 
     onEvent: (RoutinesEvent) -> Unit,
-    onEditStage: () -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val (step, allProducts, routineId) = uiState
@@ -365,19 +364,6 @@ fun StepHeroPage(
             }
         }
 
-        item {
-            Button(
-                onClick = { onEditStage() }, 
-                modifier = Modifier.fillMaxWidth().height(64.dp), 
-                shape = RoundedCornerShape(16.dp), 
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A1A1A))
-            ) {
-                Icon(Icons.Rounded.EditNote, null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(12.dp))
-                Text("EDIT RITUAL STAGE", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-            }
-        }
-        
         item { Spacer(Modifier.height(48.dp)) }
     }
 }
@@ -386,6 +372,6 @@ fun StepHeroPage(
 @Composable
 private fun StepHeroPagePreview() {
     MaterialTheme {
-        StepHeroPage(uiState = Triple(RoutineStep(id = "1", title = "Step", layeringOrder = 0), emptyList(), 1L), onEvent = {}, onEditStage = {}, navTo = {})
+        StepHeroPage(uiState = Triple(RoutineStep(id = "1", title = "Step", layeringOrder = 0), emptyList(), 1L), onEvent = {}, navTo = {})
     }
 }
