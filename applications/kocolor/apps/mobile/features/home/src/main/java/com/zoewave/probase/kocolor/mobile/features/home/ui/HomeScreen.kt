@@ -165,7 +165,7 @@ fun HomeScreen(
                 HomeHeader(
                     uiState = HomeHeaderUiState(uiState.fashionProfile, uiState.isDaytime, uiState.beautyTip, uiState.weather, uiState.locationName, uiState.headerBackgroundUrl),
                     onEvent = {},
-                    navTo = {}
+                    navTo = navTo
                 )
             }
 
@@ -307,7 +307,8 @@ fun HomeHeader(
 
                 LayeredWeatherSquareCard(
                     uiState = uiState.weather?.copy(locationName = uiState.locationName),
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 16.dp),
+                    onClick = { navTo(KoColorRoute.Weather) }
                 )
             }
 

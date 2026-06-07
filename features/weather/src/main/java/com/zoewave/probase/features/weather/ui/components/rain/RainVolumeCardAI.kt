@@ -35,6 +35,7 @@ import kotlin.random.Random
 @Composable
 fun RainVolumeCard(
     volume: Double,
+    modifier: Modifier = Modifier,
     dropCount: Int = 300  // Parameterize raindrop count
 ) {
     val cardHeight = 220.dp
@@ -56,10 +57,9 @@ fun RainVolumeCard(
     }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(cardHeight)
-            .padding(horizontal = 16.dp)
             .shadow(8.dp, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFBBDEFB))

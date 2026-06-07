@@ -1,5 +1,6 @@
 package com.zoewave.probase.features.weather.ui.components.layered
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -254,10 +255,13 @@ private fun LayeredWeatherCardPreview() {
 @Composable
 fun LayeredWeatherSquareCard(
     uiState: LayeredWeatherUiState?,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.size(140.dp),
+        modifier = modifier
+            .size(140.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
@@ -319,9 +323,10 @@ private fun LayeredWeatherSquareCardPreview() {
                     temperature = 24.0,
                     uvIndex = 0.0,
                     conditions = listOf(LayeredWeatherCondition.CLOUDY)
-                )
+                ),
+                onClick = {}
             )
-            LayeredWeatherSquareCard(uiState = null)
+            LayeredWeatherSquareCard(uiState = null, onClick = {})
         }
     }
 }

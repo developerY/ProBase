@@ -44,6 +44,7 @@ import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
+import com.zoewave.probase.features.weather.ui.WeatherUiRoute
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailScreen
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailUiState
@@ -400,6 +401,9 @@ fun koColorNavEntryProvider(
             com.zoewave.probase.features.health.hydration.ui.HydrationUiRoute(
                 onNavigateToSettings = { onNavigateTo(KoColorRoute.Settings("Hydration")) }
             )
+        }
+        is KoColorRoute.Weather -> NavEntry(route) {
+            WeatherUiRoute(onBack = onBack)
         }
         is KoColorRoute.NailLab -> NavEntry(route) {
             com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute(

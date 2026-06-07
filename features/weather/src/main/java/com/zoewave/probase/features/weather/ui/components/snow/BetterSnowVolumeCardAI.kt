@@ -34,7 +34,10 @@ import kotlinx.coroutines.delay
 import kotlin.random.Random
 
 @Composable
-fun BetterSnowVolumeCardAI(volume: Double) {
+fun BetterSnowVolumeCardAI(
+    volume: Double,
+    modifier: Modifier = Modifier
+) {
     // Increase card height for a bit more room
     val cardHeight = 220.dp
     // Initial accumulated snow height (in pixels) for simulation
@@ -59,10 +62,9 @@ fun BetterSnowVolumeCardAI(volume: Double) {
     }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(cardHeight)
-            .padding(horizontal = 16.dp)
             .shadow(8.dp, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)

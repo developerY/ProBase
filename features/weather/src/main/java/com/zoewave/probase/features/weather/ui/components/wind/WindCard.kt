@@ -31,7 +31,6 @@ fun WindCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp)
             .shadow(8.dp, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(

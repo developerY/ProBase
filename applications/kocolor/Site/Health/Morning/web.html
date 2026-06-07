@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>God-Saeng Morning Protocol Interactive Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7;
+            color: #292524;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+        .tab-active {
+            border-bottom: 3px solid #0f172a;
+            color: #0f172a;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-bottom: 3px solid transparent;
+            color: #78716c;
+        }
+        .tab-inactive:hover {
+            color: #292524;
+            border-bottom: 3px solid #d6d3d1;
+        }
+        .step-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .step-card[aria-expanded="true"] {
+            border-left-width: 4px;
+            border-left-color: #475569;
+            background-color: #f8fafc;
+        }
+        .step-content {
+            display: none;
+        }
+        .step-card[aria-expanded="true"] .step-content {
+            display: block;
+        }
+    </style>
+</head>
+<body class="antialiased text-stone-800">
+
+<!-- Chosen Palette: Warm Calm Neutrals (Alabaster, Stone, Soft Slate, Muted Accents) -->
+<!-- Application Structure Plan: A structured interactive dashboard organized by the three "Phases" of the morning routine. Instead of a linear scroll, users navigate through tabs (Phase 1, 2, 3), allowing them to focus on the specific steps and corresponding biological data visualizations for that phase. A global summary section at the bottom provides the overall daily impact. This reduces cognitive load and allows exploratory learning. -->
+<!-- Visualization & Content Choices:
+     - Phase 1 Chart -> Goal: Change -> Line Chart (Chart.js) -> Shows neurochemical trajectory (Dopamine/Cortisol) over the first 120 mins. NO SVG.
+     - Phase 2 Chart -> Goal: Compare -> Radar Chart (Chart.js) -> Compares activation vectors of Move, Cold, and Mindfulness. NO SVG.
+     - Phase 3 Chart -> Goal: Inform -> Doughnut Chart (Chart.js) -> Shows the yield distribution of the Deep Work session. NO SVG.
+     - Global Impact -> Goal: Organize/Compare -> Bar Chart (Chart.js) -> Compares 12-hour cognitive endurance of this routine vs standard. NO SVG. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+    <header class="text-center mb-16">
+        <div class="inline-flex items-center justify-center px-4 py-1.5 mb-6 rounded-full bg-stone-200 text-stone-700 text-sm font-medium uppercase tracking-wider">
+            &#10022; The Scientific Morning
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-stone-900 mb-6">
+            God-Saeng Optimization Protocol
+        </h1>
+        <p class="text-lg md:text-xl text-stone-600 max-w-3xl mx-auto leading-relaxed">
+            A meticulously engineered 10-step biological and psychological initialization sequence. Explore the interactive phases below to understand how specific actions manipulate your neurochemistry for peak cognitive endurance.
+        </p>
+    </header>
+
+    <section class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden mb-12">
+        <nav class="flex overflow-x-auto border-b border-stone-200 bg-stone-50" aria-label="Tabs">
+            <button onclick="switchTab('phase1')" id="tab-phase1" class="tab-active w-1/3 py-5 px-4 text-center text-sm md:text-base font-medium focus:outline-none transition-colors">
+                Phase 1: Biological Reset
+            </button>
+            <button onclick="switchTab('phase2')" id="tab-phase2" class="tab-inactive w-1/3 py-5 px-4 text-center text-sm md:text-base font-medium focus:outline-none transition-colors">
+                Phase 2: Neurological Activation
+            </button>
+            <button onclick="switchTab('phase3')" id="tab-phase3" class="tab-inactive w-1/3 py-5 px-4 text-center text-sm md:text-base font-medium focus:outline-none transition-colors">
+                Phase 3: Execution & Fuel
+            </button>
+        </nav>
+
+        <div class="p-6 md:p-10">
+
+            <div id="content-phase1" class="block">
+                <div class="mb-8 max-w-4xl">
+                    <h2 class="text-2xl font-bold text-stone-900 mb-4">Phase 1: Biological Reset (Minutes 0-30)</h2>
+                    <p class="text-stone-600 leading-relaxed text-lg">
+                        This foundational phase focuses on immediately halting sleep inertia, clearing bacterial accumulation from the night, and forcefully setting your circadian clock. By controlling hydration and light exposure, you perfectly time your Cortisol Awakening Response (CAR) and build a steady dopamine baseline.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div class="space-y-4" id="accordion-phase1">
+                    </div>
+
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 flex flex-col justify-center">
+                        <h3 class="text-lg font-semibold text-stone-800 mb-2 text-center">Neurochemical Trajectory (0-120 Mins)</h3>
+                        <p class="text-sm text-stone-500 mb-6 text-center">Tracking the gradual rise of baseline dopamine and the sharp, deliberate peak of morning cortisol.</p>
+                        <div class="chart-container">
+                            <canvas id="chartPhase1"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-phase2" class="hidden">
+                <div class="mb-8 max-w-4xl">
+                    <h2 class="text-2xl font-bold text-stone-900 mb-4">Phase 2: Neurological Activation (Minutes 30-60)</h2>
+                    <p class="text-stone-600 leading-relaxed text-lg">
+                        With the biological clock set, this phase applies acute, positive stressors (eustress) to elevate core body temperature and flood the brain with BDNF. We then immediately follow this sympathetic activation with deliberate parasympathetic down-regulation to build cognitive resilience.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div class="space-y-4" id="accordion-phase2">
+                    </div>
+
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 flex flex-col justify-center">
+                        <h3 class="text-lg font-semibold text-stone-800 mb-2 text-center">Phase 2 Activation Vectors</h3>
+                        <p class="text-sm text-stone-500 mb-6 text-center">Comparing how Move, Cold, and Mindfulness uniquely target different physiological systems.</p>
+                        <div class="chart-container">
+                            <canvas id="chartPhase2"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-phase3" class="hidden">
+                <div class="mb-8 max-w-4xl">
+                    <h2 class="text-2xl font-bold text-stone-900 mb-4">Phase 3: Execution & Fuel (Minutes 60-150+)</h2>
+                    <p class="text-stone-600 leading-relaxed text-lg">
+                        The nervous system is now perfectly primed. This final phase capitalizes on the neurochemical peaks to execute the most cognitively demanding work of the day, followed by structural nutritional support to sustain momentum.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div class="space-y-4" id="accordion-phase3">
+                    </div>
+
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 flex flex-col justify-center">
+                        <h3 class="text-lg font-semibold text-stone-800 mb-2 text-center">Daily Output Attribution Yield</h3>
+                        <p class="text-sm text-stone-500 mb-6 text-center">The 90-minute deep work block yields the vast majority of the day's total cognitive value.</p>
+                        <div class="chart-container">
+                            <canvas id="chartPhase3"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="mt-16 bg-stone-900 text-stone-100 rounded-2xl shadow-lg overflow-hidden p-8 md:p-12">
+        <div class="mb-10 text-center max-w-3xl mx-auto">
+            <h2 class="text-3xl font-bold mb-4">Global Daily Impact Analysis</h2>
+            <p class="text-stone-400 text-lg">
+                The God-Saeng routine isn't just about the morning; it's about altering the trajectory of the entire day. By stabilizing metabolic and neurochemical inputs early, it prevents the typical mid-afternoon cognitive crash.
+            </p>
+        </div>
+
+        <div class="bg-stone-800/50 p-6 rounded-xl border border-stone-700">
+            <div class="chart-container" style="max-width: 800px;">
+                <canvas id="globalChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    const routineData = {
+        phase1: [
+            {
+                step: "1",
+                icon: "&#9200;",
+                title: "Wake Up & Anchor",
+                subtitle: "Psychological Initialization",
+                description: "The way you wake up dictates the neurocognitive trajectory of your entire day. Instead of a passive wake-up—where you might immediately fall into reactive habits—this step is about claiming immediate psychological control.",
+                action: "Don't just turn off your alarm. Use this moment to review your 'Daily Insight' or set a single, immediate micro-goal. Checking off this very first action triggers an immediate dopamine release that reinforces self-efficacy."
+            },
+            {
+                step: "2",
+                icon: "&#129671;",
+                title: "Mouth Hygiene",
+                subtitle: "Clear Bacterial Load",
+                description: "While sleeping, your mouth becomes a breeding ground for bacteria. Swallowing water immediately introduces these pathogens into your gut microbiome, triggering low-grade systemic inflammation.",
+                action: "Use a tongue scraper 5-10 times, followed by immediate brushing and flossing. Clear the bacterial load before any ingestion."
+            },
+            {
+                step: "3",
+                icon: "&#128167;",
+                title: "Hydrate & Remineralize",
+                subtitle: "Cellular Activation",
+                description: "During 7-8 hours of sleep, respiration and perspiration cause mild cellular dehydration, slowing enzymatic functions and cognitive processing.",
+                action: "Consume 500ml (16oz) of room temperature water with a pinch of high-quality sea salt or electrolytes to rapidly rehydrate cells and kickstart metabolism."
+            },
+            {
+                step: "4",
+                icon: "&#9728;&#65039;",
+                title: "Photopic Light Exposure",
+                subtitle: "Set Circadian Rhythm",
+                description: "Viewing sunlight perfectly times the Cortisol Awakening Response (CAR) and sets the suprachiasmatic nucleus, ensuring alertness now and proper melatonin release 14-16 hours later.",
+                action: "Get outside within 30 minutes of waking. View direct sunlight (not through a window) for 10-15 minutes without sunglasses."
+            }
+        ],
+        phase2: [
+            {
+                step: "5",
+                icon: "&#127939;",
+                title: "Move",
+                subtitle: "Neuroplasticity Induction",
+                description: "Physical movement increases cerebral blood flow and triggers the release of Brain-Derived Neurotrophic Factor (BDNF), which acts as fertilizer for new neural connections.",
+                action: "Engage in 15-20 minutes of Zone 2 cardio, dynamic mobility, or light yoga. The goal is blood flow, not muscular failure."
+            },
+            {
+                step: "6",
+                icon: "&#129324;",
+                title: "Cold Exposure",
+                subtitle: "Adrenergic Spike",
+                description: "Brief exposure to cold water triggers a massive, sustained release of norepinephrine and dopamine, elevating mood, focus, and vigilance for hours post-exposure.",
+                action: "Take a 1-3 minute cold shower or plunge. Focus on controlling your breath and overriding the panic response."
+            },
+            {
+                step: "7",
+                icon: "&#129496;",
+                title: "Mindfulness",
+                subtitle: "Autonomic Balance",
+                description: "Following the sympathetic spike of the cold, this step deliberately shifts the body back into a focused, parasympathetic state, training your ability to control your nervous system.",
+                action: "Perform 5 minutes of Box Breathing or a guided Non-Sleep Deep Rest (NSDR) protocol in a quiet space."
+            }
+        ],
+        phase3: [
+            {
+                step: "8",
+                icon: "&#129504;",
+                title: "Deep Work Session",
+                subtitle: "Cognitive Capitalization",
+                description: "You are now at peak neurochemical alignment. Cortisol provides alertness, dopamine provides drive. This is the window for your most challenging, high-leverage cognitive task.",
+                action: "Engage in 90 minutes of strictly uninterrupted work. Put your phone in another room. No email, no social media. Focus purely on output."
+            },
+            {
+                step: "9",
+                icon: "&#127859;",
+                title: "High-Protein Fuel",
+                subtitle: "Metabolic Stabilization",
+                description: "Breaking the fast post-deep work with high-quality protein provides the amino acid precursors (like Tyrosine) necessary to synthesize dopamine for the remainder of the day.",
+                action: "Consume a meal containing 30-40g of protein. Avoid heavy carbohydrates to prevent an insulin spike and subsequent energy crash."
+            },
+            {
+                step: "10",
+                icon: "&#128202;",
+                title: "Insight & Loop Closure",
+                subtitle: "Datafied Visibility",
+                description: "A core God-Saeng principle is tracking progress. Taking a moment to review the morning's success acts as a secondary psychological anchor.",
+                action: "Take 2 minutes to log your morning data in your tracker. Acknowledge the successful completion of the protocol to carry momentum into the afternoon."
+            }
+        ]
+    };
+
+    function renderAccordion(phaseId, containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        routineData[phaseId].forEach((item, index) => {
+            const isExpanded = index === 0 ? 'true' : 'false';
+            const card = document.createElement('div');
+            card.className = 'step-card bg-white border border-stone-200 rounded-xl overflow-hidden cursor-pointer';
+            card.setAttribute('aria-expanded', isExpanded);
+            card.onclick = function() {
+                const currentlyExpanded = this.getAttribute('aria-expanded') === 'true';
+
+                const allCards = container.querySelectorAll('.step-card');
+                allCards.forEach(c => c.setAttribute('aria-expanded', 'false'));
+
+                if (!currentlyExpanded) {
+                    this.setAttribute('aria-expanded', 'true');
+                }
+            };
+
+            card.innerHTML = `
+                <div class="p-5 flex items-center justify-between hover:bg-stone-50 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-xl border border-stone-200">
+                            ${item.icon}
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-stone-500 uppercase tracking-wider">Step ${item.step}</h4>
+                            <h3 class="text-lg font-bold text-stone-900">${item.title}</h3>
+                        </div>
+                    </div>
+                    <div class="text-stone-400 font-bold text-xl select-none dropdown-indicator">&#43;</div>
+                </div>
+                <div class="step-content px-5 pb-5 pt-0 border-t border-stone-100">
+                    <div class="mt-4">
+                        <span class="inline-block px-3 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-full mb-3">${item.subtitle}</span>
+                        <p class="text-stone-600 mb-4 text-sm leading-relaxed">${item.description}</p>
+                        <div class="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
+                            <strong class="text-blue-900 block mb-1 text-sm">Your Action:</strong>
+                            <p class="text-blue-800 text-sm leading-relaxed">${item.action}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    renderAccordion('phase1', 'accordion-phase1');
+    renderAccordion('phase2', 'accordion-phase2');
+    renderAccordion('phase3', 'accordion-phase3');
+
+    const wrapLabel = (text, maxLength = 16) => {
+        if (text.length <= maxLength) return text;
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = '';
+
+        words.forEach(word => {
+            if ((currentLine + word).length > maxLength) {
+                if (currentLine.trim() !== '') lines.push(currentLine.trim());
+                currentLine = word + ' ';
+            } else {
+                currentLine += word + ' ';
+            }
+        });
+        if (currentLine.trim() !== '') lines.push(currentLine.trim());
+        return lines;
+    };
+
+    const standardTooltipConfig = {
+        callbacks: {
+            title: function(tooltipItems) {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                } else {
+                    return label;
+                }
+            }
+        }
+    };
+
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#78716c';
+
+    let chart1Instance = null;
+    let chart2Instance = null;
+    let chart3Instance = null;
+
+    function initPhase1Chart() {
+        if(chart1Instance) chart1Instance.destroy();
+        const ctx = document.getElementById('chartPhase1').getContext('2d');
+        const labels = ["Wake", "Mouth Hygiene", "Hydrate", "Light Exposure", "Move (Zone 2)", "Cold Plunge", "Deep Work"].map(l => wrapLabel(l));
+
+        chart1Instance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Baseline Dopamine',
+                        data: [100, 105, 115, 140, 180, 250, 230],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#3b82f6'
+                    },
+                    {
+                        label: 'Cortisol Level',
+                        data: [50, 60, 70, 100, 90, 80, 50],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        tension: 0.4,
+                        pointBackgroundColor: '#f59e0b'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: standardTooltipConfig,
+                    legend: { position: 'bottom' }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f5f5f4' }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    function initPhase2Chart() {
+        if(chart2Instance) chart2Instance.destroy();
+        const ctx = document.getElementById('chartPhase2').getContext('2d');
+        const labels = ["Adrenergic Spike", "Parasympathetic Tone", "Cortisol Release", "Cognitive Bandwidth", "Metabolic Rate"].map(l => wrapLabel(l));
+
+        chart2Instance = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Step 5: Move',
+                        data: [60, 40, 70, 70, 90],
+                        backgroundColor: 'rgba(244, 63, 94, 0.2)',
+                        borderColor: '#f43f5e',
+                        pointBackgroundColor: '#f43f5e',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Step 6: Cold',
+                        data: [100, 20, 80, 95, 80],
+                        backgroundColor: 'rgba(14, 165, 233, 0.2)',
+                        borderColor: '#0ea5e9',
+                        pointBackgroundColor: '#0ea5e9',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Step 7: Mindfulness',
+                        data: [20, 100, 30, 80, 30],
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        borderColor: '#10b981',
+                        pointBackgroundColor: '#10b981',
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: standardTooltipConfig,
+                    legend: { position: 'bottom' }
+                },
+                scales: {
+                    r: {
+                        angleLines: { color: '#e7e5e4' },
+                        grid: { color: '#e7e5e4' },
+                        pointLabels: { color: '#57534e', font: { size: 11 } },
+                        ticks: { display: false, max: 100, min: 0 }
+                    }
+                }
+            }
+        });
+    }
+
+    function initPhase3Chart() {
+        if(chart3Instance) chart3Instance.destroy();
+        const ctx = document.getElementById('chartPhase3').getContext('2d');
+        const labels = ["Deep Work (90m Block)", "Admin & Emails", "Meetings", "Spontaneous Action"].map(l => wrapLabel(l));
+
+        chart3Instance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: [60, 15, 20, 5],
+                    backgroundColor: [
+                        '#8b5cf6',
+                        '#cbd5e1',
+                        '#94a3b8',
+                        '#e2e8f0'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fdfbf7',
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    tooltip: standardTooltipConfig,
+                    legend: { position: 'right' }
+                }
+            }
+        });
+    }
+
+    function initGlobalChart() {
+        const ctx = document.getElementById('globalChart').getContext('2d');
+        const hours = ["8 AM", "10 AM", "12 PM", "2 PM", "4 PM", "6 PM"];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: hours,
+                datasets: [
+                    {
+                        label: 'God-Saeng Endurance',
+                        data: [95, 100, 85, 80, 75, 65],
+                        backgroundColor: '#14b8a6',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Standard Routine',
+                        data: [70, 85, 60, 40, 45, 30],
+                        backgroundColor: '#44403c',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: standardTooltipConfig,
+                    legend: { position: 'top', labels: { color: '#e7e5e4' } }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#a8a29e' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#a8a29e' }
+                    }
+                }
+            }
+        });
+    }
+
+    function switchTab(phase) {
+        ['phase1', 'phase2', 'phase3'].forEach(p => {
+            document.getElementById(`tab-${p}`).className = 'tab-inactive w-1/3 py-5 px-4 text-center text-sm md:text-base font-medium focus:outline-none transition-colors';
+            document.getElementById(`content-${p}`).classList.add('hidden');
+            document.getElementById(`content-${p}`).classList.remove('block');
+        });
+
+        document.getElementById(`tab-${phase}`).className = 'tab-active w-1/3 py-5 px-4 text-center text-sm md:text-base font-medium focus:outline-none transition-colors';
+        document.getElementById(`content-${phase}`).classList.remove('hidden');
+        document.getElementById(`content-${phase}`).classList.add('block');
+
+        if (phase === 'phase1') initPhase1Chart();
+        if (phase === 'phase2') initPhase2Chart();
+        if (phase === 'phase3') initPhase3Chart();
+    }
+
+    setTimeout(() => {
+        initPhase1Chart();
+        initGlobalChart();
+    }, 100);
+
+</script>
+</body>
+</html>
