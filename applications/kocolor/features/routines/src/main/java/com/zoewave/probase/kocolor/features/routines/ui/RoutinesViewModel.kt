@@ -41,7 +41,8 @@ sealed class RoutinesEvent {
     data class ReorderSteps(val routineId: Long, val fromIndex: Int, val toIndex: Int) : RoutinesEvent()
     data class ResetRoutine(val routineId: Long) : RoutinesEvent()
     data class ProjectToGlass(val time: RoutineTime) : RoutinesEvent()
-    data class UpdateStepNote(val routineId: Long, val stepId: String, val note: String) : RoutinesEvent()
+    data class AddJournalEntry(val routineId: Long, val stepId: String, val text: String) : RoutinesEvent()
+    data class DeleteJournalEntry(val routineId: Long, val stepId: String, val entryId: String) : RoutinesEvent()
     data class AddStepPhoto(val routineId: Long, val stepId: String, val uri: String) : RoutinesEvent()
     data class RemoveStepPhoto(val routineId: Long, val stepId: String, val uri: String) : RoutinesEvent()
 }
@@ -168,7 +169,8 @@ class RoutinesViewModel @Inject constructor(
                     }
                 }
             }
-            is RoutinesEvent.UpdateStepNote -> updateStepNote(event.routineId, event.stepId, event.note)
+            is RoutinesEvent.AddJournalEntry -> addJournalEntry(event.routineId, event.stepId, event.text)
+            is RoutinesEvent.DeleteJournalEntry -> deleteJournalEntry(event.routineId, event.stepId, event.entryId)
             is RoutinesEvent.AddStepPhoto -> addStepPhoto(event.routineId, event.stepId, event.uri)
             is RoutinesEvent.RemoveStepPhoto -> removeStepPhoto(event.routineId, event.stepId, event.uri)
         }
@@ -274,10 +276,22 @@ class RoutinesViewModel @Inject constructor(
         }
     }
 
-    private fun updateStepNote(routineId: Long, stepId: String, note: String) {
+    private fun addJournalEntry(routineId: Long, stepId: String, text: String) {
         val routine = getRoutine(routineId) ?: return
         val updatedSteps = routine.steps.map {
-            if (it.id == stepId) it.copy(notes = note) else it
+            if (it.id == stepId) {
+                it.copy(journalEntries = (it.journalEntries + JournalEntry(text = text)).sortedByDescending { e -> e.timestamp })
+            } else it
+        }
+        updateRoutine(routine.copy(steps = updatedSteps))
+    }
+
+    private fun deleteJournalEntry(routineId: Long, stepId: String, entryId: String) {
+        val routine = getRoutine(routineId) ?: return
+        val updatedSteps = routine.steps.map {
+            if (it.id == stepId) {
+                it.copy(journalEntries = it.journalEntries.filter { e -> e.id != entryId })
+            } else it
         }
         updateRoutine(routine.copy(steps = updatedSteps))
     }

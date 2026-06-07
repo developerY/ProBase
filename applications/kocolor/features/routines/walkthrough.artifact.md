@@ -1,32 +1,33 @@
-# Walkthrough - Enhanced Rituals: Notes, Photos, and Multi-Product Linking
+# Walkthrough - Ritual Stage Journaling & Persistent UI
 
-I have successfully enhanced the **Morning and Evening Rituals** by adding support for progress photography, personal notes, and multi-product linking for every ritual stage.
+I have successfully transformed the Ritual Stage details into a complete **Journaling Experience**. Every feature is now persistent and always visible, serving as a powerful dashboard for your morning and evening rituals.
 
 ## Key Accomplishments
 
-### 1. Progress Photography Gallery
-- **Visual Tracking**: Added a dedicated **"Progress Photos"** section to every ritual stage. Users can now capture real-time photos (e.g., monitoring skin redness or morning glow) directly from the Knowledge Hub.
-- **Horizontal Gallery**: Implemented a sleek horizontal scrollable gallery to view all captured photos for a specific stage, with the ability to remove images as needed.
-- **Intelligent Routing**: Integrated a robust camera-to-ritual routing system that ensures every photo is automatically associated with the correct stage in the correct routine.
+### 1. New Ritual Journaling System
+- **Timestamped History**: Replaced the static notes field with a dynamic **"Ritual Journal & History"** system.
+- **Lavender Entries**: Journal entries are now displayed in elegant, lavender-tinted cards (`0xFFF3E5F5`) with automatic date formatting (e.g., "October 24 • 8:30 AM").
+- **Interactive Logging**: Added a dedicated **"Add New Journal Entry"** button and dialog, allowing users to log their progress and observations instantly.
 
-### 2. Editorial Personal Notes
-- **Log Whatever**: Added a **"Personal Notes"** section using an editorial-style `OutlinedTextField`. This allows users to log feelings, observations, or specific adjustments to their ritual stages.
-- **Atelier Aesthetic**: Styled the notes container with semi-transparent backgrounds and Serif typography to maintain the high-end editorial feel of the KoColor experience.
+### 2. Persistent Functional Skeleton
+- **Power Section Visibility**: All core functions—**Progress Photos**, **Ritual Journal**, and **Linked Inventory**—are now always visible on the screen, even if they are empty.
+- **Stylized Placeholders**: Implemented high-fidelity gray placeholders for empty sections to maintain the premium "Atelier" look and prompt user engagement.
 
-### 3. Multi-Product Integration
-- **Multiple Links**: Upgraded the ritual stages to support **multiple linked products** from the user's inventory.
-- **Clarity & Transparency**: Re-styled the "Linked Products" section to clearly list each associated item with its brand, name, and micro-category metadata.
+### 3. Integrated Photography & Inventory
+- **Circular Capture Action**: Re-styled the photo capture button as a sleek circular action within the persistent **"Progress Photos"** gallery.
+- **Card-Based Product Gallery**: Transformed the linked products into a horizontal **"Linked Inventory Items"** gallery, featuring high-quality product images and Serif labels.
 
-### 4. Technical Resilience
-- **Persistent Data**: Updated the local Room database schema (via JSON serialization) to ensure all notes and photo URIs are saved instantly without requiring a backend sync.
-- **Zero-Sync Design**: Leveraged the existing architecture to maintain high performance and offline capability.
+### 4. Technical Robustness
+- **Data Model Evolution**: Created a new `JournalEntry` model and updated `RoutineStep` to persist lists of entries.
+- **Seamless Logic**: Injected `RoutineDao` into the `MainViewModel` to ensure captured photos are instantly associated with the correct ritual stage.
 
 ## Technical Details
-- **Data Model**: Expanded `RoutineStep` with `photoUris: List<String>` and `notes: String`.
-- **Navigation**: Integrated specialized `ritual_step` routing in `MainViewModel` and `KoColorNavEntryProvider`.
+- **Model**: `data class JournalEntry(id, timestamp, text)`
+- **Styling**: Editorial Serif typography throughout.
+- **Build Status**: Verified with a successful build of `:applications:kocolor:apps:mobile`.
 
 ---
 > [!SUCCESS]
-> Your Rituals are now a comprehensive biological diary. Tap any ritual stage to start logging your progress with photos and notes.
+> Your Rituals are now a complete **Biological Command Center**. Tap any stage to start your journaling journey with progress photos and products.
 
-**The KoColor platform now provides a complete feedback loop for biological optimization and style development.**
+**The KoColor experience is now more powerful, transparent, and visually spectacular.**
