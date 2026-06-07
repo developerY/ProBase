@@ -78,16 +78,55 @@ object RoutineDefaults {
     )
 
     fun getEveningRoutine(): List<RoutineStep> = listOf(
-        RoutineStep("e1", "Brush Teeth", "Nightly hygiene."),
-        RoutineStep("e2", "Floss", "Essential for gum health."),
-        RoutineStep("e3", "Double Cleanse", "Korean Skincare Step 1 & 2: Use oil then water cleanser to remove SPF and makeup.", isRecommended = true),
-        RoutineStep("e4", "Exfoliator", "Korean Skincare Step 3: Use 1-2 times weekly to remove dead skin cells.", isRecommended = true),
-        RoutineStep("e5", "Toner", "Korean Skincare Step 4: Prep skin for absorption.", isRecommended = true),
-        RoutineStep("e6", "Essence", "Korean Skincare Step 5: Deep nightly hydration.", isRecommended = true),
-        RoutineStep("e7", "Serum/Ampoule", "Korean Skincare Step 6: Intensive repair during sleep.", isRecommended = true),
-        RoutineStep("e8", "Sheet Mask", "Korean Skincare Step 7: Use 2-3 times weekly for a moisture boost.", isRecommended = true),
-        RoutineStep("e9", "Eye Cream", "Korean Skincare Step 8: Nightly care for eye area.", isRecommended = true),
-        RoutineStep("e10", "Night Cream/Sleeping Mask", "Korean Skincare Step 9: Intense overnight recovery.", isRecommended = true)
+        RoutineStep(
+            id = "e1", 
+            title = "Stage 1: Passive Body Heating", 
+            subtitle = "Thermoregulatory Sleep Induction",
+            description = "Your core body temperature naturally drops 1 to 2 degrees in the evening, serving as a primary biological signal to initiate sleep. When you take a warm bath or shower before bed, it temporarily raises your skin temperature and induces peripheral vasodilation, rushing blood to the extremities like your hands and feet. Exiting the warm water into a cool room causes these widely dilated blood vessels to rapidly dissipate stored heat, artificially mimicking and amplifying your body's natural core temperature drop. This profound thermoregulatory decline acts as a powerful chronobiotic cue that significantly shortens the time it takes to fall asleep and accelerates your entry into deep, restorative slow-wave sleep.",
+            actionLabel = "Take a warm bath or shower (maintained between 104–109°F or 40–42.5°C) 1 to 2 hours before your intended bedtime for at least 10 minutes. After bathing, transition immediately into a cool bedroom environment—optimally set between 65–68°F (18–20°C)—to allow your body heat to rapidly escape and maximize the sleep-inducing cooling effect."
+        ),
+        RoutineStep(
+            id = "e2", 
+            title = "Stage 2: Systemic Pre-Fueling", 
+            subtitle = "Anti-Glycation & Amino Acid Loading",
+            description = "Poor sleep quality and frequent micro-awakenings trigger a sharp decline in your body's insulin sensitivity, leading to abnormal spikes in blood sugar. This excess glucose initiates a damaging biochemical process called glycation, where sugar molecules permanently bond to your skin's structural collagen and elastin fibers, turning them rigid, brittle, and prone to sagging. Simultaneously, fragmented sleep keeps your primary stress hormone, cortisol, elevated into the night; this actively breaks down your remaining healthy connective tissue while blocking the crucial nocturnal growth hormone pulses required for structural repair.",
+            actionLabel = "Consume a supplement of glycine-rich collagen peptides (approximately 15 grams) roughly 60 minutes before your intended bedtime. The high glycine content acts as an inhibitory neurotransmitter that helps lower your core body temperature and significantly reduces sleep fragmentation, while the collagen peptides flood your bloodstream with the precise structural building blocks your body needs to rebuild tissue and defend against glycation overnight."
+        ),
+        RoutineStep(
+            id = "e3", 
+            title = "Stage 3: The Double Cleanse", 
+            subtitle = "Lipophilic and Hydrophilic Decontamination",
+            description = "Throughout the day, your face accumulates two distinct layers of residue: lipophilic (oil-based) elements like your natural sebum, stubborn sunscreen polymers, and trapped urban particulate matter (\$PM_{2.5}$), as well as hydrophilic (water-based) debris like sweat and environmental dust. A single water-based cleanser cannot safely dissolve the lipid-bound pollution matrix, often leading people to use harsh, damaging friction. If left behind, microscopic \$PM_{2.5}$ particles can penetrate the skin barrier and trigger massive inflammatory cascades that actively break down critical structural proteins. The double cleanse method utilizes the chemical principle of \"like dissolves like,\" allowing you to thoroughly decontaminate your pores without stripping the physiological ceramides that protect your skin's natural moisture barrier.",
+            actionLabel = "Start with dry hands and a dry face. Massage a lipophilic (oil-based) cleansing balm or oil onto your skin for 30 to 60 seconds to gently dissolve your SPF, makeup, and trapped pollution without pulling or rubbing. Add a splash of lukewarm water to emulsify the oil into a milky texture, then rinse. Immediately follow up with a mild, soap-free, and sulfate-free hydrophilic (water-based) cleanser to wash away the remaining sweat and residual emulsifiers, leaving a pristine, perfectly balanced canvas."
+        ),
+        RoutineStep(
+            id = "e4", 
+            title = "Stage 4: Epigenetic Barrier Prep", 
+            subtitle = "Postbiotic Microbiome Restoration",
+            description = "While your app's placeholder images listed an \"Exfoliator\" at this stage, applying harsh physical scrubs or strong acids at night can actually be detrimental, as your skin's natural permeability and Transepidermal Water Loss (TEWL) peak during the evening, making the barrier highly vulnerable. Instead of stripping the skin, the scientifically optimal step—replacing the \"Toner/Essence\" placeholders in your design—is to apply a hydrating liquid rich in bacterial postbiotics, such as Bifida Ferment Lysate. Because your skin is so permeable at night, these microscopic bacterial fragments easily penetrate and bind to specific cellular receptors, immediately downregulating the daily inflammation caused by UV rays and urban pollution. More importantly, they act on an epigenetic level, commanding your skin cells to rapidly upregulate the production of crucial physical barrier proteins like filaggrin and loricrin, effectively rebuilding your stratum corneum from the inside out while you sleep.",
+            actionLabel = "Immediately after your double cleanse, while your face is still slightly damp, pour a few drops of a postbiotic essence or hydrating toner into the palms of your hands. Gently press and pat the liquid directly into your face and neck until it is fully absorbed. Avoid any harsh rubbing or mechanical exfoliation. Allow the layer to dry down for a few moments so the postbiotics can effectively engage with your skin's immune receptors before you apply your heavier serums."
+        ),
+        RoutineStep(
+            id = "e5", 
+            title = "Stage 5: Targeted Actives", 
+            subtitle = "Chronopharmacological Optimization",
+            description = "Your skin operates on a strict 24-hour biological clock, and its physical properties change drastically when the sun goes down. During the night, your epidermal barrier becomes highly permeable, and the transdermal penetration of both hydrophilic and lipophilic topical compounds reaches its absolute biological maximum around 4:00 AM. Simultaneously, your body's natural nighttime temperature regulation causes peripheral vasodilation; this increased cutaneous blood flow actively accelerates the passage and cellular distribution of these active compounds. Leveraging this biological window—a concept known as chronopharmacology—means that potent, targeted ingredients like retinoids, collagen-stimulating peptides, and concentrated antioxidants will penetrate much deeper and work exponentially harder during sleep than they ever could during the day.",
+            actionLabel = "Once your postbiotic essence has dried down, dispense 2 to 3 drops of your highly concentrated active serum or ampoule (such as a retinoid or targeted peptide) onto your fingertips. Gently press and smooth the active ingredients evenly across your face, neck, and décolletage. Wait 1 to 2 minutes to allow the formula to fully sink into the epidermis and begin its transdermal journey before you seal it in with your final heavy creams."
+        ),
+        RoutineStep(
+            id = "e6", 
+            title = "Stage 6: Occlusive Seal", 
+            subtitle = "Mitigating Nocturnal TEWL",
+            description = "While your body is focused on deep cellular repair, your skin's physical barrier is paradoxically at its weakest. Driven by your biological clock, your skin's permeability and Transepidermal Water Loss (TEWL) reach their absolute peak during the night. This means that while active ingredients absorb better, essential hydration rapidly escapes into the atmosphere, which can cause micro-dehydration and trigger inflammatory pathways. To prevent this moisture evaporation and protect your vulnerable barrier, you must apply a biocompatible occlusive \"seal\". Dermatological science shows that formulations containing an optimal 3:1:1 molar ratio of ceramides, cholesterol, and free fatty acids are the most effective at structurally repairing the epidermal barrier and locking in your previous layers of hydration.",
+            actionLabel = "Dispense a dime-sized amount of a rich night cream or sleeping mask formulated with a ceramide complex. Warm the product slightly between your fingers, then gently massage it over your entire face and neck. Ensure you create a thin, continuous layer to act as an artificial barrier, effectively sealing in the postbiotics and active serums you applied in the previous steps. Allow it a few minutes to set into the skin before your face touches your pillow."
+        ),
+        RoutineStep(
+            id = "e7", 
+            title = "Stage 7: Biomimetic Oral Care", 
+            subtitle = "Nano-Hydroxyapatite Remineralization",
+            description = "While your app's initial placeholder images correctly identified \"Brush Teeth\" and \"Floss\" as essential steps, a scientifically optimized routine requires a specific chemical upgrade and a strategic sequence shift to the very end of your night. During sleep, your salivary flow drops to near zero, removing your mouth's natural mechanical washing and acid-buffering defenses. This creates a stagnant environment where bacterial counts increase markedly, producing acids that slowly erode your tooth enamel. However, this prolonged, uninterrupted period without eating or drinking is also the absolute perfect biological window for structural repair. By using a nano-hydroxyapatite toothpaste, you introduce microscopic crystals that perfectly biomimic your natural tooth structure. Throughout the night, these particles actively bind to demineralized areas, physically replacing lost calcium and phosphate ions to repair subsurface lesions and rebuild your enamel while you sleep.",
+            actionLabel = "Complete this as the absolute final step of your routine, right before your head hits the pillow. First, floss thoroughly to remove interdental plaque. Next, brush your teeth for a full two minutes using a high-quality nano-hydroxyapatite toothpaste. Crucially, **do not rinse** your mouth with water or mouthwash after brushing. Simply spit out the excess paste. Leaving this concentrated residue on your teeth allows the nano-hydroxyapatite crystals to continuously remineralize and strengthen your enamel throughout the entire night."
+        )
     )
 
     val morningAdvice = listOf(

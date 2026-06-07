@@ -69,32 +69,6 @@ class RoutinesViewModel @Inject constructor(
             routineDao.getRoutinesForDay(start, end).onEach { entities ->
                 if (entities.isEmpty()) {
                     initializeDay(date)
-                } else {
-                    // AUTO-SYNC: Ensure Morning Ritual stages follow the new scientifically optimized protocol
-                    entities.forEach { entity ->
-                        if (entity.time == RoutineTime.MORNING) {
-                            val newMorningProtocol = RoutineDefaults.getMorningRoutine()
-                            val needsUpdate = entity.steps.any { legacyStep ->
-                                val match = newMorningProtocol.find { it.id == legacyStep.id }
-                                match != null && (legacyStep.title != match.title || 
-                                                 legacyStep.subtitle != match.subtitle || 
-                                                 legacyStep.description.length != match.description.length)
-                            }
-
-                            if (needsUpdate || entity.steps.size < 10) {
-                                viewModelScope.launch {
-                                    val updatedSteps = newMorningProtocol.map { template ->
-                                        val existing = entity.steps.find { it.id == template.id }
-                                        template.copy(
-                                            isCompleted = existing?.isCompleted ?: false,
-                                            productIds = existing?.productIds ?: emptyList()
-                                        )
-                                    }
-                                    routineDao.updateRoutine(entity.copy(steps = updatedSteps))
-                                }
-                            }
-                        }
-                    }
                 }
             }
         },
