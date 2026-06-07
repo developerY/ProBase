@@ -17,11 +17,18 @@ data class RoutineStep(
     val subtitle: String? = null,
     val actionLabel: String? = null,
     val photoUris: List<String> = emptyList(),
-    val notes: String = "",
+    val journalEntries: List<JournalEntry> = emptyList(),
     
     // Professional Metadata
     val microCategory: MicroCategory? = null,
     val chemistryConflictWarning: String? = null
+)
+
+@Serializable
+data class JournalEntry(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val timestamp: Long = System.currentTimeMillis(),
+    val text: String
 )
 
 @Serializable
