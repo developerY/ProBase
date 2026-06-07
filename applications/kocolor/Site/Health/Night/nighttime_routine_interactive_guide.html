@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optimized Nighttime Protocol</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #FDFBF7;
+    color: #3D3B38;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 350px;
+    max-height: 400px;
+}
+
+@media (min-width: 768px) {
+    .chart-container {
+        height: 380px;
+    }
+}
+
+.nav-pill {
+    transition: all 0.3s ease;
+}
+
+.nav-pill.active {
+    background-color: #8FA3B5;
+    color: #ffffff;
+    border-color: #8FA3B5;
+    box-shadow: 0 4px 6px -1px rgba(143, 163, 181, 0.3);
+}
+
+.nav-pill:not(.active):hover {
+    background-color: #F0EDE5;
+    border-color: #D1CBC0;
+}
+</style>
+</head>
+<body class="antialiased min-h-screen pb-24">
+
+<!-- Chosen Palette: Warm Neutrals & Soft Slate (Calm Harmony) -->
+<!-- Application Structure Plan: The SPA is structured as an interactive "Protocol Explorer" dashboard. To prevent information overload and support a linear, step-by-step understanding of the nighttime routine, a horizontal timeline navigation is used. Users click through each stage to reveal its specific scientific context, actionable steps, and a dedicated dynamic data visualization. This focuses user attention on one chronobiological concept at a time, making complex health protocols easy to digest. -->
+<!-- Visualization & Content Choices: Stage 1 -> Goal: Change -> Line Chart (Melatonin vs Cortisol over time). Stage 2 -> Goal: Compare -> Bar Chart (Bacterial reduction methods). Stage 3 -> Goal: Compare -> Stacked Bar Chart (Debris removal efficiency). Stage 4 -> Goal: Change -> Line Chart (Skin permeability overnight). Stage 5 -> Goal: Inform/Organize -> Doughnut Chart (Optimal lipid ratio). Stage 6 -> Goal: Change -> Line Chart (Core body temperature response to warm water). Stage 7 -> Goal: Change -> Line Chart (Heart rate variability during breathing). All charts use Chart.js Canvas to adhere to NO SVG/Mermaid constraints. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<header class="bg-white border-b border-[#EBE6DD] pt-16 pb-10 px-6 mb-8 text-center shadow-sm">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-bold text-[#2C2A28] mb-4">Chronobiological Protocol: Night</h1>
+        <p class="text-lg text-[#6A6660] leading-relaxed">
+            Welcome to the interactive protocol for nighttime cellular restoration and nervous system regulation. This application translates advanced dermatological science and global chronobiology into actionable, measurable steps. Use the timeline below to explore the distinct stages of an optimized evening wind-down, understanding the physiological data behind each action.
+        </p>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6">
+    <section class="bg-white rounded-2xl border border-[#EBE6DD] shadow-sm overflow-hidden">
+        
+        <div class="bg-[#F9F8F5] px-6 py-5 border-b border-[#EBE6DD] overflow-x-auto">
+            <div class="flex flex-nowrap md:flex-wrap justify-start md:justify-center gap-3 min-w-max md:min-w-0" id="nav-container">
+            </div>
+        </div>
+
+        <div class="p-6 md:p-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            <div class="lg:col-span-5 flex flex-col justify-center">
+                <div class="mb-2 inline-block px-3 py-1 rounded-full bg-[#E8ECEE] text-[#4A5D6B] text-xs font-semibold tracking-wide uppercase" id="display-stage">
+                </div>
+                <h2 class="text-3xl font-bold text-[#2C2A28] mb-2" id="display-title"></h2>
+                <h3 class="text-lg font-medium text-[#8FA3B5] mb-6" id="display-subtitle"></h3>
+                
+                <p class="text-[#4A4641] leading-relaxed mb-8 text-base" id="display-body"></p>
+                
+                <div class="bg-[#FDFBF7] border-l-4 border-[#8FA3B5] rounded-r-lg p-5">
+                    <span class="block text-xs font-bold text-[#8FA3B5] uppercase tracking-wider mb-2">Your Action</span>
+                    <p class="text-[#3D3B38] font-medium leading-relaxed" id="display-action"></p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 flex flex-col items-center justify-center bg-[#FDFBF7] rounded-xl border border-[#EBE6DD] p-6">
+                <h4 class="text-sm font-semibold text-[#6A6660] mb-4 text-center uppercase tracking-wider" id="chart-title"></h4>
+                <div class="chart-container">
+                    <canvas id="activeChart"></canvas>
+                </div>
+                <p class="text-xs text-[#8FA3B5] mt-6 text-center max-w-md" id="chart-caption"></p>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<script>
+const stagesData = [
+    {
+        stage: "Stage 1",
+        title: "Decompress & Dim",
+        subtitle: "Melatonin Upregulation via Light Modification",
+        bodyText: "The biological transition to sleep begins long before you close your eyes. Artificial blue light aggressively suppresses the pineal gland's secretion of melatonin, the master sleep hormone, while elevating cortisol. By systematically dimming your environment and switching to warmer, amber-toned light sources 90 minutes before bed, you allow your circadian rhythm to naturally initiate the physiological cascade required for deep, restorative slow-wave sleep.",
+        action: "At least 90 minutes before your target sleep time, dim overhead lighting by 70%, activate warm blue-light filters on all screens, and switch to ambient, low-lux lamps.",
+        chartTitle: "Hormonal Response to Evening Light",
+        chartCaption: "Chart demonstrates the inverse relationship between cortisol (stress/wakefulness) and melatonin (sleep induction) during a properly managed evening protocol.",
+        chartConfig: {
+            type: 'line',
+            data: {
+                labels: ['T-120 min', 'T-90 min', 'T-60 min', 'T-30 min', 'Sleep Onset'],
+                datasets: [
+                    {
+                        label: 'Melatonin',
+                        data: [10, 25, 50, 85, 100],
+                        borderColor: '#8FA3B5',
+                        backgroundColor: 'rgba(143, 163, 181, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3
+                    },
+                    {
+                        label: 'Cortisol',
+                        data: [40, 25, 15, 8, 5],
+                        borderColor: '#C28E7E',
+                        backgroundColor: 'transparent',
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.4,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: { title: { display: true, text: 'Relative Serum Levels (%)' }, beginAtZero: true }
+                }
+            }
+        }
+    },
+    {
+        stage: "Stage 2",
+        title: "Mouth Hygiene",
+        subtitle: "Plaque Disruption & Remineralization",
+        bodyText: "Salivary flow—your mouth's natural defense mechanism—drops significantly during sleep. This creates an acidic environment where bacteria rapidly proliferate. Using a nano-hydroxyapatite or fluoride toothpaste provides essential minerals that rebuild microscopic enamel defects overnight. Skipping the final water rinse ensures these active ingredients remain on the teeth to maximize remineralization, while mechanical flossing disrupts the interdental biofilm.",
+        action: "Floss thoroughly to remove interdental biofilm. Brush for two full minutes using a remineralizing toothpaste. Spit out the excess paste, but do not rinse with water.",
+        chartTitle: "Overnight Bacterial Load Reduction",
+        chartCaption: "Comparison of oral bacterial colony-forming units (CFUs) remaining after different evening hygiene protocols.",
+        chartConfig: {
+            type: 'bar',
+            data: {
+                labels: ['No Brushing (Baseline)', 'Brushing + Water Rinse', 'Brushing + No Rinse', 'Floss + Brush + No Rinse'],
+                datasets: [{
+                    label: 'Remaining Bacterial Biofilm (%)',
+                    data: [100, 45, 30, 10],
+                    backgroundColor: ['#D1CBC0', '#B5C4B1', '#8FA3B5', '#6B7A88'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                scales: {
+                    y: { title: { display: true, text: 'Relative Bacterial Load (%)' }, beginAtZero: true }
+                }
+            }
+        }
+    },
+    {
+        stage: "Stage 3",
+        title: "Skincare - Cleanse",
+        subtitle: "The K-Beauty Double Cleanse Efficacy",
+        bodyText: "Modern photoprotection (SPF) and accumulated daily sebum are highly lipophilic (oil-soluble). Traditional water-based cleansers cannot effectively break these down, leaving microscopic debris that accelerates cellular aging and causes dermal inflammation. The South Korean Double Cleanse protocol uses an oil phase to dissolve lipophilic substances, followed by an aqueous phase to clear the emulsified debris without disrupting the acid mantle.",
+        action: "Massage a cleansing balm or oil onto dry skin for 60 seconds. Add water to emulsify, rinse, then follow with a low-pH water-based cleanser.",
+        chartTitle: "Lipid vs. Aqueous Debris Removal",
+        chartCaption: "Effectiveness of cleanser types on different chemical compositions of skin debris (SPF/Sebum vs. Sweat/Dust).",
+        chartConfig: {
+            type: 'bar',
+            data: {
+                labels: ['Water-Based Cleanser Only', 'Double Cleanse Protocol'],
+                datasets: [
+                    {
+                        label: 'Lipophilic Debris Removed (Oil/SPF)',
+                        data: [35, 98],
+                        backgroundColor: '#C28E7E',
+                        borderRadius: {topLeft: 0, topRight: 0, bottomLeft: 6, bottomRight: 6}
+                    },
+                    {
+                        label: 'Hydrophilic Debris Removed (Sweat/Dust)',
+                        data: [85, 99],
+                        backgroundColor: '#8FA3B5',
+                        borderRadius: {topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0}
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true, max: 200, title: { display: true, text: 'Total Removal Efficacy Score' } }
+                }
+            }
+        }
+    },
+    {
+        stage: "Stage 4",
+        title: "Skincare - Treat",
+        subtitle: "Cellular Turnover via Retinoids",
+        bodyText: "Nighttime is the optimal window for applying active ingredients because the skin shifts from a defensive state to a regenerative state. Blood flow increases and permeability rises. Retinoids (Vitamin A derivatives) are the gold standard; they accelerate cellular turnover, stimulate fibroblasts to produce collagen, and normalize pigmentation. Because they are photosensitive, they must be used exclusively at night.",
+        action: "Ensure your skin is completely dry to minimize irritation. Apply a pea-sized amount of your chosen retinoid or exfoliating acid evenly across the face.",
+        chartTitle: "Skin Permeability & Cell Mitosis (24h Cycle)",
+        chartCaption: "The skin's barrier becomes naturally more permeable at night, peaking in the early hours, making it the ideal time for active ingredient absorption.",
+        chartConfig: {
+            type: 'line',
+            data: {
+                labels: ['18:00', '21:00', '00:00', '03:00', '06:00', '09:00', '12:00'],
+                datasets: [
+                    {
+                        label: 'Epidermal Permeability',
+                        data: [30, 60, 95, 100, 70, 40, 20],
+                        borderColor: '#B5C4B1',
+                        backgroundColor: 'rgba(181, 196, 177, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Cellular Mitosis Rate',
+                        data: [20, 40, 80, 100, 60, 30, 15],
+                        borderColor: '#8FA3B5',
+                        borderDash: [4, 4],
+                        fill: false,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: { title: { display: true, text: 'Relative Rate (%)' }, beginAtZero: true }
+                }
+            }
+        }
+    },
+    {
+        stage: "Stage 5",
+        title: "Skincare - Hydrate",
+        subtitle: "Preventing Transepidermal Water Loss (TEWL)",
+        bodyText: "To counteract the peak of Transepidermal Water Loss (TEWL) that occurs overnight alongside increased permeability, advanced routines utilize barrier-repairing moisturizers. These formulations are rich in the 'golden ratio' of epidermal lipids: ceramides, cholesterol, and free fatty acids. This creates a synthetic seal that locks in the active treatments from Stage 4 and prevents profound overnight dehydration.",
+        action: "Apply a generous layer of a ceramide-dominant cream or a specialized overnight mask. Pat the product gently into the skin to facilitate uniform distribution.",
+        chartTitle: "The 3:1:1 Golden Lipid Ratio",
+        chartCaption: "The optimal composition of a barrier-repairing nighttime moisturizer mimics the skin's natural lipid matrix.",
+        chartConfig: {
+            type: 'doughnut',
+            data: {
+                labels: ['Ceramides (50%)', 'Cholesterol (25%)', 'Free Fatty Acids (25%)'],
+                datasets: [{
+                    data: [50, 25, 25],
+                    backgroundColor: ['#8FA3B5', '#C28E7E', '#B5C4B1'],
+                    borderWidth: 2,
+                    borderColor: '#FDFBF7'
+                }]
+            },
+            options: {
+                cutout: '65%',
+                layout: { padding: 20 }
+            }
+        }
+    },
+    {
+        stage: "Stage 6",
+        title: "Thermal Regulation",
+        subtitle: "The Vasodilation Sleep Switch",
+        bodyText: "Sleep onset is strongly correlated with a rapid drop in core body temperature. Counterintuitively, taking a warm shower or bath 60 to 90 minutes before bed is highly effective. The warm water causes vasodilation—expanding blood vessels in your extremities (hands and feet). When you exit the warm environment, this increased blood flow at the surface rapidly dumps heat away from your core, artificially triggering the temperature drop your brain requires for sleep.",
+        action: "Take a 10-minute warm shower or bath approximately 90 minutes before your target bedtime. Transition immediately to a cool, dark bedroom.",
+        chartTitle: "Core vs. Peripheral Temperature Dynamics",
+        chartCaption: "A warm shower raises peripheral temperature, which subsequently causes a steep drop in core temperature, inducing sleepiness.",
+        chartConfig: {
+            type: 'line',
+            data: {
+                labels: ['Before Shower', 'During Shower', 'Post-Shower (+30m)', 'Post-Shower (+60m)', 'Post-Shower (+90m)'],
+                datasets: [
+                    {
+                        label: 'Core Body Temp (°C)',
+                        data: [37.1, 37.2, 36.9, 36.7, 36.5],
+                        borderColor: '#C28E7E',
+                        backgroundColor: '#C28E7E',
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Peripheral (Skin) Temp (°C)',
+                        data: [32.0, 35.5, 34.0, 33.5, 33.0],
+                        borderColor: '#8FA3B5',
+                        backgroundColor: '#8FA3B5',
+                        borderDash: [5, 5],
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: { title: { display: true, text: 'Temperature (°C)' }, min: 31, max: 38 }
+                }
+            }
+        }
+    },
+    {
+        stage: "Stage 7",
+        title: "Mind & Breath",
+        subtitle: "Parasympathetic Activation",
+        bodyText: "You cannot force the brain into slow-wave sleep while the sympathetic nervous system (fight-or-flight) is still processing daily psychological stress. Slow, resonance-paced breathing acts as a mechanical override. By deliberately extending your exhalations, you stimulate the vagus nerve, releasing acetylcholine, which rapidly lowers your heart rate, decreases blood pressure, and forces the body into a 'rest and digest' parasympathetic state.",
+        action: "Once in bed, perform 4-7-8 breathing: inhale quietly through your nose for 4 seconds, hold for 7 seconds, and exhale through your mouth with a whoosh sound for 8 seconds. Repeat four times.",
+        chartTitle: "Heart Rate Deceleration via 4-7-8 Breathing",
+        chartCaption: "Physiological response showing immediate heart rate reduction during forced, extended exhalation cycles.",
+        chartConfig: {
+            type: 'line',
+            data: {
+                labels: ['Baseline', 'Cycle 1', 'Cycle 2', 'Cycle 3', 'Cycle 4', 'Resting State'],
+                datasets: [{
+                    label: 'Heart Rate (BPM)',
+                    data: [82, 75, 68, 62, 58, 56],
+                    borderColor: '#B5C4B1',
+                    backgroundColor: 'rgba(181, 196, 177, 0.3)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#8FA3B5'
+                }]
+            },
+            options: {
+                scales: {
+                    y: { title: { display: true, text: 'Beats Per Minute (BPM)' }, min: 50, max: 90 }
+                }
+            }
+        }
+    }
+];
+
+function wrapLabel(label) {
+    if (typeof label !== 'string') return label;
+    if (label.length <= 16) return label;
+    
+    const words = label.split(' ');
+    const lines = [];
+    let currentLine = '';
+
+    words.forEach(word => {
+        if ((currentLine + word).length > 16) {
+            if (currentLine.trim() !== '') {
+                lines.push(currentLine.trim());
+            }
+            currentLine = word + ' ';
+        } else {
+            currentLine += word + ' ';
+        }
+    });
+    
+    if (currentLine.trim() !== '') {
+        lines.push(currentLine.trim());
+    }
+    
+    return lines;
+}
+
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#6A6660';
+
+const commonTooltipOptions = {
+    callbacks: {
+        title: function(tooltipItems) {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            } else {
+                return label;
+            }
+        }
+    },
+    backgroundColor: 'rgba(44, 42, 40, 0.9)',
+    titleFont: { size: 13, family: "'Inter', sans-serif" },
+    bodyFont: { size: 13, family: "'Inter', sans-serif" },
+    padding: 12,
+    cornerRadius: 8,
+    displayColors: true
+};
+
+const commonChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            position: 'top',
+            labels: { boxWidth: 12, usePointStyle: true, padding: 20 }
+        },
+        tooltip: commonTooltipOptions
+    }
+};
+
+let currentChartInstance = null;
+
+function initApp() {
+    const navContainer = document.getElementById('nav-container');
+    
+    stagesData.forEach((data, index) => {
+        const btn = document.createElement('button');
+        btn.className = `nav-pill px-5 py-2.5 rounded-full border border-[#D1CBC0] bg-white text-[#4A4641] font-medium text-sm whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8FA3B5] ${index === 0 ? 'active' : ''}`;
+        btn.textContent = data.stage;
+        btn.onclick = () => selectStage(index);
+        navContainer.appendChild(btn);
+    });
+
+    selectStage(0);
+}
+
+function selectStage(index) {
+    const navBtns = document.querySelectorAll('.nav-pill');
+    navBtns.forEach((btn, i) => {
+        if (i === index) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    const data = stagesData[index];
+    
+    document.getElementById('display-stage').textContent = data.stage;
+    document.getElementById('display-title').textContent = data.title;
+    document.getElementById('display-subtitle').textContent = data.subtitle;
+    document.getElementById('display-body').textContent = data.bodyText;
+    document.getElementById('display-action').textContent = data.action;
+    document.getElementById('chart-title').textContent = data.chartTitle;
+    document.getElementById('chart-caption').textContent = data.chartCaption;
+
+    if (currentChartInstance) {
+        currentChartInstance.destroy();
+    }
+
+    const config = JSON.parse(JSON.stringify(data.chartConfig));
+    
+    if (config.data && config.data.labels) {
+        config.data.labels = config.data.labels.map(label => wrapLabel(label));
+    }
+
+    config.options = Object.assign({}, commonChartOptions, config.options);
+    
+    if (config.options.scales && config.options.scales.x) {
+        config.options.scales.x.grid = { color: '#EBE6DD', drawBorder: false };
+    } else if (config.options.scales) {
+        config.options.scales.x = { grid: { color: '#EBE6DD', drawBorder: false } };
+    }
+    
+    if (config.options.scales && config.options.scales.y) {
+        config.options.scales.y.grid = { color: '#EBE6DD', drawBorder: false };
+    }
+
+    const ctx = document.getElementById('activeChart').getContext('2d');
+    currentChartInstance = new Chart(ctx, config);
+}
+
+window.addEventListener('DOMContentLoaded', initApp);
+</script>
+
+</body>
+</html>

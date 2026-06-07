@@ -41,16 +41,18 @@ import kotlin.math.roundToLong
 //import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-fun TemperatureCardAI(temp: Double) {
+fun TemperatureCardAI(
+    temp: Double,
+    modifier: Modifier = Modifier
+) {
     // Toggle between Celsius and Fahrenheit
     var isCelsius by remember { mutableStateOf(true) }
     val temperature = if (isCelsius) temp else temp * 9 / 5 + 32
     val unit = if (isCelsius) "°C" else "°F"
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
             .shadow(8.dp, RoundedCornerShape(16.dp))
             .clickable { isCelsius = !isCelsius },
         shape = RoundedCornerShape(16.dp),

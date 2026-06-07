@@ -1,119 +1,176 @@
 package com.zoewave.probase.features.weather.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-// //import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.android.gms.maps.model.LatLng
 import com.zoewave.probase.features.weather.R
-import com.zoewave.probase.core.model.weather.Clouds
-import com.zoewave.probase.core.model.weather.Coord
-import com.zoewave.probase.core.model.weather.Main
 import com.zoewave.probase.core.model.weather.OpenWeatherResponse
-import com.zoewave.probase.core.model.weather.Rain
-import com.zoewave.probase.core.model.weather.Snow
-import com.zoewave.probase.core.model.weather.Sys
-import com.zoewave.probase.core.model.weather.WeatherOne
-import com.zoewave.probase.core.model.weather.Wind
 import com.zoewave.probase.features.weather.ui.WeatherEvent
-import com.zoewave.probase.features.weather.ui.components.combine.UnifiedWeatherCard
+import com.zoewave.probase.features.weather.ui.UnifiedDynamicWeatherCard
+import com.zoewave.probase.features.weather.ui.components.backgrounds.WeatherBackgroundAnimation
 import com.zoewave.probase.features.weather.ui.components.combine.WeatherConditionUnif
+import com.zoewave.probase.features.weather.ui.components.rain.RainVolumeCard
+import com.zoewave.probase.features.weather.ui.components.snow.BetterSnowVolumeCardAI
+import com.zoewave.probase.features.weather.ui.components.sun.TemperatureCardAI
+import com.zoewave.probase.features.weather.ui.components.wind.WindCard
 
-/*
-@Preview
-@Composable
-fun WeatherScreenPreview() {
-    WeatherScreen(
-        weather = generateDummyWeatherResponse(),
-        settings = emptyMap(),
-        location = null,
-        onEvent = {}, navTo = {}
-    )
-}
-*/
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherScreen(
-    modifier: Modifier = Modifier,
     weather: OpenWeatherResponse?,
     settings: Map<String, List<String>>,
     location: LatLng?,
     onEvent: (WeatherEvent) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    val conditionText = weather?.weather?.firstOrNull()?.main ?: "Clear"
+    val weatherCondition = when {
+        weather?.rain != null -> WeatherConditionUnif.RAINY
+        weather?.snow != null -> WeatherConditionUnif.SNOWY
+        conditionText.equals("Clouds", ignoreCase = true) -> WeatherConditionUnif.CLOUDY
+        conditionText.equals("Clear", ignoreCase = true) -> WeatherConditionUnif.SUNNY
+        else -> WeatherConditionUnif.CLEAR
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.features_weather_title)) }
+                title = { 
+                    Text(
+                        text = stringResource(R.string.features_weather_title), 
+                        fontFamily = FontFamily.Serif, 
+                        fontWeight = FontWeight.Bold,
+                        color = if (weatherCondition == WeatherConditionUnif.SUNNY) Color.Black else Color.White
+                    ) 
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = "Back",
+                            tint = if (weatherCondition == WeatherConditionUnif.SUNNY) Color.Black else Color.White
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { onEvent(WeatherEvent.FetchWeather) }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh, 
+                            contentDescription = "Refresh",
+                            tint = if (weatherCondition == WeatherConditionUnif.SUNNY) Color.Black else Color.White
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
             )
         },
-        content = { innerPadding ->
+        containerColor = Color.Transparent,
+        modifier = modifier
+    ) { padding ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Gorgeous Background Layer
+            if (weather != null) {
+                WeatherBackgroundAnimation(
+                    weatherCondition = weatherCondition,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Brush.verticalGradient(listOf(Color(0xFFE1F5FE), Color(0xFFB3E5FC))))
+                )
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(16.dp),
+                    .verticalScroll(rememberScrollState())
+                    .padding(padding)
+                    .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // Display the unified weather card if data is available
-
-                UnifiedWeatherCard(
-                    weatherCondition = WeatherConditionUnif.RAINY,
-                    temperature = 25.0,
-                    conditionText = "Rain",
-                    location = "Los Angeles, CA",
-                    windDegree = 120
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                // Button to fetch weather from the API
-                Button(onClick = { onEvent(WeatherEvent.FetchWeather) }) {
-                    Text(stringResource(R.string.features_weather_action_fetch))
+                // 1. Hero Animated Card
+                if (weather != null) {
+                    UnifiedDynamicWeatherCard(
+                        response = weather,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    // Spectacular Placeholder
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        shape = RoundedCornerShape(32.dp),
+                        color = Color.White.copy(alpha = 0.3f),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
                 }
+
+                // 2. High-Precision Detail Cards
+                Text(
+                    text = "ATMOSPHERIC METRICS",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.sp,
+                    color = (if (weatherCondition == WeatherConditionUnif.SUNNY) Color.Black else Color.White).copy(alpha = 0.6f),
+                    modifier = Modifier.align(Alignment.Start)
+                )
+
+                TemperatureCardAI(
+                    temp = weather?.main?.temp ?: 0.0,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        RainVolumeCard(
+                            volume = weather?.rain?.`1h` ?: 0.0
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        BetterSnowVolumeCardAI(
+                            volume = weather?.snow?.`1h` ?: 0.0
+                        )
+                    }
+                }
+
+                WindCard(
+                    windDegree = weather?.wind?.deg ?: 0,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(Modifier.height(48.dp))
             }
         }
-    )
-}
-
-fun generateDummyWeatherResponse(): OpenWeatherResponse {
-    return OpenWeatherResponse(
-        coord = Coord(lon = -118.2437, lat = 34.0522),
-        weather = listOf(
-            WeatherOne(
-                id = 500,
-                main = "Rain",
-                description = "light rain",
-                icon = "10d"
-            )
-        ),
-        base = "stations",
-        main = Main(
-            temp = 293.15,
-            feels_like = 293.15,
-            temp_min = 291.48,
-            temp_max = 294.82,
-            pressure = 1012,
-            humidity = 77
-        ),
-        visibility = 10000,
-        wind = Wind(speed = 2.06, deg = 290, gust = 3.6),
-        clouds = Clouds(all = 75),
-        rain = Rain(0.25, 0.25),
-        snow = Snow(.025, 9.25),
-        dt = 1603068800,
-        sys = Sys(type = 1, id = 5122, country = "US", sunrise = 1603047908, sunset = 1603087667),
-        timezone = -25200, id = 5368361, name = "Los Angeles", cod = 200
-    )
+    }
 }

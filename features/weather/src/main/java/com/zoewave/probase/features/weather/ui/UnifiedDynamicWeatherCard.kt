@@ -49,9 +49,7 @@ fun UnifiedDynamicWeatherCard(
     val windSpeed = response.wind.speed
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {

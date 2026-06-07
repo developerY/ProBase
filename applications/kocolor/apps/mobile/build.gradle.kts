@@ -81,6 +81,7 @@ dependencies {
     implementation(project(":features:camera"))
     implementation(project(":features:health:core"))
     implementation(project(":features:health:hydration"))
+    implementation(project(":features:weather"))
     implementation(project(":features:readers:barcode"))
     implementation(project(":features:readers:qrscanner"))
 
