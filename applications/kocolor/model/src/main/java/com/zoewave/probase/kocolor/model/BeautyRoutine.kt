@@ -16,6 +16,8 @@ data class RoutineStep(
     // Knowledge & Content
     val subtitle: String? = null,
     val actionLabel: String? = null,
+    val photoUris: List<String> = emptyList(),
+    val notes: String = "",
     
     // Professional Metadata
     val microCategory: MicroCategory? = null,

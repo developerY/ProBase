@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,6 +27,7 @@ import com.zoewave.probase.kocolor.model.RoutineStep
 fun SplitRitualStep(
     uiState: Triple<RoutineStep, CosmeticItem?, Boolean>,
     onEvent: (Unit) -> Unit,
+    onInfoClick: (RoutineStep) -> Unit,
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -99,8 +101,8 @@ fun SplitRitualStep(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clickable(onClick = { navTo(KoColorRoute.Home) }) // Trigger parent navigation lambda
-                    .padding(20.dp),
+                    .clickable(onClick = { navTo(KoColorRoute.Back) }) // Triggers Knowledge Hub navigation via parent lambda
+                    .padding(start = 20.dp, top = 20.dp, bottom = 20.dp, end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f).alpha(if (hasAmountInfo) 1f else 0.5f)) {
@@ -116,6 +118,15 @@ fun SplitRitualStep(
                         color = if (hasAmountInfo) statusColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )
                 }
+
+                IconButton(onClick = { onInfoClick(step) }) {
+                    Icon(
+                        imageVector = Icons.Default.Info, 
+                        contentDescription = "Scientific Info",
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }
@@ -128,6 +139,7 @@ private fun SplitRitualStepPreview() {
         SplitRitualStep(
             uiState = Triple(RoutineStep(id = "1", title = "Step", layeringOrder = 0), null, false),
             onEvent = {},
+            onInfoClick = {},
             navTo = {}
         )
     }

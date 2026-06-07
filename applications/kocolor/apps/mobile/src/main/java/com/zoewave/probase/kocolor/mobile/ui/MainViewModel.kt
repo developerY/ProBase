@@ -3,6 +3,8 @@ package com.zoewave.probase.kocolor.mobile.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
+import com.zoewave.probase.kocolor.data.mapper.toEntity
+import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.topLevelRoutes
@@ -10,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class MainUiState(
@@ -22,7 +25,8 @@ data class MainUiState(
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val settings: KoColorSettings,
-    private val sessionRepository: FashionSessionRepository
+    private val sessionRepository: FashionSessionRepository,
+    private val routineDao: com.zoewave.probase.kocolor.db.dao.RoutineDao
 ) : ViewModel() {
 
     val hydrationGoalFlow = settings.hydrationGoalFlow
@@ -87,6 +91,17 @@ class MainViewModel @Inject constructor(
 
     fun onInventoryItemCaptured(uri: String) {
         sessionRepository.setCapturedItemUri(uri)
+    }
+
+    fun onRitualStepCaptured(routineId: Long, stepId: String, uri: String) {
+        viewModelScope.launch {
+            val routine = routineDao.getRoutineById(routineId).first() ?: return@launch
+            val model = routine.toModel()
+            val updatedSteps = model.steps.map {
+                if (it.id == stepId) it.copy(photoUris = it.photoUris + uri) else it
+            }
+            routineDao.updateRoutine(model.copy(steps = updatedSteps).toEntity())
+        }
     }
 
     fun onColorCaptured(uri: String) {
