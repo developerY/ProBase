@@ -69,6 +69,30 @@ class RoutinesViewModel @Inject constructor(
             routineDao.getRoutinesForDay(start, end).onEach { entities ->
                 if (entities.isEmpty()) {
                     initializeDay(date)
+                } else {
+                    // AUTO-SYNC: Ensure Morning Ritual stages follow the new 10-stage protocol
+                    entities.forEach { entity ->
+                        if (entity.time == RoutineTime.MORNING) {
+                            val newMorningProtocol = RoutineDefaults.getMorningRoutine()
+                            val needsUpdate = entity.steps.any { legacyStep ->
+                                val match = newMorningProtocol.find { it.id == legacyStep.id }
+                                match != null && (legacyStep.title != match.title || legacyStep.subtitle != match.subtitle)
+                            }
+
+                            if (needsUpdate || entity.steps.size < 10) {
+                                viewModelScope.launch {
+                                    val updatedSteps = newMorningProtocol.map { template ->
+                                        val existing = entity.steps.find { it.id == template.id }
+                                        template.copy(
+                                            isCompleted = existing?.isCompleted ?: false,
+                                            productIds = existing?.productIds ?: emptyList()
+                                        )
+                                    }
+                                    routineDao.updateRoutine(entity.copy(steps = updatedSteps))
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -88,20 +112,6 @@ class RoutinesViewModel @Inject constructor(
         val isGlassSessionActiveVal = array[6] as Boolean
 
         val models = modelList.map { it.toModel() }
-        
-        // AUTO-SYNC: Update "Wake Up" content to the new spectacular protocol if old content is detected
-        models.forEach { routine ->
-            if (routine.time == RoutineTime.MORNING) {
-                val wakeUpStep = routine.steps.find { it.id == "m1" }
-                if (wakeUpStep != null && (wakeUpStep.title == "Wake Up" || wakeUpStep.description.startsWith("No snooze"))) {
-                    viewModelScope.launch {
-                        val newWakeUp = RoutineDefaults.getMorningRoutine().first { it.id == "m1" }
-                        val updatedSteps = routine.steps.map { if (it.id == "m1") newWakeUp else it }
-                        routineDao.updateRoutine(routine.copy(steps = updatedSteps).toEntity())
-                    }
-                }
-            }
-        }
 
         val btnState = when {
             !isGlassConnectedVal -> GlassButtonState.NO_GLASSES

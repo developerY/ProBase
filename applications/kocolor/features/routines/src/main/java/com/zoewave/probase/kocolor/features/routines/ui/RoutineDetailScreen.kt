@@ -33,9 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.routines.ui.components.DailyInsightSmall
 import com.zoewave.probase.kocolor.features.routines.ui.components.GlassConnectionHeaderAction
 import com.zoewave.probase.kocolor.features.routines.ui.components.SplitRitualStep
-import com.zoewave.probase.kocolor.model.BeautyRoutine
-import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.kocolor.model.RoutineTime
+import com.zoewave.probase.kocolor.model.*
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -77,6 +75,43 @@ fun RoutineDetailScreen(
     val accentColor = if (isMorning) Color(0xFF6B705C) else Color(0xFF457B9D)
 
     var isReorderMode by remember { mutableStateOf(false) }
+    var selectedInfoStep by remember { mutableStateOf<RoutineStep?>(null) }
+
+    if (selectedInfoStep != null) {
+        AlertDialog(
+            onDismissRequest = { selectedInfoStep = null },
+            confirmButton = {
+                TextButton(onClick = { selectedInfoStep = null }) {
+                    Text("DONE", fontWeight = FontWeight.Bold)
+                }
+            },
+            title = {
+                Column {
+                    Text(
+                        text = selectedInfoStep!!.subtitle ?: "",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = selectedInfoStep!!.title,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            text = {
+                Text(
+                    text = selectedInfoStep!!.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    lineHeight = 22.sp
+                )
+            },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = Color.White
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -211,6 +246,7 @@ fun RoutineDetailScreen(
                     SplitRitualStep(
                         uiState = Triple(step, linkedProduct, isReorderMode),
                         onEvent = { onEvent(RoutinesEvent.ToggleStep(routine.id, step.id)) },
+                        onInfoClick = { selectedInfoStep = it },
                         navTo = { navTo(KoColorRoute.RoutineEditor(routineId, step.id)) },
                         modifier = Modifier
                             .shadow(elevation)
