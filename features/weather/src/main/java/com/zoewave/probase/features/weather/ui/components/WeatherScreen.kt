@@ -39,6 +39,7 @@ fun WeatherScreen(
     location: LatLng?,
     onEvent: (WeatherEvent) -> Unit,
     onBack: () -> Unit,
+    onNavigateToSunIntelligence: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val temp = weather?.main?.temp ?: 21.0
@@ -153,7 +154,10 @@ fun WeatherScreen(
                 }
 
                 // 3. UV Intensity Gauge
-                AtelierUVGaugeCard(uvIndex = uvIndex)
+                AtelierUVGaugeCard(
+                    uvIndex = uvIndex,
+                    onClick = onNavigateToSunIntelligence
+                )
 
                 // 4. Hydrometeors Section
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {

@@ -102,6 +102,9 @@ sealed class KoColorRoute {
     data object Weather : KoColorRoute()
 
     @Serializable
+    data object SunIntelligence : KoColorRoute()
+
+    @Serializable
     data object Back : KoColorRoute()
 
     @Serializable

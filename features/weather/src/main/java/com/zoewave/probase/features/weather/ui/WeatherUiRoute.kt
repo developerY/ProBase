@@ -18,6 +18,7 @@ import com.zoewave.probase.features.weather.ui.components.WeatherScreen
 @Composable
 fun WeatherUiRoute(
     onBack: () -> Unit,
+    onNavigateToSunIntelligence: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: WeatherViewModel = hiltViewModel(),
 ) {
@@ -27,6 +28,7 @@ fun WeatherUiRoute(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         onBack = onBack,
+        onNavigateToSunIntelligence = onNavigateToSunIntelligence,
         modifier = modifier
     )
 }
@@ -36,6 +38,7 @@ internal fun WeatherUiRoute(
     uiState: WeatherUiState,
     onEvent: (WeatherEvent) -> Unit,
     onBack: () -> Unit,
+    onNavigateToSunIntelligence: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (uiState) {
@@ -58,6 +61,7 @@ internal fun WeatherUiRoute(
                 location = uiState.location,
                 onEvent = onEvent,
                 onBack = onBack,
+                onNavigateToSunIntelligence = onNavigateToSunIntelligence,
                 modifier = modifier
             )
         }
