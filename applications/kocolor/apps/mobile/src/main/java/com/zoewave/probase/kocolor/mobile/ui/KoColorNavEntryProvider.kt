@@ -10,6 +10,7 @@ import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
+import com.zoewave.probase.features.weather.ui.WeatherUiRoute
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorScreen
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
@@ -44,7 +45,6 @@ import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
-import com.zoewave.probase.features.weather.ui.WeatherUiRoute
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailScreen
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailUiState
@@ -413,7 +413,16 @@ fun koColorNavEntryProvider(
             com.zoewave.probase.features.weather.ui.sun.SunIntelligenceScreen(onBack = onBack)
         }
         is KoColorRoute.Nutrition -> NavEntry(route) {
-            com.zoewave.probase.features.health.nutrition.ui.NutritionUiRoute(onBack = onBack)
+            val viewModel: com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val routineId = state.mealsRoutine?.id ?: 0L
+            
+            com.zoewave.probase.features.health.nutrition.ui.NutritionUiRoute(
+                onBack = onBack,
+                onNavigateToKnowledgeHub = { stepId -> 
+                    onNavigateTo(KoColorRoute.RoutineEditor(routineId, stepId))
+                }
+            )
         }
         is KoColorRoute.NailLab -> NavEntry(route) {
             com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute(

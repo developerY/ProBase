@@ -210,14 +210,24 @@ fun HomeScreen(
             }
 
             item {
-                val routine = if (uiState.isDaytime) uiState.morningRoutine else uiState.eveningRoutine
-                val title = if (uiState.isDaytime) stringResource(R.string.applications_kocolor_apps_mobile_morning_ritual) else stringResource(R.string.applications_kocolor_apps_mobile_evening_ritual)
+                val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+                val activeRoutine = when {
+                    hour in 5..9 -> uiState.morningRoutine
+                    hour in 10..19 -> uiState.mealsRoutine
+                    else -> uiState.eveningRoutine
+                }
                 
-                if (routine != null) {
+                val title = when {
+                    hour in 5..9 -> "Morning Ritual"
+                    hour in 10..19 -> "Meals Ritual"
+                    else -> "Evening Ritual"
+                }
+                
+                if (activeRoutine != null) {
                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                         SectionTitle(uiState = SectionTitleUiState(title, stringResource(R.string.applications_kocolor_apps_mobile_biosynced_ritual)), onEvent = {}, navTo = {})
                         RoutineSummaryCard(
-                            uiState = routine to uiState.isDaytime,
+                            uiState = activeRoutine to uiState.isDaytime,
                             onEvent = {},
                             navTo = navTo
                         )
