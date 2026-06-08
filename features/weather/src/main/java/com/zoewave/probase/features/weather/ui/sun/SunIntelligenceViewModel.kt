@@ -32,16 +32,22 @@ class SunIntelligenceViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = SunIntelligenceUiState.Loading
             try {
-                // Get current location coords
-                val latLng = locationRepository.currentLocation.first()
-                val lat = latLng?.latitude ?: 34.4208
+                // 1. Get current location coords with 5s timeout
+                val latLng = kotlinx.coroutines.withTimeoutOrNull(5000) {
+                    locationRepository.updateLocation()
+                    locationRepository.currentLocation.first { it != null }
+                }
+                
+                val isFallback = latLng == null
+                val lat = latLng?.latitude ?: 34.4208 // Santa Barbara
                 val lon = latLng?.longitude ?: -119.6982
                 
                 val context = weatherRepo.getEnvironmentalContext(lat, lon)
                 _uiState.value = SunIntelligenceUiState.Success(
                     context = context,
                     reapplicationTimeRemaining = twoHoursInMillis,
-                    isTimerActive = false
+                    isTimerActive = false,
+                    isLocationFallback = isFallback
                 )
             } catch (e: Exception) {
                 _uiState.value = SunIntelligenceUiState.Error(e.message ?: "Failed to load UV data")

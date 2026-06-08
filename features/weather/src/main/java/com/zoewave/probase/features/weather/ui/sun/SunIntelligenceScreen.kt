@@ -90,13 +90,16 @@ internal fun SunIntelligenceScreen(
                     level < 11 -> "Very High"
                     else -> "Extreme"
                 }
+                
+                val displayLocation = if (uiState.isLocationFallback) "Location could not be found" else "Peak exposure expected until 2 PM."
 
                 Column(
                     modifier = Modifier
                         .padding(padding)
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(24.dp),
+                        .padding(24.dp)
+                        .alpha(if (uiState.isLocationFallback) 0.6f else 1.0f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(32.dp)
                 ) {
@@ -143,11 +146,11 @@ internal fun SunIntelligenceScreen(
                         }
                         
                         Spacer(Modifier.height(16.dp))
-                        Text(
-                            text = if (context != null) "Peak exposure expected until 2 PM." else "Waiting for atmospheric data...",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Black.copy(alpha = 0.7f)
-                        )
+                Text(
+                    text = displayLocation,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Black.copy(alpha = 0.7f)
+                )
                     }
 
                     // 2. Personal Protection Card with Shadow

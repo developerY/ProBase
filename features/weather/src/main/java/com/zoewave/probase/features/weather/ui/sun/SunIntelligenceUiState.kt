@@ -7,7 +7,8 @@ sealed interface SunIntelligenceUiState {
     data class Success(
         val context: EnvironmentalContext?,
         val reapplicationTimeRemaining: Long = 0, // in milliseconds
-        val isTimerActive: Boolean = false
+        val isTimerActive: Boolean = false,
+        val isLocationFallback: Boolean = false
     ) : SunIntelligenceUiState
     data class Error(val message: String) : SunIntelligenceUiState
 }

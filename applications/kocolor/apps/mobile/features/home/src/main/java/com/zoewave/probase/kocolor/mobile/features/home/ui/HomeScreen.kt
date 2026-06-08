@@ -163,7 +163,15 @@ fun HomeScreen(
         ) {
             item {
                 HomeHeader(
-                    uiState = HomeHeaderUiState(uiState.fashionProfile, uiState.isDaytime, uiState.beautyTip, uiState.weather, uiState.locationName, uiState.headerBackgroundUrl),
+                    uiState = HomeHeaderUiState(
+                        uiState.fashionProfile, 
+                        uiState.isDaytime, 
+                        uiState.beautyTip, 
+                        uiState.weather, 
+                        uiState.locationName, 
+                        uiState.isLocationFallback,
+                        uiState.headerBackgroundUrl
+                    ),
                     onEvent = {},
                     navTo = navTo
                 )
@@ -241,6 +249,7 @@ data class HomeHeaderUiState(
     val beautyTip: String,
     val weather: LayeredWeatherUiState? = null,
     val locationName: String? = null,
+    val isLocationFallback: Boolean = false,
     val backgroundUrl: String? = null
 )
 
@@ -306,8 +315,10 @@ fun HomeHeader(
                 )
 
                 LayeredWeatherSquareCard(
-                    uiState = uiState.weather?.copy(locationName = uiState.locationName),
-                    modifier = Modifier.padding(start = 16.dp),
+                    uiState = uiState.weather?.copy(
+                        locationName = if (uiState.isLocationFallback) "Location could not be found" else uiState.locationName
+                    ),
+                    modifier = Modifier.padding(start = 16.dp).alpha(if (uiState.isLocationFallback) 0.6f else 1f),
                     onClick = { navTo(KoColorRoute.Weather) }
                 )
             }

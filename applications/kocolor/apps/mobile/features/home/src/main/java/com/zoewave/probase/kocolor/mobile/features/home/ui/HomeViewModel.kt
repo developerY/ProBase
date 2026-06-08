@@ -68,6 +68,7 @@ data class HomeUiState(
     val isHealthPermissionGranted: Boolean = false,
     val weather: LayeredWeatherUiState? = null,
     val locationName: String? = null,
+    val isLocationFallback: Boolean = false,
     val headerBackgroundUrl: String? = null,
     val savedSuggestions: List<com.zoewave.probase.kocolor.model.SavedAnalysis> = emptyList()
 )
@@ -237,7 +238,8 @@ class HomeViewModel @Inject constructor(
             weather = weather,
             locationName = weather?.locationName,
             headerBackgroundUrl = headerBg,
-            savedSuggestions = savedSuggestions
+            savedSuggestions = savedSuggestions,
+            isLocationFallback = weather?.locationName == "Location could not be found"
         )
     }.stateIn(
         scope = viewModelScope,
@@ -288,7 +290,7 @@ class HomeViewModel @Inject constructor(
                     // 3. Get environmental context (UV, humidity)
                     val envContext = weatherRepo.getEnvironmentalContext(latLng.latitude, latLng.longitude)
 
-                    updateWeatherState(response, envContext)
+                    updateWeatherState(response, envContext, isFallback = false)
                 } else {
                     // 4. Fallback to Santa Barbara if GPS fails or times out
                     android.util.Log.d("HomeViewModel", "GPS timeout/unavailable. Falling back to Santa Barbara.")
@@ -298,7 +300,7 @@ class HomeViewModel @Inject constructor(
                     val envContext = response?.coord?.let { 
                         weatherRepo.getEnvironmentalContext(it.lat, it.lon)
                     }
-                    updateWeatherState(response, envContext)
+                    updateWeatherState(response, envContext, isFallback = true)
                 }
             } catch (e: Exception) {
                 android.util.Log.e("HomeViewModel", "Error fetching weather", e)
@@ -308,7 +310,8 @@ class HomeViewModel @Inject constructor(
 
     private fun updateWeatherState(
         response: com.zoewave.probase.core.model.weather.OpenWeatherResponse?,
-        envContext: com.zoewave.probase.core.model.weather.EnvironmentalContext?
+        envContext: com.zoewave.probase.core.model.weather.EnvironmentalContext?,
+        isFallback: Boolean
     ) {
         if (response != null && envContext != null) {
             val conditions = mutableListOf<LayeredWeatherCondition>()
@@ -325,7 +328,7 @@ class HomeViewModel @Inject constructor(
                 temperature = response.main.temp,
                 uvIndex = envContext.uvIndex,
                 conditions = conditions,
-                locationName = response.name
+                locationName = if (isFallback) "Location could not be found" else response.name
             )
 
             // Dynamic Unsplash Background

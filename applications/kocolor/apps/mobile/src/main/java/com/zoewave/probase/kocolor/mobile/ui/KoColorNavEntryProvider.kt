@@ -399,7 +399,8 @@ fun koColorNavEntryProvider(
             val hydrationGoal by mainViewModel.hydrationGoalFlow.collectAsStateWithLifecycle(2.7)
             
             com.zoewave.probase.features.health.hydration.ui.HydrationUiRoute(
-                onNavigateToSettings = { onNavigateTo(KoColorRoute.Settings("Hydration")) }
+                onNavigateToSettings = { onNavigateTo(KoColorRoute.Settings("Hydration")) },
+                onBack = onBack
             )
         }
         is KoColorRoute.Weather -> NavEntry(route) {

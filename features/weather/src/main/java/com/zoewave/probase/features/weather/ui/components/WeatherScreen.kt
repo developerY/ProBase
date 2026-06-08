@@ -35,6 +35,8 @@ import java.time.LocalDate
 @Composable
 fun WeatherScreen(
     weather: OpenWeatherResponse?,
+    environmentalContext: com.zoewave.probase.core.model.weather.EnvironmentalContext?,
+    isLocationFallback: Boolean,
     settings: Map<String, List<String>>,
     location: LatLng?,
     onEvent: (WeatherEvent) -> Unit,
@@ -44,8 +46,8 @@ fun WeatherScreen(
 ) {
     val temp = weather?.main?.temp ?: 21.0
     val conditionText = weather?.weather?.firstOrNull()?.main ?: "Clear"
-    val locationName = weather?.name ?: "Santa Barbara, US"
-    val uvIndex = 8.0 // Mock UV for the spectacular design demo
+    val locationName = if (isLocationFallback) "Location could not be found" else (weather?.name ?: "Santa Barbara, US")
+    val uvIndex = environmentalContext?.uvIndex ?: 0.0
     
     val isRainActive = weather?.rain != null
     val isSnowActive = weather?.snow != null
@@ -97,7 +99,8 @@ fun WeatherScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(padding)
-                    .padding(24.dp),
+                    .padding(24.dp)
+                    .alpha(if (isLocationFallback) 0.6f else 1.0f),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {

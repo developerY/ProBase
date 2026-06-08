@@ -10,6 +10,7 @@ import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -69,23 +70,44 @@ class WeatherViewModel @Inject constructor(
      */
     private fun loadSettings() {
         viewModelScope.launch {
-            // Simulate loading or retrieve actual settings from your repository
-            _uiState.value = WeatherUiState.Success(
-                weather = Weather(
-                    temperature = 22.5,
-                    description = "Sunny",
-                    iconUrl = "",
-                    location = "San Francisco, CA"
-                ),
-                settings = mapOf(
-                    "Theme" to listOf("Light", "Dark", "System Default"),
-                    "Language" to listOf("English", "Spanish", "French"),
-                    "Notifications" to listOf("Enabled", "Disabled")
-                ),
-                location = null,
-                weatherOpen = null,
-                locationString = "Santa Barbara, US" // Default location for API calls
-            )
+            _uiState.value = WeatherUiState.Loading
+            try {
+                // 1. Get real location coords with 5s timeout
+                val latLng = kotlinx.coroutines.withTimeoutOrNull(5000) {
+                    locationRepository.updateLocation()
+                    locationRepository.currentLocation.first { it != null }
+                }
+
+                val isFallback = latLng == null
+                val lat = latLng?.latitude ?: 34.4208 // Santa Barbara
+                val lon = latLng?.longitude ?: -119.6982
+                
+                // 2. Fetch real data
+                val weatherResp = weatherRepo.openCurrentWeatherByCoords(lat, lon)
+                val envContext = weatherRepo.getEnvironmentalContext(lat, lon)
+
+                _uiState.value = WeatherUiState.Success(
+                    weather = Weather(
+                        temperature = weatherResp?.main?.temp ?: 22.5,
+                        description = weatherResp?.weather?.firstOrNull()?.description ?: "Sunny",
+                        iconUrl = "",
+                        location = if (isFallback) "Location could not be found" else (weatherResp?.name ?: "San Francisco, CA")
+                    ),
+                    settings = mapOf(
+                        "Theme" to listOf("Light", "Dark", "System Default"),
+                        "Language" to listOf("English", "Spanish", "French"),
+                        "Notifications" to listOf("Enabled", "Disabled")
+                    ),
+                    location = latLng,
+                    weatherOpen = weatherResp,
+                    environmentalContext = envContext,
+                    locationString = weatherResp?.name ?: "Santa Barbara, US",
+                    isLocationFallback = isFallback
+                )
+            } catch (e: Exception) {
+                Log.e("Weather", "Failed to initialize real weather data", e)
+                _uiState.value = WeatherUiState.Error("Environment data unavailable.")
+            }
         }
     }
 
