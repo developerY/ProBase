@@ -86,6 +86,16 @@ fun RoutinesScreen(
             }
 
             item {
+                uiState.mealsRoutine?.let { routine ->
+                    HeroRitualCard(
+                        uiState = routine,
+                        onEvent = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) },
+                        navTo = navTo
+                    )
+                }
+            }
+
+            item {
                 uiState.eveningRoutine?.let { routine ->
                     HeroRitualCard(
                         uiState = routine,

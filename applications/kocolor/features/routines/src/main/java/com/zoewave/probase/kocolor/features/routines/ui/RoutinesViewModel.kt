@@ -17,6 +17,7 @@ import javax.inject.Inject
 
 data class RoutinesUiState(
     val morningRoutine: BeautyRoutine? = null,
+    val mealsRoutine: BeautyRoutine? = null,
     val eveningRoutine: BeautyRoutine? = null,
     val isLoading: Boolean = true,
     val allProducts: List<CosmeticItem> = emptyList(),
@@ -26,7 +27,12 @@ data class RoutinesUiState(
     val glassButtonState: GlassButtonState = GlassButtonState.NO_GLASSES
 ) {
     val activeEditRoutine: BeautyRoutine?
-        get() = if (morningRoutine?.id == activeEditRoutineId) morningRoutine else eveningRoutine?.takeIf { it.id == activeEditRoutineId }
+        get() = when (activeEditRoutineId) {
+            morningRoutine?.id -> morningRoutine
+            mealsRoutine?.id -> mealsRoutine
+            eveningRoutine?.id -> eveningRoutine
+            else -> null
+        }
 }
 
 sealed class RoutinesEvent {
@@ -71,8 +77,8 @@ class RoutinesViewModel @Inject constructor(
             val start = date
             val end = start + 86400000L
             routineDao.getRoutinesForDay(start, end).onEach { entities ->
-                if (entities.isEmpty()) {
-                    initializeDay(date)
+                if (entities.size < 3) {
+                    initializeDay(date, entities)
                 }
             }
         },
@@ -101,6 +107,7 @@ class RoutinesViewModel @Inject constructor(
 
         RoutinesUiState(
             morningRoutine = models.find { it.time == RoutineTime.MORNING },
+            mealsRoutine = models.find { it.time == RoutineTime.MEALS },
             eveningRoutine = models.find { it.time == RoutineTime.EVENING },
             isLoading = false,
             allProducts = cosmeticList.map { it.toModel() },
@@ -125,20 +132,33 @@ class RoutinesViewModel @Inject constructor(
         return cal.timeInMillis
     }
 
-    private fun initializeDay(date: Long) {
+    private fun initializeDay(date: Long, existing: List<RoutineEntity> = emptyList()) {
+        val existingTimes = existing.map { it.time }.toSet()
         viewModelScope.launch {
-            routineDao.insertRoutine(RoutineEntity(
-                title = "morning beautiful routine",
-                time = RoutineTime.MORNING,
-                steps = RoutineDefaults.getMorningRoutine(),
-                date = date
-            ))
-            routineDao.insertRoutine(RoutineEntity(
-                title = "Evening Routine",
-                time = RoutineTime.EVENING,
-                steps = RoutineDefaults.getEveningRoutine(),
-                date = date
-            ))
+            if (RoutineTime.MORNING !in existingTimes) {
+                routineDao.insertRoutine(RoutineEntity(
+                    title = "morning beautiful routine",
+                    time = RoutineTime.MORNING,
+                    steps = RoutineDefaults.getMorningRoutine(),
+                    date = date
+                ))
+            }
+            if (RoutineTime.MEALS !in existingTimes) {
+                routineDao.insertRoutine(RoutineEntity(
+                    title = "Meals Routine",
+                    time = RoutineTime.MEALS,
+                    steps = RoutineDefaults.getMealsRoutine(),
+                    date = date
+                ))
+            }
+            if (RoutineTime.EVENING !in existingTimes) {
+                routineDao.insertRoutine(RoutineEntity(
+                    title = "Evening Routine",
+                    time = RoutineTime.EVENING,
+                    steps = RoutineDefaults.getEveningRoutine(),
+                    date = date
+                ))
+            }
         }
     }
 
@@ -179,9 +199,11 @@ class RoutinesViewModel @Inject constructor(
     private fun toggleStep(routineId: Long, stepId: String) {
         viewModelScope.launch {
             val morning = uiState.value.morningRoutine
+            val meals = uiState.value.mealsRoutine
             val evening = uiState.value.eveningRoutine
             val routine = when {
                 morning?.id == routineId -> morning
+                meals?.id == routineId -> meals
                 evening?.id == routineId -> evening
                 else -> null
             } ?: return@launch
