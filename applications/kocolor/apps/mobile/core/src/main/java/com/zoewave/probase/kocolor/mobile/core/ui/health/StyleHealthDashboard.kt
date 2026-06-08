@@ -161,7 +161,8 @@ fun StyleHealthDashboard(
             )
             ActivityMetricsSection(
                 steps = uiState.todaySteps,
-                calories = uiState.todayCalories
+                calories = uiState.todayCalories,
+                navTo = navTo
             )
         }
 
@@ -225,7 +226,7 @@ private fun SummaryMetricItem(
 }
 
 @Composable
-private fun ActivityMetricsSection(steps: Long, calories: Double) {
+private fun ActivityMetricsSection(steps: Long, calories: Double, navTo: (KoColorRoute) -> Unit) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         ActivityCard(
             label = "Steps",
@@ -237,7 +238,8 @@ private fun ActivityMetricsSection(steps: Long, calories: Double) {
             label = "Calories",
             value = "${calories.toInt()}",
             unit = "kcal",
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            onClick = { navTo(KoColorRoute.Nutrition) }
         )
     }
 }
@@ -247,11 +249,15 @@ private fun ActivityCard(
     label: String,
     value: String,
     unit: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     val hasData = value != "0" && value != "0.0" && value != "--"
     Card(
-        modifier = modifier.aspectRatio(1f).alpha(if (hasData) 1f else 0.7f),
+        modifier = modifier
+            .aspectRatio(1f)
+            .alpha(if (hasData) 1f else 0.7f)
+            .clickable { onClick() },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black.copy(alpha = 0.08f))

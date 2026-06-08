@@ -412,6 +412,9 @@ fun koColorNavEntryProvider(
         is KoColorRoute.SunIntelligence -> NavEntry(route) {
             com.zoewave.probase.features.weather.ui.sun.SunIntelligenceScreen(onBack = onBack)
         }
+        is KoColorRoute.Nutrition -> NavEntry(route) {
+            com.zoewave.probase.features.health.nutrition.ui.NutritionUiRoute(onBack = onBack)
+        }
         is KoColorRoute.NailLab -> NavEntry(route) {
             com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute(
                 uiState = route.colorHex to route.finish,
