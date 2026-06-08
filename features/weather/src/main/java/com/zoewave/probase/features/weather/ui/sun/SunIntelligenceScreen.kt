@@ -1,8 +1,10 @@
 package com.zoewave.probase.features.weather.ui.sun
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -14,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
@@ -55,10 +58,21 @@ fun SunIntelligenceScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            // 1. Large Circular UV Gauge
+            // 1. Large Circular UV Gauge with Glow
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(modifier = Modifier.size(240.dp), contentAlignment = Alignment.Center) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.size(280.dp), contentAlignment = Alignment.Center) {
+                    // Soft Sun Glow
+                    Canvas(modifier = Modifier.size(240.dp)) {
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                colors = listOf(Color(0xFFFFB74D).copy(alpha = 0.15f), Color.Transparent),
+                                center = center,
+                                radius = size.width / 1.5f
+                            )
+                        )
+                    }
+
+                    Canvas(modifier = Modifier.size(240.dp)) {
                         val strokeWidth = 16.dp.toPx()
                         val arcSize = size.minDimension - strokeWidth
                         
@@ -89,9 +103,11 @@ fun SunIntelligenceScreen(
                 )
             }
 
-            // 2. Personal Protection Card
+            // 2. Personal Protection Card with Shadow
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(elevation = 12.dp, shape = RoundedCornerShape(24.dp), clip = false),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
@@ -116,7 +132,7 @@ fun SunIntelligenceScreen(
                 }
             }
 
-            // 3. Daily UV Exposure Graph
+            // 3. Daily UV Exposure Graph Enhanced
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(
                     text = "Daily UV Forecast", 
@@ -126,7 +142,7 @@ fun SunIntelligenceScreen(
                     color = Color.Gray
                 )
                 
-                Box(modifier = Modifier.fillMaxWidth().height(180.dp)) {
+                Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
                     UVExposureGraph(modifier = Modifier.fillMaxSize())
                 }
                 
@@ -138,9 +154,11 @@ fun SunIntelligenceScreen(
                 }
             }
 
-            // 4. Sunscreen Reminders
+            // 4. Sunscreen Reminders with Shadow
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(elevation = 12.dp, shape = RoundedCornerShape(24.dp), clip = false),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
@@ -191,40 +209,77 @@ fun UVExposureGraph(modifier: Modifier = Modifier) {
         val width = size.width
         val height = size.height
         
+        // 1. Draw Grid Lines (Bars)
+        val levels = listOf(3f, 6f, 9f, 12f, 15f)
+        levels.forEach { level ->
+            val y = height - (height * (level / 15f))
+            drawLine(
+                color = Color.Black.copy(alpha = 0.05f),
+                start = Offset(0f, y),
+                end = Offset(width, y),
+                strokeWidth = 1.dp.toPx()
+            )
+            // Optional: Draw level numbers if needed for accuracy
+        }
+
+        // 2. Draw Peak Exposure Shading (Middle section)
+        val peakStart = width * 0.35f
+        val peakEnd = width * 0.65f
+        drawRect(
+            brush = Brush.verticalGradient(
+                listOf(Color(0xFFFF8A65).copy(alpha = 0.15f), Color.Transparent)
+            ),
+            topLeft = Offset(peakStart, 0f),
+            size = Size(peakEnd - peakStart, height)
+        )
+
         val path = Path().apply {
             moveTo(0f, height)
             cubicTo(
                 width * 0.2f, height,
-                width * 0.4f, 0f,
-                width * 0.5f, 0f
+                width * 0.4f, height * 0.1f,
+                width * 0.5f, height * 0.05f
             )
             cubicTo(
-                width * 0.6f, 0f,
+                width * 0.6f, height * 0.1f,
                 width * 0.8f, height,
                 width, height
             )
         }
         
+        // 3. Draw Area Fill
         drawPath(
             path = path,
             brush = Brush.verticalGradient(
-                listOf(Color(0xFFFF8A65).copy(alpha = 0.5f), Color(0xFFFF8A65).copy(alpha = 0.1f))
+                listOf(Color(0xFFFF8A65).copy(alpha = 0.4f), Color(0xFFFF8A65).copy(alpha = 0.05f))
             )
         )
         
+        // 4. Draw Path Stroke
         drawPath(
             path = path,
             color = Color(0xFFFF8A65),
             style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
         )
         
-        // Data points
-        val points = listOf(0.1f, 0.3f, 0.6f, 0.9f, 1.0f, 0.8f, 0.4f, 0.2f)
+        // 5. Data points (Refined Open Circles)
+        val points = listOf(0.05f, 0.15f, 0.4f, 0.85f, 1.0f, 0.85f, 0.35f, 0.1f, 0.05f)
         points.forEachIndexed { index, p ->
             val x = width * (index / (points.size - 1).toFloat())
-            val y = height - (height * p * 0.9f)
-            drawCircle(color = Color.White, radius = 4.dp.toPx(), center = Offset(x, y))
-            drawCircle(color = Color(0xFFFF8A65), radius = 4.dp.toPx(), center = Offset(x, y), style = Stroke(width = 1.dp.toPx()))
+            val y = height - (height * p * 0.95f)
+            
+            // design: open circle
+            drawCircle(
+                color = Color.White,
+                radius = 5.dp.toPx(),
+                center = Offset(x, y)
+            )
+            drawCircle(
+                color = Color(0xFFFF8A65),
+                radius = 5.dp.toPx(),
+                center = Offset(x, y),
+                style = Stroke(width = 1.5.dp.toPx())
+            )
         }
     }
 }
