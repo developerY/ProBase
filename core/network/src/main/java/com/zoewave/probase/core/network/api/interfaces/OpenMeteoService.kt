@@ -5,7 +5,13 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 data class OpenMeteoResponse(
-    @SerializedName("current") val current: CurrentData
+    @SerializedName("current") val current: CurrentData,
+    @SerializedName("hourly") val hourly: HourlyData? = null
+)
+
+data class HourlyData(
+    @SerializedName("time") val time: List<String>,
+    @SerializedName("uv_index") val uvIndex: List<Double>
 )
 
 data class CurrentData(
@@ -22,6 +28,7 @@ interface OpenMeteoService {
         @Query("latitude") lat: Double,
         @Query("longitude") lon: Double,
         @Query("current") currentFields: String = "temperature_2m,relative_humidity_2m,is_day,weather_code,uv_index",
+        @Query("hourly") hourlyFields: String = "uv_index",
         @Query("timezone") timezone: String = "auto"
     ): OpenMeteoResponse
 

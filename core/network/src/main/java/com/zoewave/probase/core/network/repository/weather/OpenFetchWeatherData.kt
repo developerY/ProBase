@@ -67,7 +67,8 @@ suspend fun openFetchEnvironmentalContext(lat: Double, lon: Double): Environment
             humidity = response.current.humidity,
             uvIndex = response.current.uvIndex,
             isDay = response.current.isDay == 1,
-            weatherCode = response.current.weatherCode
+            weatherCode = response.current.weatherCode,
+            hourlyUV = response.hourly?.uvIndex ?: emptyList()
         )
     } catch (e: Exception) {
         Log.e("WeatherRepoImpl", "Error fetching environmental context", e)

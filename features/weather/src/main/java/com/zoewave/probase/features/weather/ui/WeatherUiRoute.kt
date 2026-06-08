@@ -57,6 +57,8 @@ internal fun WeatherUiRoute(
         is WeatherUiState.Success -> {
             WeatherScreen(
                 weather = uiState.weatherOpen,
+                environmentalContext = uiState.environmentalContext,
+                isLocationFallback = uiState.isLocationFallback,
                 settings = uiState.settings,
                 location = uiState.location,
                 onEvent = onEvent,

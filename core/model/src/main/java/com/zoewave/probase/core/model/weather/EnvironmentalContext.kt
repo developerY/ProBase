@@ -8,5 +8,6 @@ data class EnvironmentalContext(
     val humidity: Double,
     val uvIndex: Double,
     val isDay: Boolean,
-    val weatherCode: Int
+    val weatherCode: Int,
+    val hourlyUV: List<Double> = emptyList()
 )

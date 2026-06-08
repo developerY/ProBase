@@ -1,45 +1,43 @@
-# Implementation Plan - 10-Stage Scientific Morning Ritual Content Overhaul
+# Implementation Plan - Pure Crystal Glass (No Border)
 
-I will fully implement the 10-stage scientifically optimized morning ritual protocol. This involves updating all ritual content in the database and ensuring the interactive "Info" alerts accurately display the provided Title, Subtitle, and Body Text.
+I will overhaul the hydration buttons and cards to a "Pure Crystal" design, removing the visible gray/dark borders entirely and relying on soft light-based physics for depth.
 
-## 1. Research & Content Mapping
-- **Stages**: 10 distinct biological stages (Wake Up, Mouth Hygiene, Hydrate, Move, Cleanse, Skincare Hydrate, SPF, Makeup, Prep, Fuel).
-- **Fields**: Each stage will map to:
-    - `title`: Stage [X]: [Name]
-    - `subtitle`: [Scientific/Psychological Subtitle]
-    - `description`: [Scientific Body Text]
-- **Data Source**: `RoutineDefaults.kt` is the source of truth for new and synced routines.
+## 1. Research & Analysis
+- **Problem**: The current 1.5dp gradient border, when combined with shadows and transparency, creates a "muddy" or gray ring that clashes with the clean aesthetic.
+- **Goal**:
+    - Remove all explicit `BorderStroke` from functional components.
+    - Achieving depth using only **Shadows** and **Internal Highlights**.
+- **Aesthetic Refinements**:
+    - **Surface**: Use a multi-layer approach:
+        - Layer 1: Soft drop shadow for elevation.
+        - Layer 2: Ultra-transparent white surface (`alpha 0.1f`).
+        - Layer 3: A "Rim Light" effect—a thin white line drawn inside the top-left edge via `Canvas` to simulate light catching the glass.
 
 ## 2. Technical Steps
 
-### Content Overhaul (`RoutineDefaults.kt`)
-- [ ] Update `getMorningRoutine()` to include all 10 stages with the exact text provided for Title, Subtitle, and Body Text.
-- [ ] Standardize IDs (`m1` through `m10`) for reliable synchronization.
-
-### Migration & Sync Logic (`RoutinesViewModel.kt`)
-- [ ] Refine the **Auto-Sync Engine**:
-    - Iterate through the user's current morning ritual.
-    - Match steps by ID (`m1`-`m10`).
-    - If a step exists, update its `title`, `subtitle`, and `description` to the new scientific content.
-    - Ensure new steps (like "Mouth Hygiene") are added if missing from legacy 10-step routines.
-
-### UI Synchronization (`RoutineDetailScreen.kt`)
-- [ ] Verify the `RitualKnowledgeDialog` (AlertDialog):
-    - Ensure it displays `selectedInfoStep.subtitle` (Uppercase).
-    - Ensure it displays `selectedInfoStep.title` (Serif Bold).
-    - Ensure it displays `selectedInfoStep.description` (Body text with proper line height).
+### UI Overhaul (`HydrationUiRoute.kt`)
+- [ ] **`QuickHydrationButton` Refinement**:
+    - Remove the `border` parameter from the `Surface`.
+    - Increase `shadow` elevation slightly but use a very soft, low-alpha color to avoid a "dirty" look.
+    - Add a `Canvas` overlay to draw a 1dp white arc at the top-left corner to simulate the "crystal rim."
+- [ ] **Custom Amount Pill Refinement**:
+    - Apply the same "no-border" logic.
+    - Ensure the internal icon and text remain sharp.
+- [ ] **Reminder Card Refinement**:
+    - Sync the "Reminder" card to the same borderless standard.
 
 ## 3. Visual & Aesthetic Standards
-- **Typography**: Editorial Serif for all dialog content to maintain the "Atelier" design language.
-- **Consistency**: All stages must follow the exact same visual pattern in the info alerts.
+- **Depth**: The buttons should feel like they are carved directly out of light.
+- **Color Palette**: Zero Grays. Only pure White, transparent overlays, and the underlying Blue background gradients.
 
 ## 4. Verification
-- [ ] **Data Integrity**: Verify all 10 stages are present and correctly ordered.
-- [ ] **Interaction**: Test the info button for every single stage to ensure no text is truncated or missing.
-- [ ] **Persistence**: Verify that clearing app data or starting fresh correctly loads the new 10-stage protocol.
+- [ ] Verify the "gray ring" is completely eliminated.
+- [ ] Confirm the buttons look premium and "crystal-like" through highlights rather than outlines.
+- [ ] Ensure the background waves remain clearly visible through the components.
+- [ ] Build and run `:applications:kocolor:apps:mobile`.
 
 ---
 <!-- feedback_request -->
-I've prepared the content for all 10 stages. I will now proceed to bake this scientific text into the ritual database and ensure the info alerts show all three sections as requested.
+I've designed a "Pure Crystal" overhaul that removes all outlines. We'll use internal light highlights (rim lighting) to define the shapes instead, creating a much cleaner and higher-end look.
 
-**Should I proceed with the full 10-stage content update?**
+**Should I proceed with the borderless crystal design?**
