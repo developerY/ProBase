@@ -1,11 +1,11 @@
 package com.zoewave.probase.features.health.nutrition.ui
 
-import com.zoewave.probase.features.health.nutrition.data.NutritionRoutine
+import com.zoewave.probase.kocolor.model.BeautyRoutine
 
 sealed interface NutritionUiState {
     data object Loading : NutritionUiState
     data class Success(
-        val routine: NutritionRoutine,
+        val routine: BeautyRoutine,
         val nextMetabolicWindow: String? = null
     ) : NutritionUiState
     data class Error(val message: String) : NutritionUiState

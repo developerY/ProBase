@@ -3,7 +3,9 @@ package com.zoewave.probase.features.health.nutrition.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.features.health.nutrition.data.NutritionDefaults
-import com.zoewave.probase.features.health.nutrition.data.NutritionRoutine
+import com.zoewave.probase.kocolor.model.BeautyRoutine
+import com.zoewave.probase.kocolor.model.RoutineStep
+import com.zoewave.probase.kocolor.model.RoutineTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +21,22 @@ class NutritionViewModel @Inject constructor() : ViewModel() {
     private val _uiState = MutableStateFlow<NutritionUiState>(NutritionUiState.Loading)
     val uiState: StateFlow<NutritionUiState> = _uiState.asStateFlow()
 
-    private var currentRoutine = NutritionDefaults.getUnifiedRoutine()
+    private var currentRoutine = BeautyRoutine(
+        title = "Meals Routine",
+        time = RoutineTime.MEALS,
+        steps = NutritionDefaults.getUnifiedRoutine().stages.mapIndexed { index, stage ->
+            RoutineStep(
+                id = stage.id,
+                title = stage.title,
+                subtitle = stage.subtitle,
+                description = stage.scientificBody,
+                actionLabel = stage.suggestedMealBody,
+                isCompleted = stage.isCompleted,
+                layeringOrder = index
+            )
+        },
+        date = System.currentTimeMillis()
+    )
 
     init {
         loadData()
@@ -38,8 +55,9 @@ class NutritionViewModel @Inject constructor() : ViewModel() {
     private fun calculateNextWindow(): String? {
         val now = LocalTime.now()
         val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        val stages = NutritionDefaults.getUnifiedRoutine().stages
         
-        return currentRoutine.stages.find { 
+        return stages.find { 
             LocalTime.parse(it.startTime, formatter).isAfter(now)
         }?.startTime?.let {
             val time = LocalTime.parse(it, formatter)
@@ -55,10 +73,10 @@ class NutritionViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun toggleStage(stageId: String) {
-        val updatedStages = currentRoutine.stages.map {
+        val updatedSteps = currentRoutine.steps.map {
             if (it.id == stageId) it.copy(isCompleted = !it.isCompleted) else it
         }
-        currentRoutine = currentRoutine.copy(stages = updatedStages)
+        currentRoutine = currentRoutine.copy(steps = updatedSteps)
         loadData()
     }
 }

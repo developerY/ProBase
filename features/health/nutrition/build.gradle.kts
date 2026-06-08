@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:model"))
     implementation(project(":core:data"))
+    implementation(project(":applications:kocolor:model"))
     
     implementation(libs.androidx.projected)
     implementation(libs.androidx.navigation3.runtime)
