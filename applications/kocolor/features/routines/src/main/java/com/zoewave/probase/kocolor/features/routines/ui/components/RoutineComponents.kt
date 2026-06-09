@@ -82,7 +82,7 @@ fun HeroRitualCard(
             AsyncImage(
                 model = when (routine.time) {
                     RoutineTime.MORNING -> R.drawable.morning_routine_bg
-                    RoutineTime.MEALS -> "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=800"
+                    RoutineTime.MEALS -> R.drawable.meals_ritual_bg
                     else -> R.drawable.night_routine_bg
                 },
                 contentDescription = null,
