@@ -1,29 +1,26 @@
 package com.zoewave.probase.ui.components
 
 import android.content.Intent
-import android.os.Build
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Text
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
-import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import com.zoewave.probase.features.weather.ui.WeatherUiRoute
+import com.zoewave.probase.features.ai.capture.ui.SmartCaptureUiRoute
 import com.zoewave.probase.features.ble.ui.BluetoothLeRoute
 import com.zoewave.probase.features.calendar.ui.CalendarUiRoute
 import com.zoewave.probase.features.camera.ui.CameraUIRoute
 import com.zoewave.probase.features.health.core.ui.HealthRoute
+import com.zoewave.probase.features.health.meals.ui.MealsUiRoute
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventory
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventoryScreen
+import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.nfc.ui.NfcUiRoute
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
-import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
-import com.zoewave.probase.features.ai.capture.ui.SmartCaptureUiRoute
+import com.zoewave.probase.features.weather.ui.WeatherUiRoute
 import com.zoewave.probase.features.xr.glass.ui.GlassXRDemosPhoneScreen
-import com.zoewave.probase.features.xr.glass.GlassesMainActivity
 import com.zoewave.probase.features.xr.xrglasses.XRGlassesActivity
 import com.zoewave.probase.photodo.features.smartadvice.ui.SmartAdviceUiRoute
 
@@ -41,6 +38,7 @@ fun featureInventoryEntryProvider(
             is FeatureInventory.List -> {
                 FeatureInventoryScreen(
                     onNavigateToHealth = { navigateTo(FeatureInventory.Health) },
+                    onNavigateToHealthMeals = { navigateTo(FeatureInventory.HealthMeals) },
                     onNavigateToWeather = { navigateTo(FeatureInventory.Weather) },
                     onNavigateToBle = { navigateTo(FeatureInventory.Ble) },
                     onNavigateToNfc = { navigateTo(FeatureInventory.Nfc) },
@@ -71,9 +69,18 @@ fun featureInventoryEntryProvider(
                 }
             }
 
+            is FeatureInventory.HealthMeals -> {
+                FeatureScaffold(title = "Health Meals", onBack = navigateBack) {
+                    MealsUiRoute()
+                }
+            }
+
             is FeatureInventory.Weather -> {
                 FeatureScaffold(title = "Weather", onBack = navigateBack) {
-                    WeatherUiRoute()
+                    WeatherUiRoute(
+                        onBack = navigateBack,
+                        onNavigateToSunIntelligence = { /* Handle this if needed */ }
+                    )
                 }
             }
 
