@@ -13,6 +13,9 @@ sealed interface FeatureInventory : NavKey {
     data object Health : FeatureInventory
 
     @Serializable
+    data object HealthMeals : FeatureInventory
+
+    @Serializable
     data object Weather : FeatureInventory
     @Serializable
     data object Ble : FeatureInventory
