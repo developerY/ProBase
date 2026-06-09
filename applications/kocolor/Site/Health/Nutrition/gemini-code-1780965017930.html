@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Bio-Optimized Human: Cellular Nutrition & Chronobiology</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+h1, h2, h3, h4, h5, .font-display { font-family: 'Space+Grotesk', sans-serif; }
+.chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 350px; max-height: 400px; }
+@media (min-width: 768px) { .chart-container { height: 400px; } }
+.glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.8); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
+.gradient-text-cyan { background: linear-gradient(to right, #22d3ee, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.gradient-text-pink { background: linear-gradient(to right, #f472b6, #e11d48); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.gradient-text-lime { background: linear-gradient(to right, #4ade80, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.unicode-icon { font-size: 2rem; line-height: 1; }
+.timeline-dot { position: absolute; left: -2.25rem; width: 1.25rem; height: 1.25rem; border-radius: 50%; border: 4px solid #0f172a; }
+.timeline-track { position: absolute; left: -1.7rem; top: 1rem; bottom: -2rem; width: 2px; background-color: #334155; }
+</style>
+</head>
+<body class="antialiased min-h-screen pb-24">
+
+<!-- Chosen Palette: Energetic & Playful Cyber-Biology (Background: Slate #0f172a, Accents: Cyan #22d3ee, Hot Pink #f472b6, Electric Lime #4ade80) -->
+<!-- Application Structure Plan: The SPA is structured linearly as a daily chronobiological timeline, mimicking the human circadian rhythm. It begins with foundational endocrinology, moves into the "God-Saeng" Morning Activation phase, transitions to Mid-Day Microbiome homeostasis, and concludes with Evening Thermoregulatory Restoration. This structure is highly intuitive as it allows the user to follow the biological protocols exactly as they would live them throughout a 24-hour cycle. -->
+<!-- Visualization & Content Choices: 
+1. Hormonal Timeline -> Line Chart (Chart.js) -> Change -> Visualizes the intersection of Cortisol, Adenosine, and delayed Caffeine to explain the 90-minute delay rule. 
+2. The Leucine Threshold -> Bar Chart (Chart.js) -> Compare -> Demonstrates the protein requirements needed to trigger the mTOR anabolic pathway at breakfast. 
+3. Biomarker Optimization -> Radar Chart (Chart.js) -> Organize/Compare -> Compares the systemic physiological impact of the optimized routine versus a standard modern diet. 
+4. Daily Protocol -> Structured HTML/CSS Timeline -> Organize -> Presents the highly specific staging of skincare, hydration, and meal timing using Unicode icons instead of SVG to maintain strict compliance. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-lg">
+<div class="max-w-6xl mx-auto px-6 py-6 text-center">
+<h1 class="text-3xl md:text-5xl font-display font-bold uppercase tracking-tight mb-2">The <span class="gradient-text-cyan">Bio-Optimized</span> Human</h1>
+<p class="text-slate-400 text-sm md:text-lg max-w-3xl mx-auto">A chronobiological framework synthesizing cellular endocrinology, microbiome science, and global longevity patterns into an optimal 24-hour metabolic routine.</p>
+</div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 py-12 space-y-24">
+
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+<div>
+<h2 class="text-3xl font-display font-bold mb-6 gradient-text-cyan">Cellular Foundations of Longevity</h2>
+<p class="text-slate-300 leading-relaxed mb-6">Current scientific consensus dictates that optimal human nutrition is not merely about caloric restriction, but rather the precise temporal modulation of deep metabolic pathways. By meticulously timing our nutrient intake and environmental exposures, we actively toggle between the anabolic <strong class="text-cyan-400">mTOR pathway</strong> (driving muscle synthesis and cellular growth in the morning) and the catabolic <strong class="text-pink-400">AMPK/Sirtuin pathways</strong> (triggering cellular autophagy and repair during the evening).</p>
+<p class="text-slate-300 leading-relaxed">Populations exhibiting exceptional longevity, such as those in Blue Zones, achieve this metabolic homeostasis through lifestyle patterns that strictly align with circadian rhythms, preventing the chronic inflammation and oxidative stress that erode telomere length.</p>
+</div>
+<div class="glass-panel p-6 rounded-2xl">
+<h3 class="text-xl font-display font-bold mb-2 text-center text-slate-100">Systemic Biomarker Optimization</h3>
+<p class="text-xs text-slate-400 text-center mb-6">Comparing physiological markers of the Bio-Optimized routine vs. Standard Western Lifestyle.</p>
+<div class="chart-container" style="height: 320px;">
+<canvas id="radarChart"></canvas>
+</div>
+</div>
+</section>
+
+<section>
+<div class="text-center mb-12">
+<h2 class="text-4xl font-display font-bold mb-4 gradient-text-lime">Phase 1: Morning Activation</h2>
+<p class="text-slate-400 max-w-2xl mx-auto text-lg">Initiating the "God-Saeng" protocol. This phase forces a steep rise in your Cortisol Awakening Response (CAR) and establishes the biological anchor for your master circadian clock.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<div class="lg:col-span-5 space-y-6 pl-8 relative">
+<div class="timeline-track hidden md:block"></div>
+
+<div class="glass-panel p-5 rounded-xl relative border-l-4 border-l-lime-400">
+<div class="timeline-dot bg-lime-400 hidden md:block"></div>
+<div class="flex items-center gap-4 mb-2">
+<span class="unicode-icon text-lime-400">🧠</span>
+<div>
+<h4 class="font-bold text-slate-100 text-lg">Stage 1: Anchor</h4>
+<p class="text-xs text-slate-400 uppercase tracking-widest">Psychological Initialization</p>
+</div>
+</div>
+<p class="text-sm text-slate-300">Adopt the South Korean "God-Saeng" mindset. Claim immediate psychological control. Documenting a micro-goal generates an immediate dopaminergic reward that builds consistency.</p>
+</div>
+
+<div class="glass-panel p-5 rounded-xl relative border-l-4 border-l-lime-400">
+<div class="timeline-dot bg-lime-400 hidden md:block"></div>
+<div class="flex items-center gap-4 mb-2">
+<span class="unicode-icon text-lime-400">👅</span>
+<div>
+<h4 class="font-bold text-slate-100 text-lg">Stage 2: Clear & Protect</h4>
+<p class="text-xs text-slate-400 uppercase tracking-widest">Mouth Hygiene</p>
+</div>
+</div>
+<p class="text-sm text-slate-300">Before water, clear the overnight bacterial biofilm. Floss, brush, and tongue scrape. This protects the beneficial oral bacteria that convert dietary nitrates into nitric oxide for cardiovascular health.</p>
+</div>
+
+<div class="glass-panel p-5 rounded-xl relative border-l-4 border-l-lime-400">
+<div class="timeline-dot bg-lime-400 hidden md:block"></div>
+<div class="flex items-center gap-4 mb-2">
+<span class="unicode-icon text-lime-400">💧</span>
+<div>
+<h4 class="font-bold text-slate-100 text-lg">Stage 3: Yin-Yang Water</h4>
+<p class="text-xs text-slate-400 uppercase tracking-widest">Enteric Activation</p>
+</div>
+</div>
+<p class="text-sm text-slate-300">Fill a glass 2/3 with boiled water, top with cold. This "Eum-yang-tang" creates active thermal circulation, stimulating the enteric nervous system without the shock of ice water.</p>
+</div>
+
+<div class="glass-panel p-5 rounded-xl relative border-l-4 border-l-lime-400">
+<div class="timeline-dot bg-lime-400 hidden md:block"></div>
+<div class="flex items-center gap-4 mb-2">
+<span class="unicode-icon text-lime-400">☀️</span>
+<div>
+<h4 class="font-bold text-slate-100 text-lg">Stage 4: Photic Entrainment</h4>
+<p class="text-xs text-slate-400 uppercase tracking-widest">Move & Light</p>
+</div>
+</div>
+<p class="text-sm text-slate-300">Outdoor exposure within 60 mins. Short-wavelength light activates melanopsin receptors, spiking your CAR. Exercise accelerates core body temperature rise, phase-advancing your rhythm.</p>
+</div>
+
+<div class="glass-panel p-5 rounded-xl relative border-l-4 border-l-lime-400">
+<div class="timeline-dot bg-lime-400 hidden md:block"></div>
+<div class="flex items-center gap-4 mb-2">
+<span class="unicode-icon text-lime-400">🧴</span>
+<div>
+<h4 class="font-bold text-slate-100 text-lg">Stages 5-8: Barrier Defense</h4>
+<p class="text-xs text-slate-400 uppercase tracking-widest">Skincare & SPF</p>
+</div>
+</div>
+<p class="text-sm text-slate-300">Cleanse based on lipid barrier. Use the Korean "7-Skin Method" for deep hydrophilic hydration. Apply photostable UV filters. Wait 10 mins for polymer film cross-linking before makeup.</p>
+</div>
+</div>
+
+<div class="lg:col-span-7 space-y-8">
+<div class="glass-panel p-6 rounded-2xl border border-cyan-500/30">
+<h3 class="text-xl font-display font-bold mb-2 text-center text-slate-100">Stage 9: Strategic Caffeine Delay</h3>
+<p class="text-sm text-slate-400 text-center mb-6">Delaying caffeine 90 minutes prevents it from stacking on the cortisol spike and allows natural clearance of adenosine, averting the mid-morning crash.</p>
+<div class="chart-container" style="height: 280px;">
+<canvas id="hormoneChart"></canvas>
+</div>
+</div>
+
+<div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-lime-500/50 overflow-hidden shadow-2xl">
+<div class="bg-lime-900/40 py-4 px-6 border-b border-lime-500/30 flex justify-between items-center">
+<div>
+<h3 class="text-xl font-display font-bold text-lime-400">Stage 10: Fuel (Breakfast)</h3>
+<p class="text-xs text-slate-300 uppercase tracking-widest">Triggering the mTOR Pathway</p>
+</div>
+<div class="unicode-icon text-lime-400">🍳</div>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+<div>
+<p class="text-sm text-slate-300 mb-4">Your first meal must transition the body from an overnight catabolic state into an active anabolic state by triggering muscle protein synthesis. The biological key is the <strong>Leucine Threshold</strong>.</p>
+<ul class="space-y-3">
+<li class="flex items-start gap-2 text-sm text-slate-200">
+<span class="text-lime-400">▹</span> <strong>3 Pasture-Raised Eggs or Greek Yogurt:</strong> Yields ~30g complete protein.
+</li>
+<li class="flex items-start gap-2 text-sm text-slate-200">
+<span class="text-lime-400">▹</span> <strong>1/2 Cup Dark Berries:</strong> Anthocyanins combat oxidative stress.
+</li>
+<li class="flex items-start gap-2 text-sm text-slate-200">
+<span class="text-lime-400">▹</span> <strong>1 Tbsp EVOO:</strong> Oleic acid for fat-soluble vitamin absorption without insulin spikes.
+</li>
+</ul>
+</div>
+<div class="chart-container" style="height: 250px;">
+<canvas id="leucineChart"></canvas>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="glass-panel p-8 md:p-12 rounded-3xl border-cyan-500/30 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-8 opacity-10">
+<span class="text-9xl">🦠</span>
+</div>
+<div class="relative z-10">
+<div class="text-center mb-10">
+<h2 class="text-4xl font-display font-bold mb-4 gradient-text-cyan">Phase 2: Mid-Day Microbiome Matrix</h2>
+<p class="text-slate-300 max-w-3xl mx-auto text-lg">The human gut microbiome acts as an independent endocrine organ. For lunch, the physiological focus shifts from anabolic protein synthesis to fueling beneficial microbes via dietary fibers and polyphenols to drive the biosynthesis of Short-Chain Fatty Acids (SCFAs) like butyrate.</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="bg-slate-800/80 p-6 rounded-xl border border-slate-700">
+<div class="text-4xl mb-4">🐟</div>
+<h4 class="font-bold text-cyan-400 text-lg mb-2">Wild Alaskan Salmon</h4>
+<p class="text-sm text-slate-300">Rich in EPA/DHA omega-3 fatty acids, downregulating systemic inflammatory cytokines via the gut-brain axis.</p>
+</div>
+<div class="bg-slate-800/80 p-6 rounded-xl border border-slate-700">
+<div class="text-4xl mb-4">🥗</div>
+<h4 class="font-bold text-cyan-400 text-lg mb-2">Cruciferous Greens</h4>
+<p class="text-sm text-slate-300">Arugula and dandelion greens provide prebiotics; glucosinolates support hepatic phase 2 detoxification.</p>
+</div>
+<div class="bg-slate-800/80 p-6 rounded-xl border border-slate-700">
+<div class="text-4xl mb-4">🌾</div>
+<h4 class="font-bold text-cyan-400 text-lg mb-2">Resistant Starches</h4>
+<p class="text-sm text-slate-300">Lentils or cooled quinoa bypass the small intestine to feed colonic flora, tightening the epithelial barrier.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section>
+<div class="text-center mb-12">
+<h2 class="text-4xl font-display font-bold mb-4 gradient-text-pink">Phase 3: Evening Restoration</h2>
+<p class="text-slate-400 max-w-2xl mx-auto text-lg">Triggering parasympathetic dominance. The evening protocol rapidly lowers core body temperature, stimulates melatonin synthesis, and maximizes nocturnal cellular repair and autophagy.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<div class="lg:col-span-6 space-y-8">
+<div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-pink-500/50 overflow-hidden shadow-2xl">
+<div class="bg-pink-900/40 py-4 px-6 border-b border-pink-500/30 flex justify-between items-center">
+<div>
+<h3 class="text-xl font-display font-bold text-pink-400">Early Dinner</h3>
+<p class="text-xs text-slate-300 uppercase tracking-widest">Circadian Sunset Protocol</p>
+</div>
+<div class="unicode-icon text-pink-400">🍠</div>
+</div>
+<div class="p-6">
+<p class="text-sm text-slate-300 mb-4">Consumed 3+ hours before sleep. High in tryptophan and easily digestible to prevent gastric distension from interfering with vagal tone.</p>
+<ul class="space-y-3">
+<li class="flex items-start gap-2 text-sm text-slate-200">
+<span class="text-pink-400">▹</span> <strong>Pastured Turkey / Tofu:</strong> Provides L-tryptophan, the biochemical precursor to serotonin and melatonin.
+</li>
+<li class="flex items-start gap-2 text-sm text-slate-200">
+<span class="text-pink-400">▹</span> <strong>Roasted Sweet Potato:</strong> Complex carbs drive circulating tryptophan across the blood-brain barrier.
+</li>
+<li class="flex items-start gap-2 text-sm text-slate-200">
+<span class="text-pink-400">▹</span> <strong>Bone Broth:</strong> Easily digestible micronutrients that don't heavily tax late-day pancreatic enzymes.
+</li>
+</ul>
+</div>
+</div>
+
+<div class="glass-panel p-6 rounded-2xl border-l-4 border-l-pink-500">
+<div class="flex items-center gap-4 mb-4">
+<span class="unicode-icon text-pink-400">🧬</span>
+<h4 class="font-bold text-slate-100 text-xl">Systemic Pre-Fueling</h4>
+</div>
+<p class="text-sm text-slate-300"><strong>60 mins pre-sleep:</strong> Consume 15g of glycine-rich collagen peptides. Glycine acts as an inhibitory neurotransmitter to lower core body temperature, while amino acids support the nocturnal pulse of tissue repair, counteracting sugar-driven glycation.</p>
+</div>
+</div>
+
+<div class="lg:col-span-6 space-y-6 pl-8 relative">
+<div class="timeline-track hidden md:block"></div>
+
+<div class="glass-panel p-5 rounded-xl relative border-l-4 border-l-pink-400">
+<div class="timeline-dot bg-pink-400 hidden md:block"></div>
+<div class="flex items-center gap-4 mb-2">
+<span class="unicode-icon text-pink-400">🛀</span>
+<div>
+<h4 class="font-bold text-slate-100 text-lg">Stage 1: Passive Heating</h4>
+<p class="text-xs text-slate-400 uppercase tracking-widest">Thermoregulatory Induction</p>
+</div>
+</div>
+<p class="text-sm text-slate-300">Take a 40-42.5°C bath. This induces peripheral vasodilation. Exiting into a cool room causes widely dilated vessels to rapidly dissipate heat, creating a steep core temperature drop that accelerates entry into Slow Wave Sleep.</p>
+</div>
+
+<div class="glass-panel p-5 rounded-xl relative border-l-4 border-l-pink-400">
+<div class="timeline-dot bg-pink-400 hidden md:block"></div>
+<div class="flex items-center gap-4 mb-2">
+<span class="unicode-icon text-pink-400">🫧</span>
+<div>
+<h4 class="font-bold text-slate-100 text-lg">Stages 3-6: The Double Cleanse & Seal</h4>
+<p class="text-xs text-slate-400 uppercase tracking-widest">Cutaneous Decontamination</p>
+</div>
+</div>
+<p class="text-sm text-slate-300">Dissolve non-polar residues (sunscreen/sebum) with an oil cleanser, follow with a water-based cleanser. Apply postbiotic essence (Bifida) for epigenetic barrier restoration. Apply targeted actives (nocturnal chronopharmacology). Seal with a 3:1:1 ceramide occlusive to halt nocturnal TEWL.</p>
+</div>
+
+<div class="glass-panel p-5 rounded-xl relative border-l-4 border-l-pink-400">
+<div class="timeline-dot bg-pink-400 hidden md:block"></div>
+<div class="flex items-center gap-4 mb-2">
+<span class="unicode-icon text-pink-400">🦷</span>
+<div>
+<h4 class="font-bold text-slate-100 text-lg">Stage 7: Biomimetic Oral Care</h4>
+<p class="text-xs text-slate-400 uppercase tracking-widest">Nano-Hydroxyapatite</p>
+</div>
+</div>
+<p class="text-sm text-slate-300">Salivary flow drops to near zero during sleep. Use nano-hydroxyapatite toothpaste before bed. These microscopic crystals biomimic natural tooth structure, physically replacing lost calcium and phosphate ions overnight.</p>
+</div>
+</div>
+</div>
+</section>
+
+</main>
+
+<script>
+function wrapLabel(label) {
+    if (label.length <= 16) return label;
+    let words = label.split(' ');
+    let lines = [];
+    let currentLine = '';
+    for (let word of words) {
+        if ((currentLine + word).length > 16) {
+            if (currentLine) lines.push(currentLine.trim());
+            currentLine = word + ' ';
+        } else {
+            currentLine += word + ' ';
+        }
+    }
+    if (currentLine) lines.push(currentLine.trim());
+    return lines;
+}
+
+const tooltipConfig = {
+    plugins: {
+        tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            titleFont: { family: 'Inter', size: 14, weight: 'bold' },
+            bodyFont: { family: 'Inter', size: 13 },
+            padding: 12,
+            borderColor: 'rgba(51, 65, 85, 1)',
+            borderWidth: 1,
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    } else {
+                        return label;
+                    }
+                }
+            }
+        }
+    }
+};
+
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.font.family = 'Inter';
+
+const ctxRadar = document.getElementById('radarChart').getContext('2d');
+new Chart(ctxRadar, {
+    type: 'radar',
+    data: {
+        labels: [
+            wrapLabel("Insulin Sensitivity"),
+            wrapLabel("Cellular Autophagy"),
+            wrapLabel("Telomere Preservation"),
+            wrapLabel("SCFA Production"),
+            wrapLabel("Slow Wave Sleep")
+        ],
+        datasets: [{
+            label: 'Bio-Optimized Routine',
+            data: [95, 90, 85, 92, 96],
+            backgroundColor: 'rgba(34, 211, 238, 0.2)',
+            borderColor: '#22d3ee',
+            pointBackgroundColor: '#22d3ee',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: '#22d3ee'
+        }, {
+            label: 'Standard Western Diet',
+            data: [45, 30, 40, 35, 55],
+            backgroundColor: 'rgba(244, 114, 182, 0.2)',
+            borderColor: '#f472b6',
+            pointBackgroundColor: '#f472b6',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: '#f472b6'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            r: {
+                angleLines: { color: 'rgba(51, 65, 85, 0.5)' },
+                grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                pointLabels: { color: '#cbd5e1', font: { size: 12, family: 'Inter' } },
+                ticks: { display: false, min: 0, max: 100 }
+            }
+        },
+        ...tooltipConfig
+    }
+});
+
+const ctxHormone = document.getElementById('hormoneChart').getContext('2d');
+new Chart(ctxHormone, {
+    type: 'line',
+    data: {
+        labels: ['Wake', '+30m', '+60m', '+90m (Coffee)', '+120m', '+4hrs', '+8hrs'],
+        datasets: [
+            {
+                label: 'Natural Cortisol (CAR)',
+                data: [40, 85, 95, 80, 65, 45, 30],
+                borderColor: '#4ade80',
+                backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true
+            },
+            {
+                label: 'Adenosine Clearance',
+                data: [60, 40, 20, 10, 15, 30, 50],
+                borderColor: '#94a3b8',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                tension: 0.4
+            },
+            {
+                label: 'Delayed Caffeine Impact',
+                data: [0, 0, 0, 85, 90, 60, 20],
+                borderColor: '#22d3ee',
+                borderWidth: 3,
+                tension: 0.4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: { display: false, min: 0, max: 100 },
+            x: { grid: { display: false, drawBorder: false } }
+        },
+        plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true } },
+            ...tooltipConfig.plugins
+        }
+    }
+});
+
+const ctxLeucine = document.getElementById('leucineChart').getContext('2d');
+new Chart(ctxLeucine, {
+    type: 'bar',
+    data: {
+        labels: [
+            wrapLabel("Optimized Breakfast (Eggs/Yogurt)"), 
+            wrapLabel("Standard Oatmeal"), 
+            wrapLabel("Avocado Toast")
+        ],
+        datasets: [{
+            label: 'Grams of Leucine',
+            data: [3.2, 1.1, 0.8],
+            backgroundColor: ['#4ade80', '#64748b', '#64748b'],
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        scales: {
+            x: { 
+                grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                title: { display: true, text: 'Grams of Leucine', color: '#cbd5e1' },
+                max: 4
+            },
+            y: { grid: { display: false } }
+        },
+        plugins: {
+            legend: { display: false },
+            annotation: {
+                annotations: {
+                    line1: {
+                        type: 'line',
+                        xMin: 2.5,
+                        xMax: 2.5,
+                        borderColor: '#f472b6',
+                        borderWidth: 2,
+                        borderDash: [4, 4],
+                        label: {
+                            display: true,
+                            content: 'Activation Threshold (2.5g)',
+                            position: 'end',
+                            backgroundColor: 'rgba(244, 114, 182, 0.8)'
+                        }
+                    }
+                }
+            },
+            ...tooltipConfig.plugins
+        }
+    }
+});
+</script>
+</body>
+</html>
