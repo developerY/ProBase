@@ -1,31 +1,16 @@
 package com.zoewave.probase.features.health.meals.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -43,6 +28,8 @@ import com.zoewave.probase.features.health.meals.ui.BioOptimizedColors
 @Composable
 fun MealDetailScreen(
     meal: Meal,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
     onBack: () -> Unit
 ) {
     val accentColor = when (meal.phase) {
@@ -51,13 +38,46 @@ fun MealDetailScreen(
         MetabolicPhase.Evening -> BioOptimizedColors.Pink400
     }
 
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text("Delete Meal?", color = Color.White) },
+            text = { Text("Are you sure you want to remove this metabolic protocol from your history?", color = Color(0xFFcbd5e1)) },
+            confirmButton = {
+                TextButton(onClick = { 
+                    showDeleteConfirmation = false
+                    onDelete() 
+                }) {
+                    Text("DELETE", color = BioOptimizedColors.Pink400, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text("CANCEL", color = Color.White)
+                }
+            },
+            containerColor = BioOptimizedColors.Slate900,
+            shape = RoundedCornerShape(24.dp)
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(meal.name, color = Color.White, fontWeight = FontWeight.Bold) },
+                title = { Text(meal.name, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onEdit) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
+                    }
+                    IconButton(onClick = { showDeleteConfirmation = true }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White.copy(alpha = 0.6f))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = BioOptimizedColors.Slate950)
@@ -229,7 +249,7 @@ fun MealDetailScreen(
 }
 
 @Composable
-fun NutritionItem(label: String, value: String, color: Color) {
+private fun NutritionItem(label: String, value: String, color: Color) {
     Column(modifier = Modifier.padding(end = 24.dp)) {
         Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color(0xFF94a3b8))
         Text(text = value, style = MaterialTheme.typography.titleMedium, color = color, fontWeight = FontWeight.Bold)

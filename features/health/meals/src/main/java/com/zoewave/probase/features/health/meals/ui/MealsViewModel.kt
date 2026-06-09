@@ -38,7 +38,18 @@ class MealsViewModel @Inject constructor(
         }
     }
 
-    fun selectMeal(meal: Meal?) {
+    fun onEvent(event: MealsUiEvent) {
+        when (event) {
+            is MealsUiEvent.SelectMeal -> selectMeal(event.meal)
+            is MealsUiEvent.SetAddingMeal -> setAddingMeal(event.isAdding)
+            is MealsUiEvent.AddCapturedMeal -> addCapturedMeal(event.imageUri)
+            is MealsUiEvent.DeleteMeal -> deleteMeal(event.mealId)
+            is MealsUiEvent.EditMeal -> setEditingMeal(event.meal)
+            is MealsUiEvent.UpdateMeal -> updateMeal(event.meal)
+        }
+    }
+
+    private fun selectMeal(meal: Meal?) {
         _uiState.update { state ->
             if (state is MealsUiState.Success) {
                 state.copy(selectedMeal = meal)
@@ -46,7 +57,7 @@ class MealsViewModel @Inject constructor(
         }
     }
 
-    fun setAddingMeal(isAdding: Boolean) {
+    private fun setAddingMeal(isAdding: Boolean) {
         _uiState.update { state ->
             if (state is MealsUiState.Success) {
                 state.copy(isAddingMeal = isAdding)
@@ -54,17 +65,38 @@ class MealsViewModel @Inject constructor(
         }
     }
 
-    fun addCapturedMeal(imageUri: String) {
-        // In a real app, we might use AI to analyze the image.
-        // For now, we'll add a placeholder meal with the captured image.
+    private fun setEditingMeal(meal: Meal?) {
+        _uiState.update { state ->
+            if (state is MealsUiState.Success) {
+                state.copy(editingMeal = meal)
+            } else state
+        }
+    }
+
+    private fun deleteMeal(mealId: String) {
+        repository.deleteMeal(mealId)
+        _uiState.update { state ->
+            if (state is MealsUiState.Success) {
+                state.copy(selectedMeal = null)
+            } else state
+        }
+    }
+
+    private fun updateMeal(meal: Meal) {
+        repository.updateMeal(meal)
+        setEditingMeal(null)
+        selectMeal(meal)
+    }
+
+    private fun addCapturedMeal(imageUri: String) {
         val newMeal = Meal(
             id = UUID.randomUUID().toString(),
             name = "Captured Meal",
             description = "A new meal added via camera.",
             scientificFocus = "Pending Analysis",
-            phase = MetabolicPhase.MidDay, // Default to MidDay or detect based on time
+            phase = MetabolicPhase.MidDay,
             imageUrl = imageUri,
-            nutrition = NutritionInfo(0, 0f, 0f, 0f), // Placeholders
+            nutrition = NutritionInfo(0, 0f, 0f, 0f),
             ingredients = emptyList(),
             steps = emptyList()
         )

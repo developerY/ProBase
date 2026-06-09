@@ -77,4 +77,14 @@ class MealsRepository @Inject constructor() {
     fun addMeal(meal: Meal) {
         _meals.value = _meals.value + meal
     }
+
+    fun deleteMeal(mealId: String) {
+        _meals.value = _meals.value.filter { it.id != mealId }
+    }
+
+    fun updateMeal(meal: Meal) {
+        _meals.value = _meals.value.map {
+            if (it.id == meal.id) meal else it
+        }
+    }
 }

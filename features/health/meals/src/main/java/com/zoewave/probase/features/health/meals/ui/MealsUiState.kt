@@ -7,7 +7,17 @@ sealed interface MealsUiState {
     data class Success(
         val meals: List<Meal>,
         val selectedMeal: Meal? = null,
-        val isAddingMeal: Boolean = false
+        val isAddingMeal: Boolean = false,
+        val editingMeal: Meal? = null
     ) : MealsUiState
     data class Error(val message: String) : MealsUiState
+}
+
+sealed interface MealsUiEvent {
+    data class SelectMeal(val meal: Meal?) : MealsUiEvent
+    data class SetAddingMeal(val isAdding: Boolean) : MealsUiEvent
+    data class AddCapturedMeal(val imageUri: String) : MealsUiEvent
+    data class DeleteMeal(val mealId: String) : MealsUiEvent
+    data class EditMeal(val meal: Meal?) : MealsUiEvent
+    data class UpdateMeal(val meal: Meal) : MealsUiEvent
 }
