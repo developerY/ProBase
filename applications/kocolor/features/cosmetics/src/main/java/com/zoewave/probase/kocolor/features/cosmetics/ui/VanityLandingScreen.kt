@@ -172,21 +172,21 @@ fun VanityLandingScreen(
                     
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         val sections = listOf(
-                            "Skincare & Prep" to (Color(0xFFF7F2EB) to "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&q=80"),
-                            "Complexion" to (Color(0xFFF9F6F0) to "https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=400&q=80"),
-                            "Color & Dimension" to (Color(0xFFFDEEF4) to "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80"),
-                            "Eyes & Brows" to (Color(0xFFE8F1FD) to "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400&q=80"),
-                            "Lips" to (Color(0xFFFEECEB) to "https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=400&q=80")
+                            "Skincare & Prep" to (Color(0xFFF7F2EB) to R.drawable.vanity_skincare),
+                            "Complexion" to (Color(0xFFF9F6F0) to R.drawable.vanity_complexion),
+                            "Color & Dimension" to (Color(0xFFFDEEF4) to R.drawable.vanity_color),
+                            "Eyes & Brows" to (Color(0xFFE8F1FD) to R.drawable.vanity_eyes),
+                            "Lips" to (Color(0xFFFEECEB) to R.drawable.vanity_lips)
                         )
                         
                         sections.forEach { (name, props) ->
-                            val (bgColor, placeholderUrl) = props
+                            val (bgColor, fallbackImage) = props
                             val metadata = uiState.categoriesMetadata.entries.find { it.key.contains(name, ignoreCase = true) }?.value
                             VanityCategoryCard(
                                 name = name,
                                 metadata = metadata,
                                 baseColor = bgColor,
-                                placeholderUrl = placeholderUrl,
+                                fallbackImage = fallbackImage,
                                 navTo = navTo,
                                 modifier = Modifier.fillMaxWidth()
                             )

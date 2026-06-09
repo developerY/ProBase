@@ -292,18 +292,23 @@ fun HomeHeader(
             .background(Brush.linearGradient(colors = gradientColors))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), expressiveShape)
     ) {
-        // Frosted Glass Background Image
-        uiState.backgroundUrl?.let { url ->
-            coil.compose.AsyncImage(
-                model = url,
-                contentDescription = null,
-                modifier = Modifier
-                    .matchParentSize()
-                    .alpha(0.4f)
-                    .blur(16.dp), // Frosted glass effect
-                contentScale = ContentScale.Crop
-            )
+        // Localized Frosted Glass Background Image
+        val bgRes = when {
+            uiState.weather?.conditions?.contains(com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherCondition.THUNDER) == true -> R.drawable.home_storm_bg
+            uiState.weather?.conditions?.contains(com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherCondition.RAINY) == true -> R.drawable.home_rainy_bg
+            uiState.weather?.conditions?.contains(com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherCondition.CLOUDY) == true -> R.drawable.home_cloudy_bg
+            else -> R.drawable.home_sunny_bg
         }
+
+        AsyncImage(
+            model = bgRes,
+            contentDescription = null,
+            modifier = Modifier
+                .matchParentSize()
+                .alpha(0.4f)
+                .blur(16.dp), // Frosted glass effect
+            contentScale = ContentScale.Crop
+        )
 
         Column(
             modifier = Modifier.padding(32.dp),
@@ -528,7 +533,7 @@ fun BoutiqueCard(modifier: Modifier = Modifier) {
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             AsyncImage(
-                model = "https://images.unsplash.com/photo-1594122230689-45899d9e6f69?auto=format&fit=crop&q=80&w=800",
+                model = R.drawable.boutique_bg,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()

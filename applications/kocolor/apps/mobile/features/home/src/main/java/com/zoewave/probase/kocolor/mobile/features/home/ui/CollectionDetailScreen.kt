@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.model.FashionAdvice
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.MakeupSuggestion
@@ -131,7 +132,7 @@ fun CollectionDetailScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     AsyncImage(
-                        model = advice.clothesUri ?: "https://images.unsplash.com/photo-1539109136881-3be0616bc469?w=800&q=80",
+                        model = advice.clothesUri ?: R.drawable.advice_clothes_fallback,
                         contentDescription = "Hero Image",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -192,7 +193,7 @@ fun CollectionDetailScreen(
                     VerticalCollectionItem(
                         title = suggested.name,
                         description = suggested.description ?: "Professional selected piece for this look.",
-                        imageModel = suggested.imageUrl ?: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=200&q=80",
+                        imageModel = suggested.imageUrl ?: R.drawable.advice_clothes_fallback,
                         isOwned = suggested.isOwned
                     )
                     Spacer(Modifier.height(16.dp))
@@ -216,7 +217,7 @@ fun CollectionDetailScreen(
                 VerticalCollectionItem(
                     title = makeup.suggestedProductName ?: makeup.category,
                     description = makeup.advice,
-                    imageModel = makeup.suggestedProductImageUrl ?: "https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=200&q=80",
+                    imageModel = makeup.suggestedProductImageUrl ?: R.drawable.advice_makeup_fallback,
                     isOwned = makeup.productId != null
                 )
                 Spacer(Modifier.height(16.dp))

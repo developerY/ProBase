@@ -166,8 +166,8 @@ fun WardrobeLandingScreen(
                         val sections = listOf(
                             "Tops" to (Color(0xFFF7F2EB) to R.drawable.tops),
                             "Bottoms" to (Color(0xFFF9F6F0) to R.drawable.bottom),
-                            "Shoes" to (Color(0xFFE8F1FD) to "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80"),
-                            "Accessories" to (Color(0xFFF3EBFD) to "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80")
+                            "Shoes" to (Color(0xFFE8F1FD) to R.drawable.wardrobe_shoes),
+                            "Accessories" to (Color(0xFFF3EBFD) to R.drawable.wardrobe_accessories)
                         )
                         
                         sections.forEach { (name, props) ->

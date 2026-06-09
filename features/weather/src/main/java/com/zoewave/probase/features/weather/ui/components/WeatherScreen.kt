@@ -82,7 +82,7 @@ fun WeatherScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             // Spectacular Scenic Background
             AsyncImage(
-                model = "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80&w=1200",
+                model = R.drawable.weather_bg,
                 contentDescription = null,
                 modifier = Modifier.matchParentSize().blur(20.dp),
                 contentScale = ContentScale.Crop

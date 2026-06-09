@@ -4,6 +4,8 @@ import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.model.*
 
 object CosmeticDefaults {
+    private const val RES_PREFIX = "android.resource://com.zoewave.probase.kocolor.db/drawable/"
+
     fun getDefaultCosmetics(): List<CosmeticItemEntity> {
         val now = System.currentTimeMillis()
         val month = 30L * 24 * 60 * 60 * 1000
@@ -26,7 +28,7 @@ object CosmeticDefaults {
                 usageCount = 45,
                 isOpened = true,
                 openedDate = now - (3 * month),
-                imageUrl = "https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=400&q=80"
+                imageUrl = "${RES_PREFIX}default_cosmetic_1"
             ),
             
             // --- Complexion ---
@@ -47,7 +49,7 @@ object CosmeticDefaults {
                 usageCount = 120,
                 isOpened = true,
                 openedDate = now - (23 * month),
-                imageUrl = "https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=400&q=80",
+                imageUrl = "${RES_PREFIX}default_cosmetic_2",
                 volume = "42ml",
                 amountRemaining = 14.7,
                 amountPerUse = 0.35

@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesEvent
 import com.zoewave.probase.kocolor.model.CosmeticItem
 import com.zoewave.probase.kocolor.model.JournalEntry
@@ -54,7 +55,7 @@ fun StepHeroPage(
     }
 
     // Default hero image if no product image
-    val heroImageUrl = linkedProducts.firstOrNull()?.imageUrl ?: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=800"
+    val heroImageUrl = linkedProducts.firstOrNull()?.imageUrl ?: R.drawable.routine_hero_fallback
 
     if (showJournalDialog) {
         AlertDialog(

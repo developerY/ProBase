@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FeatureInventoryScreen(
     onNavigateToHealth: () -> Unit,
+    onNavigateToHealthMeals: () -> Unit,
     onNavigateToWeather: () -> Unit,
     onNavigateToBle: () -> Unit,
     onNavigateToNfc: () -> Unit,
@@ -70,6 +71,14 @@ fun FeatureInventoryScreen(
                     description = "Google Health Connect integration, steps, and activity.",
                     icon = Icons.Default.Favorite,
                     onClick = onNavigateToHealth
+                )
+            }
+            item {
+                FeatureCard(
+                    title = "Health Meals",
+                    description = "Manage meals, nutrition, and capture food via camera.",
+                    icon = Icons.Default.Favorite, // Use same icon or a different one
+                    onClick = onNavigateToHealthMeals
                 )
             }
             item {

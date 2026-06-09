@@ -31,7 +31,7 @@ fun VanityCategoryCard(
     name: String,
     metadata: CategoryMetadata?,
     baseColor: Color,
-    placeholderUrl: String,
+    fallbackImage: Any,
     navTo: (KoColorRoute) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -62,7 +62,7 @@ fun VanityCategoryCard(
         Box(modifier = Modifier.fillMaxSize()) {
             // 1. Background Imagery
             AsyncImage(
-                model = metadata?.representativeImageUrl ?: placeholderUrl,
+                model = metadata?.representativeImageUrl ?: fallbackImage,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize().alpha(0.3f),
                 contentScale = ContentScale.Crop
@@ -197,7 +197,7 @@ private fun VanityCategoryCardPreview() {
             name = "Complexion",
             metadata = CategoryMetadata(itemCount = 12, totalValue = 540.0),
             baseColor = Color(0xFFF9F6F0),
-            placeholderUrl = "",
+            fallbackImage = R.drawable.vanity_complexion,
             navTo = {}
         )
     }
