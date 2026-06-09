@@ -153,7 +153,11 @@ class HomeViewModel @Inject constructor(
         val startOfDay = date
         val endOfDay = date + 24 * 60 * 60 * 1000
         routineDao.getRoutinesForDay(startOfDay, endOfDay).onEach { entities ->
-            if (entities.size < 3) initializeDay(date, entities)
+            if (entities.size < 3) {
+                initializeDay(date, entities)
+            } else {
+                patchRoutineMetadata(entities)
+            }
         }
     }
 
@@ -374,6 +378,20 @@ class HomeViewModel @Inject constructor(
                     steps = RoutineDefaults.getEveningRoutine(),
                     date = date
                 ))
+            }
+        }
+    }
+
+    private fun patchRoutineMetadata(entities: List<RoutineEntity>) {
+        viewModelScope.launch {
+            entities.forEach { entity ->
+                // Identify mislabeled meals routines: 5 steps but labeled as Evening
+                if (entity.time == RoutineTime.EVENING && entity.steps.size == 5) {
+                    routineDao.updateRoutine(entity.copy(
+                        title = "Meals Routine",
+                        time = RoutineTime.MEALS
+                    ))
+                }
             }
         }
     }
