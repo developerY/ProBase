@@ -339,18 +339,6 @@ class HomeViewModel @Inject constructor(
                 locationName = if (isFallback) "Location could not be found" else response.name
             )
 
-            // Dynamic Unsplash Background
-            val weatherKeyword = when {
-                conditions.contains(LayeredWeatherCondition.THUNDER) -> "storm"
-                conditions.contains(LayeredWeatherCondition.RAINY) -> "rainy"
-                conditions.contains(LayeredWeatherCondition.CLOUDY) -> "cloudy"
-                conditions.contains(LayeredWeatherCondition.SUNNY) -> "sunny"
-                else -> "nature"
-            }
-            // Using Source Unsplash redirect for efficiency as requested
-            // Note: In production we'd use Unsplash API and cached IDs
-            _headerBackgroundUrl.value = "https://images.unsplash.com/featured/?skincare,weather,$weatherKeyword"
-
             // Environmental Trigger Logic
             if (envContext.uvIndex > 3.0) {
                 _beautyTip.value = "☀️ High UV detected. Prioritize SPF in your ritual today."
