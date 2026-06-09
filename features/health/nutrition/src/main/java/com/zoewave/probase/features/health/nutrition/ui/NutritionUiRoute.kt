@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import com.zoewave.probase.features.health.nutrition.ui.components.NutritionRitu
 import com.zoewave.probase.features.health.nutrition.ui.components.NutritionRitualStep
 import com.zoewave.probase.kocolor.model.BeautyRoutine
 import com.zoewave.probase.kocolor.model.RoutineStep
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
 fun NutritionUiRoute(
@@ -82,6 +84,11 @@ fun NutritionScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
+                actions = {
+                    IconButton(onClick = { onEvent(NutritionUiEvent.Refresh) }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
@@ -93,7 +100,7 @@ fun NutritionScreen(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        listOf(Color(0xFFE1F5FE), Color.White)
+                        listOf(Color(0xFFF9F7F2), Color.White)
                     )
                 )
                 .padding(padding)
