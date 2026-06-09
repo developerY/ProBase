@@ -48,6 +48,7 @@ import javax.inject.Inject
 data class HomeUiState(
     val fashionProfile: FashionProfile? = null,
     val morningRoutine: BeautyRoutine? = null,
+    val mealsRoutine: BeautyRoutine? = null,
     val eveningRoutine: BeautyRoutine? = null,
     val popularCosmetics: List<CosmeticItem> = emptyList(),
     val popularClothing: List<ClothingItem> = emptyList(),
@@ -102,10 +103,16 @@ class HomeViewModel @Inject constructor(
     }.timeInMillis)
 
     private val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    private val isDaytime = hour in 6..17
+    private val activeRoutineTime = when {
+        hour in 5..9 -> RoutineTime.MORNING
+        hour in 10..19 -> RoutineTime.MEALS
+        else -> RoutineTime.EVENING
+    }
+    
+    private val isDaytime = activeRoutineTime != RoutineTime.EVENING
 
     private val _beautyTip = MutableStateFlow(
-        if (isDaytime) RoutineDefaults.morningAdvice.random() 
+        if (activeRoutineTime == RoutineTime.MORNING) RoutineDefaults.morningAdvice.random() 
         else RoutineDefaults.eveningAdvice.random()
     )
 
@@ -146,7 +153,7 @@ class HomeViewModel @Inject constructor(
         val startOfDay = date
         val endOfDay = date + 24 * 60 * 60 * 1000
         routineDao.getRoutinesForDay(startOfDay, endOfDay).onEach { entities ->
-            if (entities.isEmpty()) initializeDay(date)
+            if (entities.size < 3) initializeDay(date, entities)
         }
     }
 
@@ -217,6 +224,7 @@ class HomeViewModel @Inject constructor(
         HomeUiState(
             fashionProfile = profile,
             morningRoutine = routines.find { it.time == RoutineTime.MORNING }?.toModel(),
+            mealsRoutine = routines.find { it.time == RoutineTime.MEALS }?.toModel(),
             eveningRoutine = routines.find { it.time == RoutineTime.EVENING }?.toModel(),
             popularCosmetics = cosmetics.sortedByDescending { it.timestamp }.take(5).map { it.toModel() },
             popularClothing = clothing.sortedByDescending { it.timestamp }.take(5).map { it.toModel() },
@@ -352,20 +360,33 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun initializeDay(date: Long) {
+    private fun initializeDay(date: Long, existing: List<RoutineEntity> = emptyList()) {
+        val existingTimes = existing.map { it.time }.toSet()
         viewModelScope.launch {
-            routineDao.insertRoutine(RoutineEntity(
-                title = "morning beautiful routine",
-                time = RoutineTime.MORNING,
-                steps = RoutineDefaults.getMorningRoutine(),
-                date = date
-            ))
-            routineDao.insertRoutine(RoutineEntity(
-                title = "Evening Routine",
-                time = RoutineTime.EVENING,
-                steps = RoutineDefaults.getEveningRoutine(),
-                date = date
-            ))
+            if (RoutineTime.MORNING !in existingTimes) {
+                routineDao.insertRoutine(RoutineEntity(
+                    title = "morning beautiful routine",
+                    time = RoutineTime.MORNING,
+                    steps = RoutineDefaults.getMorningRoutine(),
+                    date = date
+                ))
+            }
+            if (RoutineTime.MEALS !in existingTimes) {
+                routineDao.insertRoutine(RoutineEntity(
+                    title = "Meals Routine",
+                    time = RoutineTime.MEALS,
+                    steps = RoutineDefaults.getMealsRoutine(),
+                    date = date
+                ))
+            }
+            if (RoutineTime.EVENING !in existingTimes) {
+                routineDao.insertRoutine(RoutineEntity(
+                    title = "Evening Routine",
+                    time = RoutineTime.EVENING,
+                    steps = RoutineDefaults.getEveningRoutine(),
+                    date = date
+                ))
+            }
         }
     }
 

@@ -6,26 +6,27 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.rounded.Fastfood
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.features.health.nutrition.ui.components.NutritionStageCard
+import com.zoewave.probase.features.health.nutrition.ui.components.NutritionRitualHeader
+import com.zoewave.probase.features.health.nutrition.ui.components.NutritionRitualStep
+import com.zoewave.probase.kocolor.model.BeautyRoutine
+import com.zoewave.probase.kocolor.model.RoutineStep
 
 @Composable
 fun NutritionUiRoute(
     onBack: () -> Unit,
+    onNavigateToKnowledgeHub: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: NutritionViewModel = hiltViewModel(),
 ) {
@@ -35,6 +36,7 @@ fun NutritionUiRoute(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         onBack = onBack,
+        onNavigateToKnowledgeHub = onNavigateToKnowledgeHub,
         modifier = modifier
     )
 }
@@ -44,12 +46,14 @@ internal fun NutritionUiRoute(
     uiState: NutritionUiState,
     onEvent: (NutritionUiEvent) -> Unit,
     onBack: () -> Unit,
+    onNavigateToKnowledgeHub: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NutritionScreen(
         uiState = uiState,
         onEvent = onEvent,
         onBack = onBack,
+        onNavigateToKnowledgeHub = onNavigateToKnowledgeHub,
         modifier = modifier
     )
 }
@@ -60,6 +64,7 @@ fun NutritionScreen(
     uiState: NutritionUiState,
     onEvent: (NutritionUiEvent) -> Unit,
     onBack: () -> Unit,
+    onNavigateToKnowledgeHub: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -67,7 +72,7 @@ fun NutritionScreen(
             CenterAlignedTopAppBar(
                 title = { 
                     Text(
-                        text = "Nutrition Protocol", 
+                        text = "Meals Ritual", 
                         fontFamily = FontFamily.Serif, 
                         fontWeight = FontWeight.Bold
                     ) 
@@ -111,37 +116,22 @@ fun NutritionScreen(
                             .verticalScroll(rememberScrollState())
                             .padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(32.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // 1. Header
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Rounded.Fastfood,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(48.dp)
-                            )
-                            Spacer(Modifier.height(16.dp))
-                            Text(
-                                text = "Daily Bio-Sync",
-                                style = MaterialTheme.typography.displaySmall,
-                                fontFamily = FontFamily.Serif,
-                                fontWeight = FontWeight.Black
-                            )
-                            uiState.nextMetabolicWindow?.let {
-                                Text(
-                                    text = "Next window at $it",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.sp
-                                )
-                            }
-                        }
+                        val routine: BeautyRoutine = uiState.routine
+                        
+                        NutritionRitualHeader(
+                            completedCount = routine.steps.count { it.isCompleted },
+                            totalCount = routine.steps.size,
+                            nextWindow = uiState.nextMetabolicWindow
+                        )
 
-                        // 2. Protocol Stages
-                        uiState.routine.stages.forEach { stage ->
-                            NutritionStageCard(stage = stage)
+                        routine.steps.forEach { step: RoutineStep ->
+                            NutritionRitualStep(
+                                step = step,
+                                onToggle = { onEvent(NutritionUiEvent.ToggleStage(step.id)) },
+                                onKnowledgeHub = { onNavigateToKnowledgeHub(step.id) }
+                            )
                         }
 
                         Spacer(Modifier.height(48.dp))

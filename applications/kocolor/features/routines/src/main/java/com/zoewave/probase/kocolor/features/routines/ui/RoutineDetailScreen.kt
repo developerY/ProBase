@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -84,11 +85,20 @@ fun RoutineDetailScreen(
 ) {
     val routineId = uiState.routineId
     val state = uiState.routinesUiState
-    val routine = if (state.morningRoutine?.id == routineId) state.morningRoutine else state.eveningRoutine
+    val routine = when (routineId) {
+        state.morningRoutine?.id -> state.morningRoutine
+        state.mealsRoutine?.id -> state.mealsRoutine
+        state.eveningRoutine?.id -> state.eveningRoutine
+        else -> null
+    }
     if (routine == null) return
 
-    val isMorning = routine.time == RoutineTime.MORNING
-    val accentColor = if (isMorning) Color(0xFF6B705C) else Color(0xFF457B9D)
+    val accentColor = when (routine.time) {
+        RoutineTime.MORNING -> Color(0xFF6B705C)
+        RoutineTime.MEALS -> Color(0xFFE0C097)
+        RoutineTime.EVENING -> Color(0xFF457B9D)
+        else -> Color.Gray
+    }
 
     var selectedInfoStep by remember { mutableStateOf<RoutineStep?>(null) }
 
@@ -161,14 +171,22 @@ fun RoutineDetailScreen(
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
-                                    imageVector = if (isMorning) Icons.Default.LightMode else Icons.Default.NightsStay,
+                                    imageVector = when (routine.time) {
+                                        RoutineTime.MORNING -> Icons.Default.LightMode
+                                        RoutineTime.MEALS -> Icons.Default.Restaurant
+                                        else -> Icons.Default.NightsStay
+                                    },
                                     contentDescription = null,
                                     tint = accentColor,
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = "CURRENT RITUAL",
+                                    text = when (routine.time) {
+                                        RoutineTime.MORNING -> "CURRENT RITUAL"
+                                        RoutineTime.MEALS -> "BIO-SYNC RITUAL"
+                                        else -> "EVENING RITUAL"
+                                    },
                                     style = MaterialTheme.typography.labelSmall,
                                     color = accentColor,
                                     fontWeight = FontWeight.Black,
@@ -176,7 +194,11 @@ fun RoutineDetailScreen(
                                 )
                             }
                             Text(
-                                text = if (isMorning) "Morning Ritual" else "Evening Ritual",
+                                text = when (routine.time) {
+                                    RoutineTime.MORNING -> "Morning Ritual"
+                                    RoutineTime.MEALS -> "Meals Ritual"
+                                    else -> "Evening Ritual"
+                                },
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontFamily = FontFamily.Serif,
                                 fontWeight = FontWeight.Bold

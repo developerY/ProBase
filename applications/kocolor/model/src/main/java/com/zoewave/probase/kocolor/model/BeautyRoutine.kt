@@ -33,7 +33,7 @@ data class JournalEntry(
 
 @Serializable
 enum class RoutineTime {
-    MORNING, EVENING, OTHER;
+    MORNING, MEALS, EVENING, OTHER;
 
     val displayName: String
         get() = name.lowercase().replaceFirstChar { it.uppercase() }
@@ -44,6 +44,7 @@ enum class RoutineTime {
     val biologicalObjective: String
         get() = when (this) {
             MORNING -> "Protection & Preparation"
+            MEALS -> "Metabolic Synchronization"
             EVENING -> "Restoration & Repair"
             OTHER -> "Maintenance"
         }

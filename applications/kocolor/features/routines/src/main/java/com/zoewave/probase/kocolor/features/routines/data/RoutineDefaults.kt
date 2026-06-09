@@ -129,6 +129,44 @@ object RoutineDefaults {
         )
     )
 
+    fun getMealsRoutine(): List<RoutineStep> = listOf(
+        RoutineStep(
+            id = "n1",
+            title = "Stage 1: Intracellular Pre-Loading",
+            subtitle = "Na+/K+-ATPase Pump Activation",
+            description = "Begin your day by consuming 16 to 20 ounces of water fortified with potassium and magnesium. In a fasted state, your cells rely heavily on the Na+/K+-ATPase pump to maintain their resting membrane potential, a massive energetic requirement that accounts for up to three-fourths of a neuron's total energy expenditure. This transmembrane enzyme utilizes ATP hydrolysis and absolutely requires magnesium as an obligatory cofactor to drive the essential conformational changes of its cytoplasmic headpiece. Pre-loading these cellular osmolytes prevents dangerous intracellular sodium accumulation and protects against mitochondrial calcium overload, ensuring immediate neurological and muscular excitability.",
+            actionLabel = "Upon waking, your body needs hydration and specific minerals to activate cellular energy pumps. Suggested Options: 16–20 oz of water fortified with potassium and magnesium. Consider utilizing the traditional \"Yin-Yang water\" method."
+        ),
+        RoutineStep(
+            id = "n2",
+            title = "Stage 2: The Primary Metabolic Window",
+            subtitle = "Circadian Insulin Sensitivity & mTOR Modulation",
+            description = "Consume your most carbohydrate-dense meal early in the morning. An optimal breakfast includes steel-cut oats or a strictly vetted granola (containing 5g or less of added sugar from a single source) topped with pumpkin seeds, chia seeds, walnuts, and soy or kefir milk. Dictated by the CLOCK/BMAL1 circadian network, your glucokinase activity, insulin synthesis, and skeletal muscle GLUT4 glucose transporters naturally peak in the morning, creating a biological window of maximal insulin sensitivity. Opting for whole-food plant proteins provides lower fractional concentrations of leucine. This prevents the chronic over-saturation of the intracellular Sestrin2 sensor.",
+            actionLabel = "Capitalize on your peak morning insulin sensitivity with complex carbohydrates and plant-based proteins. Suggested Options: Steel-cut oats heavily topped with seeds/nuts, or a strictly vetted granola. Pair with unsweetened soy milk or high-quality kefir."
+        ),
+        RoutineStep(
+            id = "n3",
+            title = "Stage 3: Epigenetic Fortification",
+            subtitle = "Microbiome Fermentation & HDAC Inhibition",
+            description = "Your midday meal must deliver a massive influx of diverse, intact plant fibers and unsaturated fats. An ideal lunch is a dense bowl of leafy greens, lentils or chickpeas, avocado, and an extra-virgin olive oil dressing. Colonic bacteria ferment these non-digestible carbohydrates to synthesize short-chain fatty acids, primarily butyrate. Butyrate acts as a powerful endogenous histone deacetylase (HDAC) inhibitor. By inhibiting HDACs within the cell nucleus, butyrate maintains local chromatin in an open state, directly upregulating the transcription of vital tight junction proteins like ZO-1 and claudin-1 to physically seal the gut barrier.",
+            actionLabel = "Provide your gut with a massive dose of fermentable fibers to produce protective short-chain fatty acids. Suggested Options: Base of dark leafy greens (spinach/kale), Protein/Carb of lentils/chickpeas/beans, and Fats of sliced avocado/olive oil."
+        ),
+        RoutineStep(
+            id = "n4",
+            title = "Stage 4: The Circadian Downshift",
+            subtitle = "Early Time-Restricted Feeding (eTRF)",
+            description = "Consume a lighter, easy-to-digest dinner, such as roasted root vegetables, asparagus, and a modest portion of wild-caught salmon, tempeh, or tofu. You must strictly cease all caloric intake 3 to 4 hours prior to sleep. As the evening progresses, the peripheral clocks in your muscle tissue naturally decrease insulin sensitivity, while hepatic glucose production rises to prepare the body for the fasting state of sleep. Consuming food during this phase disrupts this natural cycle, leading to significantly higher nocturnal glucose levels and hyperinsulinemia. Confining your food intake to daylight hours synchronizes peripheral feeding rhythms.",
+            actionLabel = "Keep this meal easily digestible and finish eating 3 to 4 hours before bed. Suggested Options: Roasted root vegetables or asparagus, modest portion of lean/plant-based protein (wild salmon, tempeh, tofu). Cook with non-tropical plant oils."
+        ),
+        RoutineStep(
+            id = "n5",
+            title = "Stage 5: Autophagic Hormesis",
+            subtitle = "AMPK Activation & NAD+ Synthesis",
+            description = "Maintain a strict 14-hour overnight fast consisting only of water. As extracellular nutrients drop, the systemic insulin/IGF-1 signaling (IIS) pathway quiets down, and the cellular AMP to ATP ratio rises, triggering the activation of the cellular energy sensor, AMPK. AMPK directly phosphorylates and inhibits mTORC1, signaling that nutrients are scarce, which halts cellular growth and initiates deep, restorative autophagic repair. Furthermore, this AMPK activation drives the production of NAD+, the essential biochemical fuel required for the sirtuin network (SIRT1-7) to remove acetyl markers from DNA.",
+            actionLabel = "To trigger deep cellular repair pathways, completely avoid all caloric intake for 14 hours overnight. Suggested Options: Plain water (still or sparkling), or unsweetened, caffeine-free herbal teas."
+        )
+    )
+
     val morningAdvice = listOf(
         "Always apply sunscreen, even on cloudy days!",
         "Vitamin C in the morning protects against daily pollutants.",

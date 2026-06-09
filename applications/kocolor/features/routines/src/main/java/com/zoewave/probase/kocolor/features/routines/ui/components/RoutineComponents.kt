@@ -32,16 +32,43 @@ fun HeroRitualCard(
     navTo: (KoColorRoute) -> Unit
 ) {
     val routine = uiState
-    val isMorning = routine.time == RoutineTime.MORNING
     val completedCount = routine.steps.count { it.isCompleted }
     val totalCount = routine.steps.size
     val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
 
-    val accentColor = if (isMorning) Color(0xFF6B705C) else Color(0xFF457B9D)
-    val bgBrush = if (isMorning) {
-        Brush.verticalGradient(listOf(Color(0xFFF1F3F0), Color.White))
-    } else {
-        Brush.verticalGradient(listOf(Color(0xFFE9F5F9), Color.White))
+    val title = when (routine.time) {
+        RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_morning_ritual)
+        RoutineTime.MEALS -> "Meals Ritual"
+        RoutineTime.EVENING -> stringResource(R.string.applications_kocolor_features_routines_evening_ritual)
+        else -> routine.title
+    }
+
+    val label = when (routine.time) {
+        RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_current_ritual)
+        RoutineTime.MEALS -> "BIO-SYNC RITUAL"
+        RoutineTime.EVENING -> stringResource(R.string.applications_kocolor_features_routines_evening_ritual_label)
+        else -> "RITUAL"
+    }
+
+    val description = when (routine.time) {
+        RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_morning_desc)
+        RoutineTime.MEALS -> "Nourish your metabolism with precise biochemical timing."
+        RoutineTime.EVENING -> stringResource(R.string.applications_kocolor_features_routines_evening_desc)
+        else -> ""
+    }
+
+    val accentColor = when (routine.time) {
+        RoutineTime.MORNING -> Color(0xFF6B705C)
+        RoutineTime.MEALS -> Color(0xFFE0C097)
+        RoutineTime.EVENING -> Color(0xFF457B9D)
+        else -> Color.Gray
+    }
+
+    val bgBrush = when (routine.time) {
+        RoutineTime.MORNING -> Brush.verticalGradient(listOf(Color(0xFFF1F3F0), Color.White))
+        RoutineTime.MEALS -> Brush.verticalGradient(listOf(Color(0xFFF9F7F2), Color.White))
+        RoutineTime.EVENING -> Brush.verticalGradient(listOf(Color(0xFFE9F5F9), Color.White))
+        else -> Brush.verticalGradient(listOf(Color.LightGray, Color.White))
     }
 
     Card(
@@ -53,7 +80,11 @@ fun HeroRitualCard(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             AsyncImage(
-                model = if (isMorning) R.drawable.morning_routine_bg else R.drawable.night_routine_bg,
+                model = when (routine.time) {
+                    RoutineTime.MORNING -> R.drawable.morning_routine_bg
+                    RoutineTime.MEALS -> "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=800"
+                    else -> R.drawable.night_routine_bg
+                },
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize().alpha(0.45f),
                 contentScale = ContentScale.Crop
@@ -66,7 +97,7 @@ fun HeroRitualCard(
                 ) {
                     // 1. TOP: Title
                     Text(
-                        text = if (isMorning) stringResource(R.string.applications_kocolor_features_routines_morning_ritual) else stringResource(R.string.applications_kocolor_features_routines_evening_ritual),
+                        text = title,
                         style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
@@ -84,7 +115,7 @@ fun HeroRitualCard(
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                text = if (isMorning) stringResource(R.string.applications_kocolor_features_routines_current_ritual) else stringResource(R.string.applications_kocolor_features_routines_evening_ritual_label),
+                                text = label,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Black,
@@ -138,7 +169,7 @@ fun HeroRitualCard(
                             color = Color.Black
                         )
                         Text(
-                            text = if (isMorning) stringResource(R.string.applications_kocolor_features_routines_morning_desc) else stringResource(R.string.applications_kocolor_features_routines_evening_desc),
+                            text = description,
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Black.copy(alpha = 0.7f)
                         )
