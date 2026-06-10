@@ -18,6 +18,7 @@ data class RoutineStep(
     val actionLabel: String? = null,
     val photoUris: List<String> = emptyList(),
     val journalEntries: List<JournalEntry> = emptyList(),
+    val linkedMealId: String? = null,
     
     // Professional Metadata
     val microCategory: MicroCategory? = null,
