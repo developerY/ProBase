@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.features.health.meals.ui.components.MealSuggestionSection
 import com.zoewave.probase.features.health.meals.ui.components.MealCard
 import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesEvent
@@ -187,43 +188,30 @@ fun StepHeroPage(
         // --- NEW: Meal Suggestion Integration ---
         if (routineTime == RoutineTime.MEALS) {
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        text = "MEAL SUGGESTION",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        color = Color.Gray,
-                        letterSpacing = 1.sp
-                    )
-                    
-                    // Displaying the spectacular MealCard for the Bio-Sync Protocol
-                    MealCard(
-                        meal = com.zoewave.probase.features.health.meals.data.Meal(
-                            id = step.id,
-                            name = step.title.substringAfter(":").trim(),
-                            description = step.description,
-                            scientificFocus = step.subtitle ?: "Metabolic Optimization",
-                            phase = com.zoewave.probase.features.health.meals.data.MetabolicPhase.MidDay,
-                            nutrition = com.zoewave.probase.features.health.meals.data.NutritionInfo(450, 25f, 40f, 15f),
-                            ingredients = emptyList(),
-                            steps = emptyList()
-                        ),
-                        onClick = { /* Detail navigation if needed */ }
-                    )
-
-                    Surface(
-                        color = Color(0xFFE0C097).copy(alpha = 0.05f),
-                        shape = RoundedCornerShape(24.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE0C097).copy(alpha = 0.2f))
-                    ) {
-                        Column(modifier = Modifier.padding(24.dp)) {
-                            Text(
-                                text = step.actionLabel ?: "Meal suggestion pending...",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontFamily = FontFamily.Serif,
-                                lineHeight = 22.sp
-                            )
-                        }
+                MealSuggestionSection(
+                    currentMealId = step.linkedMealId,
+                    onMealSelected = { mealId ->
+                        onEvent(RoutinesEvent.LinkMeal(routineId, step.id, mealId))
+                    },
+                    onNavigateToPreparation = { meal ->
+                        navTo(KoColorRoute.MealsHub(mealId = meal.id, isCooking = true))
+                    }
+                )
+            }
+            
+            item {
+                Surface(
+                    color = Color(0xFFE0C097).copy(alpha = 0.05f),
+                    shape = RoundedCornerShape(24.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE0C097).copy(alpha = 0.2f))
+                ) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Text(
+                            text = step.actionLabel ?: "Meal suggestion pending...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontFamily = FontFamily.Serif,
+                            lineHeight = 22.sp
+                        )
                     }
                 }
             }
