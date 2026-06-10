@@ -239,7 +239,7 @@ private fun ActivityMetricsSection(steps: Long, calories: Double, navTo: (KoColo
             value = "${calories.toInt()}",
             unit = "kcal",
             modifier = Modifier.weight(1f),
-            onClick = { navTo(KoColorRoute.Nutrition) }
+            onClick = { navTo(KoColorRoute.Nutrition()) }
         )
     }
 }
