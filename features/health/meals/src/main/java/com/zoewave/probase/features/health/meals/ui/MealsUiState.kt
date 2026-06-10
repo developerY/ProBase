@@ -8,7 +8,9 @@ sealed interface MealsUiState {
         val meals: List<Meal>,
         val selectedMeal: Meal? = null,
         val isAddingMeal: Boolean = false,
-        val editingMeal: Meal? = null
+        val editingMeal: Meal? = null,
+        val cookingMeal: Meal? = null,
+        val currentPreparationStep: Int = 0
     ) : MealsUiState
     data class Error(val message: String) : MealsUiState
 }
@@ -20,4 +22,6 @@ sealed interface MealsUiEvent {
     data class DeleteMeal(val mealId: String) : MealsUiEvent
     data class EditMeal(val meal: Meal?) : MealsUiEvent
     data class UpdateMeal(val meal: Meal) : MealsUiEvent
+    data class StartCooking(val meal: Meal?) : MealsUiEvent
+    data class SetPreparationStep(val index: Int) : MealsUiEvent
 }

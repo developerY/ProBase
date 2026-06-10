@@ -41,6 +41,7 @@ import com.zoewave.probase.features.health.meals.ui.components.AddMealCameraScre
 import com.zoewave.probase.features.health.meals.ui.components.EditMealScreen
 import com.zoewave.probase.features.health.meals.ui.components.MealCard
 import com.zoewave.probase.features.health.meals.ui.components.MealDetailScreen
+import com.zoewave.probase.features.health.meals.ui.components.MealPreparationScreen
 
 @Composable
 fun MealsUiRoute(
@@ -77,7 +78,16 @@ internal fun MealsUiRoute(
             }
         }
         is MealsUiState.Success -> {
-            if (uiState.editingMeal != null) {
+            if (uiState.cookingMeal != null) {
+                MealPreparationScreen(
+                    meal = uiState.cookingMeal,
+                    currentStepIndex = uiState.currentPreparationStep,
+                    onStepClick = { onEvent(MealsUiEvent.SetPreparationStep(it)) },
+                    onNext = { onEvent(MealsUiEvent.SetPreparationStep(uiState.currentPreparationStep + 1)) },
+                    onPrevious = { onEvent(MealsUiEvent.SetPreparationStep(uiState.currentPreparationStep - 1)) },
+                    onBack = { onEvent(MealsUiEvent.StartCooking(null)) }
+                )
+            } else if (uiState.editingMeal != null) {
                 EditMealScreen(
                     meal = uiState.editingMeal,
                     onSave = { onEvent(MealsUiEvent.UpdateMeal(it)) },
@@ -88,6 +98,7 @@ internal fun MealsUiRoute(
                     meal = uiState.selectedMeal,
                     onEdit = { onEvent(MealsUiEvent.EditMeal(uiState.selectedMeal)) },
                     onDelete = { onEvent(MealsUiEvent.DeleteMeal(uiState.selectedMeal.id)) },
+                    onStartCooking = { onEvent(MealsUiEvent.StartCooking(uiState.selectedMeal)) },
                     onBack = { onEvent(MealsUiEvent.SelectMeal(null)) }
                 )
             } else if (uiState.isAddingMeal) {
