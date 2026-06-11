@@ -33,6 +33,7 @@ enum class GlimmerSample(val title: String) {
     ToggleButtons("Toggle Buttons"),
     Typography("Typography"),
     VoiceIndicator("Voice Input Indicator"),
+    Translation("Live Translation"),
     Ritual("Morning Ritual Layout");
 
     fun next(): GlimmerSample {

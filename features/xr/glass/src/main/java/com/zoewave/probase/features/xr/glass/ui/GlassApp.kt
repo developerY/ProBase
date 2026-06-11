@@ -106,6 +106,7 @@ fun GlassApp(
                         GlimmerSample.ToggleButtons -> ToggleButtonSamples()
                         GlimmerSample.Typography -> TypographySamples()
                         GlimmerSample.VoiceIndicator -> VoiceInputIndicatorSamples(level = { uiState.aiAudioLevel })
+                        GlimmerSample.Translation -> GlassesTranslationScreen()
                     }
                 }
             }

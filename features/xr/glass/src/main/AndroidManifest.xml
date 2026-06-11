@@ -21,5 +21,15 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.zoewave.probase.features.xr.glass.LiveTranslationActivity"
+            android:exported="true"
+            android:label="XR Live Translation"
+            android:requiredDisplayCategory="xr_projected">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
