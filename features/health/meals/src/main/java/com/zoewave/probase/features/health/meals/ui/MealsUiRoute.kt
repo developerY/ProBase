@@ -1,24 +1,35 @@
 package com.zoewave.probase.features.health.meals.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material3.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFloatingActionButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +41,7 @@ import com.zoewave.probase.features.health.meals.ui.components.AddMealCameraScre
 import com.zoewave.probase.features.health.meals.ui.components.EditMealScreen
 import com.zoewave.probase.features.health.meals.ui.components.MealCard
 import com.zoewave.probase.features.health.meals.ui.components.MealDetailScreen
+import com.zoewave.probase.features.health.meals.ui.components.MealPreparationScreen
 
 @Composable
 fun MealsUiRoute(
@@ -66,7 +78,16 @@ internal fun MealsUiRoute(
             }
         }
         is MealsUiState.Success -> {
-            if (uiState.editingMeal != null) {
+            if (uiState.cookingMeal != null) {
+                MealPreparationScreen(
+                    meal = uiState.cookingMeal,
+                    currentStepIndex = uiState.currentPreparationStep,
+                    onStepClick = { onEvent(MealsUiEvent.SetPreparationStep(it)) },
+                    onNext = { onEvent(MealsUiEvent.SetPreparationStep(uiState.currentPreparationStep + 1)) },
+                    onPrevious = { onEvent(MealsUiEvent.SetPreparationStep(uiState.currentPreparationStep - 1)) },
+                    onBack = { onEvent(MealsUiEvent.StartCooking(null)) }
+                )
+            } else if (uiState.editingMeal != null) {
                 EditMealScreen(
                     meal = uiState.editingMeal,
                     onSave = { onEvent(MealsUiEvent.UpdateMeal(it)) },
@@ -77,6 +98,7 @@ internal fun MealsUiRoute(
                     meal = uiState.selectedMeal,
                     onEdit = { onEvent(MealsUiEvent.EditMeal(uiState.selectedMeal)) },
                     onDelete = { onEvent(MealsUiEvent.DeleteMeal(uiState.selectedMeal.id)) },
+                    onStartCooking = { onEvent(MealsUiEvent.StartCooking(uiState.selectedMeal)) },
                     onBack = { onEvent(MealsUiEvent.SelectMeal(null)) }
                 )
             } else if (uiState.isAddingMeal) {

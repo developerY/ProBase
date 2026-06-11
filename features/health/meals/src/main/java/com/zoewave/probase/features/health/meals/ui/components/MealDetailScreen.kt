@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +31,7 @@ fun MealDetailScreen(
     meal: Meal,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    onStartCooking: () -> Unit,
     onBack: () -> Unit
 ) {
     val accentColor = when (meal.phase) {
@@ -242,6 +244,23 @@ fun MealDetailScreen(
             }
 
             item {
+                Spacer(modifier = Modifier.height(32.dp))
+                Button(
+                    onClick = onStartCooking,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .height(64.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BioOptimizedColors.Cyan400,
+                        contentColor = BioOptimizedColors.Slate950
+                    ),
+                    shape = RoundedCornerShape(32.dp)
+                ) {
+                    Icon(Icons.Default.Restaurant, null)
+                    Spacer(Modifier.width(12.dp))
+                    Text("Start Cooking", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                }
                 Spacer(modifier = Modifier.height(48.dp))
             }
         }

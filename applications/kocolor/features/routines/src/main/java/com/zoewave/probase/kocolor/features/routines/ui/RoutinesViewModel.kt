@@ -44,6 +44,7 @@ sealed class RoutinesEvent {
     data class AddStep(val routineId: Long) : RoutinesEvent()
     data class RemoveStep(val routineId: Long, val stepId: String) : RoutinesEvent()
     data class LinkProduct(val routineId: Long, val stepId: String, val productId: Long) : RoutinesEvent()
+    data class LinkMeal(val routineId: Long, val stepId: String, val mealId: String?) : RoutinesEvent()
     data class ReorderSteps(val routineId: Long, val fromIndex: Int, val toIndex: Int) : RoutinesEvent()
     data class ResetRoutine(val routineId: Long) : RoutinesEvent()
     data class ProjectToGlass(val time: RoutineTime) : RoutinesEvent()
@@ -79,6 +80,8 @@ class RoutinesViewModel @Inject constructor(
             routineDao.getRoutinesForDay(start, end).onEach { entities ->
                 if (entities.size < 3) {
                     initializeDay(date, entities)
+                } else {
+                    patchRoutineMetadata(entities)
                 }
             }
         },
@@ -162,6 +165,20 @@ class RoutinesViewModel @Inject constructor(
         }
     }
 
+    private fun patchRoutineMetadata(entities: List<RoutineEntity>) {
+        viewModelScope.launch {
+            entities.forEach { entity ->
+                // Identify mislabeled meals routines: 5 steps but labeled as Evening
+                if (entity.time == RoutineTime.EVENING && entity.steps.size == 5) {
+                    routineDao.updateRoutine(entity.copy(
+                        title = "Meals Routine",
+                        time = RoutineTime.MEALS
+                    ))
+                }
+            }
+        }
+    }
+
     fun onEvent(event: RoutinesEvent) {
         when (event) {
             is RoutinesEvent.ToggleStep -> toggleStep(event.routineId, event.stepId)
@@ -178,6 +195,7 @@ class RoutinesViewModel @Inject constructor(
             is RoutinesEvent.AddStep -> addStepToActive(event.routineId)
             is RoutinesEvent.RemoveStep -> removeStepFromActive(event.routineId, event.stepId)
             is RoutinesEvent.LinkProduct -> linkProductToStep(event.routineId, event.stepId, event.productId)
+            is RoutinesEvent.LinkMeal -> linkMealToStep(event.routineId, event.stepId, event.mealId)
             is RoutinesEvent.ReorderSteps -> reorderSteps(event.routineId, event.fromIndex, event.toIndex)
             is RoutinesEvent.ResetRoutine -> resetRoutine(event.routineId)
             is RoutinesEvent.ProjectToGlass -> {
@@ -272,6 +290,23 @@ class RoutinesViewModel @Inject constructor(
         }
         val updatedRoutine = routine.copy(steps = updatedSteps)
         updateRoutine(updatedRoutine)
+    }
+
+    private fun linkMealToStep(routineId: Long, stepId: String, mealId: String?) {
+        val morning = uiState.value.morningRoutine
+        val meals = uiState.value.mealsRoutine
+        val evening = uiState.value.eveningRoutine
+        val routine = when {
+            morning?.id == routineId -> morning
+            meals?.id == routineId -> meals
+            evening?.id == routineId -> evening
+            else -> null
+        } ?: return
+
+        val updatedSteps = routine.steps.map { step ->
+            if (step.id == stepId) step.copy(linkedMealId = mealId) else step
+        }
+        updateRoutine(routine.copy(steps = updatedSteps))
     }
 
     private fun reorderSteps(routineId: Long, fromIndex: Int, toIndex: Int) {

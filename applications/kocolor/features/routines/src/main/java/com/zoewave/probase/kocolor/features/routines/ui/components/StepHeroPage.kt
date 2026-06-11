@@ -28,23 +28,33 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.features.health.meals.ui.components.MealSuggestionSection
+import com.zoewave.probase.features.health.meals.ui.components.MealCard
 import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesEvent
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.JournalEntry
-import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.kocolor.model.RoutineStep
+import com.zoewave.probase.kocolor.model.*
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+data class StepHeroUiState(
+    val step: RoutineStep,
+    val allProducts: List<CosmeticItem>,
+    val routineId: Long,
+    val routineTime: RoutineTime
+)
+
 @Composable
 fun StepHeroPage(
-    uiState: Triple<RoutineStep, List<CosmeticItem>, Long>, 
+    uiState: StepHeroUiState, 
     onEvent: (RoutinesEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val (step, allProducts, routineId) = uiState
+    val step = uiState.step
+    val allProducts = uiState.allProducts
+    val routineId = uiState.routineId
+    val routineTime = uiState.routineTime
+    
     val linkedProducts = allProducts.filter { step.productIds.contains(it.id) }
     
     var showJournalDialog by remember { mutableStateOf(false) }
@@ -54,8 +64,12 @@ fun StepHeroPage(
         DateTimeFormatter.ofPattern("MMMM d • h:mm a").withZone(ZoneId.systemDefault()) 
     }
 
-    // Default hero image if no product image
-    val heroImageUrl = linkedProducts.firstOrNull()?.imageUrl ?: R.drawable.routine_hero_fallback
+    // Default hero image
+    val heroImageUrl = when (routineTime) {
+        RoutineTime.MORNING -> R.drawable.morning_routine_bg
+        RoutineTime.MEALS -> "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=1200"
+        else -> R.drawable.night_routine_bg
+    }
 
     if (showJournalDialog) {
         AlertDialog(
@@ -121,7 +135,7 @@ fun StepHeroPage(
                     .background(Color(0xFFF1F3F0))
             ) {
                 AsyncImage(
-                    model = heroImageUrl, 
+                    model = if (linkedProducts.isNotEmpty()) linkedProducts.first().imageUrl else heroImageUrl, 
                     contentDescription = null, 
                     modifier = Modifier.fillMaxSize(), 
                     contentScale = ContentScale.Crop
@@ -171,29 +185,61 @@ fun StepHeroPage(
             }
         }
 
-        val actionLabel = step.actionLabel
-        if (actionLabel != null) {
+        // --- NEW: Meal Suggestion Integration ---
+        if (routineTime == RoutineTime.MEALS) {
+            item {
+                MealSuggestionSection(
+                    currentMealId = step.linkedMealId,
+                    onMealSelected = { mealId ->
+                        onEvent(RoutinesEvent.LinkMeal(routineId, step.id, mealId))
+                    },
+                    onNavigateToPreparation = { meal ->
+                        navTo(KoColorRoute.MealsHub(mealId = meal.id, isCooking = true))
+                    }
+                )
+            }
+            
             item {
                 Surface(
-                    color = Color.White.copy(alpha = 0.6f),
+                    color = Color(0xFFE0C097).copy(alpha = 0.05f),
                     shape = RoundedCornerShape(24.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE0C097).copy(alpha = 0.2f))
                 ) {
-                    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(modifier = Modifier.padding(24.dp)) {
                         Text(
-                            text = "YOUR ACTION",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = Color.Gray,
-                            letterSpacing = 1.sp
-                        )
-                        Text(
-                            text = actionLabel,
+                            text = step.actionLabel ?: "Meal suggestion pending...",
                             style = MaterialTheme.typography.bodyMedium,
-                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                            lineHeight = 24.sp,
-                            fontFamily = FontFamily.Serif
+                            fontFamily = FontFamily.Serif,
+                            lineHeight = 22.sp
                         )
+                    }
+                }
+            }
+        } else {
+            val actionLabel = step.actionLabel
+            if (actionLabel != null) {
+                item {
+                    Surface(
+                        color = Color.White.copy(alpha = 0.6f),
+                        shape = RoundedCornerShape(24.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+                    ) {
+                        Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text(
+                                text = "YOUR ACTION",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Black,
+                                color = Color.Gray,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = actionLabel,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                lineHeight = 24.sp,
+                                fontFamily = FontFamily.Serif
+                            )
+                        }
                     }
                 }
             }
@@ -319,20 +365,17 @@ fun StepHeroPage(
             }
         }
 
-        // --- LINKED INVENTORY ITEMS ---
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                Text(
-                    text = "LINKED INVENTORY ITEMS",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Black,
-                    color = Color.Gray,
-                    letterSpacing = 1.sp
-                )
+        if (linkedProducts.isNotEmpty()) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    Text(
+                        text = "LINKED INVENTORY ITEMS",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = Color.Gray,
+                        letterSpacing = 1.sp
+                    )
 
-                if (linkedProducts.isEmpty()) {
-                    Text("Link your products to see them here.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray.copy(alpha = 0.6f))
-                } else {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         items(linkedProducts) { product ->
                             Card(
@@ -373,6 +416,6 @@ fun StepHeroPage(
 @Composable
 private fun StepHeroPagePreview() {
     MaterialTheme {
-        StepHeroPage(uiState = Triple(RoutineStep(id = "1", title = "Step", layeringOrder = 0), emptyList(), 1L), onEvent = {}, navTo = {})
+        StepHeroPage(uiState = StepHeroUiState(RoutineStep(id = "1", title = "Step", layeringOrder = 0), emptyList(), 1L, RoutineTime.MORNING), onEvent = {}, navTo = {})
     }
 }

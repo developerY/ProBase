@@ -71,7 +71,7 @@ fun featureInventoryEntryProvider(
 
             is FeatureInventory.HealthMeals -> {
                 FeatureScaffold(title = "Health Meals", onBack = navigateBack) {
-                    MealsUiRoute()
+                    MealsUiRoute(onBack = navigateBack)
                 }
             }
 

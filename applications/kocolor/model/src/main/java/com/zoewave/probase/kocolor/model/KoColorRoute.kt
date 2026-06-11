@@ -105,7 +105,10 @@ sealed class KoColorRoute {
     data object SunIntelligence : KoColorRoute()
     
     @Serializable
-    data object Nutrition : KoColorRoute()
+    data class Nutrition(val mealId: String? = null, val isCooking: Boolean = false) : KoColorRoute()
+
+    @Serializable
+    data class MealsHub(val mealId: String? = null, val isCooking: Boolean = false) : KoColorRoute()
 
     @Serializable
     data object Back : KoColorRoute()

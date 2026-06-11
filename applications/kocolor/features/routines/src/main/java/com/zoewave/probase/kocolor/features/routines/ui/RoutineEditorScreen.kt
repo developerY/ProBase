@@ -114,7 +114,7 @@ fun RoutineEditorScreen(
             } else if (activeStep != null) {
                 when (selectionStage) {
                     ProductSelectionStage.HeroPage -> StepHeroPage(
-                        uiState = Triple(activeStep, state.allProducts, routine.id), 
+                        uiState = StepHeroUiState(activeStep, state.allProducts, routine.id, routine.time), 
                         onEvent = onEvent,
                         navTo = navTo
                     )

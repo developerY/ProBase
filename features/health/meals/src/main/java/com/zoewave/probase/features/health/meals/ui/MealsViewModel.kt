@@ -46,6 +46,8 @@ class MealsViewModel @Inject constructor(
             is MealsUiEvent.DeleteMeal -> deleteMeal(event.mealId)
             is MealsUiEvent.EditMeal -> setEditingMeal(event.meal)
             is MealsUiEvent.UpdateMeal -> updateMeal(event.meal)
+            is MealsUiEvent.StartCooking -> setCookingMeal(event.meal)
+            is MealsUiEvent.SetPreparationStep -> setPreparationStep(event.index)
         }
     }
 
@@ -86,6 +88,23 @@ class MealsViewModel @Inject constructor(
         repository.updateMeal(meal)
         setEditingMeal(null)
         selectMeal(meal)
+    }
+
+    private fun setCookingMeal(meal: Meal?) {
+        _uiState.update { state ->
+            if (state is MealsUiState.Success) {
+                state.copy(cookingMeal = meal, currentPreparationStep = 0)
+            } else state
+        }
+    }
+
+    private fun setPreparationStep(index: Int) {
+        _uiState.update { state ->
+            if (state is MealsUiState.Success) {
+                val nextIndex = index.coerceIn(0, (state.cookingMeal?.steps?.size ?: 1) - 1)
+                state.copy(currentPreparationStep = nextIndex)
+            } else state
+        }
     }
 
     private fun addCapturedMeal(imageUri: String) {

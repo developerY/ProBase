@@ -44,6 +44,10 @@ import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailUiRoute
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
+import com.zoewave.probase.features.health.meals.ui.MealsUiEvent
+import com.zoewave.probase.features.health.meals.ui.MealsUiRoute
+import com.zoewave.probase.features.health.meals.ui.MealsUiState
+import com.zoewave.probase.features.health.meals.ui.MealsViewModel
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailScreen
@@ -423,6 +427,26 @@ fun koColorNavEntryProvider(
                     onNavigateTo(KoColorRoute.RoutineEditor(routineId, stepId))
                 }
             )
+        }
+        is KoColorRoute.MealsHub -> NavEntry(route) {
+            val viewModel: MealsViewModel = hiltViewModel()
+            
+            androidx.compose.runtime.LaunchedEffect(route.mealId, route.isCooking) {
+                if (route.mealId != null) {
+                    val currentState = viewModel.uiState.value
+                    if (currentState is MealsUiState.Success) {
+                        val meal = currentState.meals.find { it.id == route.mealId }
+                        if (meal != null) {
+                            viewModel.onEvent(MealsUiEvent.SelectMeal(meal))
+                            if (route.isCooking) {
+                                viewModel.onEvent(MealsUiEvent.StartCooking(meal))
+                            }
+                        }
+                    }
+                }
+            }
+
+            MealsUiRoute(onBack = onBack)
         }
         is KoColorRoute.NailLab -> NavEntry(route) {
             com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute(
