@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.xr.projected.ProjectedDeviceController
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.probase.features.xr.glass.samples.GlassesTranslationScreen
@@ -76,5 +77,13 @@ fun PhoneCompanionScreen() {
             text = "Connect your glasses to start live translation.",
             style = MaterialTheme.typography.bodyLarge
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PhoneCompanionScreenPreview() {
+    MaterialTheme {
+        PhoneCompanionScreen()
     }
 }
