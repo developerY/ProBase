@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.xr.glimmer.Card
 import androidx.xr.glimmer.GlimmerTheme
@@ -25,5 +26,13 @@ fun TitleChipSamples() {
         Card(title = { Text("Content Card") }) {
             Text("Title chips are used to label sections or groups of content.")
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun TitleChipSamplesPreview() {
+    GlimmerTheme {
+        TitleChipSamples()
     }
 }

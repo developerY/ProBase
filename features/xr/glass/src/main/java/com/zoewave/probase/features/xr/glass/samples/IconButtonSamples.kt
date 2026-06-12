@@ -11,7 +11,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Icon
 import androidx.xr.glimmer.IconButton
 
@@ -25,5 +27,13 @@ fun IconButtonSamples() {
         IconButton(onClick = {}) { Icon(Icons.Default.Favorite, null) }
         IconButton(onClick = {}) { Icon(Icons.Default.Add, null) }
         IconButton(onClick = {}) { Icon(Icons.Default.Settings, null) }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun IconButtonSamplesPreview() {
+    GlimmerTheme {
+        IconButtonSamples()
     }
 }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Text
@@ -23,5 +24,13 @@ fun TypographySamples() {
         Text("Body Medium", style = GlimmerTheme.typography.bodyMedium)
         Text("Body Small", style = GlimmerTheme.typography.bodySmall)
         Text("Caption", style = GlimmerTheme.typography.caption)
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun TypographySamplesPreview() {
+    GlimmerTheme {
+        TypographySamples()
     }
 }

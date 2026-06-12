@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Text
@@ -33,5 +34,13 @@ fun ToggleButtonSamples() {
         ) {
             Text(if (checked) "ON" else "OFF")
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun ToggleButtonSamplesPreview() {
+    GlimmerTheme {
+        ToggleButtonSamples()
     }
 }

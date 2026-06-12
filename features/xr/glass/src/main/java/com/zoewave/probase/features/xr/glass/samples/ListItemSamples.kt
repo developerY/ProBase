@@ -9,7 +9,9 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Icon
 import androidx.xr.glimmer.ListItem
 import androidx.xr.glimmer.Text
@@ -37,5 +39,13 @@ fun ListItemSamples() {
         ) {
             Text("Item with Trailing Icon")
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun ListItemSamplesPreview() {
+    GlimmerTheme {
+        ListItemSamples()
     }
 }
