@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application>
         <activity
             android:name="com.zoewave.probase.features.xr.glass.GlassesMainActivity"
@@ -16,6 +18,26 @@
             android:name="com.zoewave.probase.features.xr.glass.GoogleTestGlassesActivity"
             android:exported="true"
             android:label="Google Glimmer Test"
+            android:requiredDisplayCategory="xr_projected">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.zoewave.probase.features.xr.glass.LiveTranslationActivity"
+            android:exported="true"
+            android:label="XR Live Translation"
+            android:requiredDisplayCategory="xr_projected">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.zoewave.probase.features.xr.glass.ObjectRecognitionActivity"
+            android:exported="true"
+            android:label="XR Object Recognition"
             android:requiredDisplayCategory="xr_projected">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

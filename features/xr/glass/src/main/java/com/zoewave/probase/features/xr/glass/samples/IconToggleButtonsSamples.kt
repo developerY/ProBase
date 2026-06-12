@@ -16,7 +16,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Icon
 import androidx.xr.glimmer.IconToggleButton
 
@@ -43,5 +45,13 @@ fun IconToggleButtonsSamples() {
         ) {
             Icon(if (isNotifyOn) Icons.Default.Notifications else Icons.Default.NotificationsOff, null)
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun IconToggleButtonsSamplesPreview() {
+    GlimmerTheme {
+        IconToggleButtonsSamples()
     }
 }

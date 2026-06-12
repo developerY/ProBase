@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.ui.Alignment
@@ -17,6 +18,7 @@ import androidx.xr.compose.spatial.OrbiterAnchorPoint
 import androidx.xr.compose.spatial.Subspace
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.FaceEyeTrackingSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.PlaneDetectionSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.SpatialMemorySample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.arcore.UserTrackingSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.OrbiterSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SpatialDialogSample
@@ -27,7 +29,9 @@ import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SpatialPopup
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SubspaceModifierSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.compose.SubspaceSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.AnchoringSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.CustomMeshSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.GltfModelSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.SpatialAssetSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.TransformSample
 
 sealed class XRSampleCategory(val title: String) {
@@ -52,10 +56,13 @@ sealed class XRSample(val title: String) {
     data object GltfModel : XRSample("GLTF Model")
     data object Anchoring : XRSample("Anchoring")
     data object Transform : XRSample("Transform")
+    data object SpatialAsset : XRSample("Spatial Asset")
+    data object CustomMesh : XRSample("Custom Mesh")
     // ARCore
     data object PlaneDetection : XRSample("Plane Detection")
     data object UserTracking : XRSample("User Tracking")
     data object FaceEyeTracking : XRSample("Face & Eye Tracking")
+    data object SpatialMemory : XRSample("Spatial Memory")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,9 +117,12 @@ fun FullXRApp(onClose: () -> Unit) {
                 XRSample.GltfModel -> GltfModelSample()
                 XRSample.Anchoring -> AnchoringSample()
                 XRSample.Transform -> TransformSample()
+                XRSample.SpatialAsset -> SpatialAssetSample()
+                XRSample.CustomMesh -> CustomMeshSample()
                 XRSample.PlaneDetection -> PlaneDetectionSample()
                 XRSample.UserTracking -> UserTrackingSample()
                 XRSample.FaceEyeTracking -> FaceEyeTrackingSample()
+                XRSample.SpatialMemory -> SpatialMemorySample()
                 else -> {}
             }
 
@@ -163,6 +173,22 @@ fun FullXRApp(onClose: () -> Unit) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun FullXRAppPreview() {
+    MaterialTheme {
+        FullXRApp(onClose = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FullXRMenuPreview() {
+    MaterialTheme {
+        FullXRMenu(onCategorySelected = {})
+    }
+}
+
 @Composable
 fun FullXRMenu(onCategorySelected: (XRSampleCategory) -> Unit) {
     Column(
@@ -187,6 +213,18 @@ fun FullXRMenu(onCategorySelected: (XRSampleCategory) -> Unit) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun XRMenuCardPreview() {
+    MaterialTheme {
+        XRMenuCard(
+            title = "Sample Title",
+            description = "This is a sample description for the menu card.",
+            onClick = {}
+        )
+    }
+}
+
 @Composable
 fun XRMenuCard(title: String, description: String, onClick: () -> Unit) {
     ElevatedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
@@ -194,6 +232,14 @@ fun XRMenuCard(title: String, description: String, onClick: () -> Unit) {
             Text(title, style = MaterialTheme.typography.titleLarge)
             Text(description, style = MaterialTheme.typography.bodyMedium)
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ComposeXRSamplesPreview() {
+    MaterialTheme {
+        ComposeXRSamples(onSampleSelected = {})
     }
 }
 
@@ -244,6 +290,14 @@ fun ComposeXRSamples(onSampleSelected: (XRSample) -> Unit) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun SceneCoreSamplesPreview() {
+    MaterialTheme {
+        SceneCoreSamples(onSampleSelected = {})
+    }
+}
+
 @Composable
 fun SceneCoreSamples(onSampleSelected: (XRSample) -> Unit) {
     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -263,6 +317,24 @@ fun SceneCoreSamples(onSampleSelected: (XRSample) -> Unit) {
             supportingContent = { Text("Rotate, Scale, Move 3D entities.") },
             modifier = Modifier.clickable { onSampleSelected(XRSample.Transform) }
         )
+        ListItem(
+            headlineContent = { Text("Spatial Asset") }, 
+            supportingContent = { Text("Native glTF loading.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.SpatialAsset) }
+        )
+        ListItem(
+            headlineContent = { Text("Custom Mesh") }, 
+            supportingContent = { Text("Procedural geometry API.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.CustomMesh) }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ARCoreSamplesPreview() {
+    MaterialTheme {
+        ARCoreSamples(onSampleSelected = {})
     }
 }
 
@@ -284,6 +356,11 @@ fun ARCoreSamples(onSampleSelected: (XRSample) -> Unit) {
             headlineContent = { Text("Face & Eye Tracking") }, 
             supportingContent = { Text("Immersive gaze-based interaction.") },
             modifier = Modifier.clickable { onSampleSelected(XRSample.FaceEyeTracking) }
+        )
+        ListItem(
+            headlineContent = { Text("Spatial Memory") }, 
+            supportingContent = { Text("Anchor persistence and re-localization.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.SpatialMemory) }
         )
     }
 }

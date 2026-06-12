@@ -6,6 +6,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.xr.compose.platform.LocalSession
 import androidx.xr.compose.subspace.SpatialPanel
@@ -37,5 +38,13 @@ fun GltfModelSample() {
                 Text("XR Session Active - Ready to load models via GltfModelEntity.")
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun GltfModelSamplePreview() {
+    MaterialTheme {
+        GltfModelSample()
     }
 }

@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Text
@@ -38,5 +39,13 @@ private fun ColorRow(name: String, color: Color) {
         )
         Spacer(Modifier.width(16.dp))
         Text(name, style = GlimmerTheme.typography.bodyLarge)
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun ColorsSamplesPreview() {
+    GlimmerTheme {
+        ColorsSamples()
     }
 }

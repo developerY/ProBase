@@ -19,14 +19,35 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Icon
 import androidx.xr.glimmer.IconButton
 import androidx.xr.glimmer.Text
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.features.xr.glass.samples.*
+import com.zoewave.probase.features.xr.glass.samples.ButtonsSamples
+import com.zoewave.probase.features.xr.glass.samples.CardSamples
+import com.zoewave.probase.features.xr.glass.samples.ColorsSamples
+import com.zoewave.probase.features.xr.glass.samples.DepthEffectLevelsSample
+import com.zoewave.probase.features.xr.glass.samples.GlassesTranslationScreen
+import com.zoewave.probase.features.xr.glass.samples.GlimmerLazyListSamples
+import com.zoewave.probase.features.xr.glass.samples.GlimmerPagerSamples
+import com.zoewave.probase.features.xr.glass.samples.IconButtonSamples
+import com.zoewave.probase.features.xr.glass.samples.IconSamples
+import com.zoewave.probase.features.xr.glass.samples.IconToggleButtonsSamples
+import com.zoewave.probase.features.xr.glass.samples.IndirectPointerGestureSamples
+import com.zoewave.probase.features.xr.glass.samples.ListItemSamples
+import com.zoewave.probase.features.xr.glass.samples.ObjectRecognitionScreen
+import com.zoewave.probase.features.xr.glass.samples.ShapesSamples
+import com.zoewave.probase.features.xr.glass.samples.SpatialNoteOverlay
+import com.zoewave.probase.features.xr.glass.samples.StacksSamples
+import com.zoewave.probase.features.xr.glass.samples.SurfaceSamples
+import com.zoewave.probase.features.xr.glass.samples.TitleChipSamples
+import com.zoewave.probase.features.xr.glass.samples.ToggleButtonSamples
+import com.zoewave.probase.features.xr.glass.samples.TypographySamples
+import com.zoewave.probase.features.xr.glass.samples.VoiceInputIndicatorSamples
 
 @Composable
 fun GlassApp(
@@ -106,10 +127,39 @@ fun GlassApp(
                         GlimmerSample.ToggleButtons -> ToggleButtonSamples()
                         GlimmerSample.Typography -> TypographySamples()
                         GlimmerSample.VoiceIndicator -> VoiceInputIndicatorSamples(level = { uiState.aiAudioLevel })
+                        GlimmerSample.Translation -> GlassesTranslationScreen()
+                        GlimmerSample.ObjectRecognition -> ObjectRecognitionScreen()
+                        GlimmerSample.SpatialNote -> SpatialNoteOverlay()
                     }
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun GlassAppPreview() {
+    GlimmerTheme {
+        GlassApp(
+            areVisualsOn = true,
+            isVisualUiSupported = true,
+            onClose = {},
+            onSpeak = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun SampleNavigationHeaderPreview() {
+    GlimmerTheme {
+        SampleNavigationHeader(
+            sample = GlimmerSample.Ritual,
+            onBack = {},
+            onPrevious = {},
+            onNext = {}
+        )
     }
 }
 

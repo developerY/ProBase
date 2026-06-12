@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.xr.compose.subspace.SpatialColumn
 import androidx.xr.compose.subspace.SpatialCurvedRow
@@ -92,5 +93,13 @@ private fun LayoutPanel(title: String, color: Color) {
                 Text(title, style = MaterialTheme.typography.titleMedium)
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SpatialLayoutSamplePreview() {
+    MaterialTheme {
+        SpatialLayoutSample()
     }
 }

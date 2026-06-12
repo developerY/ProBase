@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.xr.glimmer.Button
 import androidx.xr.glimmer.Card
@@ -37,5 +38,13 @@ fun CardSamples() {
         ) {
             Text("This card has an explicit action button in the header.")
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun CardSamplesPreview() {
+    GlimmerTheme {
+        CardSamples()
     }
 }

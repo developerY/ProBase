@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -195,5 +196,13 @@ private fun launchOnGlasses(context: android.content.Context, sample: GlimmerSam
             putExtra("initial_sample", sample.name)
         }
         context.startActivity(intent)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun GlassXRDemosPhoneScreenPreview() {
+    MaterialTheme {
+        GlassXRDemosPhoneScreen(onBack = {})
     }
 }
