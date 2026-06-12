@@ -181,6 +181,14 @@ private fun FullXRAppPreview() {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun FullXRMenuPreview() {
+    MaterialTheme {
+        FullXRMenu(onCategorySelected = {})
+    }
+}
+
 @Composable
 fun FullXRMenu(onCategorySelected: (XRSampleCategory) -> Unit) {
     Column(
@@ -205,6 +213,18 @@ fun FullXRMenu(onCategorySelected: (XRSampleCategory) -> Unit) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun XRMenuCardPreview() {
+    MaterialTheme {
+        XRMenuCard(
+            title = "Sample Title",
+            description = "This is a sample description for the menu card.",
+            onClick = {}
+        )
+    }
+}
+
 @Composable
 fun XRMenuCard(title: String, description: String, onClick: () -> Unit) {
     ElevatedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
@@ -212,6 +232,14 @@ fun XRMenuCard(title: String, description: String, onClick: () -> Unit) {
             Text(title, style = MaterialTheme.typography.titleLarge)
             Text(description, style = MaterialTheme.typography.bodyMedium)
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ComposeXRSamplesPreview() {
+    MaterialTheme {
+        ComposeXRSamples(onSampleSelected = {})
     }
 }
 
@@ -262,6 +290,14 @@ fun ComposeXRSamples(onSampleSelected: (XRSample) -> Unit) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun SceneCoreSamplesPreview() {
+    MaterialTheme {
+        SceneCoreSamples(onSampleSelected = {})
+    }
+}
+
 @Composable
 fun SceneCoreSamples(onSampleSelected: (XRSample) -> Unit) {
     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -291,6 +327,14 @@ fun SceneCoreSamples(onSampleSelected: (XRSample) -> Unit) {
             supportingContent = { Text("Procedural geometry API.") },
             modifier = Modifier.clickable { onSampleSelected(XRSample.CustomMesh) }
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ARCoreSamplesPreview() {
+    MaterialTheme {
+        ARCoreSamples(onSampleSelected = {})
     }
 }
 

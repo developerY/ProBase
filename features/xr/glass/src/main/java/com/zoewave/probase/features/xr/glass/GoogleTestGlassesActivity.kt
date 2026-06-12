@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -105,6 +106,17 @@ class GoogleExampleObserver(
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
         controller.removePresentationModeChangedListener(presentationModeListener)
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun GoogleTestHomeScreenPreview() {
+    GlimmerTheme {
+        GoogleTestHomeScreen(
+            isVisualUiSupported = true,
+            onClose = {}
+        )
     }
 }
 

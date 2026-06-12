@@ -150,6 +150,19 @@ private fun GlassAppPreview() {
     }
 }
 
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun SampleNavigationHeaderPreview() {
+    GlimmerTheme {
+        SampleNavigationHeader(
+            sample = GlimmerSample.Ritual,
+            onBack = {},
+            onPrevious = {},
+            onNext = {}
+        )
+    }
+}
+
 @Composable
 fun SampleNavigationHeader(
     sample: GlimmerSample,
