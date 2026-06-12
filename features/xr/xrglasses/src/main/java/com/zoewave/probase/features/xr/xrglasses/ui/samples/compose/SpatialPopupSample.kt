@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.xr.compose.spatial.SpatialPopup
 import androidx.xr.compose.subspace.SpatialPanel
@@ -87,5 +88,13 @@ fun SpatialPopupSample() {
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SpatialPopupSamplePreview() {
+    MaterialTheme {
+        SpatialPopupSample()
     }
 }

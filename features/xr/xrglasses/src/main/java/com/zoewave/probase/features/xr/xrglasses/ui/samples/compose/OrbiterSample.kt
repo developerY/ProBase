@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.xr.compose.spatial.Orbiter
 import androidx.xr.compose.spatial.OrbiterAnchorPoint
@@ -106,5 +107,13 @@ fun OrbiterSample() {
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun OrbiterSamplePreview() {
+    MaterialTheme {
+        OrbiterSample()
     }
 }

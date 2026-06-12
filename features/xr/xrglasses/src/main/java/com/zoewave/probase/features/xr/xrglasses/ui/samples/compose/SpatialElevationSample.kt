@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.xr.compose.spatial.SpatialElevation
@@ -87,5 +88,13 @@ private fun ElevationCard(label: String, level: Dp) {
                 Text(label, style = MaterialTheme.typography.titleMedium)
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SpatialElevationSamplePreview() {
+    MaterialTheme {
+        SpatialElevationSample()
     }
 }

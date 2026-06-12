@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.ui.Alignment
@@ -160,6 +161,14 @@ fun FullXRApp(onClose: () -> Unit) {
                 XRSampleCategory.ARCore -> ARCoreSamples(onSampleSelected = { currentSample = it })
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FullXRAppPreview() {
+    MaterialTheme {
+        FullXRApp(onClose = {})
     }
 }
 

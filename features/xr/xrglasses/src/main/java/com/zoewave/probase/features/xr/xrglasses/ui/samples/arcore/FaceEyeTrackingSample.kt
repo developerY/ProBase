@@ -6,6 +6,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.xr.compose.subspace.SpatialPanel
 import androidx.xr.compose.subspace.layout.SubspaceModifier
@@ -33,5 +34,13 @@ fun FaceEyeTrackingSample() {
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FaceEyeTrackingSamplePreview() {
+    MaterialTheme {
+        FaceEyeTrackingSample()
     }
 }
