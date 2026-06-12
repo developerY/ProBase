@@ -1,0 +1,7 @@
+- [ ] Add dependencies to `:applications:photodo:apps:mobile:features:tasks`
+- [ ] Add `RECORD_AUDIO` permission and register `PhotoDoGlassesActivity` in `AndroidManifest.xml`
+- [ ] Implement `PhotoDoLiveSessionManager.kt` with Gemini Live and Tool Calling
+- [ ] Implement `ProjectedTaskDetailScreen.kt` using Jetpack Compose Glimmer
+- [ ] Implement `PhotoDoGlassesActivity.kt` to handle projection and AI session
+- [ ] Add "Project" button and logic to `TaskDetailScreen.kt`
+- [ ] Verify build and integration
