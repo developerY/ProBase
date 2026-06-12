@@ -26,9 +26,19 @@ dependencies {
     implementation(project(":features:ai:configuration"))
     implementation(project(":applications:photodo:model"))
     implementation(project(":applications:photodo:apps:mobile:core"))
+    implementation(project(":features:ai:firebase"))
 
     implementation(libs.kotlinx.datetime)
 
+    // --- XR & Glass ---
+    implementation(libs.androidx.glimmer.core)
+    implementation(libs.androidx.glimmer.google.fonts)
+    implementation(libs.androidx.projected)
+    implementation(libs.androidx.xr.runtime)
+
+    // --- AI & Firebase ---
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
 
     // --- Navigation 3 (Strict) ---
     implementation(libs.androidx.navigation3.runtime)
