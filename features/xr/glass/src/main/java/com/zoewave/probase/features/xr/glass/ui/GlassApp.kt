@@ -39,6 +39,7 @@ import com.zoewave.probase.features.xr.glass.samples.IconSamples
 import com.zoewave.probase.features.xr.glass.samples.IconToggleButtonsSamples
 import com.zoewave.probase.features.xr.glass.samples.IndirectPointerGestureSamples
 import com.zoewave.probase.features.xr.glass.samples.ListItemSamples
+import com.zoewave.probase.features.xr.glass.samples.ObjectRecognitionScreen
 import com.zoewave.probase.features.xr.glass.samples.ShapesSamples
 import com.zoewave.probase.features.xr.glass.samples.StacksSamples
 import com.zoewave.probase.features.xr.glass.samples.SurfaceSamples
@@ -126,6 +127,7 @@ fun GlassApp(
                         GlimmerSample.Typography -> TypographySamples()
                         GlimmerSample.VoiceIndicator -> VoiceInputIndicatorSamples(level = { uiState.aiAudioLevel })
                         GlimmerSample.Translation -> GlassesTranslationScreen()
+                        GlimmerSample.ObjectRecognition -> ObjectRecognitionScreen()
                     }
                 }
             }

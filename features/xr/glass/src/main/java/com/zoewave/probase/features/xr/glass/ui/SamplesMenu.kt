@@ -35,6 +35,7 @@ enum class GlimmerSample(val title: String) {
     Typography("Typography"),
     VoiceIndicator("Voice Input Indicator"),
     Translation("Live Translation"),
+    ObjectRecognition("Object Recognition"),
     Ritual("Morning Ritual Layout");
 
     fun next(): GlimmerSample {
