@@ -13,7 +13,7 @@ dependencies {
 
     // --- Firebase AI Logic ---
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.ai)
+    api(libs.firebase.ai)
 
     // --- Hilt ---
     implementation(libs.hilt.android)

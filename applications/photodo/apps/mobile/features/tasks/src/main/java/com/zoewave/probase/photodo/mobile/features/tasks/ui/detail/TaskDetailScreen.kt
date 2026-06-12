@@ -34,6 +34,8 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Cast
+import androidx.compose.material.icons.filled.CastConnected
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,7 +53,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -69,6 +73,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.xr.projected.ProjectedContext
 import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
 import com.zoewave.probase.applications.photodo.db.entity.PhotoEntity
 import com.zoewave.probase.applications.photodo.db.entity.ProjectDetails
@@ -77,10 +82,15 @@ import com.zoewave.probase.applications.photodo.db.entity.TaskEntity
 import com.zoewave.probase.core.ui.components.QuickExpenseBar
 import com.zoewave.probase.photodo.mobile.core.ui.components.BudgetProgressBar
 import com.zoewave.probase.photodo.mobile.core.ui.theme.PhotoDoTheme
+import com.zoewave.probase.photodo.mobile.features.tasks.PhotoDoGlassesActivity
 import com.zoewave.probase.photodo.mobile.features.tasks.R
 import com.zoewave.probase.photodo.model.navigation.PhotoTodoRoute
+import kotlinx.coroutines.Dispatchers
+import android.content.Intent
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
+    androidx.xr.projected.experimental.ExperimentalProjectedApi::class
+)
 @Composable
 fun TaskDetailScreen(
     uiState: TaskDetailUiState,
@@ -88,6 +98,13 @@ fun TaskDetailScreen(
     navTo: (PhotoTodoRoute?) -> Unit,
 ) {
     val context = LocalContext.current
+    val isProjectedConnected by remember(context) {
+        if (android.os.Build.VERSION.SDK_INT >= 36) {
+            ProjectedContext.isProjectedDeviceConnected(context, Dispatchers.Main)
+        } else {
+            kotlinx.coroutines.flow.flowOf(false)
+        }
+    }.collectAsState(initial = false)
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -197,6 +214,27 @@ fun TaskDetailScreen(
                                     }
                                 }
                             }
+                        }
+
+                        IconButton(onClick = {
+                            if (android.os.Build.VERSION.SDK_INT >= 35) {
+                                val options = ProjectedContext.createProjectedActivityOptions(context)
+                                val intent = Intent(context, PhotoDoGlassesActivity::class.java).apply {
+                                    putExtra("projectId", state.projectDetails.project.projectId)
+                                }
+                                context.startActivity(intent, options.toBundle())
+                            } else {
+                                val intent = Intent(context, PhotoDoGlassesActivity::class.java).apply {
+                                    putExtra("projectId", state.projectDetails.project.projectId)
+                                }
+                                context.startActivity(intent)
+                            }
+                        }) {
+                            Icon(
+                                imageVector = if (isProjectedConnected) Icons.Default.CastConnected else Icons.Default.Cast,
+                                contentDescription = "Project to Glasses",
+                                tint = if (isProjectedConnected) Color(0xFF4CAF50) else LocalContentColor.current
+                            )
                         }
 
                         IconButton(onClick = { onEvent(TaskDetailEvent.OnShowDeleteProjectConfirmation(true)) }) {
