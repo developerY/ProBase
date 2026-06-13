@@ -12,6 +12,7 @@ import com.google.ai.client.generativeai.type.generationConfig
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
+import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureStep
 import com.zoewave.probase.kocolor.model.ChemistryBase
 import com.zoewave.probase.kocolor.model.CosmeticItem
@@ -63,22 +64,29 @@ class BoxCaptureViewModel @Inject constructor(
 
     private val capturedUris = mutableListOf<String>()
 
+    fun setMode(modeString: String) {
+        val mode = try { CaptureMode.valueOf(modeString) } catch (e: Exception) { CaptureMode.BOX }
+        _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), CaptureStep.getStepsForMode(mode).first(), mode)
+    }
+
     fun onPhotoCaptured(uri: String) {
         capturedUris.add(uri)
-        val nextStep = getNextStep()
+        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
+        val nextStep = getNextStep(mode)
         if (nextStep != null) {
-            _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), nextStep)
+            _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), nextStep, mode)
         } else {
-            analyzePhotos()
+            analyzePhotos(mode)
         }
     }
 
-    private fun getNextStep(): CaptureStep? {
+    private fun getNextStep(mode: CaptureMode): CaptureStep? {
+        val steps = CaptureStep.getStepsForMode(mode)
         val currentSize = capturedUris.size
-        return CaptureStep.entries.getOrNull(currentSize)
+        return steps.getOrNull(currentSize)
     }
 
-    fun analyzePhotos() {
+    fun analyzePhotos(mode: CaptureMode) {
         viewModelScope.launch {
             _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList())
             
@@ -110,8 +118,9 @@ class BoxCaptureViewModel @Inject constructor(
 
                 val prompt = content {
                     bitmaps.forEach { image(it) }
+                    val target = if (mode == CaptureMode.BOX) "product box from all sides" else "product container (front and back)"
                     text("""
-                        Analyze these photos of a cosmetic product box from all sides.
+                        Analyze these photos of a $target.
                         Extract all available information and return it in the following JSON format:
                         {
                             "name": "Product Name",
@@ -173,7 +182,7 @@ class BoxCaptureViewModel @Inject constructor(
             CosmeticItem(
                 name = extracted.name,
                 brand = extracted.brand,
-                macroCategory = try { MacroCategory.valueOf(extracted.macroCategory ?: "TOOLS") } catch (e: Exception) { MacroCategory. TOOLS },
+                macroCategory = try { MacroCategory.valueOf(extracted.macroCategory ?: "TOOLS") } catch (e: Exception) { MacroCategory.TOOLS },
                 microCategory = try { MicroCategory.valueOf(extracted.microCategory ?: "OTHER") } catch (e: Exception) { MicroCategory.OTHER },
                 formulation = try { Formulation.valueOf(extracted.formulation ?: "UNKNOWN") } catch (e: Exception) { Formulation.UNKNOWN },
                 chemistryBase = try { ChemistryBase.valueOf(extracted.chemistryBase ?: "UNKNOWN") } catch (e: Exception) { ChemistryBase.UNKNOWN },
@@ -201,7 +210,8 @@ class BoxCaptureViewModel @Inject constructor(
     }
 
     fun reset() {
+        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
         capturedUris.clear()
-        _uiState.value = BoxCaptureUiState.Idle()
+        _uiState.value = BoxCaptureUiState.Idle(emptyList(), CaptureStep.getStepsForMode(mode).first(), mode)
     }
 }

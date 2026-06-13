@@ -170,6 +170,14 @@ fun StitchProductBuilder(
                                 }
                             }
 
+                            IconButton(onClick = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) }) {
+                                Icon(Icons.Default.PhotoCamera, null, tint = Color(0xFF8B5E3C))
+                            }
+
+                            IconButton(onClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) }) {
+                                Icon(Icons.Default.AutoAwesome, null, tint = Color(0xFF8B5E3C))
+                            }
+
                             IconButton(onClick = { navTo(KoColorRoute.BarcodeScanner) }) {
                                 Icon(Icons.Default.QrCodeScanner, null, tint = Color(0xFF8B5E3C))
                             }
@@ -187,12 +195,37 @@ fun StitchProductBuilder(
                 AlertDialog(
                     onDismissRequest = { onEvent(CosmeticsEvent.ResetScanState) },
                     confirmButton = {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(
+                                onClick = { 
+                                    onEvent(CosmeticsEvent.ResetScanState)
+                                    navTo(KoColorRoute.BoxCapture(mode = "BOX"))
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5E3C))
+                            ) {
+                                Text("SCAN FULL BOX", fontWeight = FontWeight.Bold)
+                            }
+                            OutlinedButton(
+                                onClick = { 
+                                    onEvent(CosmeticsEvent.ResetScanState)
+                                    navTo(KoColorRoute.BoxCapture(mode = "PRODUCT"))
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                border = BorderStroke(1.dp, Color(0xFF8B5E3C)),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF8B5E3C))
+                            ) {
+                                Text("SCAN FRONT/BACK ONLY", fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    },
+                    dismissButton = {
                         TextButton(onClick = { onEvent(CosmeticsEvent.ResetScanState) }) {
                             Text(stringResource(R.string.applications_kocolor_features_cosmetics_ok), fontWeight = FontWeight.Bold)
                         }
                     },
                     title = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_product_not_found_title)) },
-                    text = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_product_not_found_message)) },
+                    text = { Text("Barcode not recognized. Try one of our AI-powered visual scanning modes for full details.") },
                     shape = RoundedCornerShape(24.dp)
                 )
             }

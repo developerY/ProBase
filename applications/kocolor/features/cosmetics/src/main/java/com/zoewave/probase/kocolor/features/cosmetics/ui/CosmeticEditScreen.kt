@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
@@ -198,11 +196,6 @@ fun CosmeticEditScreen(
                     }
                 },
                 actions = {
-                    if (itemId == 0L) {
-                        IconButton(onClick = { navTo(KoColorRoute.BoxCapture) }) {
-                            Icon(Icons.Default.AutoAwesome, contentDescription = "Scan Box", tint = atelierBrown)
-                        }
-                    }
                     IconButton(onClick = { showDeleteConfirmation = true }) {
                         Icon(Icons.Default.DeleteOutline, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_delete_desc), tint = Color.Gray)
                     }
