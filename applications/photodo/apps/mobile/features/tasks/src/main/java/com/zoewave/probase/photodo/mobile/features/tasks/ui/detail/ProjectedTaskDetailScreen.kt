@@ -31,6 +31,7 @@ fun ProjectedTaskDetailScreen(
     uiState: TaskDetailUiState,
     isAiActive: Boolean,
     aiAudioLevel: () -> Float,
+    isCapturing: Boolean = false,
     onToggleTask: (Long, Boolean) -> Unit
 ) {
     val successState = uiState.loadState as? DetailLoadState.Success
@@ -52,11 +53,20 @@ fun ProjectedTaskDetailScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = projectName,
-                    style = GlimmerTheme.typography.titleMedium,
-                    color = GlimmerTheme.colors.primary
-                )
+                Column {
+                    Text(
+                        text = projectName,
+                        style = GlimmerTheme.typography.titleMedium,
+                        color = GlimmerTheme.colors.primary
+                    )
+                    if (isCapturing) {
+                        Text(
+                            text = "Capturing Photo...",
+                            style = GlimmerTheme.typography.caption,
+                            color = GlimmerTheme.colors.secondary
+                        )
+                    }
+                }
                 
                 if (isAiActive) {
                     VoiceInputIndicator(
