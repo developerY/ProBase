@@ -12,7 +12,10 @@ import com.zoewave.probase.features.ai.firebase.domain.GeminiFirebaseManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.*
 import javax.inject.Inject
@@ -32,6 +35,9 @@ class PhotoDoLiveSessionManager @Inject constructor(
     
     private val _isSessionActive = MutableStateFlow(false)
     val isSessionActive: StateFlow<Boolean> = _isSessionActive.asStateFlow()
+
+    private val _captureRequests = MutableSharedFlow<Unit>(replay = 0)
+    val captureRequests: SharedFlow<Unit> = _captureRequests.asSharedFlow()
 
     private var currentProjectId: Long? = null
 
@@ -63,6 +69,11 @@ class PhotoDoLiveSessionManager @Inject constructor(
                                     "taskId" to Schema.long("The ID of the task to update"),
                                     "isChecked" to Schema.boolean("True if completed, false otherwise")
                                 )
+                            ),
+                            FunctionDeclaration(
+                                name = "captureProjectImage",
+                                description = "Captures a photo using the glasses camera and adds it to the current project gallery.",
+                                parameters = emptyMap()
                             )
                         )
                     )
@@ -105,6 +116,9 @@ class PhotoDoLiveSessionManager @Inject constructor(
                     val taskId = toolCall.args["taskId"]?.jsonPrimitive?.longOrNull
                     val isChecked = toolCall.args["isChecked"]?.jsonPrimitive?.booleanOrNull
                     if (taskId != null && isChecked != null) handleSetTaskStatus(taskId, isChecked)
+                }
+                "captureProjectImage" -> {
+                    _captureRequests.emit(Unit)
                 }
             }
         }

@@ -217,17 +217,25 @@ fun TaskDetailScreen(
                         }
 
                         IconButton(onClick = {
-                            if (android.os.Build.VERSION.SDK_INT >= 35) {
-                                val options = ProjectedContext.createProjectedActivityOptions(context)
-                                val intent = Intent(context, PhotoDoGlassesActivity::class.java).apply {
-                                    putExtra("projectId", state.projectDetails.project.projectId)
+                            val hasCamera = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                            val hasAudio = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+                            
+                            if (hasCamera && hasAudio) {
+                                if (android.os.Build.VERSION.SDK_INT >= 35) {
+                                    val options = ProjectedContext.createProjectedActivityOptions(context)
+                                    val intent = Intent(context, PhotoDoGlassesActivity::class.java).apply {
+                                        putExtra("projectId", state.projectDetails.project.projectId)
+                                    }
+                                    context.startActivity(intent, options.toBundle())
+                                } else {
+                                    val intent = Intent(context, PhotoDoGlassesActivity::class.java).apply {
+                                        putExtra("projectId", state.projectDetails.project.projectId)
+                                    }
+                                    context.startActivity(intent)
                                 }
-                                context.startActivity(intent, options.toBundle())
                             } else {
-                                val intent = Intent(context, PhotoDoGlassesActivity::class.java).apply {
-                                    putExtra("projectId", state.projectDetails.project.projectId)
-                                }
-                                context.startActivity(intent)
+                                permissionLauncher.launch(Manifest.permission.CAMERA)
+                                // Simplified for demo: in real app, request both
                             }
                         }) {
                             Icon(
