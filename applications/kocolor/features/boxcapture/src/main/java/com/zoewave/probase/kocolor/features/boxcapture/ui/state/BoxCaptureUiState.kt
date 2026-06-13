@@ -5,7 +5,8 @@ import com.zoewave.probase.kocolor.model.CosmeticItem
 sealed interface BoxCaptureUiState {
     data class Idle(
         val capturedUris: List<String> = emptyList(),
-        val currentStep: CaptureStep = CaptureStep.FRONT
+        val currentStep: CaptureStep = CaptureStep.FRONT,
+        val mode: CaptureMode = CaptureMode.BOX
     ) : BoxCaptureUiState
 
     data class Analyzing(
@@ -22,6 +23,10 @@ sealed interface BoxCaptureUiState {
     ) : BoxCaptureUiState
 }
 
+enum class CaptureMode {
+    BOX, PRODUCT
+}
+
 enum class CaptureStep(val label: String) {
     FRONT("Front Side"),
     BACK("Back Side"),
@@ -29,5 +34,14 @@ enum class CaptureStep(val label: String) {
     RIGHT("Right Side"),
     TOP("Top Side"),
     BOTTOM("Bottom Side"),
-    INGREDIENTS("Ingredients List")
+    INGREDIENTS("Ingredients List");
+
+    companion object {
+        fun getStepsForMode(mode: CaptureMode): List<CaptureStep> {
+            return when (mode) {
+                CaptureMode.BOX -> entries
+                CaptureMode.PRODUCT -> listOf(FRONT, BACK)
+            }
+        }
+    }
 }

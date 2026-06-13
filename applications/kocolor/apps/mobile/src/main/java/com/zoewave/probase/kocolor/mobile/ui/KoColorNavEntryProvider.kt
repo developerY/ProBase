@@ -184,6 +184,7 @@ fun koColorNavEntryProvider(
         }
         is KoColorRoute.BoxCapture -> NavEntry(route) {
             BoxCaptureRoute(
+                mode = route.mode,
                 onSuccess = { item ->
                     // For now, let's just go back
                     onNavigateTo(KoColorRoute.Back)

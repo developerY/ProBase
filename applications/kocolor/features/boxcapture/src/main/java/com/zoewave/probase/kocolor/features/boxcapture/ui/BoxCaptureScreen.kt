@@ -36,6 +36,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
+import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureStep
 import com.zoewave.probase.kocolor.model.CosmeticItem
 import kotlinx.coroutines.Dispatchers
@@ -83,6 +84,7 @@ internal fun BoxCaptureScreen(
                     CameraView(
                         step = uiState.currentStep,
                         capturedUris = uiState.capturedUris,
+                        mode = uiState.mode,
                         onCapture = onCapture,
                         onDismiss = onDismiss
                     )
@@ -105,6 +107,7 @@ internal fun BoxCaptureScreen(
 private fun CameraView(
     step: CaptureStep,
     capturedUris: List<String>,
+    mode: CaptureMode,
     onCapture: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -134,6 +137,8 @@ private fun CameraView(
         }
     }
 
+    val totalSteps = CaptureStep.getStepsForMode(mode).size
+
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
             val sr = surfaceRequest
@@ -151,7 +156,7 @@ private fun CameraView(
             ) {
                 Column {
                     Text(
-                        text = "STEP ${step.ordinal + 1}/7",
+                        text = "STEP ${CaptureStep.getStepsForMode(mode).indexOf(step) + 1}/$totalSteps",
                         color = Color.White,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
@@ -169,17 +174,6 @@ private fun CameraView(
                 ) {
                     Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
                 }
-            }
-
-            // Guide Frame (Simulated)
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(0.7f)
-                    .align(Alignment.Center)
-                    .background(Color.Transparent)
-                    .padding(2.dp)
-            ) {
-                // We could add corners here
             }
         }
 
@@ -236,7 +230,8 @@ private fun CameraView(
             }
             
             Spacer(modifier = Modifier.height(12.dp))
-            Text("TAP TO CAPTURE", color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.labelSmall)
+            val captureLabel = if (mode == CaptureMode.BOX) "CAPTURE BOX" else "CAPTURE PRODUCT"
+            Text("TAP TO $captureLabel", color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.labelSmall)
         }
     }
 }
@@ -252,7 +247,7 @@ private fun AnalysisView(progress: String) {
         Spacer(modifier = Modifier.height(24.dp))
         Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFF22d3ee), modifier = Modifier.size(48.dp))
         Spacer(modifier = Modifier.height(16.dp))
-        Text("GEMINI ANALYZING BOX", color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text("GEMINI ANALYZING", color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Text(progress, color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.bodySmall)
     }
 }
