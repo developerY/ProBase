@@ -8,8 +8,9 @@ To power augmented experiences on AI Glasses, we are introducing two new, purpos
 Demos:
 * [Sample XR Apps](https://github.com/android/xr-samples)
 YouTube Videos:
-* [Building for AI Glasses with Android XR](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
+* [XR Samples](https://developer.android.com/develop/xr/samples)
+* [Building for AI Glasses with Android XR](https://www.youtube.com/watch?v=a3-OJxxW810&list=PLWz5rJ2EKKc8Q_O_Gdi7tm4brTXws8thC)
 Documentation:
-* [Jetpack XR SDK Overview](https://developer.android.com/guide/topics/connectivity/xr)
+* [Jetpack XR SDK Overview](https://developer.android.com/develop/xr)
 
 [Get early hardware](https://developer.android.com/develop/xr/catalyst?utm_source=chatgpt.com)
