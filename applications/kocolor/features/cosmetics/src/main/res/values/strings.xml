@@ -80,8 +80,13 @@
     <string name="applications_kocolor_features_cosmetics_tap_to_upload">Tap to upload or take a photo</string>
     <string name="applications_kocolor_features_cosmetics_barcode_label">BARCODE</string>
     <string name="applications_kocolor_features_cosmetics_enter_barcode_manually">Enter barcode manually...</string>
+    <string name="applications_kocolor_features_cosmetics_scan_product_desc">Scan Front/Back</string>
+    <string name="applications_kocolor_features_cosmetics_scan_box_desc">Scan Full Box</string>
     <string name="applications_kocolor_features_cosmetics_product_not_found_title">Product Not Found</string>
     <string name="applications_kocolor_features_cosmetics_product_not_found_message">The barcode could not be found in our database. Please enter the details manually.</string>
+    <string name="applications_kocolor_features_cosmetics_barcode_error_message">Barcode not recognized. Try one of our AI-powered visual scanning modes for full details.</string>
+    <string name="applications_kocolor_features_cosmetics_scan_box_action">SCAN FULL BOX</string>
+    <string name="applications_kocolor_features_cosmetics_scan_product_action">SCAN FRONT/BACK ONLY</string>
     <string name="applications_kocolor_features_cosmetics_or_divider"> OR </string>
     <string name="applications_kocolor_features_cosmetics_manual_entry">Manual Entry</string>
     <string name="applications_kocolor_features_cosmetics_category_label">CATEGORY</string>

@@ -171,11 +171,11 @@ fun StitchProductBuilder(
                             }
 
                             IconButton(onClick = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) }) {
-                                Icon(Icons.Default.PhotoCamera, null, tint = Color(0xFF8B5E3C))
+                                Icon(Icons.Default.PhotoCamera, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_scan_product_desc), tint = Color(0xFF8B5E3C))
                             }
 
                             IconButton(onClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) }) {
-                                Icon(Icons.Default.AutoAwesome, null, tint = Color(0xFF8B5E3C))
+                                Icon(Icons.Default.AutoAwesome, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_desc), tint = Color(0xFF8B5E3C))
                             }
 
                             IconButton(onClick = { navTo(KoColorRoute.BarcodeScanner) }) {
@@ -204,7 +204,7 @@ fun StitchProductBuilder(
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5E3C))
                             ) {
-                                Text("SCAN FULL BOX", fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_action), fontWeight = FontWeight.Bold)
                             }
                             OutlinedButton(
                                 onClick = { 
@@ -215,7 +215,7 @@ fun StitchProductBuilder(
                                 border = BorderStroke(1.dp, Color(0xFF8B5E3C)),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF8B5E3C))
                             ) {
-                                Text("SCAN FRONT/BACK ONLY", fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.applications_kocolor_features_cosmetics_scan_product_action), fontWeight = FontWeight.Bold)
                             }
                         }
                     },
@@ -225,7 +225,7 @@ fun StitchProductBuilder(
                         }
                     },
                     title = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_product_not_found_title)) },
-                    text = { Text("Barcode not recognized. Try one of our AI-powered visual scanning modes for full details.") },
+                    text = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_barcode_error_message)) },
                     shape = RoundedCornerShape(24.dp)
                 )
             }
