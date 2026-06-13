@@ -15,6 +15,7 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulator
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerViewModel
+import com.zoewave.probase.kocolor.features.boxcapture.ui.BoxCaptureRoute
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticAnalyticsScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverUiState
@@ -179,6 +180,15 @@ fun koColorNavEntryProvider(
                 uiState = state,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.BoxCapture -> NavEntry(route) {
+            BoxCaptureRoute(
+                onSuccess = { item ->
+                    // For now, let's just go back
+                    onNavigateTo(KoColorRoute.Back)
+                },
+                onDismiss = { onNavigateTo(KoColorRoute.Back) }
             )
         }
         is KoColorRoute.CosmeticAnalytics -> NavEntry(route) {

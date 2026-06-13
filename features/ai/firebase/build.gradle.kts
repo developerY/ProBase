@@ -12,7 +12,7 @@ dependencies {
     implementation(project(":core:util"))
 
     // --- Firebase AI Logic ---
-    implementation(platform(libs.firebase.bom))
+    api(platform(libs.firebase.bom))
     api(libs.firebase.ai)
 
     // --- Hilt ---

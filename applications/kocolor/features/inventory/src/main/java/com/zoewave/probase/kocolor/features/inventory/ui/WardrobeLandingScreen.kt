@@ -2,20 +2,38 @@ package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,11 +44,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.inventory.R
-import com.zoewave.probase.kocolor.features.inventory.ui.components.*
+import com.zoewave.probase.kocolor.features.inventory.ui.components.AtelierWardrobeCard
+import com.zoewave.probase.kocolor.features.inventory.ui.components.RecentClothingCard
+import com.zoewave.probase.kocolor.features.inventory.ui.components.SummaryStatCard
+import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeTaxonomyDialog
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
-import java.util.*
+import java.util.Locale
 
 @Preview(showBackground = true)
 @Composable
@@ -164,8 +185,8 @@ fun WardrobeLandingScreen(
                     
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         val sections = listOf(
-                            "Tops" to (Color(0xFFF7F2EB) to R.drawable.tops),
-                            "Bottoms" to (Color(0xFFF9F6F0) to R.drawable.bottom),
+                            "Tops" to (Color(0xFFF7F2EB) to R.drawable.wardrobe_tops),
+                            "Bottoms" to (Color(0xFFF9F6F0) to R.drawable.wardrobe_bottom),
                             "Shoes" to (Color(0xFFE8F1FD) to R.drawable.wardrobe_shoes),
                             "Accessories" to (Color(0xFFF3EBFD) to R.drawable.wardrobe_accessories)
                         )
