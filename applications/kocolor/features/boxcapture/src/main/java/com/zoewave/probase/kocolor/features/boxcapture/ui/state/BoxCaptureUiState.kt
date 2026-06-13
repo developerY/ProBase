@@ -27,14 +27,18 @@ enum class CaptureMode {
     BOX, PRODUCT
 }
 
-enum class CaptureStep(val label: String) {
-    FRONT("Front Side"),
-    BACK("Back Side"),
+enum class CaptureStep(val boxLabel: String, val productLabel: String = boxLabel) {
+    FRONT("Front Side", "Front of Product"),
+    BACK("Back Side", "Back of Product"),
     LEFT("Left Side"),
     RIGHT("Right Side"),
     TOP("Top Side"),
     BOTTOM("Bottom Side"),
     INGREDIENTS("Ingredients List");
+
+    fun getLabel(mode: CaptureMode): String {
+        return if (mode == CaptureMode.PRODUCT) productLabel else boxLabel
+    }
 
     companion object {
         fun getStepsForMode(mode: CaptureMode): List<CaptureStep> {

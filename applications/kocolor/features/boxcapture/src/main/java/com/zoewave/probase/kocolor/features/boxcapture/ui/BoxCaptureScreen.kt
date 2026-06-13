@@ -35,6 +35,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureStep
@@ -45,6 +48,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun BoxCaptureUiRoute(
     viewModel: BoxCaptureViewModel,
@@ -52,6 +56,16 @@ fun BoxCaptureUiRoute(
     onDismiss: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+
+    var hasRequestedPermission by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (!cameraPermissionState.status.isGranted) {
+            cameraPermissionState.launchPermissionRequest()
+            hasRequestedPermission = true
+        }
+    }
 
     LaunchedEffect(uiState) {
         if (uiState is BoxCaptureUiState.Success) {
@@ -59,12 +73,62 @@ fun BoxCaptureUiRoute(
         }
     }
 
-    BoxCaptureScreen(
-        uiState = uiState,
-        onCapture = viewModel::onPhotoCaptured,
-        onRetry = viewModel::reset,
-        onDismiss = onDismiss
-    )
+    when {
+        cameraPermissionState.status.isGranted -> {
+            BoxCaptureScreen(
+                uiState = uiState,
+                onCapture = viewModel::onPhotoCaptured,
+                onRetry = viewModel::reset,
+                onDismiss = onDismiss
+            )
+        }
+        hasRequestedPermission && !cameraPermissionState.status.isGranted -> {
+            PermissionDeniedView(onDismiss = onDismiss)
+        }
+        else -> {
+            // Loading or Waiting for dialog
+            Box(Modifier.fillMaxSize().background(Color(0xFF0f172a)))
+        }
+    }
+}
+
+@Composable
+private fun PermissionDeniedView(onDismiss: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0f172a))
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = null,
+            tint = Color(0xFFf472b6),
+            modifier = Modifier.size(64.dp)
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "CAMERA PERMISSION REQUIRED",
+            color = Color.White,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "To analyze your product packaging, KoColor needs access to your camera.",
+            color = Color.White.copy(alpha = 0.7f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(
+            onClick = onDismiss,
+            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+        ) {
+            Text("GO BACK", color = Color.Black)
+        }
+    }
 }
 
 @Composable
@@ -162,7 +226,7 @@ private fun CameraView(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = step.label.uppercase(),
+                        text = step.getLabel(mode).uppercase(),
                         color = Color(0xFF22d3ee),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
@@ -238,17 +302,45 @@ private fun CameraView(
 
 @Composable
 private fun AnalysisView(progress: String) {
+    val isLocal = progress.contains("Local")
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF0f172a)),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CircularProgressIndicator(color = Color(0xFF22d3ee))
+        CircularProgressIndicator(color = if (isLocal) Color(0xFF4ade80) else Color(0xFF22d3ee))
         Spacer(modifier = Modifier.height(24.dp))
-        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFF22d3ee), modifier = Modifier.size(48.dp))
+        Icon(
+            imageVector = if (isLocal) Icons.Default.AutoAwesome else Icons.Default.AutoAwesome, // Could use different icons
+            contentDescription = null, 
+            tint = if (isLocal) Color(0xFF4ade80) else Color(0xFF22d3ee), 
+            modifier = Modifier.size(48.dp)
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        Text("GEMINI ANALYZING", color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text(
+            text = if (isLocal) "LOCAL AI ANALYZING" else "GEMINI ANALYZING", 
+            color = Color.White, 
+            style = MaterialTheme.typography.titleMedium, 
+            fontWeight = FontWeight.Bold
+        )
         Text(progress, color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.bodySmall)
+        
+        if (isLocal) {
+            Spacer(modifier = Modifier.height(32.dp))
+            Surface(
+                color = Color(0x1A4ADE80),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.padding(horizontal = 48.dp)
+            ) {
+                Text(
+                    text = "OFFLINE MODE: Accuracy may be lower. You can refine details after extraction.",
+                    color = Color(0xFF4ade80),
+                    style = MaterialTheme.typography.labelSmall,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+        }
     }
 }
 
