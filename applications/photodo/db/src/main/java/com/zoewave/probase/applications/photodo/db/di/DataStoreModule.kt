@@ -44,12 +44,14 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    @Named("PhotoDo")
     abstract fun bindAiConfigurationSettings(
         impl: AppSettingsRepository
     ): AiConfigurationSettings
 
     @Binds
     @Singleton
+    @Named("PhotoDo")
     abstract fun bindSmartCaptureSettings(
         impl: RealSmartCaptureSettings
     ): SmartCaptureSettings
