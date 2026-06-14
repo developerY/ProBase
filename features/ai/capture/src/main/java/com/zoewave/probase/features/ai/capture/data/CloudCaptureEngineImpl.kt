@@ -59,15 +59,13 @@ class CloudCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
     }
 
     override suspend fun testModel(apiKey: String, modelName: String): String {
-        val generativeModel = GenerativeModel(
-            modelName = modelName,
-            apiKey = apiKey
-        )
-        return try {
-            val response = generativeModel.generateContent("What is your name and version?")
-            response.text ?: "No response from model"
-        } catch (e: Exception) {
-            e.localizedMessage ?: "Connection Error"
+        // We do not need Ktor for the API key verification.
+        // Using the models list check (OkHttp) instead of generateContent to avoid SDK initialization crash if Ktor is unstable.
+        val available = getAvailableModels(apiKey)
+        return if (available.isNotEmpty()) {
+            "API Key Verified. Available models: ${available.size}"
+        } else {
+            "Invalid API Key or no models available."
         }
     }
 
