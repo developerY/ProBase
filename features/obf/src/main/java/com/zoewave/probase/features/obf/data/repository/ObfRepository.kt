@@ -80,4 +80,36 @@ class ObfRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    /**
+     * Uploads a new product to Open Beauty Facts.
+     */
+    suspend fun uploadProduct(
+        item: CosmeticItem,
+        userId: String,
+        password: String
+    ): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val barcode = item.batchCode ?: return@withContext Result.failure(Exception("Barcode is required for upload."))
+            
+            val response = api.uploadProduct(
+                barcode = barcode,
+                userId = userId,
+                password = password,
+                productName = item.name,
+                brands = item.brand,
+                categories = item.microCategory.displayName,
+                ingredients = item.ingredients.joinToString(", "),
+                volume = item.volume
+            )
+
+            if (response.isSuccessful && response.body()?.status == 1) {
+                Result.success(response.body()?.statusVerbose ?: "Product successfully contributed.")
+            } else {
+                Result.failure(Exception(response.body()?.statusVerbose ?: "Failed to upload product."))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

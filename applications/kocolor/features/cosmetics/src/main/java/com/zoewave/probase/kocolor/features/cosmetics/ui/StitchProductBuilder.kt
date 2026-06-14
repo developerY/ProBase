@@ -87,6 +87,14 @@ fun StitchProductBuilder(
         return
     }
 
+    if (uiState.showObfContributionPrompt) {
+        ObfContributionDialog(
+            status = uiState.obfContributionStatus,
+            onContribute = { u, p -> onEvent(CosmeticsEvent.ContributeToObf(u, p)) },
+            onDismiss = { onEvent(CosmeticsEvent.DismissObfPrompt) }
+        )
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -379,3 +387,70 @@ fun StitchProductBuilder(
         }
     }
 }
+
+@Composable
+private fun ObfContributionDialog(
+    status: String?,
+    onContribute: (String, String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var userId by remember { mutableStateOf("off") } // Default to sandbox
+    var password by remember { mutableStateOf("off") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { 
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.CloudUpload, null, tint = Color(0xFF8B5E3C), modifier = Modifier.size(28.dp))
+                Spacer(Modifier.width(12.dp))
+                Text(stringResource(R.string.applications_kocolor_features_cosmetics_obf_contribute_title), fontFamily = FontFamily.Serif)
+            }
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(stringResource(R.string.applications_kocolor_features_cosmetics_obf_contribute_message), style = MaterialTheme.typography.bodyMedium)
+                
+                if (status != null) {
+                    Text(status, color = Color(0xFF8B5E3C), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelSmall)
+                }
+
+                OutlinedTextField(
+                    value = userId,
+                    onValueChange = { userId = it },
+                    label = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_obf_username_label)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_obf_password_label)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                
+                Text(
+                    "Note: Default 'off/off' uses the OBF sandbox/test environment.", 
+                    style = MaterialTheme.typography.labelSmall, 
+                    color = Color.Gray
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onContribute(userId, password) },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5E3C))
+            ) {
+                Text(stringResource(R.string.applications_kocolor_features_cosmetics_obf_contribute_button))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.applications_kocolor_features_cosmetics_obf_not_now), color = Color.Gray)
+            }
+        },
+        shape = RoundedCornerShape(28.dp)
+    )
+}
+

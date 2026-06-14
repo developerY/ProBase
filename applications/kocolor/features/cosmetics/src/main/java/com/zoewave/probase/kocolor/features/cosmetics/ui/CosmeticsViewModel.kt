@@ -12,6 +12,7 @@ import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
+import com.zoewave.probase.features.obf.data.repository.ObfRepository
 import com.zoewave.probase.kocolor.model.*
 import com.zoewave.probase.kocolor.features.fda.data.repository.FdaRepository
 import com.zoewave.probase.core.network.repository.weather.WeatherRepo
@@ -61,6 +62,8 @@ data class CosmeticsUiState(
     val scanStatus: String? = null,
     val isScanSuccessful: Boolean = false,
     val lastScanFailed: Boolean = false,
+    val showObfContributionPrompt: Boolean = false,
+    val obfContributionStatus: String? = null,
     val uvIndex: Double = 0.0
 )
 
@@ -80,6 +83,8 @@ sealed class CosmeticsEvent {
     data class HandleScanResult(val code: String) : CosmeticsEvent()
     data object ResetScanState : CosmeticsEvent()
     data object CancelDiscovery : CosmeticsEvent()
+    data class ContributeToObf(val userId: String, val password: String) : CosmeticsEvent()
+    data object DismissObfPrompt : CosmeticsEvent()
 }
 
 @HiltViewModel
@@ -90,6 +95,7 @@ class CosmeticsViewModel @Inject constructor(
     private val fdaRepository: FdaRepository,
     private val weatherRepo: WeatherRepo,
     private val analyzerEngine: AnalyzerEngine,
+    private val obfRepository: ObfRepository,
     @Named("KoColor") private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
@@ -101,6 +107,8 @@ class CosmeticsViewModel @Inject constructor(
     private val _scanStatus = MutableStateFlow<String?>(null)
     private val _isScanSuccessful = MutableStateFlow(false)
     private val _lastScanFailed = MutableStateFlow(false)
+    private val _showObfPrompt = MutableStateFlow(false)
+    private val _obfStatus = MutableStateFlow<String?>(null)
     private val _uvIndex = MutableStateFlow(0.0)
 
     init {
@@ -160,6 +168,8 @@ class CosmeticsViewModel @Inject constructor(
         _scanStatus,
         _isScanSuccessful,
         _lastScanFailed,
+        _showObfPrompt,
+        _obfStatus,
         _uvIndex
     ) { array ->
         val models = array[0] as List<CosmeticItem>
@@ -172,7 +182,9 @@ class CosmeticsViewModel @Inject constructor(
         val scanStatus = array[7] as String?
         val scanSuccessful = array[8] as Boolean
         val scanFailed = array[9] as Boolean
-        val uvVal = array[10] as Double
+        val showObf = array[10] as Boolean
+        val obfStatus = array[11] as String?
+        val uvVal = array[12] as Double
 
         val groupStats = models.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         
@@ -234,6 +246,8 @@ class CosmeticsViewModel @Inject constructor(
             scanStatus = scanStatus,
             isScanSuccessful = scanSuccessful,
             lastScanFailed = scanFailed,
+            showObfContributionPrompt = showObf,
+            obfContributionStatus = obfStatus,
             uvIndex = uvVal
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, CosmeticsUiState())
@@ -242,6 +256,12 @@ class CosmeticsViewModel @Inject constructor(
         when (event) {
             is CosmeticsEvent.AddItem -> {
                 addItem(event.item)
+                
+                // If it has a barcode, prompt to contribute to Open Beauty Facts
+                if (!event.item.batchCode.isNullOrBlank()) {
+                    _showObfPrompt.value = true
+                }
+
                 sessionRepository.reset()
                 _isScanSuccessful.value = false
                 _lastScanFailed.value = false
@@ -309,6 +329,24 @@ class CosmeticsViewModel @Inject constructor(
                 _isScanSuccessful.value = false
                 _lastScanFailed.value = false
                 _scanStatus.value = null
+            }
+            is CosmeticsEvent.ContributeToObf -> contributeToObf(event.userId, event.password)
+            CosmeticsEvent.DismissObfPrompt -> _showObfPrompt.value = false
+        }
+    }
+
+    private fun contributeToObf(userId: String, password: String) {
+        viewModelScope.launch {
+            _obfStatus.value = "Contributing to Open Beauty Facts..."
+            val item = sessionRepository.cosmeticDraft.value ?: return@launch
+            val result = obfRepository.uploadProduct(item, userId, password)
+            if (result.isSuccess) {
+                _obfStatus.value = "Successfully contributed!"
+                _showObfPrompt.value = false
+                delay(2000)
+                _obfStatus.value = null
+            } else {
+                _obfStatus.value = "Contribution failed: ${result.exceptionOrNull()?.message}"
             }
         }
     }

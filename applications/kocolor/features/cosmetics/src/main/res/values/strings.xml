@@ -218,4 +218,12 @@
     <string name="applications_kocolor_features_cosmetics_leading_brand_format">LEADING BRAND: %1$s</string>
     <string name="applications_kocolor_features_cosmetics_taxonomy_title">Professional Taxonomy</string>
     <string name="applications_kocolor_features_cosmetics_taxonomy_level_format">Level %1$s</string>
+
+    <!-- Open Beauty Facts -->
+    <string name="applications_kocolor_features_cosmetics_obf_contribute_title">Help the Community?</string>
+    <string name="applications_kocolor_features_cosmetics_obf_contribute_message">This product isn\'t in the global database. Would you like to contribute its details to Open Beauty Facts so everyone can benefit?</string>
+    <string name="applications_kocolor_features_cosmetics_obf_username_label">OBF Username (Optional)</string>
+    <string name="applications_kocolor_features_cosmetics_obf_password_label">OBF Password</string>
+    <string name="applications_kocolor_features_cosmetics_obf_contribute_button">CONTRIBUTE NOW</string>
+    <string name="applications_kocolor_features_cosmetics_obf_not_now">MAYBE LATER</string>
 </resources>
