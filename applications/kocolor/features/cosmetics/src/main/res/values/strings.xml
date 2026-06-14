@@ -222,8 +222,6 @@
     <!-- Open Beauty Facts -->
     <string name="applications_kocolor_features_cosmetics_obf_contribute_title">Help the Community?</string>
     <string name="applications_kocolor_features_cosmetics_obf_contribute_message">This product isn\'t in the global database. Would you like to contribute its details to Open Beauty Facts so everyone can benefit?</string>
-    <string name="applications_kocolor_features_cosmetics_obf_username_label">OBF Username (Optional)</string>
-    <string name="applications_kocolor_features_cosmetics_obf_password_label">OBF Password</string>
     <string name="applications_kocolor_features_cosmetics_obf_contribute_button">CONTRIBUTE NOW</string>
     <string name="applications_kocolor_features_cosmetics_obf_not_now">MAYBE LATER</string>
 </resources>

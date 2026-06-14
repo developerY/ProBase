@@ -90,7 +90,7 @@ fun StitchProductBuilder(
     if (uiState.showObfContributionPrompt) {
         ObfContributionDialog(
             status = uiState.obfContributionStatus,
-            onContribute = { u, p -> onEvent(CosmeticsEvent.ContributeToObf(u, p)) },
+            onContribute = { onEvent(CosmeticsEvent.ContributeToObf) },
             onDismiss = { onEvent(CosmeticsEvent.DismissObfPrompt) }
         )
     }
@@ -391,12 +391,9 @@ fun StitchProductBuilder(
 @Composable
 private fun ObfContributionDialog(
     status: String?,
-    onContribute: (String, String) -> Unit,
+    onContribute: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    var userId by remember { mutableStateOf("off") } // Default to sandbox
-    var password by remember { mutableStateOf("off") }
-
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { 
@@ -414,24 +411,8 @@ private fun ObfContributionDialog(
                     Text(status, color = Color(0xFF8B5E3C), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelSmall)
                 }
 
-                OutlinedTextField(
-                    value = userId,
-                    onValueChange = { userId = it },
-                    label = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_obf_username_label)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_obf_password_label)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                
                 Text(
-                    "Note: Default 'off/off' uses the OBF sandbox/test environment.", 
+                    "Your contribution will be submitted anonymously to help keep the global beauty database accurate for everyone.", 
                     style = MaterialTheme.typography.labelSmall, 
                     color = Color.Gray
                 )
@@ -439,7 +420,7 @@ private fun ObfContributionDialog(
         },
         confirmButton = {
             Button(
-                onClick = { onContribute(userId, password) },
+                onClick = onContribute,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5E3C))
             ) {
                 Text(stringResource(R.string.applications_kocolor_features_cosmetics_obf_contribute_button))

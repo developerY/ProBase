@@ -83,11 +83,12 @@ class ObfRepository @Inject constructor(
 
     /**
      * Uploads a new product to Open Beauty Facts.
+     * Supports optional credentials for anonymous or authenticated contribution.
      */
     suspend fun uploadProduct(
         item: CosmeticItem,
-        userId: String,
-        password: String
+        userId: String? = null,
+        password: String? = null
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
             val barcode = item.batchCode ?: return@withContext Result.failure(Exception("Barcode is required for upload."))

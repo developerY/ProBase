@@ -45,8 +45,8 @@ interface OpenBeautyFactsApi {
     @POST("cgi/product_jqm2.pl")
     suspend fun uploadProduct(
         @Field("code") barcode: String,
-        @Field("user_id") userId: String,
-        @Field("password") password: String,
+        @Field("user_id") userId: String? = null,
+        @Field("password") password: String? = null,
         @Field("product_name") productName: String?,
         @Field("brands") brands: String?,
         @Field("categories") categories: String?,

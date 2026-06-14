@@ -83,7 +83,7 @@ sealed class CosmeticsEvent {
     data class HandleScanResult(val code: String) : CosmeticsEvent()
     data object ResetScanState : CosmeticsEvent()
     data object CancelDiscovery : CosmeticsEvent()
-    data class ContributeToObf(val userId: String, val password: String) : CosmeticsEvent()
+    data object ContributeToObf : CosmeticsEvent()
     data object DismissObfPrompt : CosmeticsEvent()
 }
 
@@ -330,16 +330,16 @@ class CosmeticsViewModel @Inject constructor(
                 _lastScanFailed.value = false
                 _scanStatus.value = null
             }
-            is CosmeticsEvent.ContributeToObf -> contributeToObf(event.userId, event.password)
+            CosmeticsEvent.ContributeToObf -> contributeToObf()
             CosmeticsEvent.DismissObfPrompt -> _showObfPrompt.value = false
         }
     }
 
-    private fun contributeToObf(userId: String, password: String) {
+    private fun contributeToObf() {
         viewModelScope.launch {
             _obfStatus.value = "Contributing to Open Beauty Facts..."
             val item = sessionRepository.cosmeticDraft.value ?: return@launch
-            val result = obfRepository.uploadProduct(item, userId, password)
+            val result = obfRepository.uploadProduct(item)
             if (result.isSuccess) {
                 _obfStatus.value = "Successfully contributed!"
                 _showObfPrompt.value = false
