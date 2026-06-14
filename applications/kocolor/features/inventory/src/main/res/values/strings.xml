@@ -58,4 +58,35 @@
     <string name="applications_kocolor_features_inventory_verticals_label">VERTICALS</string>
     <string name="applications_kocolor_features_inventory_recently_added">RECENTLY ADDED</string>
     <string name="applications_kocolor_features_inventory_see_all">See All</string>
+    <string name="applications_kocolor_features_inventory_inventory">Inventory</string>
+    <string name="applications_kocolor_features_inventory_search">Search</string>
+    <string name="applications_kocolor_features_inventory_pro_insight">Strategic curated wardrobe collection.</string>
+
+    <string name="applications_kocolor_features_inventory_view_inventory_action">VIEW INVENTORY</string>
+    <string name="applications_kocolor_features_inventory_view_intelligence_action">VIEW INTELLIGENCE</string>
+    <string name="applications_kocolor_features_inventory_taxonomy_title">Wardrobe Architecture</string>
+    <string name="applications_kocolor_features_inventory_taxonomy_understand">Understand</string>
+    <string name="applications_kocolor_features_inventory_verticals_title">Archive Verticals</string>
+    <string name="applications_kocolor_features_inventory_verticals_desc">Body-zone mapping for intuitive archival retrieval.</string>
+    <string name="applications_kocolor_features_inventory_avg_utility_label">Average Utility</string>
+    <string name="applications_kocolor_features_inventory_pieces_count_format">%1$d Pieces</string>
+    <string name="applications_kocolor_features_inventory_leading_brand_format">Leading Brand: %1$s</string>
+    <string name="applications_kocolor_features_inventory_wears_format">%1$d Wears</string>
+    <string name="applications_kocolor_features_inventory_category_collection_format">The %1$s Collection.</string>
+    <string name="applications_kocolor_features_inventory_category_performance_format">Strategic performance of your %1$s curated closet.</string>
+    <string name="applications_kocolor_features_inventory_portfolio_value_label">PORTFOLIO VALUE</string>
+    <string name="applications_kocolor_features_inventory_avg_cpw_label">AVG CPW</string>
+    <string name="applications_kocolor_features_inventory_most_worn_label">MOST WORN</string>
+    <string name="applications_kocolor_features_inventory_best_value_label">BEST VALUE</string>
+    <string name="applications_kocolor_features_inventory_premium_piece_label">PREMIUM PIECE</string>
+    <string name="applications_kocolor_features_inventory_least_worn_label">LEAST WORN</string>
+    <string name="applications_kocolor_features_inventory_pro_tip_tops">Sustainability: Choose natural fibers like silk for better cost-per-wear longevity.</string>
+    <string name="applications_kocolor_features_inventory_pro_tip_bottoms">Style Note: Darker tones in your bottoms provide a solid foundation for varied pairings.</string>
+    <string name="applications_kocolor_features_inventory_pro_tip_shoes">Expert Tip: Rotating your footwear extends the life of the materials.</string>
+    <string name="applications_kocolor_features_inventory_pro_tip_accessories">Investment: High-quality accessories are the easiest way to elevate a standard look.</string>
+    <string name="applications_kocolor_features_inventory_data_insight_default">Wardrobe Data: You\'ve maximized your investment in 20% of this collection.</string>
+    <string name="applications_kocolor_features_inventory_archive_entries_label">ARCHIVE ENTRIES</string>
+    <string name="applications_kocolor_features_inventory_remove_action">Remove from Wardrobe</string>
+    <string name="applications_kocolor_features_inventory_none_yet">None yet</string>
+    <string name="applications_kocolor_features_inventory_archive_label">Archive</string>
 </resources>

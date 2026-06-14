@@ -15,4 +15,8 @@
     <string name="applications_kocolor_apps_mobile_core_settings_about_data_deletion">Data Deletion Instructions</string>
     <string name="applications_kocolor_apps_mobile_core_privacy_policy_url">https://github.com/your-org/probase/blob/main/applications/kocolor/Docs/PrivacyPolicy.md</string>
     <string name="applications_kocolor_apps_mobile_core_data_deletion_url">https://github.com/your-org/probase/blob/main/applications/kocolor/Docs/Data_Deletion_Instructions.md</string>
+    <string name="applications_kocolor_apps_mobile_core_health_wellness_title">Health &amp; Wellness</string>
+    <string name="applications_kocolor_apps_mobile_core_back">Back</string>
+    <string name="applications_kocolor_apps_mobile_core_grant_permissions">Grant Permissions</string>
+    <string name="applications_kocolor_apps_mobile_core_health_connect_disabled">Health Connect is disabled on this device.</string>
 </resources>

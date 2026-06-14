@@ -20,12 +20,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.features.inventory.ui.CategoryMetadata
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -59,7 +61,7 @@ fun SummaryStatCard(
         ))
     }
     
-    val actionText = if (isValue) "VIEW INVENTORY" else "VIEW INTELLIGENCE"
+    val actionText = if (isValue) stringResource(R.string.applications_kocolor_features_inventory_view_inventory_action) else stringResource(R.string.applications_kocolor_features_inventory_view_intelligence_action)
     val actionContentColor = if (isValue) Color.White else charcoal.copy(alpha = 0.8f)
 
     val glassBg = if (isValue) {
@@ -174,20 +176,20 @@ fun SummaryStatCard(
 fun WardrobeTaxonomyDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Wardrobe Architecture", style = MaterialTheme.typography.headlineMedium, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.applications_kocolor_features_inventory_taxonomy_title), style = MaterialTheme.typography.headlineMedium, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
         text = {
             LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(24.dp)) {
                 item {
                     TaxonomySection(
                         level = "Level 1",
-                        title = "Archive Verticals",
-                        description = "Body-zone mapping for intuitive archival retrieval.",
+                        title = stringResource(R.string.applications_kocolor_features_inventory_verticals_title),
+                        description = stringResource(R.string.applications_kocolor_features_inventory_verticals_desc),
                         items = listOf("Tops" to "Blazers, Shirts, Knitwear.", "Bottoms" to "Trousers, Skirts, Denim.", "Shoes" to "Heels, Flats, Sneakers.", "Accessories" to "Bags, Belts, Jewelry.")
                     )
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Understand", fontWeight = FontWeight.Bold) } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.applications_kocolor_features_inventory_taxonomy_understand), fontWeight = FontWeight.Bold) } },
         shape = RoundedCornerShape(28.dp),
         containerColor = Color(0xFFF9F6F0)
     )
@@ -230,7 +232,7 @@ fun AtelierWardrobeCard(
     val totalValue = metadata?.totalValue ?: 0.0
     val leadingBrand = metadata?.leadingBrand
     val averageUsage = metadata?.averageUsage ?: 0.0
-    val description = metadata?.description ?: "Strategic curated wardrobe collection."
+    val description = metadata?.description ?: stringResource(R.string.applications_kocolor_features_inventory_pro_insight)
     
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
 
@@ -285,7 +287,7 @@ fun AtelierWardrobeCard(
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "$count Pieces",
+                                text = stringResource(R.string.applications_kocolor_features_inventory_pieces_count_format, count),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.alpha(0.8f)
@@ -319,8 +321,8 @@ fun AtelierWardrobeCard(
                 // Utility Status Bar
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "Average Utility", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.alpha(0.8f))
-                        Text(text = "${averageUsage.toInt()} Wears", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFF6B705C))
+                        Text(text = stringResource(R.string.applications_kocolor_features_inventory_avg_utility_label), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.alpha(0.8f))
+                        Text(text = stringResource(R.string.applications_kocolor_features_inventory_wears_format, averageUsage.toInt()), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFF6B705C))
                     }
                     
                     val maxWears = 50.0 
@@ -337,7 +339,7 @@ fun AtelierWardrobeCard(
                     
                     if (leadingBrand != null) {
                         Text(
-                            text = "Leading Brand: $leadingBrand",
+                            text = stringResource(R.string.applications_kocolor_features_inventory_leading_brand_format, leadingBrand),
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.alpha(0.8f)

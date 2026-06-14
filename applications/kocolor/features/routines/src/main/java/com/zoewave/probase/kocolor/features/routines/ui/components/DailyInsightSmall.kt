@@ -14,6 +14,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
@@ -28,9 +30,9 @@ fun DailyInsightSmall(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text(text = "Daily Insight", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFF8B5E3C))
+            Text(text = stringResource(R.string.applications_kocolor_features_routines_daily_insight), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFF8B5E3C))
             Text(
-                text = "\"Patience is the foundation of every lasting ritual.\"",
+                text = stringResource(R.string.applications_kocolor_features_routines_insight_quote),
                 style = MaterialTheme.typography.bodyMedium,
                 fontFamily = FontFamily.Serif,
                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic

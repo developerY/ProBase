@@ -62,6 +62,8 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.toHex
+import androidx.compose.ui.res.stringResource
+import com.zoewave.probase.kocolor.mobile.features.color.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,17 +83,17 @@ fun ColorSearchScreen(
                 showColorPicker = false
             },
             onDismissRequest = { showColorPicker = false },
-            title = "Choose Custom Color"
+            title = stringResource(R.string.applications_kocolor_apps_mobile_features_color_choose_custom)
         )
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Color Search", fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_search_title), fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_color_back))
                     }
                 },
                 actions = {
@@ -112,7 +114,7 @@ fun ColorSearchScreen(
             // Recent Colors Grid
             item {
                 Text(
-                    "Recent Colors & Seasonal Palettes",
+                    stringResource(R.string.applications_kocolor_apps_mobile_features_color_recent_seasonal),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Serif
@@ -151,7 +153,7 @@ fun ColorSearchScreen(
                         ) {
                             Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(32.dp))
                             Spacer(Modifier.height(8.dp))
-                            Text("Scan Color", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_scan_color), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -170,18 +172,18 @@ fun ColorSearchScreen(
                     )
                     Spacer(Modifier.width(20.dp))
                     Column {
-                        val colorName = if (uiState.selectedColorHex.equals("#C25C4A", ignoreCase = true)) "Terracotta" else "Custom Tone"
+                        val colorName = if (uiState.selectedColorHex.equals("#C25C4A", ignoreCase = true)) stringResource(R.string.applications_kocolor_apps_mobile_features_color_terracotta) else stringResource(R.string.applications_kocolor_apps_mobile_features_color_custom_tone)
                         Text(
                             text = colorName,
                             style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily.Serif,
                             fontWeight = FontWeight.Bold
                         )
-                        Text("HEX: ${uiState.selectedColorHex.uppercase()}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                        Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_hex_format, uiState.selectedColorHex.uppercase()), style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         
                         val rgb = com.zoewave.probase.kocolor.mobile.features.color.util.ColorScienceUtils.hexToRgb(uiState.selectedColorHex)
                         if (rgb != null) {
-                            Text("RGB: ${rgb.first}, ${rgb.second}, ${rgb.third}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                            Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_rgb_format, rgb.first, rgb.second, rgb.third), style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         }
                     }
                 }
@@ -189,7 +191,7 @@ fun ColorSearchScreen(
 
             // Filters
             item {
-                Text("Filters", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+                Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_filters), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
                 Spacer(Modifier.height(16.dp))
                 Row(
                     modifier = Modifier
@@ -209,7 +211,7 @@ fun ColorSearchScreen(
                             .padding(horizontal = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("Exact Match", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_exact_match), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     }
                     Box(
                         modifier = Modifier
@@ -221,7 +223,7 @@ fun ColorSearchScreen(
                             .padding(horizontal = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("Complementary Colors", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_complementary_colors), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     }
                 }
             }
@@ -229,19 +231,19 @@ fun ColorSearchScreen(
             // Advanced Harmony Icons (Image 2)
             item {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    item { HarmonyIcon("Monochromatic", Icons.Default.BrightnessLow, uiState.searchMode == SearchMode.MONOCHROMATIC) { onEvent(ColorSearchEvent.SetMode(SearchMode.MONOCHROMATIC)) } }
-                    item { HarmonyIcon("Analogous", Icons.Default.Compare, uiState.searchMode == SearchMode.ANALOGOUS) { onEvent(ColorSearchEvent.SetMode(SearchMode.ANALOGOUS)) } }
-                    item { HarmonyIcon("Complementary", Icons.Default.SwapHoriz, uiState.searchMode == SearchMode.COMPLEMENTARY) { onEvent(ColorSearchEvent.SetMode(SearchMode.COMPLEMENTARY)) } }
-                    item { HarmonyIcon("Triadic", Icons.Default.FilterVintage, uiState.searchMode == SearchMode.TRIADIC) { onEvent(ColorSearchEvent.SetMode(SearchMode.TRIADIC)) } }
+                    item { HarmonyIcon(stringResource(R.string.applications_kocolor_apps_mobile_features_color_monochromatic), Icons.Default.BrightnessLow, uiState.searchMode == SearchMode.MONOCHROMATIC) { onEvent(ColorSearchEvent.SetMode(SearchMode.MONOCHROMATIC)) } }
+                    item { HarmonyIcon(stringResource(R.string.applications_kocolor_apps_mobile_features_color_analogous), Icons.Default.Compare, uiState.searchMode == SearchMode.ANALOGOUS) { onEvent(ColorSearchEvent.SetMode(SearchMode.ANALOGOUS)) } }
+                    item { HarmonyIcon(stringResource(R.string.applications_kocolor_apps_mobile_features_color_complementary), Icons.Default.SwapHoriz, uiState.searchMode == SearchMode.COMPLEMENTARY) { onEvent(ColorSearchEvent.SetMode(SearchMode.COMPLEMENTARY)) } }
+                    item { HarmonyIcon(stringResource(R.string.applications_kocolor_apps_mobile_features_color_triadic), Icons.Default.FilterVintage, uiState.searchMode == SearchMode.TRIADIC) { onEvent(ColorSearchEvent.SetMode(SearchMode.TRIADIC)) } }
                 }
             }
 
             // Results: Cosmetics
             item {
-                Text("Cosmetics", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+                Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_cosmetics), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
                 Spacer(Modifier.height(16.dp))
                 if (uiState.matchedCosmetics.isEmpty()) {
-                    Text("No matching cosmetics found.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                    Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_no_cosmetics_found), style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                 } else {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         items(uiState.matchedCosmetics) { item ->
@@ -255,10 +257,10 @@ fun ColorSearchScreen(
 
             // Results: Wardrobe
             item {
-                Text("Wardrobe", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+                Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_wardrobe), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
                 Spacer(Modifier.height(16.dp))
                 if (uiState.matchedWardrobe.isEmpty()) {
-                    Text("No matching wardrobe items found.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                    Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_no_wardrobe_found), style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                 } else {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         items(uiState.matchedWardrobe) { item ->

@@ -224,4 +224,25 @@
     <string name="applications_kocolor_features_cosmetics_obf_contribute_message">This product isn\'t in the global database. Would you like to contribute its details to Open Beauty Facts so everyone can benefit?</string>
     <string name="applications_kocolor_features_cosmetics_obf_contribute_button">CONTRIBUTE NOW</string>
     <string name="applications_kocolor_features_cosmetics_obf_not_now">MAYBE LATER</string>
+    <string name="applications_kocolor_features_cosmetics_serene_rituals">Serene Rituals</string>
+    <string name="applications_kocolor_features_cosmetics_done">DONE</string>
+    <string name="applications_kocolor_features_cosmetics_high_uv_warning">☀️ UV Index is high. Elevated SPF protection is recommended.</string>
+    <string name="applications_kocolor_features_cosmetics_bio_sync_hyaluronic">✨ High Synergy Today: Your hydration markers are low (%1$.1fL); this Hyaluronic Acid will compensate.</string>
+    <string name="applications_kocolor_features_cosmetics_category_edit_format">The %1$s Edit.</string>
+    <string name="applications_kocolor_features_cosmetics_category_overview_format">A professional overview of your %1$s essentials.</string>
+    <string name="applications_kocolor_features_cosmetics_avg_cpu_label">AVG COST/USE</string>
+    <string name="applications_kocolor_features_cosmetics_most_used_label">MOST USED</string>
+    <string name="applications_kocolor_features_cosmetics_best_value_label">BEST VALUE</string>
+    <string name="applications_kocolor_features_cosmetics_premium_choice_label">PREMIUM CHOICE</string>
+    <string name="applications_kocolor_features_cosmetics_least_used_label">LEAST USED</string>
+    <string name="applications_kocolor_features_cosmetics_pro_tip_face">Pro Tip: Layer liquids before powders to prevent pilling.</string>
+    <string name="applications_kocolor_features_cosmetics_pro_tip_eyes">Expert Tip: Use a primer to increase pigment longevity.</string>
+    <string name="applications_kocolor_features_cosmetics_pro_tip_lips">Artist Note: Exfoliate before applying matte stains.</string>
+    <string name="applications_kocolor_features_cosmetics_pro_tip_cheeks">Styling: Apply blush slightly higher for a lifted look.</string>
+    <string name="applications_kocolor_features_cosmetics_data_insight_default">Data Insight: You use these items in 40% of your rituals.</string>
+    <string name="applications_kocolor_features_cosmetics_none_yet">None yet</string>
+    <string name="applications_kocolor_features_cosmetics_macro_skincare">Skincare</string>
+    <string name="applications_kocolor_features_cosmetics_macro_eyes">Eyes</string>
+    <string name="applications_kocolor_features_cosmetics_macro_lips">Lips</string>
+    <string name="applications_kocolor_features_cosmetics_obf_anonymous_notice">Your contribution will be submitted anonymously to help keep the global beauty database accurate for everyone.</string>
 </resources>

@@ -271,7 +271,7 @@ fun CosmeticEditScreen(
 
             // 3. Category & Facets
             EditExpandableSection(
-                title = stringResource(R.string.applications_kocolor_features_cosmetics_category_taxonomy_title),
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_category_section),
                 isExpanded = expandedSections["Category"] == true,
                 onToggle = { expandedSections["Category"] = it }
             ) {
@@ -290,7 +290,7 @@ fun CosmeticEditScreen(
             }
 
             EditExpandableSection(
-                title = stringResource(R.string.applications_kocolor_features_cosmetics_professional_facets_title),
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_facets_section),
                 isExpanded = expandedSections["Facets"] == true,
                 onToggle = { expandedSections["Facets"] = it }
             ) {
@@ -308,7 +308,7 @@ fun CosmeticEditScreen(
 
             // 4. Physical & Color
             EditExpandableSection(
-                title = stringResource(R.string.applications_kocolor_features_cosmetics_physical_color_title),
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_physical_section),
                 isExpanded = expandedSections["Physical"] == true,
                 onToggle = { expandedSections["Physical"] = it }
             ) {
@@ -336,7 +336,7 @@ fun CosmeticEditScreen(
 
             // 5. Inventory & Economics
             EditExpandableSection(
-                title = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_economics_title),
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_economics_section),
                 isExpanded = expandedSections["Economics"] == true,
                 onToggle = { expandedSections["Economics"] = it }
             ) {
@@ -376,7 +376,7 @@ fun CosmeticEditScreen(
 
             // 6. Lifecycle Dates
             EditExpandableSection(
-                title = stringResource(R.string.applications_kocolor_features_cosmetics_product_lifecycle_title),
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_lifecycle_section),
                 isExpanded = expandedSections["Lifecycle"] == true,
                 onToggle = { expandedSections["Lifecycle"] = it }
             ) {
@@ -403,7 +403,7 @@ fun CosmeticEditScreen(
 
             // 7. Insights
             EditExpandableSection(
-                title = stringResource(R.string.applications_kocolor_features_cosmetics_artist_insights_title),
+                title = stringResource(R.string.applications_kocolor_features_cosmetics_insights_section),
                 isExpanded = expandedSections["Insights"] == true,
                 onToggle = { expandedSections["Insights"] = it }
             ) {

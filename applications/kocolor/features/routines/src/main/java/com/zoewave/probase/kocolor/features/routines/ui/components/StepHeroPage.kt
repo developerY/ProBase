@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -74,13 +75,13 @@ fun StepHeroPage(
     if (showJournalDialog) {
         AlertDialog(
             onDismissRequest = { showJournalDialog = false },
-            title = { Text("New Journal Entry", fontFamily = FontFamily.Serif) },
+            title = { Text(stringResource(R.string.applications_kocolor_features_routines_new_journal_entry), fontFamily = FontFamily.Serif) },
             text = {
                 OutlinedTextField(
                     value = journalDraft,
                     onValueChange = { journalDraft = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("How does your skin feel?") },
+                    placeholder = { Text(stringResource(R.string.applications_kocolor_features_routines_journal_placeholder)) },
                     minLines = 3
                 )
             },
@@ -92,12 +93,12 @@ fun StepHeroPage(
                         showJournalDialog = false
                     }
                 }) {
-                    Text("ADD ENTRY", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.applications_kocolor_features_routines_add_entry), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showJournalDialog = false }) {
-                    Text("CANCEL")
+                    Text(stringResource(R.string.applications_kocolor_features_routines_cancel))
                 }
             }
         )
@@ -111,14 +112,14 @@ fun StepHeroPage(
         item {
             Column(modifier = Modifier.padding(bottom = 16.dp)) {
                 Text(
-                    text = "Ritual Stage Journaling", 
+                    text = stringResource(R.string.applications_kocolor_features_routines_ritual_journaling), 
                     style = MaterialTheme.typography.displaySmall, 
                     fontFamily = FontFamily.Serif, 
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF2C2420)
                 )
                 Text(
-                    text = "Context: Premium beauty and wellness app Atelier featuring personalized rituals.",
+                    text = stringResource(R.string.applications_kocolor_features_routines_serene_rituals_desc),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray,
                     modifier = Modifier.padding(top = 8.dp)
@@ -143,7 +144,7 @@ fun StepHeroPage(
                 Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f)), startY = 400f)))
                 Column(modifier = Modifier.align(Alignment.BottomStart).padding(32.dp)) {
                     Text(
-                        text = "STAGE ${step.layeringOrder + 1}", 
+                        text = stringResource(R.string.applications_kocolor_features_routines_ritual_stage_format, step.layeringOrder + 1), 
                         style = MaterialTheme.typography.labelSmall, 
                         color = Color.White.copy(alpha = 0.8f), 
                         fontWeight = FontWeight.Black, 
@@ -207,7 +208,7 @@ fun StepHeroPage(
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
                         Text(
-                            text = step.actionLabel ?: "Meal suggestion pending...",
+                            text = step.actionLabel ?: stringResource(R.string.applications_kocolor_features_routines_meal_suggestion_pending),
                             style = MaterialTheme.typography.bodyMedium,
                             fontFamily = FontFamily.Serif,
                             lineHeight = 22.sp
@@ -226,9 +227,9 @@ fun StepHeroPage(
                     ) {
                         Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text(
-                                text = "YOUR ACTION",
+                                text = stringResource(R.string.applications_kocolor_features_routines_your_action),
                                 style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Black,
+                                fontWeight = FontWeight.Bold,
                                 color = Color.Gray,
                                 letterSpacing = 1.sp
                             )
@@ -249,7 +250,7 @@ fun StepHeroPage(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(
-                    text = "PROGRESS PHOTOS",
+                    text = stringResource(R.string.applications_kocolor_features_routines_progress_photos),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Black,
                     color = Color.Gray,
@@ -304,7 +305,7 @@ fun StepHeroPage(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "RITUAL JOURNAL & HISTORY",
+                        text = stringResource(R.string.applications_kocolor_features_routines_ritual_journal_history),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Black,
                         color = Color.Gray,
@@ -321,11 +322,11 @@ fun StepHeroPage(
                 ) {
                     Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Add New Journal Entry", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.applications_kocolor_features_routines_add_new_journal_entry), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                 }
 
                 if (step.journalEntries.isEmpty()) {
-                    Text("No journal entries yet.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray.copy(alpha = 0.6f))
+                    Text(stringResource(R.string.applications_kocolor_features_routines_no_journal_entries), style = MaterialTheme.typography.bodyMedium, color = Color.Gray.copy(alpha = 0.6f))
                 } else {
                     step.journalEntries.forEach { entry ->
                         Surface(
@@ -369,7 +370,7 @@ fun StepHeroPage(
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     Text(
-                        text = "LINKED INVENTORY ITEMS",
+                        text = stringResource(R.string.applications_kocolor_features_routines_linked_inventory_items),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Black,
                         color = Color.Gray,

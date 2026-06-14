@@ -222,7 +222,7 @@ fun WardrobeEditScreen(
 
             // Categories
             Column {
-                Text("VERTICAL", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+                Text(stringResource(R.string.applications_kocolor_features_inventory_verticals_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                 Spacer(Modifier.height(12.dp))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     ClothingCategory.entries.forEach { cat ->
@@ -267,7 +267,7 @@ fun WardrobeEditScreen(
             ) {
                 Icon(Icons.Default.Delete, null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Remove from Wardrobe")
+                Text(stringResource(R.string.applications_kocolor_features_inventory_remove_action))
             }
             
             Spacer(Modifier.height(100.dp))

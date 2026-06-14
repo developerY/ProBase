@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,7 @@ import com.zoewave.probase.features.health.core.ui.HealthEvent
 import com.zoewave.probase.features.health.core.ui.HealthSideEffect
 import com.zoewave.probase.features.health.core.ui.HealthUiState
 import com.zoewave.probase.features.health.core.ui.settings.HealthConnectionStatus
+import com.zoewave.probase.kocolor.mobile.core.R
 import com.zoewave.probase.kocolor.mobile.core.ui.theme.KoColorTheme
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlinx.coroutines.flow.Flow
@@ -37,10 +39,10 @@ fun HealthUiRoute(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Health & Wellness") },
+                title = { Text(stringResource(R.string.applications_kocolor_apps_mobile_core_health_wellness_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_core_back))
                     }
                 }
             )
@@ -160,7 +162,7 @@ fun HealthContent(
                     Text(uiState.message, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
                     Spacer(Modifier.height(16.dp))
                     Button(onClick = { onEvent(HealthEvent.RequestPermissions) }) {
-                        Text("Grant Permissions")
+                        Text(stringResource(R.string.applications_kocolor_apps_mobile_core_grant_permissions))
                     }
                 }
             }
@@ -174,7 +176,7 @@ fun HealthContent(
             }
             HealthUiState.Disabled -> {
                 Text(
-                    text = "Health Connect is disabled on this device.",
+                    text = stringResource(R.string.applications_kocolor_apps_mobile_core_health_connect_disabled),
                     modifier = Modifier.fillMaxWidth().padding(24.dp),
                     textAlign = TextAlign.Center
                 )

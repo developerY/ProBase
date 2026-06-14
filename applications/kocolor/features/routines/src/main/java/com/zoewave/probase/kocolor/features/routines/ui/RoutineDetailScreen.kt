@@ -43,9 +43,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.kocolor.features.routines.ui.components.DailyInsightSmall
 import com.zoewave.probase.kocolor.features.routines.ui.components.GlassConnectionHeaderAction
 import com.zoewave.probase.kocolor.features.routines.ui.components.SplitRitualStep
@@ -107,7 +109,7 @@ fun RoutineDetailScreen(
             onDismissRequest = { selectedInfoStep = null },
             confirmButton = {
                 TextButton(onClick = { selectedInfoStep = null }) {
-                    Text("DONE", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.applications_kocolor_features_routines_done), fontWeight = FontWeight.Bold)
                 }
             },
             title = {
@@ -141,7 +143,7 @@ fun RoutineDetailScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Serene Rituals", style = MaterialTheme.typography.titleMedium, fontFamily = FontFamily.Serif) },
+                title = { Text(stringResource(R.string.applications_kocolor_features_routines_serene_rituals), style = MaterialTheme.typography.titleMedium, fontFamily = FontFamily.Serif) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                 },
@@ -183,9 +185,9 @@ fun RoutineDetailScreen(
                                 Spacer(Modifier.width(8.dp))
                                 Text(
                                     text = when (routine.time) {
-                                        RoutineTime.MORNING -> "CURRENT RITUAL"
-                                        RoutineTime.MEALS -> "BIO-SYNC RITUAL"
-                                        else -> "EVENING RITUAL"
+                                        RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_current_ritual)
+                                        RoutineTime.MEALS -> stringResource(R.string.applications_kocolor_features_routines_bio_sync_ritual)
+                                        else -> stringResource(R.string.applications_kocolor_features_routines_evening_ritual_label)
                                     },
                                     style = MaterialTheme.typography.labelSmall,
                                     color = accentColor,
@@ -195,9 +197,9 @@ fun RoutineDetailScreen(
                             }
                             Text(
                                 text = when (routine.time) {
-                                    RoutineTime.MORNING -> "Morning Ritual"
-                                    RoutineTime.MEALS -> "Meals Ritual"
-                                    else -> "Evening Ritual"
+                                    RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_morning_ritual)
+                                    RoutineTime.MEALS -> stringResource(R.string.applications_kocolor_features_routines_meals_ritual)
+                                    else -> stringResource(R.string.applications_kocolor_features_routines_evening_ritual)
                                 },
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontFamily = FontFamily.Serif,
@@ -224,9 +226,9 @@ fun RoutineDetailScreen(
                                 strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                             )
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(text = "$completedCount/$totalCount", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+                                Text(text = stringResource(R.string.applications_kocolor_features_routines_progress_format, completedCount, totalCount), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                                 Text(
-                                    text = "DONE", 
+                                    text = stringResource(R.string.applications_kocolor_features_routines_done), 
                                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                                     modifier = Modifier.alpha(0.5f)
                                 )
@@ -236,7 +238,7 @@ fun RoutineDetailScreen(
                     
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        text = "Every step is an act of care. Complete sequence to prepare for a balanced day ahead.",
+                        text = stringResource(R.string.applications_kocolor_features_routines_ritual_description_general),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         lineHeight = 22.sp

@@ -17,4 +17,32 @@
     <string name="applications_kocolor_features_routines_insight_quote">\"Patience is the foundation of every lasting ritual.\"</string>
     <string name="applications_kocolor_features_routines_view_progress">VIEW PROGRESS</string>
     <string name="applications_kocolor_features_routines_save">Save</string>
+
+    <!-- Editor -->
+    <string name="applications_kocolor_features_routines_curate_ritual">Curate Ritual</string>
+    <string name="applications_kocolor_features_routines_ritual_knowledge">Ritual Knowledge</string>
+    <string name="applications_kocolor_features_routines_new_stage">New Stage</string>
+    <string name="applications_kocolor_features_routines_edit_stage">Edit Stage</string>
+    <string name="applications_kocolor_features_routines_select_category">Select Category</string>
+    <string name="applications_kocolor_features_routines_select_type">Select Type</string>
+    <string name="applications_kocolor_features_routines_select_product">Select Product</string>
+    <string name="applications_kocolor_features_routines_step_title">Step Title</string>
+    <string name="applications_kocolor_features_routines_product_used">Product Used</string>
+    <string name="applications_kocolor_features_routines_select_product_placeholder">Select a product...</string>
+    <string name="applications_kocolor_features_routines_add_entry">ADD ENTRY</string>
+    <string name="applications_kocolor_features_routines_journal_placeholder">How does your skin feel?</string>
+    <string name="applications_kocolor_features_routines_no_journal_entries">No journal entries yet.</string>
+    <string name="applications_kocolor_features_routines_new_journal_entry">New Journal Entry</string>
+    <string name="applications_kocolor_features_routines_cancel">CANCEL</string>
+    <string name="applications_kocolor_features_routines_ritual_stage_format">Ritual Stage %1$d</string>
+    <string name="applications_kocolor_features_routines_bio_sync_ritual">BIO-SYNC RITUAL</string>
+    <string name="applications_kocolor_features_routines_meals_ritual">Meals Ritual</string>
+    <string name="applications_kocolor_features_routines_ritual_description_general">Every step is an act of care. Complete sequence to prepare for a balanced day ahead.</string>
+    <string name="applications_kocolor_features_routines_ritual_journaling">Ritual Stage Journaling</string>
+    <string name="applications_kocolor_features_routines_meal_suggestion_pending">Meal suggestion pending…</string>
+    <string name="applications_kocolor_features_routines_your_action">YOUR ACTION</string>
+    <string name="applications_kocolor_features_routines_progress_photos">PROGRESS PHOTOS</string>
+    <string name="applications_kocolor_features_routines_ritual_journal_history">RITUAL JOURNAL &amp; HISTORY</string>
+    <string name="applications_kocolor_features_routines_linked_inventory_items">LINKED INVENTORY ITEMS</string>
+    <string name="applications_kocolor_features_routines_add_new_journal_entry">Add New Journal Entry</string>
 </resources>

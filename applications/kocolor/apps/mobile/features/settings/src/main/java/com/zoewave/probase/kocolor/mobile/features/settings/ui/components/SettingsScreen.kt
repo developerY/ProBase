@@ -62,16 +62,16 @@ fun SettingsScreen(
     navTo: (KoColorRoute) -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
-    val privacyPolicyUrl = stringResource(R.string.applications_kocolor_apps_mobile_core_privacy_policy_url)
-    val dataDeletionUrl = stringResource(R.string.applications_kocolor_apps_mobile_core_data_deletion_url)
+    val privacyPolicyUrl = stringResource(com.zoewave.probase.kocolor.mobile.core.R.string.applications_kocolor_apps_mobile_core_privacy_policy_url)
+    val dataDeletionUrl = stringResource(com.zoewave.probase.kocolor.mobile.core.R.string.applications_kocolor_apps_mobile_core_data_deletion_url)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_back))
                     }
                 }
             )
@@ -100,8 +100,8 @@ fun SettingsScreen(
             AiConfigurationCard(
                 expanded = uiState.isAiExpanded,
                 onExpandToggle = { onEvent(SettingsEvent.OnAiExpandedToggled(!uiState.isAiExpanded)) },
-                title = "AI Configuration",
-                description = "Configure your Gemini API Key for style analysis and personal suggestions."
+                title = stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_ai_title),
+                description = stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_ai_desc)
             )
 
             AppSettingsCard(
@@ -133,8 +133,8 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
-                        Text("Google XR Test", style = MaterialTheme.typography.titleMedium)
-                        Text("Launch standard Google " + "First Activity" + " example", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_xr_test_title), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_xr_test_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -144,24 +144,24 @@ fun SettingsScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f))
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Developer Options", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_dev_options), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = { onEvent(SettingsEvent.OnGenerateSampleCosmetics) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Text("Add 50 Sample Cosmetics")
+                        Text(stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_add_sample_data))
                     }
                 }
             }
             
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("About", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_about), style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("KoColor Fashion App v0.1.0")
-                    Text("Powered by Gemini AI")
+                    Text(stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_version_format, "v0.1.0"))
+                    Text(stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_powered_by))
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
@@ -171,7 +171,7 @@ fun SettingsScreen(
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Text(
-                            text = stringResource(R.string.applications_kocolor_apps_mobile_core_settings_about_privacy_policy),
+                            text = stringResource(com.zoewave.probase.kocolor.mobile.core.R.string.applications_kocolor_apps_mobile_core_settings_about_privacy_policy),
                             color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.labelLarge
                         )
@@ -183,7 +183,7 @@ fun SettingsScreen(
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Text(
-                            text = stringResource(R.string.applications_kocolor_apps_mobile_core_settings_about_data_deletion),
+                            text = stringResource(com.zoewave.probase.kocolor.mobile.core.R.string.applications_kocolor_apps_mobile_core_settings_about_data_deletion),
                             color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.labelLarge
                         )
@@ -218,9 +218,9 @@ fun AppSettingsCard(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("App Settings", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_app_settings), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "Configure hydration goals and experience",
+                        stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_app_settings_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -262,7 +262,7 @@ fun HydrationSetting(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Daily Hydration Goal", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_hydration_goal), style = MaterialTheme.typography.bodyLarge)
             Text(
                 text = "%.1fL".format(goal),
                 style = MaterialTheme.typography.bodyLarge,
@@ -279,7 +279,7 @@ fun HydrationSetting(
                     steps = 40
                 )
                 Text(
-                    "Set your daily water intake target.",
+                    stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_hydration_desc),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray
                 )
@@ -321,9 +321,9 @@ fun HealthConnectCard(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Google Health Connect", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_health_connect), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "Sync sleep and wellness data for skin analysis",
+                        stringResource(com.zoewave.probase.kocolor.mobile.features.settings.R.string.applications_kocolor_apps_mobile_features_settings_health_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

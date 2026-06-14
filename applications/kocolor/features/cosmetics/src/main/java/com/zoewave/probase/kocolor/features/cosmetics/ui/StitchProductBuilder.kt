@@ -253,9 +253,9 @@ fun StitchProductBuilder(
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     val categories = listOf(
                         Triple(MacroCategory.COMPLEXION, Icons.Default.Face, stringResource(R.string.applications_kocolor_features_cosmetics_category_section)),
-                        Triple(MacroCategory.PREP, Icons.Default.Opacity, "Skincare"), // TODO: Localize
-                        Triple(MacroCategory.EYES, Icons.Default.Visibility, "Eyes"),
-                        Triple(MacroCategory.LIPS, Icons.Default.Favorite, "Lips")
+                        Triple(MacroCategory.PREP, Icons.Default.Opacity, stringResource(R.string.applications_kocolor_features_cosmetics_macro_skincare)),
+                        Triple(MacroCategory.EYES, Icons.Default.Visibility, stringResource(R.string.applications_kocolor_features_cosmetics_macro_eyes)),
+                        Triple(MacroCategory.LIPS, Icons.Default.Favorite, stringResource(R.string.applications_kocolor_features_cosmetics_macro_lips))
                     )
                     categories.forEach { (cat, icon, label) ->
                         val isSelected = draft.macroCategory == cat
@@ -412,7 +412,7 @@ private fun ObfContributionDialog(
                 }
 
                 Text(
-                    "Your contribution will be submitted anonymously to help keep the global beauty database accurate for everyone.", 
+                    stringResource(R.string.applications_kocolor_features_cosmetics_obf_anonymous_notice), 
                     style = MaterialTheme.typography.labelSmall, 
                     color = Color.Gray
                 )

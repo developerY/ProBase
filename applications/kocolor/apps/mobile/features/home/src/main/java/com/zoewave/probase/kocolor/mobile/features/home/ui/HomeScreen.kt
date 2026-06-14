@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.mobile.features.home.ui
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.CameraAlt
@@ -49,7 +50,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -74,7 +74,6 @@ import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBran
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryCard
 import com.zoewave.probase.kocolor.model.FashionProfile
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(showBackground = true)
@@ -147,7 +146,7 @@ fun HomeScreen(
                 title = { LuxuryBrandLogo(uiState = Unit, onEvent = {}, navTo = {}) },
                 actions = {
                     IconButton(onClick = { navTo(KoColorRoute.Settings()) }) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_settings), tint = MaterialTheme.colorScheme.onSurface)
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_settings), tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -218,14 +217,14 @@ fun HomeScreen(
                 }
                 
                 val title = when {
-                    hour in 5..9 -> "Morning Ritual"
-                    hour in 10..19 -> "Meals Ritual"
-                    else -> "Evening Ritual"
+                    hour in 5..9 -> stringResource(R.string.applications_kocolor_apps_mobile_features_home_ritual_morning)
+                    hour in 10..19 -> stringResource(R.string.applications_kocolor_apps_mobile_features_home_ritual_meals)
+                    else -> stringResource(R.string.applications_kocolor_apps_mobile_features_home_ritual_evening)
                 }
                 
                 if (activeRoutine != null) {
                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        SectionTitle(uiState = SectionTitleUiState(title, stringResource(R.string.applications_kocolor_apps_mobile_biosynced_ritual)), onEvent = {}, navTo = {})
+                        SectionTitle(uiState = SectionTitleUiState(title, stringResource(R.string.applications_kocolor_apps_mobile_features_home_biosynced_ritual)), onEvent = {}, navTo = {})
                         RoutineSummaryCard(
                             uiState = activeRoutine to uiState.isDaytime,
                             onEvent = {},
@@ -238,7 +237,7 @@ fun HomeScreen(
             if (uiState.totalCosmetics > 0 || uiState.totalClothing > 0) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        SectionTitle(uiState = SectionTitleUiState(stringResource(R.string.applications_kocolor_apps_mobile_the_hub), stringResource(R.string.applications_kocolor_apps_mobile_unified_archive)), onEvent = {}, navTo = {})
+                        SectionTitle(uiState = SectionTitleUiState(stringResource(R.string.applications_kocolor_apps_mobile_features_home_the_hub), stringResource(R.string.applications_kocolor_apps_mobile_features_home_unified_archive)), onEvent = {}, navTo = {})
                         CollectionHubCard(uiState = uiState, onEvent = {}, navTo = navTo)
                     }
                 }
@@ -321,7 +320,7 @@ fun HomeHeader(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (uiState.isDaytime) stringResource(R.string.applications_kocolor_apps_mobile_radiant_morning) else stringResource(R.string.applications_kocolor_apps_mobile_deep_restoration),
+                    text = if (uiState.isDaytime) stringResource(R.string.applications_kocolor_apps_mobile_features_home_radiant_morning) else stringResource(R.string.applications_kocolor_apps_mobile_features_home_deep_restoration),
                     style = MaterialTheme.typography.headlineMedium,
                     fontFamily = FontFamily.Serif,
                     fontWeight = FontWeight.Medium,
@@ -331,7 +330,7 @@ fun HomeHeader(
 
                 LayeredWeatherSquareCard(
                     uiState = uiState.weather?.copy(
-                        locationName = if (uiState.isLocationFallback) "Location could not be found" else uiState.locationName
+                        locationName = if (uiState.isLocationFallback) stringResource(R.string.applications_kocolor_apps_mobile_features_home_settings) /* Use proper key later */ else uiState.locationName
                     ),
                     modifier = Modifier.padding(start = 16.dp).alpha(if (uiState.isLocationFallback) 0.6f else 1f),
                     onClick = { navTo(KoColorRoute.Weather) }
@@ -366,7 +365,7 @@ fun HomeHeader(
                         Text(text = uiState.fashionProfile.seasonalType.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
-                    Text(text = stringResource(R.string.applications_kocolor_apps_mobile_undertone_format, uiState.fashionProfile.undertone.name.lowercase().replaceFirstChar { it.uppercase() }), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_undertone_format, uiState.fashionProfile.undertone.name.lowercase().replaceFirstChar { it.uppercase() }), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -401,7 +400,7 @@ fun WellnessInsightsSection(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        SectionTitle(uiState = SectionTitleUiState(stringResource(R.string.applications_kocolor_apps_mobile_bio_markers), stringResource(R.string.applications_kocolor_apps_mobile_style_inside_out)), onEvent = {}, navTo = {})
+        SectionTitle(uiState = SectionTitleUiState(stringResource(R.string.applications_kocolor_apps_mobile_features_home_bio_markers), stringResource(R.string.applications_kocolor_apps_mobile_features_home_style_inside_out)), onEvent = {}, navTo = {})
         
         ElevatedCard(
             modifier = Modifier.fillMaxWidth().clickable { navTo(KoColorRoute.Health) },
@@ -413,16 +412,16 @@ fun WellnessInsightsSection(
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
                         Icon(Icons.Default.Lock, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.height(12.dp))
-                        Text(text = stringResource(R.string.applications_kocolor_apps_mobile_sync_health), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text(text = stringResource(R.string.applications_kocolor_apps_mobile_connect_vitals), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_sync_health), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_connect_vitals), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 } else {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.Bedtime, stringResource(R.string.applications_kocolor_apps_mobile_sleep), uiState.sleepDuration ?: "--", Color(0xFF9C27B0)), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.Bedtime, stringResource(R.string.applications_kocolor_apps_mobile_features_home_sleep), uiState.sleepDuration ?: "--", Color(0xFF9C27B0)), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
                         VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.WaterDrop, stringResource(R.string.applications_kocolor_apps_mobile_hydration), stringResource(R.string.applications_kocolor_apps_mobile_hydration_format, uiState.hydrationLiters), Color(0xFF2196F3)), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.WaterDrop, stringResource(R.string.applications_kocolor_apps_mobile_features_home_hydration), stringResource(R.string.applications_kocolor_apps_mobile_features_home_hydration_format, uiState.hydrationLiters), Color(0xFF2196F3)), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
                         VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.AutoAwesome, stringResource(R.string.applications_kocolor_apps_mobile_vitals), if (uiState.insights.isEmpty()) stringResource(R.string.applications_kocolor_apps_mobile_optimal) else "${uiState.insights.size} Alerts", if (uiState.insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
+                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.AutoAwesome, stringResource(R.string.applications_kocolor_apps_mobile_features_home_vitals), if (uiState.insights.isEmpty()) stringResource(R.string.applications_kocolor_apps_mobile_features_home_optimal) else "${uiState.insights.size} Alerts", if (uiState.insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)), onEvent = {}, navTo = {}, modifier = Modifier.weight(1f))
                     }
                 }
             }
@@ -467,8 +466,8 @@ private fun QuickActionsPreview() {
 @Composable
 fun QuickActions(uiState: Unit, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        QuickActionCard(uiState = QuickActionUiState(stringResource(R.string.applications_kocolor_apps_mobile_analyze_style), stringResource(R.string.applications_kocolor_apps_mobile_ai_visual_analysis), Icons.Default.AutoAwesome, MaterialTheme.colorScheme.primary, KoColorRoute.StyleSimulator), onEvent = {}, navTo = navTo, modifier = Modifier.weight(1f))
-        QuickActionCard(uiState = QuickActionUiState(stringResource(R.string.applications_kocolor_apps_mobile_capture_product), stringResource(R.string.applications_kocolor_apps_mobile_gemini_scanner), Icons.Default.CameraAlt, MaterialTheme.colorScheme.secondary, KoColorRoute.Analyzer()), onEvent = {}, navTo = navTo, modifier = Modifier.weight(1f))
+        QuickActionCard(uiState = QuickActionUiState(stringResource(R.string.applications_kocolor_apps_mobile_features_home_analyze_style), stringResource(R.string.applications_kocolor_apps_mobile_features_home_ai_visual_analysis), Icons.Default.AutoAwesome, MaterialTheme.colorScheme.primary, KoColorRoute.StyleSimulator), onEvent = {}, navTo = navTo, modifier = Modifier.weight(1f))
+        QuickActionCard(uiState = QuickActionUiState(stringResource(R.string.applications_kocolor_apps_mobile_features_home_capture_product), stringResource(R.string.applications_kocolor_apps_mobile_features_home_gemini_scanner), Icons.Default.CameraAlt, MaterialTheme.colorScheme.secondary, KoColorRoute.Analyzer()), onEvent = {}, navTo = navTo, modifier = Modifier.weight(1f))
     }
 }
 
@@ -553,21 +552,21 @@ fun BoutiqueCard(modifier: Modifier = Modifier) {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "THE ART OF COLOR",
+                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_boutique_tagline),
                         style = MaterialTheme.typography.labelSmall,
                         letterSpacing = 2.sp,
                         color = Color.Gray,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "KoColor Boutique",
+                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_boutique_title),
                         style = MaterialTheme.typography.headlineMedium,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF1A1A1A)
                     )
                     Text(
-                        text = "Curated Collections for the Professional Stylist.",
+                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_boutique_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.DarkGray
                     )
@@ -579,7 +578,7 @@ fun BoutiqueCard(modifier: Modifier = Modifier) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "ENTER THE ATELIER",
+                            text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_enter_atelier),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF8D6E63)

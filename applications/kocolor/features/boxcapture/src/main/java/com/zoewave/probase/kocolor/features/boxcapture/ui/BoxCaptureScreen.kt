@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +39,7 @@ import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.zoewave.probase.kocolor.features.boxcapture.R
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureStep
@@ -110,14 +112,14 @@ private fun PermissionDeniedView(onDismiss: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "CAMERA PERMISSION REQUIRED",
+            text = stringResource(R.string.applications_kocolor_features_boxcapture_permission_required),
             color = Color.White,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "To analyze your product packaging, KoColor needs access to your camera.",
+            text = stringResource(R.string.applications_kocolor_features_boxcapture_permission_desc),
             color = Color.White.copy(alpha = 0.7f),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
@@ -126,7 +128,7 @@ private fun PermissionDeniedView(onDismiss: () -> Unit) {
             onClick = onDismiss,
             colors = ButtonDefaults.buttonColors(containerColor = Color.White)
         ) {
-            Text("GO BACK", color = Color.Black)
+            Text(stringResource(R.string.applications_kocolor_features_boxcapture_go_back), color = Color.Black)
         }
     }
 }
@@ -220,7 +222,7 @@ private fun CameraView(
             ) {
                 Column {
                     Text(
-                        text = "STEP ${CaptureStep.getStepsForMode(mode).indexOf(step) + 1}/$totalSteps",
+                        text = stringResource(R.string.applications_kocolor_features_boxcapture_step_format, CaptureStep.getStepsForMode(mode).indexOf(step) + 1, totalSteps),
                         color = Color.White,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
@@ -236,7 +238,7 @@ private fun CameraView(
                     onClick = onDismiss,
                     modifier = Modifier.background(Color(0x33000000), CircleShape)
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_kocolor_features_boxcapture_close), tint = Color.White)
                 }
             }
         }
@@ -294,8 +296,8 @@ private fun CameraView(
             }
             
             Spacer(modifier = Modifier.height(12.dp))
-            val captureLabel = if (mode == CaptureMode.BOX) "CAPTURE BOX" else "CAPTURE PRODUCT"
-            Text("TAP TO $captureLabel", color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.labelSmall)
+            val captureLabel = if (mode == CaptureMode.BOX) stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_box) else stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_product)
+            Text(captureLabel, color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.labelSmall)
         }
     }
 }
@@ -311,14 +313,14 @@ private fun AnalysisView(progress: String) {
         CircularProgressIndicator(color = if (isLocal) Color(0xFF4ade80) else Color(0xFF22d3ee))
         Spacer(modifier = Modifier.height(24.dp))
         Icon(
-            imageVector = if (isLocal) Icons.Default.AutoAwesome else Icons.Default.AutoAwesome, // Could use different icons
+            imageVector = Icons.Default.AutoAwesome, 
             contentDescription = null, 
             tint = if (isLocal) Color(0xFF4ade80) else Color(0xFF22d3ee), 
             modifier = Modifier.size(48.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = if (isLocal) "LOCAL AI ANALYZING" else "GEMINI ANALYZING", 
+            text = if (isLocal) stringResource(R.string.applications_kocolor_features_boxcapture_local_analyzing) else stringResource(R.string.applications_kocolor_features_boxcapture_gemini_analyzing), 
             color = Color.White, 
             style = MaterialTheme.typography.titleMedium, 
             fontWeight = FontWeight.Bold
@@ -333,7 +335,7 @@ private fun AnalysisView(progress: String) {
                 modifier = Modifier.padding(horizontal = 48.dp)
             ) {
                 Text(
-                    text = "OFFLINE MODE: Accuracy may be lower. You can refine details after extraction.",
+                    text = stringResource(R.string.applications_kocolor_features_boxcapture_offline_mode_desc),
                     color = Color(0xFF4ade80),
                     style = MaterialTheme.typography.labelSmall,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -351,12 +353,12 @@ private fun ErrorView(message: String, onRetry: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("ANALYSIS FAILED", color = Color(0xFFf472b6), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.applications_kocolor_features_boxcapture_analysis_failed), color = Color(0xFFf472b6), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(16.dp))
         Text(message, color = Color.White, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         Spacer(modifier = Modifier.height(32.dp))
         Button(onClick = onRetry, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFf472b6))) {
-            Text("TRY AGAIN", color = Color.White)
+            Text(stringResource(R.string.applications_kocolor_features_boxcapture_try_again), color = Color.White)
         }
     }
 }

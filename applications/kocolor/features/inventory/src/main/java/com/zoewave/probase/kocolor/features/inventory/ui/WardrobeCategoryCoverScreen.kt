@@ -19,13 +19,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.features.inventory.ui.components.CategoryStatCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.ClothingProductGridCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.RankingStatCard
 import com.zoewave.probase.kocolor.model.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
-import java.util.*
+import java.util.Locale
 
 data class WardrobeCategoryCoverUiState(
     val categoryName: String,
@@ -57,7 +59,8 @@ private fun WardrobeCategoryCoverScreenPreview() {
 fun WardrobeCategoryCoverScreen(
     uiState: WardrobeCategoryCoverUiState,
     onEvent: (WardrobeEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val categoryName = uiState.categoryName
     val state = uiState.wardrobeUiState
@@ -79,14 +82,15 @@ fun WardrobeCategoryCoverScreen(
                 title = { Text(categoryName.uppercase(), style = MaterialTheme.typography.labelLarge, letterSpacing = 2.sp) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_inventory_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { navTo(KoColorRoute.WardrobeAnalytics) }) { Icon(Icons.Default.Insights, null) }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -99,38 +103,38 @@ fun WardrobeCategoryCoverScreen(
             item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) {
                 Column(modifier = Modifier.padding(bottom = 16.dp)) {
                     Text(
-                        text = "The $categoryName Collection.",
+                        text = stringResource(R.string.applications_kocolor_features_inventory_category_collection_format, categoryName),
                         style = MaterialTheme.typography.displaySmall,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Strategic performance of your $categoryName curated closet.",
+                        text = stringResource(R.string.applications_kocolor_features_inventory_category_performance_format, categoryName),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                     
                     Spacer(Modifier.height(32.dp))
                     
-                    Text("CATEGORY INTELLIGENCE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp, modifier = Modifier.padding(bottom = 16.dp))
+                    Text(stringResource(R.string.applications_kocolor_features_inventory_style_intelligence), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp, modifier = Modifier.padding(bottom = 16.dp))
                     
                     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
                     
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            CategoryStatCard(uiState = "PORTFOLIO VALUE" to currencyFormatter.format(totalInvestment), modifier = Modifier.weight(1f))
-                            CategoryStatCard(uiState = "AVG CPW" to (avgCostPerWear?.let { currencyFormatter.format(it) } ?: "N/A"), modifier = Modifier.weight(1f))
+                            CategoryStatCard(uiState = stringResource(R.string.applications_kocolor_features_inventory_portfolio_value_label) to currencyFormatter.format(totalInvestment), modifier = Modifier.weight(1f))
+                            CategoryStatCard(uiState = stringResource(R.string.applications_kocolor_features_inventory_avg_cpw_label) to (avgCostPerWear?.let { currencyFormatter.format(it) } ?: stringResource(R.string.applications_kocolor_features_inventory_not_available)), modifier = Modifier.weight(1f))
                         }
                         
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             RankingStatCard(
-                                title = "MOST WORN",
+                                title = stringResource(R.string.applications_kocolor_features_inventory_most_worn_label),
                                 item = mostWorn,
                                 icon = Icons.Default.Star,
                                 modifier = Modifier.weight(1f)
                             )
                             RankingStatCard(
-                                title = "BEST VALUE",
+                                title = stringResource(R.string.applications_kocolor_features_inventory_best_value_label),
                                 item = bestValueItem,
                                 icon = Icons.Default.Savings,
                                 modifier = Modifier.weight(1f)
@@ -139,13 +143,13 @@ fun WardrobeCategoryCoverScreen(
                         
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             RankingStatCard(
-                                title = "PREMIUM PIECE",
+                                title = stringResource(R.string.applications_kocolor_features_inventory_premium_piece_label),
                                 item = premiumPiece,
                                 icon = Icons.Default.Diamond,
                                 modifier = Modifier.weight(1f)
                             )
                             RankingStatCard(
-                                title = "LEAST WORN",
+                                title = stringResource(R.string.applications_kocolor_features_inventory_least_worn_label),
                                 item = leastWorn,
                                 icon = Icons.Default.History,
                                 modifier = Modifier.weight(1f)
@@ -162,11 +166,11 @@ fun WardrobeCategoryCoverScreen(
                                 Icon(Icons.Default.AutoAwesome, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(12.dp))
                                 val insight = when(categoryName.lowercase()) {
-                                    "tops" -> "Sustainability: Choose natural fibers like silk for better cost-per-wear longevity."
-                                    "bottoms" -> "Style Note: Darker tones in your bottoms provide a solid foundation for varied pairings."
-                                    "shoes" -> "Expert Tip: Rotating your footwear extends the life of the materials."
-                                    "accessories" -> "Investment: High-quality accessories are the easiest way to elevate a standard look."
-                                    else -> "Wardrobe Data: You've maximized your investment in 20% of this collection."
+                                    "tops" -> stringResource(R.string.applications_kocolor_features_inventory_pro_tip_tops)
+                                    "bottoms" -> stringResource(R.string.applications_kocolor_features_inventory_pro_tip_bottoms)
+                                    "shoes" -> stringResource(R.string.applications_kocolor_features_inventory_pro_tip_shoes)
+                                    "accessories" -> stringResource(R.string.applications_kocolor_features_inventory_pro_tip_accessories)
+                                    else -> stringResource(R.string.applications_kocolor_features_inventory_data_insight_default)
                                 }
                                 Text(text = insight, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
                             }
@@ -174,7 +178,7 @@ fun WardrobeCategoryCoverScreen(
                     }
                     
                     Spacer(Modifier.height(32.dp))
-                    Text("ARCHIVE ENTRIES", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Text(stringResource(R.string.applications_kocolor_features_inventory_archive_entries_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                 }
             }
 

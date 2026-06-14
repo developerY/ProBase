@@ -61,6 +61,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import androidx.compose.ui.res.stringResource
+import com.zoewave.probase.kocolor.mobile.features.color.R
 import com.zoewave.probase.kocolor.model.FashionAdvice
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.SavedAnalysis
@@ -86,12 +88,14 @@ private fun ColorUiRoutePreview() {
 fun ColorUiRoute(
     uiState: ColorUiState,
     onEvent: (ColorEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     ColorScreen(
         uiState = uiState,
         onEvent = onEvent,
-        navTo = navTo
+        navTo = navTo,
+        modifier = modifier
     )
 }
 
@@ -100,14 +104,15 @@ fun ColorUiRoute(
 fun ColorScreen(
     uiState: ColorUiState,
     onEvent: (ColorEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { 
                     Text(
-                        "Color Analysis History", 
+                        stringResource(R.string.applications_kocolor_apps_mobile_features_color_history_title), 
                         fontFamily = FontFamily.Serif, 
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge
@@ -116,7 +121,8 @@ fun ColorScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
-        containerColor = Color(0xFFF9F6F0) // Cream background
+        containerColor = Color(0xFFF9F6F0), // Cream background
+        modifier = modifier
     ) { padding ->
         if (uiState.savedSuggestions.isEmpty()) {
             Box(
@@ -125,7 +131,7 @@ fun ColorScreen(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("No history found. Try analyzing a look!", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_no_history), style = MaterialTheme.typography.bodyLarge)
             }
         } else {
             LazyColumn(
@@ -199,13 +205,13 @@ private fun ColorHistoryCard(
                 
                 Row {
                     IconButton(onClick = onCopyClick) {
-                        Icon(Icons.Default.ContentCopy, "Copy", modifier = Modifier.size(18.dp), tint = Color.Gray)
+                        Icon(Icons.Default.ContentCopy, stringResource(R.string.applications_kocolor_apps_mobile_features_color_experience), modifier = Modifier.size(18.dp), tint = Color.Gray)
                     }
                     IconButton(onClick = onEditClick) {
-                        Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(18.dp), tint = Color.Gray)
+                        Icon(Icons.Default.Edit, stringResource(R.string.applications_kocolor_apps_mobile_features_color_experience), modifier = Modifier.size(18.dp), tint = Color.Gray)
                     }
                     IconButton(onClick = onDeleteClick) {
-                        Icon(Icons.Default.DeleteOutline, "Delete", modifier = Modifier.size(18.dp), tint = Color.Gray)
+                        Icon(Icons.Default.DeleteOutline, stringResource(R.string.applications_kocolor_apps_mobile_features_color_experience), modifier = Modifier.size(18.dp), tint = Color.Gray)
                     }
                 }
             }
@@ -241,7 +247,7 @@ private fun ColorHistoryCard(
 
                 Column(modifier = Modifier.weight(0.55f)) {
                     Text(
-                        text = analysis.advice.title ?: "Curated Look",
+                        text = analysis.advice.title ?: stringResource(R.string.applications_kocolor_apps_mobile_features_color_default_look_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
@@ -287,20 +293,22 @@ data class ColorDetailUiState(
 fun ColorDetailScreen(
     uiState: ColorDetailUiState,
     onEvent: (ColorEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val analysis = uiState.analysis ?: return
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Analysis Details") },
+                title = { Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_details_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_color_back))
                     }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         Column(
             modifier = Modifier
@@ -348,12 +356,12 @@ fun ColorDetailScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("Seasonal Type", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_seasonal_type), style = MaterialTheme.typography.labelMedium)
                         Text(analysis.advice.seasonalType.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     }
                     VerticalDivider(modifier = Modifier.height(40.dp).width(1.dp))
                     Column(horizontalAlignment = Alignment.End) {
-                        Text("Undertone", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_undertone), style = MaterialTheme.typography.labelMedium)
                         Text(analysis.advice.undertone.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -362,7 +370,7 @@ fun ColorDetailScreen(
             Spacer(modifier = Modifier.height(32.dp))
             
             Text(
-                text = "Perfect Makeup Palette",
+                text = stringResource(R.string.applications_kocolor_apps_mobile_features_color_perfect_makeup_palette),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.align(Alignment.Start)
@@ -378,7 +386,7 @@ fun ColorDetailScreen(
             
             Spacer(modifier = Modifier.height(32.dp))
             Text(
-                text = "Makeup & Nail Suggestions",
+                text = stringResource(R.string.applications_kocolor_apps_mobile_features_color_makeup_nail_suggestions),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.align(Alignment.Start)
@@ -413,7 +421,7 @@ fun ColorDetailScreen(
                             ) {
                                 Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Experience", style = MaterialTheme.typography.labelSmall)
+                                Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_experience), style = MaterialTheme.typography.labelSmall)
                             }
                         }
                     }
@@ -422,7 +430,7 @@ fun ColorDetailScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
             Text(
-                text = "AI Coordination Notes",
+                text = stringResource(R.string.applications_kocolor_apps_mobile_features_color_ai_coordination_notes),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.align(Alignment.Start)

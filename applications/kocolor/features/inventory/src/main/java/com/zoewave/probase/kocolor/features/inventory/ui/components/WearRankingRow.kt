@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.model.ClothingCategory
 import com.zoewave.probase.kocolor.model.ClothingItem
@@ -38,7 +40,15 @@ fun WearRankingRow(item: ClothingItem, rank: Int, maxUsage: Int) {
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                Text(text = "${item.brand ?: "Archive"} · ${item.usageCount} wears", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = stringResource(
+                        R.string.applications_kocolor_features_inventory_brand_wears_format, 
+                        item.brand ?: stringResource(R.string.applications_kocolor_features_inventory_archive_label), 
+                        item.usageCount
+                    ), 
+                    style = MaterialTheme.typography.labelSmall, 
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             Box(
                 modifier = Modifier

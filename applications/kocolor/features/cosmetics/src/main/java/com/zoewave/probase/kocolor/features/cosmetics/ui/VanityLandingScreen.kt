@@ -55,7 +55,8 @@ private fun VanityLandingScreenPreview() {
 fun VanityLandingScreen(
     uiState: CosmeticsUiState,
     onEvent: (CosmeticsEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var showTaxonomyInfo by remember { mutableStateOf(false) }
 
@@ -87,7 +88,8 @@ fun VanityLandingScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add_item))
             }
-        }
+        },
+        modifier = modifier
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -172,11 +174,11 @@ fun VanityLandingScreen(
                     
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         val sections = listOf(
-                            "Skincare & Prep" to (Color(0xFFF7F2EB) to R.drawable.vanity_skincare),
-                            "Complexion" to (Color(0xFFF9F6F0) to R.drawable.vanity_complexion),
-                            "Color & Dimension" to (Color(0xFFFDEEF4) to R.drawable.vanity_color),
-                            "Eyes & Brows" to (Color(0xFFE8F1FD) to R.drawable.vanity_eyes),
-                            "Lips" to (Color(0xFFFEECEB) to R.drawable.vanity_lips)
+                            MacroCategory.PREP.displayName to (Color(0xFFF7F2EB) to R.drawable.vanity_skincare),
+                            MacroCategory.COMPLEXION.displayName to (Color(0xFFF9F6F0) to R.drawable.vanity_complexion),
+                            MacroCategory.DIMENSION.displayName to (Color(0xFFFDEEF4) to R.drawable.vanity_color),
+                            MacroCategory.EYES.displayName to (Color(0xFFE8F1FD) to R.drawable.vanity_eyes),
+                            MacroCategory.LIPS.displayName to (Color(0xFFFEECEB) to R.drawable.vanity_lips)
                         )
                         
                         sections.forEach { (name, props) ->

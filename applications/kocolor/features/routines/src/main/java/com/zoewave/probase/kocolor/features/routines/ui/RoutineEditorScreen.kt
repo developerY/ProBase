@@ -66,11 +66,11 @@ fun RoutineEditorScreen(
                 title = { 
                     Text(
                         text = when (selectionStage) {
-                            ProductSelectionStage.HeroPage -> if (editingStepId == null) "Curate Ritual" else "Ritual Knowledge"
-                            ProductSelectionStage.MainForm -> if (newStepDraft != null) "New Stage" else "Edit Stage"
-                            ProductSelectionStage.Macro -> "Select Category"
-                            ProductSelectionStage.Micro -> "Select Type"
-                            ProductSelectionStage.Item -> "Select Product"
+                            ProductSelectionStage.HeroPage -> if (editingStepId == null) stringResource(R.string.applications_kocolor_features_routines_curate_ritual) else stringResource(R.string.applications_kocolor_features_routines_ritual_knowledge)
+                            ProductSelectionStage.MainForm -> if (newStepDraft != null) stringResource(R.string.applications_kocolor_features_routines_new_stage) else stringResource(R.string.applications_kocolor_features_routines_edit_stage)
+                            ProductSelectionStage.Macro -> stringResource(R.string.applications_kocolor_features_routines_select_category)
+                            ProductSelectionStage.Micro -> stringResource(R.string.applications_kocolor_features_routines_select_type)
+                            ProductSelectionStage.Item -> stringResource(R.string.applications_kocolor_features_routines_select_product)
                         },
                         style = MaterialTheme.typography.titleLarge,
                         fontFamily = FontFamily.Serif

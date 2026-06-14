@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -61,6 +62,7 @@ import com.zoewave.probase.kocolor.model.Undertone
 @Composable
 fun CollectionDetailScreen(
     analysis: SavedAnalysis,
+    onEvent: (HomeEvent) -> Unit = {},
     navTo: (KoColorRoute) -> Unit
 ) {
     val advice = analysis.advice
@@ -68,10 +70,10 @@ fun CollectionDetailScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Atelier", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.applications_kocolor_apps_mobile_features_home_atelier), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_back))
                     }
                 },
                 actions = {
@@ -103,7 +105,7 @@ fun CollectionDetailScreen(
             item {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = advice.title ?: "The Silk Gala\nCollection",
+                        text = advice.title ?: stringResource(R.string.applications_kocolor_apps_mobile_features_home_default_collection_title),
                         style = MaterialTheme.typography.displayMedium,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
@@ -133,7 +135,7 @@ fun CollectionDetailScreen(
                 ) {
                     AsyncImage(
                         model = advice.clothesUri ?: R.drawable.advice_clothes_fallback,
-                        contentDescription = "Hero Image",
+                        contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hero_image),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
@@ -144,13 +146,13 @@ fun CollectionDetailScreen(
             item {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Color Story",
+                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_color_story),
                         style = MaterialTheme.typography.titleLarge,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "FOUNDATIONAL TONES",
+                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_foundational_tones),
                         style = MaterialTheme.typography.labelSmall,
                         letterSpacing = 2.sp,
                         modifier = Modifier.alpha(0.6f)
@@ -179,7 +181,7 @@ fun CollectionDetailScreen(
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "The Wardrobe",
+                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_wardrobe),
                         style = MaterialTheme.typography.headlineMedium,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
@@ -192,7 +194,7 @@ fun CollectionDetailScreen(
                 items(outfit.suggestedItems) { suggested ->
                     VerticalCollectionItem(
                         title = suggested.name,
-                        description = suggested.description ?: "Professional selected piece for this look.",
+                        description = suggested.description ?: stringResource(R.string.applications_kocolor_apps_mobile_features_home_default_suggested_desc),
                         imageModel = suggested.imageUrl ?: R.drawable.advice_clothes_fallback,
                         isOwned = suggested.isOwned
                     )
@@ -204,7 +206,7 @@ fun CollectionDetailScreen(
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "The Vanity",
+                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_vanity),
                         style = MaterialTheme.typography.headlineMedium,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
@@ -283,7 +285,7 @@ private fun VerticalCollectionItem(
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
-                            text = "SUGGESTED",
+                            text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_suggested),
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 7.sp),
                             fontWeight = FontWeight.Black

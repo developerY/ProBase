@@ -214,7 +214,7 @@ fun WardrobeDetailScreen(
 
                 Spacer(Modifier.height(32.dp))
                 
-                ProInsightCard(text = "Strategic curated wardrobe collection.")
+                ProInsightCard(text = stringResource(R.string.applications_kocolor_features_inventory_pro_insight))
             }
             
             Spacer(modifier = Modifier.height(100.dp))

@@ -331,7 +331,7 @@ fun CoordinationSection(uvIndex: Double = 0.0) {
         
         if (isHighUv) {
             Text(
-                text = "☀️ UV Index is high. Elevated SPF protection is recommended.",
+                text = stringResource(R.string.applications_kocolor_features_cosmetics_high_uv_warning),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
@@ -473,12 +473,12 @@ fun UsageStockSection(item: CosmeticItem, uiState: CosmeticDetailUiState) {
         
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column {
-                Text(stringResource(R.string.applications_kocolor_features_cosmetics_total_uses), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                Text("${item.usageCount}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Light, fontFamily = FontFamily.Serif)
+                Text(text = stringResource(R.string.applications_kocolor_features_cosmetics_total_uses), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                Text(text = item.usageCount.toString(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Light, fontFamily = FontFamily.Serif)
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text(stringResource(R.string.applications_kocolor_features_cosmetics_est_days_left), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                Text("${uiState.estimatedDaysRemaining ?: stringResource(R.string.applications_kocolor_features_cosmetics_not_available)}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Light, fontFamily = FontFamily.Serif)
+                Text(text = stringResource(R.string.applications_kocolor_features_cosmetics_est_days_left), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                Text(text = uiState.estimatedDaysRemaining?.toString() ?: stringResource(R.string.applications_kocolor_features_cosmetics_not_available), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Light, fontFamily = FontFamily.Serif)
             }
         }
         
