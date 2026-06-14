@@ -11,16 +11,11 @@ import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
+import com.zoewave.probase.kocolor.features.boxcapture.data.LocalProductAnalyzer
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureStep
-import com.zoewave.probase.kocolor.model.ChemistryBase
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.Coverage
-import com.zoewave.probase.kocolor.model.Finish
-import com.zoewave.probase.kocolor.model.Formulation
-import com.zoewave.probase.kocolor.model.MacroCategory
-import com.zoewave.probase.kocolor.model.MicroCategory
+import com.zoewave.probase.kocolor.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -56,7 +51,8 @@ private data class ExtractedCosmetic(
 class BoxCaptureViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val aiSettings: AiConfigurationSettings,
-    private val repository: CosmeticInventoryRepository
+    private val repository: CosmeticInventoryRepository,
+    private val localAnalyzer: LocalProductAnalyzer
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<BoxCaptureUiState>(BoxCaptureUiState.Idle())
@@ -88,21 +84,17 @@ class BoxCaptureViewModel @Inject constructor(
 
     fun analyzePhotos(mode: CaptureMode) {
         viewModelScope.launch {
-            _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList())
+            val apiKey = aiSettings.getGeminiApiKey()
+            
+            if (apiKey.isNullOrBlank()) {
+                runLocalAnalysis()
+                return@launch
+            }
+
+            _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Querying Gemini Cloud...")
             
             try {
-                val apiKey = aiSettings.getGeminiApiKey()
-                if (apiKey.isNullOrBlank()) {
-                    _uiState.value = BoxCaptureUiState.Error("Gemini API Key is not configured.")
-                    return@launch
-                }
-
-                val bitmaps = capturedUris.mapNotNull { uriString ->
-                    withContext(Dispatchers.IO) {
-                        loadBitmapFromUri(Uri.parse(uriString))
-                    }
-                }
-
+                val bitmaps = loadBitmaps()
                 if (bitmaps.isEmpty()) {
                     _uiState.value = BoxCaptureUiState.Error("No valid images captured.")
                     return@launch
@@ -121,7 +113,7 @@ class BoxCaptureViewModel @Inject constructor(
                     val target = if (mode == CaptureMode.BOX) "product box from all sides" else "product container (front and back)"
                     text("""
                         Analyze these photos of a $target.
-                        Extract all available information and return it in the following JSON format:
+                        Extract all available information, especially the ingredients list if visible on the back, and return it in the following JSON format:
                         {
                             "name": "Product Name",
                             "brand": "Brand Name",
@@ -140,6 +132,7 @@ class BoxCaptureViewModel @Inject constructor(
                             "volume": "30ml"
                         }
                         Return ONLY the JSON block. If a field is unknown, omit it or use null. Be precise.
+                        If this is a product container without a box, prioritize the brand and product name from the front, and ingredients/volume from the back.
                     """.trimIndent())
                 }
 
@@ -156,6 +149,28 @@ class BoxCaptureViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = BoxCaptureUiState.Error("Analysis failed: ${e.localizedMessage}")
             }
+        }
+    }
+
+    private suspend fun runLocalAnalysis() {
+        _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Running Local AI (Offline)...")
+        try {
+            val bitmaps = loadBitmaps()
+            if (bitmaps.isEmpty()) {
+                _uiState.value = BoxCaptureUiState.Error("No valid images captured.")
+                return
+            }
+            val item = localAnalyzer.analyze(bitmaps)
+            repository.saveCosmeticItem(item)
+            _uiState.value = BoxCaptureUiState.Success(item)
+        } catch (e: Exception) {
+            _uiState.value = BoxCaptureUiState.Error("Local analysis failed: ${e.localizedMessage}")
+        }
+    }
+
+    private suspend fun loadBitmaps(): List<Bitmap> = withContext(Dispatchers.IO) {
+        capturedUris.mapNotNull { uriString ->
+            loadBitmapFromUri(Uri.parse(uriString))
         }
     }
 
