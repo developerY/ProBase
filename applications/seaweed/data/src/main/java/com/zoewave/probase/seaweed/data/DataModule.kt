@@ -6,7 +6,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -32,14 +31,12 @@ abstract class DataModule {
 
     @Binds
     @Singleton
-    @Named("Seaweed")
     abstract fun bindAiConfigurationSettings(
         impl: UserSettingsRepository
     ): AiConfigurationSettings
 
     @Binds
     @Singleton
-    @Named("Seaweed")
     abstract fun bindSmartCaptureSettings(
         impl: UserSettingsRepository
     ): SmartCaptureSettings

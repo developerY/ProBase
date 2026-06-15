@@ -15,6 +15,6 @@ object SmartCaptureBridgeModule {
     @Provides
     @Singleton
     fun provideDefaultSmartCaptureSettings(
-        @Named("Seaweed") impl: SmartCaptureSettings
+        impl: SmartCaptureSettings
     ): SmartCaptureSettings = impl
 }

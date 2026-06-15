@@ -5,7 +5,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -15,6 +14,6 @@ object AiConfigurationBridgeModule {
     @Provides
     @Singleton
     fun provideDefaultAiSettings(
-        @Named("Seaweed") impl: AiConfigurationSettings
+        impl: AiConfigurationSettings
     ): AiConfigurationSettings = impl
 }
