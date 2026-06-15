@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.model
+package com.zoewave.probase.core.model.ritual
 
 import kotlinx.serialization.Serializable
 
