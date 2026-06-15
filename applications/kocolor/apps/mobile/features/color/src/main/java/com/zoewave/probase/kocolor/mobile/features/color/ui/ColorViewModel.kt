@@ -3,7 +3,7 @@ package com.zoewave.probase.kocolor.mobile.features.color.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.data.FashionRepository
-import com.zoewave.probase.kocolor.model.SavedAnalysis
+import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
