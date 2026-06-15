@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":core:util"))
     implementation(project(":applications:seaweed:model"))
     implementation(project(":applications:seaweed:data"))
+    implementation(project(":core:data"))
     
     // AI & Gemini
     implementation(project(":features:ai:firebase"))

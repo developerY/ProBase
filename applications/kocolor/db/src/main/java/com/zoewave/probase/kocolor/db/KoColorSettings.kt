@@ -9,7 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.zoewave.probase.core.data.repository.SecureApiKeyRepository
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

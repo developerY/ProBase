@@ -9,7 +9,7 @@ import com.zoewave.probase.ashbike.database.repository.DataStoreAppSettingsRepos
 import com.zoewave.probase.ashbike.database.repository.DataStoreUserProfileRepository
 import com.zoewave.probase.ashbike.database.repository.UserProfileRepository
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -46,14 +46,12 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    @Named("AshBike")
     abstract fun bindAiConfigurationSettings(
         impl: DataStoreAppSettingsRepository
     ): AiConfigurationSettings
 
     @Binds
     @Singleton
-    @Named("AshBike")
     abstract fun bindSmartCaptureSettings(
         impl: DataStoreAppSettingsRepository
     ): SmartCaptureSettings

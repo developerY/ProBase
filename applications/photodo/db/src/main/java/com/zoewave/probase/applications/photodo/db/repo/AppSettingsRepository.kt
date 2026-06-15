@@ -1,6 +1,6 @@
 package com.zoewave.probase.applications.photodo.db.repo
 
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import kotlinx.coroutines.flow.Flow
 
 interface AppSettingsRepository : AiConfigurationSettings {

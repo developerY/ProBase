@@ -5,7 +5,7 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
@@ -22,7 +22,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 
 enum class SortOption {
     NEWEST, EXPIRY, COST_PER_USE, BRAND
@@ -90,7 +89,7 @@ class CosmeticsViewModel @Inject constructor(
     private val fdaRepository: FdaRepository,
     private val weatherRepo: WeatherRepo,
     private val analyzerEngine: AnalyzerEngine,
-    @Named("KoColor") private val aiSettings: AiConfigurationSettings
+    private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
     private val _isAnalyzing = MutableStateFlow(false)

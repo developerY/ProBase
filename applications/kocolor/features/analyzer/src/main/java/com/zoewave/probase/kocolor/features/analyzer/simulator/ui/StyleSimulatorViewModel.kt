@@ -3,7 +3,7 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleSimulatorEngine
 import com.zoewave.probase.kocolor.model.*
@@ -49,7 +49,7 @@ class StyleSimulatorViewModel @Inject constructor(
     private val wardrobeRepository: WardrobeRepository,
     private val fashionRepository: com.zoewave.probase.kocolor.data.FashionRepository,
     private val simulatorEngine: StyleSimulatorEngine,
-    @Named("KoColor") private val aiSettings: AiConfigurationSettings
+    private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StyleSimulatorUiState())

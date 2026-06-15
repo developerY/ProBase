@@ -6,7 +6,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.core.data.repository.travel.LocationRepository
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
@@ -56,7 +56,7 @@ class AnalyzerViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val analyzerEngine: AnalyzerEngine,
     private val fashionRepository: FashionRepository,
-    @Named("KoColor") private val aiSettings: AiConfigurationSettings,
+    private val aiSettings: AiConfigurationSettings,
     private val sessionRepository: FashionSessionRepository,
     private val locationRepository: LocationRepository
 ) : ViewModel() {

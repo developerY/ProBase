@@ -2,7 +2,7 @@ package com.zoewave.probase.kocolor.features.suggestions.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.features.suggestions.data.SuggestionEngine
 import com.zoewave.probase.kocolor.model.FashionAdvice
@@ -11,7 +11,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 
 sealed class SuggestionsLoadingState {
     data object Idle : SuggestionsLoadingState()
@@ -33,7 +32,7 @@ sealed class SuggestionsEvent {
 class SuggestionsViewModel @Inject constructor(
     private val suggestionEngine: SuggestionEngine,
     private val fashionRepository: FashionRepository,
-    @Named("KoColor") private val aiSettings: AiConfigurationSettings
+    private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
     private val _loadingState = MutableStateFlow<SuggestionsLoadingState>(SuggestionsLoadingState.Idle)

@@ -3,7 +3,7 @@ package com.zoewave.probase.kocolor.db.di
 import android.content.Context
 import androidx.room3.Room
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.kocolor.db.KoColorDatabase
 import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
@@ -27,12 +27,10 @@ abstract class DatabaseModule {
 
     @Binds
     @Singleton
-    @Named("KoColor")
     abstract fun bindAiConfigurationSettings(impl: KoColorSettings): AiConfigurationSettings
 
     @Binds
     @Singleton
-    @Named("KoColor")
     abstract fun bindSmartCaptureSettings(impl: KoColorSettings): SmartCaptureSettings
 
     companion object {

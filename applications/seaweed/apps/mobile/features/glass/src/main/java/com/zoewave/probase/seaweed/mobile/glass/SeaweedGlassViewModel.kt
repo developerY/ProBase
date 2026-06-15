@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.util.CurrencyUtils
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.features.ai.vision.financial.FinancialAdvisorEngine
 import com.zoewave.probase.seaweed.data.FinancialRepository
 import com.zoewave.probase.seaweed.model.FinancialProfile
