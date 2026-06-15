@@ -16,9 +16,9 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.kocolor.features.routines.ui.components.DailyInsightBanner
 import com.zoewave.probase.kocolor.features.routines.ui.components.HeroRitualCard
-import com.zoewave.probase.kocolor.model.BeautyRoutine
+import com.zoewave.probase.core.model.ritual.BeautyRoutine
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.kocolor.model.RoutineTime
+import com.zoewave.probase.core.model.ritual.RoutineTime
 
 @Preview(showBackground = true)
 @Composable

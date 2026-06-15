@@ -32,8 +32,8 @@ import com.zoewave.probase.kocolor.features.inventory.ui.components.DetailRow
 import com.zoewave.probase.kocolor.features.inventory.ui.components.MetricItem
 import com.zoewave.probase.kocolor.features.inventory.ui.components.ProInsightCard
 import com.zoewave.probase.kocolor.features.inventory.ui.components.SectionHeader
-import com.zoewave.probase.kocolor.model.ClothingCategory
-import com.zoewave.probase.kocolor.model.ClothingItem
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.*

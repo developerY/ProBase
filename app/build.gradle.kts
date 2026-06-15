@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.projected)
     implementation(project(":features:ai:capture"))
     implementation(project(":features:ai:configuration"))
+    implementation(project(":core:data"))
     implementation(project(":applications:photodo:features:smartadvice"))
     implementation(project(":applications:photodo:db"))
     // implementation(project(":applications:photodo:apps:mobile"))

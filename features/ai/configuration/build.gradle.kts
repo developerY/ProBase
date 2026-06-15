@@ -13,7 +13,7 @@ dependencies {
     // --- Shared Core Projects ---
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
-    implementation(project(":core:data"))
+    api(project(":core:data"))
 
     // --- Feature Dependencies ---
     implementation(project(":features:ai:capture"))

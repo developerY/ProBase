@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailUiState
-import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 
 @Composable
 fun AtelierExpandableSection(

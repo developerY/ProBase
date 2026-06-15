@@ -2,7 +2,7 @@ package com.zoewave.probase.kocolor.db.entity
 
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
-import com.zoewave.probase.kocolor.model.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingCategory
 
 @Entity(tableName = "clothing_items")
 data class ClothingItemEntity(
@@ -16,7 +16,7 @@ data class ClothingItemEntity(
     val price: Double? = null,
     val imageUrl: String? = null,
     val notes: String? = null,
-    val timestamp: Long,
+    val timestamp: Long = System.currentTimeMillis(),
     
     // --- Wardrobe Color Engine Metadata ---
     val dominantHex: String? = null,
@@ -27,5 +27,7 @@ data class ClothingItemEntity(
     val seasonalPalette: String? = null,
     val contrastLevel: String? = null,
     val koColorGroup: String? = null,
+
+    // --- Usage & Performance ---
     val usageCount: Int = 0
 )

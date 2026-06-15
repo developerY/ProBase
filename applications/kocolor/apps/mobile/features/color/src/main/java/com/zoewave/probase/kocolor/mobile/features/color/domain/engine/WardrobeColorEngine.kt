@@ -3,9 +3,9 @@ package com.zoewave.probase.kocolor.mobile.features.color.domain.engine
 import android.graphics.Bitmap
 import com.zoewave.probase.kocolor.mobile.features.color.util.ColorScienceUtils
 import com.zoewave.probase.kocolor.mobile.features.color.util.WardrobeAnalyzer
-import com.zoewave.probase.kocolor.model.ClothingItem
-import com.zoewave.probase.kocolor.model.SeasonalType
-import com.zoewave.probase.kocolor.model.Undertone
+import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.SeasonalType
+import com.zoewave.probase.core.model.ritual.Undertone
 import javax.inject.Inject
 import javax.inject.Singleton
 

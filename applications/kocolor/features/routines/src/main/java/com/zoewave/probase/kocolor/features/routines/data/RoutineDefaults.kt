@@ -1,7 +1,7 @@
 package com.zoewave.probase.kocolor.features.routines.data
 
-import com.zoewave.probase.kocolor.model.RoutineStep
-import com.zoewave.probase.kocolor.model.RoutineTime
+import com.zoewave.probase.core.model.ritual.RoutineStep
+import com.zoewave.probase.core.model.ritual.RoutineTime
 
 object RoutineDefaults {
     fun getMorningRoutine(): List<RoutineStep> = listOf(

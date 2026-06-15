@@ -9,7 +9,7 @@ import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
 import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

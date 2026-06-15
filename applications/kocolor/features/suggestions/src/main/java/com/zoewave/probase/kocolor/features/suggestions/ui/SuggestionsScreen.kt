@@ -12,6 +12,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.kocolor.features.suggestions.R
 import com.zoewave.probase.kocolor.features.suggestions.ui.components.NoProfileState
 import com.zoewave.probase.kocolor.features.suggestions.ui.components.SuggestionsList
+import com.zoewave.probase.core.model.ritual.FashionProfile
+import com.zoewave.probase.core.model.ritual.SeasonalType
+import com.zoewave.probase.core.model.ritual.Undertone
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
@@ -45,9 +48,9 @@ private fun SuggestionsScreenPreview_Loading() {
     MaterialTheme {
         SuggestionsScreen(
             uiState = SuggestionsScreenUiState(
-                fashionProfile = com.zoewave.probase.kocolor.model.FashionProfile(
-                    seasonalType = com.zoewave.probase.kocolor.model.SeasonalType.WINTER,
-                    undertone = com.zoewave.probase.kocolor.model.Undertone.COOL
+                fashionProfile = FashionProfile(
+                    seasonalType = SeasonalType.WINTER,
+                    undertone = Undertone.COOL
                 ),
                 loadingState = SuggestionsLoadingState.Loading
             ),

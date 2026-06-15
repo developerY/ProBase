@@ -1,6 +1,6 @@
 package com.zoewave.probase.kocolor.features.analyzer.data
 
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton

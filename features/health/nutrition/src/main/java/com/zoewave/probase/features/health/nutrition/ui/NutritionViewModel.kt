@@ -3,9 +3,9 @@ package com.zoewave.probase.features.health.nutrition.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.features.health.nutrition.data.NutritionDefaults
-import com.zoewave.probase.kocolor.model.BeautyRoutine
-import com.zoewave.probase.kocolor.model.RoutineStep
-import com.zoewave.probase.kocolor.model.RoutineTime
+import com.zoewave.probase.core.model.ritual.BeautyRoutine
+import com.zoewave.probase.core.model.ritual.RoutineStep
+import com.zoewave.probase.core.model.ritual.RoutineTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

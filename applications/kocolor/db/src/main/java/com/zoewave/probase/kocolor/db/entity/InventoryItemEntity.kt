@@ -2,7 +2,7 @@ package com.zoewave.probase.kocolor.db.entity
 
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
-import com.zoewave.probase.kocolor.model.InventoryMetadata
+import com.zoewave.probase.core.model.ritual.InventoryMetadata
 
 enum class InventoryType {
     FACE, HAIR, SHOES, CLOTHES

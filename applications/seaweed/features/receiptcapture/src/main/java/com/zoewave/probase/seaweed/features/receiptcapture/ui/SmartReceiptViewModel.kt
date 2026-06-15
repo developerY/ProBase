@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.util.network.NetworkStatsProvider
 import com.zoewave.probase.features.ai.capture.data.ImageLoader
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptOrchestrator
 import com.zoewave.probase.core.util.CurrencyUtils
 import com.zoewave.probase.seaweed.data.FinancialRepository

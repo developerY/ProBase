@@ -35,7 +35,8 @@ import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CategoryIconItem
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Preview(showBackground = true)
 @Composable

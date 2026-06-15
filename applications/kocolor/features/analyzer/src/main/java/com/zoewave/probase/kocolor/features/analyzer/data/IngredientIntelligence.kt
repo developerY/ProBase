@@ -1,7 +1,7 @@
 package com.zoewave.probase.kocolor.features.analyzer.data
 
 import com.google.ai.client.generativeai.GenerativeModel
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
-import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 
 @Composable
 fun RankingStatCard(

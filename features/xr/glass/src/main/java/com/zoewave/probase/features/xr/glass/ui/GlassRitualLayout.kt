@@ -21,6 +21,7 @@ import androidx.xr.glimmer.VoiceInputIndicator
 import androidx.xr.glimmer.stack.VerticalStack
 import androidx.xr.glimmer.stack.items
 import androidx.xr.glimmer.surface
+import com.zoewave.probase.core.model.ritual.*
 
 @Composable
 fun GlassRitualLayout(
@@ -147,21 +148,21 @@ private fun GlassRitualLayoutPreview() {
     GlimmerTheme {
         GlassRitualLayout(
             uiState = GlassUiState(
-                morningRoutine = com.zoewave.probase.kocolor.model.BeautyRoutine(
+                morningRoutine = BeautyRoutine(
                     title = "morning beautiful routine",
-                    time = com.zoewave.probase.kocolor.model.RoutineTime.MORNING,
+                    time = RoutineTime.MORNING,
                     steps = listOf(
-                        com.zoewave.probase.kocolor.model.RoutineStep(
+                        RoutineStep(
                             title = "Wake Up",
                             description = "No snooze, open curtains for natural light.",
                             isCompleted = true
                         ),
-                        com.zoewave.probase.kocolor.model.RoutineStep(
+                        RoutineStep(
                             title = "Hydrate",
                             description = "Drink water (optionally with lemon).",
                             isCompleted = false
                         ),
-                        com.zoewave.probase.kocolor.model.RoutineStep(
+                        RoutineStep(
                             title = "Move",
                             description = "10 min yoga or light stretch.",
                             isCompleted = false

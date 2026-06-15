@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.ai.configuration.domain
+package com.zoewave.probase.core.data.repository
 
 import kotlinx.coroutines.flow.Flow
 

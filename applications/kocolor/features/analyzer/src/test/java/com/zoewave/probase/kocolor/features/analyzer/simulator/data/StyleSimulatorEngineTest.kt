@@ -1,8 +1,8 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.data
 
 import com.google.common.truth.Truth.assertThat
-import com.zoewave.probase.kocolor.model.ClothingCategory
-import com.zoewave.probase.kocolor.model.ClothingItem
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import org.junit.Test
 
 class StyleSimulatorEngineTest {

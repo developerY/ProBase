@@ -2,10 +2,10 @@ package com.zoewave.probase.kocolor.data.engine
 
 import android.graphics.Bitmap
 import com.google.common.truth.Truth.assertThat
-import com.zoewave.probase.kocolor.model.ClothingCategory
-import com.zoewave.probase.kocolor.model.ClothingItem
-import com.zoewave.probase.kocolor.model.SeasonalType
-import com.zoewave.probase.kocolor.model.Undertone
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.SeasonalType
+import com.zoewave.probase.core.model.ritual.Undertone
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Before

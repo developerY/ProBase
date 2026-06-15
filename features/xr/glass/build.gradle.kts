@@ -10,9 +10,7 @@ android {
 
 dependencies {
     implementation(project(":core:model"))
-    implementation(project(":applications:kocolor:data"))
-    implementation(project(":applications:kocolor:model"))
-    implementation(project(":applications:kocolor:db"))
+    implementation(project(":core:data"))
     implementation(project(":features:ai:firebase"))
 
     implementation(libs.androidx.glimmer.core)

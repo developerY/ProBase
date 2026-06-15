@@ -1,32 +1,34 @@
 package com.zoewave.probase.kocolor.data.di
 
+import com.zoewave.probase.core.data.repository.GlassBridgeRepository
+import com.zoewave.probase.core.data.repository.RitualRepository
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
-import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
-import com.zoewave.probase.kocolor.db.dao.SavedSuggestionDao
+import com.zoewave.probase.kocolor.data.repository.RitualRepositoryImpl
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DataModule {
+abstract class DataModule {
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideFashionRepository(
-        fashionProfileDao: FashionProfileDao,
-        savedSuggestionDao: SavedSuggestionDao
-    ): FashionRepository {
-        return FashionRepository(fashionProfileDao, savedSuggestionDao)
-    }
+    abstract fun bindGlassBridgeRepository(impl: FashionRepository): GlassBridgeRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideFashionSessionRepository(): FashionSessionRepository {
-        return FashionSessionRepository()
+    abstract fun bindRitualRepository(impl: RitualRepositoryImpl): RitualRepository
+
+    companion object {
+        @Provides
+        @Singleton
+        fun provideFashionSessionRepository(): FashionSessionRepository {
+            return FashionSessionRepository()
+        }
     }
 }

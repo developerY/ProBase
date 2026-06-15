@@ -28,8 +28,8 @@ import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 import com.zoewave.probase.kocolor.features.inventory.R
-import com.zoewave.probase.kocolor.model.ClothingCategory
-import com.zoewave.probase.kocolor.model.ClothingItem
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class WardrobeEditUiState(
@@ -225,11 +225,11 @@ fun WardrobeEditScreen(
                 Text("VERTICAL", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                 Spacer(Modifier.height(12.dp))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ClothingCategory.entries.forEach { cat ->
+                    ClothingCategory.entries.forEach { categoryEnum ->
                         FilterChip(
-                            selected = draft.category == cat,
-                            onClick = { onEvent(WardrobeEvent.UpdateDraft(draft.copy(category = cat))) },
-                            label = { Text(cat.name) },
+                            selected = draft.category == categoryEnum,
+                            onClick = { onEvent(WardrobeEvent.UpdateDraft(draft.copy(category = categoryEnum))) },
+                            label = { Text(categoryEnum.name) },
                             shape = RoundedCornerShape(12.dp)
                         )
                     }

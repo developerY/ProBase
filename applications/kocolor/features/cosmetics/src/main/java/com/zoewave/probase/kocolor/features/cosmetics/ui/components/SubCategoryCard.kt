@@ -8,7 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.kocolor.model.MicroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
 
 @Composable
 fun SubCategoryCard(

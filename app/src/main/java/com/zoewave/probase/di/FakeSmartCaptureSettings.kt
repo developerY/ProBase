@@ -1,7 +1,7 @@
 package com.zoewave.probase.di
 
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject

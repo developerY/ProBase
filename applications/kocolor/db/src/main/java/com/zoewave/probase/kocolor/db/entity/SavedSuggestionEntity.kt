@@ -2,9 +2,7 @@ package com.zoewave.probase.kocolor.db.entity
 
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
-import com.zoewave.probase.kocolor.model.FashionAdvice
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import com.zoewave.probase.core.model.ritual.FashionAdvice
 
 @Entity(tableName = "saved_suggestions")
 data class SavedSuggestionEntity(

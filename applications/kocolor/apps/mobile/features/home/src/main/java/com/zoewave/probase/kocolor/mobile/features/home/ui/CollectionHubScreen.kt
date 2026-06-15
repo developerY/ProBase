@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
+import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.Locale
@@ -157,7 +158,7 @@ fun CollectionHubScreen(
 
 @Composable
 private fun CuratedCollectionCard(
-    analysis: com.zoewave.probase.kocolor.model.SavedAnalysis,
+    analysis: SavedAnalysis,
     onClick: () -> Unit
 ) {
     val dateFormat = remember { java.text.SimpleDateFormat("MMM dd, yyyy - HH:mm", java.util.Locale.getDefault()) }

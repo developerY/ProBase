@@ -17,7 +17,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.kocolor.features.routines.ui.components.*
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class RoutineEditorUiState(
     val initialStepId: String? = null,

@@ -22,7 +22,7 @@ import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsEvent
-import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable

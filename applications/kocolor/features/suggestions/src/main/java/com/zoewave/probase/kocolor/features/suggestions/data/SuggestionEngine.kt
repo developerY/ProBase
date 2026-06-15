@@ -3,10 +3,10 @@ package com.zoewave.probase.kocolor.features.suggestions.data
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
-import com.zoewave.probase.kocolor.model.FashionAdvice
-import com.zoewave.probase.kocolor.model.FashionProfile
-import com.zoewave.probase.kocolor.model.SeasonalType
-import com.zoewave.probase.kocolor.model.Undertone
+import com.zoewave.probase.core.model.ritual.FashionAdvice
+import com.zoewave.probase.core.model.ritual.FashionProfile
+import com.zoewave.probase.core.model.ritual.SeasonalType
+import com.zoewave.probase.core.model.ritual.Undertone
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 

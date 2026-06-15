@@ -20,7 +20,7 @@ import com.zoewave.probase.features.xr.glass.data.GlassSessionRepository
 import com.zoewave.probase.features.xr.glass.ui.GlassApp
 import com.zoewave.probase.features.xr.glass.ui.GlimmerSample
 import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
-import com.zoewave.probase.kocolor.data.FashionRepository
+import com.zoewave.probase.core.data.repository.GlassBridgeRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,7 +29,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class GlassesMainActivity : ComponentActivity() {
 
-    @Inject lateinit var fashionRepository: FashionRepository
+    @Inject lateinit var glassBridgeRepository: GlassBridgeRepository
     @Inject lateinit var glassSessionRepository: GlassSessionRepository
     @Inject lateinit var firebaseLiveSessionManager: FirebaseLiveSessionManager
     private lateinit var audioInterface: GlassAudioInterface
@@ -67,7 +67,7 @@ class GlassesMainActivity : ComponentActivity() {
         initializeGlassesFeatures()
 
         lifecycleScope.launch {
-            fashionRepository.glassCommands.collect { command ->
+            glassBridgeRepository.glassCommands.collect { command ->
                 if (command == "EXIT") {
                     finish()
                 }
@@ -128,14 +128,14 @@ class GlassesMainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         lifecycleScope.launch {
-            fashionRepository.updateGlassSessionState(isActive = true)
+            glassBridgeRepository.updateGlassSessionState(isActive = true)
         }
     }
 
     override fun onStop() {
         super.onStop()
         lifecycleScope.launch {
-            fashionRepository.updateGlassSessionState(isActive = false)
+            glassBridgeRepository.updateGlassSessionState(isActive = false)
         }
     }
 }

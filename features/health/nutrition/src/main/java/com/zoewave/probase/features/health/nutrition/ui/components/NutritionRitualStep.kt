@@ -17,7 +17,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.kocolor.model.RoutineStep
+import com.zoewave.probase.core.model.ritual.RoutineStep
 
 @Composable
 fun NutritionRitualStep(

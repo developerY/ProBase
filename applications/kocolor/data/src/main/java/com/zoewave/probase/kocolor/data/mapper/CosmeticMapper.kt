@@ -1,7 +1,7 @@
 package com.zoewave.probase.kocolor.data.mapper
 
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
-import com.zoewave.probase.kocolor.model.CosmeticItem
 
 fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     id = id,

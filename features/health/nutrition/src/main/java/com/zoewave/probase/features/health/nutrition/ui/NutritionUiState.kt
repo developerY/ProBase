@@ -1,6 +1,6 @@
 package com.zoewave.probase.features.health.nutrition.ui
 
-import com.zoewave.probase.kocolor.model.BeautyRoutine
+import com.zoewave.probase.core.model.ritual.BeautyRoutine
 
 sealed interface NutritionUiState {
     data object Loading : NutritionUiState

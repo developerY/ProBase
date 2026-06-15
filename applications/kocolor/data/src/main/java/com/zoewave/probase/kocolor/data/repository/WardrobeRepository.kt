@@ -1,6 +1,6 @@
 package com.zoewave.probase.kocolor.data.repository
 
-import com.zoewave.probase.kocolor.model.ClothingItem
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import kotlinx.coroutines.flow.Flow
 
 interface WardrobeRepository {

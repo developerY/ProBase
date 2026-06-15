@@ -1,8 +1,8 @@
 package com.zoewave.probase.kocolor.mobile.features.color.domain.engine
 
-import com.zoewave.probase.kocolor.model.ClothingItem
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.HarmonizedLook
+import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.HarmonizedLook
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,9 +14,9 @@ class ComprehensiveLookBuilder @Inject constructor() {
      */
     fun buildLook(garment: ClothingItem, availableCosmetics: List<CosmeticItem>): HarmonizedLook {
         // Filter cosmetics by category for specific roles
-        val lipOptions = availableCosmetics.filter { it.microCategory.macro == com.zoewave.probase.kocolor.model.MacroCategory.LIPS }
-        val eyeOptions = availableCosmetics.filter { it.microCategory.macro == com.zoewave.probase.kocolor.model.MacroCategory.EYES }
-        val cheekOptions = availableCosmetics.filter { it.microCategory.macro == com.zoewave.probase.kocolor.model.MacroCategory.DIMENSION }
+        val lipOptions = availableCosmetics.filter { it.microCategory.macro == com.zoewave.probase.core.model.ritual.MacroCategory.LIPS }
+        val eyeOptions = availableCosmetics.filter { it.microCategory.macro == com.zoewave.probase.core.model.ritual.MacroCategory.EYES }
+        val cheekOptions = availableCosmetics.filter { it.microCategory.macro == com.zoewave.probase.core.model.ritual.MacroCategory.DIMENSION }
 
         // In a production engine, we would match based on seasonalPalette and colorTemperature
         // For now, we take the most relevant items

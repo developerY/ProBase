@@ -7,7 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.zoewave.probase.applications.photodo.db.repo.AppSettingsRepository
 import com.zoewave.probase.applications.photodo.db.repo.DataStoreAppSettingsRepository
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
-import com.zoewave.probase.features.ai.configuration.domain.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

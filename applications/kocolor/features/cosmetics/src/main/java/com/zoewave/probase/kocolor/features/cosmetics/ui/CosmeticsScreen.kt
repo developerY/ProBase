@@ -21,7 +21,8 @@ import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CosmeticProductCard
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.GroupSectionCard
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.SubCategoryCard
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
 fun CosmeticsUiRoute(

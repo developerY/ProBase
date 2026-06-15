@@ -5,7 +5,7 @@ import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
-import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject

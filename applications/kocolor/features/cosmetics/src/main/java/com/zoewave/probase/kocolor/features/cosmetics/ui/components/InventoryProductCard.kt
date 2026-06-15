@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.cosmetics.R
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.MacroCategory
-import com.zoewave.probase.kocolor.model.MicroCategory
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
 import java.text.NumberFormat
 import java.util.*
 

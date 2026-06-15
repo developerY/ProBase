@@ -1,22 +1,17 @@
 package com.zoewave.probase.kocolor.data
 
 import android.util.Log
+import com.zoewave.probase.core.data.repository.GlassBridgeRepository
+import com.zoewave.probase.core.model.ritual.FashionAdvice
+import com.zoewave.probase.core.model.ritual.FashionProfile
+import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.data.mapper.toSavedSuggestionEntity
 import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
 import com.zoewave.probase.kocolor.db.dao.SavedSuggestionDao
-import com.zoewave.probase.kocolor.model.FashionAdvice
-import com.zoewave.probase.kocolor.model.FashionProfile
-import com.zoewave.probase.kocolor.model.SavedAnalysis
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,25 +22,25 @@ private const val TAG = "FashionRepository"
 class FashionRepository @Inject constructor(
     private val fashionProfileDao: FashionProfileDao,
     private val savedSuggestionDao: SavedSuggestionDao
-) {
+) : GlassBridgeRepository {
     private val _isGlassConnected = MutableStateFlow(false)
-    val isGlassConnected = _isGlassConnected.asStateFlow()
+    override val isGlassConnected = _isGlassConnected.asStateFlow()
 
     private val _isGlassSessionActive = MutableStateFlow(false)
-    val isGlassSessionActive = _isGlassSessionActive.asStateFlow()
+    override val isGlassSessionActive = _isGlassSessionActive.asStateFlow()
 
     private val _glassCommands = MutableSharedFlow<String>()
-    val glassCommands = _glassCommands.asSharedFlow()
+    override val glassCommands = _glassCommands.asSharedFlow()
 
-    fun updateGlassConnectionState(isConnected: Boolean) {
+    override fun updateGlassConnectionState(isConnected: Boolean) {
         _isGlassConnected.value = isConnected
     }
 
-    fun updateGlassSessionState(isActive: Boolean) {
+    override fun updateGlassSessionState(isActive: Boolean) {
         _isGlassSessionActive.value = isActive
     }
 
-    suspend fun sendGlassCommand(command: String) {
+    override suspend fun sendGlassCommand(command: String) {
         _glassCommands.emit(command)
     }
 

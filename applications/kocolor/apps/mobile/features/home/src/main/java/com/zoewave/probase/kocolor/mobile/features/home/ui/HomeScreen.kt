@@ -72,7 +72,7 @@ import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CollectionHubCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryCard
-import com.zoewave.probase.kocolor.model.FashionProfile
+import com.zoewave.probase.core.model.ritual.FashionProfile
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 

@@ -1,10 +1,10 @@
 package com.zoewave.probase.kocolor.data.mapper
 
+import com.zoewave.probase.core.model.ritual.FashionAdvice
+import com.zoewave.probase.core.model.ritual.FashionProfile
+import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import com.zoewave.probase.kocolor.db.entity.FashionProfileEntity
 import com.zoewave.probase.kocolor.db.entity.SavedSuggestionEntity
-import com.zoewave.probase.kocolor.model.FashionAdvice
-import com.zoewave.probase.kocolor.model.FashionProfile
-import com.zoewave.probase.kocolor.model.SavedAnalysis
 
 fun FashionProfileEntity.toModel(): FashionProfile = FashionProfile(
     id = id,

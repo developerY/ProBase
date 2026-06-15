@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.mobile.features.home.R
-import com.zoewave.probase.kocolor.model.BeautyRoutine
+import com.zoewave.probase.core.model.ritual.BeautyRoutine
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
