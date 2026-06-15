@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.features.suggestions.data.SuggestionEngine
-import com.zoewave.probase.kocolor.model.FashionAdvice
-import com.zoewave.probase.kocolor.model.FashionProfile
+import com.zoewave.probase.core.model.ritual.FashionAdvice
+import com.zoewave.probase.core.model.ritual.FashionProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

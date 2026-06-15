@@ -19,10 +19,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.features.analyzer.R
-import com.zoewave.probase.kocolor.model.FashionAdvice
+import com.zoewave.probase.core.model.ritual.FashionAdvice
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.kocolor.model.SeasonalType
-import com.zoewave.probase.kocolor.model.Undertone
+import com.zoewave.probase.core.model.ritual.SeasonalType
+import com.zoewave.probase.core.model.ritual.Undertone
 
 @Composable
 fun AnalysisResultScreen(

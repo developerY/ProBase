@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 

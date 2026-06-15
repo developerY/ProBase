@@ -49,10 +49,10 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.routines.ui.components.DailyInsightSmall
 import com.zoewave.probase.kocolor.features.routines.ui.components.GlassConnectionHeaderAction
 import com.zoewave.probase.kocolor.features.routines.ui.components.SplitRitualStep
-import com.zoewave.probase.kocolor.model.BeautyRoutine
+import com.zoewave.probase.core.model.ritual.BeautyRoutine
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.kocolor.model.RoutineStep
-import com.zoewave.probase.kocolor.model.RoutineTime
+import com.zoewave.probase.core.model.ritual.RoutineStep
+import com.zoewave.probase.core.model.ritual.RoutineTime
 
 data class RoutineDetailUiState(
     val routineId: Long,

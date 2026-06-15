@@ -15,7 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.*
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

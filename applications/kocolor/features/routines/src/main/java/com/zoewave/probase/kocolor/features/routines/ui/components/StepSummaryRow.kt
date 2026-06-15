@@ -12,7 +12,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.kocolor.model.RoutineStep
+import com.zoewave.probase.core.model.ritual.RoutineStep
 
 @Composable
 fun StepSummaryRow(uiState: RoutineStep, onEvent: (Unit) -> Unit) {

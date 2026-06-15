@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

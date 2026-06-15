@@ -23,7 +23,8 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CategoryStatCard
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CosmeticProductGridCard
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.RankingStatCard
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.Locale
 

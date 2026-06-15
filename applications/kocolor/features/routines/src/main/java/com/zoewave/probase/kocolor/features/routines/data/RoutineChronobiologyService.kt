@@ -1,7 +1,7 @@
 package com.zoewave.probase.kocolor.features.routines.data
 
-import com.zoewave.probase.kocolor.model.BeautyRoutine
-import com.zoewave.probase.kocolor.model.RoutineTime
+import com.zoewave.probase.core.model.ritual.BeautyRoutine
+import com.zoewave.probase.core.model.ritual.RoutineTime
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton

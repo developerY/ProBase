@@ -12,7 +12,7 @@ import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.kocolor.features.fda.data.repository.FdaRepository
 import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 import com.zoewave.probase.kocolor.features.cosmetics.R

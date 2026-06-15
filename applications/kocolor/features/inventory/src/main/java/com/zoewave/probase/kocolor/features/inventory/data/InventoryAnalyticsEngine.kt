@@ -1,6 +1,6 @@
 package com.zoewave.probase.kocolor.features.inventory.data
 
-import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import javax.inject.Inject
 import javax.inject.Singleton
 

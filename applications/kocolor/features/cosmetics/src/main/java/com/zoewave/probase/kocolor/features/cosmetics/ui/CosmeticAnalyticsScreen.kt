@@ -30,10 +30,10 @@ import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AnalyticsSta
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ProfessionalTaxonomyDialog
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.UsageRankingRow
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ValueEfficiencyRow
-import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.kocolor.model.MacroCategory
-import com.zoewave.probase.kocolor.model.MicroCategory
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
 import java.text.NumberFormat
 import java.util.*
 

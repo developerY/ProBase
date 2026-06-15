@@ -14,7 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.features.suggestions.R
-import com.zoewave.probase.kocolor.model.FashionAdvice
+import com.zoewave.probase.core.model.ritual.FashionAdvice
+import com.zoewave.probase.core.model.ritual.SeasonalType
+import com.zoewave.probase.core.model.ritual.Undertone
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
@@ -67,8 +69,8 @@ private fun SuggestionsListPreview() {
         SuggestionsList(
             uiState = FashionAdvice(
                 summary = "Advice summary",
-                seasonalType = com.zoewave.probase.kocolor.model.SeasonalType.WINTER,
-                undertone = com.zoewave.probase.kocolor.model.Undertone.COOL,
+                seasonalType = com.zoewave.probase.core.model.ritual.SeasonalType.WINTER,
+                undertone = com.zoewave.probase.core.model.ritual.Undertone.COOL,
                 makeupSuggestions = emptyList(),
                 outfitSuggestions = emptyList(),
                 recommendedPalette = emptyList()

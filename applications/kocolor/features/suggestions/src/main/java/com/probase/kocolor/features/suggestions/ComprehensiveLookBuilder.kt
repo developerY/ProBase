@@ -1,6 +1,6 @@
 package com.probase.kocolor.features.suggestions
 
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
 
 /**
  * Professional Look Builder that aligns clothing color DNA with the vanity archive.

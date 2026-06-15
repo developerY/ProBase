@@ -34,8 +34,8 @@ import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulationStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
-import com.zoewave.probase.kocolor.model.ClothingCategory
-import com.zoewave.probase.kocolor.model.ClothingItem
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
@@ -218,7 +218,7 @@ fun ResultStep(
             Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_vault_selections), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         }
 
-        items(uiState.recommendedClothing) { item ->
+        items(uiState.recommendedClothing) { item: ClothingItem ->
             ResultCard(uiState = item, onEvent = {}, navTo = {})
         }
         
