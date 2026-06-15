@@ -11,8 +11,8 @@ android {
 dependencies {
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:db"))
-    implementation(project(":core:model"))
-    implementation(project(":core:data"))
+    api(project(":core:model"))
+    api(project(":core:data"))
     implementation(project(":core:util"))
     implementation(project(":features:ai:configuration"))
 

@@ -1,6 +1,6 @@
 package com.zoewave.probase.kocolor.data.repository
 
-import com.zoewave.probase.kocolor.model.CosmeticItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import kotlinx.coroutines.flow.Flow
 
 interface CosmeticInventoryRepository {

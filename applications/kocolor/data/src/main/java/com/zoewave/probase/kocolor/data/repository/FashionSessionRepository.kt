@@ -30,8 +30,8 @@ class FashionSessionRepository @Inject constructor() {
     private val _location = MutableStateFlow<String?>(null)
     val location: StateFlow<String?> = _location.asStateFlow()
 
-    private val _cosmeticDraft = MutableStateFlow<com.zoewave.probase.kocolor.model.CosmeticItem?>(null)
-    val cosmeticDraft: StateFlow<com.zoewave.probase.kocolor.model.CosmeticItem?> = _cosmeticDraft.asStateFlow()
+    private val _cosmeticDraft = MutableStateFlow<com.zoewave.probase.core.model.ritual.CosmeticItem?>(null)
+    val cosmeticDraft: StateFlow<com.zoewave.probase.core.model.ritual.CosmeticItem?> = _cosmeticDraft.asStateFlow()
 
     fun setFaceUri(uri: String?) {
         Log.d("KoColorSession", "Setting Face URI: $uri")
@@ -63,7 +63,7 @@ class FashionSessionRepository @Inject constructor() {
         _lastScannedCode.value = code
     }
 
-    fun setCosmeticDraft(item: com.zoewave.probase.kocolor.model.CosmeticItem?) {
+    fun setCosmeticDraft(item: com.zoewave.probase.core.model.ritual.CosmeticItem?) {
         Log.d("KoColorSession", "Setting Cosmetic Draft: ${item?.name}")
         _cosmeticDraft.value = item
     }
