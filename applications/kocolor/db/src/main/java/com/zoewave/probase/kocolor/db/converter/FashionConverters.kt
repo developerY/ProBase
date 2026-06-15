@@ -2,20 +2,7 @@ package com.zoewave.probase.kocolor.db.converter
 
 import androidx.room3.TypeConverter
 import com.zoewave.probase.kocolor.db.entity.InventoryType
-import com.zoewave.probase.kocolor.model.ChemistryBase
-import com.zoewave.probase.kocolor.model.ClothingCategory
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.Coverage
-import com.zoewave.probase.kocolor.model.FashionAdvice
-import com.zoewave.probase.kocolor.model.Finish
-import com.zoewave.probase.kocolor.model.Formulation
-import com.zoewave.probase.kocolor.model.InventoryMetadata
-import com.zoewave.probase.kocolor.model.MacroCategory
-import com.zoewave.probase.kocolor.model.MicroCategory
-import com.zoewave.probase.kocolor.model.RoutineStep
-import com.zoewave.probase.kocolor.model.RoutineTime
-import com.zoewave.probase.kocolor.model.SeasonalType
-import com.zoewave.probase.kocolor.model.Undertone
+import com.zoewave.probase.core.model.ritual.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 

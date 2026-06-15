@@ -2,7 +2,7 @@ package com.zoewave.probase.kocolor.db.entity
 
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
 
 @Entity(tableName = "cosmetic_items")
 data class CosmeticItemEntity(
@@ -22,10 +22,11 @@ data class CosmeticItemEntity(
     val shadeName: String? = null,
     val imageUrl: String? = null,
     val notes: String? = null,
+    /** Official manufacturer instructions for use. */
     val instructions: String? = null,
-    val timestamp: Long,
-    
-    // --- Professional Inventory ---
+    val timestamp: Long = System.currentTimeMillis(),
+
+    // --- Professional Inventory & Logistics ---
     val batchCode: String? = null,
     val openedDate: Long? = null,
     val paoMonths: Int? = null,

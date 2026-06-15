@@ -1,7 +1,7 @@
 package com.zoewave.probase.kocolor.db.data
 
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.model.ritual.*
 
 object CosmeticDefaults {
     private const val RES_PREFIX = "android.resource://com.zoewave.probase.kocolor.db/drawable/"

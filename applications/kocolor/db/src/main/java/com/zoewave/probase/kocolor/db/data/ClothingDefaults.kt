@@ -1,7 +1,7 @@
 package com.zoewave.probase.kocolor.db.data
 
 import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
-import com.zoewave.probase.kocolor.model.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingCategory
 
 object ClothingDefaults {
     private const val RES_PREFIX = "android.resource://com.zoewave.probase.kocolor.db/drawable/"
