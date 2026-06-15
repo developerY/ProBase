@@ -4,11 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.features.xr.glass.data.GlassSessionRepository
 import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
-import com.zoewave.probase.kocolor.data.mapper.toEntity
-import com.zoewave.probase.kocolor.data.mapper.toModel
-import com.zoewave.probase.kocolor.db.dao.CosmeticDao
-import com.zoewave.probase.kocolor.db.dao.RoutineDao
-import com.zoewave.probase.kocolor.model.*
+import com.zoewave.probase.core.data.repository.RitualRepository
+import com.zoewave.probase.core.model.ritual.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -17,8 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GlassViewModel @Inject constructor(
-    private val routineDao: RoutineDao,
-    private val cosmeticDao: CosmeticDao,
+    private val ritualRepository: RitualRepository,
     private val aiSessionManager: FirebaseLiveSessionManager,
     private val glassSessionRepository: GlassSessionRepository
 ) : ViewModel() {
@@ -32,7 +28,7 @@ class GlassViewModel @Inject constructor(
             val start = date
             val end = start + 86400000L
             combine(
-                routineDao.getRoutinesForDay(start, end).map { routines -> routines.map { it.toModel() } },
+                ritualRepository.getRoutinesForDay(start, end),
                 glassSessionRepository.requestedRoutineTime
             ) { models, requestedTimeName ->
                 val requestedTime = requestedTimeName?.let { 
@@ -126,14 +122,13 @@ class GlassViewModel @Inject constructor(
                     step.copy(isCompleted = newCompleted)
                 } else step
             }
-            routineDao.updateRoutine(routine.copy(steps = updatedSteps).toEntity())
+            ritualRepository.updateRoutine(routine.copy(steps = updatedSteps))
         }
     }
 
     private fun incrementProductUsage(productId: Long) {
         viewModelScope.launch {
-            cosmeticDao.getCosmeticById(productId).first()?.let { entity ->
-                val model = entity.toModel()
+            ritualRepository.getCosmeticById(productId).first()?.let { model ->
                 val currentAmount = model.amountRemaining
                 val perUse = model.amountPerUse
                 
@@ -141,10 +136,10 @@ class GlassViewModel @Inject constructor(
                     (currentAmount - perUse).coerceAtLeast(0.0)
                 } else currentAmount
                 
-                cosmeticDao.updateCosmetic(model.copy(
+                ritualRepository.updateCosmetic(model.copy(
                     usageCount = model.usageCount + 1,
                     amountRemaining = updatedAmount
-                ).toEntity())
+                ))
             }
         }
     }
