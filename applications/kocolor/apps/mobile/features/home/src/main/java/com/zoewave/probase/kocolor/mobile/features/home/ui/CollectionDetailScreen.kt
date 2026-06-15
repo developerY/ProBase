@@ -49,13 +49,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.mobile.features.home.R
-import com.zoewave.probase.kocolor.model.FashionAdvice
+import com.zoewave.probase.core.model.ritual.FashionAdvice
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.kocolor.model.MakeupSuggestion
-import com.zoewave.probase.kocolor.model.OutfitSuggestion
-import com.zoewave.probase.kocolor.model.SavedAnalysis
-import com.zoewave.probase.kocolor.model.SeasonalType
-import com.zoewave.probase.kocolor.model.Undertone
+import com.zoewave.probase.core.model.ritual.MakeupSuggestion
+import com.zoewave.probase.core.model.ritual.OutfitSuggestion
+import com.zoewave.probase.core.model.ritual.SavedAnalysis
+import com.zoewave.probase.core.model.ritual.SeasonalType
+import com.zoewave.probase.core.model.ritual.Undertone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

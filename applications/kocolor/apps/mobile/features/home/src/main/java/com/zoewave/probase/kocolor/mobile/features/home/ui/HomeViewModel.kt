@@ -21,11 +21,11 @@ import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
 import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
-import com.zoewave.probase.kocolor.model.BeautyRoutine
-import com.zoewave.probase.kocolor.model.ClothingItem
-import com.zoewave.probase.kocolor.model.CosmeticItem
-import com.zoewave.probase.kocolor.model.FashionProfile
-import com.zoewave.probase.kocolor.model.RoutineTime
+import com.zoewave.probase.core.model.ritual.BeautyRoutine
+import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.FashionProfile
+import com.zoewave.probase.core.model.ritual.RoutineTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,7 +71,7 @@ data class HomeUiState(
     val locationName: String? = null,
     val isLocationFallback: Boolean = false,
     val headerBackgroundUrl: String? = null,
-    val savedSuggestions: List<com.zoewave.probase.kocolor.model.SavedAnalysis> = emptyList()
+    val savedSuggestions: List<com.zoewave.probase.core.model.ritual.SavedAnalysis> = emptyList()
 )
 
 sealed class HomeEvent {
@@ -201,7 +201,7 @@ class HomeViewModel @Inject constructor(
         val headerBg = array[7] as String?
         val healthInfo = array[8] as Pair<Boolean, Triple<Float?, String?, Double>>
         val (hasPerms, healthData) = healthInfo
-        val savedSuggestions = array[9] as List<com.zoewave.probase.kocolor.model.SavedAnalysis>
+        val savedSuggestions = array[9] as List<com.zoewave.probase.core.model.ritual.SavedAnalysis>
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
