@@ -40,12 +40,13 @@ fun RoutineEditorScreen(
     val routine = state.activeEditRoutine ?: return
     var editingStepId by remember { mutableStateOf(initialStepId) }
     
-    var newStepDraft by remember { 
+    val newRitualStageTitle = stringResource(R.string.applications_kocolor_features_routines_new_ritual_stage)
+    var newStepDraft by remember(newRitualStageTitle) { 
         mutableStateOf(
             if (initialStepId == "new_step") {
                 RoutineStep(
                     id = java.util.UUID.randomUUID().toString(),
-                    title = "New Ritual Stage",
+                    title = newRitualStageTitle,
                     layeringOrder = routine.steps.size
                 )
             } else null
@@ -67,11 +68,11 @@ fun RoutineEditorScreen(
                 title = { 
                     Text(
                         text = when (selectionStage) {
-                            ProductSelectionStage.HeroPage -> if (editingStepId == null) "Curate Ritual" else "Ritual Knowledge"
-                            ProductSelectionStage.MainForm -> if (newStepDraft != null) "New Stage" else "Edit Stage"
-                            ProductSelectionStage.Macro -> "Select Category"
-                            ProductSelectionStage.Micro -> "Select Type"
-                            ProductSelectionStage.Item -> "Select Product"
+                            ProductSelectionStage.HeroPage -> if (editingStepId == null) stringResource(R.string.applications_kocolor_features_routines_curate_ritual) else stringResource(R.string.applications_kocolor_features_routines_ritual_knowledge)
+                            ProductSelectionStage.MainForm -> if (newStepDraft != null) stringResource(R.string.applications_kocolor_features_routines_new_stage) else stringResource(R.string.applications_kocolor_features_routines_edit_stage)
+                            ProductSelectionStage.Macro -> stringResource(R.string.applications_kocolor_features_routines_select_category)
+                            ProductSelectionStage.Micro -> stringResource(R.string.applications_kocolor_features_routines_select_type)
+                            ProductSelectionStage.Item -> stringResource(R.string.applications_kocolor_features_routines_select_product)
                         },
                         style = MaterialTheme.typography.titleLarge,
                         fontFamily = FontFamily.Serif
@@ -109,7 +110,11 @@ fun RoutineEditorScreen(
             if (editingStepId == null && newStepDraft == null) {
                 LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     items(routine.steps) { step ->
-                        StepSummaryRow(uiState = step, onEvent = { editingStepId = step.id; selectionStage = ProductSelectionStage.HeroPage })
+                        StepSummaryRow(
+                            uiState = step, 
+                            onEvent = { editingStepId = step.id; selectionStage = ProductSelectionStage.HeroPage },
+                            navTo = {}
+                        )
                     }
                 }
             } else if (activeStep != null) {
@@ -119,23 +124,42 @@ fun RoutineEditorScreen(
                         onEvent = onEvent,
                         navTo = navTo
                     )
-                    ProductSelectionStage.MainForm -> EditStepForm(uiState = activeStep to state.allProducts, onEvent = { event ->
-                        when (event) {
-                            "product" -> selectionStage = ProductSelectionStage.Macro
-                            "remove" -> { if (newStepDraft != null) onBack() else { onEvent(RoutinesEvent.RemoveStep(routine.id, activeStep.id)); editingStepId = null } }
-                        }
-                    })
-                    ProductSelectionStage.Macro -> MacroSelectionPage(onEvent = { macro -> selectedMacro = macro; selectionStage = ProductSelectionStage.Micro })
-                    ProductSelectionStage.Micro -> MicroSelectionPage(macro = selectedMacro!!, onEvent = { micro -> selectedMicro = micro; selectionStage = ProductSelectionStage.Item })
-                    ProductSelectionStage.Item -> ItemSelectionPage(uiState = Triple(state.allProducts.filter { it.microCategory == selectedMicro }, activeStep.productIds, { productId: Long ->
-                        if (newStepDraft != null) {
-                            val newIds = if (newStepDraft!!.productIds.contains(productId)) newStepDraft!!.productIds - productId else newStepDraft!!.productIds + productId
-                            newStepDraft = newStepDraft!!.copy(productIds = newIds)
-                        } else {
-                            onEvent(RoutinesEvent.LinkProduct(routine.id, activeStep.id, productId))
-                        }
-                        selectionStage = ProductSelectionStage.MainForm
-                    }))
+                    ProductSelectionStage.MainForm -> EditStepForm(
+                        uiState = EditStepFormUiState(activeStep, state.allProducts), 
+                        onEvent = { event ->
+                            when (event) {
+                                "product" -> selectionStage = ProductSelectionStage.Macro
+                                "remove" -> { if (newStepDraft != null) onBack() else { onEvent(RoutinesEvent.RemoveStep(routine.id, activeStep.id)); editingStepId = null } }
+                            }
+                        },
+                        navTo = {}
+                    )
+                    ProductSelectionStage.Macro -> MacroSelectionPage(
+                        uiState = Unit,
+                        onEvent = { macro -> selectedMacro = macro; selectionStage = ProductSelectionStage.Micro },
+                        navTo = {}
+                    )
+                    ProductSelectionStage.Micro -> MicroSelectionPage(
+                        uiState = MicroSelectionUiState(selectedMacro!!), 
+                        onEvent = { micro -> selectedMicro = micro; selectionStage = ProductSelectionStage.Item },
+                        navTo = {}
+                    )
+                    ProductSelectionStage.Item -> ItemSelectionPage(
+                        uiState = ItemSelectionUiState(
+                            items = state.allProducts.filter { it.microCategory == selectedMicro }, 
+                            selectedIds = activeStep.productIds
+                        ),
+                        onEvent = { productId ->
+                            if (newStepDraft != null) {
+                                val newIds = if (newStepDraft!!.productIds.contains(productId)) newStepDraft!!.productIds - productId else newStepDraft!!.productIds + productId
+                                newStepDraft = newStepDraft!!.copy(productIds = newIds)
+                            } else {
+                                onEvent(RoutinesEvent.LinkProduct(routine.id, activeStep.id, productId))
+                            }
+                            selectionStage = ProductSelectionStage.MainForm
+                        },
+                        navTo = {}
+                    )
                 }
             }
         }

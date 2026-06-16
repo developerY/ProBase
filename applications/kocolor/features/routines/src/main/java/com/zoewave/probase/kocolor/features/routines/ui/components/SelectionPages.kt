@@ -23,43 +23,89 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
-fun MacroSelectionPage(onEvent: (MacroCategory) -> Unit) {
+fun MacroSelectionPage(
+    uiState: Unit,
+    onEvent: (MacroCategory) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(MacroCategory.entries) { macro ->
-            SelectionRow(text = macro.displayName, onClick = { onEvent(macro) })
+            SelectionRow(
+                uiState = macro.displayName, 
+                onEvent = { onEvent(macro) },
+                navTo = {}
+            )
         }
     }
 }
 
+data class MicroSelectionUiState(val macro: MacroCategory)
+
 @Composable
-fun MicroSelectionPage(macro: MacroCategory, onEvent: (MicroCategory) -> Unit) {
+fun MicroSelectionPage(
+    uiState: MicroSelectionUiState,
+    onEvent: (MicroCategory) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    val macro = uiState.macro
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(MicroCategory.entries.filter { it.macro == macro }) { micro ->
-            SelectionRow(text = micro.displayName, onClick = { onEvent(micro) })
+            SelectionRow(
+                uiState = micro.displayName, 
+                onEvent = { onEvent(micro) },
+                navTo = {}
+            )
         }
     }
 }
 
 @Composable
-fun SelectionRow(text: String, onClick: () -> Unit) {
-    Surface(onClick = onClick, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))) {
+fun SelectionRow(
+    uiState: String, 
+    onEvent: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    Surface(
+        onClick = onEvent, 
+        modifier = Modifier.fillMaxWidth(), 
+        shape = RoundedCornerShape(16.dp), 
+        color = MaterialTheme.colorScheme.surface, 
+        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+    ) {
         Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(text = text, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(text = uiState, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(Modifier.weight(1f))
             Icon(Icons.Default.ChevronRight, null, modifier = Modifier.alpha(0.3f))
         }
     }
 }
 
+data class ItemSelectionUiState(
+    val items: List<CosmeticItem>,
+    val selectedIds: List<Long>
+)
+
 @Composable
-fun ItemSelectionPage(uiState: Triple<List<CosmeticItem>, List<Long>, (Long) -> Unit>) {
-    val (products, selectedIds, onItemClick) = uiState
+fun ItemSelectionPage(
+    uiState: ItemSelectionUiState,
+    onEvent: (Long) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    val products = uiState.items
+    val selectedIds = uiState.selectedIds
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(products) { product ->
             val isSelected = selectedIds.contains(product.id)
-            Surface(onClick = { onItemClick(product.id) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else Color.Black.copy(alpha = 0.05f))) {
+            Surface(
+                onClick = { onEvent(product.id) }, 
+                modifier = Modifier.fillMaxWidth(), 
+                shape = RoundedCornerShape(16.dp), 
+                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface, 
+                border = BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else Color.Black.copy(alpha = 0.05f))
+            ) {
                 Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(modifier = Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
                         if (product.imageUrl != null) AsyncImage(model = product.imageUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)

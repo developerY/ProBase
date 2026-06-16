@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,14 +24,21 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.features.stitch.R
 import com.zoewave.probase.kocolor.features.stitch.ui.PickingTarget
 import com.zoewave.probase.kocolor.features.stitch.ui.StitchUiState
+import com.zoewave.probase.kocolor.model.KoColorRoute
+
+data class SectionHeaderUiState(val title: String, val icon: ImageVector)
 
 @Composable
-fun SectionHeader(title: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+fun SectionHeader(
+    uiState: SectionHeaderUiState,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+        Icon(uiState.icon, null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(12.dp))
         Text(
-            text = title,
+            text = uiState.title,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Black,
             letterSpacing = 2.sp,
@@ -39,20 +47,26 @@ fun SectionHeader(title: String, icon: androidx.compose.ui.graphics.vector.Image
     }
 }
 
+data class StitchItemRowUiState(
+    val title: String,
+    val category: String,
+    val imageUrl: String?,
+    val isOwned: Boolean,
+    val modifier: Modifier = Modifier
+)
+
 @Composable
 fun StitchItemRow(
-    title: String,
-    category: String,
-    imageUrl: String?,
-    isOwned: Boolean,
+    uiState: StitchItemRowUiState,
     onPickClick: () -> Unit,
-    onRemoveClick: () -> Unit
+    onRemoveClick: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        modifier = uiState.modifier.fillMaxWidth().padding(vertical = 4.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = if (isOwned) Color.White else Color(0xFFF5F5F5)),
-        border = if (isOwned) BorderStroke(1.dp, Color(0xFFEEEEEE)) else null
+        colors = CardDefaults.cardColors(containerColor = if (uiState.isOwned) Color.White else Color(0xFFF5F5F5)),
+        border = if (uiState.isOwned) BorderStroke(1.dp, Color(0xFFEEEEEE)) else null
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -63,17 +77,17 @@ fun StitchItemRow(
                 shape = RoundedCornerShape(8.dp),
                 color = Color.LightGray.copy(alpha = 0.2f)
             ) {
-                if (imageUrl != null) {
-                    AsyncImage(model = imageUrl, contentDescription = null, contentScale = ContentScale.Crop)
+                if (uiState.imageUrl != null) {
+                    AsyncImage(model = uiState.imageUrl, contentDescription = null, contentScale = ContentScale.Crop)
                 }
             }
             
             Spacer(Modifier.width(16.dp))
             
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = category.uppercase(), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                Text(text = title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                if (!isOwned) {
+                Text(text = uiState.category.uppercase(), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                Text(text = uiState.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                if (!uiState.isOwned) {
                     Text(stringResource(R.string.applications_kocolor_features_stitch_suggested_piece), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                 }
             }
@@ -116,11 +130,19 @@ fun StitchItemPickerOverlay(
             ) {
                 if (isMakeup) {
                     items(uiState.allCosmetics) { item ->
-                        PickerItemRow(item.name, item.brand, item.imageUrl, item.microCategory.displayName) { onItemSelected(item) }
+                        PickerItemRow(
+                            uiState = PickerItemUiState(item.name, item.brand, item.imageUrl, item.microCategory.displayName),
+                            onEvent = { onItemSelected(item) },
+                            navTo = {}
+                        )
                     }
                 } else {
                     items(uiState.allWardrobe) { item ->
-                        PickerItemRow(item.name, item.brand ?: stringResource(R.string.applications_kocolor_features_stitch_archive), item.imageUrl, item.category.name) { onItemSelected(item) }
+                        PickerItemRow(
+                            uiState = PickerItemUiState(item.name, item.brand ?: stringResource(R.string.applications_kocolor_features_stitch_archive), item.imageUrl, item.category.name),
+                            onEvent = { onItemSelected(item) },
+                            navTo = {}
+                        )
                     }
                 }
             }
@@ -128,20 +150,26 @@ fun StitchItemPickerOverlay(
     }
 }
 
+data class PickerItemUiState(val title: String, val subtitle: String, val imageUrl: String?, val cat: String)
+
 @Composable
-fun PickerItemRow(title: String, subtitle: String, imageUrl: String?, cat: String, onClick: () -> Unit) {
+fun PickerItemRow(
+    uiState: PickerItemUiState, 
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(8.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = { onEvent(Unit) }).padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(modifier = Modifier.size(48.dp), shape = RoundedCornerShape(8.dp), color = Color(0xFFF5F5F5)) {
-            if (imageUrl != null) AsyncImage(model = imageUrl, contentDescription = null, contentScale = ContentScale.Crop)
+            if (uiState.imageUrl != null) AsyncImage(model = uiState.imageUrl, contentDescription = null, contentScale = ContentScale.Crop)
         }
         Spacer(Modifier.width(16.dp))
         Column {
-            Text(text = cat, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-            Text(text = title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-            Text(text = subtitle, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(text = uiState.cat, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+            Text(text = uiState.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+            Text(text = uiState.subtitle, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
     }
 }

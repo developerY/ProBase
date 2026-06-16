@@ -17,4 +17,23 @@
     <string name="applications_kocolor_features_routines_insight_quote">\"Patience is the foundation of every lasting ritual.\"</string>
     <string name="applications_kocolor_features_routines_view_progress">VIEW PROGRESS</string>
     <string name="applications_kocolor_features_routines_save">Save</string>
+    <string name="applications_kocolor_features_routines_meals_ritual">Meals Ritual</string>
+    <string name="applications_kocolor_features_routines_bio_sync_ritual">BIO-SYNC RITUAL</string>
+    <string name="applications_kocolor_features_routines_meals_desc">Nourish your metabolism with precise biochemical timing.</string>
+    <string name="applications_kocolor_features_routines_ritual_label">RITUAL</string>
+    <string name="applications_kocolor_features_routines_remaining_format_percent">%1$d%% Remaining</string>
+    <string name="applications_kocolor_features_routines_missing_consumption">Missing consumption data</string>
+    <string name="applications_kocolor_features_routines_scientific_info">Scientific Info</string>
+    <string name="applications_kocolor_features_routines_curate_ritual">Curate Ritual</string>
+    <string name="applications_kocolor_features_routines_ritual_knowledge">Ritual Knowledge</string>
+    <string name="applications_kocolor_features_routines_new_stage">New Stage</string>
+    <string name="applications_kocolor_features_routines_edit_stage">Edit Stage</string>
+    <string name="applications_kocolor_features_routines_select_category">Select Category</string>
+    <string name="applications_kocolor_features_routines_select_type">Select Type</string>
+    <string name="applications_kocolor_features_routines_select_product">Select Product</string>
+    <string name="applications_kocolor_features_routines_new_ritual_stage">New Ritual Stage</string>
+    <string name="applications_kocolor_features_routines_ritual_stage_format">Ritual Stage %1$d</string>
+    <string name="applications_kocolor_features_routines_step_title_label">Step Title</string>
+    <string name="applications_kocolor_features_routines_product_used_label">Product Used</string>
+    <string name="applications_kocolor_features_routines_select_product_placeholder">Select a product...</string>
 </resources>

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -20,28 +21,35 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.kocolor.features.inventory.R
 import com.zoewave.probase.kocolor.features.inventory.ui.CategoryMetadata
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.*
 
+data class SummaryStatUiState(
+    val label: String,
+    val value: String,
+    val icon: ImageVector,
+    val modifier: Modifier = Modifier
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SummaryStatCard(
-    label: String,
-    value: String,
-    icon: ImageVector,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    uiState: SummaryStatUiState,
+    onEvent: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val isValue = label.contains("VALUE")
+    val isValue = uiState.label.contains("VALUE")
     val charcoal = Color(0xFF2C2420)
     
     val valueBrush = if (isValue) {
@@ -69,11 +77,11 @@ fun SummaryStatCard(
     }
 
     Card(
-        modifier = modifier.aspectRatio(0.85f),
+        modifier = uiState.modifier.aspectRatio(0.85f),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
-        onClick = onClick,
+        onClick = onEvent,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize().background(glassBg)) {
@@ -90,7 +98,7 @@ fun SummaryStatCard(
                     horizontalArrangement = Arrangement.Start
                 ) {
                     Icon(
-                        imageVector = icon,
+                        imageVector = uiState.icon,
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                         tint = charcoal.copy(alpha = 0.4f)
@@ -101,9 +109,9 @@ fun SummaryStatCard(
 
                 if (valueBrush != null) {
                     Text(
-                        text = value,
+                        text = uiState.value,
                         style = MaterialTheme.typography.displayLarge.copy(
-                            fontSize = if (value.length > 6) 38.sp else 64.sp,
+                            fontSize = if (uiState.value.length > 6) 38.sp else 64.sp,
                             fontFamily = FontFamily.Serif,
                             brush = valueBrush
                         ),
@@ -112,7 +120,7 @@ fun SummaryStatCard(
                     )
                 } else {
                     Text(
-                        text = value,
+                        text = uiState.value,
                         style = MaterialTheme.typography.displayLarge.copy(
                             fontSize = 64.sp,
                             fontFamily = FontFamily.Serif
@@ -123,7 +131,7 @@ fun SummaryStatCard(
                 }
                 
                 Text(
-                    text = label,
+                    text = uiState.label,
                     style = MaterialTheme.typography.labelSmall.copy(
                         letterSpacing = 2.sp,
                         fontWeight = FontWeight.Black,
@@ -141,7 +149,7 @@ fun SummaryStatCard(
                 contentAlignment = Alignment.Center
             ) {
                 Surface(
-                    color = Color.White.copy(alpha = if (isValue) 0.12f else 0.45f), // Frosted Glass Effect
+                    color = Color.White.copy(alpha = if (isValue) 0.12f else 0.45f), 
                     border = BorderStroke(0.5.dp, actionContentColor.copy(alpha = 0.2f)),
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -171,39 +179,62 @@ fun SummaryStatCard(
 }
 
 @Composable
-fun WardrobeTaxonomyDialog(onDismiss: () -> Unit) {
+fun WardrobeTaxonomyDialog(
+    uiState: Unit,
+    onEvent: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Wardrobe Architecture", style = MaterialTheme.typography.headlineMedium, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
+        onDismissRequest = onEvent,
+        title = { Text(stringResource(R.string.applications_kocolor_features_inventory_architecture_title), style = MaterialTheme.typography.headlineMedium, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold) },
         text = {
             LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(24.dp)) {
                 item {
                     TaxonomySection(
-                        level = "Level 1",
-                        title = "Archive Verticals",
-                        description = "Body-zone mapping for intuitive archival retrieval.",
-                        items = listOf("Tops" to "Blazers, Shirts, Knitwear.", "Bottoms" to "Trousers, Skirts, Denim.", "Shoes" to "Heels, Flats, Sneakers.", "Accessories" to "Bags, Belts, Jewelry.")
+                        uiState = TaxonomySectionUiState(
+                            level = "Level 1",
+                            title = stringResource(R.string.applications_kocolor_features_inventory_verticals_title),
+                            description = stringResource(R.string.applications_kocolor_features_inventory_verticals_desc),
+                            items = listOf("Tops" to "Blazers, Shirts, Knitwear.", "Bottoms" to "Trousers, Skirts, Denim.", "Shoes" to "Heels, Flats, Sneakers.", "Accessories" to "Bags, Belts, Jewelry.")
+                        ),
+                        onEvent = {},
+                        navTo = {}
                     )
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Understand", fontWeight = FontWeight.Bold) } },
+        confirmButton = { TextButton(onClick = onEvent) { Text("Understand", fontWeight = FontWeight.Bold) } },
         shape = RoundedCornerShape(28.dp),
         containerColor = Color(0xFFF9F6F0)
     )
 }
 
+data class TaxonomySectionUiState(
+    val level: String,
+    val title: String,
+    val description: String,
+    val items: List<Pair<String, String>>,
+    val modifier: Modifier = Modifier
+)
+
 @Composable
-private fun TaxonomySection(level: String, title: String, description: String, items: List<Pair<String, String>>) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+private fun TaxonomySection(
+    uiState: TaxonomySectionUiState,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    Column(
+        modifier = uiState.modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         Column {
-            Text(text = level.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-            Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(text = description, style = MaterialTheme.typography.bodySmall, modifier = Modifier.alpha(0.7f))
+            Text(text = uiState.level.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+            Text(text = uiState.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(text = uiState.description, style = MaterialTheme.typography.bodySmall, modifier = Modifier.alpha(0.7f))
         }
         Surface(color = Color.White.copy(alpha = 0.5f), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items.forEach { (label, detail) ->
+                uiState.items.forEach { (label, detail) ->
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(text = "•", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                         Column {
@@ -217,32 +248,41 @@ private fun TaxonomySection(level: String, title: String, description: String, i
     }
 }
 
+data class AtelierWardrobeUiState(
+    val name: String,
+    val metadata: CategoryMetadata?,
+    val baseColor: Color,
+    val imageModel: Any,
+    val modifier: Modifier = Modifier
+)
+
 @Composable
 fun AtelierWardrobeCard(
-    name: String,
-    metadata: CategoryMetadata?,
-    baseColor: Color,
-    imageModel: Any,
-    navTo: (KoColorRoute) -> Unit,
-    modifier: Modifier = Modifier
+    uiState: AtelierWardrobeUiState,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val name = uiState.name
+    val metadata = uiState.metadata
+    val baseColor = uiState.baseColor
+    val imageModel = uiState.imageModel
+    
     val count = metadata?.itemCount ?: 0
     val totalValue = metadata?.totalValue ?: 0.0
     val leadingBrand = metadata?.leadingBrand
     val averageUsage = metadata?.averageUsage ?: 0.0
     val description = metadata?.description ?: "Strategic curated wardrobe collection."
     
-    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
 
     Card(
         onClick = { navTo(KoColorRoute.WardrobeCategoryCover(categoryName = name)) },
-        modifier = modifier.height(180.dp),
+        modifier = uiState.modifier.height(180.dp),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = baseColor),
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // 1. Background Imagery (Definitive vertical asset)
             AsyncImage(
                 model = imageModel,
                 contentDescription = null,
@@ -250,7 +290,6 @@ fun AtelierWardrobeCard(
                 contentScale = ContentScale.Crop
             )
 
-            // 2. Readability Scrim
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -263,7 +302,6 @@ fun AtelierWardrobeCard(
                     )
             )
 
-            // 3. Data Content
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -285,7 +323,7 @@ fun AtelierWardrobeCard(
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "$count Pieces",
+                                text = stringResource(R.string.applications_kocolor_features_inventory_pieces_format, count),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.alpha(0.8f)
@@ -316,11 +354,10 @@ fun AtelierWardrobeCard(
                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                 )
 
-                // Utility Status Bar
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "Average Utility", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.alpha(0.8f))
-                        Text(text = "${averageUsage.toInt()} Wears", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFF6B705C))
+                        Text(text = stringResource(R.string.applications_kocolor_features_inventory_average_utility), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.alpha(0.8f))
+                        Text(text = stringResource(R.string.applications_kocolor_features_inventory_wears_format_plural, averageUsage.toInt()), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFF6B705C))
                     }
                     
                     val maxWears = 50.0 
@@ -337,7 +374,7 @@ fun AtelierWardrobeCard(
                     
                     if (leadingBrand != null) {
                         Text(
-                            text = "Leading Brand: $leadingBrand",
+                            text = stringResource(R.string.applications_kocolor_features_inventory_leading_brand_label_format, leadingBrand),
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.alpha(0.8f)
@@ -366,7 +403,6 @@ fun RecentClothingCard(uiState: ClothingItem, onEvent: (Unit) -> Unit, navTo: (K
                     contentScale = ContentScale.Crop
                 )
 
-                // Representative Color Badge
                 val itemColor = item.dominantHex?.let { parseColor(it) } 
                     ?: item.colorHex?.let { parseColor(it) } 
                     ?: Color.White
@@ -387,7 +423,6 @@ fun RecentClothingCard(uiState: ClothingItem, onEvent: (Unit) -> Unit, navTo: (K
                 Box(modifier = Modifier.fillMaxSize().background(itemColor))
             }
             
-            // Badge Overlay
             Surface(
                 modifier = Modifier.padding(16.dp).align(Alignment.TopStart),
                 color = Color.White.copy(alpha = 0.9f),
@@ -401,7 +436,6 @@ fun RecentClothingCard(uiState: ClothingItem, onEvent: (Unit) -> Unit, navTo: (K
                 )
             }
 
-            // Scrim
             Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f)), startY = 300f)))
             
             Column(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
