@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_kocolor_apps_mobile_features_color_analysis_history">Color Analysis History</string>
+    <string name="applications_kocolor_apps_mobile_features_color_no_history">No history found. Try analyzing a look!</string>
+    <string name="applications_kocolor_apps_mobile_features_color_analysis_details">Analysis Details</string>
+    <string name="applications_kocolor_apps_mobile_features_color_back">Back</string>
+    <string name="applications_kocolor_apps_mobile_features_color_seasonal_type">Seasonal Type</string>
+    <string name="applications_kocolor_apps_mobile_features_color_undertone">Undertone</string>
+    <string name="applications_kocolor_apps_mobile_features_color_makeup_palette">Perfect Makeup Palette</string>
+    <string name="applications_kocolor_apps_mobile_features_color_makeup_nail_suggestions">Makeup &amp; Nail Suggestions</string>
+    <string name="applications_kocolor_apps_mobile_features_color_experience">Experience</string>
+    <string name="applications_kocolor_apps_mobile_features_color_ai_coordination_notes">AI Coordination Notes</string>
+    <string name="applications_kocolor_apps_mobile_features_color_copy">Copy</string>
+    <string name="applications_kocolor_apps_mobile_features_color_edit">Edit</string>
+    <string name="applications_kocolor_apps_mobile_features_color_delete">Delete</string>
+    <string name="applications_kocolor_apps_mobile_features_color_curated_look">Curated Look</string>
+    <string name="applications_kocolor_apps_mobile_features_color_search">Color Search</string>
+    <string name="applications_kocolor_apps_mobile_features_color_profile">Profile</string>
+    <string name="applications_kocolor_apps_mobile_features_color_recent_palettes">Recent Colors &amp; Seasonal Palettes</string>
+    <string name="applications_kocolor_apps_mobile_features_color_scan_color">Scan Color</string>
+    <string name="applications_kocolor_apps_mobile_features_color_custom_tone">Custom Tone</string>
+    <string name="applications_kocolor_apps_mobile_features_color_hex_format">HEX: %1$s</string>
+    <string name="applications_kocolor_apps_mobile_features_color_rgb_format">RGB: %1$d, %2$d, %3$d</string>
+    <string name="applications_kocolor_apps_mobile_features_color_filters">Filters</string>
+    <string name="applications_kocolor_apps_mobile_features_color_exact_match">Exact Match</string>
+    <string name="applications_kocolor_apps_mobile_features_color_complementary">Complementary Colors</string>
+    <string name="applications_kocolor_apps_mobile_features_color_monochromatic">Monochromatic</string>
+    <string name="applications_kocolor_apps_mobile_features_color_analogous">Analogous</string>
+    <string name="applications_kocolor_apps_mobile_features_color_triadic">Triadic</string>
+    <string name="applications_kocolor_apps_mobile_features_color_cosmetics">Cosmetics</string>
+    <string name="applications_kocolor_apps_mobile_features_color_wardrobe">Wardrobe</string>
+    <string name="applications_kocolor_apps_mobile_features_color_no_matching_cosmetics">No matching cosmetics found.</string>
+    <string name="applications_kocolor_apps_mobile_features_color_no_matching_wardrobe">No matching wardrobe items found.</string>
+    <string name="applications_kocolor_apps_mobile_features_color_choose_custom">Choose Custom Color</string>
+</resources>

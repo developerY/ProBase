@@ -3,21 +3,7 @@ package com.zoewave.probase.kocolor.mobile.features.color.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -33,16 +19,6 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Badge
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -52,16 +28,16 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.FashionAdvice
+import com.zoewave.probase.kocolor.mobile.features.color.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.core.model.ritual.SavedAnalysis
 import com.zoewave.probase.core.model.ritual.SeasonalType
@@ -107,7 +83,7 @@ fun ColorScreen(
             CenterAlignedTopAppBar(
                 title = { 
                     Text(
-                        "Color Analysis History", 
+                        stringResource(R.string.applications_kocolor_apps_mobile_features_color_analysis_history), 
                         fontFamily = FontFamily.Serif, 
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge
@@ -116,7 +92,7 @@ fun ColorScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
-        containerColor = Color(0xFFF9F6F0) // Cream background
+        containerColor = Color(0xFFF9F6F0)
     ) { padding ->
         if (uiState.savedSuggestions.isEmpty()) {
             Box(
@@ -125,7 +101,7 @@ fun ColorScreen(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("No history found. Try analyzing a look!", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_no_history), style = MaterialTheme.typography.bodyLarge)
             }
         } else {
             LazyColumn(
@@ -137,11 +113,16 @@ fun ColorScreen(
             ) {
                 items(uiState.savedSuggestions) { analysis ->
                     ColorHistoryCard(
-                        analysis = analysis,
-                        onClick = { navTo(KoColorRoute.CollectionDetail(analysis.id)) },
-                        onEditClick = { navTo(KoColorRoute.Stitch(analysis.id, isCopy = false)) },
-                        onCopyClick = { navTo(KoColorRoute.Stitch(analysis.id, isCopy = true)) },
-                        onDeleteClick = { onEvent(ColorEvent.DeleteCollection(analysis.id)) }
+                        uiState = ColorHistoryCardUiState(analysis),
+                        onEvent = { event ->
+                            when (event) {
+                                is ColorHistoryEvent.Click -> navTo(KoColorRoute.CollectionDetail(analysis.id))
+                                is ColorHistoryEvent.Edit -> navTo(KoColorRoute.Stitch(analysis.id, isCopy = false))
+                                is ColorHistoryEvent.Copy -> navTo(KoColorRoute.Stitch(analysis.id, isCopy = true))
+                                is ColorHistoryEvent.Delete -> onEvent(ColorEvent.DeleteCollection(analysis.id))
+                            }
+                        },
+                        navTo = navTo
                     )
                 }
             }
@@ -149,27 +130,34 @@ fun ColorScreen(
     }
 }
 
+data class ColorHistoryCardUiState(val analysis: SavedAnalysis)
+
+sealed class ColorHistoryEvent {
+    data object Click : ColorHistoryEvent()
+    data object Edit : ColorHistoryEvent()
+    data object Copy : ColorHistoryEvent()
+    data object Delete : ColorHistoryEvent()
+}
+
 @Composable
 private fun ColorHistoryCard(
-    analysis: SavedAnalysis,
-    onClick: () -> Unit,
-    onEditClick: () -> Unit,
-    onCopyClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    uiState: ColorHistoryCardUiState,
+    onEvent: (ColorHistoryEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val analysis = uiState.analysis
     val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy - HH:mm", Locale.getDefault()) }
     val dateStr = dateFormat.format(Date(analysis.timestamp))
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { onEvent(ColorHistoryEvent.Click) },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            // 1. Top Bar: Date, Season and Actions
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -198,21 +186,20 @@ private fun ColorHistoryCard(
                 }
                 
                 Row {
-                    IconButton(onClick = onCopyClick) {
-                        Icon(Icons.Default.ContentCopy, "Copy", modifier = Modifier.size(18.dp), tint = Color.Gray)
+                    IconButton(onClick = { onEvent(ColorHistoryEvent.Copy) }) {
+                        Icon(Icons.Default.ContentCopy, stringResource(R.string.applications_kocolor_apps_mobile_features_color_copy), modifier = Modifier.size(18.dp), tint = Color.Gray)
                     }
-                    IconButton(onClick = onEditClick) {
-                        Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(18.dp), tint = Color.Gray)
+                    IconButton(onClick = { onEvent(ColorHistoryEvent.Edit) }) {
+                        Icon(Icons.Default.Edit, stringResource(R.string.applications_kocolor_apps_mobile_features_color_edit), modifier = Modifier.size(18.dp), tint = Color.Gray)
                     }
-                    IconButton(onClick = onDeleteClick) {
-                        Icon(Icons.Default.DeleteOutline, "Delete", modifier = Modifier.size(18.dp), tint = Color.Gray)
+                    IconButton(onClick = { onEvent(ColorHistoryEvent.Delete) }) {
+                        Icon(Icons.Default.DeleteOutline, stringResource(R.string.applications_kocolor_apps_mobile_features_color_delete), modifier = Modifier.size(18.dp), tint = Color.Gray)
                     }
                 }
             }
 
             Spacer(Modifier.height(16.dp))
 
-            // 2. Middle Content: Images + Summary
             Row(modifier = Modifier.fillMaxWidth()) {
                 Row(modifier = Modifier.weight(0.45f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     analysis.advice.faceUri?.let {
@@ -241,7 +228,7 @@ private fun ColorHistoryCard(
 
                 Column(modifier = Modifier.weight(0.55f)) {
                     Text(
-                        text = analysis.advice.title ?: "Curated Look",
+                        text = analysis.advice.title ?: stringResource(R.string.applications_kocolor_apps_mobile_features_color_curated_look),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
@@ -259,7 +246,6 @@ private fun ColorHistoryCard(
 
             Spacer(Modifier.height(16.dp))
 
-            // 3. Palette Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -293,10 +279,10 @@ fun ColorDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Analysis Details") },
+                title = { Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_analysis_details)) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_color_back))
                     }
                 }
             )
@@ -348,12 +334,12 @@ fun ColorDetailScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("Seasonal Type", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_seasonal_type), style = MaterialTheme.typography.labelMedium)
                         Text(analysis.advice.seasonalType.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     }
                     VerticalDivider(modifier = Modifier.height(40.dp).width(1.dp))
                     Column(horizontalAlignment = Alignment.End) {
-                        Text("Undertone", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_undertone), style = MaterialTheme.typography.labelMedium)
                         Text(analysis.advice.undertone.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -362,7 +348,7 @@ fun ColorDetailScreen(
             Spacer(modifier = Modifier.height(32.dp))
             
             Text(
-                text = "Perfect Makeup Palette",
+                text = stringResource(R.string.applications_kocolor_apps_mobile_features_color_makeup_palette),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.align(Alignment.Start)
@@ -372,13 +358,13 @@ fun ColorDetailScreen(
             
             MakeupPaletteGraphic(
                 uiState = analysis.advice.recommendedPalette,
-                onEvent = onEvent,
+                onEvent = {},
                 navTo = navTo
             )
             
             Spacer(modifier = Modifier.height(32.dp))
             Text(
-                text = "Makeup & Nail Suggestions",
+                text = stringResource(R.string.applications_kocolor_apps_mobile_features_color_makeup_nail_suggestions),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.align(Alignment.Start)
@@ -413,7 +399,7 @@ fun ColorDetailScreen(
                             ) {
                                 Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Experience", style = MaterialTheme.typography.labelSmall)
+                                Text(stringResource(R.string.applications_kocolor_apps_mobile_features_color_experience), style = MaterialTheme.typography.labelSmall)
                             }
                         }
                     }
@@ -422,7 +408,7 @@ fun ColorDetailScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
             Text(
-                text = "AI Coordination Notes",
+                text = stringResource(R.string.applications_kocolor_apps_mobile_features_color_ai_coordination_notes),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.align(Alignment.Start)
@@ -445,7 +431,7 @@ fun ColorDetailScreen(
 @Composable
 fun MakeupPaletteGraphic(
     uiState: List<String>,
-    onEvent: (ColorEvent) -> Unit,
+    onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val paletteBackground = Brush.linearGradient(
@@ -470,7 +456,7 @@ fun MakeupPaletteGraphic(
                 items(uiState) { hex ->
                     MakeupPan(
                         uiState = hex,
-                        onEvent = onEvent,
+                        onEvent = {},
                         navTo = navTo
                     )
                 }
@@ -482,7 +468,7 @@ fun MakeupPaletteGraphic(
 @Composable
 fun MakeupPan(
     uiState: String,
-    onEvent: (ColorEvent) -> Unit,
+    onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val color = try {
@@ -542,22 +528,22 @@ private fun MakeupPaletteGraphicPreview() {
 private fun ColorHistoryCardPreview() {
     MaterialTheme {
         ColorHistoryCard(
-            analysis = SavedAnalysis(
-                id = 1,
-                timestamp = System.currentTimeMillis(),
-                advice = FashionAdvice(
-                    summary = "Your features—cool-toned skin, dark hair, and clear eyes—align perfectly with a Deep Winter palette.",
-                    seasonalType = SeasonalType.WINTER,
-                    undertone = Undertone.COOL,
-                    makeupSuggestions = emptyList(),
-                    outfitSuggestions = emptyList(),
-                    recommendedPalette = listOf("#0047AB", "#FFFFFF", "#708090", "#C77398", "#3D2B1F")
+            uiState = ColorHistoryCardUiState(
+                SavedAnalysis(
+                    id = 1,
+                    timestamp = System.currentTimeMillis(),
+                    advice = FashionAdvice(
+                        summary = "Your features—cool-toned skin, dark hair, and clear eyes—align perfectly with a Deep Winter palette.",
+                        seasonalType = SeasonalType.WINTER,
+                        undertone = Undertone.COOL,
+                        makeupSuggestions = emptyList(),
+                        outfitSuggestions = emptyList(),
+                        recommendedPalette = listOf("#0047AB", "#FFFFFF", "#708090", "#C77398", "#3D2B1F")
+                    )
                 )
             ),
-            onClick = {},
-            onEditClick = {},
-            onCopyClick = {},
-            onDeleteClick = {}
+            onEvent = {},
+            navTo = {}
         )
     }
 }
