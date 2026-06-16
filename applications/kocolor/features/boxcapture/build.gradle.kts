@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
     implementation(project(":core:data"))
+    implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:data"))
     implementation(project(":features:ai:configuration"))
 

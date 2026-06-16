@@ -44,22 +44,28 @@ import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiStat
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureStep
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+sealed class BoxCaptureEvent {
+    data class Capture(val uri: String) : BoxCaptureEvent()
+    data object Retry : BoxCaptureEvent()
+    data object Dismiss : BoxCaptureEvent()
+    data class Success(val item: CosmeticItem) : BoxCaptureEvent()
+}
+
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun BoxCaptureUiRoute(
-    viewModel: BoxCaptureViewModel,
-    onSuccess: (CosmeticItem) -> Unit,
-    onDismiss: () -> Unit
+    uiState: BoxCaptureUiState,
+    onEvent: (BoxCaptureEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
-
     var hasRequestedPermission by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -71,7 +77,7 @@ fun BoxCaptureUiRoute(
 
     LaunchedEffect(uiState) {
         if (uiState is BoxCaptureUiState.Success) {
-            onSuccess((uiState as BoxCaptureUiState.Success).item)
+            onEvent(BoxCaptureEvent.Success(uiState.item))
         }
     }
 
@@ -79,23 +85,29 @@ fun BoxCaptureUiRoute(
         cameraPermissionState.status.isGranted -> {
             BoxCaptureScreen(
                 uiState = uiState,
-                onCapture = viewModel::onPhotoCaptured,
-                onRetry = viewModel::reset,
-                onDismiss = onDismiss
+                onEvent = onEvent,
+                navTo = navTo
             )
         }
         hasRequestedPermission && !cameraPermissionState.status.isGranted -> {
-            PermissionDeniedView(onDismiss = onDismiss)
+            PermissionDeniedView(
+                uiState = Unit,
+                onEvent = { onEvent(BoxCaptureEvent.Dismiss) },
+                navTo = {}
+            )
         }
         else -> {
-            // Loading or Waiting for dialog
             Box(Modifier.fillMaxSize().background(Color(0xFF0f172a)))
         }
     }
 }
 
 @Composable
-private fun PermissionDeniedView(onDismiss: () -> Unit) {
+private fun PermissionDeniedView(
+    uiState: Unit,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -125,7 +137,7 @@ private fun PermissionDeniedView(onDismiss: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(32.dp))
         Button(
-            onClick = onDismiss,
+            onClick = { onEvent(Unit) },
             colors = ButtonDefaults.buttonColors(containerColor = Color.White)
         ) {
             Text(stringResource(R.string.applications_kocolor_features_boxcapture_go_back), color = Color.Black)
@@ -136,9 +148,8 @@ private fun PermissionDeniedView(onDismiss: () -> Unit) {
 @Composable
 internal fun BoxCaptureScreen(
     uiState: BoxCaptureUiState,
-    onCapture: (String) -> Unit,
-    onRetry: () -> Unit,
-    onDismiss: () -> Unit
+    onEvent: (BoxCaptureEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -148,34 +159,48 @@ internal fun BoxCaptureScreen(
             when (uiState) {
                 is BoxCaptureUiState.Idle -> {
                     CameraView(
-                        step = uiState.currentStep,
-                        capturedUris = uiState.capturedUris,
-                        mode = uiState.mode,
-                        onCapture = onCapture,
-                        onDismiss = onDismiss
+                        uiState = CameraViewUiState(
+                            step = uiState.currentStep,
+                            capturedUris = uiState.capturedUris,
+                            mode = uiState.mode
+                        ),
+                        onEvent = onEvent,
+                        navTo = navTo
                     )
                 }
                 is BoxCaptureUiState.Analyzing -> {
-                    AnalysisView(progress = uiState.progress)
+                    AnalysisView(
+                        uiState = AnalysisViewUiState(uiState.progress),
+                        onEvent = {},
+                        navTo = {}
+                    )
                 }
                 is BoxCaptureUiState.Error -> {
-                    ErrorView(message = uiState.message, onRetry = onRetry)
+                    ErrorView(
+                        uiState = ErrorViewUiState(uiState.message),
+                        onEvent = { onEvent(BoxCaptureEvent.Retry) },
+                        navTo = {}
+                    )
                 }
                 is BoxCaptureUiState.Success -> {
-                    // Handled by Route/LaunchedEffect
+                    // Handled by Route
                 }
             }
         }
     }
 }
 
+data class CameraViewUiState(
+    val step: CaptureStep,
+    val capturedUris: List<String>,
+    val mode: CaptureMode
+)
+
 @Composable
 private fun CameraView(
-    step: CaptureStep,
-    capturedUris: List<String>,
-    mode: CaptureMode,
-    onCapture: (String) -> Unit,
-    onDismiss: () -> Unit
+    uiState: CameraViewUiState,
+    onEvent: (BoxCaptureEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -203,7 +228,7 @@ private fun CameraView(
         }
     }
 
-    val totalSteps = CaptureStep.getStepsForMode(mode).size
+    val totalSteps = CaptureStep.getStepsForMode(uiState.mode).size
 
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
@@ -212,7 +237,6 @@ private fun CameraView(
                 CameraXViewfinder(surfaceRequest = sr, modifier = Modifier.fillMaxSize())
             }
 
-            // Top Overlay
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -222,20 +246,20 @@ private fun CameraView(
             ) {
                 Column {
                     Text(
-                        text = stringResource(R.string.applications_kocolor_features_boxcapture_step_format, CaptureStep.getStepsForMode(mode).indexOf(step) + 1, totalSteps),
+                        text = stringResource(R.string.applications_kocolor_features_boxcapture_step_format, CaptureStep.getStepsForMode(uiState.mode).indexOf(uiState.step) + 1, totalSteps),
                         color = Color.White,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = step.getLabel(mode).uppercase(),
+                        text = uiState.step.getLabel(uiState.mode).uppercase(),
                         color = Color(0xFF22d3ee),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 IconButton(
-                    onClick = onDismiss,
+                    onClick = { onEvent(BoxCaptureEvent.Dismiss) },
                     modifier = Modifier.background(Color(0x33000000), CircleShape)
                 ) {
                     Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_kocolor_features_boxcapture_close), tint = Color.White)
@@ -243,7 +267,6 @@ private fun CameraView(
             }
         }
 
-        // Bottom Controls
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -256,7 +279,7 @@ private fun CameraView(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
-                items(capturedUris) { uri ->
+                items(uiState.capturedUris) { uri ->
                     AsyncImage(
                         model = uri,
                         contentDescription = null,
@@ -278,7 +301,7 @@ private fun CameraView(
                             ContextCompat.getMainExecutor(context),
                             object : ImageCapture.OnImageSavedCallback {
                                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                                    onCapture(Uri.fromFile(file).toString())
+                                    onEvent(BoxCaptureEvent.Capture(Uri.fromFile(file).toString()))
                                 }
                                 override fun onError(exception: ImageCaptureException) {
                                     Log.e("BoxCapture", "Capture failed", exception)
@@ -296,15 +319,21 @@ private fun CameraView(
             }
             
             Spacer(modifier = Modifier.height(12.dp))
-            val captureLabel = if (mode == CaptureMode.BOX) stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_box) else stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_product)
+            val captureLabel = if (uiState.mode == CaptureMode.BOX) stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_box) else stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_product)
             Text(captureLabel, color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.labelSmall)
         }
     }
 }
 
+data class AnalysisViewUiState(val progress: String)
+
 @Composable
-private fun AnalysisView(progress: String) {
-    val isLocal = progress.contains("Local")
+private fun AnalysisView(
+    uiState: AnalysisViewUiState,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    val isLocal = uiState.progress.contains("Local")
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF0f172a)),
         verticalArrangement = Arrangement.Center,
@@ -325,7 +354,7 @@ private fun AnalysisView(progress: String) {
             style = MaterialTheme.typography.titleMedium, 
             fontWeight = FontWeight.Bold
         )
-        Text(progress, color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.bodySmall)
+        Text(uiState.progress, color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.bodySmall)
         
         if (isLocal) {
             Spacer(modifier = Modifier.height(32.dp))
@@ -346,8 +375,14 @@ private fun AnalysisView(progress: String) {
     }
 }
 
+data class ErrorViewUiState(val message: String)
+
 @Composable
-private fun ErrorView(message: String, onRetry: () -> Unit) {
+private fun ErrorView(
+    uiState: ErrorViewUiState,
+    onEvent: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF0f172a)).padding(32.dp),
         verticalArrangement = Arrangement.Center,
@@ -355,9 +390,9 @@ private fun ErrorView(message: String, onRetry: () -> Unit) {
     ) {
         Text(stringResource(R.string.applications_kocolor_features_boxcapture_analysis_failed), color = Color(0xFFf472b6), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(16.dp))
-        Text(message, color = Color.White, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        Text(uiState.message, color = Color.White, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         Spacer(modifier = Modifier.height(32.dp))
-        Button(onClick = onRetry, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFf472b6))) {
+        Button(onClick = onEvent, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFf472b6))) {
             Text(stringResource(R.string.applications_kocolor_features_boxcapture_try_again), color = Color.White)
         }
     }

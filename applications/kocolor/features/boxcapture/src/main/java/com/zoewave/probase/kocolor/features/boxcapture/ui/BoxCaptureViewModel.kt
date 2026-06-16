@@ -60,12 +60,21 @@ class BoxCaptureViewModel @Inject constructor(
 
     private val capturedUris = mutableListOf<String>()
 
+    fun onEvent(event: BoxCaptureEvent) {
+        when (event) {
+            is BoxCaptureEvent.Capture -> onPhotoCaptured(event.uri)
+            BoxCaptureEvent.Retry -> reset()
+            BoxCaptureEvent.Dismiss -> { /* Handled in UI layer typically */ }
+            is BoxCaptureEvent.Success -> { /* Handled in UI layer typically */ }
+        }
+    }
+
     fun setMode(modeString: String) {
         val mode = try { CaptureMode.valueOf(modeString) } catch (e: Exception) { CaptureMode.BOX }
         _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), CaptureStep.getStepsForMode(mode).first(), mode)
     }
 
-    fun onPhotoCaptured(uri: String) {
+    private fun onPhotoCaptured(uri: String) {
         capturedUris.add(uri)
         val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
         val nextStep = getNextStep(mode)
