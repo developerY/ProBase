@@ -15,11 +15,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CategoryStatCard
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CosmeticProductGridCard
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.RankingStatCard
@@ -82,7 +84,7 @@ fun CosmeticCategoryCoverScreen(
                 title = { Text(categoryName.uppercase(), style = MaterialTheme.typography.labelLarge, letterSpacing = 2.sp) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_back))
                     }
                 },
                 actions = {
@@ -97,7 +99,7 @@ fun CosmeticCategoryCoverScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Product")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add_product))
             }
         }
     ) { padding ->
@@ -108,43 +110,41 @@ fun CosmeticCategoryCoverScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Editorial Header & Category Intelligence Dashboard
             item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) {
                 Column(modifier = Modifier.padding(bottom = 16.dp)) {
                     Text(
-                        text = "The $categoryName Edit.",
+                        text = stringResource(R.string.applications_kocolor_features_cosmetics_category_edit_format, categoryName),
                         style = MaterialTheme.typography.displaySmall,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "A professional overview of your $categoryName essentials.",
+                        text = stringResource(R.string.applications_kocolor_features_cosmetics_category_desc_format, categoryName),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                     
                     Spacer(Modifier.height(32.dp))
                     
-                    // --- CATEGORY INTELLIGENCE GRID ---
-                    Text("CATEGORY INTELLIGENCE", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp, modifier = Modifier.padding(bottom = 16.dp))
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_category_intelligence), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp, modifier = Modifier.padding(bottom = 16.dp))
                     
-                    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+                    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
                     
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            CategoryStatCard(uiState = "TOTAL VALUE" to currencyFormatter.format(totalValue), modifier = Modifier.weight(1f))
-                            CategoryStatCard(uiState = "AVG COST/USE" to (avgCostPerUse?.let { currencyFormatter.format(it) } ?: "N/A"), modifier = Modifier.weight(1f))
+                            CategoryStatCard(uiState = stringResource(R.string.applications_kocolor_features_cosmetics_total_value) to currencyFormatter.format(totalValue), modifier = Modifier.weight(1f))
+                            CategoryStatCard(uiState = stringResource(R.string.applications_kocolor_features_cosmetics_avg_cost_use) to (avgCostPerUse?.let { currencyFormatter.format(it) } ?: stringResource(R.string.applications_kocolor_features_cosmetics_not_available)), modifier = Modifier.weight(1f))
                         }
                         
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             RankingStatCard(
-                                title = "MOST USED",
+                                title = stringResource(R.string.applications_kocolor_features_cosmetics_most_used),
                                 item = mostUsed,
                                 icon = Icons.Default.Star,
                                 modifier = Modifier.weight(1f)
                             )
                             RankingStatCard(
-                                title = "BEST VALUE",
+                                title = stringResource(R.string.applications_kocolor_features_cosmetics_best_value),
                                 item = bestValueItem,
                                 icon = Icons.Default.Savings,
                                 modifier = Modifier.weight(1f)
@@ -153,20 +153,19 @@ fun CosmeticCategoryCoverScreen(
                         
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             RankingStatCard(
-                                title = "PREMIUM CHOICE",
+                                title = stringResource(R.string.applications_kocolor_features_cosmetics_premium_choice),
                                 item = premiumItem,
                                 icon = Icons.Default.Diamond,
                                 modifier = Modifier.weight(1f)
                             )
                             RankingStatCard(
-                                title = "LEAST USED",
+                                title = stringResource(R.string.applications_kocolor_features_cosmetics_least_used),
                                 item = leastUsed,
                                 icon = Icons.Default.History,
                                 modifier = Modifier.weight(1f)
                             )
                         }
 
-                        // Educational Insight
                         Surface(
                             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
                             shape = RoundedCornerShape(16.dp),
@@ -188,13 +187,14 @@ fun CosmeticCategoryCoverScreen(
                     }
                     
                     Spacer(Modifier.height(32.dp))
-                    Text("VAULT SELECTIONS", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_vault_selections), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                 }
             }
 
             items(items) { item ->
                 CosmeticProductGridCard(
                     uiState = item,
+                    onEvent = {},
                     navTo = navTo
                 )
             }

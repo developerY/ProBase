@@ -17,19 +17,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.features.cosmetics.R
+import com.zoewave.probase.kocolor.model.KoColorRoute
+
+data class GroupSectionUiState(
+    val title: String,
+    val itemCount: Int,
+    val isExpanded: Boolean,
+    val modifier: Modifier = Modifier
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupSectionCard(
-    title: String,
-    itemCount: Int,
-    isExpanded: Boolean,
-    onToggle: (Boolean) -> Unit
+    uiState: GroupSectionUiState,
+    onEvent: (Boolean) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = uiState.modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        onClick = { onToggle(!isExpanded) }
+        onClick = { onEvent(!uiState.isExpanded) }
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
@@ -48,12 +55,12 @@ fun GroupSectionCard(
             Spacer(modifier = Modifier.width(16.dp))
             
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
-                Text(text = stringResource(R.string.applications_kocolor_features_cosmetics_item_count_format, itemCount), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = uiState.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+                Text(text = stringResource(R.string.applications_kocolor_features_cosmetics_item_count_format, uiState.itemCount), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             
             Icon(
-                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                imageVector = if (uiState.isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                 contentDescription = null
             )
         }

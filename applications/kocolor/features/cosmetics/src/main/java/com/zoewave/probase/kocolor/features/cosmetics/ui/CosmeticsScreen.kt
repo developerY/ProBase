@@ -18,9 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.kocolor.features.cosmetics.R
-import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CosmeticProductCard
-import com.zoewave.probase.kocolor.features.cosmetics.ui.components.GroupSectionCard
-import com.zoewave.probase.kocolor.features.cosmetics.ui.components.SubCategoryCard
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.*
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
@@ -105,7 +103,6 @@ fun CosmeticsScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            // Search Bar
             OutlinedTextField(
                 value = uiState.searchQuery,
                 onValueChange = { onEvent(CosmeticsEvent.UpdateSearchQuery(it)) },
@@ -145,10 +142,13 @@ fun CosmeticsScreen(
                             
                             item {
                                 GroupSectionCard(
-                                    title = macro.displayName,
-                                    itemCount = itemsInMacro.size,
-                                    isExpanded = isExpanded,
-                                    onToggle = { expandedMacros[macro] = it }
+                                    uiState = GroupSectionUiState(
+                                        title = macro.displayName,
+                                        itemCount = itemsInMacro.size,
+                                        isExpanded = isExpanded
+                                    ),
+                                    onEvent = { expandedMacros[macro] = it },
+                                    navTo = {}
                                 )
                             }
 
@@ -158,9 +158,13 @@ fun CosmeticsScreen(
                                 groupedByMicro.forEach { (micro, itemsInMicro) ->
                                     item {
                                         SubCategoryCard(
-                                            micro = micro,
-                                            itemCount = itemsInMicro.size,
-                                            modifier = Modifier.padding(start = 16.dp)
+                                            uiState = SubCategoryUiState(
+                                                micro = micro,
+                                                itemCount = itemsInMicro.size,
+                                                modifier = Modifier.padding(start = 16.dp)
+                                            ),
+                                            onEvent = {},
+                                            navTo = {}
                                         )
                                     }
 

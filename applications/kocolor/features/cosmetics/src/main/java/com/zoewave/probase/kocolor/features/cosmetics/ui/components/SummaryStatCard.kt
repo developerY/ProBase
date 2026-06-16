@@ -21,17 +21,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.cosmetics.R
+import com.zoewave.probase.kocolor.model.KoColorRoute
+
+data class SummaryStatUiState(
+    val label: String,
+    val value: String,
+    val icon: ImageVector,
+    val modifier: Modifier = Modifier
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SummaryStatCard(
-    label: String,
-    value: String,
-    icon: ImageVector,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    uiState: SummaryStatUiState,
+    onEvent: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val isExpiring = label.contains("EXPIRING")
+    val isExpiring = uiState.label.contains("EXPIRING")
     
     val serifFont = FontFamily.Serif
     val charcoal = Color(0xFF2C2420)
@@ -61,11 +67,11 @@ fun SummaryStatCard(
     }
 
     Card(
-        modifier = modifier.aspectRatio(0.85f),
+        modifier = uiState.modifier.aspectRatio(0.85f),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
-        onClick = onClick,
+        onClick = onEvent,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize().background(glassBg)) {
@@ -82,7 +88,7 @@ fun SummaryStatCard(
                     horizontalArrangement = Arrangement.Start
                 ) {
                     Icon(
-                        imageVector = icon,
+                        imageVector = uiState.icon,
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                         tint = charcoal.copy(alpha = 0.4f)
@@ -93,7 +99,7 @@ fun SummaryStatCard(
 
                 if (valueBrush != null) {
                     Text(
-                        text = value,
+                        text = uiState.value,
                         style = MaterialTheme.typography.displayLarge.copy(
                             fontSize = 72.sp,
                             fontFamily = serifFont,
@@ -103,7 +109,7 @@ fun SummaryStatCard(
                     )
                 } else {
                     Text(
-                        text = value,
+                        text = uiState.value,
                         style = MaterialTheme.typography.displayLarge.copy(
                             fontSize = 72.sp,
                             fontFamily = serifFont
@@ -114,7 +120,7 @@ fun SummaryStatCard(
                 }
                 
                 Text(
-                    text = label,
+                    text = uiState.label,
                     style = MaterialTheme.typography.labelSmall.copy(
                         letterSpacing = 2.sp,
                         fontWeight = FontWeight.Black,
@@ -166,10 +172,13 @@ fun SummaryStatCard(
 private fun SummaryStatCardPreview() {
     MaterialTheme {
         SummaryStatCard(
-            label = "TOTAL PRODUCTS",
-            value = "34",
-            icon = Icons.Default.Inventory2,
-            onClick = {}
+            uiState = SummaryStatUiState(
+                label = "TOTAL PRODUCTS",
+                value = "34",
+                icon = Icons.Default.Inventory2
+            ),
+            onEvent = {},
+            navTo = {}
         )
     }
 }

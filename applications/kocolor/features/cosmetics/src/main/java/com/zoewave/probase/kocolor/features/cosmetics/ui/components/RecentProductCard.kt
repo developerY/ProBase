@@ -28,6 +28,7 @@ import com.zoewave.probase.core.model.ritual.MicroCategory
 @Composable
 fun RecentProductCard(
     uiState: CosmeticItem,
+    onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val item = uiState
@@ -59,6 +60,7 @@ private fun RecentProductCardPreview() {
     MaterialTheme {
         RecentProductCard(
             uiState = CosmeticItem(name = "Sample", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION),
+            onEvent = {},
             navTo = {}
         )
     }

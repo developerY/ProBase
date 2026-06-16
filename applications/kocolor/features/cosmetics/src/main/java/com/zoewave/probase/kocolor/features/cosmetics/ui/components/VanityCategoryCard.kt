@@ -26,26 +26,36 @@ import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CategoryMetadata
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+data class VanityCategoryUiState(
+    val name: String,
+    val metadata: CategoryMetadata?,
+    val baseColor: Color,
+    val fallbackImage: Any,
+    val modifier: Modifier = Modifier
+)
+
 @Composable
 fun VanityCategoryCard(
-    name: String,
-    metadata: CategoryMetadata?,
-    baseColor: Color,
-    fallbackImage: Any,
-    navTo: (KoColorRoute) -> Unit,
-    modifier: Modifier = Modifier
+    uiState: VanityCategoryUiState,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val name = uiState.name
+    val metadata = uiState.metadata
+    val baseColor = uiState.baseColor
+    val fallbackImage = uiState.fallbackImage
+    
     val count = metadata?.itemCount ?: 0
     val totalValue = metadata?.totalValue ?: 0.0
     val leadingBrand = metadata?.leadingBrand
     val averageFill = metadata?.averageFillLevel ?: 1.0
     val description = metadata?.description ?: when {
-        name.contains("Skincare", ignoreCase = true) -> "Everything applied before pigment."
-        name.contains("Complexion", ignoreCase = true) -> "Products that unify the skin tone."
-        name.contains("Dimension", ignoreCase = true) -> "Products that bring life, shadow, and light."
-        name.contains("Eyes", ignoreCase = true) -> "All definition for the upper face."
-        name.contains("Lips", ignoreCase = true) -> "All color and care for the mouth."
-        else -> "Professional curated category."
+        name.contains("Skincare", ignoreCase = true) -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_skincare)
+        name.contains("Complexion", ignoreCase = true) -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_complexion)
+        name.contains("Dimension", ignoreCase = true) -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_dimension)
+        name.contains("Eyes", ignoreCase = true) -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_eyes)
+        name.contains("Lips", ignoreCase = true) -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_lips)
+        else -> stringResource(R.string.applications_kocolor_features_cosmetics_desc_default)
     }
     
     val currencyFormatter = remember { 
@@ -54,13 +64,12 @@ fun VanityCategoryCard(
 
     Card(
         onClick = { navTo(KoColorRoute.CosmeticCategoryCover(name)) },
-        modifier = modifier.height(200.dp),
+        modifier = uiState.modifier.height(200.dp),
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = baseColor),
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // 1. Background Imagery
             AsyncImage(
                 model = metadata?.representativeImageUrl ?: fallbackImage,
                 contentDescription = null,
@@ -68,7 +77,6 @@ fun VanityCategoryCard(
                 contentScale = ContentScale.Crop
             )
             
-            // 2. Readability Scrim
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -81,7 +89,6 @@ fun VanityCategoryCard(
                     )
             )
 
-            // 3. Data Content
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -144,7 +151,6 @@ fun VanityCategoryCard(
                     }
                 }
 
-                // Stock Status Bar
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(), 
@@ -194,10 +200,13 @@ fun VanityCategoryCard(
 private fun VanityCategoryCardPreview() {
     MaterialTheme {
         VanityCategoryCard(
-            name = "Complexion",
-            metadata = CategoryMetadata(itemCount = 12, totalValue = 540.0),
-            baseColor = Color(0xFFF9F6F0),
-            fallbackImage = R.drawable.vanity_complexion,
+            uiState = VanityCategoryUiState(
+                name = "Complexion",
+                metadata = CategoryMetadata(itemCount = 12, totalValue = 540.0),
+                baseColor = Color(0xFFF9F6F0),
+                fallbackImage = R.drawable.vanity_complexion
+            ),
+            onEvent = {},
             navTo = {}
         )
     }

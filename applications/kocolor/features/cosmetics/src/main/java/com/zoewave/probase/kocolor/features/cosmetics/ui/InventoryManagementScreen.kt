@@ -68,18 +68,29 @@ fun InventoryManagementScreen(
                 .fillMaxSize()
                 .background(Color(0xFFFBF8F5)) 
         ) {
-            HeaderSection(uiState.totalCosmetics)
-            
-            SearchBarAndFilter(
-                query = uiState.searchQuery,
-                onQueryChange = { onEvent(CosmeticsEvent.UpdateSearchQuery(it)) }
+            HeaderSection(
+                uiState = HeaderSectionUiState(uiState.totalCosmetics),
+                onEvent = {},
+                navTo = {}
             )
             
-            val categories = remember { listOf("All Products") + MacroCategory.entries.map { it.displayName } }
-            var selectedCategory by remember { mutableStateOf("All Products") }
+            SearchBarAndFilter(
+                uiState = SearchBarAndFilterUiState(uiState.searchQuery),
+                onEvent = { event ->
+                    when (event) {
+                        is SearchBarAndFilterEvent.QueryChange -> onEvent(CosmeticsEvent.UpdateSearchQuery(event.query))
+                        SearchBarAndFilterEvent.FilterClick -> { /* TODO */ }
+                    }
+                },
+                navTo = navTo
+            )
+            
+            val allProductsLabel = stringResource(R.string.applications_kocolor_features_cosmetics_all_products)
+            val categories = remember(allProductsLabel) { listOf(allProductsLabel) + MacroCategory.entries.map { it.displayName } }
+            var selectedCategory by remember { mutableStateOf(allProductsLabel) }
             
             val displayItems = remember(uiState.filteredItems, selectedCategory) {
-                if (selectedCategory == "All Products") {
+                if (selectedCategory == allProductsLabel) {
                     uiState.filteredItems
                 } else {
                     uiState.filteredItems.filter { it.macroCategory.displayName == selectedCategory }
@@ -87,27 +98,34 @@ fun InventoryManagementScreen(
             }
 
             CategoryChipsSection(
-                categories = categories,
-                selectedCategory = selectedCategory,
-                onCategorySelected = { selectedCategory = it }
+                uiState = CategoryChipsUiState(categories, selectedCategory),
+                onEvent = { selectedCategory = it },
+                navTo = {}
             )
             
             InventoryList(
-                items = displayItems,
-                onItemClick = { navTo(KoColorRoute.CosmeticDetail(it.id)) }
+                uiState = InventoryListUiState(displayItems),
+                onEvent = { item -> navTo(KoColorRoute.CosmeticDetail(item.id)) },
+                navTo = navTo
             )
         }
     }
 }
 
+data class HeaderSectionUiState(val totalCount: Int)
+
 @Composable
-private fun HeaderSection(totalCount: Int) {
+private fun HeaderSection(
+    uiState: HeaderSectionUiState,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     Column(
         modifier = Modifier
             .padding(horizontal = 24.dp, vertical = 20.dp)
     ) {
         Text(
-            text = "Inventory Management",
+            text = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_management_title),
             style = MaterialTheme.typography.headlineMedium,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Light,
@@ -115,17 +133,25 @@ private fun HeaderSection(totalCount: Int) {
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Manage and track your $totalCount cosmetic variants.",
+            text = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_management_desc, uiState.totalCount),
             style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray
         )
     }
 }
 
+data class SearchBarAndFilterUiState(val query: String)
+
+sealed class SearchBarAndFilterEvent {
+    data class QueryChange(val query: String) : SearchBarAndFilterEvent()
+    data object FilterClick : SearchBarAndFilterEvent()
+}
+
 @Composable
 private fun SearchBarAndFilter(
-    query: String,
-    onQueryChange: (String) -> Unit
+    uiState: SearchBarAndFilterUiState,
+    onEvent: (SearchBarAndFilterEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -134,8 +160,8 @@ private fun SearchBarAndFilter(
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedTextField(
-            value = query,
-            onValueChange = onQueryChange,
+            value = uiState.query,
+            onValueChange = { onEvent(SearchBarAndFilterEvent.QueryChange(it)) },
             modifier = Modifier
                 .weight(1f)
                 .heightIn(min = 52.dp),
@@ -168,7 +194,7 @@ private fun SearchBarAndFilter(
         Spacer(modifier = Modifier.width(12.dp))
         
         OutlinedButton(
-            onClick = { /* TODO */ },
+            onClick = { onEvent(SearchBarAndFilterEvent.FilterClick) },
             modifier = Modifier.height(52.dp),
             shape = RoundedCornerShape(12.dp),
             contentPadding = PaddingValues(horizontal = 16.dp),
@@ -186,21 +212,23 @@ private fun SearchBarAndFilter(
     }
 }
 
+data class CategoryChipsUiState(val categories: List<String>, val selectedCategory: String)
+
 @Composable
 private fun CategoryChipsSection(
-    categories: List<String>,
-    selectedCategory: String,
-    onCategorySelected: (String) -> Unit
+    uiState: CategoryChipsUiState,
+    onEvent: (String) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     LazyRow(
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(categories) { category ->
-            val isSelected = category == selectedCategory
+        items(uiState.categories) { category ->
+            val isSelected = category == uiState.selectedCategory
             FilterChip(
                 selected = isSelected,
-                onClick = { onCategorySelected(category) },
+                onClick = { onEvent(category) },
                 label = { Text(category) },
                 shape = RoundedCornerShape(20.dp),
                 colors = FilterChipDefaults.filterChipColors(
@@ -222,18 +250,21 @@ private fun CategoryChipsSection(
     }
 }
 
+data class InventoryListUiState(val items: List<CosmeticItem>)
+
 @Composable
 private fun InventoryList(
-    items: List<CosmeticItem>,
-    onItemClick: (CosmeticItem) -> Unit
+    uiState: InventoryListUiState,
+    onEvent: (CosmeticItem) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 100.dp, top = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(items) { item ->
-            InventoryProductCard(item = item, onClick = { onItemClick(item) })
+        items(uiState.items) { item ->
+            InventoryProductCard(item = item, onClick = { onEvent(item) })
         }
     }
 }

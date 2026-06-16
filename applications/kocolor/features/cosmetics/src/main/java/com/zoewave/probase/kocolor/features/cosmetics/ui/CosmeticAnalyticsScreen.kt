@@ -47,7 +47,11 @@ fun CosmeticAnalyticsScreen(
     var showTaxonomyInfo by remember { mutableStateOf(false) }
 
     if (showTaxonomyInfo) {
-        ProfessionalTaxonomyDialog(onDismiss = { showTaxonomyInfo = false })
+        ProfessionalTaxonomyDialog(
+            uiState = com.zoewave.probase.kocolor.features.cosmetics.ui.components.ProfessionalTaxonomyUiState(),
+            onEvent = { showTaxonomyInfo = false },
+            navTo = {}
+        )
     }
 
     Scaffold(
