@@ -79,7 +79,6 @@ include(":features:obf")
 include(":features:ai:capture")
 include(":features:ai:vision")
 include(":features:ai:configuration")
-include(":features:ai:firebase")
 
 
 include(":applications:ashbike:apps:wear:features:home")

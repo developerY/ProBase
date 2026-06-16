@@ -268,7 +268,7 @@ androidx-xr-scenecore = { group = "androidx.xr.scenecore", name = "scenecore", v
 # -- Firebase & ML --
 google-play-age-signals = { group = "com.google.android.play", name = "age-signals", version.ref = "playAgeSignals" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
+# firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-installations = { group = "com.google.firebase", name = "firebase-installations" }
