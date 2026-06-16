@@ -8,6 +8,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import com.zoewave.probase.features.health.meals.ui.MealsUiEvent
+import com.zoewave.probase.features.health.meals.ui.MealsUiRoute
+import com.zoewave.probase.features.health.meals.ui.MealsUiState
+import com.zoewave.probase.features.health.meals.ui.MealsViewModel
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
@@ -15,7 +19,9 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulator
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorViewModel
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerUiRoute
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerViewModel
-import com.zoewave.probase.kocolor.features.boxcapture.ui.BoxCaptureRoute
+import com.zoewave.probase.kocolor.features.boxcapture.ui.BoxCaptureEvent
+import com.zoewave.probase.kocolor.features.boxcapture.ui.BoxCaptureUiRoute
+import com.zoewave.probase.kocolor.features.boxcapture.ui.BoxCaptureViewModel
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticAnalyticsScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverUiState
@@ -24,7 +30,7 @@ import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticEditScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticEditUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsEvent
-import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsUiRoute
+import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsViewModel
 import com.zoewave.probase.kocolor.features.cosmetics.ui.InventoryManagementScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.StitchProductBuilder
@@ -42,13 +48,10 @@ import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeLandingScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeViewModel
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailUiRoute
+import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
-import com.zoewave.probase.features.health.meals.ui.MealsUiEvent
-import com.zoewave.probase.features.health.meals.ui.MealsUiRoute
-import com.zoewave.probase.features.health.meals.ui.MealsUiState
-import com.zoewave.probase.features.health.meals.ui.MealsViewModel
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailScreen
@@ -63,6 +66,7 @@ import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiRoute
 import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeViewModel
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.components.SettingsUiRoute
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalProjectedApi::class)
 fun koColorNavEntryProvider(
@@ -99,12 +103,18 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.BoxCapture -> NavEntry(route) {
-            BoxCaptureRoute(
-                mode = route.mode,
-                onSuccess = { item ->
-                    onNavigateTo(KoColorRoute.CosmeticDetail(item.id))
+            val viewModel: BoxCaptureViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            BoxCaptureUiRoute(
+                uiState = state,
+                onEvent = { event ->
+                    when (event) {
+                        is BoxCaptureEvent.Success -> onNavigateTo(KoColorRoute.CosmeticDetail(event.item.id))
+                        BoxCaptureEvent.Dismiss -> onBack()
+                        else -> viewModel.onEvent(event)
+                    }
                 },
-                onDismiss = onBack
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.Stitch -> NavEntry(route) {
@@ -160,14 +170,45 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.Routines -> NavEntry(route) {
+            val viewModel: RoutinesViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val context = LocalContext.current
+            androidx.compose.runtime.LaunchedEffect(Unit) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.BAKLAVA) {
+                    ProjectedContext.isProjectedDeviceConnected(context, this.coroutineContext)
+                        .collectLatest { isConnected ->
+                            viewModel.updateGlassConnection(isConnected)
+                        }
+                } else {
+                    viewModel.updateGlassConnection(false)
+                }
+            }
             RoutinesUiRoute(
-                onNavigateTo = onNavigateTo
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo,
+                sideEffects = viewModel.sideEffect
             )
         }
         is KoColorRoute.RoutineDetail -> NavEntry(route) {
+            val viewModel: RoutinesViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val context = LocalContext.current
+            androidx.compose.runtime.LaunchedEffect(Unit) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.BAKLAVA) {
+                    ProjectedContext.isProjectedDeviceConnected(context, this.coroutineContext)
+                        .collectLatest { isConnected ->
+                            viewModel.updateGlassConnection(isConnected)
+                        }
+                } else {
+                    viewModel.updateGlassConnection(false)
+                }
+            }
             RoutineDetailUiRoute(
-                routineId = route.routineId,
-                onNavigateTo = onNavigateTo
+                uiState = RoutineDetailUiState(route.routineId, state),
+                onEvent = viewModel::onEvent,
+                navTo = onNavigateTo,
+                sideEffects = viewModel.sideEffect
             )
         }
         is KoColorRoute.RoutineEditor -> NavEntry(route) {
@@ -224,6 +265,7 @@ fun koColorNavEntryProvider(
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             WardrobeAnalyticsScreen(
                 uiState = state,
+                onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
         }
@@ -248,7 +290,7 @@ fun koColorNavEntryProvider(
         is KoColorRoute.Cosmetics -> NavEntry(route) {
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            CosmeticsUiRoute(
+            CosmeticsScreen(
                 uiState = state,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
@@ -402,16 +444,15 @@ fun koColorNavEntryProvider(
             }
             
             HealthUiRoute(
-                uiState = state,
+                uiState = com.zoewave.probase.kocolor.mobile.core.ui.health.KoColorHealthUiState(
+                    featureState = state,
+                    sideEffects = viewModel.sideEffect
+                ),
                 onEvent = viewModel::onEvent,
-                navTo = onNavigateTo,
-                sideEffects = viewModel.sideEffect
+                navTo = onNavigateTo
             )
         }
         is KoColorRoute.Hydration -> NavEntry(route) {
-            val mainViewModel: com.zoewave.probase.kocolor.mobile.ui.MainViewModel = hiltViewModel()
-            val hydrationGoal by mainViewModel.hydrationGoalFlow.collectAsStateWithLifecycle(2.7)
-            
             com.zoewave.probase.features.health.hydration.ui.HydrationUiRoute(
                 onNavigateToSettings = { onNavigateTo(KoColorRoute.Settings("Hydration")) },
                 onBack = onBack
@@ -481,21 +522,16 @@ fun koColorNavEntryProvider(
         is KoColorRoute.GoogleXRTest -> NavEntry(route) {
             val context = LocalContext.current
             androidx.compose.runtime.LaunchedEffect(Unit) {
-                android.util.Log.d("NavEntryProvider", "Handling GoogleXRTest route")
                 if (android.os.Build.VERSION.SDK_INT >= 35) {
                     try {
-                        android.util.Log.d("NavEntryProvider", "Attempting projected activity launch (API 35+) with options")
                         val options = ProjectedContext.createProjectedActivityOptions(context)
                         val intent = android.content.Intent(context, com.zoewave.probase.features.xr.glass.GoogleTestGlassesActivity::class.java).apply {
                             addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                         }
                         context.startActivity(intent, options.toBundle())
-                        android.util.Log.d("NavEntryProvider", "startActivity called successfully")
                     } catch (e: Exception) {
-                        android.util.Log.e("NavEntryProvider", "Projected launch failed", e)
                     }
                 } else {
-                    android.util.Log.d("NavEntryProvider", "Attempting standard activity launch (API < 35)")
                     val intent = android.content.Intent(context, com.zoewave.probase.features.xr.glass.GoogleTestGlassesActivity::class.java).apply {
                         addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
