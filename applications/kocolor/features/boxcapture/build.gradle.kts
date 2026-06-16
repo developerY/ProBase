@@ -15,10 +15,8 @@ dependencies {
     implementation(project(":core:util"))
     implementation(project(":core:data"))
     implementation(project(":applications:kocolor:data"))
-    implementation(project(":features:ai:firebase"))
     implementation(project(":features:ai:configuration"))
 
-    implementation(platform(libs.firebase.bom))
     implementation(libs.google.generative.ai)
 
     implementation(libs.androidx.compose.material3)
