@@ -22,6 +22,7 @@ dependencies {
     // Use the AshBike-specific data module (contains BikeRepository)
     implementation(project(":applications:ashbike:data"))
     implementation(project(":applications:ashbike:model"))
+    implementation(project(":core:data"))
     implementation(project(":features:xr:glass"))
 
     // --- 2. Android XR / Glass (Glimmer) ---
@@ -31,9 +32,9 @@ dependencies {
     implementation(libs.androidx.projected)
 
     // --- 3. AI & Gemini (Isolated Firebase SDK) ---
-    implementation(project(":features:ai:firebase"))
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.ai)
+    // implementation(project(":features:ai:firebase"))
+    // implementation(libs.firebase.ai)
 
     // --- 4. Standard UI & Compose ---
     // Note: 'library.compose' plugin adds the BOM and basic UI/Tooling automatically.

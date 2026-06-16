@@ -4,6 +4,7 @@ import com.zoewave.ashbike.data.repository.bike.BikeRepository
 import com.zoewave.ashbike.data.repository.bike.BikeRepositoryImpl
 import com.zoewave.probase.ashbike.data.repository.FakeRitualRepository
 import com.zoewave.probase.core.data.repository.GlassBridgeRepository
+import com.zoewave.probase.core.data.repository.LiveAiRepository
 import com.zoewave.probase.core.data.repository.RitualRepository
 import dagger.Binds
 import dagger.Module
@@ -32,4 +33,10 @@ abstract class BikeDataModule {
     abstract fun bindGlassBridgeRepository(
         impl: FakeRitualRepository
     ): GlassBridgeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLiveAiRepository(
+        impl: FakeRitualRepository
+    ): LiveAiRepository
 }
