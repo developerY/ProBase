@@ -2,8 +2,10 @@ package com.zoewave.probase.di
 
 import com.zoewave.probase.core.data.repository.GlassBridgeRepository
 import com.zoewave.probase.core.data.repository.RitualRepository
+import com.zoewave.probase.core.data.repository.LiveAiRepository
 import com.zoewave.probase.data.repository.DefaultGlassBridgeRepository
 import com.zoewave.probase.data.repository.DefaultRitualRepository
+import com.zoewave.probase.data.repository.DefaultLiveAiRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -25,4 +27,10 @@ abstract class GlassModule {
     abstract fun bindRitualRepository(
         impl: DefaultRitualRepository
     ): RitualRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLiveAiRepository(
+        impl: DefaultLiveAiRepository
+    ): LiveAiRepository
 }
