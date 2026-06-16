@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.androidx.datastore.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.google.generative.ai)
 
     // --- External Utilities (Optional, based on your Repos) ---
     // If your repositories parse dates/times:
