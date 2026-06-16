@@ -69,6 +69,7 @@ dependencies {
     implementation(project(":applications:kocolor:features:suggestions"))
     implementation(project(":applications:kocolor:apps:mobile:features:color"))
     implementation(project(":applications:kocolor:features:stitch"))
+    implementation(project(":applications:kocolor:features:boxcapture"))
     implementation(project(":applications:kocolor:features:inventory"))
     implementation(project(":applications:kocolor:features:routines"))
     implementation(project(":applications:kocolor:features:cosmetics"))
