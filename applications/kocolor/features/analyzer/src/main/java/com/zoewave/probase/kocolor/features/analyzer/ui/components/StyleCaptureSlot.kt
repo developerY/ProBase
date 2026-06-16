@@ -22,14 +22,20 @@ import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerEvent
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+data class StyleCaptureSlotUiState(
+    val title: String,
+    val uri: String?,
+    val modifier: Modifier = Modifier
+)
+
 @Composable
 fun StyleCaptureSlot(
-    uiState: Pair<String, String?>,
+    uiState: StyleCaptureSlotUiState,
     onEvent: (AnalyzerEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val title = uiState.first
-    val uri = uiState.second
+    val title = uiState.title
+    val uri = uiState.uri
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -48,7 +54,7 @@ fun StyleCaptureSlot(
     var showOptions by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier
+        modifier = uiState.modifier
             .height(200.dp)
             .fillMaxWidth()
             .clickable { showOptions = true },
@@ -125,7 +131,7 @@ fun StyleCaptureSlot(
 private fun StyleCaptureSlotPreview() {
     MaterialTheme {
         StyleCaptureSlot(
-            uiState = "Your Face" to null,
+            uiState = StyleCaptureSlotUiState("Your Face", null),
             onEvent = {},
             navTo = {}
         )

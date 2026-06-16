@@ -42,24 +42,40 @@ fun StyleCaptureState(
         ) {
             Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 StyleCaptureSlot(
-                    uiState = stringResource(R.string.applications_kocolor_features_analyzer_face_label) to uiState.faceUri,
+                    uiState = StyleCaptureSlotUiState(
+                        title = stringResource(R.string.applications_kocolor_features_analyzer_face_label),
+                        uri = uiState.faceUri,
+                        modifier = Modifier.weight(1f)
+                    ),
                     onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("face")) }
                 )
                 StyleCaptureSlot(
-                    uiState = stringResource(R.string.applications_kocolor_features_analyzer_hair_label) to uiState.hairUri,
+                    uiState = StyleCaptureSlotUiState(
+                        title = stringResource(R.string.applications_kocolor_features_analyzer_hair_label),
+                        uri = uiState.hairUri,
+                        modifier = Modifier.weight(1f)
+                    ),
                     onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("hair")) }
                 )
             }
             Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 StyleCaptureSlot(
-                    uiState = stringResource(R.string.applications_kocolor_features_analyzer_shoes_label) to uiState.shoesUri,
+                    uiState = StyleCaptureSlotUiState(
+                        title = stringResource(R.string.applications_kocolor_features_analyzer_shoes_label),
+                        uri = uiState.shoesUri,
+                        modifier = Modifier.weight(1f)
+                    ),
                     onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("shoes")) }
                 )
                 StyleCaptureSlot(
-                    uiState = stringResource(R.string.applications_kocolor_features_analyzer_clothes_label) to uiState.clothesUri,
+                    uiState = StyleCaptureSlotUiState(
+                        title = stringResource(R.string.applications_kocolor_features_analyzer_clothes_label),
+                        uri = uiState.clothesUri,
+                        modifier = Modifier.weight(1f)
+                    ),
                     onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("clothes")) }
                 )
@@ -67,13 +83,13 @@ fun StyleCaptureState(
         }
 
         OccasionFilter(
-            uiState = uiState.selectedOccasion,
+            uiState = OccasionFilterUiState(uiState.selectedOccasion),
             onEvent = onEvent,
             navTo = {}
         )
 
         LocationInput(
-            uiState = uiState.locationName to uiState.isLocating,
+            uiState = LocationInputUiState(uiState.locationName, uiState.isLocating),
             onEvent = onEvent,
             navTo = {}
         )

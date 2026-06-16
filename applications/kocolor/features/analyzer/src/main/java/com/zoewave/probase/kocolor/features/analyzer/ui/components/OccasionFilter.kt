@@ -13,9 +13,14 @@ import com.zoewave.probase.kocolor.features.analyzer.R
 import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerEvent
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+data class OccasionFilterUiState(
+    val selectedOccasion: String,
+    val modifier: Modifier = Modifier
+)
+
 @Composable
 fun OccasionFilter(
-    uiState: String,
+    uiState: OccasionFilterUiState,
     onEvent: (AnalyzerEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -26,7 +31,7 @@ fun OccasionFilter(
         stringResource(R.string.applications_kocolor_features_analyzer_occasion_formal)
     )
     
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = uiState.modifier.fillMaxWidth()) {
         Text(stringResource(R.string.applications_kocolor_features_analyzer_select_occasion), style = MaterialTheme.typography.labelMedium)
         Row(
             modifier = Modifier
@@ -36,7 +41,7 @@ fun OccasionFilter(
         ) {
             occasions.forEach { occasion ->
                 FilterChip(
-                    selected = uiState == occasion,
+                    selected = uiState.selectedOccasion == occasion,
                     onClick = { onEvent(AnalyzerEvent.OnOccasionSelected(occasion)) },
                     label = { Text(occasion) }
                 )
@@ -50,7 +55,7 @@ fun OccasionFilter(
 private fun OccasionFilterPreview() {
     MaterialTheme {
         OccasionFilter(
-            uiState = "Work",
+            uiState = OccasionFilterUiState("Work"),
             onEvent = {},
             navTo = {}
         )
