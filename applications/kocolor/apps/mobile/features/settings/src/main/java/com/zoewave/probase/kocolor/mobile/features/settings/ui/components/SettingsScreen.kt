@@ -339,13 +339,15 @@ fun HealthConnectCard(
                 Box(modifier = Modifier.padding(16.dp)) {
                     val healthViewModel: com.zoewave.probase.features.health.core.ui.HealthViewModel = hiltViewModel()
                     val healthState by healthViewModel.uiState.collectAsStateWithLifecycle()
-                    HealthContent(
-                        uiState = healthState,
+                    com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContent(
+                        uiState = com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContentUiState(
+                            featureState = healthState,
+                            sideEffects = healthViewModel.sideEffect,
+                            statusOnly = true,
+                            modifier = Modifier.fillMaxWidth()
+                        ),
                         onEvent = healthViewModel::onEvent,
-                        navTo = navTo,
-                        sideEffects = healthViewModel.sideEffect,
-                        modifier = Modifier.fillMaxWidth(),
-                        statusOnly = true
+                        navTo = navTo
                     )
                 }
             }
