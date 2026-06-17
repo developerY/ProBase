@@ -23,6 +23,8 @@ data class TranslationUiState(
     val translatedText: String = "",
     val isListening: Boolean = false,
     val isTranslating: Boolean = false,
+    val isApiKeySet: Boolean = false,
+    val isEngineAvailable: Boolean = false,
     val error: String? = null
 )
 
@@ -38,12 +40,24 @@ class TranslationViewModel @Inject constructor(
     private var speechRecognizer: SpeechRecognizer? = null
 
     init {
+        checkStatus()
         initSpeechRecognizer()
+    }
+
+    private fun checkStatus() {
+        viewModelScope.launch {
+            settings.isGeminiApiKeySetFlow.collect { isSet ->
+                _uiState.value = _uiState.value.copy(isApiKeySet = isSet)
+            }
+        }
     }
 
     private fun initSpeechRecognizer() {
         val context = getApplication<Application>()
-        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+        val available = SpeechRecognizer.isRecognitionAvailable(context)
+        _uiState.value = _uiState.value.copy(isEngineAvailable = available)
+        
+        if (!available) {
             _uiState.value = _uiState.value.copy(error = "DEBUG: Speech Engine Missing! Ensure Google Speech Services are updated.")
             return
         }

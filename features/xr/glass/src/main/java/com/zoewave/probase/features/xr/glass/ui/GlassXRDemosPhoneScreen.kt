@@ -25,8 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.probase.features.xr.glass.GlassesMainActivity
-import com.zoewave.probase.features.glass.translation.ui.TranslationViewModel
-import com.zoewave.probase.features.glass.translation.ui.PhoneRemoteControl
+import com.zoewave.probase.features.glass.translation.ui.UnifiedTranslationScreen
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalProjectedApi::class)
 @Composable
@@ -44,51 +43,30 @@ fun GlassXRDemosPhoneScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Glass XR Demos") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            if (activeSample != GlimmerSample.Translation) {
+                TopAppBar(
+                    title = { Text("Glass XR Demos") },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                    actions = {
+                        if (isConnected) {
+                            Icon(
+                                imageVector = Icons.Default.CastConnected,
+                                contentDescription = "Glasses Connected",
+                                tint = Color(0xFF4CAF50),
+                                modifier = Modifier.padding(end = 16.dp)
+                            )
+                        }
                     }
-                },
-                actions = {
-                    if (isConnected) {
-                        Icon(
-                            imageVector = Icons.Default.CastConnected,
-                            contentDescription = "Glasses Connected",
-                            tint = Color(0xFF4CAF50),
-                            modifier = Modifier.padding(end = 16.dp)
-                        )
-                    }
-                }
-            )
+                )
+            }
         },
         bottomBar = {
             activeSample?.let { sample ->
-                if (sample == GlimmerSample.Translation) {
-                    // Show full Remote Control for Translation
-                    val translationViewModel: TranslationViewModel = hiltViewModel()
-                    Surface(
-                        tonalElevation = 12.dp,
-                        shadowElevation = 12.dp,
-                        color = MaterialTheme.colorScheme.surface
-                    ) {
-                        Column {
-                            // Mini header for the remote
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("Translation Control", style = MaterialTheme.typography.labelSmall)
-                                IconButton(onClick = { viewModel.updateActiveSample(null) }, modifier = Modifier.size(24.dp)) {
-                                    Icon(Icons.Default.Close, contentDescription = "Stop", modifier = Modifier.size(16.dp))
-                                }
-                            }
-                            PhoneRemoteControl(viewModel = translationViewModel)
-                        }
-                    }
-                } else {
+                if (sample != GlimmerSample.Translation) {
                     Surface(
                         tonalElevation = 8.dp,
                         shadowElevation = 8.dp,
@@ -127,72 +105,87 @@ fun GlassXRDemosPhoneScreen(
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isConnected) Color(0xFFE8F5E9) else MaterialTheme.colorScheme.secondaryContainer
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+        if (activeSample == GlimmerSample.Translation) {
+            Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+                UnifiedTranslationScreen(
+                    onNavigateToSettings = { /* No-op for now */ }
+                )
+                // Floating Close Button for the demo
+                IconButton(
+                    onClick = { viewModel.updateActiveSample(null) },
+                    modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = if (isConnected) "Glasses Connected" else "Projected Experience",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = if (isConnected) Color(0xFF2E7D32) else Color.Unspecified
-                        )
-                        Text(
-                            text = if (isConnected) 
-                                "Your glasses are ready. Tap a sample below to project it immediately." 
-                                else "These samples are designed to be projected onto intelligent eyewear. Connect your glasses and tap 'Launch' to see the Glimmer UI in action.",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+                    Icon(Icons.Default.Close, contentDescription = "Close Hub")
                 }
             }
-
-            items(GlimmerSample.entries) { sample ->
-                val isActive = activeSample == sample
-                OutlinedCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    border = if (isActive) CardDefaults.outlinedCardBorder().copy(width = 2.dp, brush = androidx.compose.ui.graphics.SolidColor(Color(0xFF4CAF50))) else CardDefaults.outlinedCardBorder(),
-                    colors = CardDefaults.outlinedCardColors(
-                        containerColor = if (isActive) Color(0xFFE8F5E9) else Color.Transparent
-                    ),
-                    onClick = {
-                        launchOnGlasses(context, sample)
-                    }
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isConnected) Color(0xFFE8F5E9) else MaterialTheme.colorScheme.secondaryContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
+                        Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = sample.title, 
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = if (isActive) androidx.compose.ui.text.font.FontWeight.Bold else null
+                                text = if (isConnected) "Glasses Connected" else "Projected Experience",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = if (isConnected) Color(0xFF2E7D32) else Color.Unspecified
                             )
                             Text(
-                                "Demo of Glimmer ${sample.title} component.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                text = if (isConnected) 
+                                    "Your glasses are ready. Tap a sample below to project it immediately." 
+                                    else "These samples are designed to be projected onto intelligent eyewear. Connect your glasses and tap 'Launch' to see the Glimmer UI in action.",
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
-                        Icon(
-                            imageVector = if (isActive) Icons.Default.CastConnected else Icons.Default.Cast,
-                            contentDescription = "Launch on Glasses",
-                            tint = if (isConnected || isActive) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
-                        )
+                    }
+                }
+
+                items(GlimmerSample.entries) { sample ->
+                    val isActive = activeSample == sample
+                    OutlinedCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        border = if (isActive) CardDefaults.outlinedCardBorder().copy(width = 2.dp, brush = androidx.compose.ui.graphics.SolidColor(Color(0xFF4CAF50))) else CardDefaults.outlinedCardBorder(),
+                        colors = CardDefaults.outlinedCardColors(
+                            containerColor = if (isActive) Color(0xFFE8F5E9) else Color.Transparent
+                        ),
+                        onClick = {
+                            launchOnGlasses(context, sample)
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = sample.title, 
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = if (isActive) androidx.compose.ui.text.font.FontWeight.Bold else null
+                                )
+                                Text(
+                                    "Demo of Glimmer ${sample.title} component.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Icon(
+                                imageVector = if (isActive) Icons.Default.CastConnected else Icons.Default.Cast,
+                                contentDescription = "Launch on Glasses",
+                                tint = if (isConnected || isActive) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
