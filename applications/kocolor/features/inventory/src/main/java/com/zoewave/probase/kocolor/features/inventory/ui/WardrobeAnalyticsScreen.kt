@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.inventory.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,12 +37,17 @@ import java.util.*
 @Composable
 fun WardrobeAnalyticsScreen(
     uiState: WardrobeUiState,
+    onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     var showTaxonomyInfo by remember { mutableStateOf(false) }
 
     if (showTaxonomyInfo) {
-        WardrobeTaxonomyDialog(onDismiss = { showTaxonomyInfo = false })
+        WardrobeTaxonomyDialog(
+            uiState = Unit,
+            onEvent = { showTaxonomyInfo = false },
+            navTo = {}
+        )
     }
 
     Scaffold(
@@ -56,7 +62,7 @@ fun WardrobeAnalyticsScreen(
                 actions = {
                     IconButton(onClick = { showTaxonomyInfo = true }) {
                         Text(
-                            text = "i",
+                            text = stringResource(R.string.applications_kocolor_features_inventory_info_icon),
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontFamily = FontFamily.Serif,
                                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
@@ -74,7 +80,6 @@ fun WardrobeAnalyticsScreen(
             contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            // 1. Headline
             item {
                 Column {
                     Text(
@@ -91,7 +96,6 @@ fun WardrobeAnalyticsScreen(
                 }
             }
 
-            // 2. High-Level Performance Metrics
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(stringResource(R.string.applications_kocolor_features_inventory_portfolio_performance), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
@@ -115,7 +119,6 @@ fun WardrobeAnalyticsScreen(
                 }
             }
 
-            // 3. Usage Leaderboard
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(stringResource(R.string.applications_kocolor_features_inventory_most_worn), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
@@ -133,7 +136,6 @@ fun WardrobeAnalyticsScreen(
                 }
             }
 
-            // 4. Wardrobe Palette
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(stringResource(R.string.applications_kocolor_features_inventory_wardrobe_palette), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
@@ -160,7 +162,6 @@ fun WardrobeAnalyticsScreen(
                 }
             }
 
-            // 5. Efficiency Analysis
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(stringResource(R.string.applications_kocolor_features_inventory_style_efficiency), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
@@ -195,6 +196,7 @@ private fun WardrobeAnalyticsScreenPreview() {
                     ClothingItem(id = 2, name = "Denim Jeans", category = ClothingCategory.BOTTOMS, usageCount = 45, colorHex = "#000080", price = 120.0)
                 )
             ),
+            onEvent = {},
             navTo = {}
         )
     }

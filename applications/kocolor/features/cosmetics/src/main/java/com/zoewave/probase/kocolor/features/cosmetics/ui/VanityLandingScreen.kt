@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
@@ -60,7 +61,11 @@ fun VanityLandingScreen(
     var showTaxonomyInfo by remember { mutableStateOf(false) }
 
     if (showTaxonomyInfo) {
-        ProfessionalTaxonomyDialog(onDismiss = { showTaxonomyInfo = false })
+        ProfessionalTaxonomyDialog(
+            uiState = ProfessionalTaxonomyUiState(),
+            onEvent = { showTaxonomyInfo = false },
+            navTo = {}
+        )
     }
 
     Scaffold(
@@ -73,6 +78,9 @@ fun VanityLandingScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { navTo(KoColorRoute.BoxCapture()) }) { 
+                        Icon(Icons.Default.AutoAwesome, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add_item)) 
+                    }
                     IconButton(onClick = { navTo(KoColorRoute.InventoryManagement) }) { Icon(Icons.Default.Inventory2, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_title)) }
                     IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_filter)) }
                 }
@@ -94,7 +102,6 @@ fun VanityLandingScreen(
             contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            // 1. Welcome Header
             item {
                 Column {
                     Text(
@@ -111,30 +118,34 @@ fun VanityLandingScreen(
                 }
             }
 
-            // 2. Summary Row
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     SummaryStatCard(
-                        label = stringResource(R.string.applications_kocolor_features_cosmetics_total_products),
-                        value = uiState.totalCosmetics.toString(),
-                        icon = Icons.Default.Inventory2,
-                        modifier = Modifier.weight(1f),
-                        onClick = { navTo(KoColorRoute.CosmeticAnalytics) }
+                        uiState = SummaryStatUiState(
+                            label = stringResource(R.string.applications_kocolor_features_cosmetics_total_products),
+                            value = uiState.totalCosmetics.toString(),
+                            icon = Icons.Default.Inventory2,
+                            modifier = Modifier.weight(1f)
+                        ),
+                        onEvent = { navTo(KoColorRoute.CosmeticAnalytics) },
+                        navTo = navTo
                     )
                     SummaryStatCard(
-                        label = stringResource(R.string.applications_kocolor_features_cosmetics_expiring_soon),
-                        value = uiState.expiringCosmeticsCount.toString(),
-                        icon = Icons.Default.ErrorOutline,
-                        modifier = Modifier.weight(1f),
-                        onClick = { navTo(KoColorRoute.ExpiringSoon) }
+                        uiState = SummaryStatUiState(
+                            label = stringResource(R.string.applications_kocolor_features_cosmetics_expiring_soon),
+                            value = uiState.expiringCosmeticsCount.toString(),
+                            icon = Icons.Default.ErrorOutline,
+                            modifier = Modifier.weight(1f)
+                        ),
+                        onEvent = { navTo(KoColorRoute.ExpiringSoon) },
+                        navTo = navTo
                     )
                 }
             }
 
-            // 3. Category Hero Cards
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     Row(
@@ -152,13 +163,13 @@ fun VanityLandingScreen(
                             onClick = { showTaxonomyInfo = true },
                             shape = CircleShape,
                             color = Color.White,
-                            border = BorderStroke(1.dp, Color(0xFFD4AF37)), // Golden Border
+                            border = BorderStroke(1.dp, Color(0xFFD4AF37)), 
                             shadowElevation = 4.dp,
                             modifier = Modifier.size(36.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
-                                    text = "i",
+                                    text = stringResource(R.string.applications_kocolor_features_cosmetics_info_icon),
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontFamily = FontFamily.Serif,
                                         fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
@@ -183,19 +194,21 @@ fun VanityLandingScreen(
                             val (bgColor, fallbackImage) = props
                             val metadata = uiState.categoriesMetadata.entries.find { it.key.contains(name, ignoreCase = true) }?.value
                             VanityCategoryCard(
-                                name = name,
-                                metadata = metadata,
-                                baseColor = bgColor,
-                                fallbackImage = fallbackImage,
-                                navTo = navTo,
-                                modifier = Modifier.fillMaxWidth()
+                                uiState = VanityCategoryUiState(
+                                    name = name,
+                                    metadata = metadata,
+                                    baseColor = bgColor,
+                                    fallbackImage = fallbackImage,
+                                    modifier = Modifier.fillMaxWidth()
+                                ),
+                                onEvent = {},
+                                navTo = navTo
                             )
                         }
                     }
                 }
             }
 
-            // 4. Recently Added
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     Row(
@@ -219,6 +232,7 @@ fun VanityLandingScreen(
                         items(uiState.items.take(5)) { item ->
                             RecentProductCard(
                                 uiState = item,
+                                onEvent = {},
                                 navTo = navTo
                             )
                         }

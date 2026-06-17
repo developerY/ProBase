@@ -17,25 +17,29 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+data class HydrationWaterDropUiState(
+    val currentLiters: Double,
+    val targetLiters: Double,
+    val modifier: Modifier = Modifier
+)
+
 @Composable
 fun HydrationWaterDropCard(
-    currentLiters: Double,
-    targetLiters: Double,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    uiState: HydrationWaterDropUiState,
+    onEvent: (Unit) -> Unit,
+    navTo: (Unit) -> Unit
 ) {
-    val progress = (currentLiters / targetLiters).toFloat().coerceIn(0f, 1f)
+    val progress = (uiState.currentLiters / uiState.targetLiters).toFloat().coerceIn(0f, 1f)
 
     Card(
-        modifier = modifier
+        modifier = uiState.modifier
             .fillMaxWidth()
-            .height(480.dp) // Large visual section
-            .clickable { onClick() },
+            .height(480.dp) 
+            .clickable { onEvent(Unit) },
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Gradient Background from Spectacular Image
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -52,7 +56,7 @@ fun HydrationWaterDropCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Current Progress",
+                    text = "Current Progress", // TODO: Move to strings
                     style = MaterialTheme.typography.titleLarge,
                     fontFamily = FontFamily.Serif,
                     color = Color.Black.copy(alpha = 0.7f)
@@ -60,7 +64,6 @@ fun HydrationWaterDropCard(
 
                 Spacer(Modifier.height(32.dp))
 
-                // Optimized Water Drop for Summary View
                 WaterDropVisual(
                     progress = progress,
                     modifier = Modifier.size(220.dp)

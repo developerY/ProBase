@@ -85,7 +85,7 @@ fun ExpiringCosmeticsScreen(
             ) {
                 item {
                     Text(
-                        text = "The following items in your collection are approaching their estimated expiry dates. Consider prioritizing their usage or planning for replacements.",
+                        text = stringResource(R.string.applications_kocolor_features_cosmetics_expiring_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 8.dp)

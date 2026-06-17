@@ -1,6 +1,7 @@
 package com.zoewave.probase.ashbike.data.repository
 
 import com.zoewave.probase.core.data.repository.GlassBridgeRepository
+import com.zoewave.probase.core.data.repository.LiveAiRepository
 import com.zoewave.probase.core.data.repository.RitualRepository
 import com.zoewave.probase.core.model.ritual.BeautyRoutine
 import com.zoewave.probase.core.model.ritual.CosmeticItem
@@ -9,7 +10,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FakeRitualRepository @Inject constructor() : RitualRepository, GlassBridgeRepository {
+class FakeRitualRepository @Inject constructor() : RitualRepository, GlassBridgeRepository, LiveAiRepository {
 
     override fun getRoutinesForDay(start: Long, end: Long): Flow<List<BeautyRoutine>> = flowOf(emptyList())
     override suspend fun updateRoutine(routine: BeautyRoutine) {}
@@ -21,6 +22,10 @@ class FakeRitualRepository @Inject constructor() : RitualRepository, GlassBridge
 
     private val _isSessionActive = MutableStateFlow(false)
     override val isGlassSessionActive: StateFlow<Boolean> = _isSessionActive.asStateFlow()
+    override val isSessionActive: StateFlow<Boolean> = _isSessionActive.asStateFlow()
+
+    private val _audioLevel = MutableStateFlow(0f)
+    override val audioLevel: StateFlow<Float> = _audioLevel.asStateFlow()
 
     private val _commands = MutableSharedFlow<String>()
     override val glassCommands: SharedFlow<String> = _commands.asSharedFlow()
@@ -35,5 +40,13 @@ class FakeRitualRepository @Inject constructor() : RitualRepository, GlassBridge
 
     override suspend fun sendGlassCommand(command: String) {
         _commands.emit(command)
+    }
+
+    override fun startSession() {
+        _isSessionActive.value = true
+    }
+
+    override fun stopSession() {
+        _isSessionActive.value = false
     }
 }

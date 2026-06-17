@@ -67,8 +67,8 @@ fun WardrobeLandingScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { navTo(KoColorRoute.Wardrobe) }) { Icon(Icons.Default.Inventory2, contentDescription = "Inventory") }
-                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { Icon(Icons.Default.Search, contentDescription = "Search") }
+                    IconButton(onClick = { navTo(KoColorRoute.Wardrobe) }) { Icon(Icons.Default.Inventory2, contentDescription = stringResource(R.string.applications_kocolor_features_inventory_inventory)) }
+                    IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.applications_kocolor_features_inventory_search)) }
                 }
             )
         }
@@ -78,7 +78,6 @@ fun WardrobeLandingScreen(
             contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            // 1. Welcome Header
             item {
                 Column {
                     Text(
@@ -95,36 +94,44 @@ fun WardrobeLandingScreen(
                 }
             }
 
-            // 2. Summary Row
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     SummaryStatCard(
-                        label = stringResource(R.string.applications_kocolor_features_inventory_total_pieces_label),
-                        value = uiState.totalItems.toString(),
-                        icon = Icons.Default.Checkroom,
-                        modifier = Modifier.weight(1f),
-                        onClick = { navTo(KoColorRoute.WardrobeAnalytics) }
+                        uiState = SummaryStatUiState(
+                            label = stringResource(R.string.applications_kocolor_features_inventory_total_pieces_label),
+                            value = uiState.totalItems.toString(),
+                            icon = Icons.Default.Checkroom,
+                            modifier = Modifier.weight(1f)
+                        ),
+                        onEvent = { navTo(KoColorRoute.WardrobeAnalytics) },
+                        navTo = navTo
                     )
                     
-                    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+                    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
                     SummaryStatCard(
-                        label = stringResource(R.string.applications_kocolor_features_inventory_total_value_label),
-                        value = currencyFormatter.format(uiState.totalInvestment),
-                        icon = Icons.Default.MonetizationOn,
-                        modifier = Modifier.weight(1f),
-                        onClick = { navTo(KoColorRoute.Wardrobe) }
+                        uiState = SummaryStatUiState(
+                            label = stringResource(R.string.applications_kocolor_features_inventory_total_value_label),
+                            value = currencyFormatter.format(uiState.totalInvestment),
+                            icon = Icons.Default.MonetizationOn,
+                            modifier = Modifier.weight(1f)
+                        ),
+                        onEvent = { navTo(KoColorRoute.Wardrobe) },
+                        navTo = navTo
                     )
                 }
             }
 
-            // 3. Verticals Hero Cards
             item {
                 var showTaxonomyInfo by remember { mutableStateOf(false) }
                 if (showTaxonomyInfo) {
-                    WardrobeTaxonomyDialog(onDismiss = { showTaxonomyInfo = false })
+                    WardrobeTaxonomyDialog(
+                        uiState = Unit,
+                        onEvent = { showTaxonomyInfo = false },
+                        navTo = {}
+                    )
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -150,7 +157,7 @@ fun WardrobeLandingScreen(
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
-                                    text = "i",
+                                    text = stringResource(R.string.applications_kocolor_features_inventory_info_icon),
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontFamily = FontFamily.Serif,
                                         fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
@@ -174,19 +181,21 @@ fun WardrobeLandingScreen(
                             val (bgColor, imageModel) = props
                             val metadata = uiState.categoriesMetadata.entries.find { it.key.equals(name, ignoreCase = true) }?.value
                             AtelierWardrobeCard(
-                                name = name,
-                                metadata = metadata,
-                                baseColor = bgColor,
-                                imageModel = imageModel,
-                                navTo = navTo,
-                                modifier = Modifier.fillMaxWidth()
+                                uiState = AtelierWardrobeUiState(
+                                    name = name,
+                                    metadata = metadata,
+                                    baseColor = bgColor,
+                                    imageModel = imageModel,
+                                    modifier = Modifier.fillMaxWidth()
+                                ),
+                                onEvent = {},
+                                navTo = navTo
                             )
                         }
                     }
                 }
             }
 
-            // 4. Recently Added
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     Row(

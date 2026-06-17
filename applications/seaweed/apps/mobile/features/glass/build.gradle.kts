@@ -15,11 +15,11 @@ dependencies {
     implementation(project(":core:data"))
     
     // AI & Gemini
-    implementation(project(":features:ai:firebase"))
     implementation(project(":features:ai:vision"))
     implementation(libs.google.generative.ai)
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.ai)
+    // implementation(project(":features:ai:firebase"))
+    // implementation(platform(libs.firebase.bom))
+    // implementation(libs.firebase.ai)
     
     // ML Kit
     implementation(libs.mlkit.text.recognition)

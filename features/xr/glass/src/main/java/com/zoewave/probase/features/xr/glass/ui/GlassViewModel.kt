@@ -2,26 +2,29 @@ package com.zoewave.probase.features.xr.glass.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zoewave.probase.features.xr.glass.data.GlassSessionRepository
-import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
+import com.zoewave.probase.core.data.repository.LiveAiRepository
 import com.zoewave.probase.core.data.repository.RitualRepository
-import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.core.model.ritual.RoutineTime
+import com.zoewave.probase.features.xr.glass.data.GlassSessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class GlassViewModel @Inject constructor(
     private val ritualRepository: RitualRepository,
-    private val aiSessionManager: FirebaseLiveSessionManager,
+    private val liveAiRepository: LiveAiRepository,
     private val glassSessionRepository: GlassSessionRepository
 ) : ViewModel() {
 
     private val _currentDate = MutableStateFlow(getStartOfDay(System.currentTimeMillis()))
-    private val _isAiActive = MutableStateFlow(false)
-    private val _aiAudioLevel = MutableStateFlow(0f)
     
     val uiState: StateFlow<GlassUiState> = combine(
         _currentDate.flatMapLatest { date ->
@@ -44,8 +47,8 @@ class GlassViewModel @Inject constructor(
                 }
             }
         },
-        _isAiActive,
-        _aiAudioLevel
+        liveAiRepository.isSessionActive,
+        liveAiRepository.audioLevel
     ) { activeRoutine, isAiActive, aiLevel ->
         GlassUiState(
             morningRoutine = activeRoutine,
@@ -54,23 +57,6 @@ class GlassViewModel @Inject constructor(
             aiAudioLevel = aiLevel
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), GlassUiState())
-
-    init {
-        // Mock audio level for visual testing when AI is active
-        viewModelScope.launch {
-            while (true) {
-                if (_isAiActive.value) {
-                    _aiAudioLevel.value = (0.1f..0.9f).random()
-                } else {
-                    _aiAudioLevel.value = 0f
-                }
-                delay(100)
-            }
-        }
-    }
-
-    private fun ClosedRange<Float>.random() = 
-        start + (endInclusive - start) * (java.util.Random().nextFloat())
 
     private fun getStartOfDay(timestamp: Long): Long {
         val cal = java.util.Calendar.getInstance()
@@ -87,35 +73,25 @@ class GlassViewModel @Inject constructor(
             is GlassUiEvent.ToggleStep -> toggleStep(event.stepId)
             GlassUiEvent.ToggleAi -> toggleAi()
             is GlassUiEvent.CloseApp -> { 
-                aiSessionManager.stopConversation()
+                liveAiRepository.stopSession()
             }
         }
     }
 
     private fun toggleAi() {
-        _isAiActive.value = !_isAiActive.value
-        if (_isAiActive.value) {
-            try {
-                aiSessionManager.startConversation()
-            } catch (e: Exception) {
-                _isAiActive.value = false
-            }
+        if (liveAiRepository.isSessionActive.value) {
+            liveAiRepository.stopSession()
         } else {
-            aiSessionManager.stopConversation()
+            liveAiRepository.startSession()
         }
     }
 
     private fun toggleStep(stepId: String) {
-        android.util.Log.d("GlassRitual", "Toggling step: $stepId")
         viewModelScope.launch {
-            val routine = uiState.value.morningRoutine ?: run {
-                android.util.Log.e("GlassRitual", "Routine is null")
-                return@launch
-            }
+            val routine = uiState.value.morningRoutine ?: return@launch
             val updatedSteps = routine.steps.map { step ->
                 if (step.id == stepId) {
                     val newCompleted = !step.isCompleted
-                    android.util.Log.d("GlassRitual", "Step ${step.title} -> $newCompleted")
                     if (newCompleted) {
                         step.productIds.forEach { pid -> incrementProductUsage(pid) }
                     }

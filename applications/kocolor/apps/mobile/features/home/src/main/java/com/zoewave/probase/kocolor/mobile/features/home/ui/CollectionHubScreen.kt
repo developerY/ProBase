@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -51,12 +52,12 @@ fun CollectionHubScreen(
                 title = { LuxuryBrandLogo(uiState = Unit, onEvent = {}, navTo = {}) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { /* Notifications */ }) {
-                        Icon(Icons.Default.NotificationsNone, contentDescription = "Notifications")
+                        Icon(Icons.Default.NotificationsNone, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_notifications))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
@@ -87,7 +88,7 @@ fun CollectionHubScreen(
                     Icon(Icons.Default.Search, null, tint = Color.Gray)
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        text = "Search entire collection",
+                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_search_all),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Gray,
                         modifier = Modifier.weight(1f)
@@ -107,36 +108,42 @@ fun CollectionHubScreen(
             ) {
                 item {
                     ArchiveVerticalCard(
-                        title = "The Vanity",
-                        count = uiState.totalCosmetics,
-                        countLabel = "items tracked",
-                        valueLabel = "NET COLLECTION VALUE",
-                        value = uiState.totalVanityValue,
-                        imageModel = R.drawable.vanity_white_background,
-                        icon = Icons.Default.Face,
-                        breakdown = uiState.cosmeticsByGroup,
-                        onClick = { navTo(KoColorRoute.VanityLanding) }
+                        uiState = ArchiveVerticalUiState(
+                            title = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_vanity_title),
+                            count = uiState.totalCosmetics,
+                            countLabel = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_items_tracked),
+                            valueLabel = stringResource(R.string.applications_kocolor_apps_mobile_features_home_total_value),
+                            value = uiState.totalVanityValue,
+                            imageModel = R.drawable.vanity_white_background,
+                            icon = Icons.Default.Face,
+                            breakdown = uiState.cosmeticsByGroup
+                        ),
+                        onEvent = { navTo(KoColorRoute.VanityLanding) },
+                        navTo = navTo
                     )
                 }
 
                 item {
                     ArchiveVerticalCard(
-                        title = "The Wardrobe",
-                        count = uiState.totalClothing,
-                        countLabel = "pieces curated",
-                        valueLabel = "TOTAL CLOSET INVESTMENT",
-                        value = uiState.totalWardrobeValue,
-                        imageModel = R.drawable.wardrobe_background,
-                        icon = Icons.Default.Checkroom,
-                        breakdown = uiState.clothingByCategory,
-                        onClick = { navTo(KoColorRoute.WardrobeLanding) }
+                        uiState = ArchiveVerticalUiState(
+                            title = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_wardrobe_title),
+                            count = uiState.totalClothing,
+                            countLabel = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_pieces_curated),
+                            valueLabel = "TOTAL CLOSET INVESTMENT", // TODO: Move to strings
+                            value = uiState.totalWardrobeValue,
+                            imageModel = R.drawable.wardrobe_background,
+                            icon = Icons.Default.Checkroom,
+                            breakdown = uiState.clothingByCategory
+                        ),
+                        onEvent = { navTo(KoColorRoute.WardrobeLanding) },
+                        navTo = navTo
                     )
                 }
 
                 if (uiState.savedSuggestions.isNotEmpty()) {
                     item {
                         Text(
-                            text = "BLUEPRINT HISTORY",
+                            text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_hub_blueprint_history),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 2.sp,
@@ -146,8 +153,9 @@ fun CollectionHubScreen(
 
                     items(uiState.savedSuggestions) { analysis ->
                         CuratedCollectionCard(
-                            analysis = analysis,
-                            onClick = { navTo(KoColorRoute.CollectionDetail(analysis.id)) }
+                            uiState = CuratedCollectionUiState(analysis),
+                            onEvent = { navTo(KoColorRoute.CollectionDetail(analysis.id)) },
+                            navTo = navTo
                         )
                     }
                 }
@@ -156,11 +164,15 @@ fun CollectionHubScreen(
     }
 }
 
+data class CuratedCollectionUiState(val analysis: SavedAnalysis)
+
 @Composable
 private fun CuratedCollectionCard(
-    analysis: SavedAnalysis,
-    onClick: () -> Unit
+    uiState: CuratedCollectionUiState,
+    onEvent: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val analysis = uiState.analysis
     val dateFormat = remember { java.text.SimpleDateFormat("MMM dd, yyyy - HH:mm", java.util.Locale.getDefault()) }
     val dateStr = dateFormat.format(java.util.Date(analysis.timestamp))
 
@@ -168,9 +180,9 @@ private fun CuratedCollectionCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .clickable { onClick() },
+            .clickable { onEvent() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F2F8)) // Soft Lavender Gray
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F2F8)) 
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -194,7 +206,6 @@ private fun CuratedCollectionCard(
             Spacer(Modifier.height(12.dp))
 
             Row(verticalAlignment = Alignment.Top) {
-                // Feature Images
                 Row(modifier = Modifier.weight(0.4f), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     analysis.advice.faceUri?.let {
                         AsyncImage(
@@ -221,7 +232,7 @@ private fun CuratedCollectionCard(
                 Spacer(Modifier.width(12.dp))
 
                 Text(
-                    text = analysis.advice.title ?: "Curated Look",
+                    text = analysis.advice.title ?: stringResource(com.zoewave.probase.kocolor.mobile.features.color.R.string.applications_kocolor_apps_mobile_features_color_curated_look),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
@@ -239,7 +250,6 @@ private fun CuratedCollectionCard(
 
             Spacer(Modifier.height(12.dp))
 
-            // Palette
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -258,32 +268,38 @@ private fun CuratedCollectionCard(
     }
 }
 
+data class ArchiveVerticalUiState(
+    val title: String,
+    val count: Int,
+    val countLabel: String,
+    val valueLabel: String,
+    val value: Double,
+    val imageModel: Any,
+    val icon: ImageVector,
+    val breakdown: Map<String, Int> = emptyMap(),
+    val modifier: Modifier = Modifier
+)
+
 @Composable
 private fun ArchiveVerticalCard(
-    title: String,
-    count: Int,
-    countLabel: String,
-    valueLabel: String,
-    value: Double,
-    imageModel: Any,
-    icon: ImageVector,
-    breakdown: Map<String, Int> = emptyMap(),
-    onClick: () -> Unit
+    uiState: ArchiveVerticalUiState,
+    onEvent: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
 
     Card(
-        modifier = Modifier
+        modifier = uiState.modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .clickable { onClick() },
+            .clickable { onEvent() },
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             AsyncImage(
-                model = imageModel,
+                model = uiState.imageModel,
                 contentDescription = null,
                 modifier = Modifier.matchParentSize().alpha(0.15f),
                 contentScale = ContentScale.Crop
@@ -300,13 +316,13 @@ private fun ArchiveVerticalCard(
                 ) {
                     Column {
                         Text(
-                            text = title,
+                            text = uiState.title,
                             style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Serif
                         )
                         Text(
-                            text = "$count $countLabel",
+                            text = "${uiState.count} ${uiState.countLabel}",
                             style = MaterialTheme.typography.bodyLarge,
                             color = Color.Gray
                         )
@@ -318,18 +334,17 @@ private fun ArchiveVerticalCard(
                         modifier = Modifier.size(48.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Icon(icon, null, modifier = Modifier.size(24.dp))
+                            Icon(uiState.icon, null, modifier = Modifier.size(24.dp))
                         }
                     }
                 }
 
-                // More Info: Breakdown
-                if (breakdown.isNotEmpty()) {
+                if (uiState.breakdown.isNotEmpty()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        breakdown.entries.sortedByDescending { it.value }.take(3).forEach { (cat, num) ->
+                        uiState.breakdown.entries.sortedByDescending { it.value }.take(3).forEach { (cat, num) ->
                             Column {
                                 Text(
                                     text = num.toString(),
@@ -349,13 +364,13 @@ private fun ArchiveVerticalCard(
 
                 Column {
                     Text(
-                        text = currencyFormatter.format(value),
+                        text = currencyFormatter.format(uiState.value),
                         style = MaterialTheme.typography.headlineLarge.copy(fontSize = 42.sp),
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Serif
                     )
                     Text(
-                        text = valueLabel,
+                        text = uiState.valueLabel,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp,

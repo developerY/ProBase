@@ -17,11 +17,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.cosmetics.R
+import com.zoewave.probase.kocolor.model.KoColorRoute
+
+data class ProfessionalTaxonomyUiState(
+    val modifier: Modifier = Modifier
+)
 
 @Composable
-fun ProfessionalTaxonomyDialog(onDismiss: () -> Unit) {
+fun ProfessionalTaxonomyDialog(
+    uiState: ProfessionalTaxonomyUiState,
+    onEvent: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = onEvent,
         title = { 
             Text(
                 stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_title), 
@@ -37,53 +46,65 @@ fun ProfessionalTaxonomyDialog(onDismiss: () -> Unit) {
             ) {
                 item {
                     TaxonomySection(
-                        level = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_level_format, "1"),
-                        title = "Macro Categories (The UI Layer)",
-                        description = "Top-level intuitive 'buckets' for body-zone mapping.",
-                        items = listOf(
-                            "Skincare & Prep" to "Applied before pigment.",
-                            "Complexion (Base)" to "Unifies skin tone.",
-                            "Color & Dimension" to "Life, shadow, and light.",
-                            "Eyes & Brows" to "Upper face definition.",
-                            "Lips" to "Color and care.",
-                            "Tools & Hygiene" to "Application and sanitization."
-                        )
+                        uiState = TaxonomySectionUiState(
+                            level = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_level_format, "1"),
+                            title = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_macro_title),
+                            description = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_macro_desc),
+                            items = listOf(
+                                "Skincare & Prep" to "Applied before pigment.",
+                                "Complexion (Base)" to "Unifies skin tone.",
+                                "Color & Dimension" to "Life, shadow, and light.",
+                                "Eyes & Brows" to "Upper face definition.",
+                                "Lips" to "Color and care.",
+                                "Tools & Hygiene" to "Application and sanitization."
+                            )
+                        ),
+                        onEvent = {},
+                        navTo = {}
                     )
                 }
                 
                 item {
                     TaxonomySection(
-                        level = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_level_format, "2"),
-                        title = "Micro Categories (Product Type)",
-                        description = "Specific product types ensuring a clean, technical database.",
-                        items = listOf(
-                            "Skincare" to "Cleanser, Toner, Serum, SPF, Primer.",
-                            "Complexion" to "Foundation, Concealer, Setting Powder.",
-                            "Dimension" to "Blush, Bronzer, Contour, Highlighter.",
-                            "Eyes" to "Eyeshadow, Eyeliner, Mascara, Brow Gel.",
-                            "Lips" to "Lipstick, Gloss, Liner, Stain, Balm."
-                        )
+                        uiState = TaxonomySectionUiState(
+                            level = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_level_format, "2"),
+                            title = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_micro_title),
+                            description = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_micro_desc),
+                            items = listOf(
+                                "Skincare" to "Cleanser, Toner, Serum, SPF, Primer.",
+                                "Complexion" to "Foundation, Concealer, Setting Powder.",
+                                "Dimension" to "Blush, Bronzer, Contour, Highlighter.",
+                                "Eyes" to "Eyeshadow, Eyeliner, Mascara, Brow Gel.",
+                                "Lips" to "Lipstick, Gloss, Liner, Stain, Balm."
+                            )
+                        ),
+                        onEvent = {},
+                        navTo = {}
                     )
                 }
 
                 item {
                     TaxonomySection(
-                        level = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_level_format, "3"),
-                        title = "Professional Facets (The Engine Layer)",
-                        description = "Expert-status attributes for algorithmic synergy and filtering.",
-                        items = listOf(
-                            "Formulation" to "Liquid, Cream, Powder, Gel, Balm.",
-                            "Chemistry" to "Water, Silicone, or Oil bases (Critical for layering).",
-                            "Finish" to "Matte, Satin, Radiant, Metallic, Glitter.",
-                            "Coverage" to "Sheer, Light, Medium, Full, Buildable.",
-                            "Temperature" to "Warm, Cool, Neutral, Olive (Engine alignment)."
-                        )
+                        uiState = TaxonomySectionUiState(
+                            level = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_level_format, "3"),
+                            title = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_facets_title),
+                            description = stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_facets_desc),
+                            items = listOf(
+                                "Formulation" to "Liquid, Cream, Powder, Gel, Balm.",
+                                "Chemistry" to "Water, Silicone, or Oil bases (Critical for layering).",
+                                "Finish" to "Matte, Satin, Radiant, Metallic, Glitter.",
+                                "Coverage" to "Sheer, Light, Medium, Full, Buildable.",
+                                "Temperature" to "Warm, Cool, Neutral, Olive (Engine alignment)."
+                            )
+                        ),
+                        onEvent = {},
+                        navTo = {}
                     )
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = onEvent) {
                 Text(stringResource(R.string.applications_kocolor_features_cosmetics_understand), fontWeight = FontWeight.Bold)
             }
         },
@@ -92,29 +113,36 @@ fun ProfessionalTaxonomyDialog(onDismiss: () -> Unit) {
     )
 }
 
+data class TaxonomySectionUiState(
+    val level: String,
+    val title: String,
+    val description: String,
+    val items: List<Pair<String, String>>,
+    val modifier: Modifier = Modifier
+)
+
 @Composable
 private fun TaxonomySection(
-    level: String,
-    title: String,
-    description: String,
-    items: List<Pair<String, String>>
+    uiState: TaxonomySectionUiState,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(modifier = uiState.modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Column {
             Text(
-                text = level.uppercase(),
+                text = uiState.level.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.sp
             )
             Text(
-                text = title,
+                text = uiState.title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = description,
+                text = uiState.description,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.alpha(0.7f)
             )
@@ -126,7 +154,7 @@ private fun TaxonomySection(
             border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items.forEach { (label, detail) ->
+                uiState.items.forEach { (label, detail) ->
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
                             text = "•",
@@ -157,6 +185,10 @@ private fun TaxonomySection(
 @Composable
 private fun ProfessionalTaxonomyDialogPreview() {
     MaterialTheme {
-        ProfessionalTaxonomyDialog(onDismiss = {})
+        ProfessionalTaxonomyDialog(
+            uiState = ProfessionalTaxonomyUiState(),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }

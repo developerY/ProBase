@@ -24,7 +24,7 @@ import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import com.zoewave.ashbike.data.repository.bike.BikeRepository
 import com.zoewave.ashbike.mobile.glass.audio.VoiceGearController
 import com.zoewave.ashbike.mobile.glass.ui.GlassApp
-import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
+import com.zoewave.probase.core.data.repository.LiveAiRepository
 import com.zoewave.probase.features.xr.glass.GlassAudioInterface
 import com.zoewave.probase.features.xr.glass.GlassesLifecycleObserver
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,7 +39,7 @@ class GlassesMainActivity : ComponentActivity() {
 
     // Inject the shared repository instance
     @Inject lateinit var repository: BikeRepository
-    @Inject lateinit var firebaseLiveSessionManager: FirebaseLiveSessionManager
+    @Inject lateinit var liveAiRepository: LiveAiRepository
     private lateinit var audioInterface: GlassAudioInterface
     private lateinit var voiceGearController: VoiceGearController
 
@@ -74,14 +74,14 @@ class GlassesMainActivity : ComponentActivity() {
             if (command == "AI Assistant") {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
                     @SuppressLint("MissingPermission")
-                    firebaseLiveSessionManager.startConversation()
+                    liveAiRepository.startSession()
                 }
             } else {
                 audioInterface.speak("Changing $command")
             }
         }
         lifecycle.addObserver(voiceGearController)
-        lifecycle.addObserver(firebaseLiveSessionManager)
+        lifecycle.addObserver(liveAiRepository)
 
         checkAndRequestAudioPermission()
 

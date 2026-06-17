@@ -9,15 +9,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.kocolor.model.KoColorRoute
+
+data class SubCategoryUiState(
+    val micro: MicroCategory,
+    val itemCount: Int,
+    val modifier: Modifier = Modifier
+)
 
 @Composable
 fun SubCategoryCard(
-    micro: MicroCategory,
-    itemCount: Int,
-    modifier: Modifier = Modifier
+    uiState: SubCategoryUiState,
+    onEvent: (Unit) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = uiState.modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
     ) {
@@ -27,13 +34,13 @@ fun SubCategoryCard(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = micro.displayName,
+                text = uiState.micro.displayName,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.secondary
             )
             Badge(containerColor = MaterialTheme.colorScheme.secondary) {
-                Text(text = itemCount.toString(), modifier = Modifier.padding(horizontal = 4.dp))
+                Text(text = uiState.itemCount.toString(), modifier = Modifier.padding(horizontal = 4.dp))
             }
         }
     }

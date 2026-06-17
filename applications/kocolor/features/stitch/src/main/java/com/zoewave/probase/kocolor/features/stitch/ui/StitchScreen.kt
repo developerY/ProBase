@@ -25,9 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.stitch.R
-import com.zoewave.probase.kocolor.features.stitch.ui.components.SectionHeader
-import com.zoewave.probase.kocolor.features.stitch.ui.components.StitchItemPickerOverlay
-import com.zoewave.probase.kocolor.features.stitch.ui.components.StitchItemRow
+import com.zoewave.probase.kocolor.features.stitch.ui.components.*
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Preview(showBackground = true)
@@ -77,7 +75,6 @@ fun StitchScreen(
                 contentPadding = PaddingValues(24.dp),
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
-                // 1. Metadata Section
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         OutlinedTextField(
@@ -99,21 +96,27 @@ fun StitchScreen(
                     }
                 }
 
-                // 2. The Wardrobe (Outfit) Section
                 item {
-                    SectionHeader(stringResource(R.string.applications_kocolor_features_stitch_wardrobe_section), Icons.Default.Checkroom)
+                    SectionHeader(
+                        uiState = SectionHeaderUiState(stringResource(R.string.applications_kocolor_features_stitch_wardrobe_section), Icons.Default.Checkroom),
+                        onEvent = {},
+                        navTo = {}
+                    )
                 }
 
                 advice.outfitSuggestions.forEachIndexed { outfitIdx, outfit ->
                     items(outfit.suggestedItems.size) { itemIdx ->
                         val item = outfit.suggestedItems[itemIdx]
                         StitchItemRow(
-                            title = item.name,
-                            category = item.category,
-                            imageUrl = item.imageUrl,
-                            isOwned = item.isOwned,
+                            uiState = StitchItemRowUiState(
+                                title = item.name,
+                                category = item.category,
+                                imageUrl = item.imageUrl,
+                                isOwned = item.isOwned
+                            ),
                             onPickClick = { onEvent(StitchEvent.RequestPickItem(PickingTarget.Outfit(outfitIdx, itemIdx))) },
-                            onRemoveClick = { onEvent(StitchEvent.RemoveOutfitItem(outfitIdx, itemIdx)) }
+                            onRemoveClick = { onEvent(StitchEvent.RemoveOutfitItem(outfitIdx, itemIdx)) },
+                            navTo = navTo
                         )
                     }
                 }
@@ -130,20 +133,26 @@ fun StitchScreen(
                     }
                 }
 
-                // 3. The Vanity Section
                 item {
-                    SectionHeader(stringResource(R.string.applications_kocolor_features_stitch_vanity_section), Icons.Default.Face)
+                    SectionHeader(
+                        uiState = SectionHeaderUiState(stringResource(R.string.applications_kocolor_features_stitch_vanity_section), Icons.Default.Face),
+                        onEvent = {},
+                        navTo = {}
+                    )
                 }
 
                 items(advice.makeupSuggestions.size) { index ->
                     val makeup = advice.makeupSuggestions[index]
                     StitchItemRow(
-                        title = makeup.suggestedProductName ?: makeup.category,
-                        category = makeup.category,
-                        imageUrl = makeup.suggestedProductImageUrl,
-                        isOwned = makeup.productId != null,
+                        uiState = StitchItemRowUiState(
+                            title = makeup.suggestedProductName ?: makeup.category,
+                            category = makeup.category,
+                            imageUrl = makeup.suggestedProductImageUrl,
+                            isOwned = makeup.productId != null
+                        ),
                         onPickClick = { onEvent(StitchEvent.RequestPickItem(PickingTarget.Makeup(index))) },
-                        onRemoveClick = { onEvent(StitchEvent.RemoveMakeupSuggestion(index)) }
+                        onRemoveClick = { onEvent(StitchEvent.RemoveMakeupSuggestion(index)) },
+                        navTo = navTo
                     )
                 }
 
@@ -159,7 +168,6 @@ fun StitchScreen(
                     }
                 }
 
-                // Danger Zone
                 if (uiState.collectionId != 0L) {
                     item {
                         TextButton(
@@ -179,7 +187,6 @@ fun StitchScreen(
                 item { Spacer(Modifier.height(100.dp)) }
             }
 
-            // OVERLAY: The Item Picker
             AnimatedVisibility(
                 visible = uiState.pickingTarget != null,
                 enter = slideInVertically { it } + fadeIn(),

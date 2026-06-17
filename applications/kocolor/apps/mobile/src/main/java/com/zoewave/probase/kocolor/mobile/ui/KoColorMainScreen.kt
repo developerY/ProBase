@@ -24,14 +24,19 @@ import com.zoewave.probase.kocolor.mobile.core.ui.theme.KoColorTheme
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.kocolor.model.topLevelRoutes
 
+data class KoColorMainUiState(
+    val mainState: MainUiState,
+    val windowSizeClass: WindowSizeClass,
+    val modifier: Modifier = Modifier
+)
+
 @Composable
 fun KoColorMainScreen(
-    windowSizeClass: WindowSizeClass,
-    viewModel: MainViewModel = hiltViewModel(),
+    uiState: KoColorMainUiState,
+    onEvent: (MainEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    val darkTheme = when (uiState.theme) {
+    val darkTheme = when (uiState.mainState.theme) {
         "LIGHT" -> false
         "DARK" -> true
         else -> isSystemInDarkTheme()
@@ -39,7 +44,7 @@ fun KoColorMainScreen(
 
     KoColorTheme(
         darkTheme = darkTheme,
-        palette = uiState.palette
+        palette = uiState.mainState.palette
     ) {
         NavigationSuiteScaffold(
             navigationSuiteItems = {
@@ -51,19 +56,19 @@ fun KoColorMainScreen(
                         else -> null
                     }
                     item(
-                        selected = uiState.currentTab::class == route::class,
-                        onClick = { viewModel.navigateTo(route) },
+                        selected = uiState.mainState.currentTab::class == route::class,
+                        onClick = { onEvent(MainEvent.NavigateTo(route)) },
                         icon = { route.icon?.let { Icon(it, contentDescription = labelId?.let { stringResource(it) }) } },
                         label = { labelId?.let { Text(stringResource(it)) } }
                     )
                 }
             },
-            modifier = Modifier.fillMaxSize()
+            modifier = uiState.modifier.fillMaxSize()
         ) {
             NavDisplay<KoColorRoute>(
-                backStack = uiState.backStack,
+                backStack = uiState.mainState.backStack,
                 onBack = { 
-                    viewModel.navigateBack()
+                    onEvent(MainEvent.NavigateBack)
                 },
                 entryDecorators = listOf(
                     rememberSaveableStateHolderNavEntryDecorator(),
@@ -72,21 +77,19 @@ fun KoColorMainScreen(
                 entryProvider = { key ->
                     koColorNavEntryProvider(
                         route = key,
-                        windowSizeClass = windowSizeClass,
-                        onNavigateTo = { dest ->
-                            viewModel.navigateTo(dest)
-                        },
+                        windowSizeClass = uiState.windowSizeClass,
+                        onNavigateTo = navTo,
                         onBack = {
-                            viewModel.navigateBack()
+                            onEvent(MainEvent.NavigateBack)
                         },
-                        onFaceCaptured = viewModel::onFaceCaptured,
-                        onHairCaptured = viewModel::onHairCaptured,
-                        onShoesCaptured = viewModel::onShoesCaptured,
-                        onClothesCaptured = viewModel::onClothesCaptured,
-                        onInventoryItemCaptured = viewModel::onInventoryItemCaptured,
-                        onRitualStepCaptured = viewModel::onRitualStepCaptured,
-                        onColorCaptured = viewModel::onColorCaptured,
-                        onCodeScanned = viewModel::onCodeScanned
+                        onFaceCaptured = { onEvent(MainEvent.FaceCaptured(it)) },
+                        onHairCaptured = { onEvent(MainEvent.HairCaptured(it)) },
+                        onShoesCaptured = { onEvent(MainEvent.ShoesCaptured(it)) },
+                        onClothesCaptured = { onEvent(MainEvent.ClothesCaptured(it)) },
+                        onInventoryItemCaptured = { onEvent(MainEvent.InventoryItemCaptured(it)) },
+                        onRitualStepCaptured = { r, s, u -> onEvent(MainEvent.RitualStepCaptured(r, s, u)) },
+                        onColorCaptured = { onEvent(MainEvent.ColorCaptured(it)) },
+                        onCodeScanned = { onEvent(MainEvent.CodeScanned(it)) }
                     )
                 }
             )
@@ -100,7 +103,12 @@ fun KoColorMainScreen(
 private fun KoColorMainScreenPreview() {
     KoColorTheme {
         KoColorMainScreen(
-            windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(400.dp, 800.dp))
+            uiState = KoColorMainUiState(
+                mainState = MainUiState(),
+                windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(400.dp, 800.dp))
+            ),
+            onEvent = {},
+            navTo = {}
         )
     }
 }

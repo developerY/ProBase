@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:db"))
     implementation(project(":applications:kocolor:apps:mobile:core"))
+    implementation(project(":applications:kocolor:apps:mobile:features:color"))
     implementation(project(":applications:kocolor:features:analyzer"))
     implementation(project(":applications:kocolor:features:suggestions"))
     implementation(project(":applications:kocolor:features:routines"))

@@ -38,21 +38,21 @@ fun HeroRitualCard(
 
     val title = when (routine.time) {
         RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_morning_ritual)
-        RoutineTime.MEALS -> "Meals Ritual"
+        RoutineTime.MEALS -> stringResource(R.string.applications_kocolor_features_routines_meals_ritual)
         RoutineTime.EVENING -> stringResource(R.string.applications_kocolor_features_routines_evening_ritual)
         else -> routine.title
     }
 
     val label = when (routine.time) {
         RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_current_ritual)
-        RoutineTime.MEALS -> "BIO-SYNC RITUAL"
+        RoutineTime.MEALS -> stringResource(R.string.applications_kocolor_features_routines_bio_sync_ritual)
         RoutineTime.EVENING -> stringResource(R.string.applications_kocolor_features_routines_evening_ritual_label)
-        else -> "RITUAL"
+        else -> stringResource(R.string.applications_kocolor_features_routines_ritual_label)
     }
 
     val description = when (routine.time) {
         RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_morning_desc)
-        RoutineTime.MEALS -> "Nourish your metabolism with precise biochemical timing."
+        RoutineTime.MEALS -> stringResource(R.string.applications_kocolor_features_routines_meals_desc)
         RoutineTime.EVENING -> stringResource(R.string.applications_kocolor_features_routines_evening_desc)
         else -> ""
     }
@@ -95,7 +95,6 @@ fun HeroRitualCard(
                     modifier = Modifier.padding(28.dp).fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // 1. TOP: Title
                     Text(
                         text = title,
                         style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
@@ -104,7 +103,6 @@ fun HeroRitualCard(
                         color = Color.Black
                     )
                     
-                    // 2. MIDDLE: Progress label and circle
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -160,7 +158,6 @@ fun HeroRitualCard(
                         }
                     }
 
-                    // 3. BOTTOM: Duration and rest
                     Column {
                         Text(
                             text = stringResource(R.string.applications_kocolor_features_routines_duration_format, 15),
@@ -187,7 +184,7 @@ fun DailyInsightBanner(
     navTo: (KoColorRoute) -> Unit
 ) {
     Surface(
-        color = Color(0xFFFDF0ED), // Soft Peach
+        color = Color(0xFFFDF0ED),
         shape = RoundedCornerShape(24.dp),
         modifier = Modifier.fillMaxWidth()
     ) {

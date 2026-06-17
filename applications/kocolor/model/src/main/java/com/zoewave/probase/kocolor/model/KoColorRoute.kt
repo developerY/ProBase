@@ -24,6 +24,9 @@ sealed class KoColorRoute {
     data object VanityLanding : KoColorRoute()
 
     @Serializable
+    data class BoxCapture(val mode: String = "BOX") : KoColorRoute()
+
+    @Serializable
     data object CosmeticAnalytics : KoColorRoute()
     
     @Serializable

@@ -22,6 +22,19 @@ data class MainUiState(
     val currentTab: KoColorRoute = KoColorRoute.Home
 )
 
+sealed class MainEvent {
+    data class NavigateTo(val route: KoColorRoute) : MainEvent()
+    data object NavigateBack : MainEvent()
+    data class FaceCaptured(val uri: String) : MainEvent()
+    data class ClothesCaptured(val uri: String) : MainEvent()
+    data class HairCaptured(val uri: String) : MainEvent()
+    data class ShoesCaptured(val uri: String) : MainEvent()
+    data class InventoryItemCaptured(val uri: String) : MainEvent()
+    data class RitualStepCaptured(val routineId: Long, val stepId: String, val uri: String) : MainEvent()
+    data class ColorCaptured(val uri: String) : MainEvent()
+    data class CodeScanned(val code: String) : MainEvent()
+}
+
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val settings: KoColorSettings,
@@ -39,7 +52,6 @@ class MainViewModel @Inject constructor(
         settings.colorPaletteFlow
     ) { backStack, theme, palette ->
         val currentRoute = backStack.last()
-        // Find which top level tab this route belongs to
         val currentTab = topLevelRoutes.find { it::class == currentRoute::class } 
             ?: topLevelRoutes.first()
 
@@ -55,7 +67,22 @@ class MainViewModel @Inject constructor(
         initialValue = MainUiState()
     )
 
-    fun navigateTo(route: KoColorRoute) {
+    fun onEvent(event: MainEvent) {
+        when (event) {
+            is MainEvent.NavigateTo -> navigateTo(event.route)
+            MainEvent.NavigateBack -> navigateBack()
+            is MainEvent.FaceCaptured -> sessionRepository.setFaceUri(event.uri)
+            is MainEvent.ClothesCaptured -> sessionRepository.setClothesUri(event.uri)
+            is MainEvent.HairCaptured -> sessionRepository.setHairUri(event.uri)
+            is MainEvent.ShoesCaptured -> sessionRepository.setShoesUri(event.uri)
+            is MainEvent.InventoryItemCaptured -> sessionRepository.setCapturedItemUri(event.uri)
+            is MainEvent.RitualStepCaptured -> handleRitualStepCaptured(event.routineId, event.stepId, event.uri)
+            is MainEvent.ColorCaptured -> sessionRepository.setCapturedItemUri(event.uri)
+            is MainEvent.CodeScanned -> sessionRepository.setLastScannedCode(event.code)
+        }
+    }
+
+    private fun navigateTo(route: KoColorRoute) {
         if (route == KoColorRoute.Back) {
             navigateBack()
             return
@@ -67,33 +94,13 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun navigateBack() {
+    private fun navigateBack() {
         if (_backStack.value.size > 1) {
             _backStack.value = _backStack.value.removeAt(_backStack.value.size - 1)
         }
     }
 
-    fun onFaceCaptured(uri: String) {
-        sessionRepository.setFaceUri(uri)
-    }
-
-    fun onClothesCaptured(uri: String) {
-        sessionRepository.setClothesUri(uri)
-    }
-
-    fun onHairCaptured(uri: String) {
-        sessionRepository.setHairUri(uri)
-    }
-
-    fun onShoesCaptured(uri: String) {
-        sessionRepository.setShoesUri(uri)
-    }
-
-    fun onInventoryItemCaptured(uri: String) {
-        sessionRepository.setCapturedItemUri(uri)
-    }
-
-    fun onRitualStepCaptured(routineId: Long, stepId: String, uri: String) {
+    private fun handleRitualStepCaptured(routineId: Long, stepId: String, uri: String) {
         viewModelScope.launch {
             val routine = routineDao.getRoutineById(routineId).first() ?: return@launch
             val model = routine.toModel()
@@ -102,13 +109,5 @@ class MainViewModel @Inject constructor(
             }
             routineDao.updateRoutine(model.copy(steps = updatedSteps).toEntity())
         }
-    }
-
-    fun onColorCaptured(uri: String) {
-        sessionRepository.setCapturedItemUri(uri) // Reusing for simplicity or can have dedicated field
-    }
-
-    fun onCodeScanned(code: String) {
-        sessionRepository.setLastScannedCode(code)
     }
 }

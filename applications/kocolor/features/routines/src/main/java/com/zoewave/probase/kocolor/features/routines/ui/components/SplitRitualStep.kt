@@ -16,22 +16,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.core.model.ritual.RoutineStep
 
+data class SplitRitualStepUiState(
+    val step: RoutineStep,
+    val linkedProduct: CosmeticItem?,
+    val isReorderMode: Boolean,
+    val modifier: Modifier = Modifier
+)
+
 @Composable
 fun SplitRitualStep(
-    uiState: Triple<RoutineStep, CosmeticItem?, Boolean>,
+    uiState: SplitRitualStepUiState,
     onEvent: (Unit) -> Unit,
     onInfoClick: (RoutineStep) -> Unit,
-    navTo: (KoColorRoute) -> Unit,
-    modifier: Modifier = Modifier
+    navTo: (KoColorRoute) -> Unit
 ) {
-    val (step, linkedProduct, isReorderMode) = uiState
+    val step = uiState.step
+    val linkedProduct = uiState.linkedProduct
+    val isReorderMode = uiState.isReorderMode
     val isCompleted = step.isCompleted
     val hasAmountInfo = linkedProduct?.amountPerUse != null && linkedProduct.amountRemaining != null
     
@@ -41,13 +51,13 @@ fun SplitRitualStep(
     val fillLevel = linkedProduct?.fillLevel ?: 1.0
     val statusColor = when {
         !hasAmountInfo -> Color.Gray.copy(alpha = 0.3f)
-        fillLevel > 0.5 -> Color(0xFF4CAF50) // Green
-        fillLevel > 0.2 -> Color(0xFFFFA000) // Orange
-        else -> Color(0xFFD32F2F) // Red
+        fillLevel > 0.5 -> Color(0xFF4CAF50) 
+        fillLevel > 0.2 -> Color(0xFFFFA000) 
+        else -> Color(0xFFD32F2F) 
     }
 
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = uiState.modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = backgroundColor,
         border = if (!isCompleted && hasAmountInfo) BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)) else null
@@ -56,7 +66,6 @@ fun SplitRitualStep(
             modifier = Modifier.height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // LEFT ZONE: Mark Done
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -96,12 +105,11 @@ fun SplitRitualStep(
                 color = if (isCompleted) Color.Black.copy(alpha = 0.05f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
             )
 
-            // RIGHT ZONE: Info / Knowledge Hub
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clickable(onClick = { navTo(KoColorRoute.Back) }) // Triggers Knowledge Hub navigation via parent lambda
+                    .clickable(onClick = { navTo(KoColorRoute.Back) }) 
                     .padding(start = 20.dp, top = 20.dp, bottom = 20.dp, end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -113,7 +121,7 @@ fun SplitRitualStep(
                         modifier = Modifier.alpha(if (isCompleted) 0.6f else 1f)
                     )
                     Text(
-                        text = if (hasAmountInfo) "${(fillLevel * 100).toInt()}% Remaining" else "Missing consumption data",
+                        text = if (hasAmountInfo) stringResource(R.string.applications_kocolor_features_routines_remaining_format_percent, (fillLevel * 100).toInt()) else stringResource(R.string.applications_kocolor_features_routines_missing_consumption),
                         style = MaterialTheme.typography.bodySmall,
                         color = if (hasAmountInfo) statusColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )
@@ -122,7 +130,7 @@ fun SplitRitualStep(
                 IconButton(onClick = { onInfoClick(step) }) {
                     Icon(
                         imageVector = Icons.Default.Info, 
-                        contentDescription = "Scientific Info",
+                        contentDescription = stringResource(R.string.applications_kocolor_features_routines_scientific_info),
                         tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                         modifier = Modifier.size(20.dp)
                     )
@@ -137,7 +145,7 @@ fun SplitRitualStep(
 private fun SplitRitualStepPreview() {
     MaterialTheme {
         SplitRitualStep(
-            uiState = Triple(RoutineStep(id = "1", title = "Step", layeringOrder = 0), null, false),
+            uiState = SplitRitualStepUiState(RoutineStep(id = "1", title = "Step", layeringOrder = 0), null, false),
             onEvent = {},
             onInfoClick = {},
             navTo = {}

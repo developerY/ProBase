@@ -11,7 +11,6 @@ android {
 dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:data"))
-    implementation(project(":features:ai:firebase"))
 
     implementation(libs.androidx.glimmer.core)
     implementation(libs.androidx.glimmer.google.fonts)

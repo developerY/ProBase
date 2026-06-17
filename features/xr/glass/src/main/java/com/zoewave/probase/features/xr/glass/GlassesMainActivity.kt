@@ -19,8 +19,8 @@ import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.probase.features.xr.glass.data.GlassSessionRepository
 import com.zoewave.probase.features.xr.glass.ui.GlassApp
 import com.zoewave.probase.features.xr.glass.ui.GlimmerSample
-import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
 import com.zoewave.probase.core.data.repository.GlassBridgeRepository
+import com.zoewave.probase.core.data.repository.LiveAiRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -31,7 +31,7 @@ class GlassesMainActivity : ComponentActivity() {
 
     @Inject lateinit var glassBridgeRepository: GlassBridgeRepository
     @Inject lateinit var glassSessionRepository: GlassSessionRepository
-    @Inject lateinit var firebaseLiveSessionManager: FirebaseLiveSessionManager
+    @Inject lateinit var liveAiRepository: LiveAiRepository
     private lateinit var audioInterface: GlassAudioInterface
 
     private var displayController: ProjectedDisplayController? = null
@@ -53,7 +53,7 @@ class GlassesMainActivity : ComponentActivity() {
             "Resuming your ritual.",
         )
         lifecycle.addObserver(audioInterface)
-        lifecycle.addObserver(firebaseLiveSessionManager)
+        lifecycle.addObserver(liveAiRepository)
 
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onDestroy(owner: LifecycleOwner) {

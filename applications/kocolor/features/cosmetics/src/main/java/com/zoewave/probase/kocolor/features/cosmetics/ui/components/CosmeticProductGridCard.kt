@@ -22,6 +22,7 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 @Composable
 fun CosmeticProductGridCard(
     uiState: CosmeticItem,
+    onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val item = uiState
@@ -42,7 +43,6 @@ fun CosmeticProductGridCard(
                 Box(modifier = Modifier.fillMaxSize().background(item.colorHex?.let { Color(android.graphics.Color.parseColor(it)) } ?: MaterialTheme.colorScheme.surfaceVariant))
             }
 
-            // Scrim
             Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f)), startY = 200f)))
             
             Column(modifier = Modifier.align(Alignment.BottomStart).padding(12.dp)) {

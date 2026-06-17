@@ -1,6 +1,8 @@
 package com.zoewave.probase.seaweed.data
 
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.LiveAiRepository
+import com.zoewave.probase.core.data.repository.BYOKLiveAiRepository
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
 import dagger.Binds
 import dagger.Module
@@ -52,4 +54,10 @@ abstract class DataModule {
     abstract fun bindCategoryRepository(
         impl: CategoryRepositoryImpl
     ): CategoryRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLiveAiRepository(
+        impl: BYOKLiveAiRepository
+    ): LiveAiRepository
 }

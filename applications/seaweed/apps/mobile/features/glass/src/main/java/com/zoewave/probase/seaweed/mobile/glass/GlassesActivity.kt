@@ -31,7 +31,7 @@ import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
 import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
-import com.zoewave.probase.features.ai.firebase.data.FirebaseLiveSessionManager
+import com.zoewave.probase.core.data.repository.LiveAiRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -39,7 +39,7 @@ import javax.inject.Inject
 class GlassesActivity : ComponentActivity() {
 
     @Inject
-    lateinit var firebaseLiveSessionManager: FirebaseLiveSessionManager
+    lateinit var liveAiRepository: LiveAiRepository
 
     private val viewModel: SeaweedGlassViewModel by viewModels()
     private lateinit var audioInterface: SeaweedAudioInterface
@@ -62,7 +62,7 @@ class GlassesActivity : ComponentActivity() {
 
         audioInterface = SeaweedAudioInterface(this, "Seaweed Glass active.")
         lifecycle.addObserver(audioInterface)
-        lifecycle.addObserver(firebaseLiveSessionManager)
+        lifecycle.addObserver(liveAiRepository)
 
         checkAndRequestCameraPermission()
 
@@ -116,7 +116,7 @@ class GlassesActivity : ComponentActivity() {
                     SeaweedGlassApp(
                         uiState = uiState,
                         onTalkToGemini = {
-                            firebaseLiveSessionManager.startConversation()
+                            liveAiRepository.startSession()
                         },
                         onCaptureImage = {
                             captureAndAnalyze(imageCapture)

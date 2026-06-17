@@ -58,4 +58,14 @@
     <string name="applications_kocolor_features_inventory_verticals_label">VERTICALS</string>
     <string name="applications_kocolor_features_inventory_recently_added">RECENTLY ADDED</string>
     <string name="applications_kocolor_features_inventory_see_all">See All</string>
+    <string name="applications_kocolor_features_inventory_inventory">Inventory</string>
+    <string name="applications_kocolor_features_inventory_search">Search</string>
+    <string name="applications_kocolor_features_inventory_info_icon">i</string>
+    <string name="applications_kocolor_features_inventory_architecture_title">Wardrobe Architecture</string>
+    <string name="applications_kocolor_features_inventory_verticals_title">Archive Verticals</string>
+    <string name="applications_kocolor_features_inventory_verticals_desc">Body-zone mapping for intuitive archival retrieval.</string>
+    <string name="applications_kocolor_features_inventory_pieces_format">%1$d Pieces</string>
+    <string name="applications_kocolor_features_inventory_average_utility">Average Utility</string>
+    <string name="applications_kocolor_features_inventory_wears_format_plural">%1$d Wears</string>
+    <string name="applications_kocolor_features_inventory_leading_brand_label_format">Leading Brand: %1$s</string>
 </resources>

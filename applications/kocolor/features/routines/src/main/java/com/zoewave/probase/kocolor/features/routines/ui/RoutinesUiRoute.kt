@@ -6,38 +6,26 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.probase.features.xr.glass.GlassesMainActivity
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.SharedFlow
 
 @OptIn(ExperimentalProjectedApi::class)
 @Composable
 fun RoutinesUiRoute(
-    onNavigateTo: (KoColorRoute) -> Unit,
-    viewModel: RoutinesViewModel = hiltViewModel()
+    uiState: RoutinesUiState,
+    onEvent: (RoutinesEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
+    sideEffects: SharedFlow<RoutinesSideEffect>
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-            ProjectedContext.isProjectedDeviceConnected(context, this.coroutineContext)
-                .collectLatest { isConnected ->
-                    viewModel.updateGlassConnection(isConnected)
-                }
-        } else {
-            viewModel.updateGlassConnection(false)
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.sideEffect.collect { effect ->
+        sideEffects.collect { effect ->
             when (effect) {
                 is RoutinesSideEffect.LaunchGlassProjection -> {
                     if (Build.VERSION.SDK_INT >= 35) {
@@ -54,7 +42,6 @@ fun RoutinesUiRoute(
                             Toast.makeText(context, "Projection Failed: ${e.message}", Toast.LENGTH_LONG).show()
                         }
                     } else {
-                        // Fallback for older API levels - start activity normally
                         try {
                             val intent = Intent(context, GlassesMainActivity::class.java).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -73,7 +60,7 @@ fun RoutinesUiRoute(
 
     RoutinesScreen(
         uiState = uiState,
-        onEvent = viewModel::onEvent,
-        navTo = onNavigateTo
+        onEvent = onEvent,
+        navTo = navTo
     )
 }

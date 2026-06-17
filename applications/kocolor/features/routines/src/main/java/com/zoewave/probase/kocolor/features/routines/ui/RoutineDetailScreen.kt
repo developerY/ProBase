@@ -1,17 +1,6 @@
 package com.zoewave.probase.kocolor.features.routines.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,17 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,14 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoewave.probase.kocolor.features.routines.ui.components.DailyInsightSmall
-import com.zoewave.probase.kocolor.features.routines.ui.components.GlassConnectionHeaderAction
-import com.zoewave.probase.kocolor.features.routines.ui.components.SplitRitualStep
+import com.zoewave.probase.kocolor.features.routines.R
+import com.zoewave.probase.kocolor.features.routines.ui.components.*
 import com.zoewave.probase.core.model.ritual.BeautyRoutine
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.core.model.ritual.RoutineStep
@@ -107,7 +86,7 @@ fun RoutineDetailScreen(
             onDismissRequest = { selectedInfoStep = null },
             confirmButton = {
                 TextButton(onClick = { selectedInfoStep = null }) {
-                    Text("DONE", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.applications_kocolor_features_routines_done), fontWeight = FontWeight.Bold)
                 }
             },
             title = {
@@ -141,7 +120,7 @@ fun RoutineDetailScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Serene Rituals", style = MaterialTheme.typography.titleMedium, fontFamily = FontFamily.Serif) },
+                title = { Text(stringResource(R.string.applications_kocolor_features_routines_serene_rituals), style = MaterialTheme.typography.titleMedium, fontFamily = FontFamily.Serif) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
                 },
@@ -183,9 +162,9 @@ fun RoutineDetailScreen(
                                 Spacer(Modifier.width(8.dp))
                                 Text(
                                     text = when (routine.time) {
-                                        RoutineTime.MORNING -> "CURRENT RITUAL"
-                                        RoutineTime.MEALS -> "BIO-SYNC RITUAL"
-                                        else -> "EVENING RITUAL"
+                                        RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_current_ritual)
+                                        RoutineTime.MEALS -> stringResource(R.string.applications_kocolor_features_routines_bio_sync_ritual)
+                                        else -> stringResource(R.string.applications_kocolor_features_routines_evening_ritual_label)
                                     },
                                     style = MaterialTheme.typography.labelSmall,
                                     color = accentColor,
@@ -195,9 +174,9 @@ fun RoutineDetailScreen(
                             }
                             Text(
                                 text = when (routine.time) {
-                                    RoutineTime.MORNING -> "Morning Ritual"
-                                    RoutineTime.MEALS -> "Meals Ritual"
-                                    else -> "Evening Ritual"
+                                    RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_morning_ritual)
+                                    RoutineTime.MEALS -> stringResource(R.string.applications_kocolor_features_routines_meals_ritual)
+                                    else -> stringResource(R.string.applications_kocolor_features_routines_evening_ritual)
                                 },
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontFamily = FontFamily.Serif,
@@ -224,9 +203,9 @@ fun RoutineDetailScreen(
                                 strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                             )
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(text = "$completedCount/$totalCount", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+                                Text(text = stringResource(R.string.applications_kocolor_features_routines_progress_format, completedCount, totalCount), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                                 Text(
-                                    text = "DONE", 
+                                    text = stringResource(R.string.applications_kocolor_features_routines_done), 
                                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                                     modifier = Modifier.alpha(0.5f)
                                 )
@@ -236,7 +215,10 @@ fun RoutineDetailScreen(
                     
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        text = "Every step is an act of care. Complete sequence to prepare for a balanced day ahead.",
+                        text = when (routine.time) {
+                            RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_morning_desc)
+                            else -> stringResource(R.string.applications_kocolor_features_routines_evening_desc)
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         lineHeight = 22.sp
@@ -248,11 +230,15 @@ fun RoutineDetailScreen(
                 val linkedProduct = state.allProducts.find { step.productIds.contains(it.id) }
                 
                 SplitRitualStep(
-                    uiState = Triple(step, linkedProduct, false),
+                    uiState = SplitRitualStepUiState(
+                        step = step,
+                        linkedProduct = linkedProduct,
+                        isReorderMode = false,
+                        modifier = Modifier.shadow(0.dp)
+                    ),
                     onEvent = { onEvent(RoutinesEvent.ToggleStep(routine.id, step.id)) },
                     onInfoClick = { selectedInfoStep = it },
-                    navTo = { navTo(KoColorRoute.RoutineEditor(routineId, step.id)) },
-                    modifier = Modifier.shadow(0.dp)
+                    navTo = { navTo(KoColorRoute.RoutineEditor(routineId, step.id)) }
                 )
             }
             
