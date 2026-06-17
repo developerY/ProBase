@@ -11,17 +11,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Text
+import androidx.xr.glimmer.Icon
+import androidx.xr.glimmer.IconButton
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.foundation.shape.CircleShape
+import androidx.xr.glimmer.DepthEffect
+import androidx.xr.glimmer.DepthEffectLevels
 
 /**
  * A Glimmer-optimized translation screen for AI Glasses (Display Glasses).
@@ -88,26 +89,22 @@ fun TranslationScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Control UI (Rendered on host/phone side or as interactive overlay)
-                Surface(
-                    color = if (uiState.isListening) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                    shape = CircleShape,
-                ) {
-                    IconButton(
-                        onClick = {
-                            if (micPermissionState.status.isGranted) {
-                                if (uiState.isListening) viewModel.stopListening() else viewModel.startListening()
-                            } else {
-                                micPermissionState.launchPermissionRequest()
-                            }
+                // Glimmer-native IconButton for touchpad support
+                IconButton(
+                    onClick = {
+                        if (micPermissionState.status.isGranted) {
+                            if (uiState.isListening) viewModel.stopListening() else viewModel.startListening()
+                        } else {
+                            micPermissionState.launchPermissionRequest()
                         }
-                    ) {
-                        Icon(
-                            imageVector = if (uiState.isListening) Icons.Default.Mic else Icons.Default.MicOff,
-                            contentDescription = "Toggle Microphone",
-                            tint = if (uiState.isListening) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    },
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Icon(
+                        imageVector = if (uiState.isListening) Icons.Default.Mic else Icons.Default.MicOff,
+                        contentDescription = "Toggle Microphone",
+                        tint = if (uiState.isListening) GlimmerTheme.colors.primary else GlimmerTheme.colors.secondary
+                    )
                 }
             }
         }
