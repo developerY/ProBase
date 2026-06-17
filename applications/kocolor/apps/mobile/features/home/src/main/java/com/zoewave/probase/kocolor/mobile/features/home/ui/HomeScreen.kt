@@ -48,6 +48,7 @@ import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CollectionHubCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryCard
+import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryUiState
 import com.zoewave.probase.core.model.ritual.FashionProfile
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -83,6 +84,7 @@ fun HomeUiRoute(
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
+    modifier: Modifier = Modifier,
     onEvent: (HomeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -115,7 +117,7 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { LuxuryBrandLogo(uiState = Unit, onEvent = {}, navTo = {}) },
+                title = { LuxuryBrandLogo(uiState = Unit, modifier = Modifier, onEvent = {}, navTo = {}) },
                 actions = {
                     IconButton(onClick = { navTo(KoColorRoute.Settings()) }) {
                         Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_settings), tint = MaterialTheme.colorScheme.onSurface)
@@ -124,7 +126,8 @@ fun HomeScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
-        containerColor = backgroundColor
+        containerColor = backgroundColor,
+        modifier = modifier
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -162,9 +165,9 @@ fun HomeScreen(
                             uiState.lastNightSleepDuration,
                             uiState.hydrationLiters,
                             uiState.hydrationGoalLiters,
-                            uiState.isHealthPermissionGranted,
-                            modifier = Modifier.weight(1f)
+                            uiState.isHealthPermissionGranted
                         ),
+                        modifier = Modifier.weight(1f),
                         onEvent = {},
                         navTo = navTo
                     )
@@ -201,7 +204,7 @@ fun HomeScreen(
                             navTo = {}
                         )
                         RoutineSummaryCard(
-                            uiState = activeRoutine to uiState.isDaytime,
+                            uiState = RoutineSummaryUiState(activeRoutine, uiState.isDaytime),
                             onEvent = {},
                             navTo = navTo
                         )
@@ -220,14 +223,19 @@ fun HomeScreen(
                             onEvent = {}, 
                             navTo = {}
                         )
-                        CollectionHubCard(uiState = uiState, onEvent = {}, navTo = navTo)
+                        CollectionHubCard(
+                            uiState = uiState, 
+                            modifier = Modifier,
+                            onEvent = {}, 
+                            navTo = navTo
+                        )
                     }
                 }
             }
             
             item {
                 BoutiqueCard(
-                    uiState = BoutiqueCardUiState(Modifier.padding(top = 16.dp)),
+                    modifier = Modifier.padding(top = 16.dp),
                     onEvent = {},
                     navTo = {}
                 )
@@ -251,6 +259,7 @@ data class HomeHeaderUiState(
 @Composable
 fun HomeHeader(
     uiState: HomeHeaderUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -263,7 +272,7 @@ fun HomeHeader(
     val expressiveShape = RoundedCornerShape(topStart = 48.dp, topEnd = 12.dp, bottomEnd = 48.dp, bottomStart = 12.dp)
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(expressiveShape)
             .background(Brush.linearGradient(colors = gradientColors))
@@ -352,17 +361,17 @@ data class WellnessInsightsUiState(
     val sleepDuration: String?,
     val hydrationLiters: Double,
     val hydrationGoalLiters: Double,
-    val isPermissionGranted: Boolean,
-    val modifier: Modifier = Modifier
+    val isPermissionGranted: Boolean
 )
 
 @Composable
 fun WellnessInsightsSection(
     uiState: WellnessInsightsUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    Column(modifier = uiState.modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionTitle(uiState = SectionTitleUiState(stringResource(R.string.applications_kocolor_apps_mobile_features_home_bio_markers), stringResource(R.string.applications_kocolor_apps_mobile_features_home_style_inside_out)), onEvent = {}, navTo = {})
         
         ElevatedCard(
@@ -380,11 +389,11 @@ fun WellnessInsightsSection(
                     }
                 } else {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.Bedtime, stringResource(R.string.applications_kocolor_apps_mobile_features_home_sleep), uiState.sleepDuration ?: "--", Color(0xFF9C27B0), Modifier.weight(1f)), onEvent = {}, navTo = {})
+                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.Bedtime, stringResource(R.string.applications_kocolor_apps_mobile_features_home_sleep), uiState.sleepDuration ?: "--", Color(0xFF9C27B0)), modifier = Modifier.weight(1f), onEvent = {}, navTo = {})
                         VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.WaterDrop, stringResource(R.string.applications_kocolor_apps_mobile_features_home_hydration), stringResource(R.string.applications_kocolor_apps_mobile_features_home_hydration_format, uiState.hydrationLiters), Color(0xFF2196F3), Modifier.weight(1f)), onEvent = {}, navTo = {})
+                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.WaterDrop, stringResource(R.string.applications_kocolor_apps_mobile_features_home_hydration), stringResource(R.string.applications_kocolor_apps_mobile_features_home_hydration_format, uiState.hydrationLiters), Color(0xFF2196F3)), modifier = Modifier.weight(1f), onEvent = {}, navTo = {})
                         VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.AutoAwesome, stringResource(R.string.applications_kocolor_apps_mobile_features_home_vitals), if (uiState.insights.isEmpty()) stringResource(R.string.applications_kocolor_apps_mobile_features_home_optimal) else stringResource(R.string.applications_kocolor_apps_mobile_features_home_alerts_format, uiState.insights.size), if (uiState.insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336), Modifier.weight(1f)), onEvent = {}, navTo = {})
+                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.AutoAwesome, stringResource(R.string.applications_kocolor_apps_mobile_features_home_vitals), if (uiState.insights.isEmpty()) stringResource(R.string.applications_kocolor_apps_mobile_features_home_optimal) else stringResource(R.string.applications_kocolor_apps_mobile_features_home_alerts_format, uiState.insights.size), if (uiState.insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)), modifier = Modifier.weight(1f), onEvent = {}, navTo = {})
                     }
                 }
             }
@@ -392,12 +401,17 @@ fun WellnessInsightsSection(
     }
 }
 
-data class BioMarkerUiState(val icon: ImageVector, val label: String, val value: String, val color: Color, val modifier: Modifier = Modifier)
+data class BioMarkerUiState(val icon: ImageVector, val label: String, val value: String, val color: Color)
 
 @Composable
-fun BioMarkerItem(uiState: BioMarkerUiState, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+fun BioMarkerItem(
+    uiState: BioMarkerUiState, 
+    modifier: Modifier = Modifier, 
+    onEvent: (Unit) -> Unit, 
+    navTo: (KoColorRoute) -> Unit
+) {
     Column(
-        modifier = uiState.modifier,
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally, 
         verticalArrangement = Arrangement.Center
     ) {
@@ -411,18 +425,28 @@ fun BioMarkerItem(uiState: BioMarkerUiState, onEvent: (Unit) -> Unit, navTo: (Ko
 }
 
 @Composable
-fun QuickActions(uiState: Unit, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        QuickActionCard(uiState = QuickActionUiState(stringResource(R.string.applications_kocolor_apps_mobile_features_home_analyze_style), stringResource(R.string.applications_kocolor_apps_mobile_features_home_ai_visual_analysis), Icons.Default.AutoAwesome, MaterialTheme.colorScheme.primary, KoColorRoute.StyleSimulator, Modifier.weight(1f)), onEvent = {}, navTo = navTo)
-        QuickActionCard(uiState = QuickActionUiState(stringResource(R.string.applications_kocolor_apps_mobile_features_home_capture_product), stringResource(R.string.applications_kocolor_apps_mobile_features_home_gemini_scanner), Icons.Default.CameraAlt, MaterialTheme.colorScheme.secondary, KoColorRoute.Analyzer(), Modifier.weight(1f)), onEvent = {}, navTo = navTo)
+fun QuickActions(
+    uiState: Unit, 
+    modifier: Modifier = Modifier,
+    onEvent: (Unit) -> Unit, 
+    navTo: (KoColorRoute) -> Unit
+) {
+    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        QuickActionCard(uiState = QuickActionUiState(stringResource(R.string.applications_kocolor_apps_mobile_features_home_analyze_style), stringResource(R.string.applications_kocolor_apps_mobile_features_home_ai_visual_analysis), Icons.Default.AutoAwesome, MaterialTheme.colorScheme.primary, KoColorRoute.StyleSimulator), modifier = Modifier.weight(1f), onEvent = {}, navTo = navTo)
+        QuickActionCard(uiState = QuickActionUiState(stringResource(R.string.applications_kocolor_apps_mobile_features_home_capture_product), stringResource(R.string.applications_kocolor_apps_mobile_features_home_gemini_scanner), Icons.Default.CameraAlt, MaterialTheme.colorScheme.secondary, KoColorRoute.Analyzer()), modifier = Modifier.weight(1f), onEvent = {}, navTo = navTo)
     }
 }
 
-data class QuickActionUiState(val title: String, val subtitle: String, val icon: ImageVector, val color: Color, val route: KoColorRoute, val modifier: Modifier = Modifier)
+data class QuickActionUiState(val title: String, val subtitle: String, val icon: ImageVector, val color: Color, val route: KoColorRoute)
 
 @Composable
-fun QuickActionCard(uiState: QuickActionUiState, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
-    ElevatedCard(onClick = { navTo(uiState.route) }, modifier = uiState.modifier, shape = RoundedCornerShape(24.dp)) {
+fun QuickActionCard(
+    uiState: QuickActionUiState, 
+    modifier: Modifier = Modifier,
+    onEvent: (Unit) -> Unit, 
+    navTo: (KoColorRoute) -> Unit
+) {
+    ElevatedCard(onClick = { navTo(uiState.route) }, modifier = modifier, shape = RoundedCornerShape(24.dp)) {
         Column(modifier = Modifier.padding(20.dp)) {
             Icon(uiState.icon, null, tint = uiState.color, modifier = Modifier.size(28.dp))
             Spacer(Modifier.height(12.dp))
@@ -435,20 +459,27 @@ fun QuickActionCard(uiState: QuickActionUiState, onEvent: (Unit) -> Unit, navTo:
 data class SectionTitleUiState(val title: String, val subtitle: String)
 
 @Composable
-fun SectionTitle(uiState: SectionTitleUiState, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
-    Column {
+fun SectionTitle(
+    uiState: SectionTitleUiState, 
+    modifier: Modifier = Modifier,
+    onEvent: (Unit) -> Unit, 
+    navTo: (KoColorRoute) -> Unit
+) {
+    Column(modifier = modifier) {
         Text(text = uiState.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
         Text(text = uiState.subtitle.uppercase(), style = MaterialTheme.typography.labelSmall, letterSpacing = 2.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
-data class BoutiqueCardUiState(val modifier: Modifier = Modifier)
-
 @Composable
-fun BoutiqueCard(uiState: BoutiqueCardUiState, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+fun BoutiqueCard(
+    modifier: Modifier = Modifier, 
+    onEvent: (Unit) -> Unit, 
+    navTo: (KoColorRoute) -> Unit
+) {
     val uriHandler = LocalUriHandler.current
     ElevatedCard(
-        modifier = uiState.modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(440.dp)
             .clickable { uriHandler.openUri("https://www.kocolor.com") },

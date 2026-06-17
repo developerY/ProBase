@@ -30,12 +30,17 @@ private val themeOptions = listOf(
     ThemeIdentifiers.DARK to R.string.applications_kocolor_apps_mobile_core_theme_dark
 )
 
+data class ThemeSettingsUiState(
+    val isExpanded: Boolean,
+    val currentTheme: String
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun ThemeSettingsCardPreview() {
     MaterialTheme {
         ThemeSettingsCard(
-            uiState = true to ThemeIdentifiers.SYSTEM,
+            uiState = ThemeSettingsUiState(isExpanded = true, currentTheme = ThemeIdentifiers.SYSTEM),
             onEvent = {},
             navTo = {}
         )
@@ -44,15 +49,16 @@ private fun ThemeSettingsCardPreview() {
 
 @Composable
 fun ThemeSettingsCard(
-    uiState: Pair<Boolean, String>,
+    uiState: ThemeSettingsUiState,
+    modifier: Modifier = Modifier,
     onEvent: (SettingsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val expanded = uiState.first
-    val currentTheme = uiState.second
+    val expanded = uiState.isExpanded
+    val currentTheme = uiState.currentTheme
 
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Column {
             Row(
