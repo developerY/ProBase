@@ -25,6 +25,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.probase.features.xr.glass.GlassesMainActivity
+import com.zoewave.probase.features.glass.translation.ui.TranslationViewModel
+import com.zoewave.probase.features.glass.translation.ui.PhoneRemoteControl
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalProjectedApi::class)
 @Composable
@@ -63,36 +65,61 @@ fun GlassXRDemosPhoneScreen(
         },
         bottomBar = {
             activeSample?.let { sample ->
-                Surface(
-                    tonalElevation = 8.dp,
-                    shadowElevation = 8.dp,
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                if (sample == GlimmerSample.Translation) {
+                    // Show full Remote Control for Translation
+                    val translationViewModel: TranslationViewModel = hiltViewModel()
+                    Surface(
+                        tonalElevation = 12.dp,
+                        shadowElevation = 12.dp,
+                        color = MaterialTheme.colorScheme.surface
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                            IconButton(onClick = { viewModel.updateActiveSample(null) }) {
-                                Icon(Icons.Default.Close, contentDescription = "Stop Demo")
+                        Column {
+                            // Mini header for the remote
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Translation Control", style = MaterialTheme.typography.labelSmall)
+                                IconButton(onClick = { viewModel.updateActiveSample(null) }, modifier = Modifier.size(24.dp)) {
+                                    Icon(Icons.Default.Close, contentDescription = "Stop", modifier = Modifier.size(16.dp))
+                                }
                             }
-                            Spacer(Modifier.width(8.dp))
-                            Column {
-                                Text("Projecting", style = MaterialTheme.typography.labelSmall, color = Color(0xFF4CAF50))
-                                Text(sample.title, style = MaterialTheme.typography.bodyMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                            }
+                            PhoneRemoteControl(viewModel = translationViewModel)
                         }
-
-                        Row {
-                            IconButton(onClick = { viewModel.updateActiveSample(sample.previous()) }) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous")
+                    }
+                } else {
+                    Surface(
+                        tonalElevation = 8.dp,
+                        shadowElevation = 8.dp,
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                IconButton(onClick = { viewModel.updateActiveSample(null) }) {
+                                    Icon(Icons.Default.Close, contentDescription = "Stop Demo")
+                                }
+                                Spacer(Modifier.width(8.dp))
+                                Column {
+                                    Text("Projecting", style = MaterialTheme.typography.labelSmall, color = Color(0xFF4CAF50))
+                                    Text(sample.title, style = MaterialTheme.typography.bodyMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                                }
                             }
-                            Spacer(Modifier.width(8.dp))
-                            IconButton(onClick = { viewModel.updateActiveSample(sample.next()) }) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next")
+
+                            Row {
+                                IconButton(onClick = { viewModel.updateActiveSample(sample.previous()) }) {
+                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous")
+                                }
+                                Spacer(Modifier.width(8.dp))
+                                IconButton(onClick = { viewModel.updateActiveSample(sample.next()) }) {
+                                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next")
+                                }
                             }
                         }
                     }

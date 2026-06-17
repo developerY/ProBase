@@ -42,7 +42,13 @@ class TranslationViewModel @Inject constructor(
     }
 
     private fun initSpeechRecognizer() {
-        speechRecognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(getApplication())
+        val context = getApplication<Application>()
+        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+            _uiState.value = _uiState.value.copy(error = "DEBUG: Speech Engine Missing! Ensure Google Speech Services are updated.")
+            return
+        }
+
+        speechRecognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
         speechRecognizer?.setRecognitionListener(object : RecognitionListener {
             override fun onReadyForSpeech(params: Bundle?) {
                 _uiState.value = _uiState.value.copy(isListening = true, error = null)

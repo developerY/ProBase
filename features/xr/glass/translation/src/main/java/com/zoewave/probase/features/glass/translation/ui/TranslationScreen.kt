@@ -22,7 +22,12 @@ import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.shape.CircleShape
 import androidx.xr.glimmer.DepthEffect
-import androidx.xr.glimmer.DepthEffectLevels
+import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import android.app.Activity
+import androidx.xr.projected.ProjectedDisplayController
+import androidx.xr.projected.ProjectedDisplayController.PresentationMode
+import java.util.function.Consumer
+import androidx.compose.ui.platform.LocalContext
 
 /**
  * A Glimmer-optimized translation screen for AI Glasses (Display Glasses).
@@ -32,13 +37,28 @@ import androidx.xr.glimmer.DepthEffectLevels
  * 2. Field of View: Subtitles are pinned to the bottom.
  * 3. Legibility: Glimmer typography is used.
  */
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalProjectedApi::class)
 @Composable
 fun TranslationScreen(
     viewModel: TranslationViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val micPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+    val context = LocalContext.current
+    
+    // DEBUG: Wear State Protocol (Using PresentationMode as proxy for WearState)
+    var visualsOn by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        try {
+            val activity = context as? Activity ?: return@LaunchedEffect
+            val controller = ProjectedDisplayController.create(activity)
+            controller.addPresentationModeChangedListener { flags ->
+                visualsOn = flags.hasPresentationMode(PresentationMode.VISUALS_ON)
+            }
+        } catch (_: Exception) {
+            // Fallback for non-projected context
+        }
+    }
 
     GlimmerTheme {
         Box(
@@ -47,6 +67,15 @@ fun TranslationScreen(
                 .background(Color.Black), // Transparent on glasses
             contentAlignment = Alignment.BottomCenter
         ) {
+            // DEBUG OVERLAY (Step 1 of Protocol)
+            Box(modifier = Modifier.fillMaxSize().padding(top = 100.dp), contentAlignment = Alignment.TopCenter) {
+                Text(
+                    text = "DEBUG: VisualsOn (Proxy for WearState) = $visualsOn", 
+                    color = Color.Yellow, 
+                    style = GlimmerTheme.typography.bodySmall
+                )
+            }
+
             Column(
                 modifier = Modifier
                     .padding(bottom = 64.dp, start = 32.dp, end = 32.dp)
