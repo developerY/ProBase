@@ -28,6 +28,7 @@ import com.zoewave.probase.core.model.ritual.RoutineTime
 @Composable
 fun HeroRitualCard(
     uiState: BeautyRoutine,
+    modifier: Modifier = Modifier,
     onEvent: (RoutinesEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -73,7 +74,7 @@ fun HeroRitualCard(
 
     Card(
         onClick = { navTo(KoColorRoute.RoutineDetail(routine.id)) },
-        modifier = Modifier.fillMaxWidth().height(260.dp),
+        modifier = modifier.fillMaxWidth().height(260.dp),
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(1.dp, accentColor.copy(alpha = 0.1f))
@@ -180,13 +181,14 @@ fun HeroRitualCard(
 @Composable
 fun DailyInsightBanner(
     uiState: Unit,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Surface(
         color = Color(0xFFFDF0ED),
         shape = RoundedCornerShape(24.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             Text(

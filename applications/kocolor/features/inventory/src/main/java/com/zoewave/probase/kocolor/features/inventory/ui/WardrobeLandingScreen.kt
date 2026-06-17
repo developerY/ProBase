@@ -54,6 +54,7 @@ private fun WardrobeLandingScreenPreview() {
 @Composable
 fun WardrobeLandingScreen(
     uiState: WardrobeUiState,
+    modifier: Modifier = Modifier,
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -71,7 +72,8 @@ fun WardrobeLandingScreen(
                     IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.applications_kocolor_features_inventory_search)) }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -103,9 +105,9 @@ fun WardrobeLandingScreen(
                         uiState = SummaryStatUiState(
                             label = stringResource(R.string.applications_kocolor_features_inventory_total_pieces_label),
                             value = uiState.totalItems.toString(),
-                            icon = Icons.Default.Checkroom,
-                            modifier = Modifier.weight(1f)
+                            icon = Icons.Default.Checkroom
                         ),
+                        modifier = Modifier.weight(1f),
                         onEvent = { navTo(KoColorRoute.WardrobeAnalytics) },
                         navTo = navTo
                     )
@@ -115,9 +117,9 @@ fun WardrobeLandingScreen(
                         uiState = SummaryStatUiState(
                             label = stringResource(R.string.applications_kocolor_features_inventory_total_value_label),
                             value = currencyFormatter.format(uiState.totalInvestment),
-                            icon = Icons.Default.MonetizationOn,
-                            modifier = Modifier.weight(1f)
+                            icon = Icons.Default.MonetizationOn
                         ),
+                        modifier = Modifier.weight(1f),
                         onEvent = { navTo(KoColorRoute.Wardrobe) },
                         navTo = navTo
                     )
@@ -185,9 +187,9 @@ fun WardrobeLandingScreen(
                                     name = name,
                                     metadata = metadata,
                                     baseColor = bgColor,
-                                    imageModel = imageModel,
-                                    modifier = Modifier.fillMaxWidth()
+                                    imageModel = imageModel
                                 ),
+                                modifier = Modifier.fillMaxWidth(),
                                 onEvent = {},
                                 navTo = navTo
                             )
@@ -219,6 +221,7 @@ fun WardrobeLandingScreen(
                         items(uiState.items.take(5)) { item ->
                             RecentClothingCard(
                                 uiState = item,
+                                modifier = Modifier,
                                 onEvent = {},
                                 navTo = navTo
                             )

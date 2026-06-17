@@ -28,13 +28,13 @@ import com.zoewave.probase.core.model.ritual.RoutineStep
 data class SplitRitualStepUiState(
     val step: RoutineStep,
     val linkedProduct: CosmeticItem?,
-    val isReorderMode: Boolean,
-    val modifier: Modifier = Modifier
+    val isReorderMode: Boolean
 )
 
 @Composable
 fun SplitRitualStep(
     uiState: SplitRitualStepUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     onInfoClick: (RoutineStep) -> Unit,
     navTo: (KoColorRoute) -> Unit
@@ -57,7 +57,7 @@ fun SplitRitualStep(
     }
 
     Surface(
-        modifier = uiState.modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = backgroundColor,
         border = if (!isCompleted && hasAmountInfo) BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f)) else null

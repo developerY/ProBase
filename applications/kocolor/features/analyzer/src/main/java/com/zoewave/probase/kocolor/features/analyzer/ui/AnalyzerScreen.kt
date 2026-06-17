@@ -80,6 +80,7 @@ fun AnalyzerScreen(
                 is AnalyzerUiState.Success -> {
                     AnalysisResultScreen(
                         uiState = state.advice,
+                        modifier = Modifier.fillMaxSize(),
                         onEvent = { event ->
                             if (event is AnalyzerEvent.OnSaveClicked) {
                                 onEvent(event)

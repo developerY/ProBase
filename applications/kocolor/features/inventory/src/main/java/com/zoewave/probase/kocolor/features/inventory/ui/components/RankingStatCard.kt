@@ -22,11 +22,15 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.core.model.ritual.ClothingItem
 
+data class RankingStatUiState(
+    val title: String,
+    val item: ClothingItem?,
+    val icon: ImageVector
+)
+
 @Composable
 fun RankingStatCard(
-    title: String,
-    item: ClothingItem?,
-    icon: ImageVector,
+    uiState: RankingStatUiState,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -37,28 +41,28 @@ fun RankingStatCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
+                Icon(uiState.icon, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    text = title,
+                    text = uiState.title,
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Black,
                     modifier = Modifier.alpha(0.5f)
                 )
             }
             Spacer(Modifier.height(8.dp))
-            if (item != null) {
+            if (uiState.item != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
                             .size(16.dp)
                             .clip(CircleShape)
-                            .background(item.colorHex?.let { parseColor(it) } ?: item.dominantHex?.let { parseColor(it) } ?: Color.Gray)
+                            .background(uiState.item.colorHex?.let { parseColor(it) } ?: uiState.item.dominantHex?.let { parseColor(it) } ?: Color.Gray)
                             .border(0.5.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = item.name,
+                        text = uiState.item.name,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,

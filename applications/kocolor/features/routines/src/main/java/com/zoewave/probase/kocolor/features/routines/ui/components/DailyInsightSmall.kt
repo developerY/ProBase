@@ -19,13 +19,14 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 @Composable
 fun DailyInsightSmall(
     uiState: Unit,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Surface(
         color = Color(0xFFFDF0ED),
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(text = "Daily Insight", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, color = Color(0xFF8B5E3C))

@@ -48,6 +48,7 @@ data class StepHeroUiState(
 @Composable
 fun StepHeroPage(
     uiState: StepHeroUiState, 
+    modifier: Modifier = Modifier,
     onEvent: (RoutinesEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -105,7 +106,7 @@ fun StepHeroPage(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().background(Color(0xFFF9F7F2)), 
+        modifier = modifier.fillMaxSize().background(Color(0xFFF9F7F2)), 
         contentPadding = PaddingValues(24.dp), 
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
@@ -186,7 +187,6 @@ fun StepHeroPage(
             }
         }
 
-        // --- NEW: Meal Suggestion Integration ---
         if (routineTime == RoutineTime.MEALS) {
             item {
                 MealSuggestionSection(
@@ -246,7 +246,6 @@ fun StepHeroPage(
             }
         }
 
-        // --- PROGRESS PHOTOS ---
         item {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(
@@ -296,7 +295,6 @@ fun StepHeroPage(
             }
         }
 
-        // --- RITUAL JOURNAL & HISTORY ---
         item {
             Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 Row(
@@ -330,7 +328,7 @@ fun StepHeroPage(
                 } else {
                     step.journalEntries.forEach { entry ->
                         Surface(
-                            color = Color(0xFFF3E5F5), // Light Lavender
+                            color = Color(0xFFF3E5F5), 
                             shape = RoundedCornerShape(16.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {

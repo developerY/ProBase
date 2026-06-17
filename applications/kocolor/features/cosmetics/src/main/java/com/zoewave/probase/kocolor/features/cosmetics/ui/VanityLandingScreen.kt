@@ -55,6 +55,7 @@ private fun VanityLandingScreenPreview() {
 @Composable
 fun VanityLandingScreen(
     uiState: CosmeticsUiState,
+    modifier: Modifier = Modifier,
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -62,7 +63,6 @@ fun VanityLandingScreen(
 
     if (showTaxonomyInfo) {
         ProfessionalTaxonomyDialog(
-            uiState = ProfessionalTaxonomyUiState(),
             onEvent = { showTaxonomyInfo = false },
             navTo = {}
         )
@@ -95,7 +95,8 @@ fun VanityLandingScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add_item))
             }
-        }
+        },
+        modifier = modifier
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -127,9 +128,9 @@ fun VanityLandingScreen(
                         uiState = SummaryStatUiState(
                             label = stringResource(R.string.applications_kocolor_features_cosmetics_total_products),
                             value = uiState.totalCosmetics.toString(),
-                            icon = Icons.Default.Inventory2,
-                            modifier = Modifier.weight(1f)
+                            icon = Icons.Default.Inventory2
                         ),
+                        modifier = Modifier.weight(1f),
                         onEvent = { navTo(KoColorRoute.CosmeticAnalytics) },
                         navTo = navTo
                     )
@@ -137,9 +138,9 @@ fun VanityLandingScreen(
                         uiState = SummaryStatUiState(
                             label = stringResource(R.string.applications_kocolor_features_cosmetics_expiring_soon),
                             value = uiState.expiringCosmeticsCount.toString(),
-                            icon = Icons.Default.ErrorOutline,
-                            modifier = Modifier.weight(1f)
+                            icon = Icons.Default.ErrorOutline
                         ),
+                        modifier = Modifier.weight(1f),
                         onEvent = { navTo(KoColorRoute.ExpiringSoon) },
                         navTo = navTo
                     )
@@ -198,9 +199,9 @@ fun VanityLandingScreen(
                                     name = name,
                                     metadata = metadata,
                                     baseColor = bgColor,
-                                    fallbackImage = fallbackImage,
-                                    modifier = Modifier.fillMaxWidth()
+                                    fallbackImage = fallbackImage
                                 ),
+                                modifier = Modifier.fillMaxWidth(),
                                 onEvent = {},
                                 navTo = navTo
                             )
@@ -232,6 +233,7 @@ fun VanityLandingScreen(
                         items(uiState.items.take(5)) { item ->
                             RecentProductCard(
                                 uiState = item,
+                                modifier = Modifier,
                                 onEvent = {},
                                 navTo = navTo
                             )

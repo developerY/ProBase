@@ -45,6 +45,7 @@ private fun InventoryManagementScreenPreview() {
 @Composable
 fun InventoryManagementScreen(
     uiState: CosmeticsUiState,
+    modifier: Modifier = Modifier,
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -60,7 +61,8 @@ fun InventoryManagementScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add_item))
             }
-        }
+        },
+        modifier = modifier
     ) { padding ->
         Column(
             modifier = Modifier
@@ -117,11 +119,12 @@ data class HeaderSectionUiState(val totalCount: Int)
 @Composable
 private fun HeaderSection(
     uiState: HeaderSectionUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 24.dp, vertical = 20.dp)
     ) {
         Text(
@@ -150,11 +153,12 @@ sealed class SearchBarAndFilterEvent {
 @Composable
 private fun SearchBarAndFilter(
     uiState: SearchBarAndFilterUiState,
+    modifier: Modifier = Modifier,
     onEvent: (SearchBarAndFilterEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -217,10 +221,12 @@ data class CategoryChipsUiState(val categories: List<String>, val selectedCatego
 @Composable
 private fun CategoryChipsSection(
     uiState: CategoryChipsUiState,
+    modifier: Modifier = Modifier,
     onEvent: (String) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     LazyRow(
+        modifier = modifier,
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -255,16 +261,21 @@ data class InventoryListUiState(val items: List<CosmeticItem>)
 @Composable
 private fun InventoryList(
     uiState: InventoryListUiState,
+    modifier: Modifier = Modifier,
     onEvent: (CosmeticItem) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 100.dp, top = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(uiState.items) { item ->
-            InventoryProductCard(item = item, onClick = { onEvent(item) })
+            InventoryProductCard(
+                uiState = item, 
+                onEvent = { onEvent(item) },
+                navTo = navTo
+            )
         }
     }
 }

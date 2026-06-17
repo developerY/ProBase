@@ -28,10 +28,11 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 @Composable
 fun MacroSelectionPage(
     uiState: Unit,
+    modifier: Modifier = Modifier,
     onEvent: (MacroCategory) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    LazyColumn(modifier = modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(MacroCategory.entries) { macro ->
             SelectionRow(
                 uiState = macro.displayName, 
@@ -47,11 +48,12 @@ data class MicroSelectionUiState(val macro: MacroCategory)
 @Composable
 fun MicroSelectionPage(
     uiState: MicroSelectionUiState,
+    modifier: Modifier = Modifier,
     onEvent: (MicroCategory) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val macro = uiState.macro
-    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    LazyColumn(modifier = modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(MicroCategory.entries.filter { it.macro == macro }) { micro ->
             SelectionRow(
                 uiState = micro.displayName, 
@@ -65,12 +67,13 @@ fun MicroSelectionPage(
 @Composable
 fun SelectionRow(
     uiState: String, 
+    modifier: Modifier = Modifier,
     onEvent: () -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Surface(
         onClick = onEvent, 
-        modifier = Modifier.fillMaxWidth(), 
+        modifier = modifier.fillMaxWidth(), 
         shape = RoundedCornerShape(16.dp), 
         color = MaterialTheme.colorScheme.surface, 
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
@@ -91,12 +94,13 @@ data class ItemSelectionUiState(
 @Composable
 fun ItemSelectionPage(
     uiState: ItemSelectionUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Long) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val products = uiState.items
     val selectedIds = uiState.selectedIds
-    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    LazyColumn(modifier = modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(products) { product ->
             val isSelected = selectedIds.contains(product.id)
             Surface(

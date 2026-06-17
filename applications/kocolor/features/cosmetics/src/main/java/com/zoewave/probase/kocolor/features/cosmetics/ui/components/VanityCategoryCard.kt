@@ -30,13 +30,13 @@ data class VanityCategoryUiState(
     val name: String,
     val metadata: CategoryMetadata?,
     val baseColor: Color,
-    val fallbackImage: Any,
-    val modifier: Modifier = Modifier
+    val fallbackImage: Any
 )
 
 @Composable
 fun VanityCategoryCard(
     uiState: VanityCategoryUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -64,7 +64,7 @@ fun VanityCategoryCard(
 
     Card(
         onClick = { navTo(KoColorRoute.CosmeticCategoryCover(name)) },
-        modifier = uiState.modifier.height(200.dp),
+        modifier = modifier.height(200.dp),
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(containerColor = baseColor),
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))

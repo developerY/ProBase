@@ -15,35 +15,41 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.kocolor.model.KoColorRoute
+
+data class CategoryIconUiState(
+    val icon: ImageVector,
+    val label: String,
+    val isSelected: Boolean
+)
 
 @Composable
 fun CategoryIconItem(
-    icon: ImageVector,
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    uiState: CategoryIconUiState,
+    modifier: Modifier = Modifier,
+    onEvent: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
     Surface(
-        onClick = onClick,
+        onClick = onEvent,
         modifier = modifier.height(80.dp),
         shape = RoundedCornerShape(16.dp),
-        color = if (isSelected) Color.White else Color(0xFFF5F5F5),
-        border = if (isSelected) BorderStroke(1.dp, Color(0xFF8B5E3C).copy(alpha = 0.5f)) else null,
-        shadowElevation = if (isSelected) 2.dp else 0.dp
+        color = if (uiState.isSelected) Color.White else Color(0xFFF5F5F5),
+        border = if (uiState.isSelected) BorderStroke(1.dp, Color(0xFF8B5E3C).copy(alpha = 0.5f)) else null,
+        shadowElevation = if (uiState.isSelected) 2.dp else 0.dp
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.padding(4.dp)
         ) {
-            Icon(icon, null, modifier = Modifier.size(24.dp), tint = if (isSelected) Color(0xFF8B5E3C) else Color.Gray)
+            Icon(uiState.icon, null, modifier = Modifier.size(24.dp), tint = if (uiState.isSelected) Color(0xFF8B5E3C) else Color.Gray)
             Spacer(Modifier.height(4.dp))
             Text(
-                text = label,
+                text = uiState.label,
                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) Color(0xFF8B5E3C) else Color.Gray
+                fontWeight = if (uiState.isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (uiState.isSelected) Color(0xFF8B5E3C) else Color.Gray
             )
         }
     }

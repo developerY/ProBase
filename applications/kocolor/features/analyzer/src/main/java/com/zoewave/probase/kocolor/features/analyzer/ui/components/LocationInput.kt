@@ -16,20 +16,20 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class LocationInputUiState(
     val locationName: String?,
-    val isLocating: Boolean,
-    val modifier: Modifier = Modifier
+    val isLocating: Boolean
 )
 
 @Composable
 fun LocationInput(
     uiState: LocationInputUiState,
+    modifier: Modifier = Modifier,
     onEvent: (AnalyzerEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val locationName = uiState.locationName
     val isLocating = uiState.isLocating
 
-    Column(modifier = uiState.modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Text(stringResource(R.string.applications_kocolor_features_analyzer_style_location), style = MaterialTheme.typography.labelMedium)
         Row(
             modifier = Modifier

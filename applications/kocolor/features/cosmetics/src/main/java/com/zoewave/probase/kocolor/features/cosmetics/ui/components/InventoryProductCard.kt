@@ -25,20 +25,22 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.core.model.ritual.CosmeticItem
-import com.zoewave.probase.core.model.ritual.MacroCategory
-import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.*
 
 @Composable
 fun InventoryProductCard(
-    item: CosmeticItem,
-    onClick: () -> Unit
+    uiState: CosmeticItem,
+    modifier: Modifier = Modifier,
+    onEvent: () -> Unit,
+    navTo: (KoColorRoute) -> Unit
 ) {
+    val item = uiState
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { onEvent() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -48,7 +50,6 @@ fun InventoryProductCard(
                 .padding(12.dp)
                 .fillMaxWidth()
         ) {
-            // Thumbnail
             Box(
                 modifier = Modifier
                     .size(80.dp)
@@ -75,7 +76,6 @@ fun InventoryProductCard(
             Spacer(modifier = Modifier.width(16.dp))
             
             Column(modifier = Modifier.weight(1f)) {
-                // Metadata Header
                 Text(
                     text = "${item.macroCategory.displayName.uppercase()} • ${item.batchCode ?: stringResource(R.string.applications_kocolor_features_cosmetics_not_available)}",
                     style = MaterialTheme.typography.labelSmall,
@@ -184,8 +184,9 @@ private fun FooterDetail(item: CosmeticItem) {
 private fun InventoryProductCardPreview() {
     MaterialTheme {
         InventoryProductCard(
-            item = CosmeticItem(name = "Sample Product", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION),
-            onClick = {}
+            uiState = CosmeticItem(name = "Sample Product", brand = "Brand", macroCategory = com.zoewave.probase.core.model.ritual.MacroCategory.COMPLEXION, microCategory = com.zoewave.probase.core.model.ritual.MicroCategory.FOUNDATION),
+            onEvent = {},
+            navTo = {}
         )
     }
 }

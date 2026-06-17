@@ -11,17 +11,20 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+data class CategoryStatUiState(
+    val title: String,
+    val value: String,
+    val isAlert: Boolean = false
+)
+
 @Composable
 fun CategoryStatCard(
-    uiState: Pair<String, String>, 
-    modifier: Modifier = Modifier,
-    isAlert: Boolean = false
+    uiState: CategoryStatUiState, 
+    modifier: Modifier = Modifier
 ) {
-    val title = uiState.first
-    val value = uiState.second
-    val backgroundColor = if (isAlert) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) 
+    val backgroundColor = if (uiState.isAlert) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) 
                           else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    val contentColor = if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+    val contentColor = if (uiState.isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
     
     Surface(
         modifier = modifier,
@@ -30,7 +33,7 @@ fun CategoryStatCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = title,
+                text = uiState.title,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Black,
                 modifier = Modifier.alpha(0.5f),
@@ -38,7 +41,7 @@ fun CategoryStatCard(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = value, 
+                text = uiState.value, 
                 style = MaterialTheme.typography.titleMedium, 
                 fontWeight = FontWeight.Bold, 
                 maxLines = 1,
