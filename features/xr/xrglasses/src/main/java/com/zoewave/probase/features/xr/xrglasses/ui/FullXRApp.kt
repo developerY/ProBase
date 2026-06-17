@@ -33,16 +33,20 @@ import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.CustomMesh
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.GltfModelSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.SpatialAssetSample
 import com.zoewave.probase.features.xr.xrglasses.ui.samples.scenecore.TransformSample
+import com.zoewave.probase.features.xr.xrglasses.ui.samples.TranslationScreen
 
 sealed class XRSampleCategory(val title: String) {
     data object Compose : XRSampleCategory("Compose for XR")
     data object SceneCore : XRSampleCategory("SceneCore 3D")
     data object ARCore : XRSampleCategory("ARCore Perception")
+    data object Glasses : XRSampleCategory("Glasses Experiences")
     data object None : XRSampleCategory("Menu")
 }
 
 sealed class XRSample(val title: String) {
     data object None : XRSample("None")
+    // Glasses
+    data object Translation : XRSample("Live Translation")
     // Compose
     data object SpatialPanel : XRSample("Spatial Panel")
     data object Orbiter : XRSample("Orbiter")
@@ -123,6 +127,7 @@ fun FullXRApp(onClose: () -> Unit) {
                 XRSample.UserTracking -> UserTrackingSample()
                 XRSample.FaceEyeTracking -> FaceEyeTrackingSample()
                 XRSample.SpatialMemory -> SpatialMemorySample()
+                XRSample.Translation -> TranslationScreen()
                 else -> {}
             }
 
@@ -168,8 +173,21 @@ fun FullXRApp(onClose: () -> Unit) {
                 XRSampleCategory.Compose -> ComposeXRSamples(onSampleSelected = { currentSample = it })
                 XRSampleCategory.SceneCore -> SceneCoreSamples(onSampleSelected = { currentSample = it })
                 XRSampleCategory.ARCore -> ARCoreSamples(onSampleSelected = { currentSample = it })
+                XRSampleCategory.Glasses -> GlassesXRSamples(onSampleSelected = { currentSample = it })
             }
         }
+    }
+}
+
+@Composable
+fun GlassesXRSamples(onSampleSelected: (XRSample) -> Unit) {
+    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("Glasses Experiences", style = MaterialTheme.typography.headlineSmall)
+        ListItem(
+            headlineContent = { Text("Live Translation") }, 
+            supportingContent = { Text("Speech recognition and translation for glasses.") },
+            modifier = Modifier.clickable { onSampleSelected(XRSample.Translation) }
+        )
     }
 }
 
@@ -209,6 +227,11 @@ fun FullXRMenu(onCategorySelected: (XRSampleCategory) -> Unit) {
             title = "ARCore Perception",
             description = "Spatial tracking, plane detection, face and eye tracking.",
             onClick = { onCategorySelected(XRSampleCategory.ARCore) }
+        )
+        XRMenuCard(
+            title = "Glasses Experiences",
+            description = "Optimized for display glasses (Glimmer).",
+            onClick = { onCategorySelected(XRSampleCategory.Glasses) }
         )
     }
 }

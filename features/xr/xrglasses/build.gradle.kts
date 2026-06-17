@@ -11,11 +11,19 @@ android {
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
+    implementation(project(":core:data"))
     
     implementation(libs.androidx.xr.runtime)
     implementation(libs.androidx.xr.arcore)
     implementation(libs.androidx.xr.compose)
     implementation(libs.androidx.xr.scenecore)
+
+    implementation(libs.androidx.glimmer.core)
+    implementation(libs.androidx.glimmer.google.fonts)
+    implementation(libs.androidx.projected)
+
+    implementation(libs.google.generative.ai)
+    implementation(libs.google.accompanist.permissions)
 
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.material3)
