@@ -53,13 +53,13 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class WellnessTrackerHeroUiState(
     val connectionState: GattConnectionState,
-    val metrics: Map<String, String>,
-    val modifier: Modifier = Modifier
+    val metrics: Map<String, String>
 )
 
 @Composable
 fun WellnessTrackerHeroCard(
     uiState: WellnessTrackerHeroUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -77,7 +77,7 @@ fun WellnessTrackerHeroCard(
     val isConnected = uiState.connectionState == GattConnectionState.Connected
 
     Card(
-        modifier = uiState.modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(200.dp)
             .shadow(16.dp, RoundedCornerShape(32.dp)),
@@ -225,10 +225,11 @@ data class TrackerMetricUiState(
 @Composable
 private fun TrackerMetric(
     uiState: TrackerMetricUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(uiState.icon, null, modifier = Modifier.size(16.dp), tint = uiState.color)
         Spacer(modifier = Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.Bottom) {

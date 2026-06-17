@@ -65,6 +65,7 @@ import java.time.LocalDate
 @Composable
 fun StyleHealthDashboard(
     uiState: HealthUiState.Success,
+    modifier: Modifier = Modifier,
     onEvent: (HealthEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -75,7 +76,7 @@ fun StyleHealthDashboard(
     var showTracker by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .background(Color(0xFFF9F7F2))
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp),
@@ -207,11 +208,11 @@ fun StyleHealthDashboard(
                 WellnessTrackerHeroCard(
                     uiState = WellnessTrackerHeroUiState(
                         connectionState = uiState.bleConnectionState,
-                        metrics = uiState.trackerMetrics,
-                        modifier = Modifier.clickable {
-                            onEvent(HealthEvent.SyncTracker)
-                        }
+                        metrics = uiState.trackerMetrics
                     ),
+                    modifier = Modifier.clickable {
+                        onEvent(HealthEvent.SyncTracker)
+                    },
                     onEvent = {},
                     navTo = {}
                 )
@@ -232,10 +233,11 @@ data class SummaryMetricUiState(
 @Composable
 private fun SummaryMetricItem(
     uiState: SummaryMetricUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Surface(color = uiState.color.copy(alpha = 0.1f), shape = CircleShape, modifier = Modifier.size(40.dp)) {
             Box(contentAlignment = Alignment.Center) { Icon(uiState.icon, null, modifier = Modifier.size(18.dp), tint = uiState.color) }
         }
@@ -253,17 +255,18 @@ data class ActivityMetricsUiState(
 @Composable
 private fun ActivityMetricsSection(
     uiState: ActivityMetricsUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         ActivityCard(
             uiState = ActivityCardUiState(
                 label = stringResource(R.string.applications_kocolor_apps_mobile_core_health_steps),
                 value = "${uiState.steps}",
-                unit = stringResource(R.string.applications_kocolor_apps_mobile_core_health_today),
-                modifier = Modifier.weight(1f)
+                unit = stringResource(R.string.applications_kocolor_apps_mobile_core_health_today)
             ),
+            modifier = Modifier.weight(1f),
             onEvent = {},
             navTo = {}
         )
@@ -271,9 +274,9 @@ private fun ActivityMetricsSection(
             uiState = ActivityCardUiState(
                 label = stringResource(R.string.applications_kocolor_apps_mobile_core_health_calories),
                 value = "${uiState.calories.toInt()}",
-                unit = stringResource(R.string.applications_kocolor_apps_mobile_core_health_kcal),
-                modifier = Modifier.weight(1f)
+                unit = stringResource(R.string.applications_kocolor_apps_mobile_core_health_kcal)
             ),
+            modifier = Modifier.weight(1f),
             onEvent = { navTo(KoColorRoute.Nutrition()) },
             navTo = navTo
         )
@@ -283,19 +286,19 @@ private fun ActivityMetricsSection(
 data class ActivityCardUiState(
     val label: String,
     val value: String,
-    val unit: String,
-    val modifier: Modifier = Modifier
+    val unit: String
 )
 
 @Composable
 private fun ActivityCard(
     uiState: ActivityCardUiState,
+    modifier: Modifier = Modifier,
     onEvent: () -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val hasData = uiState.value != "0" && uiState.value != "0.0" && uiState.value != "--"
     Card(
-        modifier = uiState.modifier
+        modifier = modifier
             .aspectRatio(1f)
             .alpha(if (hasData) 1f else 0.7f)
             .clickable { onEvent() },

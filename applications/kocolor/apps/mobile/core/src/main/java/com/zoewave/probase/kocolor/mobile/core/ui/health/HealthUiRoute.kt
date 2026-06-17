@@ -29,14 +29,14 @@ import kotlinx.coroutines.flow.emptyFlow
 
 data class KoColorHealthUiState(
     val featureState: HealthUiState,
-    val sideEffects: Flow<HealthSideEffect> = emptyFlow(),
-    val modifier: Modifier = Modifier
+    val sideEffects: Flow<HealthSideEffect> = emptyFlow()
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HealthUiRoute(
     uiState: KoColorHealthUiState,
+    modifier: Modifier = Modifier,
     onEvent: (HealthEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -51,17 +51,17 @@ fun HealthUiRoute(
                 }
             )
         },
-        modifier = uiState.modifier
+        modifier = modifier
     ) { padding ->
         HealthContent(
             uiState = HealthContentUiState(
                 featureState = uiState.featureState,
-                sideEffects = uiState.sideEffects,
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
+                sideEffects = uiState.sideEffects
             ),
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             onEvent = onEvent,
             navTo = navTo
         )
@@ -71,13 +71,13 @@ fun HealthUiRoute(
 data class HealthContentUiState(
     val featureState: HealthUiState,
     val sideEffects: Flow<HealthSideEffect> = emptyFlow(),
-    val statusOnly: Boolean = false,
-    val modifier: Modifier = Modifier
+    val statusOnly: Boolean = false
 )
 
 @Composable
 fun HealthContent(
     uiState: HealthContentUiState,
+    modifier: Modifier = Modifier,
     onEvent: (HealthEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -142,7 +142,7 @@ fun HealthContent(
         }
     }
 
-    Box(modifier = uiState.modifier) {
+    Box(modifier = modifier) {
         when (val state = uiState.featureState) {
             is HealthUiState.Loading -> {
                 Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
