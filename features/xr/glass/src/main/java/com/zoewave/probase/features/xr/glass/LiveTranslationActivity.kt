@@ -18,7 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.xr.projected.ProjectedDeviceController
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import com.zoewave.probase.features.xr.glass.samples.GlassesTranslationScreen
+import com.zoewave.probase.features.glass.translation.ui.TranslationScreen
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * A standalone activity demonstrating the "Host Activity" pattern for live translation.
@@ -27,6 +28,7 @@ import com.zoewave.probase.features.xr.glass.samples.GlassesTranslationScreen
  * and handles the bridging of audio/translation to the glasses UI.
  */
 @OptIn(ExperimentalProjectedApi::class)
+@AndroidEntryPoint
 class LiveTranslationActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,20 +36,12 @@ class LiveTranslationActivity : ComponentActivity() {
         
         setContent {
             var isGlassesConnected by remember { mutableStateOf(false) }
-            var translatedText by remember { mutableStateOf("Listening for audio...") }
 
             // Check for glasses connection
             LaunchedEffect(Unit) {
                 try {
                     val controller = ProjectedDeviceController.create(this@LiveTranslationActivity)
                     isGlassesConnected = controller.capabilities.isNotEmpty()
-                    
-                    if (isGlassesConnected) {
-                        // Simulated translation stream
-                        startTranslationStream { translation ->
-                            translatedText = translation
-                        }
-                    }
                 } catch (e: Exception) {
                     isGlassesConnected = false
                 }
@@ -55,18 +49,12 @@ class LiveTranslationActivity : ComponentActivity() {
 
             if (isGlassesConnected) {
                 // This UI is rendered to the projected display (the glasses)
-                GlassesTranslationScreen(translatedText)
+                TranslationScreen()
             } else {
                 // Fallback UI for the phone screen
                 PhoneCompanionScreen()
             }
         }
-    }
-
-    private fun startTranslationStream(onTranslation: (String) -> Unit) {
-        // Implementation detail: Audio capturing logic would go here.
-        // For the demo, we simulate a translation update.
-        onTranslation("Hello, welcome to the DroidCon 2026 session!")
     }
 }
 

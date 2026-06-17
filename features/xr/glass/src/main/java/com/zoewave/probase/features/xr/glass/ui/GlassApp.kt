@@ -31,7 +31,7 @@ import com.zoewave.probase.features.xr.glass.samples.ButtonsSamples
 import com.zoewave.probase.features.xr.glass.samples.CardSamples
 import com.zoewave.probase.features.xr.glass.samples.ColorsSamples
 import com.zoewave.probase.features.xr.glass.samples.DepthEffectLevelsSample
-import com.zoewave.probase.features.xr.glass.samples.GlassesTranslationScreen
+import com.zoewave.probase.features.glass.translation.ui.TranslationScreen
 import com.zoewave.probase.features.xr.glass.samples.GlimmerLazyListSamples
 import com.zoewave.probase.features.xr.glass.samples.GlimmerPagerSamples
 import com.zoewave.probase.features.xr.glass.samples.IconButtonSamples
@@ -127,7 +127,7 @@ fun GlassApp(
                         GlimmerSample.ToggleButtons -> ToggleButtonSamples()
                         GlimmerSample.Typography -> TypographySamples()
                         GlimmerSample.VoiceIndicator -> VoiceInputIndicatorSamples(level = { uiState.aiAudioLevel })
-                        GlimmerSample.Translation -> GlassesTranslationScreen()
+                        GlimmerSample.Translation -> TranslationScreen()
                         GlimmerSample.ObjectRecognition -> ObjectRecognitionScreen()
                         GlimmerSample.SpatialNote -> SpatialNoteOverlay()
                     }
