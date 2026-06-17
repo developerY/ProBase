@@ -22,6 +22,16 @@ import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
 import com.zoewave.probase.features.xr.glass.ui.GlassXRDemosPhoneScreen
 import com.zoewave.probase.features.xr.xrglasses.XRGlassesActivity
+import com.zoewave.probase.features.xr.xrglasses.ui.FullXRApp
+import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import com.zoewave.probase.photodo.features.smartadvice.ui.SmartAdviceUiRoute
 
 @OptIn(ExperimentalProjectedApi::class)
@@ -148,6 +158,26 @@ fun featureInventoryEntryProvider(
                         projectId = key.projectId,
                         onDismiss = navigateBack
                     )
+                }
+            }
+
+            is FeatureInventory.FullXR -> {
+                FullXRApp(onClose = navigateBack)
+            }
+
+            is FeatureInventory.Settings -> {
+                FeatureScaffold(title = "Settings", onBack = navigateBack) {
+                    var expanded by remember { mutableStateOf(true) }
+                    Column(
+                        modifier = androidx.compose.ui.Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        AiConfigurationCard(
+                            expanded = expanded,
+                            onExpandToggle = { expanded = !expanded }
+                        )
+                    }
                 }
             }
 
