@@ -8,10 +8,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import com.zoewave.probase.features.health.meals.ui.MealsUiEvent
-import com.zoewave.probase.features.health.meals.ui.MealsUiRoute
-import com.zoewave.probase.features.health.meals.ui.MealsUiState
-import com.zoewave.probase.features.health.meals.ui.MealsViewModel
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
@@ -52,6 +48,10 @@ import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
+import com.zoewave.probase.features.health.meals.ui.MealsUiEvent
+import com.zoewave.probase.features.health.meals.ui.MealsUiRoute
+import com.zoewave.probase.features.health.meals.ui.MealsUiState
+import com.zoewave.probase.features.health.meals.ui.MealsViewModel
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailScreen
@@ -501,14 +501,14 @@ fun koColorNavEntryProvider(
         }
         is KoColorRoute.NailLab -> NavEntry(route) {
             com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute(
-                uiState = route.colorHex to route.finish,
+                uiState = com.zoewave.probase.features.ar.naillab.ui.NailLabInitialUiState(route.colorHex, route.finish),
                 onEvent = {},
                 navTo = onNavigateTo
             )
         }
         is KoColorRoute.FaceLab -> NavEntry(route) {
             com.zoewave.probase.features.ar.facelab.ui.FaceLabUiRoute(
-                uiState = route.colorHex to route.category,
+                uiState = com.zoewave.probase.features.ar.facelab.ui.FaceLabInitialUiState(route.colorHex, route.category),
                 onEvent = {},
                 navTo = onNavigateTo
             )
