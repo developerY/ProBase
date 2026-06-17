@@ -75,6 +75,7 @@ fun ColorUiRoute(
 @Composable
 fun ColorScreen(
     uiState: ColorUiState,
+    modifier: Modifier = Modifier,
     onEvent: (ColorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -92,7 +93,8 @@ fun ColorScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
-        containerColor = Color(0xFFF9F6F0)
+        containerColor = Color(0xFFF9F6F0),
+        modifier = modifier
     ) { padding ->
         if (uiState.savedSuggestions.isEmpty()) {
             Box(
@@ -142,6 +144,7 @@ sealed class ColorHistoryEvent {
 @Composable
 private fun ColorHistoryCard(
     uiState: ColorHistoryCardUiState,
+    modifier: Modifier = Modifier,
     onEvent: (ColorHistoryEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -150,7 +153,7 @@ private fun ColorHistoryCard(
     val dateStr = dateFormat.format(Date(analysis.timestamp))
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onEvent(ColorHistoryEvent.Click) },
         shape = RoundedCornerShape(24.dp),
@@ -272,6 +275,7 @@ data class ColorDetailUiState(
 @Composable
 fun ColorDetailScreen(
     uiState: ColorDetailUiState,
+    modifier: Modifier = Modifier,
     onEvent: (ColorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -286,7 +290,8 @@ fun ColorDetailScreen(
                     }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         Column(
             modifier = Modifier
@@ -431,6 +436,7 @@ fun ColorDetailScreen(
 @Composable
 fun MakeupPaletteGraphic(
     uiState: List<String>,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -439,7 +445,7 @@ fun MakeupPaletteGraphic(
     )
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .shadow(8.dp, RoundedCornerShape(12.dp)),
@@ -468,6 +474,7 @@ fun MakeupPaletteGraphic(
 @Composable
 fun MakeupPan(
     uiState: String,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -479,7 +486,7 @@ fun MakeupPan(
     
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(4.dp)
+        modifier = modifier.padding(4.dp)
     ) {
         Box(
             modifier = Modifier
