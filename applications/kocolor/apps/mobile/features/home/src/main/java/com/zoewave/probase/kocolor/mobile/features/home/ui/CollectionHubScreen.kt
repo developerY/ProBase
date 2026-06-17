@@ -43,13 +43,14 @@ import java.util.Locale
 @Composable
 fun CollectionHubScreen(
     uiState: HomeUiState,
+    modifier: Modifier = Modifier,
     onEvent: (HomeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { LuxuryBrandLogo(uiState = Unit, onEvent = {}, navTo = {}) },
+                title = { LuxuryBrandLogo(uiState = Unit, modifier = Modifier, onEvent = {}, navTo = {}) },
                 navigationIcon = {
                     IconButton(onClick = { navTo(KoColorRoute.Back) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_kocolor_apps_mobile_features_home_back))
@@ -62,7 +63,8 @@ fun CollectionHubScreen(
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         Column(
             modifier = Modifier
@@ -169,6 +171,7 @@ data class CuratedCollectionUiState(val analysis: SavedAnalysis)
 @Composable
 private fun CuratedCollectionCard(
     uiState: CuratedCollectionUiState,
+    modifier: Modifier = Modifier,
     onEvent: () -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -177,7 +180,7 @@ private fun CuratedCollectionCard(
     val dateStr = dateFormat.format(java.util.Date(analysis.timestamp))
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onEvent() },
@@ -276,20 +279,20 @@ data class ArchiveVerticalUiState(
     val value: Double,
     val imageModel: Any,
     val icon: ImageVector,
-    val breakdown: Map<String, Int> = emptyMap(),
-    val modifier: Modifier = Modifier
+    val breakdown: Map<String, Int> = emptyMap()
 )
 
 @Composable
 private fun ArchiveVerticalCard(
     uiState: ArchiveVerticalUiState,
+    modifier: Modifier = Modifier,
     onEvent: () -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.US) }
 
     Card(
-        modifier = uiState.modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
             .clickable { onEvent() },

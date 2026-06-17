@@ -39,6 +39,7 @@ private fun RoutinesScreenPreview() {
 @Composable
 fun RoutinesScreen(
     uiState: RoutinesUiState,
+    modifier: Modifier = Modifier,
     onEvent: (RoutinesEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -52,7 +53,8 @@ fun RoutinesScreen(
                     }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -106,7 +108,7 @@ fun RoutinesScreen(
             }
 
             item {
-                DailyInsightBanner(uiState = Unit, onEvent = {}, navTo = {})
+                DailyInsightBanner(uiState = Unit, onEvent = {}, navTo = navTo)
             }
         }
     }

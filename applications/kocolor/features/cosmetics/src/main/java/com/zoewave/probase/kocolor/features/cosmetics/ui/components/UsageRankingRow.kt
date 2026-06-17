@@ -23,11 +23,20 @@ import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 
+data class UsageRankingUiState(
+    val item: CosmeticItem,
+    val rank: Int,
+    val maxUsage: Int
+)
+
 @Composable
-fun UsageRankingRow(item: CosmeticItem, rank: Int, maxUsage: Int) {
-    val progress = item.usageCount.toFloat() / maxUsage.coerceAtLeast(1)
+fun UsageRankingRow(
+    uiState: UsageRankingUiState,
+    modifier: Modifier = Modifier
+) {
+    val progress = uiState.item.usageCount.toFloat() / uiState.maxUsage.coerceAtLeast(1)
     
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Surface(
                 modifier = Modifier.size(28.dp),
@@ -35,19 +44,19 @@ fun UsageRankingRow(item: CosmeticItem, rank: Int, maxUsage: Int) {
                 shape = CircleShape
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(text = rank.toString(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+                    Text(text = uiState.rank.toString(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                 }
             }
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                Text(text = stringResource(R.string.applications_kocolor_features_cosmetics_brand_uses_format, item.brand, item.usageCount), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = uiState.item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                Text(text = stringResource(R.string.applications_kocolor_features_cosmetics_brand_uses_format, uiState.item.brand, uiState.item.usageCount), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Box(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(CircleShape)
-                    .background(item.colorHex?.let { parseColor(it) } ?: Color.Gray)
+                    .background(uiState.item.colorHex?.let { parseColor(it) } ?: Color.Gray)
                     .border(1.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
             )
         }
@@ -66,9 +75,11 @@ fun UsageRankingRow(item: CosmeticItem, rank: Int, maxUsage: Int) {
 private fun UsageRankingRowPreview() {
     MaterialTheme {
         UsageRankingRow(
-            item = CosmeticItem(name = "Product", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, usageCount = 42),
-            rank = 1,
-            maxUsage = 100
+            uiState = UsageRankingUiState(
+                item = CosmeticItem(name = "Product", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, usageCount = 42),
+                rank = 1,
+                maxUsage = 100
+            )
         )
     }
 }

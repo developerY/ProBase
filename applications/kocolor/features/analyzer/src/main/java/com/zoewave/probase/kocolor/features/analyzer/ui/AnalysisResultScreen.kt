@@ -27,11 +27,12 @@ import com.zoewave.probase.core.model.ritual.Undertone
 @Composable
 fun AnalysisResultScreen(
     uiState: FashionAdvice,
+    modifier: Modifier = Modifier,
     onEvent: (AnalyzerEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {

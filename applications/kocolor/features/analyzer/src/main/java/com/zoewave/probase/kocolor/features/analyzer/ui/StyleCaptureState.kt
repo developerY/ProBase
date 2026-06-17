@@ -44,18 +44,18 @@ fun StyleCaptureState(
                 StyleCaptureSlot(
                     uiState = StyleCaptureSlotUiState(
                         title = stringResource(R.string.applications_kocolor_features_analyzer_face_label),
-                        uri = uiState.faceUri,
-                        modifier = Modifier.weight(1f)
+                        uri = uiState.faceUri
                     ),
+                    modifier = Modifier.weight(1f),
                     onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("face")) }
                 )
                 StyleCaptureSlot(
                     uiState = StyleCaptureSlotUiState(
                         title = stringResource(R.string.applications_kocolor_features_analyzer_hair_label),
-                        uri = uiState.hairUri,
-                        modifier = Modifier.weight(1f)
+                        uri = uiState.hairUri
                     ),
+                    modifier = Modifier.weight(1f),
                     onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("hair")) }
                 )
@@ -64,18 +64,18 @@ fun StyleCaptureState(
                 StyleCaptureSlot(
                     uiState = StyleCaptureSlotUiState(
                         title = stringResource(R.string.applications_kocolor_features_analyzer_shoes_label),
-                        uri = uiState.shoesUri,
-                        modifier = Modifier.weight(1f)
+                        uri = uiState.shoesUri
                     ),
+                    modifier = Modifier.weight(1f),
                     onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("shoes")) }
                 )
                 StyleCaptureSlot(
                     uiState = StyleCaptureSlotUiState(
                         title = stringResource(R.string.applications_kocolor_features_analyzer_clothes_label),
-                        uri = uiState.clothesUri,
-                        modifier = Modifier.weight(1f)
+                        uri = uiState.clothesUri
                     ),
+                    modifier = Modifier.weight(1f),
                     onEvent = onEvent,
                     navTo = { navTo(KoColorRoute.Camera("clothes")) }
                 )

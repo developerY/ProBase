@@ -49,6 +49,7 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 @Composable
 fun ColorSearchScreen(
     uiState: ColorSearchUiState,
+    modifier: Modifier = Modifier,
     onEvent: (ColorSearchEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -81,7 +82,8 @@ fun ColorSearchScreen(
                     }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -289,10 +291,11 @@ data class HarmonyIconUiState(val label: String, val icon: ImageVector, val isSe
 @Composable
 private fun HarmonyIcon(
     uiState: HarmonyIconUiState, 
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit, 
     navTo: (KoColorRoute) -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onEvent(Unit) }) {
+    Column(modifier = modifier.clickable { onEvent(Unit) }, horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
                 .size(56.dp)
@@ -313,11 +316,12 @@ data class ResultCardUiState(val name: String, val brand: String, val imageUrl: 
 @Composable
 private fun ResultCard(
     uiState: ResultCardUiState, 
+    modifier: Modifier = Modifier,
     onEvent: () -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .width(160.dp)
             .height(220.dp)
             .clickable { onEvent() },

@@ -26,13 +26,13 @@ import com.zoewave.probase.kocolor.model.topLevelRoutes
 
 data class KoColorMainUiState(
     val mainState: MainUiState,
-    val windowSizeClass: WindowSizeClass,
-    val modifier: Modifier = Modifier
+    val windowSizeClass: WindowSizeClass
 )
 
 @Composable
 fun KoColorMainScreen(
     uiState: KoColorMainUiState,
+    modifier: Modifier = Modifier,
     onEvent: (MainEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -63,7 +63,7 @@ fun KoColorMainScreen(
                     )
                 }
             },
-            modifier = uiState.modifier.fillMaxSize()
+            modifier = modifier.fillMaxSize()
         ) {
             NavDisplay<KoColorRoute>(
                 backStack = uiState.mainState.backStack,
@@ -85,10 +85,10 @@ fun KoColorMainScreen(
                         onFaceCaptured = { onEvent(MainEvent.FaceCaptured(it)) },
                         onHairCaptured = { onEvent(MainEvent.HairCaptured(it)) },
                         onShoesCaptured = { onEvent(MainEvent.ShoesCaptured(it)) },
+                        onColorCaptured = { onEvent(MainEvent.ColorCaptured(it)) },
                         onClothesCaptured = { onEvent(MainEvent.ClothesCaptured(it)) },
                         onInventoryItemCaptured = { onEvent(MainEvent.InventoryItemCaptured(it)) },
                         onRitualStepCaptured = { r, s, u -> onEvent(MainEvent.RitualStepCaptured(r, s, u)) },
-                        onColorCaptured = { onEvent(MainEvent.ColorCaptured(it)) },
                         onCodeScanned = { onEvent(MainEvent.CodeScanned(it)) }
                     )
                 }

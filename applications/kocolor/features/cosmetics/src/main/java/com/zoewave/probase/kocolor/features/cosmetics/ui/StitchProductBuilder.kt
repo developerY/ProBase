@@ -34,7 +34,7 @@ import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 import com.zoewave.probase.kocolor.features.cosmetics.R
-import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CategoryIconItem
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.*
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
@@ -54,6 +54,7 @@ private fun StitchProductBuilderPreview() {
 @Composable
 fun StitchProductBuilder(
     uiState: CosmeticsUiState,
+    modifier: Modifier = Modifier,
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -101,7 +102,8 @@ fun StitchProductBuilder(
                     }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         Column(
             modifier = Modifier
@@ -111,7 +113,6 @@ fun StitchProductBuilder(
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // 1. Image Capture Area (Dotted border style)
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -140,7 +141,6 @@ fun StitchProductBuilder(
                 }
             }
 
-            // 2. Barcode Section
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.applications_kocolor_features_cosmetics_barcode_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                 OutlinedTextField(
@@ -151,13 +151,12 @@ fun StitchProductBuilder(
                     shape = RoundedCornerShape(12.dp),
                     trailingIcon = {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 4.dp)) {
-                            // Status Indicator Icon
                             when {
                                 uiState.isAnalyzing -> {
                                     CircularProgressIndicator(
                                         modifier = Modifier.size(20.dp),
                                         strokeWidth = 2.dp,
-                                        color = Color(0xFF2196F3) // Blue
+                                        color = Color(0xFF2196F3) 
                                     )
                                 }
                                 uiState.lastScanFailed -> {
@@ -198,7 +197,6 @@ fun StitchProductBuilder(
                 )
             }
 
-            // 3. OR Divider
             Row(verticalAlignment = Alignment.CenterVertically) {
                 HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray.copy(alpha = 0.3f))
                 Text(stringResource(R.string.applications_kocolor_features_cosmetics_or_divider), modifier = Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
@@ -207,35 +205,36 @@ fun StitchProductBuilder(
 
             Text(stringResource(R.string.applications_kocolor_features_cosmetics_manual_entry), style = MaterialTheme.typography.headlineSmall, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
 
-            // 4. Category Icons
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.applications_kocolor_features_cosmetics_category_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     val categories = listOf(
                         Triple(MacroCategory.COMPLEXION, Icons.Default.Face, stringResource(R.string.applications_kocolor_features_cosmetics_category_section)),
-                        Triple(MacroCategory.PREP, Icons.Default.Opacity, "Skincare"), // TODO: Localize
+                        Triple(MacroCategory.PREP, Icons.Default.Opacity, "Skincare"), 
                         Triple(MacroCategory.EYES, Icons.Default.Visibility, "Eyes"),
                         Triple(MacroCategory.LIPS, Icons.Default.Favorite, "Lips")
                     )
                     categories.forEach { (cat, icon, label) ->
                         val isSelected = draft.macroCategory == cat
                         CategoryIconItem(
-                            icon = icon,
-                            label = label,
-                            isSelected = isSelected,
-                            onClick = { 
+                            uiState = CategoryIconUiState(
+                                icon = icon,
+                                label = label,
+                                isSelected = isSelected
+                            ),
+                            modifier = Modifier.weight(1f),
+                            onEvent = { 
                                 onEvent(CosmeticsEvent.UpdateDraft(draft.copy(
                                     macroCategory = cat,
                                     microCategory = MicroCategory.entries.first { it.macro == cat }
                                 )))
                             },
-                            modifier = Modifier.weight(1f)
+                            navTo = {}
                         )
                     }
                 }
             }
 
-            // 5. Sub-Category Dropdown
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.applications_kocolor_features_cosmetics_subcategory_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                 var showSubMenu by remember { mutableStateOf(false) }
@@ -265,7 +264,6 @@ fun StitchProductBuilder(
                 }
             }
 
-            // 6. Brand Name
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.applications_kocolor_features_cosmetics_brand_name_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                 OutlinedTextField(
@@ -281,7 +279,6 @@ fun StitchProductBuilder(
                 )
             }
 
-            // 7. Product Name
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.applications_kocolor_features_cosmetics_product_name_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                 OutlinedTextField(
@@ -297,7 +294,6 @@ fun StitchProductBuilder(
                 )
             }
 
-            // 8. Shade Name / Number
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.applications_kocolor_features_cosmetics_shade_name_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {

@@ -23,6 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
 import com.zoewave.probase.kocolor.mobile.core.R
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContent
+import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContentUiState
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsEvent
 import com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsUiState
@@ -86,13 +87,13 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ThemeSettingsCard(
-                uiState = uiState.isThemeExpanded to uiState.currentTheme,
+                uiState = ThemeSettingsUiState(uiState.isThemeExpanded, uiState.currentTheme),
                 onEvent = onEvent,
                 navTo = navTo
             )
 
             PaletteSettingsCard(
-                uiState = uiState.isPaletteExpanded to uiState.currentPalette,
+                uiState = PaletteSettingsUiState(uiState.isPaletteExpanded, uiState.currentPalette),
                 onEvent = onEvent,
                 navTo = navTo
             )
@@ -339,13 +340,13 @@ fun HealthConnectCard(
                 Box(modifier = Modifier.padding(16.dp)) {
                     val healthViewModel: com.zoewave.probase.features.health.core.ui.HealthViewModel = hiltViewModel()
                     val healthState by healthViewModel.uiState.collectAsStateWithLifecycle()
-                    com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContent(
-                        uiState = com.zoewave.probase.kocolor.mobile.core.ui.health.HealthContentUiState(
+                    HealthContent(
+                        uiState = HealthContentUiState(
                             featureState = healthState,
                             sideEffects = healthViewModel.sideEffect,
-                            statusOnly = true,
-                            modifier = Modifier.fillMaxWidth()
+                            statusOnly = true
                         ),
+                        modifier = Modifier.fillMaxWidth(),
                         onEvent = healthViewModel::onEvent,
                         navTo = navTo
                     )

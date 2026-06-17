@@ -22,11 +22,12 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 @Composable
 fun SuggestionsList(
     uiState: FashionAdvice,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {

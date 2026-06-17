@@ -34,12 +34,17 @@ private val paletteOptions = listOf(
     PaletteIdentifiers.DYNAMIC to R.string.applications_kocolor_apps_mobile_core_palette_dynamic
 )
 
+data class PaletteSettingsUiState(
+    val isExpanded: Boolean,
+    val currentPalette: String
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun PaletteSettingsCardPreview() {
     MaterialTheme {
         PaletteSettingsCard(
-            uiState = true to PaletteIdentifiers.CLASSIC,
+            uiState = PaletteSettingsUiState(isExpanded = true, currentPalette = PaletteIdentifiers.CLASSIC),
             onEvent = {},
             navTo = {}
         )
@@ -48,15 +53,16 @@ private fun PaletteSettingsCardPreview() {
 
 @Composable
 fun PaletteSettingsCard(
-    uiState: Pair<Boolean, String>,
+    uiState: PaletteSettingsUiState,
+    modifier: Modifier = Modifier,
     onEvent: (SettingsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val expanded = uiState.first
-    val currentPalette = uiState.second
+    val expanded = uiState.isExpanded
+    val currentPalette = uiState.currentPalette
 
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Column {
             Row(

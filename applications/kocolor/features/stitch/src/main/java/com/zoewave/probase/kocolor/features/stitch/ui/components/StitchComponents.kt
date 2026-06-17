@@ -31,10 +31,11 @@ data class SectionHeaderUiState(val title: String, val icon: ImageVector)
 @Composable
 fun SectionHeader(
     uiState: SectionHeaderUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Icon(uiState.icon, null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(12.dp))
         Text(
@@ -51,19 +52,19 @@ data class StitchItemRowUiState(
     val title: String,
     val category: String,
     val imageUrl: String?,
-    val isOwned: Boolean,
-    val modifier: Modifier = Modifier
+    val isOwned: Boolean
 )
 
 @Composable
 fun StitchItemRow(
     uiState: StitchItemRowUiState,
+    modifier: Modifier = Modifier,
     onPickClick: () -> Unit,
     onRemoveClick: () -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Card(
-        modifier = uiState.modifier.fillMaxWidth().padding(vertical = 4.dp),
+        modifier = modifier.fillMaxWidth().padding(vertical = 4.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = if (uiState.isOwned) Color.White else Color(0xFFF5F5F5)),
         border = if (uiState.isOwned) BorderStroke(1.dp, Color(0xFFEEEEEE)) else null
@@ -155,11 +156,12 @@ data class PickerItemUiState(val title: String, val subtitle: String, val imageU
 @Composable
 fun PickerItemRow(
     uiState: PickerItemUiState, 
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = { onEvent(Unit) }).padding(8.dp),
+        modifier = modifier.fillMaxWidth().clickable(onClick = { onEvent(Unit) }).padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(modifier = Modifier.size(48.dp), shape = RoundedCornerShape(8.dp), color = Color(0xFFF5F5F5)) {

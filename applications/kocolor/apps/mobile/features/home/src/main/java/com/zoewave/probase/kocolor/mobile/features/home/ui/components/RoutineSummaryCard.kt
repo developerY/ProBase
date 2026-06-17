@@ -36,20 +36,27 @@ import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.core.model.ritual.BeautyRoutine
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+data class RoutineSummaryUiState(
+    val routine: BeautyRoutine,
+    val isDaytime: Boolean
+)
+
 @Composable
 fun RoutineSummaryCard(
-    uiState: Pair<BeautyRoutine, Boolean>,
+    uiState: RoutineSummaryUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    val (routine, isDaytime) = uiState
+    val routine = uiState.routine
+    val isDaytime = uiState.isDaytime
     val completedCount = routine.steps.count { it.isCompleted }
     val totalCount = routine.steps.size
     val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
     val cardColor = if (isDaytime) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) else MaterialTheme.colorScheme.surfaceVariant
 
     Surface(
-        modifier = Modifier.fillMaxWidth().clickable { navTo(KoColorRoute.RoutineDetail(routine.id)) },
+        modifier = modifier.fillMaxWidth().clickable { navTo(KoColorRoute.RoutineDetail(routine.id)) },
         shape = RoundedCornerShape(32.dp),
         color = cardColor
     ) {
@@ -70,7 +77,6 @@ fun RoutineSummaryCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // 1. TOP: Title
                     Text(
                         text = if (isDaytime) "Morning Ritual" else "Evening Ritual",
                         style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
@@ -79,7 +85,6 @@ fun RoutineSummaryCard(
                         color = Color.Black
                     )
 
-                    // 1b. TOP RIGHT: General Routines List Gateway
                     Surface(
                         color = Color.Black.copy(alpha = 0.1f),
                         shape = CircleShape,
@@ -96,7 +101,6 @@ fun RoutineSummaryCard(
                     }
                 }
                 
-                // 2. MIDDLE: Progress label and circle
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -147,7 +151,6 @@ fun RoutineSummaryCard(
                     }
                 }
 
-                // 3. BOTTOM: Duration and rest
                 Column {
                     Text(
                         text = "15 mins duration",

@@ -26,14 +26,14 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 data class SummaryStatUiState(
     val label: String,
     val value: String,
-    val icon: ImageVector,
-    val modifier: Modifier = Modifier
+    val icon: ImageVector
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SummaryStatCard(
     uiState: SummaryStatUiState,
+    modifier: Modifier = Modifier,
     onEvent: () -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -67,7 +67,7 @@ fun SummaryStatCard(
     }
 
     Card(
-        modifier = uiState.modifier.aspectRatio(0.85f),
+        modifier = modifier.aspectRatio(0.85f),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),

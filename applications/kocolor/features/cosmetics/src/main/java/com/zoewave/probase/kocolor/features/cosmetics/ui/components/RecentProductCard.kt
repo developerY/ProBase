@@ -22,19 +22,18 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.core.model.ritual.MacroCategory
-import com.zoewave.probase.core.model.ritual.MicroCategory
 
 @Composable
 fun RecentProductCard(
     uiState: CosmeticItem,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val item = uiState
     val onClick = { navTo(KoColorRoute.CosmeticDetail(item.id)) }
     Card(
-        modifier = Modifier.width(200.dp).height(260.dp).clickable(onClick = onClick),
+        modifier = modifier.width(200.dp).height(260.dp).clickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -59,7 +58,7 @@ fun RecentProductCard(
 private fun RecentProductCardPreview() {
     MaterialTheme {
         RecentProductCard(
-            uiState = CosmeticItem(name = "Sample", brand = "Brand", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION),
+            uiState = CosmeticItem(name = "Sample", brand = "Brand", macroCategory = com.zoewave.probase.core.model.ritual.MacroCategory.COMPLEXION, microCategory = com.zoewave.probase.core.model.ritual.MicroCategory.FOUNDATION),
             onEvent = {},
             navTo = {}
         )

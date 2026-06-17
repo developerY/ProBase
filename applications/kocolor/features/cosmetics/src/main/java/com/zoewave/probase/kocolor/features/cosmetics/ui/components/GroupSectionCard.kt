@@ -22,19 +22,19 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 data class GroupSectionUiState(
     val title: String,
     val itemCount: Int,
-    val isExpanded: Boolean,
-    val modifier: Modifier = Modifier
+    val isExpanded: Boolean
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupSectionCard(
     uiState: GroupSectionUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Boolean) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     ElevatedCard(
-        modifier = uiState.modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         onClick = { onEvent(!uiState.isExpanded) }
     ) {

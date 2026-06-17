@@ -38,14 +38,14 @@ import java.util.*
 data class SummaryStatUiState(
     val label: String,
     val value: String,
-    val icon: ImageVector,
-    val modifier: Modifier = Modifier
+    val icon: ImageVector
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SummaryStatCard(
     uiState: SummaryStatUiState,
+    modifier: Modifier = Modifier,
     onEvent: () -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -77,7 +77,7 @@ fun SummaryStatCard(
     }
 
     Card(
-        modifier = uiState.modifier.aspectRatio(0.85f),
+        modifier = modifier.aspectRatio(0.85f),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
@@ -213,18 +213,18 @@ data class TaxonomySectionUiState(
     val level: String,
     val title: String,
     val description: String,
-    val items: List<Pair<String, String>>,
-    val modifier: Modifier = Modifier
+    val items: List<Pair<String, String>>
 )
 
 @Composable
 private fun TaxonomySection(
     uiState: TaxonomySectionUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Column(
-        modifier = uiState.modifier,
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Column {
@@ -252,13 +252,13 @@ data class AtelierWardrobeUiState(
     val name: String,
     val metadata: CategoryMetadata?,
     val baseColor: Color,
-    val imageModel: Any,
-    val modifier: Modifier = Modifier
+    val imageModel: Any
 )
 
 @Composable
 fun AtelierWardrobeCard(
     uiState: AtelierWardrobeUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -277,7 +277,7 @@ fun AtelierWardrobeCard(
 
     Card(
         onClick = { navTo(KoColorRoute.WardrobeCategoryCover(categoryName = name)) },
-        modifier = uiState.modifier.height(180.dp),
+        modifier = modifier.height(180.dp),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = baseColor),
         border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
@@ -387,11 +387,11 @@ fun AtelierWardrobeCard(
 }
 
 @Composable
-fun RecentClothingCard(uiState: ClothingItem, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
+fun RecentClothingCard(uiState: ClothingItem, modifier: Modifier = Modifier, onEvent: (Unit) -> Unit, navTo: (KoColorRoute) -> Unit) {
     val item = uiState
     val onClick = { navTo(KoColorRoute.WardrobeDetail(item.id)) }
     Card(
-        modifier = Modifier.width(220.dp).aspectRatio(0.8f).clickable { onClick() },
+        modifier = modifier.width(220.dp).aspectRatio(0.8f).clickable { onClick() },
         shape = RoundedCornerShape(28.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {

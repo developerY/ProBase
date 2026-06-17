@@ -24,13 +24,13 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class StyleCaptureSlotUiState(
     val title: String,
-    val uri: String?,
-    val modifier: Modifier = Modifier
+    val uri: String?
 )
 
 @Composable
 fun StyleCaptureSlot(
     uiState: StyleCaptureSlotUiState,
+    modifier: Modifier = Modifier,
     onEvent: (AnalyzerEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -54,7 +54,7 @@ fun StyleCaptureSlot(
     var showOptions by remember { mutableStateOf(false) }
 
     Card(
-        modifier = uiState.modifier
+        modifier = modifier
             .height(200.dp)
             .fillMaxWidth()
             .clickable { showOptions = true },

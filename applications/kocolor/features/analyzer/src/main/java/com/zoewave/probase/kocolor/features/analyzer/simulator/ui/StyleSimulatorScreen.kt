@@ -22,6 +22,7 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 @Composable
 fun StyleSimulatorScreen(
     uiState: StyleSimulatorUiState,
+    modifier: Modifier = Modifier,
     effect: kotlinx.coroutines.flow.Flow<SimulatorEffect>? = null,
     onEvent: (SimulatorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
@@ -48,7 +49,8 @@ fun StyleSimulatorScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.surface,
+        modifier = modifier
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             MagicBackground()

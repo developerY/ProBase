@@ -44,6 +44,7 @@ private fun StitchScreenPreview() {
 @Composable
 fun StitchScreen(
     uiState: StitchUiState,
+    modifier: Modifier = Modifier,
     onEvent: (StitchEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -67,7 +68,8 @@ fun StitchScreen(
                     }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             LazyColumn(

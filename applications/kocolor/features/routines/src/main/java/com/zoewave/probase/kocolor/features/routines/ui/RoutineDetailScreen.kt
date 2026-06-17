@@ -59,6 +59,7 @@ private fun RoutineDetailScreenPreview() {
 @Composable
 fun RoutineDetailScreen(
     uiState: RoutineDetailUiState,
+    modifier: Modifier = Modifier,
     onEvent: (RoutinesEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -133,7 +134,8 @@ fun RoutineDetailScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -233,9 +235,9 @@ fun RoutineDetailScreen(
                     uiState = SplitRitualStepUiState(
                         step = step,
                         linkedProduct = linkedProduct,
-                        isReorderMode = false,
-                        modifier = Modifier.shadow(0.dp)
+                        isReorderMode = false
                     ),
+                    modifier = Modifier.shadow(0.dp),
                     onEvent = { onEvent(RoutinesEvent.ToggleStep(routine.id, step.id)) },
                     onInfoClick = { selectedInfoStep = it },
                     navTo = { navTo(KoColorRoute.RoutineEditor(routineId, step.id)) }

@@ -18,20 +18,20 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class EditStepFormUiState(
     val step: RoutineStep,
-    val allProducts: List<CosmeticItem>,
-    val modifier: Modifier = Modifier
+    val allProducts: List<CosmeticItem>
 )
 
 @Composable
 fun EditStepForm(
     uiState: EditStepFormUiState, 
+    modifier: Modifier = Modifier,
     onEvent: (String) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val step = uiState.step
     val allProducts = uiState.allProducts
     val linkedProduct = allProducts.find { step.productIds.contains(it.id) }
-    Column(modifier = uiState.modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(28.dp)) {
+    Column(modifier = modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(28.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(text = stringResource(R.string.applications_kocolor_features_routines_step_title_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, modifier = Modifier.alpha(0.4f), letterSpacing = 1.sp)
             Text(text = step.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)

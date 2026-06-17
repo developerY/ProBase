@@ -20,11 +20,20 @@ import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 
+data class WearRankingUiState(
+    val item: ClothingItem,
+    val rank: Int,
+    val maxUsage: Int
+)
+
 @Composable
-fun WearRankingRow(item: ClothingItem, rank: Int, maxUsage: Int) {
-    val progress = item.usageCount.toFloat() / maxUsage.coerceAtLeast(1)
+fun WearRankingRow(
+    uiState: WearRankingUiState,
+    modifier: Modifier = Modifier
+) {
+    val progress = uiState.item.usageCount.toFloat() / uiState.maxUsage.coerceAtLeast(1)
     
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Surface(
                 modifier = Modifier.size(28.dp),
@@ -32,19 +41,19 @@ fun WearRankingRow(item: ClothingItem, rank: Int, maxUsage: Int) {
                 shape = CircleShape
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(text = rank.toString(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
+                    Text(text = uiState.rank.toString(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black)
                 }
             }
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                Text(text = "${item.brand ?: "Archive"} · ${item.usageCount} wears", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = uiState.item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                Text(text = "${uiState.item.brand ?: "Archive"} · ${uiState.item.usageCount} wears", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Box(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(CircleShape)
-                    .background(item.colorHex?.let { parseColor(it) } ?: item.dominantHex?.let { parseColor(it) } ?: Color.Gray)
+                    .background(uiState.item.colorHex?.let { parseColor(it) } ?: uiState.item.dominantHex?.let { parseColor(it) } ?: Color.Gray)
                     .border(1.dp, Color.Black.copy(alpha = 0.1f), CircleShape)
             )
         }
@@ -63,9 +72,11 @@ fun WearRankingRow(item: ClothingItem, rank: Int, maxUsage: Int) {
 private fun WearRankingRowPreview() {
     MaterialTheme {
         WearRankingRow(
-            item = ClothingItem(name = "Blazer", category = ClothingCategory.TOPS, usageCount = 12),
-            rank = 1,
-            maxUsage = 100
+            uiState = WearRankingUiState(
+                item = ClothingItem(name = "Blazer", category = ClothingCategory.TOPS, usageCount = 12),
+                rank = 1,
+                maxUsage = 100
+            )
         )
     }
 }

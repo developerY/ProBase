@@ -36,14 +36,20 @@ import com.zoewave.probase.features.ar.naillab.domain.NailRenderingEngine
 import androidx.compose.ui.tooling.preview.Preview
 import java.util.concurrent.Executors
 
+data class NailLabInitialUiState(
+    val colorHex: String,
+    val finish: String
+)
+
 @Composable
 fun NailLabUiRoute(
-    uiState: Pair<String, String>,
+    uiState: NailLabInitialUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit = {},
     navTo: (KoColorRoute) -> Unit
 ) {
-    val colorHex = uiState.first
-    val finish = uiState.second
+    val colorHex = uiState.colorHex
+    val finish = uiState.finish
     val viewModel: NailLabViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -54,6 +60,7 @@ fun NailLabUiRoute(
 
     NailLabScreen(
         uiState = state,
+        modifier = modifier,
         onEvent = viewModel::onEvent,
         navTo = navTo
     )
@@ -63,6 +70,7 @@ fun NailLabUiRoute(
 @Composable
 fun NailLabScreen(
     uiState: NailLabUiState,
+    modifier: Modifier = Modifier,
     onEvent: (NailLabEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -73,7 +81,6 @@ fun NailLabScreen(
 
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Camera Permission State
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
 
     val handLandmarkerHelper = remember(uiState.isFrontCamera) {
@@ -186,7 +193,8 @@ fun NailLabScreen(
                     }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             if (cameraPermissionState.status.isGranted) {
@@ -195,7 +203,6 @@ fun NailLabScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // AR Overlay
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val result = uiState.latestResult
                     if (result != null) {
@@ -214,7 +221,6 @@ fun NailLabScreen(
                     }
                 }
             } else {
-                // Permission Denied State
                 val textToShow = if (cameraPermissionState.status.shouldShowRationale) {
                     "Camera permission is needed for AR nail simulation."
                 } else {
@@ -262,7 +268,6 @@ fun NailLabScreen(
                 }
             }
 
-            // Info badge
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
                 shape = MaterialTheme.shapes.medium,

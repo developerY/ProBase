@@ -23,10 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.inventory.R
-import com.zoewave.probase.kocolor.features.inventory.ui.components.AnalyticsStatCard
-import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeEfficiencyRow
-import com.zoewave.probase.kocolor.features.inventory.ui.components.WardrobeTaxonomyDialog
-import com.zoewave.probase.kocolor.features.inventory.ui.components.WearRankingRow
+import com.zoewave.probase.kocolor.features.inventory.ui.components.*
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -37,6 +34,7 @@ import java.util.*
 @Composable
 fun WardrobeAnalyticsScreen(
     uiState: WardrobeUiState,
+    modifier: Modifier = Modifier,
     onEvent: (WardrobeEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -73,7 +71,8 @@ fun WardrobeAnalyticsScreen(
                     }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -102,18 +101,22 @@ fun WardrobeAnalyticsScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
                         AnalyticsStatCard(
-                            label = stringResource(R.string.applications_kocolor_features_inventory_total_value), 
-                            value = currencyFormatter.format(uiState.totalInvestment), 
-                            icon = Icons.Default.MonetizationOn, 
+                            uiState = AnalyticsStatUiState(
+                                label = stringResource(R.string.applications_kocolor_features_inventory_total_value), 
+                                value = currencyFormatter.format(uiState.totalInvestment), 
+                                icon = Icons.Default.MonetizationOn
+                            ),
                             modifier = Modifier.weight(1f),
-                            onClick = {}
+                            onEvent = {}
                         )
                         AnalyticsStatCard(
-                            label = stringResource(R.string.applications_kocolor_features_inventory_avg_cpw), 
-                            value = uiState.items.mapNotNull { it.costPerUse }.let { if (it.isEmpty()) stringResource(R.string.applications_kocolor_features_inventory_not_available) else currencyFormatter.format(it.average()) }, 
-                            icon = Icons.AutoMirrored.Filled.TrendingDown, 
+                            uiState = AnalyticsStatUiState(
+                                label = stringResource(R.string.applications_kocolor_features_inventory_avg_cpw), 
+                                value = uiState.items.mapNotNull { it.costPerUse }.let { if (it.isEmpty()) stringResource(R.string.applications_kocolor_features_inventory_not_available) else currencyFormatter.format(it.average()) }, 
+                                icon = Icons.AutoMirrored.Filled.TrendingDown
+                            ),
                             modifier = Modifier.weight(1f),
-                            onClick = {}
+                            onEvent = {}
                         )
                     }
                 }
@@ -129,7 +132,13 @@ fun WardrobeAnalyticsScreen(
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             topUsed.forEachIndexed { index, item ->
-                                WearRankingRow(item = item, rank = index + 1, maxUsage = topUsed.first().usageCount)
+                                WearRankingRow(
+                                    uiState = WearRankingUiState(
+                                        item = item, 
+                                        rank = index + 1, 
+                                        maxUsage = topUsed.first().usageCount
+                                    )
+                                )
                             }
                         }
                     }
@@ -172,7 +181,12 @@ fun WardrobeAnalyticsScreen(
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             bestValue.forEach { item ->
-                                WardrobeEfficiencyRow(item = item, label = stringResource(R.string.applications_kocolor_features_inventory_per_wear))
+                                WardrobeEfficiencyRow(
+                                    uiState = WardrobeEfficiencyUiState(
+                                        item = item, 
+                                        label = stringResource(R.string.applications_kocolor_features_inventory_per_wear)
+                                    )
+                                )
                             }
                         }
                     }

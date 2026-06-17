@@ -51,6 +51,7 @@ private fun CosmeticsScreenPreview() {
 @Composable
 fun CosmeticsScreen(
     uiState: CosmeticsUiState,
+    modifier: Modifier = Modifier,
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -100,7 +101,8 @@ fun CosmeticsScreen(
             FloatingActionButton(onClick = { navTo(KoColorRoute.CosmeticAdd()) }) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add_item))
             }
-        }
+        },
+        modifier = modifier
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
             OutlinedTextField(
@@ -160,9 +162,9 @@ fun CosmeticsScreen(
                                         SubCategoryCard(
                                             uiState = SubCategoryUiState(
                                                 micro = micro,
-                                                itemCount = itemsInMicro.size,
-                                                modifier = Modifier.padding(start = 16.dp)
+                                                itemCount = itemsInMicro.size
                                             ),
+                                            modifier = Modifier.padding(start = 16.dp),
                                             onEvent = {},
                                             navTo = {}
                                         )

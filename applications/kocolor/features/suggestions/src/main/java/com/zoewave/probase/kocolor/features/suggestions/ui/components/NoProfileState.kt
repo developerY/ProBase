@@ -16,11 +16,12 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 @Composable
 fun NoProfileState(
     uiState: Unit,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
+        modifier = modifier.fillMaxSize().padding(32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

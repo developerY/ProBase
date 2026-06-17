@@ -1,0 +1,22 @@
+# Task: KoColor Production Readiness & MAD Standard Refactor
+
+- [ ] **Phase 1: Core & Health Refactor**
+    - [ ] [MODIFY] `WellnessTrackerHeroCard.kt` (Extract strings, fix signature)
+    - [ ] [MODIFY] `HealthUiRoute.kt` (Refactor to 3-arg signature)
+    - [ ] [MODIFY] `StyleHealthDashboard.kt` (Extract strings, fix signature)
+- [ ] **Phase 2: Home Feature Refactor**
+    - [ ] [MODIFY] `HomeScreen.kt` (Refactor to 3-arg signature, extract strings)
+    - [ ] [MODIFY] `CollectionHubScreen.kt` (Extract strings)
+    - [ ] [MODIFY] Home Components (Refactor signatures)
+- [ ] **Phase 3: Color Feature Refactor**
+    - [ ] [MODIFY] `ColorScreen.kt` (Extract strings, fix signatures)
+    - [ ] [MODIFY] `ColorSearchScreen.kt` (Extract strings)
+- [ ] **Phase 4: Box Capture Refactor**
+    - [ ] [MODIFY] `BoxCaptureScreen.kt` (Ensure 3-arg signatures)
+- [ ] **Phase 5: General Cosmetics & Inventory Refactor**
+    - [ ] [MODIFY] `VanityLandingScreen.kt` (Extract strings)
+    - [ ] [MODIFY] `InventoryManagementScreen.kt` (Extract strings)
+    - [ ] [MODIFY] `RoutinesScreen.kt` (Extract strings)
+- [ ] **Phase 6: Verification**
+    - [ ] Project-wide build
+    - [ ] Smoke test UI

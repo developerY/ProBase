@@ -64,6 +64,7 @@ private fun SuggestionsScreenPreview_Loading() {
 @Composable
 fun SuggestionsScreen(
     uiState: SuggestionsScreenUiState,
+    modifier: Modifier = Modifier,
     onEvent: (SuggestionsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -77,7 +78,8 @@ fun SuggestionsScreen(
                     }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             if (uiState.fashionProfile == null) {

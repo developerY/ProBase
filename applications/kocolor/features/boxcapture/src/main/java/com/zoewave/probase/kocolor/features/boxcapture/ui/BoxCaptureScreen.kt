@@ -62,6 +62,7 @@ sealed class BoxCaptureEvent {
 @Composable
 fun BoxCaptureUiRoute(
     uiState: BoxCaptureUiState,
+    modifier: Modifier = Modifier,
     onEvent: (BoxCaptureEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -85,6 +86,7 @@ fun BoxCaptureUiRoute(
         cameraPermissionState.status.isGranted -> {
             BoxCaptureScreen(
                 uiState = uiState,
+                modifier = modifier,
                 onEvent = onEvent,
                 navTo = navTo
             )
@@ -92,12 +94,13 @@ fun BoxCaptureUiRoute(
         hasRequestedPermission && !cameraPermissionState.status.isGranted -> {
             PermissionDeniedView(
                 uiState = Unit,
+                modifier = modifier,
                 onEvent = { onEvent(BoxCaptureEvent.Dismiss) },
                 navTo = {}
             )
         }
         else -> {
-            Box(Modifier.fillMaxSize().background(Color(0xFF0f172a)))
+            Box(modifier.fillMaxSize().background(Color(0xFF0f172a)))
         }
     }
 }
@@ -105,11 +108,12 @@ fun BoxCaptureUiRoute(
 @Composable
 private fun PermissionDeniedView(
     uiState: Unit,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(Color(0xFF0f172a))
             .padding(32.dp),
@@ -148,11 +152,12 @@ private fun PermissionDeniedView(
 @Composable
 internal fun BoxCaptureScreen(
     uiState: BoxCaptureUiState,
+    modifier: Modifier = Modifier,
     onEvent: (BoxCaptureEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         containerColor = Color.Black
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
@@ -183,7 +188,6 @@ internal fun BoxCaptureScreen(
                     )
                 }
                 is BoxCaptureUiState.Success -> {
-                    // Handled by Route
                 }
             }
         }
@@ -199,6 +203,7 @@ data class CameraViewUiState(
 @Composable
 private fun CameraView(
     uiState: CameraViewUiState,
+    modifier: Modifier = Modifier,
     onEvent: (BoxCaptureEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -230,7 +235,7 @@ private fun CameraView(
 
     val totalSteps = CaptureStep.getStepsForMode(uiState.mode).size
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
             val sr = surfaceRequest
             if (sr != null) {
@@ -330,12 +335,13 @@ data class AnalysisViewUiState(val progress: String)
 @Composable
 private fun AnalysisView(
     uiState: AnalysisViewUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val isLocal = uiState.progress.contains("Local")
     Column(
-        modifier = Modifier.fillMaxSize().background(Color(0xFF0f172a)),
+        modifier = modifier.fillMaxSize().background(Color(0xFF0f172a)),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -380,11 +386,12 @@ data class ErrorViewUiState(val message: String)
 @Composable
 private fun ErrorView(
     uiState: ErrorViewUiState,
+    modifier: Modifier = Modifier,
     onEvent: () -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().background(Color(0xFF0f172a)).padding(32.dp),
+        modifier = modifier.fillMaxSize().background(Color(0xFF0f172a)).padding(32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

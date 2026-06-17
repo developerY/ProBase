@@ -19,20 +19,20 @@ import androidx.compose.ui.unit.dp
 
 data class HydrationWaterDropUiState(
     val currentLiters: Double,
-    val targetLiters: Double,
-    val modifier: Modifier = Modifier
+    val targetLiters: Double
 )
 
 @Composable
 fun HydrationWaterDropCard(
     uiState: HydrationWaterDropUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (Unit) -> Unit
 ) {
     val progress = (uiState.currentLiters / uiState.targetLiters).toFloat().coerceIn(0f, 1f)
 
     Card(
-        modifier = uiState.modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(480.dp) 
             .clickable { onEvent(Unit) },
@@ -56,7 +56,7 @@ fun HydrationWaterDropCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Current Progress", // TODO: Move to strings
+                    text = "Current Progress", 
                     style = MaterialTheme.typography.titleLarge,
                     fontFamily = FontFamily.Serif,
                     color = Color.Black.copy(alpha = 0.7f)

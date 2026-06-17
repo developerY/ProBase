@@ -13,18 +13,18 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class SubCategoryUiState(
     val micro: MicroCategory,
-    val itemCount: Int,
-    val modifier: Modifier = Modifier
+    val itemCount: Int
 )
 
 @Composable
 fun SubCategoryCard(
     uiState: SubCategoryUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     Card(
-        modifier = uiState.modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
     ) {

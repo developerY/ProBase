@@ -2,14 +2,30 @@ package com.zoewave.probase.kocolor.features.cosmetics.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material3.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,23 +40,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AnalyticsStatCard
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AnalyticsStatUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ProfessionalTaxonomyDialog
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.UsageRankingRow
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.UsageRankingUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ValueEfficiencyRow
-import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.ValueEfficiencyUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.core.model.ritual.MacroCategory
-import com.zoewave.probase.core.model.ritual.MicroCategory
 import java.text.NumberFormat
-import java.util.*
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CosmeticAnalyticsScreen(
     uiState: CosmeticsUiState,
+    modifier: Modifier = Modifier,
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -48,7 +68,6 @@ fun CosmeticAnalyticsScreen(
 
     if (showTaxonomyInfo) {
         ProfessionalTaxonomyDialog(
-            uiState = com.zoewave.probase.kocolor.features.cosmetics.ui.components.ProfessionalTaxonomyUiState(),
             onEvent = { showTaxonomyInfo = false },
             navTo = {}
         )
@@ -64,7 +83,8 @@ fun CosmeticAnalyticsScreen(
                     }
                 },
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -95,18 +115,20 @@ fun CosmeticAnalyticsScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
                         AnalyticsStatCard(
-                            label = stringResource(R.string.applications_kocolor_features_cosmetics_total_uses), 
-                            value = uiState.items.sumOf { it.usageCount }.toString(), 
-                            icon = Icons.Default.History, 
-                            modifier = Modifier.weight(1f),
-                            onClick = {}
+                            uiState = AnalyticsStatUiState(
+                                label = stringResource(R.string.applications_kocolor_features_cosmetics_total_uses), 
+                                value = uiState.items.sumOf { it.usageCount }.toString(), 
+                                icon = Icons.Default.History
+                            ),
+                            modifier = Modifier.weight(1f)
                         )
                         AnalyticsStatCard(
-                            label = stringResource(R.string.applications_kocolor_features_cosmetics_avg_cpu), 
-                            value = uiState.items.mapNotNull { it.costPerUse }.let { if (it.isEmpty()) stringResource(R.string.applications_kocolor_features_cosmetics_not_available) else currencyFormatter.format(it.average()) }, 
-                            icon = Icons.AutoMirrored.Filled.TrendingDown, 
-                            modifier = Modifier.weight(1f),
-                            onClick = {}
+                            uiState = AnalyticsStatUiState(
+                                label = stringResource(R.string.applications_kocolor_features_cosmetics_avg_cpu), 
+                                value = uiState.items.mapNotNull { it.costPerUse }.let { if (it.isEmpty()) stringResource(R.string.applications_kocolor_features_cosmetics_not_available) else currencyFormatter.format(it.average()) }, 
+                                icon = Icons.AutoMirrored.Filled.TrendingDown
+                            ),
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -123,7 +145,13 @@ fun CosmeticAnalyticsScreen(
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             topUsed.forEachIndexed { index, item ->
-                                UsageRankingRow(item = item, rank = index + 1, maxUsage = topUsed.first().usageCount)
+                                UsageRankingRow(
+                                    uiState = UsageRankingUiState(
+                                        item = item, 
+                                        rank = index + 1, 
+                                        maxUsage = topUsed.first().usageCount
+                                    )
+                                )
                             }
                         }
                     }
@@ -168,7 +196,12 @@ fun CosmeticAnalyticsScreen(
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             bestValue.forEach { item ->
-                                ValueEfficiencyRow(item = item, label = stringResource(R.string.applications_kocolor_features_cosmetics_per_use))
+                                ValueEfficiencyRow(
+                                    uiState = ValueEfficiencyUiState(
+                                        item = item, 
+                                        label = stringResource(R.string.applications_kocolor_features_cosmetics_per_use)
+                                    )
+                                )
                             }
                         }
                     }

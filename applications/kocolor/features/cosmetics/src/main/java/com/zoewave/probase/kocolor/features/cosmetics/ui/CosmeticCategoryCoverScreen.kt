@@ -22,9 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.cosmetics.R
-import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CategoryStatCard
-import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CosmeticProductGridCard
-import com.zoewave.probase.kocolor.features.cosmetics.ui.components.RankingStatCard
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.*
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
@@ -60,6 +58,7 @@ private fun CosmeticCategoryCoverScreenPreview() {
 @Composable
 fun CosmeticCategoryCoverScreen(
     uiState: CosmeticCategoryCoverUiState,
+    modifier: Modifier = Modifier,
     onEvent: (CosmeticsEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -101,7 +100,8 @@ fun CosmeticCategoryCoverScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add_product))
             }
-        }
+        },
+        modifier = modifier
     ) { padding ->
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -132,36 +132,56 @@ fun CosmeticCategoryCoverScreen(
                     
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            CategoryStatCard(uiState = stringResource(R.string.applications_kocolor_features_cosmetics_total_value) to currencyFormatter.format(totalValue), modifier = Modifier.weight(1f))
-                            CategoryStatCard(uiState = stringResource(R.string.applications_kocolor_features_cosmetics_avg_cost_use) to (avgCostPerUse?.let { currencyFormatter.format(it) } ?: stringResource(R.string.applications_kocolor_features_cosmetics_not_available)), modifier = Modifier.weight(1f))
-                        }
-                        
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            RankingStatCard(
-                                title = stringResource(R.string.applications_kocolor_features_cosmetics_most_used),
-                                item = mostUsed,
-                                icon = Icons.Default.Star,
+                            CategoryStatCard(
+                                uiState = CategoryStatUiState(
+                                    title = stringResource(R.string.applications_kocolor_features_cosmetics_total_value), 
+                                    value = currencyFormatter.format(totalValue)
+                                ),
                                 modifier = Modifier.weight(1f)
                             )
-                            RankingStatCard(
-                                title = stringResource(R.string.applications_kocolor_features_cosmetics_best_value),
-                                item = bestValueItem,
-                                icon = Icons.Default.Savings,
+                            CategoryStatCard(
+                                uiState = CategoryStatUiState(
+                                    title = stringResource(R.string.applications_kocolor_features_cosmetics_avg_cost_use), 
+                                    value = (avgCostPerUse?.let { currencyFormatter.format(it) } ?: stringResource(R.string.applications_kocolor_features_cosmetics_not_available))
+                                ),
                                 modifier = Modifier.weight(1f)
                             )
                         }
                         
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             RankingStatCard(
-                                title = stringResource(R.string.applications_kocolor_features_cosmetics_premium_choice),
-                                item = premiumItem,
-                                icon = Icons.Default.Diamond,
+                                uiState = RankingStatUiState(
+                                    title = stringResource(R.string.applications_kocolor_features_cosmetics_most_used),
+                                    item = mostUsed,
+                                    icon = Icons.Default.Star
+                                ),
                                 modifier = Modifier.weight(1f)
                             )
                             RankingStatCard(
-                                title = stringResource(R.string.applications_kocolor_features_cosmetics_least_used),
-                                item = leastUsed,
-                                icon = Icons.Default.History,
+                                uiState = RankingStatUiState(
+                                    title = stringResource(R.string.applications_kocolor_features_cosmetics_best_value),
+                                    item = bestValueItem,
+                                    icon = Icons.Default.Savings
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            RankingStatCard(
+                                uiState = RankingStatUiState(
+                                    title = stringResource(R.string.applications_kocolor_features_cosmetics_premium_choice),
+                                    item = premiumItem,
+                                    icon = Icons.Default.Diamond
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            RankingStatCard(
+                                uiState = RankingStatUiState(
+                                    title = stringResource(R.string.applications_kocolor_features_cosmetics_least_used),
+                                    item = leastUsed,
+                                    icon = Icons.Default.History
+                                ),
                                 modifier = Modifier.weight(1f)
                             )
                         }

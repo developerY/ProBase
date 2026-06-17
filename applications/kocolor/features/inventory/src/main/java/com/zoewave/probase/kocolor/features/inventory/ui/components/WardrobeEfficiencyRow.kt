@@ -20,13 +20,22 @@ import com.zoewave.probase.core.model.ritual.ClothingItem
 import java.text.NumberFormat
 import java.util.*
 
+data class WardrobeEfficiencyUiState(
+    val item: ClothingItem,
+    val label: String,
+    val usePrice: Boolean = false
+)
+
 @Composable
-fun WardrobeEfficiencyRow(item: ClothingItem, label: String, usePrice: Boolean = false) {
+fun WardrobeEfficiencyRow(
+    uiState: WardrobeEfficiencyUiState,
+    modifier: Modifier = Modifier
+) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
-    val displayValue = if (usePrice) item.price ?: 0.0 else item.costPerUse ?: 0.0
+    val displayValue = if (uiState.usePrice) uiState.item.price ?: 0.0 else uiState.item.costPerUse ?: 0.0
     
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
@@ -37,12 +46,12 @@ fun WardrobeEfficiencyRow(item: ClothingItem, label: String, usePrice: Boolean =
             modifier = Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(item.colorHex?.let { parseColor(it) } ?: item.dominantHex?.let { parseColor(it) } ?: Color.Gray)
+                .background(uiState.item.colorHex?.let { parseColor(it) } ?: uiState.item.dominantHex?.let { parseColor(it) } ?: Color.Gray)
         )
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-            Text(text = item.brand ?: "Archive", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = uiState.item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+            Text(text = uiState.item.brand ?: "Archive", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Column(horizontalAlignment = Alignment.End) {
             Text(
@@ -51,7 +60,7 @@ fun WardrobeEfficiencyRow(item: ClothingItem, label: String, usePrice: Boolean =
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.primary
             )
-            Text(text = label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = uiState.label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -61,8 +70,10 @@ fun WardrobeEfficiencyRow(item: ClothingItem, label: String, usePrice: Boolean =
 private fun WardrobeEfficiencyRowPreview() {
     MaterialTheme {
         WardrobeEfficiencyRow(
-            item = ClothingItem(name = "Jeans", category = ClothingCategory.BOTTOMS, price = 120.0),
-            label = "PER WEAR"
+            uiState = WardrobeEfficiencyUiState(
+                item = ClothingItem(name = "Jeans", category = ClothingCategory.BOTTOMS, price = 120.0),
+                label = "PER WEAR"
+            )
         )
     }
 }

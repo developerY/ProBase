@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -39,9 +40,9 @@ import java.util.Locale
 @Composable
 fun CollectionHubCard(
     uiState: HomeUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit,
-    modifier: Modifier = Modifier
+    navTo: (KoColorRoute) -> Unit
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
     val totalValue = uiState.totalVanityValue + uiState.totalWardrobeValue

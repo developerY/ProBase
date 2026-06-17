@@ -19,18 +19,15 @@ import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
-data class ProfessionalTaxonomyUiState(
-    val modifier: Modifier = Modifier
-)
-
 @Composable
 fun ProfessionalTaxonomyDialog(
-    uiState: ProfessionalTaxonomyUiState,
+    modifier: Modifier = Modifier,
     onEvent: () -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onEvent,
+        modifier = modifier,
         title = { 
             Text(
                 stringResource(R.string.applications_kocolor_features_cosmetics_taxonomy_title), 
@@ -117,17 +114,17 @@ data class TaxonomySectionUiState(
     val level: String,
     val title: String,
     val description: String,
-    val items: List<Pair<String, String>>,
-    val modifier: Modifier = Modifier
+    val items: List<Pair<String, String>>
 )
 
 @Composable
 private fun TaxonomySection(
     uiState: TaxonomySectionUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    Column(modifier = uiState.modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Column {
             Text(
                 text = uiState.level.uppercase(),
@@ -186,7 +183,6 @@ private fun TaxonomySection(
 private fun ProfessionalTaxonomyDialogPreview() {
     MaterialTheme {
         ProfessionalTaxonomyDialog(
-            uiState = ProfessionalTaxonomyUiState(),
             onEvent = {},
             navTo = {}
         )

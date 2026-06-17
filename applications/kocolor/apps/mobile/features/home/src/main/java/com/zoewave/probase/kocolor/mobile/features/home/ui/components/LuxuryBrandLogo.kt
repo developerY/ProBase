@@ -37,12 +37,12 @@ private fun LuxuryBrandLogoPreview() {
 @Composable
 fun LuxuryBrandLogo(
     uiState: Unit,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "LuxuryEffects")
     
-    // Light Source / Sun Animation
     val lightX by infiniteTransition.animateFloat(
         initialValue = -150f,
         targetValue = 150f,
@@ -53,7 +53,6 @@ fun LuxuryBrandLogo(
         label = "lightX"
     )
 
-    // Shimmer Animation
     val shimmerTranslate by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1000f,
@@ -64,12 +63,10 @@ fun LuxuryBrandLogo(
         label = "shimmerTranslate"
     )
 
-    // Derived Shadow Values
     val shadowOffsetX = -(lightX / 10).dp
     val shadowAlpha = (0.3f - (kotlin.math.abs(lightX) / 1000f)).coerceAtLeast(0.1f)
 
-    Box(contentAlignment = Alignment.Center) {
-        // Subtle moving light source (Sun)
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Box(
             modifier = Modifier
                 .offset { IntOffset(lightX.toInt(), -20) }
@@ -92,7 +89,6 @@ fun LuxuryBrandLogo(
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.drawWithContent {
                 drawContent()
-                // Premium Shimmer Overlay
                 drawRect(
                     brush = Brush.linearGradient(
                         colors = listOf(
