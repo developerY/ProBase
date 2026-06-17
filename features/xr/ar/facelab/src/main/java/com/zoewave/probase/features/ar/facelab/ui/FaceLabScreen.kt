@@ -36,14 +36,20 @@ import com.zoewave.probase.features.ar.facelab.domain.FaceRenderingEngine
 import androidx.compose.ui.tooling.preview.Preview
 import java.util.concurrent.Executors
 
+data class FaceLabInitialUiState(
+    val colorHex: String,
+    val category: String
+)
+
 @Composable
 fun FaceLabUiRoute(
-    uiState: Pair<String, String>,
+    uiState: FaceLabInitialUiState,
+    modifier: Modifier = Modifier,
     onEvent: (Unit) -> Unit = {},
     navTo: (KoColorRoute) -> Unit
 ) {
-    val colorHex = uiState.first
-    val category = uiState.second
+    val colorHex = uiState.colorHex
+    val category = uiState.category
     val viewModel: FaceLabViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -54,6 +60,7 @@ fun FaceLabUiRoute(
 
     FaceLabScreen(
         uiState = state,
+        modifier = modifier,
         onEvent = viewModel::onEvent,
         navTo = navTo
     )
@@ -63,6 +70,7 @@ fun FaceLabUiRoute(
 @Composable
 fun FaceLabScreen(
     uiState: FaceLabUiState,
+    modifier: Modifier = Modifier,
     onEvent: (FaceLabEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -73,7 +81,6 @@ fun FaceLabScreen(
 
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Camera Permission State
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
 
     val faceLandmarkerHelper = remember(uiState.isFrontCamera) {
@@ -187,7 +194,8 @@ fun FaceLabScreen(
                     }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             if (cameraPermissionState.status.isGranted) {
@@ -196,7 +204,6 @@ fun FaceLabScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // AR Overlay
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val result = uiState.latestResult
                     if (result != null) {
@@ -215,7 +222,6 @@ fun FaceLabScreen(
                     }
                 }
             } else {
-                // Permission Denied State
                 Column(
                     modifier = Modifier.fillMaxSize().padding(24.dp),
                     verticalArrangement = Arrangement.Center,
@@ -250,7 +256,6 @@ fun FaceLabScreen(
                 }
             }
 
-            // Info badge
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
                 shape = MaterialTheme.shapes.medium,
