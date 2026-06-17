@@ -53,11 +53,11 @@ fun MainScaffold() {
                     label = { Text("Main") }
                 )
                 NavigationBarItem(
-                    selected = currentKey is FeatureInventory.FullXR,
+                    selected = currentKey is FeatureInventory.GlassXR,
                     onClick = { 
-                        if (currentKey !is FeatureInventory.FullXR) {
+                        if (currentKey !is FeatureInventory.GlassXR) {
                             backStack.clear()
-                            backStack.add(FeatureInventory.FullXR)
+                            backStack.add(FeatureInventory.GlassXR)
                         } 
                     },
                     icon = { Icon(Icons.Default.AutoAwesome, contentDescription = "Examples") },
