@@ -78,7 +78,7 @@ class TranslationViewModel @Inject constructor(
             override fun onError(error: Int) {
                 val message = when (error) {
                     SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
-                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions. Please grant microphone access on your phone."
                     SpeechRecognizer.ERROR_NETWORK -> "Network error"
                     SpeechRecognizer.ERROR_NO_MATCH -> "No speech recognized"
                     else -> "Speech recognition error: $error"

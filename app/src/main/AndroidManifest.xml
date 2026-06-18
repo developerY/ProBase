@@ -12,6 +12,7 @@
         android:required="false" />
 
     <uses-permission android:name="android.permission.CAMERA" /> <!-- alarm -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- - NFC -->
     <uses-permission android:name="android.permission.NFC" />

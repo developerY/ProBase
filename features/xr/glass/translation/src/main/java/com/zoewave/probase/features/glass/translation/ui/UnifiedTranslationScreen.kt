@@ -19,11 +19,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.xr.projected.ProjectedDisplayController
-import androidx.xr.projected.ProjectedDisplayController.PresentationMode
+import androidx.xr.projected.ProjectedContext
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
+import kotlinx.coroutines.Dispatchers
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class, androidx.xr.projected.experimental.ExperimentalProjectedApi::class)
 @Composable
@@ -35,16 +36,18 @@ fun UnifiedTranslationScreen(
     val micPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
     val context = LocalContext.current
     
-    // Diagnostic state
-    var visualsOn by remember { mutableStateOf(false) }
+    // Diagnostic state: Correct phone-side connectivity check
+    var isConnected by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        try {
-            val activity = context as? Activity ?: return@LaunchedEffect
-            val controller = ProjectedDisplayController.create(activity)
-            controller.addPresentationModeChangedListener { flags ->
-                visualsOn = flags.hasPresentationMode(PresentationMode.VISUALS_ON)
+        if (android.os.Build.VERSION.SDK_INT >= 36) {
+            ProjectedContext.isProjectedDeviceConnected(context, Dispatchers.Main).collect { connected ->
+                isConnected = connected
             }
-        } catch (_: Exception) {}
+        } else {
+            // Simple check if any display name matches PROJECTED_DISPLAY_NAME
+            // or just rely on alphabetic version of ProjectedContext if available
+            isConnected = false 
+        }
     }
 
     Scaffold(
@@ -78,8 +81,8 @@ fun UnifiedTranslationScreen(
                     Spacer(Modifier.height(12.dp))
                     
                     DiagnosticRow(
-                        label = "Glasses Connection (Visuals)",
-                        isActive = visualsOn,
+                        label = "Glasses Connection",
+                        isActive = isConnected,
                         activeIcon = Icons.Default.Visibility,
                         inactiveIcon = Icons.Default.VisibilityOff
                     )
@@ -140,7 +143,18 @@ fun UnifiedTranslationScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (uiState.error != null) {
+                if (!micPermissionState.status.isGranted) {
+                    val rationale = if (micPermissionState.status.shouldShowRationale) {
+                        "The app needs microphone access to transcribe your speech."
+                    } else {
+                        "Microphone permission is required."
+                    }
+                    Text(
+                        text = rationale,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                } else if (uiState.error != null) {
                     Text(text = uiState.error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
                 }
 
