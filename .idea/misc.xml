@@ -14,6 +14,7 @@
       <file path="$PROJECT_DIR$/features/weather/docs" />
       <file path="$PROJECT_DIR$/features/xr/doc" />
       <file path="$PROJECT_DIR$/features/xr/glass/docs" />
+      <file path="$PROJECT_DIR$/features/xr/glass/translation/docs" />
     </excludeRoots>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />

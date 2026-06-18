@@ -11,13 +11,16 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
+import com.zoewave.probase.features.glass.translation.data.TranslationRepository
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
@@ -30,6 +33,7 @@ data class TranslationUiState(
     val isApiKeySet: Boolean = false,
     val isEngineAvailable: Boolean = false,
     val isPermissionGranted: Boolean = false,
+    val micSource: String = "Phone",
     val error: String? = null
 )
 
@@ -37,12 +41,45 @@ data class TranslationUiState(
 @HiltViewModel
 class TranslationViewModel @Inject constructor(
     application: Application,
-    private val settings: AiConfigurationSettings
+    private val settings: AiConfigurationSettings,
+    private val repository: TranslationRepository
 ) : AndroidViewModel(application) {
 
     private val TAG = "TranslationVM"
-    private val _uiState = MutableStateFlow(TranslationUiState())
-    val uiState: StateFlow<TranslationUiState> = _uiState.asStateFlow()
+    
+    private val _isApiKeySet = MutableStateFlow(false)
+    private val _isEngineAvailable = MutableStateFlow(false)
+    private val _isPermissionGranted = MutableStateFlow(false)
+    private val _micSource = MutableStateFlow("Phone")
+    private val _error = MutableStateFlow<String?>(null)
+
+    val uiState: StateFlow<TranslationUiState> = combine(
+        repository.transcribedText,
+        repository.translatedText,
+        repository.isListening,
+        repository.isTranslating,
+        _isApiKeySet,
+        _isEngineAvailable,
+        _isPermissionGranted,
+        _micSource,
+        _error
+    ) { args: Array<Any?> ->
+        TranslationUiState(
+            transcribedText = args[0] as String,
+            translatedText = args[1] as String,
+            isListening = args[2] as Boolean,
+            isTranslating = args[3] as Boolean,
+            isApiKeySet = args[4] as Boolean,
+            isEngineAvailable = args[5] as Boolean,
+            isPermissionGranted = args[6] as Boolean,
+            micSource = args[7] as String,
+            error = args[8] as String?
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = TranslationUiState()
+    )
 
     private var speechRecognizer: SpeechRecognizer? = null
     private var useOnDevice: Boolean = true
@@ -54,56 +91,57 @@ class TranslationViewModel @Inject constructor(
     private fun checkStatus() {
         viewModelScope.launch {
             settings.isGeminiApiKeySetFlow.collect { isSet ->
-                _uiState.value = _uiState.value.copy(isApiKeySet = isSet)
+                _isApiKeySet.value = isSet
             }
         }
     }
 
     fun updatePermissionStatus(granted: Boolean) {
-        _uiState.value = _uiState.value.copy(isPermissionGranted = granted)
+        _isPermissionGranted.value = granted
     }
 
     @OptIn(ExperimentalProjectedApi::class)
     private fun initSpeechRecognizer() {
         Log.d(TAG, "Initializing SpeechRecognizer (useOnDevice=$useOnDevice)")
         val context = getApplication<Application>()
-        
-        val hostContext = try { 
-            ProjectedContext.createHostDeviceContext(context) 
-        } catch (e: Exception) { 
-            Log.e(TAG, "Failed to create host context: ${e.message}")
-            context 
+
+        // Try to use Glasses context to target glasses hardware mic
+        val (finalContext, source) = try {
+            ProjectedContext.createProjectedDeviceContext(context) to "Glasses"
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to create projected context: ${e.message}. Falling back to Phone.")
+            context to "Phone"
         }
 
-        val available = SpeechRecognizer.isRecognitionAvailable(hostContext)
-        Log.d(TAG, "Speech recognition available: $available")
-        _uiState.value = _uiState.value.copy(isEngineAvailable = available)
+        _micSource.value = source
+
+        val available = SpeechRecognizer.isRecognitionAvailable(finalContext)
+        Log.d(TAG, "Speech recognition available: $available on $source")
+        _isEngineAvailable.value = available
         
         if (!available) {
-            _uiState.value = _uiState.value.copy(error = "Speech Engine Missing! Ensure Google Speech Services are updated.")
+            _error.value = "Speech Engine Missing! Ensure Google Speech Services are updated."
             return
         }
 
         try {
             speechRecognizer?.destroy()
             
-            // On emulators, on-device recognition often fails with Error 13 (Language Unavailable)
-            // because models aren't downloaded. We check support first.
-            val canDoOnDevice = android.os.Build.VERSION.SDK_INT >= 31 && 
-                               SpeechRecognizer.isOnDeviceRecognitionAvailable(hostContext)
+            val canDoOnDevice = SpeechRecognizer.isOnDeviceRecognitionAvailable(finalContext)
             
             speechRecognizer = if (useOnDevice && canDoOnDevice) {
-                Log.d(TAG, "Creating On-Device Recognizer")
-                SpeechRecognizer.createOnDeviceSpeechRecognizer(hostContext)
+                Log.d(TAG, "Creating On-Device Recognizer on $source")
+                SpeechRecognizer.createOnDeviceSpeechRecognizer(finalContext)
             } else {
-                Log.d(TAG, "Creating Cloud Recognizer (Fallback)")
-                SpeechRecognizer.createSpeechRecognizer(hostContext)
+                Log.d(TAG, "Creating Cloud Recognizer (Fallback) on $source")
+                SpeechRecognizer.createSpeechRecognizer(finalContext)
             }
             
             speechRecognizer?.setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {
                     Log.d(TAG, "onReadyForSpeech")
-                    _uiState.value = _uiState.value.copy(isListening = true, error = null)
+                    repository.updateListening(true)
+                    _error.value = null
                 }
 
                 override fun onBeginningOfSpeech() {
@@ -113,18 +151,18 @@ class TranslationViewModel @Inject constructor(
                 override fun onBufferReceived(buffer: ByteArray?) {}
                 override fun onEndOfSpeech() {
                     Log.d(TAG, "onEndOfSpeech")
-                    _uiState.value = _uiState.value.copy(isListening = false)
+                    repository.updateListening(false)
                 }
 
                 override fun onError(error: Int) {
                     Log.e(TAG, "Speech error: $error")
                     
-                    if (error == 13 && useOnDevice) {
+                    if (error == SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE && useOnDevice) {
                         Log.w(TAG, "Error 13 detected. Retrying with Cloud Recognizer...")
                         useOnDevice = false
                         speechRecognizer?.destroy()
                         speechRecognizer = null
-                        startListening() // Recursive call will trigger cloud init
+                        startListening() 
                         return
                     }
 
@@ -141,7 +179,8 @@ class TranslationViewModel @Inject constructor(
                         SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE -> "Language model unavailable on device. Retrying with cloud..."
                         else -> "Speech error: $error"
                     }
-                    _uiState.value = _uiState.value.copy(isListening = false, error = message)
+                    repository.updateListening(false)
+                    _error.value = message
                     
                     if (error == SpeechRecognizer.ERROR_CLIENT) {
                         speechRecognizer?.cancel()
@@ -153,7 +192,7 @@ class TranslationViewModel @Inject constructor(
                     Log.d(TAG, "onResults: ${matches?.getOrNull(0)}")
                     if (!matches.isNullOrEmpty()) {
                         val text = matches[0]
-                        _uiState.value = _uiState.value.copy(transcribedText = text)
+                        repository.updateTranscription(text)
                         translateText(text)
                     }
                 }
@@ -161,7 +200,7 @@ class TranslationViewModel @Inject constructor(
                 override fun onPartialResults(partialResults: Bundle?) {
                     val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     if (!matches.isNullOrEmpty()) {
-                        _uiState.value = _uiState.value.copy(transcribedText = matches[0])
+                        repository.updateTranscription(matches[0])
                     }
                 }
 
@@ -169,14 +208,15 @@ class TranslationViewModel @Inject constructor(
             })
         } catch (e: Exception) {
             Log.e(TAG, "Engine Init Failed: ${e.message}")
-            _uiState.value = _uiState.value.copy(error = "Engine Init Failed: ${e.message}")
+            _error.value = "Engine Init Failed: ${e.message}"
         }
     }
 
     fun startListening() {
         Log.d(TAG, "startListening requested")
         
-        _uiState.value = _uiState.value.copy(transcribedText = "", translatedText = "", error = null)
+        repository.clear()
+        _error.value = null
 
         if (speechRecognizer == null) {
             initSpeechRecognizer()
@@ -199,14 +239,12 @@ class TranslationViewModel @Inject constructor(
 
     private fun translateText(text: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isTranslating = true)
+            repository.updateTranslating(true)
             try {
                 val apiKey = settings.getGeminiApiKey()
                 if (apiKey.isNullOrBlank()) {
-                    _uiState.value = _uiState.value.copy(
-                        isTranslating = false,
-                        error = "Gemini API Key missing. Check Settings."
-                    )
+                    _error.value = "Gemini API Key missing. Check Settings."
+                    repository.updateTranslating(false)
                     return@launch
                 }
 
@@ -219,15 +257,11 @@ class TranslationViewModel @Inject constructor(
                 val prompt = "Translate to Spanish: $text"
                 val response = generativeModel.generateContent(prompt)
                 
-                _uiState.value = _uiState.value.copy(
-                    translatedText = response.text ?: "Translation failed",
-                    isTranslating = false
-                )
+                repository.updateTranslation(response.text ?: "Translation failed")
+                repository.updateTranslating(false)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isTranslating = false,
-                    error = "AI Error: ${e.message}"
-                )
+                _error.value = "AI Error: ${e.message}"
+                repository.updateTranslating(false)
             }
         }
     }
