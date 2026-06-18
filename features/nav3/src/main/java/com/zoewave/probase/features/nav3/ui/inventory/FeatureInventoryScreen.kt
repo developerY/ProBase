@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Card
@@ -45,7 +46,8 @@ fun FeatureInventoryScreen(
     onNavigateToNfc: () -> Unit,
     onNavigateToQrScanner: () -> Unit,
     onNavigateToBarcode: () -> Unit,
-    onNavigateToCamera: () -> Unit, // ✅ Added Camera Callback
+    onNavigateToCamera: () -> Unit,
+    onNavigateToMicrophone: () -> Unit,
     onNavigateToCalendar: () -> Unit,
     onNavigateToSmartCapture: () -> Unit,
     onNavigateToGlassXR: () -> Unit,
@@ -128,6 +130,14 @@ fun FeatureInventoryScreen(
                     description = "Capture photos and record videos.",
                     icon = Icons.Default.CameraAlt,
                     onClick = onNavigateToCamera
+                )
+            }
+            item {
+                FeatureCard(
+                    title = "Microphone",
+                    description = "Test speech recognition and microphone input.",
+                    icon = Icons.Default.Mic,
+                    onClick = onNavigateToMicrophone
                 )
             }
             item {

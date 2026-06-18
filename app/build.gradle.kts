@@ -54,6 +54,7 @@ dependencies {
     implementation(project(":features:readers:qrscanner"))
     implementation(project(":features:readers:barcode"))
     implementation(project(":features:camera"))
+    implementation(project(":features:microphone"))
     implementation(project(":features:calendar"))
     implementation(project(":features:xr:glass"))
     implementation(project(":features:xr:xrglasses"))

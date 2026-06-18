@@ -16,6 +16,7 @@ import com.zoewave.probase.features.health.core.ui.HealthRoute
 import com.zoewave.probase.features.health.meals.ui.MealsUiRoute
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventory
 import com.zoewave.probase.features.nav3.ui.inventory.FeatureInventoryScreen
+import com.zoewave.probase.features.microphone.SpeechTestScreen
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.nfc.ui.NfcUiRoute
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
@@ -55,6 +56,7 @@ fun featureInventoryEntryProvider(
                     onNavigateToQrScanner = { navigateTo(FeatureInventory.QrScanner) },
                     onNavigateToBarcode = { navigateTo(FeatureInventory.BarcodeScanner) },
                     onNavigateToCamera = { navigateTo(FeatureInventory.Camera) }, // ✅ Added Camera Callback
+                    onNavigateToMicrophone = { navigateTo(FeatureInventory.Microphone) },
                     onNavigateToCalendar = { navigateTo(FeatureInventory.Calendar) },
                     onNavigateToSmartCapture = { navigateTo(FeatureInventory.SmartCapture) },
                     onNavigateToGlassXR = { navigateTo(FeatureInventory.GlassXR) },
@@ -132,6 +134,12 @@ fun featureInventoryEntryProvider(
             is FeatureInventory.Calendar -> {
                 FeatureScaffold(title = "Calendar", onBack = navigateBack) {
                     CalendarUiRoute()
+                }
+            }
+
+            is FeatureInventory.Microphone -> {
+                FeatureScaffold(title = "Microphone", onBack = navigateBack) {
+                    SpeechTestScreen()
                 }
             }
 
