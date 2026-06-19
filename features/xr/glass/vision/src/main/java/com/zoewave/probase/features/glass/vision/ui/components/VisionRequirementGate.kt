@@ -29,15 +29,17 @@ import com.zoewave.probase.features.glass.vision.ui.VisionViewModel
 fun VisionRequirementGate(
     viewModel: VisionViewModel,
     onNavigateToSettings: () -> Unit,
+    onRequestGlassesPermission: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
 
-    val isPermissionOk = uiState.isPermissionGranted
+    val isPhonePermissionOk = uiState.isPermissionGranted
+    val isGlassesPermissionOk = uiState.isGlassesPermissionGranted
     val isApiKeyOk = uiState.isApiKeySet
 
-    if (isPermissionOk && isApiKeyOk) {
+    if (isPhonePermissionOk && isGlassesPermissionOk && isApiKeyOk) {
         content()
     } else {
         Column(
@@ -68,12 +70,23 @@ fun VisionRequirementGate(
             Spacer(Modifier.height(32.dp))
 
             RequirementCard(
-                title = "Camera Permission",
-                description = "Allow the app to use the glasses camera.",
-                isMet = isPermissionOk,
+                title = "Phone Camera Access",
+                description = "Required to allow projected access.",
+                isMet = isPhonePermissionOk,
                 icon = Icons.Default.CameraAlt,
-                buttonLabel = "GRANT PERMISSION",
+                buttonLabel = "GRANT PHONE ACCESS",
                 onButtonClick = { cameraPermissionState.launchPermissionRequest() }
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            RequirementCard(
+                title = "Glasses Camera Access",
+                description = "Allow the app to use the glasses hardware.",
+                isMet = isGlassesPermissionOk,
+                icon = Icons.Default.CameraAlt,
+                buttonLabel = "GRANT GLASSES ACCESS",
+                onButtonClick = onRequestGlassesPermission
             )
 
             Spacer(Modifier.height(16.dp))

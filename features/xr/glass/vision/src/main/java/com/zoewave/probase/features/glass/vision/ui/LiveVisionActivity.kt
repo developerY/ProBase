@@ -62,6 +62,13 @@ class LiveVisionActivity : ComponentActivity() {
                         viewModel = viewModel,
                         onNavigateToSettings = {
                             // Navigate to settings logic
+                        },
+                        onRequestGlassesPermission = {
+                            val params = ProjectedPermissionsRequestParams(
+                                permissions = listOf(Manifest.permission.CAMERA),
+                                rationale = "Camera access is needed on your AI glasses to describe what you see."
+                            )
+                            projectedPermissionLauncher.launch(listOf(params))
                         }
                     )
                     

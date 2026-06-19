@@ -40,7 +40,8 @@ import kotlinx.coroutines.Dispatchers
 @Composable
 fun UnifiedVisionScreen(
     viewModel: VisionViewModel = hiltViewModel(),
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit = {},
+    onRequestGlassesPermission: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
@@ -52,6 +53,7 @@ fun UnifiedVisionScreen(
     LaunchedEffect(cameraPermissionState.status.isGranted) {
         viewModel.updatePermissionStatus(cameraPermissionState.status.isGranted)
         if (cameraPermissionState.status.isGranted && activity != null) {
+            viewModel.checkGlassesPermission(activity)
             viewModel.setupCamera(activity)
         }
     }
@@ -87,7 +89,8 @@ fun UnifiedVisionScreen(
     ) { innerPadding ->
         VisionRequirementGate(
             viewModel = viewModel,
-            onNavigateToSettings = onNavigateToSettings
+            onNavigateToSettings = onNavigateToSettings,
+            onRequestGlassesPermission = onRequestGlassesPermission
         ) {
             Column(
                 modifier = Modifier
@@ -114,8 +117,8 @@ fun UnifiedVisionScreen(
                         inactiveIcon = Icons.Default.VisibilityOff
                     )
                     DiagnosticRow(
-                        label = "Camera Permission",
-                        isActive = uiState.isPermissionGranted,
+                        label = "Glasses Camera Access",
+                        isActive = uiState.isGlassesPermissionGranted,
                         activeIcon = Icons.Default.Camera,
                         inactiveIcon = Icons.Default.CameraAlt
                     )

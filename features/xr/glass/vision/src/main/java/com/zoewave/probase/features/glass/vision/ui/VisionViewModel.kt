@@ -10,6 +10,7 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.lifecycle.awaitInstance
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
@@ -39,6 +40,7 @@ data class VisionUiState(
     val isApiKeySet: Boolean = false,
     val cameraSource: String = "Phone",
     val isPermissionGranted: Boolean = false,
+    val isGlassesPermissionGranted: Boolean = false,
     val capturedImage: Bitmap? = null,
     val logs: List<String> = emptyList(),
     val error: String? = null
@@ -59,6 +61,7 @@ class VisionViewModel @Inject constructor(
     private val _cameraSource = MutableStateFlow("Phone")
     private val _isApiKeySet = MutableStateFlow(false)
     private val _isPermissionGranted = MutableStateFlow(false)
+    private val _isGlassesPermissionGranted = MutableStateFlow(false)
     private val _logs = MutableStateFlow<List<String>>(emptyList())
     private val _error = MutableStateFlow<String?>(null)
 
@@ -69,6 +72,7 @@ class VisionViewModel @Inject constructor(
         _isApiKeySet,
         _cameraSource,
         _isPermissionGranted,
+        _isGlassesPermissionGranted,
         repository.capturedImage,
         _logs,
         _error
@@ -80,9 +84,10 @@ class VisionViewModel @Inject constructor(
             isApiKeySet = args[3] as Boolean,
             cameraSource = args[4] as String,
             isPermissionGranted = args[5] as Boolean,
-            capturedImage = args[6] as Bitmap?,
-            logs = args[7] as List<String>,
-            error = args[8] as String?
+            isGlassesPermissionGranted = args[6] as Boolean,
+            capturedImage = args[7] as Bitmap?,
+            logs = args[8] as List<String>,
+            error = args[9] as String?
         )
     }.stateIn(
         scope = viewModelScope,
@@ -106,48 +111,76 @@ class VisionViewModel @Inject constructor(
         _isPermissionGranted.value = granted
     }
 
-    fun setupCamera(activity: Activity) {
-        addLog("Initializing Camera...")
-        // Try to use Glasses context to target glasses hardware camera
-        val (finalContext, source) = try {
-            val projectedContext = ProjectedContext.createProjectedDeviceContext(activity)
-            addLog("Successfully created ProjectedContext for Glasses.")
-            projectedContext to "Glasses"
-        } catch (e: Exception) {
-            val errorMsg = "Projected Context Failed: ${e.message ?: "Unknown error"}"
-            addLog(errorMsg)
-            Log.e(TAG, errorMsg, e)
-            activity to "Phone"
-        }
-
-        _cameraSource.value = source
-        addLog("Camera Source set to: $source")
-
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(finalContext)
-        cameraProviderFuture.addListener({
+    fun checkGlassesPermission(activity: Activity) {
+        viewModelScope.launch {
             try {
-                val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-                
-                // Select the camera. When using the projected context, DEFAULT_BACK_CAMERA maps to the AI glasses' camera.
-                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-                imageCapture = ImageCapture.Builder()
-                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                    .build()
-
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
-                    activity as LifecycleOwner,
-                    cameraSelector,
-                    imageCapture
-                )
-                addLog("Camera successfully bound to lifecycle.")
+                val projectedContext = ProjectedContext.createProjectedDeviceContext(activity)
+                val status = ContextCompat.checkSelfPermission(projectedContext, android.Manifest.permission.CAMERA)
+                val granted = status == android.content.pm.PackageManager.PERMISSION_GRANTED
+                _isGlassesPermissionGranted.value = granted
+                addLog("Glasses camera permission status: ${if (granted) "GRANTED" else "DENIED"}")
             } catch (e: Exception) {
-                addLog("Camera binding failed: ${e.message}")
-                Log.e(TAG, "Camera binding failed", e)
-                _error.value = "Camera Init Failed: ${e.message}"
+                Log.e(TAG, "Failed to check glasses permission", e)
+                _isGlassesPermissionGranted.value = false
             }
-        }, ContextCompat.getMainExecutor(finalContext))
+        }
+    }
+
+    fun setupCamera(activity: Activity) {
+        viewModelScope.launch {
+            addLog("Initializing Camera Probing...")
+            
+            val providers = listOf(
+                "Glasses" to try { ProjectedContext.createProjectedDeviceContext(activity) } catch (e: Exception) { null },
+                "Host (Phone)" to try { ProjectedContext.createHostDeviceContext(activity) } catch (e: Exception) { null },
+                "Application" to getApplication<Application>()
+            )
+
+            var bound = false
+            for ((name, ctx) in providers) {
+                if (ctx == null) continue
+                if (bound) break
+
+                addLog("Probing $name context...")
+                try {
+                    val cameraProvider = ProcessCameraProvider.awaitInstance(ctx)
+                    val selectors = listOf(
+                        CameraSelector.DEFAULT_BACK_CAMERA,
+                        CameraSelector.DEFAULT_FRONT_CAMERA
+                    )
+
+                    for (selector in selectors) {
+                        if (cameraProvider.hasCamera(selector)) {
+                            val lens = if (selector == CameraSelector.DEFAULT_BACK_CAMERA) "BACK" else "FRONT"
+                            addLog("Found $lens camera in $name context. Binding...")
+                            
+                            imageCapture = ImageCapture.Builder()
+                                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                                .build()
+
+                            cameraProvider.unbindAll()
+                            cameraProvider.bindToLifecycle(
+                                activity as LifecycleOwner,
+                                selector,
+                                imageCapture
+                            )
+                            
+                            _cameraSource.value = "$name ($lens)"
+                            addLog("SUCCESS: Camera successfully bound to $name.")
+                            bound = true
+                            break
+                        }
+                    }
+                } catch (e: Exception) {
+                    addLog("Probe failed for $name: ${e.message}")
+                }
+            }
+
+            if (!bound) {
+                addLog("CRITICAL: No available camera found in any context.")
+                _error.value = "Camera binding failed: No cameras found."
+            }
+        }
     }
 
     fun takePicture() {
