@@ -39,7 +39,8 @@ fun GlassXRDemosPhoneScreen(
     val context = LocalContext.current
     val projectedPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         ProjectedPermissionsResultContract()
-    ) { _ ->
+    ) { results ->
+        android.util.Log.d("GlassXRDemos", "Projected permissions result: $results")
         // Handle result if needed
     }
     
@@ -132,6 +133,7 @@ fun GlassXRDemosPhoneScreen(
                 UnifiedVisionScreen(
                     onNavigateToSettings = { /* No-op for now */ },
                     onRequestGlassesPermission = {
+                        android.util.Log.d("GlassXRDemos", "onRequestGlassesPermission triggered in Demos Screen")
                         val params = ProjectedPermissionsRequestParams(
                             permissions = listOf(android.Manifest.permission.CAMERA),
                             rationale = "Camera access is needed on your AI glasses for this demo."

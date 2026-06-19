@@ -64,6 +64,7 @@ class LiveVisionActivity : ComponentActivity() {
                             // Navigate to settings logic
                         },
                         onRequestGlassesPermission = {
+                            android.util.Log.d("LiveVisionActivity", "onRequestGlassesPermission triggered in Activity")
                             val params = ProjectedPermissionsRequestParams(
                                 permissions = listOf(Manifest.permission.CAMERA),
                                 rationale = "Camera access is needed on your AI glasses to describe what you see."
