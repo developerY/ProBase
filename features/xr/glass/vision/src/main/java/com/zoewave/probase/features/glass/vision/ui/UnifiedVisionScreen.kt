@@ -252,7 +252,7 @@ fun UnifiedVisionScreen(
                     if (!uiState.isPermissionGranted) {
                         cameraPermissionState.launchPermissionRequest()
                     } else {
-                        viewModel.takePicture()
+                        viewModel.triggerGlassesCapture()
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),

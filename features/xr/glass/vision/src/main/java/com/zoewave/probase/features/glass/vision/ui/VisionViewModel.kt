@@ -21,6 +21,7 @@ import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.GlassBridgeRepository
 import com.zoewave.probase.features.glass.vision.data.VisionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +53,8 @@ data class VisionUiState(
 class VisionViewModel @Inject constructor(
     application: Application,
     private val settings: AiConfigurationSettings,
-    private val repository: VisionRepository
+    private val repository: VisionRepository,
+    private val bridgeRepository: GlassBridgeRepository
 ) : AndroidViewModel(application) {
 
     private val TAG = "VisionVM"
@@ -98,6 +100,22 @@ class VisionViewModel @Inject constructor(
 
     init {
         checkStatus()
+        observeBridgeCommands()
+    }
+
+    private fun observeBridgeCommands() {
+        viewModelScope.launch {
+            bridgeRepository.glassCommands.collect { cmd ->
+                if (cmd == "CAPTURE_IMAGE") {
+                    addLog("Received Remote Command: CAPTURE_IMAGE")
+                    if (imageCapture != null) {
+                        takePicture()
+                    } else {
+                        addLog("Cannot execute capture: Camera not bound in this context.")
+                    }
+                }
+            }
+        }
     }
 
     private fun checkStatus() {
@@ -110,6 +128,13 @@ class VisionViewModel @Inject constructor(
 
     fun updatePermissionStatus(granted: Boolean) {
         _isPermissionGranted.value = granted
+    }
+
+    fun triggerGlassesCapture() {
+        viewModelScope.launch {
+            addLog("Sending Remote Command: CAPTURE_IMAGE...")
+            bridgeRepository.sendGlassCommand("CAPTURE_IMAGE")
+        }
     }
 
     fun checkGlassesPermission(activity: Activity) {
@@ -145,6 +170,11 @@ class VisionViewModel @Inject constructor(
                 for (attempt in 1..3) {
                     addLog("Probing $name context (Attempt $attempt of 3)...")
                     try {
+                        // DEEP DEBUG: Check OS CameraManager directly
+                        val cm = ctx.getSystemService(android.content.Context.CAMERA_SERVICE) as android.hardware.camera2.CameraManager
+                        val osCams = cm.cameraIdList
+                        addLog("OS CameraManager reports ${osCams.size} cameras for $name: [${osCams.joinToString()}]")
+                        
                         val cameraProvider = ProcessCameraProvider.awaitInstance(ctx)
                         val availableCams = cameraProvider.availableCameraInfos.size
                         addLog("$name reports $availableCams total cameras.")
