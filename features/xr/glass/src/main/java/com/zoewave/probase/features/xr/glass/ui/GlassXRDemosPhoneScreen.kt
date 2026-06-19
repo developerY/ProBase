@@ -41,7 +41,6 @@ fun GlassXRDemosPhoneScreen(
         ProjectedPermissionsResultContract()
     ) { results ->
         android.util.Log.d("GlassXRDemos", "Projected permissions result: $results")
-        // Handle result if needed
     }
     
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
@@ -133,12 +132,31 @@ fun GlassXRDemosPhoneScreen(
                 UnifiedVisionScreen(
                     onNavigateToSettings = { /* No-op for now */ },
                     onRequestGlassesPermission = {
-                        android.util.Log.d("GlassXRDemos", "onRequestGlassesPermission triggered in Demos Screen")
-                        val params = ProjectedPermissionsRequestParams(
-                            permissions = listOf(android.Manifest.permission.CAMERA),
-                            rationale = "Camera access is needed on your AI glasses for this demo."
-                        )
-                        projectedPermissionLauncher.launch(listOf(params))
+                        android.util.Log.d("GlassXRDemos", "onRequestGlassesPermission triggered. Using device-targeted request.")
+                        try {
+                            val activity = context as? android.app.Activity
+                            val glassesContext = ProjectedContext.createProjectedDeviceContext(context)
+                            val deviceId = glassesContext.deviceId
+                            android.util.Log.d("GlassXRDemos", "Targeting Projected Device ID: $deviceId")
+                            
+                            if (activity != null && android.os.Build.VERSION.SDK_INT >= 35) {
+                                activity.requestPermissions(
+                                    arrayOf(android.Manifest.permission.CAMERA),
+                                    1001, // Request code
+                                    deviceId
+                                )
+                                android.util.Log.d("GlassXRDemos", "Triggered activity.requestPermissions with deviceId")
+                            } else {
+                                // Fallback to contract if activity is null or SDK too low
+                                val params = ProjectedPermissionsRequestParams(
+                                    permissions = listOf(android.Manifest.permission.CAMERA),
+                                    rationale = "Camera access is needed on your AI glasses for this demo."
+                                )
+                                projectedPermissionLauncher.launch(listOf(params))
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("GlassXRDemos", "Failed to trigger device-targeted permissions", e)
+                        }
                     }
                 )
                 // Floating Close Button for the demo
