@@ -20,6 +20,18 @@ class SpeechEngine(private val context: Context) {
     private val _logs = MutableStateFlow<List<String>>(emptyList())
     val logs: StateFlow<List<String>> = _logs
 
+    private val _rmsLevel = MutableStateFlow(0f)
+    val rmsLevel: StateFlow<Float> = _rmsLevel
+
+    private val _isServiceReady = MutableStateFlow(false)
+    val isServiceReady: StateFlow<Boolean> = _isServiceReady
+
+    private val _hasDetectedSignal = MutableStateFlow(false)
+    val hasDetectedSignal: StateFlow<Boolean> = _hasDetectedSignal
+
+    val isRecognitionAvailable: Boolean
+        get() = SpeechRecognizer.isRecognitionAvailable(context)
+
     private fun addLog(message: String) {
         Log.d("SpeechEngine", message)
         _logs.update { it + message }
@@ -27,7 +39,11 @@ class SpeechEngine(private val context: Context) {
 
     fun startListening() {
         addLog("Action: startListening()")
-        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+        _rmsLevel.value = 0f
+        _isServiceReady.value = false
+        _hasDetectedSignal.value = false
+
+        if (!isRecognitionAvailable) {
             val error = "ERROR: SpeechRecognizer not available on this device."
             _textState.value = error
             addLog(error)
@@ -38,15 +54,20 @@ class SpeechEngine(private val context: Context) {
             setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {
                     _textState.value = "Listening..."
+                    _isServiceReady.value = true
                     addLog("Event: onReadyForSpeech")
                 }
                 override fun onBeginningOfSpeech() {
                     addLog("Event: onBeginningOfSpeech")
                 }
                 override fun onRmsChanged(rmsdB: Float) {
-                    // Too noisy for logs, but could be added if needed for mic levels
+                    _rmsLevel.value = rmsdB
+                    if (rmsdB > -2f) { // Threshold for "signal detected"
+                        _hasDetectedSignal.value = true
+                    }
                 }
                 override fun onBufferReceived(buffer: ByteArray?) {
+                    _hasDetectedSignal.value = true
                     addLog("Event: onBufferReceived (size: ${buffer?.size ?: 0})")
                 }
                 override fun onEndOfSpeech() {
@@ -55,6 +76,7 @@ class SpeechEngine(private val context: Context) {
                 override fun onError(error: Int) {
                     val errorMessage = getErrorText(error)
                     _textState.value = "ERROR: $errorMessage"
+                    _isServiceReady.value = false
                     addLog("Event: onError - Code $error ($errorMessage)")
                 }
                 override fun onResults(results: Bundle?) {
