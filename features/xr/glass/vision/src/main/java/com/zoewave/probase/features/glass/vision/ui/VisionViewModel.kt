@@ -39,6 +39,8 @@ data class VisionUiState(
     val isApiKeySet: Boolean = false,
     val cameraSource: String = "Phone",
     val isPermissionGranted: Boolean = false,
+    val capturedImage: Bitmap? = null,
+    val logs: List<String> = emptyList(),
     val error: String? = null
 )
 
@@ -57,6 +59,7 @@ class VisionViewModel @Inject constructor(
     private val _cameraSource = MutableStateFlow("Phone")
     private val _isApiKeySet = MutableStateFlow(false)
     private val _isPermissionGranted = MutableStateFlow(false)
+    private val _logs = MutableStateFlow<List<String>>(emptyList())
     private val _error = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<VisionUiState> = combine(
@@ -66,6 +69,8 @@ class VisionViewModel @Inject constructor(
         _isApiKeySet,
         _cameraSource,
         _isPermissionGranted,
+        repository.capturedImage,
+        _logs,
         _error
     ) { args: Array<Any?> ->
         VisionUiState(
@@ -75,7 +80,9 @@ class VisionViewModel @Inject constructor(
             isApiKeySet = args[3] as Boolean,
             cameraSource = args[4] as String,
             isPermissionGranted = args[5] as Boolean,
-            error = args[6] as String?
+            capturedImage = args[6] as Bitmap?,
+            logs = args[7] as List<String>,
+            error = args[8] as String?
         )
     }.stateIn(
         scope = viewModelScope,
@@ -100,15 +107,18 @@ class VisionViewModel @Inject constructor(
     }
 
     fun setupCamera(activity: Activity) {
+        addLog("Initializing Camera...")
         // Try to use Glasses context to target glasses hardware camera
         val (finalContext, source) = try {
             ProjectedContext.createProjectedDeviceContext(activity) to "Glasses"
         } catch (e: Exception) {
+            addLog("Projected Context Failed: ${e.message}")
             Log.e(TAG, "Failed to create projected context: ${e.message}. Falling back to Phone.")
             activity to "Phone"
         }
 
         _cameraSource.value = source
+        addLog("Camera Source set to: $source")
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(finalContext)
         cameraProviderFuture.addListener({
@@ -128,7 +138,9 @@ class VisionViewModel @Inject constructor(
                     cameraSelector,
                     imageCapture
                 )
+                addLog("Camera successfully bound to lifecycle.")
             } catch (e: Exception) {
+                addLog("Camera binding failed: ${e.message}")
                 Log.e(TAG, "Camera binding failed", e)
                 _error.value = "Camera Init Failed: ${e.message}"
             }
@@ -136,12 +148,17 @@ class VisionViewModel @Inject constructor(
     }
 
     fun takePicture() {
-        val capture = imageCapture ?: return
+        val capture = imageCapture ?: run {
+            addLog("Error: ImageCapture not initialized")
+            return
+        }
+        addLog("Capture Triggered...")
         repository.updateCapturing(true)
         _error.value = null
 
         capture.takePicture(cameraExecutor, object : ImageCapture.OnImageCapturedCallback() {
             override fun onCaptureSuccess(image: ImageProxy) {
+                addLog("Capture Success! Processing bitmap...")
                 val bitmap = image.toBitmap()
                 image.close()
                 repository.updateCapturedImage(bitmap)
@@ -150,6 +167,7 @@ class VisionViewModel @Inject constructor(
             }
 
             override fun onError(exception: ImageCaptureException) {
+                addLog("Capture Error: ${exception.message}")
                 Log.e(TAG, "Capture failed", exception)
                 repository.updateCapturing(false)
                 _error.value = "Capture failed: ${exception.message}"
@@ -159,15 +177,18 @@ class VisionViewModel @Inject constructor(
 
     private fun analyzeImage(bitmap: Bitmap) {
         viewModelScope.launch {
+            addLog("Starting Gemini Analysis...")
             repository.updateAnalyzing(true)
             try {
                 val apiKey = settings.getGeminiApiKey()
                 if (apiKey.isNullOrBlank()) {
+                    addLog("Error: Gemini API Key missing!")
                     _error.value = "Gemini API Key missing. Check Settings."
                     repository.updateAnalyzing(false)
                     return@launch
                 }
 
+                addLog("API Key validated. Model: gemini-1.5-flash")
                 // Use gemini-1.5-flash for vision tasks as it's optimized for speed and images
                 val generativeModel = GenerativeModel(
                     modelName = "gemini-1.5-flash",
@@ -175,19 +196,32 @@ class VisionViewModel @Inject constructor(
                 )
 
                 val prompt = "Describe this image in a few words for someone wearing AI glasses. Be concise."
+                addLog("Prompt sent: \"$prompt\"")
+                
                 val inputContent = content {
                     image(bitmap)
                     text(prompt)
                 }
 
                 val response = generativeModel.generateContent(inputContent)
-                repository.updateImageDescription(response.text ?: "Could not describe image")
+                val textResponse = response.text ?: "Could not describe image"
+                addLog("Gemini Response: $textResponse")
+                
+                repository.updateImageDescription(textResponse)
                 repository.updateAnalyzing(false)
             } catch (e: Exception) {
+                addLog("AI Error: ${e.message}")
                 _error.value = "AI Error: ${e.message}"
                 repository.updateAnalyzing(false)
             }
         }
+    }
+
+    private fun addLog(message: String) {
+        val timestamp = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+        val formattedMsg = "[$timestamp] $message"
+        Log.d(TAG, formattedMsg)
+        _logs.value = _logs.value + formattedMsg
     }
 
     private fun ImageProxy.toBitmap(): Bitmap {
