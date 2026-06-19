@@ -153,6 +153,8 @@ fun GlassXRSpatialContent(viewModel: GlassXRDemosViewModel) {
 ### sample code
 [Android XR Samples](https://developer.android.com/develop/xr/samples)
 
+[AI Glass](https://github.com/android/ai-samples/tree/prototype-ai-glasses)
+
 
 
 For more information on building XR experiences with Jetpack Compose and Glimmer, refer to the following resources:
