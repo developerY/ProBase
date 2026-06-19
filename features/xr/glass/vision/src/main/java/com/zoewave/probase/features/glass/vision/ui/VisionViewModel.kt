@@ -12,6 +12,7 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.delay
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
@@ -128,7 +129,7 @@ class VisionViewModel @Inject constructor(
 
     fun setupCamera(activity: Activity) {
         viewModelScope.launch {
-            addLog("Initializing Camera Probing...")
+            addLog("Initializing Camera Probing (with retry logic)...")
             
             val providers = listOf(
                 "Glasses" to try { ProjectedContext.createProjectedDeviceContext(activity) } catch (e: Exception) { null },
@@ -141,43 +142,54 @@ class VisionViewModel @Inject constructor(
                 if (ctx == null) continue
                 if (bound) break
 
-                addLog("Probing $name context...")
-                try {
-                    val cameraProvider = ProcessCameraProvider.awaitInstance(ctx)
-                    val selectors = listOf(
-                        CameraSelector.DEFAULT_BACK_CAMERA,
-                        CameraSelector.DEFAULT_FRONT_CAMERA
-                    )
+                for (attempt in 1..3) {
+                    addLog("Probing $name context (Attempt $attempt of 3)...")
+                    try {
+                        val cameraProvider = ProcessCameraProvider.awaitInstance(ctx)
+                        val availableCams = cameraProvider.availableCameraInfos.size
+                        addLog("$name reports $availableCams total cameras.")
 
-                    for (selector in selectors) {
-                        if (cameraProvider.hasCamera(selector)) {
-                            val lens = if (selector == CameraSelector.DEFAULT_BACK_CAMERA) "BACK" else "FRONT"
-                            addLog("Found $lens camera in $name context. Binding...")
-                            
-                            imageCapture = ImageCapture.Builder()
-                                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                                .build()
+                        val selectors = listOf(
+                            CameraSelector.DEFAULT_BACK_CAMERA,
+                            CameraSelector.DEFAULT_FRONT_CAMERA
+                        )
 
-                            cameraProvider.unbindAll()
-                            cameraProvider.bindToLifecycle(
-                                activity as LifecycleOwner,
-                                selector,
-                                imageCapture
-                            )
-                            
-                            _cameraSource.value = "$name ($lens)"
-                            addLog("SUCCESS: Camera successfully bound to $name.")
-                            bound = true
-                            break
+                        for (selector in selectors) {
+                            if (cameraProvider.hasCamera(selector)) {
+                                val lens = if (selector == CameraSelector.DEFAULT_BACK_CAMERA) "BACK" else "FRONT"
+                                addLog("Found $lens camera in $name context. Binding...")
+                                
+                                imageCapture = ImageCapture.Builder()
+                                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                                    .build()
+
+                                cameraProvider.unbindAll()
+                                cameraProvider.bindToLifecycle(
+                                    activity as LifecycleOwner,
+                                    selector,
+                                    imageCapture
+                                )
+                                
+                                _cameraSource.value = "$name ($lens)"
+                                addLog("SUCCESS: Camera successfully bound to $name.")
+                                bound = true
+                                break
+                            }
                         }
+                        
+                        if (bound) break
+                        
+                        addLog("No matching lens found in $name. Waiting before retry...")
+                        delay(500)
+                    } catch (e: Exception) {
+                        addLog("Probe failed for $name: ${e.message}")
+                        delay(500)
                     }
-                } catch (e: Exception) {
-                    addLog("Probe failed for $name: ${e.message}")
                 }
             }
 
             if (!bound) {
-                addLog("CRITICAL: No available camera found in any context.")
+                addLog("CRITICAL: No available camera found in any context after retries.")
                 _error.value = "Camera binding failed: No cameras found."
             }
         }
