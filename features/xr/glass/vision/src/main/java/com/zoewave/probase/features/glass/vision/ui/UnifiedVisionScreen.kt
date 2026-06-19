@@ -33,6 +33,7 @@ import androidx.xr.projected.ProjectedContext
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.zoewave.probase.features.glass.vision.ui.components.VisionRequirementGate
 import kotlinx.coroutines.Dispatchers
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class, androidx.xr.projected.experimental.ExperimentalProjectedApi::class)
@@ -44,11 +45,15 @@ fun UnifiedVisionScreen(
     val uiState by viewModel.uiState.collectAsState()
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val context = LocalContext.current
+    val activity = context as? android.app.Activity
     val logListState = rememberLazyListState()
 
-    // Sync permission status with ViewModel
+    // Sync permission status with ViewModel and trigger camera setup
     LaunchedEffect(cameraPermissionState.status.isGranted) {
         viewModel.updatePermissionStatus(cameraPermissionState.status.isGranted)
+        if (cameraPermissionState.status.isGranted && activity != null) {
+            viewModel.setupCamera(activity)
+        }
     }
 
     // Diagnostic state: Correct phone-side connectivity check
@@ -80,14 +85,18 @@ fun UnifiedVisionScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        VisionRequirementGate(
+            viewModel = viewModel,
+            onNavigateToSettings = onNavigateToSettings
         ) {
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
             // --- DIAGNOSTICS SECTION ---
             Card(
                 colors = CardDefaults.cardColors(
@@ -115,7 +124,8 @@ fun UnifiedVisionScreen(
                         isActive = uiState.cameraSource == "Glasses",
                         activeIcon = Icons.Default.CheckCircle,
                         inactiveIcon = Icons.Default.Error,
-                        statusOverride = uiState.cameraSource
+                        statusOverride = uiState.cameraSource,
+                        isCritical = true
                     )
                     DiagnosticRow(
                         label = "Gemini API Key",
@@ -235,6 +245,7 @@ fun UnifiedVisionScreen(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
+            }
         }
     }
 }
@@ -246,6 +257,7 @@ fun DiagnosticRow(
     activeIcon: ImageVector, 
     inactiveIcon: ImageVector,
     statusOverride: String? = null,
+    isCritical: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
     Row(
@@ -270,7 +282,7 @@ fun DiagnosticRow(
             text = statusOverride ?: (if (isActive) "OK" else "FAIL"),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = if (isActive) Color(0xFF4CAF50) else MaterialTheme.colorScheme.error
+            color = if (isActive) Color(0xFF4CAF50) else (if (isCritical) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
         )
     }
 }

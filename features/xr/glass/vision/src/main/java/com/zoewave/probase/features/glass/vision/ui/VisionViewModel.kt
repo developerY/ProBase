@@ -110,10 +110,13 @@ class VisionViewModel @Inject constructor(
         addLog("Initializing Camera...")
         // Try to use Glasses context to target glasses hardware camera
         val (finalContext, source) = try {
-            ProjectedContext.createProjectedDeviceContext(activity) to "Glasses"
+            val projectedContext = ProjectedContext.createProjectedDeviceContext(activity)
+            addLog("Successfully created ProjectedContext for Glasses.")
+            projectedContext to "Glasses"
         } catch (e: Exception) {
-            addLog("Projected Context Failed: ${e.message}")
-            Log.e(TAG, "Failed to create projected context: ${e.message}. Falling back to Phone.")
+            val errorMsg = "Projected Context Failed: ${e.message ?: "Unknown error"}"
+            addLog(errorMsg)
+            Log.e(TAG, errorMsg, e)
             activity to "Phone"
         }
 
