@@ -5,12 +5,13 @@ plugins {
 }
 
 android {
-    namespace = "com.zoewave.probase.features.xr.glass"
+    namespace = "com.zoewave.probase.features.glass.vision"
 }
 
 dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:data"))
+    implementation(project(":core:ui"))
 
     implementation(libs.androidx.glimmer.core)
     implementation(libs.androidx.glimmer.google.fonts)
@@ -18,10 +19,9 @@ dependencies {
     implementation(libs.androidx.xr.runtime)
     implementation(libs.androidx.xr.arcore)
 
-    implementation(project(":features:xr:glass:translation"))
-    implementation(project(":features:xr:glass:vision"))
+    implementation(libs.google.generative.ai)
+    implementation(libs.google.accompanist.permissions)
 
-    // CameraX
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
@@ -34,8 +34,6 @@ dependencies {
 
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
-
-    implementation(libs.androidx.lifecycle.process)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
