@@ -140,6 +140,13 @@ fun UnifiedTranslationScreen(
                         inactiveIcon = Icons.Default.MicOff
                     )
                     DiagnosticRow(
+                        label = "Microphone Source",
+                        isActive = uiState.micSource == "Glasses",
+                        activeIcon = Icons.Default.CheckCircle,
+                        inactiveIcon = Icons.Default.Error,
+                        statusOverride = uiState.micSource
+                    )
+                    DiagnosticRow(
                         label = "Gemini API Key",
                         isActive = uiState.isApiKeySet,
                         activeIcon = Icons.Default.VpnKey,
@@ -259,6 +266,7 @@ fun DiagnosticRow(
     isActive: Boolean, 
     activeIcon: ImageVector, 
     inactiveIcon: ImageVector,
+    statusOverride: String? = null,
     onClick: (() -> Unit)? = null
 ) {
     Row(
@@ -280,7 +288,7 @@ fun DiagnosticRow(
             Text(label, style = MaterialTheme.typography.bodyMedium)
         }
         Text(
-            text = if (isActive) "OK" else "FAIL",
+            text = statusOverride ?: (if (isActive) "OK" else "FAIL"),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = if (isActive) Color(0xFF4CAF50) else MaterialTheme.colorScheme.error

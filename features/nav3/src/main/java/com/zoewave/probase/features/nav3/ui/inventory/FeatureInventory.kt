@@ -32,6 +32,9 @@ sealed interface FeatureInventory : NavKey {
     data object Camera : FeatureInventory
 
     @Serializable
+    data object Microphone : FeatureInventory
+
+    @Serializable
     data object Calendar : FeatureInventory
 
     @Serializable

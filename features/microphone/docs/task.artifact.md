@@ -1,0 +1,12 @@
+- [x] Register `:features:microphone` in `settings.gradle.kts`
+- [x] Create `:features:microphone` module
+    - [x] Create `features/microphone/build.gradle.kts`
+    - [x] Create `features/microphone/src/main/AndroidManifest.xml`
+    - [x] Create `features/microphone/src/main/java/com/zoewave/probase/features/microphone/SpeechEngine.kt`
+    - [x] Create `features/microphone/src/main/java/com/zoewave/probase/features/microphone/SpeechTestScreen.kt`
+- [x] Add dependency to `app/build.gradle.kts`
+- [x] Integrate into Navigation & UI
+    - [x] Update `FeatureInventory.kt`
+    - [x] Update `FeatureInventoryScreen.kt`
+    - [x] Update `FeatureInventoryEntryProvider.kt`
+- [x] Verify build and functionality

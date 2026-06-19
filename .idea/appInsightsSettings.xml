@@ -37,8 +37,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.zoewave.probase.ashbike" />
-                  <option name="mobileSdkAppId" value="1:786488326984:android:f2f08312fbdcdbf395517d" />
+                  <option name="appId" value="com.zoewave.probase.goswift" />
+                  <option name="mobileSdkAppId" value="1:786488326984:android:17e64e3fe4555a7b95517d" />
                   <option name="projectId" value="android-zoewave" />
                   <option name="projectNumber" value="786488326984" />
                 </ConnectionSetting>
