@@ -10,6 +10,7 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.lifecycle.awaitInstance
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
@@ -39,6 +40,9 @@ data class VisionUiState(
     val isApiKeySet: Boolean = false,
     val cameraSource: String = "Phone",
     val isPermissionGranted: Boolean = false,
+    val isGlassesPermissionGranted: Boolean = false,
+    val capturedImage: Bitmap? = null,
+    val logs: List<String> = emptyList(),
     val error: String? = null
 )
 
@@ -57,6 +61,8 @@ class VisionViewModel @Inject constructor(
     private val _cameraSource = MutableStateFlow("Phone")
     private val _isApiKeySet = MutableStateFlow(false)
     private val _isPermissionGranted = MutableStateFlow(false)
+    private val _isGlassesPermissionGranted = MutableStateFlow(false)
+    private val _logs = MutableStateFlow<List<String>>(emptyList())
     private val _error = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<VisionUiState> = combine(
@@ -66,6 +72,9 @@ class VisionViewModel @Inject constructor(
         _isApiKeySet,
         _cameraSource,
         _isPermissionGranted,
+        _isGlassesPermissionGranted,
+        repository.capturedImage,
+        _logs,
         _error
     ) { args: Array<Any?> ->
         VisionUiState(
@@ -75,7 +84,10 @@ class VisionViewModel @Inject constructor(
             isApiKeySet = args[3] as Boolean,
             cameraSource = args[4] as String,
             isPermissionGranted = args[5] as Boolean,
-            error = args[6] as String?
+            isGlassesPermissionGranted = args[6] as Boolean,
+            capturedImage = args[7] as Bitmap?,
+            logs = args[8] as List<String>,
+            error = args[9] as String?
         )
     }.stateIn(
         scope = viewModelScope,
@@ -99,49 +111,90 @@ class VisionViewModel @Inject constructor(
         _isPermissionGranted.value = granted
     }
 
-    fun setupCamera(activity: Activity) {
-        // Try to use Glasses context to target glasses hardware camera
-        val (finalContext, source) = try {
-            ProjectedContext.createProjectedDeviceContext(activity) to "Glasses"
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to create projected context: ${e.message}. Falling back to Phone.")
-            activity to "Phone"
-        }
-
-        _cameraSource.value = source
-
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(finalContext)
-        cameraProviderFuture.addListener({
+    fun checkGlassesPermission(activity: Activity) {
+        viewModelScope.launch {
             try {
-                val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-                
-                // Select the camera. When using the projected context, DEFAULT_BACK_CAMERA maps to the AI glasses' camera.
-                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-                imageCapture = ImageCapture.Builder()
-                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                    .build()
-
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
-                    activity as LifecycleOwner,
-                    cameraSelector,
-                    imageCapture
-                )
+                val projectedContext = ProjectedContext.createProjectedDeviceContext(activity)
+                val status = ContextCompat.checkSelfPermission(projectedContext, android.Manifest.permission.CAMERA)
+                val granted = status == android.content.pm.PackageManager.PERMISSION_GRANTED
+                _isGlassesPermissionGranted.value = granted
+                addLog("Glasses camera permission status: ${if (granted) "GRANTED" else "DENIED"}")
             } catch (e: Exception) {
-                Log.e(TAG, "Camera binding failed", e)
-                _error.value = "Camera Init Failed: ${e.message}"
+                Log.e(TAG, "Failed to check glasses permission", e)
+                _isGlassesPermissionGranted.value = false
             }
-        }, ContextCompat.getMainExecutor(finalContext))
+        }
+    }
+
+    fun setupCamera(activity: Activity) {
+        viewModelScope.launch {
+            addLog("Initializing Camera Probing...")
+            
+            val providers = listOf(
+                "Glasses" to try { ProjectedContext.createProjectedDeviceContext(activity) } catch (e: Exception) { null },
+                "Host (Phone)" to try { ProjectedContext.createHostDeviceContext(activity) } catch (e: Exception) { null },
+                "Application" to getApplication<Application>()
+            )
+
+            var bound = false
+            for ((name, ctx) in providers) {
+                if (ctx == null) continue
+                if (bound) break
+
+                addLog("Probing $name context...")
+                try {
+                    val cameraProvider = ProcessCameraProvider.awaitInstance(ctx)
+                    val selectors = listOf(
+                        CameraSelector.DEFAULT_BACK_CAMERA,
+                        CameraSelector.DEFAULT_FRONT_CAMERA
+                    )
+
+                    for (selector in selectors) {
+                        if (cameraProvider.hasCamera(selector)) {
+                            val lens = if (selector == CameraSelector.DEFAULT_BACK_CAMERA) "BACK" else "FRONT"
+                            addLog("Found $lens camera in $name context. Binding...")
+                            
+                            imageCapture = ImageCapture.Builder()
+                                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                                .build()
+
+                            cameraProvider.unbindAll()
+                            cameraProvider.bindToLifecycle(
+                                activity as LifecycleOwner,
+                                selector,
+                                imageCapture
+                            )
+                            
+                            _cameraSource.value = "$name ($lens)"
+                            addLog("SUCCESS: Camera successfully bound to $name.")
+                            bound = true
+                            break
+                        }
+                    }
+                } catch (e: Exception) {
+                    addLog("Probe failed for $name: ${e.message}")
+                }
+            }
+
+            if (!bound) {
+                addLog("CRITICAL: No available camera found in any context.")
+                _error.value = "Camera binding failed: No cameras found."
+            }
+        }
     }
 
     fun takePicture() {
-        val capture = imageCapture ?: return
+        val capture = imageCapture ?: run {
+            addLog("Error: ImageCapture not initialized")
+            return
+        }
+        addLog("Capture Triggered...")
         repository.updateCapturing(true)
         _error.value = null
 
         capture.takePicture(cameraExecutor, object : ImageCapture.OnImageCapturedCallback() {
             override fun onCaptureSuccess(image: ImageProxy) {
+                addLog("Capture Success! Processing bitmap...")
                 val bitmap = image.toBitmap()
                 image.close()
                 repository.updateCapturedImage(bitmap)
@@ -150,6 +203,7 @@ class VisionViewModel @Inject constructor(
             }
 
             override fun onError(exception: ImageCaptureException) {
+                addLog("Capture Error: ${exception.message}")
                 Log.e(TAG, "Capture failed", exception)
                 repository.updateCapturing(false)
                 _error.value = "Capture failed: ${exception.message}"
@@ -159,15 +213,18 @@ class VisionViewModel @Inject constructor(
 
     private fun analyzeImage(bitmap: Bitmap) {
         viewModelScope.launch {
+            addLog("Starting Gemini Analysis...")
             repository.updateAnalyzing(true)
             try {
                 val apiKey = settings.getGeminiApiKey()
                 if (apiKey.isNullOrBlank()) {
+                    addLog("Error: Gemini API Key missing!")
                     _error.value = "Gemini API Key missing. Check Settings."
                     repository.updateAnalyzing(false)
                     return@launch
                 }
 
+                addLog("API Key validated. Model: gemini-1.5-flash")
                 // Use gemini-1.5-flash for vision tasks as it's optimized for speed and images
                 val generativeModel = GenerativeModel(
                     modelName = "gemini-1.5-flash",
@@ -175,19 +232,32 @@ class VisionViewModel @Inject constructor(
                 )
 
                 val prompt = "Describe this image in a few words for someone wearing AI glasses. Be concise."
+                addLog("Prompt sent: \"$prompt\"")
+                
                 val inputContent = content {
                     image(bitmap)
                     text(prompt)
                 }
 
                 val response = generativeModel.generateContent(inputContent)
-                repository.updateImageDescription(response.text ?: "Could not describe image")
+                val textResponse = response.text ?: "Could not describe image"
+                addLog("Gemini Response: $textResponse")
+                
+                repository.updateImageDescription(textResponse)
                 repository.updateAnalyzing(false)
             } catch (e: Exception) {
+                addLog("AI Error: ${e.message}")
                 _error.value = "AI Error: ${e.message}"
                 repository.updateAnalyzing(false)
             }
         }
+    }
+
+    private fun addLog(message: String) {
+        val timestamp = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+        val formattedMsg = "[$timestamp] $message"
+        Log.d(TAG, formattedMsg)
+        _logs.value = _logs.value + formattedMsg
     }
 
     private fun ImageProxy.toBitmap(): Bitmap {

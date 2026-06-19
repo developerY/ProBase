@@ -14,7 +14,8 @@ import androidx.xr.glimmer.Text
 import androidx.xr.glimmer.Icon
 import androidx.xr.glimmer.IconButton
 import androidx.xr.glimmer.TitleChip
-import androidx.xr.glimmer.TitleChip
+import androidx.xr.glimmer.Card
+import androidx.xr.glimmer.CardDefaults
 import androidx.xr.projected.ProjectedDisplayController
 import androidx.xr.projected.ProjectedDisplayController.PresentationMode
 import androidx.compose.material.icons.Icons
@@ -96,22 +97,24 @@ fun VisionScreen(
 
                 // Result description
                 val displayMsg = when {
-                    uiState.isAnalyzing -> "Analyzing image..."
+                    uiState.isAnalyzing -> "Analyzing..."
                     uiState.isCapturing -> "Capturing..."
                     uiState.imageDescription.isNotEmpty() -> uiState.imageDescription
-                    else -> "Tap camera to describe what you see"
+                    else -> "Ready"
                 }
 
-                Text(
-                    text = displayMsg,
-                    style = GlimmerTheme.typography.titleMedium, // Better fit for HUD
-                    color = GlimmerTheme.colors.primary,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                Card(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    onClick = { viewModel.takePicture() }
+                ) {
+                    Text(
+                        text = displayMsg,
+                        style = GlimmerTheme.typography.titleSmall,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Capture Button
+                // Capture Button (Alternative trigger)
                 IconButton(
                     onClick = {
                         if (cameraPermissionState.status.isGranted) {
@@ -119,8 +122,7 @@ fun VisionScreen(
                         } else {
                             cameraPermissionState.launchPermissionRequest()
                         }
-                    },
-                    modifier = Modifier.padding(16.dp)
+                    }
                 ) {
                     Icon(
                         imageVector = Icons.Default.CameraAlt,

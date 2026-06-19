@@ -56,11 +56,24 @@ class LiveVisionActivity : ComponentActivity() {
 
             MaterialTheme {
                 if (isGlassesConnected) {
-                    // RENDERED ON GLASSES (via Glimmer)
-                    VisionScreen(viewModel = viewModel)
+                    // Note: In a real multi-display setup, the system decides which UI to show.
+                    // For debugging, we want the Unified Diagnostic Hub on the phone.
+                    UnifiedVisionScreen(
+                        viewModel = viewModel,
+                        onNavigateToSettings = {
+                            // Navigate to settings logic
+                        },
+                        onRequestGlassesPermission = {
+                            val params = ProjectedPermissionsRequestParams(
+                                permissions = listOf(Manifest.permission.CAMERA),
+                                rationale = "Camera access is needed on your AI glasses to describe what you see."
+                            )
+                            projectedPermissionLauncher.launch(listOf(params))
+                        }
+                    )
                     
-                    // RENDERED ON PHONE (Remote Control)
-                    PhoneVisionControl(viewModel = viewModel)
+                    // The Glimmer UI for glasses is usually handled by a separate 
+                    // Projection activity, but we can also trigger it here if needed.
                 } else {
                     // Fallback UI for the phone screen
                     VisionCompanionScreen()

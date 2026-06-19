@@ -24,8 +24,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
+import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import com.zoewave.probase.features.xr.glass.GlassesMainActivity
 import com.zoewave.probase.features.glass.translation.ui.UnifiedTranslationScreen
+import com.zoewave.probase.features.glass.vision.ui.UnifiedVisionScreen
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalProjectedApi::class)
 @Composable
@@ -34,6 +37,12 @@ fun GlassXRDemosPhoneScreen(
     viewModel: GlassXRDemosViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val projectedPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        ProjectedPermissionsResultContract()
+    ) { _ ->
+        // Handle result if needed
+    }
+    
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
     val activeSample by viewModel.activeSample.collectAsStateWithLifecycle()
 
@@ -43,7 +52,7 @@ fun GlassXRDemosPhoneScreen(
 
     Scaffold(
         topBar = {
-            if (activeSample != GlimmerSample.Translation) {
+            if (activeSample != GlimmerSample.Translation && activeSample != GlimmerSample.Vision) {
                 TopAppBar(
                     title = { Text("Glass XR Demos") },
                     navigationIcon = {
@@ -66,7 +75,7 @@ fun GlassXRDemosPhoneScreen(
         },
         bottomBar = {
             activeSample?.let { sample ->
-                if (sample != GlimmerSample.Translation) {
+                if (sample != GlimmerSample.Translation && sample != GlimmerSample.Vision) {
                     Surface(
                         tonalElevation = 8.dp,
                         shadowElevation = 8.dp,
@@ -118,6 +127,26 @@ fun GlassXRDemosPhoneScreen(
                     Icon(Icons.Default.Close, contentDescription = "Close Hub")
                 }
             }
+        } else if (activeSample == GlimmerSample.Vision) {
+            Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+                UnifiedVisionScreen(
+                    onNavigateToSettings = { /* No-op for now */ },
+                    onRequestGlassesPermission = {
+                        val params = ProjectedPermissionsRequestParams(
+                            permissions = listOf(android.Manifest.permission.CAMERA),
+                            rationale = "Camera access is needed on your AI glasses for this demo."
+                        )
+                        projectedPermissionLauncher.launch(listOf(params))
+                    }
+                )
+                // Floating Close Button for the demo
+                IconButton(
+                    onClick = { viewModel.updateActiveSample(null) },
+                    modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = "Close Hub", tint = MaterialTheme.colorScheme.onSurface)
+                }
+            }
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -158,6 +187,7 @@ fun GlassXRDemosPhoneScreen(
                             containerColor = if (isActive) Color(0xFFE8F5E9) else Color.Transparent
                         ),
                         onClick = {
+                            viewModel.updateActiveSample(sample)
                             launchOnGlasses(context, sample)
                         }
                     ) {
