@@ -75,7 +75,10 @@ fun VisionRequirementGate(
                 isMet = isPhonePermissionOk,
                 icon = Icons.Default.CameraAlt,
                 buttonLabel = "GRANT PHONE ACCESS",
-                onButtonClick = { cameraPermissionState.launchPermissionRequest() }
+                onButtonClick = { 
+                    android.util.Log.d("VisionGate", "GRANT PHONE ACCESS clicked")
+                    cameraPermissionState.launchPermissionRequest() 
+                }
             )
 
             Spacer(Modifier.height(16.dp))
@@ -86,7 +89,10 @@ fun VisionRequirementGate(
                 isMet = isGlassesPermissionOk,
                 icon = Icons.Default.CameraAlt,
                 buttonLabel = "GRANT GLASSES ACCESS",
-                onButtonClick = onRequestGlassesPermission
+                onButtonClick = {
+                    android.util.Log.d("VisionGate", "GRANT GLASSES ACCESS clicked")
+                    onRequestGlassesPermission()
+                }
             )
 
             Spacer(Modifier.height(16.dp))
