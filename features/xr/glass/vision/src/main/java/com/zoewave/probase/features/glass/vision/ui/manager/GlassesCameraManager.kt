@@ -33,6 +33,8 @@ import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 
 @ExperimentalLensFacing
 @ExperimentalCamera2Interop
@@ -52,6 +54,19 @@ class GlassesCameraManager @Inject constructor(
 
     private val _logs = MutableStateFlow<List<String>>(emptyList())
     val logs: StateFlow<List<String>> = _logs.asStateFlow()
+
+    fun checkGlassesPermission(activity: Activity): Boolean {
+        return try {
+            val projectedContext = ProjectedContext.createProjectedDeviceContext(activity)
+            val status = ContextCompat.checkSelfPermission(projectedContext, android.Manifest.permission.CAMERA)
+            val granted = status == PackageManager.PERMISSION_GRANTED
+            addLog("Glasses camera permission status check: ${if (granted) "GRANTED" else "DENIED"}")
+            granted
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to check glasses permission", e)
+            false
+        }
+    }
 
     fun initialize(activity: Activity) {
         scope.launch {

@@ -124,12 +124,8 @@ class VisionViewModel @Inject constructor(
         }
     }
 
-    fun checkGlassesPermission() {
-        viewModelScope.launch {
-            cameraManager.addLog("Checking Glasses permissions...")
-            // The actual check is now handled within the manager's lifecycle
-            _isGlassesPermissionGranted.value = true 
-        }
+    fun updateGlassesPermissionStatus(granted: Boolean) {
+        _isGlassesPermissionGranted.value = granted
     }
 
     private fun analyzeImage(bitmap: Bitmap) {

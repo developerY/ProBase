@@ -97,7 +97,8 @@ fun UnifiedVisionScreen(
             if (event == Lifecycle.Event.ON_RESUME) {
                 android.util.Log.d("UnifiedVision", "Lifecycle RESUME: Refreshing status...")
                 if (cameraPermissionState.status.isGranted && activity != null) {
-                    viewModel.checkGlassesPermission()
+                    val glassesGranted = viewModel.cameraManager.checkGlassesPermission(activity)
+                    viewModel.updateGlassesPermissionStatus(glassesGranted)
                     viewModel.cameraManager.initialize(activity)
                 }
             }
@@ -112,7 +113,8 @@ fun UnifiedVisionScreen(
     LaunchedEffect(cameraPermissionState.status.isGranted) {
         viewModel.updatePermissionStatus(cameraPermissionState.status.isGranted)
         if (cameraPermissionState.status.isGranted && activity != null) {
-            viewModel.checkGlassesPermission()
+            val glassesGranted = viewModel.cameraManager.checkGlassesPermission(activity)
+            viewModel.updateGlassesPermissionStatus(glassesGranted)
             viewModel.cameraManager.initialize(activity)
         }
     }
