@@ -1,28 +1,39 @@
 package com.zoewave.probase.features.glass.vision.ui
 
+import android.Manifest
 import android.app.Activity
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import androidx.camera.core.ExperimentalLensFacing
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.xr.glimmer.Card
 import androidx.xr.glimmer.GlimmerTheme
-import androidx.xr.glimmer.Text
 import androidx.xr.glimmer.Icon
 import androidx.xr.glimmer.IconButton
+import androidx.xr.glimmer.Text
 import androidx.xr.glimmer.TitleChip
-import androidx.xr.glimmer.Card
-import androidx.xr.glimmer.CardDefaults
 import androidx.xr.projected.ProjectedDisplayController
 import androidx.xr.projected.ProjectedDisplayController.PresentationMode
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import android.Manifest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -30,6 +41,8 @@ import com.google.accompanist.permissions.rememberPermissionState
 /**
  * A Glimmer-optimized vision screen for AI Glasses.
  */
+@ExperimentalLensFacing
+@ExperimentalCamera2Interop
 @OptIn(ExperimentalPermissionsApi::class, androidx.xr.projected.experimental.ExperimentalProjectedApi::class)
 @Composable
 fun VisionScreen(
@@ -55,7 +68,7 @@ fun VisionScreen(
     LaunchedEffect(cameraPermissionState.status.isGranted) {
         viewModel.updatePermissionStatus(cameraPermissionState.status.isGranted)
         if (cameraPermissionState.status.isGranted && activity != null) {
-            viewModel.setupCamera(activity)
+            viewModel.cameraManager.initialize(activity)
         }
     }
 
@@ -105,7 +118,7 @@ fun VisionScreen(
 
                 Card(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    onClick = { viewModel.takePicture() }
+                    onClick = { viewModel.triggerGlassesCapture() }
                 ) {
                     Text(
                         text = displayMsg,
@@ -118,7 +131,7 @@ fun VisionScreen(
                 IconButton(
                     onClick = {
                         if (cameraPermissionState.status.isGranted) {
-                            viewModel.takePicture()
+                            viewModel.triggerGlassesCapture()
                         } else {
                             cameraPermissionState.launchPermissionRequest()
                         }
