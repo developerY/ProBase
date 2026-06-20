@@ -1,6 +1,8 @@
 package com.zoewave.probase.features.glass.vision.ui.components
 
 import android.Manifest
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import androidx.camera.core.ExperimentalLensFacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +26,9 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zoewave.probase.features.glass.vision.ui.VisionViewModel
 
+@ExperimentalLensFacing
+@ExperimentalCamera2Interop
+@androidx.xr.projected.experimental.ExperimentalProjectedApi
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun VisionRequirementGate(
