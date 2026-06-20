@@ -28,7 +28,7 @@ class RxLogicMainViewModel @Inject constructor() : ViewModel() {
         _uiState.update { 
             if (it.backStack.size > 1) {
                 val newStack = it.backStack.dropLast(1)
-                it.copy(currentRoute = newStack.last(), backStack = newStack)
+                it.copy(currentRoute = newStack.lastOrNull() ?: RxLogicRoute.Main, backStack = newStack)
             } else it
         }
     }

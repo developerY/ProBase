@@ -68,6 +68,8 @@ fun VisionScreen(
     LaunchedEffect(cameraPermissionState.status.isGranted) {
         viewModel.updatePermissionStatus(cameraPermissionState.status.isGranted)
         if (cameraPermissionState.status.isGranted && activity != null) {
+            val glassesGranted = viewModel.cameraManager.checkGlassesPermission(activity)
+            viewModel.updateGlassesPermissionStatus(glassesGranted)
             viewModel.cameraManager.initialize(activity)
         }
     }
