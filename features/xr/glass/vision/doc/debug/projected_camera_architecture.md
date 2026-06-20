@@ -126,6 +126,7 @@ Because AI Glasses execute logic on the phone but manage hardware on the headset
 | :--- | :--- | :--- |
 | **Bridge** | `CameraManagerGlobal: Connecting to camera service` | Glasses OS is linking to the Phone's request. |
 | **Validation** | `CameraValidator: Virtual device with ID: 1 has X cameras.` | **MUST be > 0.** If 0, hardware mount failed. |
+| **Bridge Crash** | `retryOpenSession: failed... microxr.Audio` | **FATAL.** Bridge is severed. Reset emulators. |
 | **Handshake** | `XR_Compositor: New projected buffer allocated` | Visual data is streaming from glasses to phone memory. |
 
 ---
@@ -136,4 +137,6 @@ Because AI Glasses execute logic on the phone but manage hardware on the headset
 | :--- | :--- | :--- |
 | **`Cams: 0`** | Virtual hardware not yet registered. | Add retry loop with 1.5s delay in `setupCamera`. |
 | **`Filters: 1`** | Lens facing conflict (BACK vs EXTERNAL). | Remove explicit facing requirements when using raw IDs. |
+| **`Filters: 2`** | Over-constrained selector during fallback. | Use standard `DEFAULT_BACK_CAMERA` for Host/Phone contexts. |
 | **`Error 3`** | Hardware link timeout on the headset. | Restart the glasses emulator or check physical cable. |
+| **`microxr RPC Hub`** | Foundational communication bridge crashed. | **Wipe Data** and **Cold Boot** both emulators. |
