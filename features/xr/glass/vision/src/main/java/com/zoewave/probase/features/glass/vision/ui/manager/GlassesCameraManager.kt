@@ -25,6 +25,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ExecutorService
@@ -208,6 +209,6 @@ class GlassesCameraManager @Inject constructor(
         val timestamp = java.text.SimpleDateFormat("HH:ss:mm", java.util.Locale.getDefault()).format(java.util.Date())
         val formattedMsg = "[$timestamp] $message"
         Log.d(tag, formattedMsg)
-        _logs.value += formattedMsg
+        _logs.update { it + formattedMsg }
     }
 }
