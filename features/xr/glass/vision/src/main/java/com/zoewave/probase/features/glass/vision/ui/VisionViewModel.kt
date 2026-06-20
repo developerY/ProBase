@@ -176,7 +176,11 @@ class VisionViewModel @Inject constructor(
                 }
 
                 val providers = listOf(
-                    "Glasses" to try { ProjectedContext.createProjectedDeviceContext(baseContext) } catch (e: Exception) { null },
+                    "Glasses" to try { 
+                        val ctx = ProjectedContext.createProjectedDeviceContext(baseContext)
+                        addLog("PHASE 1 SUCCESS: Created ProjectedContext for Glasses.")
+                        ctx
+                    } catch (e: Exception) { null },
                     "Host (Phone)" to try { ProjectedContext.createHostDeviceContext(baseContext) } catch (e: Exception) { null },
                     "Application" to getApplication<Application>()
                 )
@@ -194,7 +198,10 @@ class VisionViewModel @Inject constructor(
                             addLog("OS reports ${ids.size} cameras in $name: [${ids.joinToString()}]")
                             
                             // 1. Fetch provider for THIS specific context
+                            addLog("Fetching CameraProvider for $name...")
                             val cameraProvider = ProcessCameraProvider.awaitInstance(ctx)
+                            val providerCams = cameraProvider.availableCameraInfos.size
+                            addLog("Provider reports $providerCams cameras in $name.")
 
                             for (id in ids) {
                                 val chars = cm.getCameraCharacteristics(id)
@@ -208,6 +215,7 @@ class VisionViewModel @Inject constructor(
                                 addLog("-> Found ID $id ($facingName). Testing binding...")
 
                                 // 2. Create selector that matches the OS facing property to avoid CameraX filtering conflict
+                                addLog("PHASE 4: Hardware Verification for ID $id ($facingName)...")
                                 val selector = CameraSelector.Builder()
                                     .requireLensFacing(
                                         when (lensFacing) {
@@ -225,7 +233,7 @@ class VisionViewModel @Inject constructor(
 
                                 if (bindCameraOnMainThread(activity, cameraProvider, selector)) {
                                     _cameraSource.value = "$name ($facingName - ID $id)"
-                                    addLog("SUCCESS: Camera $id bound to $name.")
+                                    addLog("PHASE 6 SUCCESS: Shutter linked to $name (ID $id).")
                                     bound = true
                                     break
                                 }

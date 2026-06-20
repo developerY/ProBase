@@ -50,7 +50,6 @@ suspend fun initializeGlassesCamera(activity: ComponentActivity) {
     val cameraProvider = ProcessCameraProvider.awaitInstance(projectedContext)
     
     // 3. Select the outward-pointing Glasses camera
-    // Within a projected context, DEFAULT_BACK_CAMERA is automatically mapped to the glasses.
     val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
     // 4. Pre-binding Hardware Verification
@@ -68,8 +67,8 @@ suspend fun initializeGlassesCamera(activity: ComponentActivity) {
                 .build()
         )
 
-    // CORRECT: Use Extender to apply Camera2-level options (e.g. FPS range)
-    val fpsRange = Range(10, 10) // Optimized for Computer Vision thermals
+    // CORRECT: Use Extender to apply Camera2-level options
+    val fpsRange = Range(10, 10) 
     Camera2Interop.Extender(imageCaptureBuilder)
         .setCaptureRequestOption(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange)
 
@@ -92,39 +91,49 @@ suspend fun initializeGlassesCamera(activity: ComponentActivity) {
 
 ---
 
-## 4. Verification Logs (End-to-End Trace)
+## 4. Cross-Device Debugging Strategy
 
-Use these log patterns to verify your setup is working correctly.
+Because AI Glasses execute logic on the phone but manage hardware on the headset, logs are split across two distinct streams.
 
-### Context & Hardware Check
-| Stage | Log Message | Meaning |
-| :--- | :--- | :--- |
-| **Start** | `VisionDebug: PHASE 1 SUCCESS: Created ProjectedContext.` | The OS has recognized the glasses link. |
-| **Discovery** | `CameraManagerGlobal: Connecting to camera service` | The system is reaching out to the virtual hardware bridge. |
-| **Validation** | `CameraValidator: Virtual device with ID: 1 has X cameras.` | **MUST be > 0.** If 0, the OS hasn't finished linking the hardware. |
-| **Verification**| `VisionDebug: PHASE 4 SUCCESS: Hardware verified.` | CameraX confirms `DEFAULT_BACK_CAMERA` exists in this context. |
+### A. The Phone Logcat (Application Space)
+- **Target**: The connected Phone or Emulator.
+- **Filter**: `package:mine` or `tag:VisionVM`.
+- **Content**: Jetpack Compose state, Gemini API calls, and the `ProjectedContext` lifecycle.
 
-### Binding & Runtime
-| Stage | Log Message | Meaning |
-| :--- | :--- | :--- |
-| **Binding** | `VisionDebug: PHASE 6 SUCCESS: Shutter linked to Glasses.` | The camera is now active and controlled by the glasses lifecycle. |
-| **Capture** | `VisionVM: Capture Success! Processing bitmap...` | The image has been successfully pulled from the glasses hardware memory. |
+### B. The Display Glasses Logcat (Hardware Space)
+- **Target**: `Display Glasses (emulator-5556)`.
+- **Filter**: `tag:XR_Compositor`, `tag:CameraDevice`, `tag:SurfaceFlinger`.
+- **Content**: Low-level hardware faults, frame drops, and projection bridge handshake errors.
+
+### C. Recommended Workflow
+1. **Split Logcat**: Right-click the Logcat tab in Android Studio and select **Split Right**.
+2. **Left Panel**: Target **Phone**. Monitor `VisionVM` for "Phase" success signals.
+3. **Right Panel**: Target **Glasses**. Monitor for hardware initialization errors or permission denials.
 
 ---
 
-## 5. Common Failure Signatures
+## 5. Verification Logs (End-to-End Trace)
 
-### "Cams: 0" (Hardware Link Missing)
-- **Log**: `IllegalArgumentException: No available camera can be found. Cams:0`
-- **Cause**: The `ProjectedContext` was used before the virtual hardware was ready.
-- **Fix**: Add a 1.5s delay or retry loop after `createProjectedDeviceContext`.
+### Phone Logcat (Logic Trace)
+| Stage | Log Message | Meaning |
+| :--- | :--- | :--- |
+| **Start** | `VisionDebug: PHASE 1 SUCCESS: Created ProjectedContext.` | The OS has recognized the glasses link. |
+| **Verification**| `VisionDebug: PHASE 4 SUCCESS: Hardware verified.` | CameraX confirms `DEFAULT_BACK_CAMERA` exists. |
+| **Binding** | `VisionDebug: PHASE 6 SUCCESS: Shutter linked to Glasses.` | The camera is now active. |
 
-### "Filters: 1" (Selector Conflict)
-- **Log**: `Bind failed: No available camera can be found. Filters:1`
-- **Cause**: The `CameraSelector` has contradictory filters (e.g. asking for `EXTERNAL` when the OS reports the lens as `BACK`).
-- **Fix**: Use `DEFAULT_BACK_CAMERA` inside the `ProjectedContext`; do not add manual lens-facing requirements.
+### Glasses Logcat (Hardware Trace)
+| Stage | Log Message | Meaning |
+| :--- | :--- | :--- |
+| **Bridge** | `CameraManagerGlobal: Connecting to camera service` | Glasses OS is linking to the Phone's request. |
+| **Validation** | `CameraValidator: Virtual device with ID: 1 has X cameras.` | **MUST be > 0.** If 0, hardware mount failed. |
+| **Handshake** | `XR_Compositor: New projected buffer allocated` | Visual data is streaming from glasses to phone memory. |
 
-### "Channel Broken" (ANR/Crash)
-- **Log**: `InputDispatcher: Channel is unrecoverably broken`
-- **Cause**: Running the initialization loop on the Main thread.
-- **Fix**: Offload `setupCamera` to `Dispatchers.IO`.
+---
+
+## 6. Common Failure Signatures
+
+| Observation | Root Cause | Fix |
+| :--- | :--- | :--- |
+| **`Cams: 0`** | Virtual hardware not yet registered. | Add retry loop with 1.5s delay in `setupCamera`. |
+| **`Filters: 1`** | Lens facing conflict (BACK vs EXTERNAL). | Remove explicit facing requirements when using raw IDs. |
+| **`Error 3`** | Hardware link timeout on the headset. | Restart the glasses emulator or check physical cable. |
