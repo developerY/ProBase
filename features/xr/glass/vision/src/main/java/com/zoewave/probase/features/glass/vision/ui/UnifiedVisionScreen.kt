@@ -1,6 +1,7 @@
 package com.zoewave.probase.features.glass.vision.ui
 
 import android.Manifest
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.ExperimentalLensFacing
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -74,7 +75,8 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.zoewave.probase.features.glass.vision.ui.components.VisionRequirementGate
 import kotlinx.coroutines.Dispatchers
 
-@androidx.annotation.OptIn(ExperimentalLensFacing::class)
+@ExperimentalLensFacing
+@ExperimentalCamera2Interop
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class, androidx.xr.projected.experimental.ExperimentalProjectedApi::class)
 @Composable
 fun UnifiedVisionScreen(
@@ -95,8 +97,8 @@ fun UnifiedVisionScreen(
             if (event == Lifecycle.Event.ON_RESUME) {
                 android.util.Log.d("UnifiedVision", "Lifecycle RESUME: Refreshing status...")
                 if (cameraPermissionState.status.isGranted && activity != null) {
-                    viewModel.checkGlassesPermission(activity)
-                    viewModel.setupCamera(activity)
+                    viewModel.checkGlassesPermission()
+                    viewModel.cameraManager.initialize(activity)
                 }
             }
         }
@@ -110,8 +112,8 @@ fun UnifiedVisionScreen(
     LaunchedEffect(cameraPermissionState.status.isGranted) {
         viewModel.updatePermissionStatus(cameraPermissionState.status.isGranted)
         if (cameraPermissionState.status.isGranted && activity != null) {
-            viewModel.checkGlassesPermission(activity)
-            viewModel.setupCamera(activity)
+            viewModel.checkGlassesPermission()
+            viewModel.cameraManager.initialize(activity)
         }
     }
 
