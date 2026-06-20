@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.util.Log
@@ -38,10 +37,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 data class VisionUiState(
     val imageDescription: String = "",
@@ -56,7 +55,9 @@ data class VisionUiState(
     val error: String? = null
 )
 
-@OptIn(ExperimentalProjectedApi::class, ExperimentalCamera2Interop::class, ExperimentalLensFacing::class)
+@ExperimentalLensFacing
+@ExperimentalCamera2Interop
+@OptIn(ExperimentalProjectedApi::class)
 @HiltViewModel
 class VisionViewModel @Inject constructor(
     application: Application,
@@ -65,7 +66,7 @@ class VisionViewModel @Inject constructor(
     private val bridgeRepository: GlassBridgeRepository
 ) : AndroidViewModel(application) {
 
-    private val TAG = "VisionVM"
+    private val tag = "VisionVM"
     private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var imageCapture: ImageCapture? = null
 
@@ -97,7 +98,7 @@ class VisionViewModel @Inject constructor(
             isPermissionGranted = args[5] as Boolean,
             isGlassesPermissionGranted = args[6] as Boolean,
             capturedImage = args[7] as Bitmap?,
-            logs = args[8] as List<String>,
+            logs = @Suppress("UNCHECKED_CAST") (args[8] as List<String>),
             error = args[9] as String?
         )
     }.stateIn(
@@ -154,13 +155,14 @@ class VisionViewModel @Inject constructor(
                 _isGlassesPermissionGranted.value = granted
                 addLog("Glasses camera permission status: ${if (granted) "GRANTED" else "DENIED"}")
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to check glasses permission", e)
+                Log.e(tag, "Failed to check glasses permission", e)
                 _isGlassesPermissionGranted.value = false
             }
         }
     }
 
-    @OptIn(ExperimentalCamera2Interop::class, ExperimentalLensFacing::class)
+    @ExperimentalLensFacing
+    @ExperimentalCamera2Interop
     fun setupCamera(activity: Activity) {
         viewModelScope.launch {
             // FIX: Run probing in IO thread to prevent ANR/Crash
@@ -176,9 +178,13 @@ class VisionViewModel @Inject constructor(
                 }
 
                 val providers = listOf(
-                    "Glasses" to try { ProjectedContext.createProjectedDeviceContext(baseContext) } catch (e: Exception) { null },
+                    "Glasses" to try { 
+                        val ctx = ProjectedContext.createProjectedDeviceContext(baseContext)
+                        addLog("PHASE 1 SUCCESS: Created ProjectedContext for Glasses.")
+                        ctx
+                    } catch (e: Exception) { null },
                     "Host (Phone)" to try { ProjectedContext.createHostDeviceContext(baseContext) } catch (e: Exception) { null },
-                    "Application" to getApplication<Application>()
+                    "Application" to getApplication()
                 )
 
                 var bound = false
@@ -194,7 +200,10 @@ class VisionViewModel @Inject constructor(
                             addLog("OS reports ${ids.size} cameras in $name: [${ids.joinToString()}]")
                             
                             // 1. Fetch provider for THIS specific context
+                            addLog("Fetching CameraProvider for $name...")
                             val cameraProvider = ProcessCameraProvider.awaitInstance(ctx)
+                            val providerCams = cameraProvider.availableCameraInfos.size
+                            addLog("Provider reports $providerCams cameras in $name.")
 
                             for (id in ids) {
                                 val chars = cm.getCameraCharacteristics(id)
@@ -208,6 +217,7 @@ class VisionViewModel @Inject constructor(
                                 addLog("-> Found ID $id ($facingName). Testing binding...")
 
                                 // 2. Create selector that matches the OS facing property to avoid CameraX filtering conflict
+                                addLog("PHASE 4: Hardware Verification for ID $id ($facingName)...")
                                 val selector = CameraSelector.Builder()
                                     .requireLensFacing(
                                         when (lensFacing) {
@@ -225,7 +235,7 @@ class VisionViewModel @Inject constructor(
 
                                 if (bindCameraOnMainThread(activity, cameraProvider, selector)) {
                                     _cameraSource.value = "$name ($facingName - ID $id)"
-                                    addLog("SUCCESS: Camera $id bound to $name.")
+                                    addLog("PHASE 6 SUCCESS: Shutter linked to $name (ID $id).")
                                     bound = true
                                     break
                                 }
@@ -233,10 +243,10 @@ class VisionViewModel @Inject constructor(
 
                             if (bound) break
                             addLog("No cameras could be bound in $name. Waiting...")
-                            delay(1000)
+                            delay(1000.milliseconds)
                         } catch (e: Exception) {
                             addLog("Probe error in $name: ${e.message}")
-                            delay(1000)
+                            delay(1000.milliseconds)
                         }
                     }
                 }
@@ -268,7 +278,7 @@ class VisionViewModel @Inject constructor(
             true
         } catch (e: Exception) {
             // Log.d is fine here as it's not blocking
-            Log.e(TAG, "Bind failed for selector: ${e.message}")
+            Log.e(tag, "Bind failed for selector: ${e.message}")
             false
         }
     }
@@ -294,7 +304,7 @@ class VisionViewModel @Inject constructor(
 
             override fun onError(exception: ImageCaptureException) {
                 addLog("Capture Error: ${exception.message}")
-                Log.e(TAG, "Capture failed", exception)
+                Log.e(tag, "Capture failed", exception)
                 repository.updateCapturing(false)
                 _error.value = "Capture failed: ${exception.message}"
             }
@@ -346,15 +356,8 @@ class VisionViewModel @Inject constructor(
     private fun addLog(message: String) {
         val timestamp = java.text.SimpleDateFormat("HH:ss:mm", java.util.Locale.getDefault()).format(java.util.Date())
         val formattedMsg = "[$timestamp] $message"
-        Log.d(TAG, formattedMsg)
-        _logs.value = _logs.value + formattedMsg
-    }
-
-    private fun ImageProxy.toBitmap(): Bitmap {
-        val buffer: ByteBuffer = planes[0].buffer
-        val bytes = ByteArray(buffer.remaining())
-        buffer.get(bytes)
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        Log.d(tag, formattedMsg)
+        _logs.value += formattedMsg
     }
 
     override fun onCleared() {
