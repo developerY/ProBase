@@ -216,28 +216,45 @@ class VisionViewModel @Inject constructor(
                                 }
                                 addLog("-> Found ID $id ($facingName). Testing binding...")
 
-                                // 2. Create selector that matches the OS facing property to avoid CameraX filtering conflict
-                                addLog("PHASE 4: Hardware Verification for ID $id ($facingName)...")
-                                val selector = CameraSelector.Builder()
-                                    .requireLensFacing(
-                                        when (lensFacing) {
-                                            CameraCharacteristics.LENS_FACING_FRONT -> CameraSelector.LENS_FACING_FRONT
-                                            CameraCharacteristics.LENS_FACING_BACK -> CameraSelector.LENS_FACING_BACK
-                                            else -> CameraSelector.LENS_FACING_EXTERNAL
-                                        }
-                                    )
-                                    .addCameraFilter { cameraInfos ->
-                                        cameraInfos.filter { info -> 
-                                            try { Camera2CameraInfo.from(info).cameraId == id } catch (e: Exception) { false }
-                                        }
+                                // Strategy 1: If it's a fallback context (Phone/App), use standard CameraX selectors to avoid "Filters: 2"
+                                if (name != "Glasses") {
+                                    addLog("Using standard $facingName selector for fallback...")
+                                    val fallbackSelector = if (lensFacing == CameraCharacteristics.LENS_FACING_FRONT) {
+                                        CameraSelector.DEFAULT_FRONT_CAMERA
+                                    } else {
+                                        CameraSelector.DEFAULT_BACK_CAMERA
                                     }
-                                    .build()
+                                    
+                                    if (bindCameraOnMainThread(activity, cameraProvider, fallbackSelector)) {
+                                        _cameraSource.value = "$name ($facingName - Default)"
+                                        addLog("SUCCESS: Bound via standard selector for fallback.")
+                                        bound = true
+                                        break
+                                    }
+                                } else {
+                                    // Strategy 2: For Glasses, use the specific ID binding to ensure we hit the projected hardware
+                                    addLog("PHASE 4: Hardware Verification for Glasses ID $id ($facingName)...")
+                                    val selector = CameraSelector.Builder()
+                                        .requireLensFacing(
+                                            when (lensFacing) {
+                                                CameraCharacteristics.LENS_FACING_FRONT -> CameraSelector.LENS_FACING_FRONT
+                                                CameraCharacteristics.LENS_FACING_BACK -> CameraSelector.LENS_FACING_BACK
+                                                else -> CameraSelector.LENS_FACING_EXTERNAL
+                                            }
+                                        )
+                                        .addCameraFilter { cameraInfos ->
+                                            cameraInfos.filter { info -> 
+                                                try { Camera2CameraInfo.from(info).cameraId == id } catch (e: Exception) { false }
+                                            }
+                                        }
+                                        .build()
 
-                                if (bindCameraOnMainThread(activity, cameraProvider, selector)) {
-                                    _cameraSource.value = "$name ($facingName - ID $id)"
-                                    addLog("PHASE 6 SUCCESS: Shutter linked to $name (ID $id).")
-                                    bound = true
-                                    break
+                                    if (bindCameraOnMainThread(activity, cameraProvider, selector)) {
+                                        _cameraSource.value = "$name ($facingName - ID $id)"
+                                        addLog("PHASE 6 SUCCESS: Shutter linked to $name (ID $id).")
+                                        bound = true
+                                        break
+                                    }
                                 }
                             }
 
