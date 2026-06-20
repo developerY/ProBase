@@ -165,7 +165,7 @@ class VisionViewModel @Inject constructor(
     @ExperimentalCamera2Interop
     fun setupCamera(activity: Activity) {
         viewModelScope.launch {
-            // FIX: Run probing in IO thread to prevent ANR/Crash
+            // FIX 1: Run probing in IO thread to prevent ANR/Crash
             withContext(Dispatchers.IO) {
                 addLog("Starting Filter-Aware Hardware Probing...")
                 
@@ -202,8 +202,6 @@ class VisionViewModel @Inject constructor(
                             // 1. Fetch provider for THIS specific context
                             addLog("Fetching CameraProvider for $name...")
                             val cameraProvider = ProcessCameraProvider.awaitInstance(ctx)
-                            val providerCams = cameraProvider.availableCameraInfos.size
-                            addLog("Provider reports $providerCams cameras in $name.")
 
                             for (id in ids) {
                                 val chars = cm.getCameraCharacteristics(id)
@@ -216,9 +214,10 @@ class VisionViewModel @Inject constructor(
                                 }
                                 addLog("-> Found ID $id ($facingName). Testing binding...")
 
-                                // Strategy 1: If it's a fallback context (Phone/App), use standard CameraX selectors to avoid "Filters: 2"
+                                // Strategy 1: Strictly separate Glasses ID-binding from standard Fallback selectors
                                 if (name != "Glasses") {
-                                    addLog("Using standard $facingName selector for fallback...")
+                                    // Use standard CameraX selectors for Host/Application fallback to avoid "Filters: 1/2" error
+                                    addLog("Using standard $facingName selector for fallback (clearing custom filters)...")
                                     val fallbackSelector = if (lensFacing == CameraCharacteristics.LENS_FACING_FRONT) {
                                         CameraSelector.DEFAULT_FRONT_CAMERA
                                     } else {
@@ -232,7 +231,7 @@ class VisionViewModel @Inject constructor(
                                         break
                                     }
                                 } else {
-                                    // Strategy 2: For Glasses, use the specific ID binding to ensure we hit the projected hardware
+                                    // Strategy 2: For Glasses, use specific ID binding to ensure we hit the projected hardware
                                     addLog("PHASE 4: Hardware Verification for Glasses ID $id ($facingName)...")
                                     val selector = CameraSelector.Builder()
                                         .requireLensFacing(
@@ -260,10 +259,10 @@ class VisionViewModel @Inject constructor(
 
                             if (bound) break
                             addLog("No cameras could be bound in $name. Waiting...")
-                            delay(1000.milliseconds)
+                            delay(1500.milliseconds)
                         } catch (e: Exception) {
                             addLog("Probe error in $name: ${e.message}")
-                            delay(1000.milliseconds)
+                            delay(1500.milliseconds)
                         }
                     }
                 }
@@ -294,7 +293,6 @@ class VisionViewModel @Inject constructor(
             )
             true
         } catch (e: Exception) {
-            // Log.d is fine here as it's not blocking
             Log.e(tag, "Bind failed for selector: ${e.message}")
             false
         }
