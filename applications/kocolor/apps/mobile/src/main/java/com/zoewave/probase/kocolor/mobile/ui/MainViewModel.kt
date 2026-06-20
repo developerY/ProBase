@@ -51,7 +51,7 @@ class MainViewModel @Inject constructor(
         settings.appThemeFlow,
         settings.colorPaletteFlow
     ) { backStack, theme, palette ->
-        val currentRoute = backStack.last()
+        val currentRoute = backStack.lastOrNull() ?: KoColorRoute.Home
         val currentTab = topLevelRoutes.find { it::class == currentRoute::class } 
             ?: topLevelRoutes.first()
 

@@ -25,7 +25,7 @@ fun MainScaffold() {
         // but for now, we'll just add it. 
         // A better approach for tabs in Nav3 is often to have multiple backstacks, 
         // but let's keep it simple first.
-        if (backStack.last() != dest) {
+        if (backStack.lastOrNull() != dest) {
             backStack.add(dest)
         }
     }
@@ -39,7 +39,7 @@ fun MainScaffold() {
     Scaffold(
         bottomBar = {
             NavigationBar {
-                val currentKey = backStack.last()
+                val currentKey = backStack.lastOrNull() ?: FeatureInventory.List
                 
                 NavigationBarItem(
                     selected = currentKey is FeatureInventory.List,
