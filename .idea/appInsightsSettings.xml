@@ -37,8 +37,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.zoewave.probase.goswift" />
-                  <option name="mobileSdkAppId" value="1:786488326984:android:17e64e3fe4555a7b95517d" />
+                  <option name="appId" value="com.zoewave.probase.gotmind" />
+                  <option name="mobileSdkAppId" value="1:786488326984:android:ee2a00b5f83d9a2895517d" />
                   <option name="projectId" value="android-zoewave" />
                   <option name="projectNumber" value="786488326984" />
                 </ConnectionSetting>

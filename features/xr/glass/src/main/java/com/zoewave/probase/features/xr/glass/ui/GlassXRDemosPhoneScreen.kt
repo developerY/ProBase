@@ -1,7 +1,17 @@
 package com.zoewave.probase.features.xr.glass.ui
 
 import android.content.Intent
-import androidx.compose.foundation.layout.*
+import androidx.camera.core.ExperimentalLensFacing
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -10,7 +20,17 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.CastConnected
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,31 +46,104 @@ import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
 import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
-import com.zoewave.probase.features.xr.glass.GlassesMainActivity
 import com.zoewave.probase.features.glass.translation.ui.UnifiedTranslationScreen
 import com.zoewave.probase.features.glass.vision.ui.UnifiedVisionScreen
+import com.zoewave.probase.features.glass.vision.ui.VisionUiEvent
+import com.zoewave.probase.features.glass.vision.ui.VisionUiState
+import com.zoewave.probase.features.glass.vision.ui.VisionViewModel
+import com.zoewave.probase.features.xr.glass.GlassesMainActivity
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalProjectedApi::class)
+@androidx.annotation.OptIn(ExperimentalLensFacing::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, 
+    ExperimentalProjectedApi::class,
+    com.google.accompanist.permissions.ExperimentalPermissionsApi::class
+)
 @Composable
-fun GlassXRDemosPhoneScreen(
+fun GlassXRDemosPhoneRoute(
     onBack: () -> Unit,
-    viewModel: GlassXRDemosViewModel = hiltViewModel()
+    viewModel: GlassXRDemosViewModel = hiltViewModel(),
+    visionViewModel: VisionViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
+    val activeSample by viewModel.activeSample.collectAsStateWithLifecycle()
+    val visionUiState by visionViewModel.uiState.collectAsStateWithLifecycle()
+
+    val phonePermissionState = com.google.accompanist.permissions.rememberPermissionState(android.Manifest.permission.CAMERA)
+
     val projectedPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         ProjectedPermissionsResultContract()
     ) { results ->
         android.util.Log.d("GlassXRDemos", "Projected permissions result: $results")
+        // Re-poll status
+        visionViewModel.onEvent(VisionUiEvent.CheckPermissions(context))
     }
-    
-    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
-    val activeSample by viewModel.activeSample.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.checkConnection(context)
+        visionViewModel.onEvent(VisionUiEvent.CheckPermissions(context))
     }
 
+    GlassXRDemosPhoneScreen(
+        isConnected = isConnected,
+        activeSample = activeSample,
+        visionUiState = visionUiState,
+        onBack = onBack,
+        onSampleSelected = { sample ->
+            viewModel.updateActiveSample(sample)
+            launchOnGlasses(context, sample)
+        },
+        onStopDemo = { viewModel.updateActiveSample(null) },
+        onNextSample = { sample -> viewModel.updateActiveSample(sample.next()) },
+        onPreviousSample = { sample -> viewModel.updateActiveSample(sample.previous()) },
+        onVisionEvent = visionViewModel::onEvent,
+        requestPhonePermission = {
+            android.util.Log.d("GlassXRDemos", "requestPhonePermission clicked")
+            phonePermissionState.launchPermissionRequest()
+        },
+        onRequestGlassesPermission = {
+            android.util.Log.d("GlassXRDemos", "onRequestGlassesPermission triggered.")
+            try {
+                // Primary method: Use standard contract for better robustness in low-discovery states
+                val params = ProjectedPermissionsRequestParams(
+                    permissions = listOf(android.Manifest.permission.CAMERA),
+                    rationale = "Camera access is needed on your AI glasses for this demo."
+                )
+                projectedPermissionLauncher.launch(listOf(params))
+                
+                // Secondary check for targeted request capability
+                val activity = context as? android.app.Activity
+                val glassesContext = try { ProjectedContext.createProjectedDeviceContext(context) } catch (e: Exception) { null }
+                if (glassesContext != null && activity != null && android.os.Build.VERSION.SDK_INT >= 35) {
+                    android.util.Log.d("GlassXRDemos", "Device ID available: ${glassesContext.deviceId}. Contract launched.")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("GlassXRDemos", "Failed to trigger permissions", e)
+            }
+        }
+    )
+}
+
+@androidx.annotation.OptIn(ExperimentalLensFacing::class)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GlassXRDemosPhoneScreen(
+    isConnected: Boolean,
+    activeSample: GlimmerSample?,
+    visionUiState: VisionUiState,
+    onBack: () -> Unit,
+    onSampleSelected: (GlimmerSample) -> Unit,
+    onStopDemo: () -> Unit,
+    onNextSample: (GlimmerSample) -> Unit,
+    onPreviousSample: (GlimmerSample) -> Unit,
+    onVisionEvent: (VisionUiEvent) -> Unit,
+    onRequestGlassesPermission: () -> Unit,
+    requestPhonePermission: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             if (activeSample != GlimmerSample.Translation && activeSample != GlimmerSample.Vision) {
                 TopAppBar(
@@ -89,7 +182,7 @@ fun GlassXRDemosPhoneScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                                IconButton(onClick = { viewModel.updateActiveSample(null) }) {
+                                IconButton(onClick = onStopDemo) {
                                     Icon(Icons.Default.Close, contentDescription = "Stop Demo")
                                 }
                                 Spacer(Modifier.width(8.dp))
@@ -100,11 +193,11 @@ fun GlassXRDemosPhoneScreen(
                             }
 
                             Row {
-                                IconButton(onClick = { viewModel.updateActiveSample(sample.previous()) }) {
+                                IconButton(onClick = { onPreviousSample(sample) }) {
                                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous")
                                 }
                                 Spacer(Modifier.width(8.dp))
-                                IconButton(onClick = { viewModel.updateActiveSample(sample.next()) }) {
+                                IconButton(onClick = { onNextSample(sample) }) {
                                     Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next")
                                 }
                             }
@@ -121,7 +214,7 @@ fun GlassXRDemosPhoneScreen(
                 )
                 // Floating Close Button for the demo
                 IconButton(
-                    onClick = { viewModel.updateActiveSample(null) },
+                    onClick = onStopDemo,
                     modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
                 ) {
                     Icon(Icons.Default.Close, contentDescription = "Close Hub")
@@ -130,38 +223,16 @@ fun GlassXRDemosPhoneScreen(
         } else if (activeSample == GlimmerSample.Vision) {
             Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
                 UnifiedVisionScreen(
+                    uiState = visionUiState,
+                    onEvent = onVisionEvent,
                     onNavigateToSettings = { /* No-op for now */ },
-                    onRequestGlassesPermission = {
-                        android.util.Log.d("GlassXRDemos", "onRequestGlassesPermission triggered. Using device-targeted request.")
-                        try {
-                            val activity = context as? android.app.Activity
-                            val glassesContext = ProjectedContext.createProjectedDeviceContext(context)
-                            val deviceId = glassesContext.deviceId
-                            android.util.Log.d("GlassXRDemos", "Targeting Projected Device ID: $deviceId")
-                            
-                            if (activity != null && android.os.Build.VERSION.SDK_INT >= 35) {
-                                activity.requestPermissions(
-                                    arrayOf(android.Manifest.permission.CAMERA),
-                                    1001, // Request code
-                                    deviceId
-                                )
-                                android.util.Log.d("GlassXRDemos", "Triggered activity.requestPermissions with deviceId")
-                            } else {
-                                // Fallback to contract if activity is null or SDK too low
-                                val params = ProjectedPermissionsRequestParams(
-                                    permissions = listOf(android.Manifest.permission.CAMERA),
-                                    rationale = "Camera access is needed on your AI glasses for this demo."
-                                )
-                                projectedPermissionLauncher.launch(listOf(params))
-                            }
-                        } catch (e: Exception) {
-                            android.util.Log.e("GlassXRDemos", "Failed to trigger device-targeted permissions", e)
-                        }
-                    }
+                    onRequestGlassesPermission = onRequestGlassesPermission,
+                    onBack = onStopDemo,
+                    requestPhonePermission = requestPhonePermission
                 )
                 // Floating Close Button for the demo
                 IconButton(
-                    onClick = { viewModel.updateActiveSample(null) },
+                    onClick = onStopDemo,
                     modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
                 ) {
                     Icon(Icons.Default.Close, contentDescription = "Close Hub", tint = MaterialTheme.colorScheme.onSurface)
@@ -206,10 +277,7 @@ fun GlassXRDemosPhoneScreen(
                         colors = CardDefaults.outlinedCardColors(
                             containerColor = if (isActive) Color(0xFFE8F5E9) else Color.Transparent
                         ),
-                        onClick = {
-                            viewModel.updateActiveSample(sample)
-                            launchOnGlasses(context, sample)
-                        }
+                        onClick = { onSampleSelected(sample) }
                     ) {
                         Row(
                             modifier = Modifier
@@ -243,6 +311,26 @@ fun GlassXRDemosPhoneScreen(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun GlassXRDemosPhoneScreenPreview() {
+    MaterialTheme {
+        GlassXRDemosPhoneScreen(
+            isConnected = true,
+            activeSample = null,
+            visionUiState = VisionUiState(),
+            onBack = {},
+            onSampleSelected = {},
+            onStopDemo = {},
+            onNextSample = {},
+            onPreviousSample = {},
+            onVisionEvent = {},
+            onRequestGlassesPermission = {},
+            requestPhonePermission = {}
+        )
+    }
+}
+
 @OptIn(ExperimentalProjectedApi::class)
 private fun launchOnGlasses(context: android.content.Context, sample: GlimmerSample) {
     if (android.os.Build.VERSION.SDK_INT >= 35) {
@@ -266,13 +354,5 @@ private fun launchOnGlasses(context: android.content.Context, sample: GlimmerSam
             putExtra("initial_sample", sample.name)
         }
         context.startActivity(intent)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun GlassXRDemosPhoneScreenPreview() {
-    MaterialTheme {
-        GlassXRDemosPhoneScreen(onBack = {})
     }
 }

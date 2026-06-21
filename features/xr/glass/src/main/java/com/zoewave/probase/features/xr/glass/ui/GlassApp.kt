@@ -48,8 +48,15 @@ import com.zoewave.probase.features.xr.glass.samples.TitleChipSamples
 import com.zoewave.probase.features.xr.glass.samples.ToggleButtonSamples
 import com.zoewave.probase.features.xr.glass.samples.TypographySamples
 import com.zoewave.probase.features.xr.glass.samples.VoiceInputIndicatorSamples
-import com.zoewave.probase.features.glass.vision.ui.VisionScreen
+import com.zoewave.probase.features.glass.vision.ui.VisionRoute
+import androidx.camera.core.ExperimentalLensFacing
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
+@ExperimentalLensFacing
+@ExperimentalCamera2Interop
+@OptIn(ExperimentalProjectedApi::class, ExperimentalPermissionsApi::class)
 @Composable
 fun GlassApp(
     areVisualsOn: Boolean,
@@ -129,7 +136,7 @@ fun GlassApp(
                         GlimmerSample.Typography -> TypographySamples()
                         GlimmerSample.VoiceIndicator -> VoiceInputIndicatorSamples(level = { uiState.aiAudioLevel })
                         GlimmerSample.Translation -> TranslationScreen()
-                        GlimmerSample.Vision -> VisionScreen()
+                        GlimmerSample.Vision -> VisionRoute()
                         GlimmerSample.ObjectRecognition -> ObjectRecognitionScreen()
                         GlimmerSample.SpatialNote -> SpatialNoteOverlay()
                     }

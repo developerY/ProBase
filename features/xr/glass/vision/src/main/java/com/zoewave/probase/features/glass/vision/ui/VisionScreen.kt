@@ -39,13 +39,13 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 
 /**
- * A Glimmer-optimized vision screen for AI Glasses.
+ * The entry point for the Vision screen.
  */
 @ExperimentalLensFacing
 @ExperimentalCamera2Interop
 @OptIn(ExperimentalPermissionsApi::class, androidx.xr.projected.experimental.ExperimentalProjectedApi::class)
 @Composable
-fun VisionScreen(
+fun VisionRoute(
     viewModel: VisionViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -53,30 +53,53 @@ fun VisionScreen(
     val context = LocalContext.current
     val activity = context as? Activity
 
-    // DEBUG: Wear State Protocol
-    var visualsOn by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        try {
-            val controller = ProjectedDisplayController.create(activity ?: return@LaunchedEffect)
-            controller.addPresentationModeChangedListener { flags ->
-                visualsOn = flags.hasPresentationMode(PresentationMode.VISUALS_ON)
-            }
-        } catch (_: Exception) {}
-    }
-
     // Sync permission status with ViewModel
     LaunchedEffect(cameraPermissionState.status.isGranted) {
-        viewModel.updatePermissionStatus(cameraPermissionState.status.isGranted)
+        viewModel.onEvent(VisionUiEvent.UpdatePermissionStatus(cameraPermissionState.status.isGranted))
         if (cameraPermissionState.status.isGranted && activity != null) {
             val glassesGranted = viewModel.cameraManager.checkGlassesPermission(activity)
-            viewModel.updateGlassesPermissionStatus(glassesGranted)
+            viewModel.onEvent(VisionUiEvent.UpdateGlassesPermissionStatus(glassesGranted))
             viewModel.cameraManager.initialize(activity)
         }
     }
 
+    VisionScreen(
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        requestPhonePermission = { cameraPermissionState.launchPermissionRequest() }
+    )
+}
+
+/**
+ * A Glimmer-optimized vision screen for AI Glasses (Stateless).
+ */
+@ExperimentalLensFacing
+@ExperimentalCamera2Interop
+@OptIn(androidx.xr.projected.experimental.ExperimentalProjectedApi::class)
+@Composable
+fun VisionScreen(
+    uiState: VisionUiState,
+    onEvent: (VisionUiEvent) -> Unit,
+    requestPhonePermission: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val activity = context as? Activity
+
+    // DEBUG: Wear State Protocol
+    var visualsOn by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        try {
+            val controller = androidx.xr.projected.ProjectedDisplayController.create(activity ?: return@LaunchedEffect)
+            controller.addPresentationModeChangedListener { flags ->
+                visualsOn = flags.hasPresentationMode(androidx.xr.projected.ProjectedDisplayController.PresentationMode.VISUALS_ON)
+            }
+        } catch (_: Exception) {}
+    }
+
     GlimmerTheme {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .background(Color.Black), // Transparent on glasses
             contentAlignment = Alignment.BottomCenter
@@ -104,7 +127,7 @@ fun VisionScreen(
                 // Error indicator
                 if (uiState.error != null) {
                     Text(
-                        text = uiState.error!!,
+                        text = uiState.error,
                         color = Color.Red,
                         style = GlimmerTheme.typography.bodySmall
                     )
@@ -120,7 +143,7 @@ fun VisionScreen(
 
                 Card(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    onClick = { viewModel.triggerGlassesCapture() }
+                    onClick = { onEvent(VisionUiEvent.TriggerCapture) }
                 ) {
                     Text(
                         text = displayMsg,
@@ -132,10 +155,10 @@ fun VisionScreen(
                 // Capture Button (Alternative trigger)
                 IconButton(
                     onClick = {
-                        if (cameraPermissionState.status.isGranted) {
-                            viewModel.triggerGlassesCapture()
+                        if (uiState.isPermissionGranted) {
+                            onEvent(VisionUiEvent.TriggerCapture)
                         } else {
-                            cameraPermissionState.launchPermissionRequest()
+                            requestPhonePermission()
                         }
                     }
                 ) {

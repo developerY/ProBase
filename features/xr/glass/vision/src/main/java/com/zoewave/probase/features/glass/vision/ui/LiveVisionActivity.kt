@@ -6,12 +6,17 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.ExperimentalLensFacing
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
@@ -36,6 +41,7 @@ class LiveVisionActivity : ComponentActivity() {
             }
         }
 
+    @androidx.annotation.OptIn(ExperimentalLensFacing::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -59,11 +65,11 @@ class LiveVisionActivity : ComponentActivity() {
                 if (isGlassesConnected) {
                     // Note: In a real multi-display setup, the system decides which UI to show.
                     // For debugging, we want the Unified Diagnostic Hub on the phone.
-                    UnifiedVisionScreen(
-                        viewModel = viewModel,
+                    UnifiedVisionRoute(
                         onNavigateToSettings = {
                             // Navigate to settings logic
                         },
+                        onBack = { finish() },
                         onRequestGlassesPermission = {
                             android.util.Log.d("LiveVisionActivity", "onRequestGlassesPermission triggered. Using device-targeted request.")
                             try {

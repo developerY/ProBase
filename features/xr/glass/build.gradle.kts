@@ -18,6 +18,8 @@ dependencies {
     implementation(libs.androidx.xr.runtime)
     implementation(libs.androidx.xr.arcore)
 
+    implementation(libs.google.accompanist.permissions)
+
     implementation(project(":features:xr:glass:translation"))
     implementation(project(":features:xr:glass:vision"))
 
