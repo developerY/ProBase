@@ -1,5 +1,7 @@
 package com.zoewave.probase.features.xr.glass.ui
 
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import androidx.camera.core.ExperimentalLensFacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,11 +29,14 @@ import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.Icon
 import androidx.xr.glimmer.IconButton
 import androidx.xr.glimmer.Text
+import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.zoewave.probase.features.glass.translation.ui.TranslationScreen
+import com.zoewave.probase.features.glass.vision.ui.VisionRoute
 import com.zoewave.probase.features.xr.glass.samples.ButtonsSamples
 import com.zoewave.probase.features.xr.glass.samples.CardSamples
 import com.zoewave.probase.features.xr.glass.samples.ColorsSamples
 import com.zoewave.probase.features.xr.glass.samples.DepthEffectLevelsSample
-import com.zoewave.probase.features.glass.translation.ui.TranslationScreen
 import com.zoewave.probase.features.xr.glass.samples.GlimmerLazyListSamples
 import com.zoewave.probase.features.xr.glass.samples.GlimmerPagerSamples
 import com.zoewave.probase.features.xr.glass.samples.IconButtonSamples
@@ -48,11 +53,6 @@ import com.zoewave.probase.features.xr.glass.samples.TitleChipSamples
 import com.zoewave.probase.features.xr.glass.samples.ToggleButtonSamples
 import com.zoewave.probase.features.xr.glass.samples.TypographySamples
 import com.zoewave.probase.features.xr.glass.samples.VoiceInputIndicatorSamples
-import com.zoewave.probase.features.glass.vision.ui.VisionRoute
-import androidx.camera.core.ExperimentalLensFacing
-import androidx.camera.camera2.interop.ExperimentalCamera2Interop
-import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @ExperimentalLensFacing
 @ExperimentalCamera2Interop
@@ -146,6 +146,7 @@ fun GlassApp(
     }
 }
 
+@androidx.annotation.OptIn(ExperimentalLensFacing::class)
 @Preview(showBackground = true, backgroundColor = 0xFF000000)
 @Composable
 private fun GlassAppPreview() {
