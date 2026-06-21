@@ -71,12 +71,6 @@ Accessing the optical sensors on a split-compute architecture requires bypassing
 * **Thermal Throttling & Backpressure:** Streaming continuous 60fps high-resolution video down a tether to a phone will rapidly drain the battery and physically overheat the glasses on the user’s face.
 * **Frame Dropping Implementation:** You must implement a backpressure strategy. Instruct the CameraX `ImageAnalysis` use case to use `STRATEGY_KEEP_ONLY_LATEST` (dropping intermediate frames). Only convert the `ImageProxy` to a bitmap exactly when the AI engine signals it is ready for inference. Once the frame is passed to the AI payload, you must instantly call `imageProxy.close()` to clear volatile memory and keep the hardware cool.
 
-## 7. The Intelligence Payload & BYOK Security
-
-* **The Decompiler Threat:** Hardcoding Gemini API keys inside your APK (or even native C++ libraries) is a massive security flaw. Tools like `jadx` or simple `strings` commands can extract these keys instantly, leading to hijacked cloud bills.
-* **Bring Your Own Key (BYOK):** The secure solution. Provide an onboarding screen where the user pastes their own Google AI Studio key. Store it safely in `EncryptedSharedPreferences`.
-* **The Stateful Loop:** Initialize the `genai.Client` locally. The phone grabs the glasses' camera frame + mic audio &rarr; Gemini inference processes it locally in volatile memory &rarr; Glimmer projects the text answer back to the lens &rarr; the raw payload is instantly destroyed.
-
 ## 7. Conclusion
 
 Wired XR glasses are a technological stopgap; AI Glasses are a cultural stopgap. They are converging. By mastering the lightweight, multimodal interaction model of Glimmer today, developers are writing the core application patterns for the inevitable future where all glasses are smart, immersive, and completely indistinguishable from everyday eyewear.
