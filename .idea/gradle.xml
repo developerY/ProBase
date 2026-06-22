@@ -203,6 +203,7 @@
             <option value="$PROJECT_DIR$/features/xr/ar/facelab" />
             <option value="$PROJECT_DIR$/features/xr/ar/naillab" />
             <option value="$PROJECT_DIR$/features/xr/glass" />
+            <option value="$PROJECT_DIR$/features/xr/glass/samples" />
             <option value="$PROJECT_DIR$/features/xr/glass/translation" />
             <option value="$PROJECT_DIR$/features/xr/glass/vision" />
             <option value="$PROJECT_DIR$/features/xr/xrglasses" />
