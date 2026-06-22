@@ -29,11 +29,10 @@ import androidx.compose.ui.unit.dp
 @androidx.xr.projected.experimental.ExperimentalProjectedApi
 @Composable
 fun PhoneVisionControl(
-    viewModel: VisionViewModel,
+    uiState: VisionUiState,
+    onEvent: (VisionUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -47,7 +46,7 @@ fun PhoneVisionControl(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { viewModel.triggerGlassesCapture() },
+                onClick = { onEvent(VisionUiEvent.TriggerCapture) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isCapturing && !uiState.isAnalyzing
             ) {

@@ -3,6 +3,7 @@ package com.zoewave.probase.features.glass.vision.ui.manager
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.content.pm.PackageManager
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.util.Log
@@ -15,6 +16,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.xr.projected.ProjectedContext
 import com.zoewave.probase.features.glass.vision.data.VisionRepository
@@ -33,8 +35,6 @@ import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
 
 @ExperimentalLensFacing
 @ExperimentalCamera2Interop
@@ -46,6 +46,7 @@ class GlassesCameraManager @Inject constructor(
 ) {
     private val tag = "GlassesCameraManager"
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var initJob: kotlinx.coroutines.Job? = null
     private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var imageCapture: ImageCapture? = null
 
@@ -54,6 +55,9 @@ class GlassesCameraManager @Inject constructor(
 
     private val _logs = MutableStateFlow<List<String>>(emptyList())
     val logs: StateFlow<List<String>> = _logs.asStateFlow()
+
+    private val _discoveredCameras = MutableStateFlow<List<Pair<String, String>>>(emptyList())
+    val discoveredCameras: StateFlow<List<Pair<String, String>>> = _discoveredCameras.asStateFlow()
 
     fun checkGlassesPermission(activity: Activity): Boolean {
         return try {
@@ -69,24 +73,24 @@ class GlassesCameraManager @Inject constructor(
     }
 
     fun initialize(activity: Activity) {
-        scope.launch {
+        initJob?.cancel()
+        initJob = scope.launch {
             withContext(Dispatchers.IO) {
                 addLog("Starting Filter-Aware Hardware Probing...")
+                _discoveredCameras.value = emptyList()
                 
-                val baseContext = try {
-                    activity.createAttributionContext("xr_projected")
-                } catch (e: Exception) {
-                    addLog("Warning: Could not create attribution context.")
-                    activity
-                }
+                val baseContext = activity
 
                 val providers = listOf(
                     "Glasses" to try { 
-                        val ctx = ProjectedContext.createProjectedDeviceContext(baseContext)
-                        addLog("PHASE 1 SUCCESS: Created ProjectedContext for Glasses.")
-                        ctx
+                        ProjectedContext.createProjectedDeviceContext(baseContext)
+                    } catch (e: Exception) { 
+                        addLog("Glasses Context Error: ${e.message}")
+                        null 
+                    },
+                    "Host (Phone)" to try { 
+                        ProjectedContext.createHostDeviceContext(baseContext) 
                     } catch (e: Exception) { null },
-                    "Host (Phone)" to try { ProjectedContext.createHostDeviceContext(baseContext) } catch (e: Exception) { null },
                     "Application" to application
                 )
 
@@ -95,14 +99,49 @@ class GlassesCameraManager @Inject constructor(
                     if (ctx == null) continue
                     if (bound) break
 
+                    // 1. Discovery phase (once per provider)
+                    try {
+                        val cm = ctx.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+                        val ids = cm.cameraIdList
+                        addLog("OS reports ${ids.size} cameras in $name context.")
+                        
+                        for (id in ids) {
+                            val chars = cm.getCameraCharacteristics(id)
+                            val lensFacing = chars.get(CameraCharacteristics.LENS_FACING)
+                            val facingName = when (lensFacing) {
+                                CameraCharacteristics.LENS_FACING_FRONT -> "FRONT"
+                                CameraCharacteristics.LENS_FACING_BACK -> "BACK"
+                                CameraCharacteristics.LENS_FACING_EXTERNAL -> "EXTERNAL"
+                                else -> "UNKNOWN"
+                            }
+                            val entry = name to "ID $id ($facingName)"
+                            if (!_discoveredCameras.value.contains(entry)) {
+                                _discoveredCameras.update { it + entry }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        addLog("Discovery error in $name: ${e.message}")
+                    }
+
+                    // 2. Probing phase
                     for (attempt in 1..3) {
                         addLog("Probing $name (Attempt $attempt of 3)...")
                         try {
+                            val cameraProvider = ProcessCameraProvider.awaitInstance(ctx)
+
+                            // Try DEFAULT_BACK_CAMERA directly if no IDs were found (Glasses fallback)
+                            if (_discoveredCameras.value.none { it.first == name } && name == "Glasses") {
+                                addLog("No IDs found for Glasses. Attempting DEFAULT_BACK_CAMERA fallback...")
+                                if (bindCameraOnMainThread(activity, cameraProvider, CameraSelector.DEFAULT_BACK_CAMERA)) {
+                                    _cameraSource.value = "Glasses (Fallback Selector)"
+                                    addLog("SUCCESS: Bound via DEFAULT_BACK_CAMERA fallback.")
+                                    bound = true
+                                    break
+                                }
+                            }
+
                             val cm = ctx.getSystemService(Context.CAMERA_SERVICE) as CameraManager
                             val ids = cm.cameraIdList
-                            addLog("OS reports ${ids.size} cameras in $name: [${ids.joinToString()}]")
-                            
-                            val cameraProvider = ProcessCameraProvider.awaitInstance(ctx)
 
                             for (id in ids) {
                                 val chars = cm.getCameraCharacteristics(id)
@@ -110,13 +149,12 @@ class GlassesCameraManager @Inject constructor(
                                 val facingName = when (lensFacing) {
                                     CameraCharacteristics.LENS_FACING_FRONT -> "FRONT"
                                     CameraCharacteristics.LENS_FACING_BACK -> "BACK"
-                                    CameraCharacteristics.LENS_FACING_EXTERNAL -> "EXTERNAL"
-                                    else -> "UNKNOWN"
+                                    else -> "EXTERNAL"
                                 }
-                                addLog("-> Found ID $id ($facingName). Testing binding...")
+                                
+                                addLog("-> Testing binding for ID $id ($facingName)...")
 
                                 if (name != "Glasses") {
-                                    addLog("Using standard $facingName selector for fallback...")
                                     val fallbackSelector = if (lensFacing == CameraCharacteristics.LENS_FACING_FRONT) {
                                         CameraSelector.DEFAULT_FRONT_CAMERA
                                     } else {
@@ -125,12 +163,11 @@ class GlassesCameraManager @Inject constructor(
                                     
                                     if (bindCameraOnMainThread(activity, cameraProvider, fallbackSelector)) {
                                         _cameraSource.value = "$name ($facingName - Default)"
-                                        addLog("SUCCESS: Bound via standard selector for fallback.")
+                                        addLog("SUCCESS: Bound via standard selector.")
                                         bound = true
                                         break
                                     }
                                 } else {
-                                    addLog("PHASE 4: Hardware Verification for Glasses ID $id ($facingName)...")
                                     val selector = CameraSelector.Builder()
                                         .requireLensFacing(
                                             when (lensFacing) {
@@ -147,8 +184,8 @@ class GlassesCameraManager @Inject constructor(
                                         .build()
 
                                     if (bindCameraOnMainThread(activity, cameraProvider, selector)) {
-                                        _cameraSource.value = "$name ($facingName - ID $id)"
-                                        addLog("PHASE 6 SUCCESS: Shutter linked to $name (ID $id).")
+                                        _cameraSource.value = "Glasses (ID $id)"
+                                        addLog("SUCCESS: Bound Glasses ID $id.")
                                         bound = true
                                         break
                                     }
@@ -156,17 +193,16 @@ class GlassesCameraManager @Inject constructor(
                             }
 
                             if (bound) break
-                            addLog("No cameras could be bound in $name. Waiting...")
-                            delay(1500.milliseconds)
+                            delay(1000.milliseconds)
                         } catch (e: Exception) {
                             addLog("Probe error in $name: ${e.message}")
-                            delay(1500.milliseconds)
+                            delay(1000.milliseconds)
                         }
                     }
                 }
 
                 if (!bound) {
-                    addLog("CRITICAL: Failed to bind any camera after deep probing.")
+                    addLog("CRITICAL: Failed to bind any camera.")
                 }
             }
         }
@@ -190,7 +226,9 @@ class GlassesCameraManager @Inject constructor(
             )
             true
         } catch (e: Exception) {
-            Log.e(tag, "Bind failed for selector: ${e.message}")
+            val errorMsg = "Bind failed: ${e.message}"
+            Log.e(tag, errorMsg)
+            addLog(errorMsg)
             false
         }
     }
@@ -221,7 +259,7 @@ class GlassesCameraManager @Inject constructor(
     }
 
     fun addLog(message: String) {
-        val timestamp = java.text.SimpleDateFormat("HH:ss:mm", java.util.Locale.getDefault()).format(java.util.Date())
+        val timestamp = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
         val formattedMsg = "[$timestamp] $message"
         Log.d(tag, formattedMsg)
         _logs.update { it + formattedMsg }

@@ -29,9 +29,18 @@ data class VisionUiState(
     val isPermissionGranted: Boolean = false,
     val isGlassesPermissionGranted: Boolean = false,
     val capturedImage: Bitmap? = null,
+    val discoveredCameras: List<Pair<String, String>> = emptyList(),
     val logs: List<String> = emptyList(),
     val error: String? = null
 )
+
+sealed interface VisionUiEvent {
+    data class CheckPermissions(val context: android.content.Context) : VisionUiEvent
+    data object TriggerCapture : VisionUiEvent
+    data class UpdatePermissionStatus(val granted: Boolean) : VisionUiEvent
+    data class UpdateGlassesPermissionStatus(val granted: Boolean) : VisionUiEvent
+    data object RequestGlassesPermission : VisionUiEvent
+}
 
 @ExperimentalLensFacing
 @ExperimentalCamera2Interop
@@ -58,6 +67,7 @@ class VisionViewModel @Inject constructor(
         _isPermissionGranted,
         _isGlassesPermissionGranted,
         repository.capturedImage,
+        cameraManager.discoveredCameras,
         cameraManager.logs,
         _error
     ) { args: Array<Any?> ->
@@ -70,8 +80,9 @@ class VisionViewModel @Inject constructor(
             isPermissionGranted = args[5] as Boolean,
             isGlassesPermissionGranted = args[6] as Boolean,
             capturedImage = args[7] as Bitmap?,
-            logs = @Suppress("UNCHECKED_CAST") (args[8] as List<String>),
-            error = args[9] as String?
+            discoveredCameras = @Suppress("UNCHECKED_CAST") (args[8] as List<Pair<String, String>>),
+            logs = @Suppress("UNCHECKED_CAST") (args[9] as List<String>),
+            error = args[10] as String?
         )
     }.stateIn(
         scope = viewModelScope,
@@ -83,6 +94,40 @@ class VisionViewModel @Inject constructor(
         checkStatus()
         observeBridgeCommands()
         observeCapturedImages()
+    }
+
+    private fun checkInitialPermissions(context: android.content.Context) {
+        val phoneGranted = androidx.core.content.ContextCompat.checkSelfPermission(
+            context, android.Manifest.permission.CAMERA
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        _isPermissionGranted.value = phoneGranted
+        cameraManager.addLog("Phone Camera: ${if (phoneGranted) "GRANTED" else "DENIED"}")
+        
+        try {
+            val glassesContext = androidx.xr.projected.ProjectedContext.createProjectedDeviceContext(context)
+            val glassesGranted = androidx.core.content.ContextCompat.checkSelfPermission(
+                glassesContext, android.Manifest.permission.CAMERA
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            _isGlassesPermissionGranted.value = glassesGranted
+            cameraManager.addLog("Glasses Camera: ${if (glassesGranted) "GRANTED" else "DENIED"}")
+        } catch (e: Exception) {
+            cameraManager.addLog("Glasses Permission Check Error: ${e.message}")
+            _isGlassesPermissionGranted.value = false
+        }
+    }
+
+    fun onEvent(event: VisionUiEvent) {
+        when (event) {
+            is VisionUiEvent.CheckPermissions -> checkInitialPermissions(event.context)
+            is VisionUiEvent.TriggerCapture -> triggerGlassesCapture()
+            is VisionUiEvent.UpdatePermissionStatus -> _isPermissionGranted.value = event.granted
+            is VisionUiEvent.UpdateGlassesPermissionStatus -> _isGlassesPermissionGranted.value = event.granted
+            is VisionUiEvent.RequestGlassesPermission -> {
+                // This will be handled by the Route/Screen via a separate callback if needed, 
+                // but we can log the intent here.
+                cameraManager.addLog("Intent: Request Glasses Permission")
+            }
+        }
     }
 
     private fun observeBridgeCommands() {
@@ -113,19 +158,11 @@ class VisionViewModel @Inject constructor(
         }
     }
 
-    fun updatePermissionStatus(granted: Boolean) {
-        _isPermissionGranted.value = granted
-    }
-
-    fun triggerGlassesCapture() {
+    private fun triggerGlassesCapture() {
         viewModelScope.launch {
             cameraManager.addLog("Sending Remote Command: CAPTURE_IMAGE...")
             bridgeRepository.sendGlassCommand("CAPTURE_IMAGE")
         }
-    }
-
-    fun updateGlassesPermissionStatus(granted: Boolean) {
-        _isGlassesPermissionGranted.value = granted
     }
 
     private fun analyzeImage(bitmap: Bitmap) {

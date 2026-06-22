@@ -21,7 +21,7 @@ import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.nfc.ui.NfcUiRoute
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
-import com.zoewave.probase.features.xr.glass.ui.GlassXRDemosPhoneScreen
+import com.zoewave.probase.features.xr.glass.ui.GlassXRDemosPhoneRoute
 import com.zoewave.probase.features.xr.xrglasses.XRGlassesActivity
 import com.zoewave.probase.features.xr.xrglasses.ui.FullXRApp
 import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
@@ -71,7 +71,7 @@ fun featureInventoryEntryProvider(
 
             is FeatureInventory.GlassXR -> {
                 FeatureScaffold(title = "Glass XR Demos", onBack = navigateBack) {
-                    GlassXRDemosPhoneScreen(onBack = navigateBack)
+                    GlassXRDemosPhoneRoute(onBack = navigateBack)
                 }
             }
 

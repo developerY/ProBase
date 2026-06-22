@@ -26,20 +26,23 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zoewave.probase.features.glass.vision.ui.VisionViewModel
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.zoewave.probase.features.glass.vision.ui.VisionUiEvent
+import com.zoewave.probase.features.glass.vision.ui.VisionUiState
+
 @ExperimentalLensFacing
 @ExperimentalCamera2Interop
 @androidx.xr.projected.experimental.ExperimentalProjectedApi
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun VisionRequirementGate(
-    viewModel: VisionViewModel,
+    uiState: VisionUiState,
     onNavigateToSettings: () -> Unit,
+    onRequestPhonePermission: () -> Unit,
     onRequestGlassesPermission: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
-
     val isPhonePermissionOk = uiState.isPermissionGranted
     val isGlassesPermissionOk = uiState.isGlassesPermissionGranted
     val isApiKeyOk = uiState.isApiKeySet
@@ -50,6 +53,7 @@ fun VisionRequirementGate(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -80,9 +84,11 @@ fun VisionRequirementGate(
                 isMet = isPhonePermissionOk,
                 icon = Icons.Default.CameraAlt,
                 buttonLabel = "GRANT PHONE ACCESS",
-                onButtonClick = { 
-                    android.util.Log.d("VisionGate", "GRANT PHONE ACCESS clicked")
-                    cameraPermissionState.launchPermissionRequest() 
+                onButtonClick = {
+                    if (!isPhonePermissionOk) {
+                        android.util.Log.d("VisionGate", "GRANT PHONE ACCESS clicked")
+                        onRequestPhonePermission()
+                    }
                 }
             )
 
@@ -95,8 +101,10 @@ fun VisionRequirementGate(
                 icon = Icons.Default.CameraAlt,
                 buttonLabel = "GRANT GLASSES ACCESS",
                 onButtonClick = {
-                    android.util.Log.d("VisionGate", "GRANT GLASSES ACCESS clicked")
-                    onRequestGlassesPermission()
+                    if (!isGlassesPermissionOk) {
+                        android.util.Log.d("VisionGate", "GRANT GLASSES ACCESS clicked")
+                        onRequestGlassesPermission()
+                    }
                 }
             )
 
