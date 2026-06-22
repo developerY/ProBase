@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The Android XR Hardware & Software Matrix</title>
+    <style>
+        body {
+            margin: 0; padding: 20px;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #2d3748; background-color: #f4f6f8;
+            font-size: 11pt; line-height: 1.5;
+        }
+        .header-banner {
+            background-color: #2b6cb0; color: white;
+            padding: 20px 25px; border-radius: 8px 8px 0 0;
+        }
+        .header-banner h1 { margin: 0; font-size: 20pt; }
+        .container {
+            background-color: #ffffff; border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0; border-top: none; padding: 25px;
+        }
+        table {
+            width: 100%; border-collapse: collapse;
+            font-size: 10.5pt; margin-bottom: 30px; margin-top: 20px;
+        }
+        th, td {
+            padding: 14px 15px; text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background-color: #edf2f7; font-weight: bold;
+            text-transform: uppercase; font-size: 9pt;
+        }
+        td strong { color: #2b6cb0; }
+        code {
+            background-color: #edf2f7; padding: 2px 6px;
+            border-radius: 4px; font-family: monospace; color: #e53e3e;
+        }
+        .note-box {
+            background-color: #ebf8fa; border-left: 4px solid #319795;
+            padding: 20px; border-radius: 4px; font-size: 10pt;
+        }
+        .note-box h3 { margin-top: 0; color: #234e52; font-size: 12pt; }
+    </style>
+</head>
+<body>
+<div class="header-banner">
+    <h1>The Android XR Hardware & Software Matrix</h1>
+</div>
+<div class="container">
+    <p>In the Android XR ecosystem, the entire development paradigm boils down to a simple decision matrix. If you know how many displays the user is looking at and where the CPU is located, the hardware category and the required software libraries define themselves.</p>
+
+    <table>
+        <thead>
+        <tr>
+            <th width="18%">Number of Screens</th>
+            <th width="22%">Where is the Main Compute?</th>
+            <th width="25%">Hardware Category</th>
+            <th width="35%">UI Toolkit & Core SDK</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><strong>0</strong> (Audio-Only)</td>
+            <td><strong>Host Phone</strong> (Pocket)</td>
+            <td><strong>AI Glasses</strong> <br><span style="color: #718096; font-size: 9.5pt;">(e.g., Jinju)</span></td>
+            <td><strong>Voice / TTS</strong> + <code>Jetpack Projected</code><br><span style="color: #718096; font-size: 9pt;">(Bypass UI rendering entirely)</span></td>
+        </tr>
+        <tr>
+            <td><strong>1</strong> (Monocular)</td>
+            <td><strong>Host Phone</strong> (Pocket)</td>
+            <td><strong>AI Glasses</strong> <br><span style="color: #718096; font-size: 9.5pt;">(e.g., Haean)</span></td>
+            <td><strong>Jetpack Compose Glimmer</strong> + <code>Jetpack Projected</code></td>
+        </tr>
+        <tr>
+            <td><strong>2</strong> (Binocular)</td>
+            <td><strong>Compute Puck</strong> (Tethered)</td>
+            <td><strong>Wired XR Glasses</strong> <br><span style="color: #718096; font-size: 9.5pt;">(e.g., XREAL AURA)</span></td>
+            <td><strong>Jetpack Compose for XR</strong> + <code>SceneCore / ARCore</code></td>
+        </tr>
+        <tr>
+            <td><strong>2</strong> (Binocular)</td>
+            <td><strong>On-Device</strong> (Face)</td>
+            <td><strong>XR Headset</strong> <br><span style="color: #718096; font-size: 9.5pt;">(e.g., Galaxy XR)</span></td>
+            <td><strong>Jetpack Compose for XR</strong> + <code>SceneCore / ARCore</code></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="note-box">
+        <h3>How to Read the Matrix as a Developer:</h3>
+        <ol>
+            <li><strong>The Screen Rule:</strong> If the answer is <strong>1</strong>, you are dealing with additive light and extreme thermal limits. You <em>must</em> use <strong>Glimmer</strong>. If the answer is <strong>2</strong>, you are dealing with stereoscopic 3D and immersive canvases. You use <strong>Compose for XR</strong>.</li>
+            <li><strong>The Compute Rule:</strong> If the compute is on the <strong>Phone</strong>, you must manage a projection tether (<code>Jetpack Projected</code>) and build "disconnection-proof" lifecycle logic. If the compute is in a <strong>Puck</strong> or <strong>On-Device</strong>, your application runs natively like a standard VR/spatial app.</li>
+        </ol>
+    </div>
+</div>
+</body>
+</html>
