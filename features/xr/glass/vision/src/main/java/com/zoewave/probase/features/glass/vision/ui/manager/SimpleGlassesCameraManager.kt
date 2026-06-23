@@ -2,7 +2,6 @@ package com.zoewave.probase.features.glass.vision.ui.manager
 
 import android.app.Activity
 import android.app.Application
-import android.content.pm.PackageManager
 import android.util.Log
 import android.util.Size
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
@@ -15,7 +14,6 @@ import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.xr.projected.ProjectedContext
 import com.zoewave.probase.features.glass.vision.data.VisionRepository
@@ -58,19 +56,6 @@ class SimpleGlassesCameraManager @Inject constructor(
 
     private val _discoveredCameras = MutableStateFlow<List<Pair<String, String>>>(emptyList())
     val discoveredCameras: StateFlow<List<Pair<String, String>>> = _discoveredCameras.asStateFlow()
-
-    fun checkGlassesPermission(activity: Activity): Boolean {
-        return try {
-            val projectedContext = ProjectedContext.createProjectedDeviceContext(activity)
-            val status = ContextCompat.checkSelfPermission(projectedContext, android.Manifest.permission.CAMERA)
-            val granted = status == PackageManager.PERMISSION_GRANTED
-            addLog("Glasses permission check: ${if (granted) "GRANTED" else "DENIED"}")
-            granted
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to check glasses permission", e)
-            false
-        }
-    }
 
     fun initialize(activity: Activity) {
         scope.launch {
