@@ -59,24 +59,35 @@ class SimpleGlassesCameraManager @Inject constructor(
 
     fun initialize(activity: Activity) {
         scope.launch {
-            addLog("Initializing Glasses Camera (Simple Manager)...")
+            addLog("[INIT] Starting Initialization Sequence...")
+            Log.d(tag, "initialize() called with activity: ${activity::class.java.simpleName}")
             
             val projectedContext = try {
-                ProjectedContext.createProjectedDeviceContext(activity)
+                addLog("[INIT] Creating ProjectedContext...")
+                ProjectedContext.createProjectedDeviceContext(activity).also {
+                    Log.d(tag, "ProjectedContext created successfully")
+                }
             } catch (e: Exception) {
-                addLog("ERROR: Could not create ProjectedContext: ${e.message}")
+                val msg = "ERROR: Could not create context bridge: ${e.message}"
+                addLog(msg)
+                Log.e(tag, msg, e)
                 return@launch
             }
 
             try {
+                addLog("[INIT] Requesting ProcessCameraProvider...")
                 val cameraProvider = ProcessCameraProvider.awaitInstance(projectedContext)
+                addLog("[INIT] Provider acquired. Selecting DEFAULT_BACK_CAMERA...")
                 val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
                 if (!cameraProvider.hasCamera(cameraSelector)) {
-                    addLog("ERROR: Glasses camera (DEFAULT_BACK_CAMERA) not found.")
+                    val msg = "ERROR: Hardware camera not found on projected device."
+                    addLog(msg)
+                    Log.w(tag, msg)
                     return@launch
                 }
-
+                
+                addLog("[INIT] Camera found. Building ResolutionSelector (640x480)...")
                 // AI Glasses optimized resolution (640x480) to manage thermal/battery
                 val targetResolution = Size(640, 480)
                 val resolutionStrategy = ResolutionStrategy(
@@ -87,6 +98,7 @@ class SimpleGlassesCameraManager @Inject constructor(
                     .setResolutionStrategy(resolutionStrategy)
                     .build()
 
+                addLog("[INIT] Building ImageCapture use case...")
                 imageCapture = ImageCapture.Builder()
                     .setResolutionSelector(resolutionSelector)
                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
@@ -94,45 +106,74 @@ class SimpleGlassesCameraManager @Inject constructor(
 
                 withContext(Dispatchers.Main) {
                     try {
+                        addLog("[INIT] Requesting Main Thread binding...")
+                        Log.d(tag, "Main thread binding start. imageCapture is currently: ${if (imageCapture == null) "NULL" else "NOT NULL"}")
+                        
+                        addLog("[INIT] Unbinding previous use cases...")
                         cameraProvider.unbindAll()
+                        
+                        addLog("[INIT] Binding to lifecycle: ${activity::class.java.simpleName}...")
                         cameraProvider.bindToLifecycle(
                             activity as LifecycleOwner,
                             cameraSelector,
                             imageCapture
                         )
-                        _cameraSource.value = "AI Glasses (Projected)"
-                        addLog("SUCCESS: Camera bound to AI Glasses context at 640x480.")
+                        _cameraSource.value = "Hardware Camera (Projected)"
+                        addLog("SUCCESS: Camera bound and ready at 640x480.")
+                        Log.d(tag, "Camera initialization complete and bound to lifecycle. ImageCapture instance: $imageCapture")
                     } catch (e: Exception) {
-                        addLog("ERROR: Lifecycle binding failed: ${e.message}")
+                        val msg = "ERROR: Lifecycle binding failed: ${e.message}"
+                        addLog(msg)
+                        Log.e(tag, msg, e)
                     }
                 }
             } catch (e: Exception) {
-                addLog("ERROR: Camera initialization failed: ${e.message}")
+                val msg = "ERROR: Camera initialization failed: ${e.message}"
+                addLog(msg)
+                Log.e(tag, msg, e)
             }
         }
     }
 
     fun takePicture() {
+        Log.d(tag, "takePicture() called")
         val capture = imageCapture ?: run {
-            addLog("ERROR: ImageCapture not initialized")
+            val msg = "ERROR: Cannot capture - ImageCapture not initialized"
+            addLog(msg)
+            Log.e(tag, msg)
             return
         }
         
-        addLog("Taking picture from glasses...")
+        addLog("Capturing image from hardware...")
         repository.updateCapturing(true)
 
+        Log.d(tag, "Triggering takePicture on ImageCapture instance...")
         capture.takePicture(cameraExecutor, object : ImageCapture.OnImageCapturedCallback() {
             override fun onCaptureSuccess(image: ImageProxy) {
-                addLog("Capture Success!")
+                val width = image.width
+                val height = image.height
+                val format = image.format
+                Log.d(tag, "onCaptureSuccess: size=${width}x${height}, format=$format")
+                addLog("Capture Success! Processing ${width}x${height} frame...")
+                
                 val bitmap = image.toBitmap()
+                if (bitmap != null) {
+                    Log.d(tag, "Bitmap generated successfully: ${bitmap.width}x${bitmap.height}")
+                    repository.updateCapturedImage(bitmap)
+                    addLog("Image updated in repository.")
+                } else {
+                    Log.e(tag, "Failed to generate bitmap from ImageProxy")
+                    addLog("ERROR: Bitmap generation failed.")
+                }
+                
                 image.close()
-                repository.updateCapturedImage(bitmap)
                 repository.updateCapturing(false)
             }
 
             override fun onError(exception: ImageCaptureException) {
-                addLog("Capture Error: ${exception.message}")
-                Log.e(tag, "Capture failed", exception)
+                val msg = "Capture Error: ${exception.message} (Type: ${exception.imageCaptureError})"
+                addLog(msg)
+                Log.e(tag, msg, exception)
                 repository.updateCapturing(false)
             }
         })

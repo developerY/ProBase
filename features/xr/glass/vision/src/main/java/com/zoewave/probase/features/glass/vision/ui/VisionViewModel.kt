@@ -1,6 +1,7 @@
 package com.zoewave.probase.features.glass.vision.ui
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.ExperimentalLensFacing
 import androidx.lifecycle.ViewModel
@@ -50,6 +51,7 @@ class VisionViewModel @Inject constructor(
     val cameraManager: SimpleGlassesCameraManager
 ) : ViewModel() {
 
+    private val instanceId = java.util.UUID.randomUUID().toString().take(4)
     private val _isApiKeySet = MutableStateFlow(false)
     private val _isPermissionGranted = MutableStateFlow(false)
     private val _error = MutableStateFlow<String?>(null)
@@ -91,25 +93,34 @@ class VisionViewModel @Inject constructor(
     }
 
     private fun checkInitialPermissions(context: android.content.Context) {
+        val contextName = context::class.java.simpleName
         val phoneGranted = androidx.core.content.ContextCompat.checkSelfPermission(
             context, android.Manifest.permission.CAMERA
         ) == android.content.pm.PackageManager.PERMISSION_GRANTED
         _isPermissionGranted.value = phoneGranted
-        cameraManager.addLog("Camera Permission Status: ${if (phoneGranted) "GRANTED" else "DENIED"}")
+        val msg = "Camera Permission Status: ${if (phoneGranted) "GRANTED" else "DENIED"} (Checked from $contextName)"
+        Log.d("VisionVM", "[$instanceId] $msg")
+        cameraManager.addLog("[$instanceId] $msg")
     }
 
     fun onEvent(event: VisionUiEvent) {
+        Log.d("VisionVM", "[$instanceId] onEvent: ${event::class.java.simpleName}")
         when (event) {
             is VisionUiEvent.CheckPermissions -> checkInitialPermissions(event.context)
             is VisionUiEvent.TriggerCapture -> triggerGlassesCapture()
-            is VisionUiEvent.UpdatePermissionStatus -> _isPermissionGranted.value = event.granted
+            is VisionUiEvent.UpdatePermissionStatus -> {
+                Log.d("VisionVM", "[$instanceId] Permission updated: ${event.granted}")
+                _isPermissionGranted.value = event.granted
+            }
         }
     }
 
     private fun observeBridgeCommands() {
         viewModelScope.launch {
             bridgeRepository.glassCommands.collect { cmd ->
+                Log.d("VisionVM", "[$instanceId] Command received from bridge: $cmd")
                 if (cmd == "CAPTURE_IMAGE") {
+                    Log.d("VisionVM", "[$instanceId] Dispatching takePicture to cameraManager")
                     cameraManager.takePicture()
                 }
             }
@@ -136,7 +147,8 @@ class VisionViewModel @Inject constructor(
 
     private fun triggerGlassesCapture() {
         viewModelScope.launch {
-            cameraManager.addLog("Sending Remote Command: CAPTURE_IMAGE...")
+            Log.d("VisionVM", "[$instanceId] Triggering capture. Sending command: CAPTURE_IMAGE")
+            cameraManager.addLog("[$instanceId] Sending Remote Command: CAPTURE_IMAGE...")
             bridgeRepository.sendGlassCommand("CAPTURE_IMAGE")
         }
     }

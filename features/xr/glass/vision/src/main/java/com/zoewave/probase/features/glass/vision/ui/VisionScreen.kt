@@ -2,6 +2,7 @@ package com.zoewave.probase.features.glass.vision.ui
 
 import android.Manifest
 import android.app.Activity
+import android.util.Log
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.ExperimentalLensFacing
 import androidx.compose.foundation.background
@@ -53,8 +54,11 @@ fun VisionRoute(
 
     // Sync permission status with ViewModel
     LaunchedEffect(cameraPermissionState.status.isGranted) {
-        viewModel.onEvent(VisionUiEvent.UpdatePermissionStatus(cameraPermissionState.status.isGranted))
-        if (cameraPermissionState.status.isGranted && activity != null) {
+        val granted = cameraPermissionState.status.isGranted
+        Log.d("VisionUI", "GlassesRoute: Permission Status Updated = $granted")
+        viewModel.onEvent(VisionUiEvent.UpdatePermissionStatus(granted))
+        if (granted && activity != null) {
+            Log.d("VisionUI", "GlassesRoute: Initializing camera manager")
             viewModel.cameraManager.initialize(activity)
         }
     }
@@ -151,6 +155,7 @@ fun VisionScreen(
                 // Capture Button (Alternative trigger)
                 IconButton(
                     onClick = {
+                        Log.d("VisionUI", "GLASSES_ICON_CLICKED (Glimmer UI)")
                         if (uiState.isPermissionGranted) {
                             onEvent(VisionUiEvent.TriggerCapture)
                         } else {
