@@ -84,7 +84,6 @@ import kotlinx.coroutines.Dispatchers
 fun UnifiedVisionRoute(
     viewModel: VisionViewModel = hiltViewModel(),
     onNavigateToSettings: () -> Unit = {},
-    onRequestGlassesPermission: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -103,12 +102,9 @@ fun UnifiedVisionRoute(
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.onEvent(VisionUiEvent.CheckPermissions(context))
-                // Always try to initialize if glasses granted, to re-discover hardware
-                if (activity != null) {
-                    val glassesGranted = viewModel.cameraManager.checkGlassesPermission(activity)
-                    if (glassesGranted) {
-                        viewModel.cameraManager.initialize(activity)
-                    }
+                // Always try to initialize if camera permission is granted
+                if (activity != null && cameraPermissionState.status.isGranted) {
+                    viewModel.cameraManager.initialize(activity)
                 }
             }
         }
@@ -118,16 +114,10 @@ fun UnifiedVisionRoute(
         }
     }
 
-    // Initial sync
-    LaunchedEffect(cameraPermissionState.status.isGranted) {
-        viewModel.onEvent(VisionUiEvent.CheckPermissions(context))
-    }
-
     UnifiedVisionScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         onNavigateToSettings = onNavigateToSettings,
-        onRequestGlassesPermission = onRequestGlassesPermission,
         onBack = onBack,
         requestPhonePermission = { cameraPermissionState.launchPermissionRequest() }
     )
@@ -144,7 +134,6 @@ fun UnifiedVisionScreen(
     uiState: VisionUiState,
     onEvent: (VisionUiEvent) -> Unit,
     onNavigateToSettings: () -> Unit,
-    onRequestGlassesPermission: () -> Unit,
     onBack: () -> Unit,
     requestPhonePermission: () -> Unit,
     modifier: Modifier = Modifier
@@ -190,8 +179,7 @@ fun UnifiedVisionScreen(
         VisionRequirementGate(
             uiState = uiState,
             onNavigateToSettings = onNavigateToSettings,
-            onRequestPhonePermission = requestPhonePermission,
-            onRequestGlassesPermission = onRequestGlassesPermission
+            onRequestPhonePermission = requestPhonePermission
         ) {
             Column(
                 modifier = Modifier
@@ -224,13 +212,6 @@ fun UnifiedVisionScreen(
                             activeIcon = Icons.Default.Camera,
                             inactiveIcon = Icons.Default.CameraAlt,
                             statusOverride = if (uiState.isPermissionGranted) "ALLOWED" else "DENIED"
-                        )
-                        DiagnosticRow(
-                            label = "Glasses Camera Access",
-                            isActive = uiState.isGlassesPermissionGranted,
-                            activeIcon = Icons.Default.Camera,
-                            inactiveIcon = Icons.Default.CameraAlt,
-                            statusOverride = if (uiState.isGlassesPermissionGranted) "ALLOWED" else "DENIED"
                         )
                         DiagnosticRow(
                             label = "Camera Source",

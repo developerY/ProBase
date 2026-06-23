@@ -32,8 +32,6 @@ import androidx.xr.glimmer.Icon
 import androidx.xr.glimmer.IconButton
 import androidx.xr.glimmer.Text
 import androidx.xr.glimmer.TitleChip
-import androidx.xr.projected.ProjectedDisplayController
-import androidx.xr.projected.ProjectedDisplayController.PresentationMode
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -57,8 +55,6 @@ fun VisionRoute(
     LaunchedEffect(cameraPermissionState.status.isGranted) {
         viewModel.onEvent(VisionUiEvent.UpdatePermissionStatus(cameraPermissionState.status.isGranted))
         if (cameraPermissionState.status.isGranted && activity != null) {
-            val glassesGranted = viewModel.cameraManager.checkGlassesPermission(activity)
-            viewModel.onEvent(VisionUiEvent.UpdateGlassesPermissionStatus(glassesGranted))
             viewModel.cameraManager.initialize(activity)
         }
     }

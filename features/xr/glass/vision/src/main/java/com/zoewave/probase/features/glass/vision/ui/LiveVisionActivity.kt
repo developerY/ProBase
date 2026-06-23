@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.ProjectedDeviceController
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
@@ -69,31 +68,7 @@ class LiveVisionActivity : ComponentActivity() {
                         onNavigateToSettings = {
                             // Navigate to settings logic
                         },
-                        onBack = { finish() },
-                        onRequestGlassesPermission = {
-                            android.util.Log.d("LiveVisionActivity", "onRequestGlassesPermission triggered. Using device-targeted request.")
-                            try {
-                                val glassesContext = ProjectedContext.createProjectedDeviceContext(this@LiveVisionActivity)
-                                val deviceId = glassesContext.deviceId
-                                
-                                if (android.os.Build.VERSION.SDK_INT >= 35) {
-                                    requestPermissions(
-                                        arrayOf(Manifest.permission.CAMERA),
-                                        1002,
-                                        deviceId
-                                    )
-                                    android.util.Log.d("LiveVisionActivity", "Triggered activity.requestPermissions with deviceId: $deviceId")
-                                } else {
-                                    val params = ProjectedPermissionsRequestParams(
-                                        permissions = listOf(Manifest.permission.CAMERA),
-                                        rationale = "Camera access is needed on your AI glasses to describe what you see."
-                                    )
-                                    projectedPermissionLauncher.launch(listOf(params))
-                                }
-                            } catch (e: Exception) {
-                                android.util.Log.e("LiveVisionActivity", "Failed to trigger device-targeted permissions", e)
-                            }
-                        }
+                        onBack = { finish() }
                     )
                     
                     // The Glimmer UI for glasses is usually handled by a separate 
