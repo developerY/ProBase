@@ -44,8 +44,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
-import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import com.zoewave.probase.features.glass.translation.ui.UnifiedTranslationScreen
 import com.zoewave.probase.features.glass.vision.ui.UnifiedVisionScreen
 import com.zoewave.probase.features.glass.vision.ui.VisionUiEvent
@@ -72,14 +70,6 @@ fun GlassXRDemosPhoneRoute(
 
     val phonePermissionState = com.google.accompanist.permissions.rememberPermissionState(android.Manifest.permission.CAMERA)
 
-    val projectedPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-        ProjectedPermissionsResultContract()
-    ) { results ->
-        android.util.Log.d("GlassXRDemos", "Projected permissions result: $results")
-        // Re-poll status
-        visionViewModel.onEvent(VisionUiEvent.CheckPermissions(context))
-    }
-
     LaunchedEffect(Unit) {
         viewModel.checkConnection(context)
         visionViewModel.onEvent(VisionUiEvent.CheckPermissions(context))
@@ -101,26 +91,6 @@ fun GlassXRDemosPhoneRoute(
         requestPhonePermission = {
             android.util.Log.d("GlassXRDemos", "requestPhonePermission clicked")
             phonePermissionState.launchPermissionRequest()
-        },
-        onRequestGlassesPermission = {
-            android.util.Log.d("GlassXRDemos", "onRequestGlassesPermission triggered.")
-            try {
-                // Primary method: Use standard contract for better robustness in low-discovery states
-                val params = ProjectedPermissionsRequestParams(
-                    permissions = listOf(android.Manifest.permission.CAMERA),
-                    rationale = "Camera access is needed on your AI glasses for this demo."
-                )
-                projectedPermissionLauncher.launch(listOf(params))
-                
-                // Secondary check for targeted request capability
-                val activity = context as? android.app.Activity
-                val glassesContext = try { ProjectedContext.createProjectedDeviceContext(context) } catch (e: Exception) { null }
-                if (glassesContext != null && activity != null && android.os.Build.VERSION.SDK_INT >= 35) {
-                    android.util.Log.d("GlassXRDemos", "Device ID available: ${glassesContext.deviceId}. Contract launched.")
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("GlassXRDemos", "Failed to trigger permissions", e)
-            }
         }
     )
 }
@@ -138,7 +108,6 @@ fun GlassXRDemosPhoneScreen(
     onNextSample: (GlimmerSample) -> Unit,
     onPreviousSample: (GlimmerSample) -> Unit,
     onVisionEvent: (VisionUiEvent) -> Unit,
-    onRequestGlassesPermission: () -> Unit,
     requestPhonePermission: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -226,7 +195,6 @@ fun GlassXRDemosPhoneScreen(
                     uiState = visionUiState,
                     onEvent = onVisionEvent,
                     onNavigateToSettings = { /* No-op for now */ },
-                    onRequestGlassesPermission = onRequestGlassesPermission,
                     onBack = onStopDemo,
                     requestPhonePermission = requestPhonePermission
                 )
@@ -325,7 +293,6 @@ private fun GlassXRDemosPhoneScreenPreview() {
             onNextSample = {},
             onPreviousSample = {},
             onVisionEvent = {},
-            onRequestGlassesPermission = {},
             requestPhonePermission = {}
         )
     }

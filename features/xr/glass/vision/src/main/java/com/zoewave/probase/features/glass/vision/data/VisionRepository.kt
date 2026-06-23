@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,25 +23,25 @@ class VisionRepository @Inject constructor() {
     val isCapturing: StateFlow<Boolean> = _isCapturing.asStateFlow()
 
     fun updateCapturedImage(bitmap: Bitmap?) {
-        _capturedImage.value = bitmap
+        _capturedImage.update { bitmap }
     }
 
     fun updateImageDescription(description: String) {
-        _imageDescription.value = description
+        _imageDescription.update { description }
     }
 
     fun updateAnalyzing(analyzing: Boolean) {
-        _isAnalyzing.value = analyzing
+        _isAnalyzing.update { analyzing }
     }
 
     fun updateCapturing(capturing: Boolean) {
-        _isCapturing.value = capturing
+        _isCapturing.update { capturing }
     }
 
     fun clear() {
-        _capturedImage.value = null
-        _imageDescription.value = ""
-        _isAnalyzing.value = false
-        _isCapturing.value = false
+        _capturedImage.update { null }
+        _imageDescription.update { "" }
+        _isAnalyzing.update { false }
+        _isCapturing.update { false }
     }
 }

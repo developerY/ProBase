@@ -1,5 +1,6 @@
 package com.zoewave.probase.data.repository
 
+import android.util.Log
 import com.zoewave.probase.core.data.repository.GlassBridgeRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +31,7 @@ class DefaultGlassBridgeRepository @Inject constructor() : GlassBridgeRepository
     }
 
     override suspend fun sendGlassCommand(command: String) {
+        Log.d("GlassBridge", "Emitting command: $command")
         _glassCommands.emit(command)
     }
 }

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.ExperimentalLensFacing
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,23 +22,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.ProjectedDeviceController
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import androidx.xr.projected.permissions.ProjectedPermissionsRequestParams
-import androidx.xr.projected.permissions.ProjectedPermissionsResultContract
 import dagger.hilt.android.AndroidEntryPoint
 
 @OptIn(ExperimentalProjectedApi::class)
 @AndroidEntryPoint
 class LiveVisionActivity : ComponentActivity() {
 
-    private val projectedPermissionLauncher =
-        registerForActivityResult(ProjectedPermissionsResultContract()) { results ->
-            if (results[Manifest.permission.CAMERA] == true) {
-                Log.d("LiveVisionActivity", "Projected camera permission granted")
+    private val permissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                Log.d("LiveVisionActivity", "Camera permission granted")
             } else {
-                Log.e("LiveVisionActivity", "Projected camera permission denied")
+                Log.e("LiveVisionActivity", "Camera permission denied")
             }
         }
 
@@ -69,31 +67,7 @@ class LiveVisionActivity : ComponentActivity() {
                         onNavigateToSettings = {
                             // Navigate to settings logic
                         },
-                        onBack = { finish() },
-                        onRequestGlassesPermission = {
-                            android.util.Log.d("LiveVisionActivity", "onRequestGlassesPermission triggered. Using device-targeted request.")
-                            try {
-                                val glassesContext = ProjectedContext.createProjectedDeviceContext(this@LiveVisionActivity)
-                                val deviceId = glassesContext.deviceId
-                                
-                                if (android.os.Build.VERSION.SDK_INT >= 35) {
-                                    requestPermissions(
-                                        arrayOf(Manifest.permission.CAMERA),
-                                        1002,
-                                        deviceId
-                                    )
-                                    android.util.Log.d("LiveVisionActivity", "Triggered activity.requestPermissions with deviceId: $deviceId")
-                                } else {
-                                    val params = ProjectedPermissionsRequestParams(
-                                        permissions = listOf(Manifest.permission.CAMERA),
-                                        rationale = "Camera access is needed on your AI glasses to describe what you see."
-                                    )
-                                    projectedPermissionLauncher.launch(listOf(params))
-                                }
-                            } catch (e: Exception) {
-                                android.util.Log.e("LiveVisionActivity", "Failed to trigger device-targeted permissions", e)
-                            }
-                        }
+                        onBack = { finish() }
                     )
                     
                     // The Glimmer UI for glasses is usually handled by a separate 
@@ -108,16 +82,10 @@ class LiveVisionActivity : ComponentActivity() {
 
     private fun checkAndRequestPermissions() {
         val permission = Manifest.permission.CAMERA
-        // Use attribution context for XR hardware access tracking
-        val attributionContext = createAttributionContext("xr_projected")
-        val permissionStatus = ContextCompat.checkSelfPermission(attributionContext, permission)
+        val permissionStatus = ContextCompat.checkSelfPermission(this, permission)
 
         if (permissionStatus != PackageManager.PERMISSION_GRANTED) {
-            val params = ProjectedPermissionsRequestParams(
-                permissions = listOf(permission),
-                rationale = "Camera access is needed on your AI glasses to describe what you see."
-            )
-            projectedPermissionLauncher.launch(listOf(params))
+            permissionLauncher.launch(permission)
         }
     }
 }

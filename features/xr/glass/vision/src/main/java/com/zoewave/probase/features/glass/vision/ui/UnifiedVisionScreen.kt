@@ -1,6 +1,7 @@
 package com.zoewave.probase.features.glass.vision.ui
 
 import android.Manifest
+import android.util.Log
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.ExperimentalLensFacing
 import androidx.compose.foundation.Image
@@ -63,6 +64,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -84,13 +86,12 @@ import kotlinx.coroutines.Dispatchers
 fun UnifiedVisionRoute(
     viewModel: VisionViewModel = hiltViewModel(),
     onNavigateToSettings: () -> Unit = {},
-    onRequestGlassesPermission: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val context = LocalContext.current
-    val activity = context as? android.app.Activity
+    val activity = context as? androidx.activity.ComponentActivity
     val lifecycleOwner = LocalLifecycleOwner.current
 
     // Initial sync
@@ -101,14 +102,13 @@ fun UnifiedVisionRoute(
     // Refresh permission and camera status on Resume
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
+            Log.d("VisionUI", "UnifiedVisionRoute Lifecycle: $event")
             if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.onEvent(VisionUiEvent.CheckPermissions(context))
-                // Always try to initialize if glasses granted, to re-discover hardware
-                if (activity != null) {
-                    val glassesGranted = viewModel.cameraManager.checkGlassesPermission(activity)
-                    if (glassesGranted) {
-                        viewModel.cameraManager.initialize(activity)
-                    }
+                // Always try to initialize if camera permission is granted
+                if (activity != null && cameraPermissionState.status.isGranted) {
+                    Log.d("VisionUI", "Initializing camera from ON_RESUME")
+                    viewModel.cameraManager.initialize(activity)
                 }
             }
         }
@@ -118,16 +118,10 @@ fun UnifiedVisionRoute(
         }
     }
 
-    // Initial sync
-    LaunchedEffect(cameraPermissionState.status.isGranted) {
-        viewModel.onEvent(VisionUiEvent.CheckPermissions(context))
-    }
-
     UnifiedVisionScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         onNavigateToSettings = onNavigateToSettings,
-        onRequestGlassesPermission = onRequestGlassesPermission,
         onBack = onBack,
         requestPhonePermission = { cameraPermissionState.launchPermissionRequest() }
     )
@@ -144,7 +138,6 @@ fun UnifiedVisionScreen(
     uiState: VisionUiState,
     onEvent: (VisionUiEvent) -> Unit,
     onNavigateToSettings: () -> Unit,
-    onRequestGlassesPermission: () -> Unit,
     onBack: () -> Unit,
     requestPhonePermission: () -> Unit,
     modifier: Modifier = Modifier
@@ -190,8 +183,7 @@ fun UnifiedVisionScreen(
         VisionRequirementGate(
             uiState = uiState,
             onNavigateToSettings = onNavigateToSettings,
-            onRequestPhonePermission = requestPhonePermission,
-            onRequestGlassesPermission = onRequestGlassesPermission
+            onRequestPhonePermission = requestPhonePermission
         ) {
             Column(
                 modifier = Modifier
@@ -219,22 +211,15 @@ fun UnifiedVisionScreen(
                             statusOverride = if (isConnected) "CONNECTED" else "DISCONNECTED"
                         )
                         DiagnosticRow(
-                            label = "Phone Camera Access",
+                            label = "Camera Access",
                             isActive = uiState.isPermissionGranted,
                             activeIcon = Icons.Default.Camera,
                             inactiveIcon = Icons.Default.CameraAlt,
                             statusOverride = if (uiState.isPermissionGranted) "ALLOWED" else "DENIED"
                         )
                         DiagnosticRow(
-                            label = "Glasses Camera Access",
-                            isActive = uiState.isGlassesPermissionGranted,
-                            activeIcon = Icons.Default.Camera,
-                            inactiveIcon = Icons.Default.CameraAlt,
-                            statusOverride = if (uiState.isGlassesPermissionGranted) "ALLOWED" else "DENIED"
-                        )
-                        DiagnosticRow(
                             label = "Camera Source",
-                            isActive = uiState.cameraSource.contains("Glasses"),
+                            isActive = uiState.cameraSource.contains("Hardware"),
                             activeIcon = Icons.Default.CheckCircle,
                             inactiveIcon = Icons.Default.Error,
                             statusOverride = uiState.cameraSource,
@@ -356,6 +341,7 @@ fun UnifiedVisionScreen(
                 // --- CONTROLS SECTION ---
                 Button(
                     onClick = {
+                        Log.d("VisionUI", "CAPTURE_BUTTON_CLICKED (Phone UI)")
                         if (!uiState.isPermissionGranted) {
                             requestPhonePermission()
                         } else {
@@ -368,7 +354,7 @@ fun UnifiedVisionScreen(
                 ) {
                     Icon(Icons.Default.CameraAlt, contentDescription = null)
                     Spacer(Modifier.width(12.dp))
-                    Text("TRIGGER GLASSES CAMERA")
+                    Text("CAPTURE IMAGE")
                 }
                 
                 if (uiState.error != null) {
@@ -417,6 +403,27 @@ fun DiagnosticRow(
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = if (isActive) Color(0xFF4CAF50) else (if (isCritical) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
+        )
+    }
+}
+
+@ExperimentalLensFacing
+@ExperimentalCamera2Interop
+@Preview(showBackground = true)
+@Composable
+private fun UnifiedVisionScreenPreview() {
+    MaterialTheme {
+        UnifiedVisionScreen(
+            uiState = VisionUiState(
+                cameraSource = "Hardware Camera (Projected)",
+                isPermissionGranted = true,
+                isApiKeySet = true,
+                imageDescription = "A scenic view of a mountain path."
+            ),
+            onEvent = {},
+            onNavigateToSettings = {},
+            onBack = {},
+            requestPhonePermission = {}
         )
     }
 }

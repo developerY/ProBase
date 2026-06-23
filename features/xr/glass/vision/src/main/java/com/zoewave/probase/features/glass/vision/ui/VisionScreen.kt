@@ -1,7 +1,7 @@
 package com.zoewave.probase.features.glass.vision.ui
 
-import android.Manifest
 import android.app.Activity
+import android.util.Log
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.ExperimentalLensFacing
 import androidx.compose.foundation.background
@@ -32,41 +32,26 @@ import androidx.xr.glimmer.Icon
 import androidx.xr.glimmer.IconButton
 import androidx.xr.glimmer.Text
 import androidx.xr.glimmer.TitleChip
-import androidx.xr.projected.ProjectedDisplayController
-import androidx.xr.projected.ProjectedDisplayController.PresentationMode
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 
 /**
  * The entry point for the Vision screen.
+ *
+ * ARCHITECTURAL NOTE: This route runs on the Glasses.
+ * It must NOT request permissions or initialize the CameraManager.
+ * The host phone app handles the Context Bridge setup.
  */
 @ExperimentalLensFacing
 @ExperimentalCamera2Interop
-@OptIn(ExperimentalPermissionsApi::class, androidx.xr.projected.experimental.ExperimentalProjectedApi::class)
+@OptIn(androidx.xr.projected.experimental.ExperimentalProjectedApi::class)
 @Composable
 fun VisionRoute(
     viewModel: VisionViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
-    val context = LocalContext.current
-    val activity = context as? Activity
-
-    // Sync permission status with ViewModel
-    LaunchedEffect(cameraPermissionState.status.isGranted) {
-        viewModel.onEvent(VisionUiEvent.UpdatePermissionStatus(cameraPermissionState.status.isGranted))
-        if (cameraPermissionState.status.isGranted && activity != null) {
-            val glassesGranted = viewModel.cameraManager.checkGlassesPermission(activity)
-            viewModel.onEvent(VisionUiEvent.UpdateGlassesPermissionStatus(glassesGranted))
-            viewModel.cameraManager.initialize(activity)
-        }
-    }
 
     VisionScreen(
         uiState = uiState,
-        onEvent = viewModel::onEvent,
-        requestPhonePermission = { cameraPermissionState.launchPermissionRequest() }
+        onEvent = viewModel::onEvent
     )
 }
 
@@ -80,7 +65,6 @@ fun VisionRoute(
 fun VisionScreen(
     uiState: VisionUiState,
     onEvent: (VisionUiEvent) -> Unit,
-    requestPhonePermission: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -101,7 +85,7 @@ fun VisionScreen(
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .background(Color.Black), // Transparent on glasses
+                .background(Color.Black), // Pure Black ensures total optical transparency
             contentAlignment = Alignment.BottomCenter
         ) {
             // DEBUG OVERLAY
@@ -152,14 +136,12 @@ fun VisionScreen(
                     )
                 }
 
-                // Capture Button (Alternative trigger)
+                // Capture Button
                 IconButton(
                     onClick = {
-                        if (uiState.isPermissionGranted) {
-                            onEvent(VisionUiEvent.TriggerCapture)
-                        } else {
-                            requestPhonePermission()
-                        }
+                        Log.d("VisionUI", "GLASSES_ICON_CLICKED (Glimmer UI)")
+                        // We assume the phone already handled permissions. Just fire the capture!
+                        onEvent(VisionUiEvent.TriggerCapture)
                     }
                 ) {
                     Icon(

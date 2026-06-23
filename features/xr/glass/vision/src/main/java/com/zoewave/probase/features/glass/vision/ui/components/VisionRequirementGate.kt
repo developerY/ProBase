@@ -40,14 +40,12 @@ fun VisionRequirementGate(
     uiState: VisionUiState,
     onNavigateToSettings: () -> Unit,
     onRequestPhonePermission: () -> Unit,
-    onRequestGlassesPermission: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val isPhonePermissionOk = uiState.isPermissionGranted
-    val isGlassesPermissionOk = uiState.isGlassesPermissionGranted
     val isApiKeyOk = uiState.isApiKeySet
 
-    if (isPhonePermissionOk && isGlassesPermissionOk && isApiKeyOk) {
+    if (isPhonePermissionOk && isApiKeyOk) {
         content()
     } else {
         Column(
@@ -79,31 +77,15 @@ fun VisionRequirementGate(
             Spacer(Modifier.height(32.dp))
 
             RequirementCard(
-                title = "Phone Camera Access",
-                description = "Required to allow projected access.",
+                title = "Camera Access",
+                description = "Required to enable vision capabilities.",
                 isMet = isPhonePermissionOk,
                 icon = Icons.Default.CameraAlt,
-                buttonLabel = "GRANT PHONE ACCESS",
+                buttonLabel = "GRANT CAMERA ACCESS",
                 onButtonClick = {
                     if (!isPhonePermissionOk) {
-                        android.util.Log.d("VisionGate", "GRANT PHONE ACCESS clicked")
+                        android.util.Log.d("VisionGate", "GRANT CAMERA ACCESS clicked")
                         onRequestPhonePermission()
-                    }
-                }
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            RequirementCard(
-                title = "Glasses Camera Access",
-                description = "Allow the app to use the glasses hardware.",
-                isMet = isGlassesPermissionOk,
-                icon = Icons.Default.CameraAlt,
-                buttonLabel = "GRANT GLASSES ACCESS",
-                onButtonClick = {
-                    if (!isGlassesPermissionOk) {
-                        android.util.Log.d("VisionGate", "GRANT GLASSES ACCESS clicked")
-                        onRequestGlassesPermission()
                     }
                 }
             )
