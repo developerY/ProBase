@@ -10,7 +10,7 @@ import com.google.ai.client.generativeai.type.content
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.core.data.repository.GlassBridgeRepository
 import com.zoewave.probase.features.glass.vision.data.VisionRepository
-import com.zoewave.probase.features.glass.vision.ui.manager.GlassesCameraManager
+import com.zoewave.probase.features.glass.vision.ui.manager.SimpleGlassesCameraManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -50,7 +50,7 @@ class VisionViewModel @Inject constructor(
     private val settings: AiConfigurationSettings,
     private val repository: VisionRepository,
     private val bridgeRepository: GlassBridgeRepository,
-    val cameraManager: GlassesCameraManager
+    val cameraManager: SimpleGlassesCameraManager
 ) : ViewModel() {
 
     private val _isApiKeySet = MutableStateFlow(false)
