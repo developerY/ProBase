@@ -1,9 +1,8 @@
 package com.zoewave.probase.features.glass.vision.ui.manager
 
-import android.app.Activity
-import android.app.Application
 import android.util.Log
 import android.util.Size
+import androidx.activity.ComponentActivity
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalLensFacing
@@ -14,7 +13,6 @@ import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
-import androidx.lifecycle.LifecycleOwner
 import androidx.xr.projected.ProjectedContext
 import com.zoewave.probase.features.glass.vision.data.VisionRepository
 import kotlinx.coroutines.CoroutineScope
@@ -25,7 +23,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
@@ -40,7 +37,6 @@ import javax.inject.Singleton
 @androidx.xr.projected.experimental.ExperimentalProjectedApi
 @Singleton
 class SimpleGlassesCameraManager @Inject constructor(
-    private val application: Application,
     private val repository: VisionRepository
 ) {
     private val tag = "SimpleGlassesCameraManager"
@@ -57,7 +53,7 @@ class SimpleGlassesCameraManager @Inject constructor(
     private val _discoveredCameras = MutableStateFlow<List<Pair<String, String>>>(emptyList())
     val discoveredCameras: StateFlow<List<Pair<String, String>>> = _discoveredCameras.asStateFlow()
 
-    fun initialize(activity: Activity) {
+    fun initialize(activity: ComponentActivity) {
         scope.launch {
             addLog("[INIT] Starting Initialization Sequence...")
             Log.d(tag, "initialize() called with activity: ${activity::class.java.simpleName}")
@@ -104,28 +100,26 @@ class SimpleGlassesCameraManager @Inject constructor(
                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                     .build()
 
-                withContext(Dispatchers.Main) {
-                    try {
-                        addLog("[INIT] Requesting Main Thread binding...")
-                        Log.d(tag, "Main thread binding start. imageCapture is currently: ${if (imageCapture == null) "NULL" else "NOT NULL"}")
-                        
-                        addLog("[INIT] Unbinding previous use cases...")
-                        cameraProvider.unbindAll()
-                        
-                        addLog("[INIT] Binding to lifecycle: ${activity::class.java.simpleName}...")
-                        cameraProvider.bindToLifecycle(
-                            activity as LifecycleOwner,
-                            cameraSelector,
-                            imageCapture
-                        )
-                        _cameraSource.value = "Hardware Camera (Projected)"
-                        addLog("SUCCESS: Camera bound and ready at 640x480.")
-                        Log.d(tag, "Camera initialization complete and bound to lifecycle. ImageCapture instance: $imageCapture")
-                    } catch (e: Exception) {
-                        val msg = "ERROR: Lifecycle binding failed: ${e.message}"
-                        addLog(msg)
-                        Log.e(tag, msg, e)
-                    }
+                try {
+                    addLog("[INIT] Unbinding previous use cases...")
+                    cameraProvider.unbindAll()
+
+                    addLog("[INIT] Binding to lifecycle: ${activity::class.java.simpleName}...")
+                    cameraProvider.bindToLifecycle(
+                        activity,
+                        cameraSelector,
+                        imageCapture
+                    )
+                    _cameraSource.value = "Hardware Camera (Projected)"
+                    addLog("SUCCESS: Camera bound and ready at 640x480.")
+                    Log.d(
+                        tag,
+                        "Camera initialization complete and bound to lifecycle. ImageCapture instance: $imageCapture"
+                    )
+                } catch (e: Exception) {
+                    val msg = "ERROR: Lifecycle binding failed: ${e.message}"
+                    addLog(msg)
+                    Log.e(tag, msg, e)
                 }
             } catch (e: Exception) {
                 val msg = "ERROR: Camera initialization failed: ${e.message}"

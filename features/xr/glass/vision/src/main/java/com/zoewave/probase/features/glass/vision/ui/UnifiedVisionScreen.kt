@@ -91,7 +91,7 @@ fun UnifiedVisionRoute(
     val uiState by viewModel.uiState.collectAsState()
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val context = LocalContext.current
-    val activity = context as? android.app.Activity
+    val activity = context as? androidx.activity.ComponentActivity
     val lifecycleOwner = LocalLifecycleOwner.current
 
     // Initial sync

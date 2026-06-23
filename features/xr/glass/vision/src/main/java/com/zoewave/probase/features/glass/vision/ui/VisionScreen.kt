@@ -50,7 +50,7 @@ fun VisionRoute(
     val uiState by viewModel.uiState.collectAsState()
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val context = LocalContext.current
-    val activity = context as? Activity
+    val activity = context as? androidx.activity.ComponentActivity
 
     // Sync permission status with ViewModel
     LaunchedEffect(cameraPermissionState.status.isGranted) {
