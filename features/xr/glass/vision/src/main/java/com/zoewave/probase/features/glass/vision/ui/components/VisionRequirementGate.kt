@@ -77,14 +77,14 @@ fun VisionRequirementGate(
             Spacer(Modifier.height(32.dp))
 
             RequirementCard(
-                title = "Phone Camera Access",
-                description = "Required to allow projected access.",
+                title = "Camera Access",
+                description = "Required to enable vision capabilities.",
                 isMet = isPhonePermissionOk,
                 icon = Icons.Default.CameraAlt,
-                buttonLabel = "GRANT PHONE ACCESS",
+                buttonLabel = "GRANT CAMERA ACCESS",
                 onButtonClick = {
                     if (!isPhonePermissionOk) {
-                        android.util.Log.d("VisionGate", "GRANT PHONE ACCESS clicked")
+                        android.util.Log.d("VisionGate", "GRANT CAMERA ACCESS clicked")
                         onRequestPhonePermission()
                     }
                 }
