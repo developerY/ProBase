@@ -3,6 +3,7 @@ package com.zoewave.probase.features.xr.glass
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.camera.core.ExperimentalLensFacing
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,11 +17,11 @@ import androidx.xr.projected.ProjectedDeviceController
 import androidx.xr.projected.ProjectedDeviceController.Capability.Companion.CAPABILITY_VISUAL_UI
 import androidx.xr.projected.ProjectedDisplayController
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import com.zoewave.probase.core.data.repository.GlassBridgeRepository
+import com.zoewave.probase.core.data.repository.LiveAiRepository
 import com.zoewave.probase.features.xr.glass.data.GlassSessionRepository
 import com.zoewave.probase.features.xr.glass.ui.GlassApp
 import com.zoewave.probase.features.xr.glass.ui.GlimmerSample
-import com.zoewave.probase.core.data.repository.GlassBridgeRepository
-import com.zoewave.probase.core.data.repository.LiveAiRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,6 +41,7 @@ class GlassesMainActivity : ComponentActivity() {
 
     private var initialSample: GlimmerSample? = null
 
+    @androidx.annotation.OptIn(ExperimentalLensFacing::class)
     @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,8 +52,11 @@ class GlassesMainActivity : ComponentActivity() {
 
         audioInterface = GlassAudioInterface(
             this,
-            "Resuming your ritual.",
+            "", // Empty default to prevent unintentional greeting
         )
+        if (initialSample == GlimmerSample.Ritual) {
+            audioInterface.speak("Resuming your ritual.")
+        }
         lifecycle.addObserver(audioInterface)
         lifecycle.addObserver(liveAiRepository)
 
@@ -104,12 +109,18 @@ class GlassesMainActivity : ComponentActivity() {
     }
 
     private fun initializeGlassesFeatures() {
-        lifecycleScope.launch {
+        // Peer Review Adjustment: Move controllers to main thread to avoid lifecycle race conditions.
+        // Clarification: create() is a suspend function in alpha08, so we use launch(Main.immediate).
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.Main.immediate) {
             try {
                 val projectedDeviceController = ProjectedDeviceController.create(this@GlassesMainActivity)
                 val connected = projectedDeviceController.capabilities.isNotEmpty()
                 isVisualUiSupported = projectedDeviceController.capabilities.contains(CAPABILITY_VISUAL_UI)
-                glassSessionRepository.updateConnection(connected)
+                
+                // Keep repository update async as it might be state-driven
+                launch {
+                    glassSessionRepository.updateConnection(connected)
+                }
 
                 val controller = ProjectedDisplayController.create(this@GlassesMainActivity)
                 displayController = controller
@@ -120,7 +131,9 @@ class GlassesMainActivity : ComponentActivity() {
                 lifecycle.addObserver(observer)
             } catch (e: Exception) {
                 android.util.Log.e("GlassesMain", "Init failed", e)
-                glassSessionRepository.updateConnection(false)
+                launch {
+                    glassSessionRepository.updateConnection(false)
+                }
             }
         }
     }
