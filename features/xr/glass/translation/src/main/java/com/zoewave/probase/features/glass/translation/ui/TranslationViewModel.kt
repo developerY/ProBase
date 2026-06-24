@@ -100,6 +100,13 @@ class TranslationViewModel @Inject constructor(
         _isPermissionGranted.value = granted
     }
 
+    /**
+     * Triggers the official Google SDK microphone diagnostic test.
+     */
+    fun runMicDiagnostic(context: android.content.Context) {
+        runOfficialMicTest(context)
+    }
+
     @OptIn(ExperimentalProjectedApi::class)
     private fun initSpeechRecognizer() {
         Log.d(TAG, "Initializing SpeechRecognizer (useOnDevice=$useOnDevice)")
