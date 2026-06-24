@@ -18,17 +18,21 @@ class LocalProductAnalyzer @Inject constructor() {
         val allText = mutableListOf<String>()
 
         for (bitmap in bitmaps) {
-            val image = InputImage.fromBitmap(bitmap, 0)
-            try {
-                val result = recognizer.process(image).await()
-                allText.add(result.text)
-            } catch (e: Exception) {
-                // Skip failed images
-            }
+            allText.add(extractText(bitmap))
         }
 
         val combinedText = allText.joinToString("\n")
         return heuristicGuess(combinedText)
+    }
+
+    suspend fun extractText(bitmap: Bitmap): String {
+        val image = InputImage.fromBitmap(bitmap, 0)
+        return try {
+            val result = recognizer.process(image).await()
+            result.text
+        } catch (e: Exception) {
+            ""
+        }
     }
 
     private fun heuristicGuess(text: String): CosmeticItem {

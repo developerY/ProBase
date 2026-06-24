@@ -71,9 +71,23 @@ class BoxCaptureViewModel @Inject constructor(
         when (event) {
             is BoxCaptureEvent.Capture -> onPhotoCaptured(event.uri)
             is BoxCaptureEvent.BarcodeScanned -> onBarcodeScanned(event.code)
+            is BoxCaptureEvent.UpdateDraft -> onUpdateDraft(event.item)
+            BoxCaptureEvent.ConfirmSave -> onConfirmSave()
             BoxCaptureEvent.Retry -> reset()
             BoxCaptureEvent.Dismiss -> { /* Handled in UI layer typically */ }
             is BoxCaptureEvent.Success -> { /* Handled in UI layer typically */ }
+        }
+    }
+
+    private fun onUpdateDraft(item: CosmeticItem) {
+        _uiState.value = BoxCaptureUiState.Reviewing(item)
+    }
+
+    private fun onConfirmSave() {
+        val item = (uiState.value as? BoxCaptureUiState.Reviewing)?.item ?: return
+        viewModelScope.launch {
+            repository.saveCosmeticItem(item)
+            _uiState.value = BoxCaptureUiState.Success(item)
         }
     }
 
@@ -181,9 +195,26 @@ class BoxCaptureViewModel @Inject constructor(
                 
                 if (jsonText != null) {
                     Log.d(TAG, "Received response from Gemini: $jsonText")
-                    val item = parseJsonToCosmeticItem(jsonText)
-                    repository.saveCosmeticItem(item)
-                    _uiState.value = BoxCaptureUiState.Success(item)
+                    var item = parseJsonToCosmeticItem(jsonText)
+                    
+                    // Pre-fill Front Image and Barcode
+                    item = item.copy(
+                        imageUrl = capturedUris.firstOrNull(),
+                        batchCode = scannedBarcode ?: item.batchCode
+                    )
+
+                    // Local OCR for Ingredients if in Quick Mode
+                    if (mode == CaptureMode.QUICK_BOX && capturedUris.size >= 3) {
+                        val ingredientsBitmap = loadBitmapFromUri(Uri.parse(capturedUris[2]))
+                        if (ingredientsBitmap != null) {
+                            val localIngredients = localAnalyzer.extractText(ingredientsBitmap)
+                            if (localIngredients.isNotBlank()) {
+                                item = item.copy(instructions = localIngredients) // Instructions used for ingredients in model
+                            }
+                        }
+                    }
+
+                    _uiState.value = BoxCaptureUiState.Reviewing(item)
                 } else {
                     Log.e(TAG, "Gemini returned null text in response.")
                     _uiState.value = BoxCaptureUiState.Error("Failed to extract data from images.")
