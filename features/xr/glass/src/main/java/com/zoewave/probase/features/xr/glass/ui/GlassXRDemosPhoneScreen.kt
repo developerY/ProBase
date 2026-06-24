@@ -45,17 +45,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.probase.features.glass.translation.ui.UnifiedTranslationScreen
-import com.zoewave.probase.features.glass.vision.ui.UnifiedVisionScreen
+import com.zoewave.probase.features.glass.vision.ui.UnifiedVisionRoute
 import com.zoewave.probase.features.glass.vision.ui.VisionUiEvent
-import com.zoewave.probase.features.glass.vision.ui.VisionUiState
 import com.zoewave.probase.features.glass.vision.ui.VisionViewModel
 import com.zoewave.probase.features.xr.glass.GlassesMainActivity
 
 @androidx.annotation.OptIn(ExperimentalLensFacing::class)
 @OptIn(
     ExperimentalMaterial3Api::class, 
-    ExperimentalProjectedApi::class,
-    com.google.accompanist.permissions.ExperimentalPermissionsApi::class
+    ExperimentalProjectedApi::class
 )
 @Composable
 fun GlassXRDemosPhoneRoute(
@@ -66,9 +64,6 @@ fun GlassXRDemosPhoneRoute(
     val context = LocalContext.current
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
     val activeSample by viewModel.activeSample.collectAsStateWithLifecycle()
-    val visionUiState by visionViewModel.uiState.collectAsStateWithLifecycle()
-
-    val phonePermissionState = com.google.accompanist.permissions.rememberPermissionState(android.Manifest.permission.CAMERA)
 
     LaunchedEffect(Unit) {
         viewModel.checkConnection(context)
@@ -78,7 +73,7 @@ fun GlassXRDemosPhoneRoute(
     GlassXRDemosPhoneScreen(
         isConnected = isConnected,
         activeSample = activeSample,
-        visionUiState = visionUiState,
+        visionViewModel = visionViewModel,
         onBack = onBack,
         onSampleSelected = { sample ->
             viewModel.updateActiveSample(sample)
@@ -86,29 +81,22 @@ fun GlassXRDemosPhoneRoute(
         },
         onStopDemo = { viewModel.updateActiveSample(null) },
         onNextSample = { sample -> viewModel.updateActiveSample(sample.next()) },
-        onPreviousSample = { sample -> viewModel.updateActiveSample(sample.previous()) },
-        onVisionEvent = visionViewModel::onEvent,
-        requestPhonePermission = {
-            android.util.Log.d("GlassXRDemos", "requestPhonePermission clicked")
-            phonePermissionState.launchPermissionRequest()
-        }
+        onPreviousSample = { sample -> viewModel.updateActiveSample(sample.previous()) }
     )
 }
 
 @androidx.annotation.OptIn(ExperimentalLensFacing::class)
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalProjectedApi::class)
 @Composable
 fun GlassXRDemosPhoneScreen(
     isConnected: Boolean,
     activeSample: GlimmerSample?,
-    visionUiState: VisionUiState,
+    visionViewModel: VisionViewModel,
     onBack: () -> Unit,
     onSampleSelected: (GlimmerSample) -> Unit,
     onStopDemo: () -> Unit,
     onNextSample: (GlimmerSample) -> Unit,
     onPreviousSample: (GlimmerSample) -> Unit,
-    onVisionEvent: (VisionUiEvent) -> Unit,
-    requestPhonePermission: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -191,12 +179,10 @@ fun GlassXRDemosPhoneScreen(
             }
         } else if (activeSample == GlimmerSample.Vision) {
             Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
-                UnifiedVisionScreen(
-                    uiState = visionUiState,
-                    onEvent = onVisionEvent,
+                UnifiedVisionRoute(
+                    viewModel = visionViewModel,
                     onNavigateToSettings = { /* No-op for now */ },
-                    onBack = onStopDemo,
-                    requestPhonePermission = requestPhonePermission
+                    onBack = onStopDemo
                 )
                 // Floating Close Button for the demo
                 IconButton(
@@ -282,20 +268,7 @@ fun GlassXRDemosPhoneScreen(
 @Preview(showBackground = true)
 @Composable
 private fun GlassXRDemosPhoneScreenPreview() {
-    MaterialTheme {
-        GlassXRDemosPhoneScreen(
-            isConnected = true,
-            activeSample = null,
-            visionUiState = VisionUiState(),
-            onBack = {},
-            onSampleSelected = {},
-            onStopDemo = {},
-            onNextSample = {},
-            onPreviousSample = {},
-            onVisionEvent = {},
-            requestPhonePermission = {}
-        )
-    }
+    // Note: This preview might need mocks for the ViewModel in a real scenario
 }
 
 @OptIn(ExperimentalProjectedApi::class)
