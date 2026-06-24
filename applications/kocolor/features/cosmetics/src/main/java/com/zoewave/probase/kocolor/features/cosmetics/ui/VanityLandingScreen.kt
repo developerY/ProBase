@@ -79,7 +79,7 @@ fun VanityLandingScreen(
                 },
                 actions = {
                     IconButton(onClick = { navTo(KoColorRoute.BoxCapture()) }) { 
-                        Icon(Icons.Default.AutoAwesome, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_add_item)) 
+                        Icon(Icons.Default.AutoAwesome, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_title)) 
                     }
                     IconButton(onClick = { navTo(KoColorRoute.InventoryManagement) }) { Icon(Icons.Default.Inventory2, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_inventory_title)) }
                     IconButton(onClick = { navTo(KoColorRoute.ColorSearch) }) { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_filter)) }

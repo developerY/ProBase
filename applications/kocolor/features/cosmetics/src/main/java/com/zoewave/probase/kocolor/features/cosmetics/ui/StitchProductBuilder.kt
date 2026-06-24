@@ -100,6 +100,11 @@ fun StitchProductBuilder(
                     }) {
                         Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_close_desc))
                     }
+                },
+                actions = {
+                    IconButton(onClick = { navTo(KoColorRoute.BoxCapture()) }) {
+                        Icon(Icons.Default.AutoAwesome, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_title), tint = Color(0xFF8B5E3C))
+                    }
                 }
             )
         },
@@ -201,6 +206,44 @@ fun StitchProductBuilder(
                 HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray.copy(alpha = 0.3f))
                 Text(stringResource(R.string.applications_kocolor_features_cosmetics_or_divider), modifier = Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                 HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray.copy(alpha = 0.3f))
+            }
+
+            Surface(
+                onClick = { navTo(KoColorRoute.BoxCapture()) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = Color(0xFF8B5E3C).copy(alpha = 0.05f),
+                border = BorderStroke(1.dp, Color(0xFF8B5E3C).copy(alpha = 0.2f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFF8B5E3C),
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF8B5E3C)
+                        )
+                        Text(
+                            text = stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                    Icon(Icons.Default.ChevronRight, null, tint = Color.LightGray)
+                }
             }
 
             Text(stringResource(R.string.applications_kocolor_features_cosmetics_manual_entry), style = MaterialTheme.typography.headlineSmall, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
