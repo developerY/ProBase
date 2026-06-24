@@ -36,6 +36,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -53,6 +56,7 @@ import java.util.Locale
 
 sealed class BoxCaptureEvent {
     data class Capture(val uri: String) : BoxCaptureEvent()
+    data class BarcodeScanned(val code: String) : BoxCaptureEvent()
     data object Retry : BoxCaptureEvent()
     data object Dismiss : BoxCaptureEvent()
     data class Success(val item: CosmeticItem) : BoxCaptureEvent()
@@ -211,6 +215,25 @@ private fun CameraView(
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
 
+    val scanner = remember(context) {
+        val options = GmsBarcodeScannerOptions.Builder()
+            .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+            .build()
+        GmsBarcodeScanning.getClient(context, options)
+    }
+
+    LaunchedEffect(uiState.step) {
+        if (uiState.step == CaptureStep.BARCODE) {
+            scanner.startScan()
+                .addOnSuccessListener { barcode ->
+                    barcode.rawValue?.let { onEvent(BoxCaptureEvent.BarcodeScanned(it)) }
+                }
+                .addOnFailureListener {
+                    // Fail silently or let user retry
+                }
+        }
+    }
+
     val previewUseCase = remember { Preview.Builder().build() }
     val imageCaptureUseCase = remember { ImageCapture.Builder().build() }
     var surfaceRequest by remember { mutableStateOf<SurfaceRequest?>(null) }
@@ -296,31 +319,54 @@ private fun CameraView(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = {
-                    coroutineScope.launch(Dispatchers.IO) {
-                        val file = createFile(context)
-                        val options = ImageCapture.OutputFileOptions.Builder(file).build()
-                        imageCaptureUseCase.takePicture(
-                            options,
-                            ContextCompat.getMainExecutor(context),
-                            object : ImageCapture.OnImageSavedCallback {
-                                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                                    onEvent(BoxCaptureEvent.Capture(Uri.fromFile(file).toString()))
-                                }
-                                override fun onError(exception: ImageCaptureException) {
-                                    Log.e("BoxCapture", "Capture failed", exception)
-                                }
+            if (uiState.step == CaptureStep.BARCODE) {
+                Button(
+                    onClick = {
+                        scanner.startScan()
+                            .addOnSuccessListener { barcode ->
+                                barcode.rawValue?.let { onEvent(BoxCaptureEvent.BarcodeScanned(it)) }
                             }
-                        )
-                    }
-                },
-                modifier = Modifier.size(80.dp),
-                shape = CircleShape,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Icon(Icons.Default.CameraAlt, contentDescription = "Capture", tint = Color.Black, modifier = Modifier.size(32.dp))
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22d3ee))
+                ) {
+                    Icon(Icons.Default.AutoAwesome, null, tint = Color.Black)
+                    Spacer(Modifier.width(8.dp))
+                    Text("START BARCODE SCAN", color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+            } else {
+                Button(
+                    onClick = {
+                        coroutineScope.launch(Dispatchers.IO) {
+                            val file = createFile(context)
+                            val options = ImageCapture.OutputFileOptions.Builder(file).build()
+                            imageCaptureUseCase.takePicture(
+                                options,
+                                ContextCompat.getMainExecutor(context),
+                                object : ImageCapture.OnImageSavedCallback {
+                                    override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                        onEvent(BoxCaptureEvent.Capture(Uri.fromFile(file).toString()))
+                                    }
+
+                                    override fun onError(exception: ImageCaptureException) {
+                                        Log.e("BoxCapture", "Capture failed", exception)
+                                    }
+                                }
+                            )
+                        }
+                    },
+                    modifier = Modifier.size(80.dp),
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        Icons.Default.CameraAlt,
+                        contentDescription = "Capture",
+                        tint = Color.Black,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(12.dp))

@@ -24,7 +24,7 @@ sealed interface BoxCaptureUiState {
 }
 
 enum class CaptureMode {
-    BOX, PRODUCT
+    BOX, PRODUCT, QUICK_BOX
 }
 
 enum class CaptureStep(val boxLabel: String, val productLabel: String = boxLabel) {
@@ -34,7 +34,8 @@ enum class CaptureStep(val boxLabel: String, val productLabel: String = boxLabel
     RIGHT("Right Side"),
     TOP("Top Side"),
     BOTTOM("Bottom Side"),
-    INGREDIENTS("Ingredients List");
+    INGREDIENTS("Ingredients List"),
+    BARCODE("Barcode Scan");
 
     fun getLabel(mode: CaptureMode): String {
         return if (mode == CaptureMode.PRODUCT) productLabel else boxLabel
@@ -43,8 +44,9 @@ enum class CaptureStep(val boxLabel: String, val productLabel: String = boxLabel
     companion object {
         fun getStepsForMode(mode: CaptureMode): List<CaptureStep> {
             return when (mode) {
-                CaptureMode.BOX -> entries
+                CaptureMode.BOX -> listOf(FRONT, BACK, LEFT, RIGHT, TOP, BOTTOM, INGREDIENTS)
                 CaptureMode.PRODUCT -> listOf(FRONT, BACK)
+                CaptureMode.QUICK_BOX -> listOf(FRONT, BACK, INGREDIENTS, BARCODE)
             }
         }
     }
