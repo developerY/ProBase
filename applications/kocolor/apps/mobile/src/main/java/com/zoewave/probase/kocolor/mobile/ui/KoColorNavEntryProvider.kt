@@ -105,6 +105,11 @@ fun koColorNavEntryProvider(
         is KoColorRoute.BoxCapture -> NavEntry(route) {
             val viewModel: BoxCaptureViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+            androidx.compose.runtime.LaunchedEffect(route.mode) {
+                viewModel.setMode(route.mode)
+            }
+
             BoxCaptureUiRoute(
                 uiState = state,
                 onEvent = { event ->

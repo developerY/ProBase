@@ -59,10 +59,12 @@ class BoxCaptureViewModel @Inject constructor(
     val uiState: StateFlow<BoxCaptureUiState> = _uiState.asStateFlow()
 
     private val capturedUris = mutableListOf<String>()
+    private var scannedBarcode: String? = null
 
     fun onEvent(event: BoxCaptureEvent) {
         when (event) {
             is BoxCaptureEvent.Capture -> onPhotoCaptured(event.uri)
+            is BoxCaptureEvent.BarcodeScanned -> onBarcodeScanned(event.code)
             BoxCaptureEvent.Retry -> reset()
             BoxCaptureEvent.Dismiss -> { /* Handled in UI layer typically */ }
             is BoxCaptureEvent.Success -> { /* Handled in UI layer typically */ }
@@ -71,6 +73,7 @@ class BoxCaptureViewModel @Inject constructor(
 
     fun setMode(modeString: String) {
         val mode = try { CaptureMode.valueOf(modeString) } catch (e: Exception) { CaptureMode.BOX }
+        reset() // Ensure clean state when switching modes
         _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), CaptureStep.getStepsForMode(mode).first(), mode)
     }
 
@@ -83,6 +86,12 @@ class BoxCaptureViewModel @Inject constructor(
         } else {
             analyzePhotos(mode)
         }
+    }
+
+    private fun onBarcodeScanned(code: String) {
+        scannedBarcode = code
+        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.QUICK_BOX
+        analyzePhotos(mode)
     }
 
     private fun getNextStep(mode: CaptureMode): CaptureStep? {
@@ -119,9 +128,15 @@ class BoxCaptureViewModel @Inject constructor(
 
                 val prompt = content {
                     bitmaps.forEach { image(it) }
-                    val target = if (mode == CaptureMode.BOX) "product box from all sides" else "product container (front and back)"
+                    val target = when (mode) {
+                        CaptureMode.BOX -> "product box from all sides"
+                        CaptureMode.QUICK_BOX -> "essential product box angles"
+                        CaptureMode.PRODUCT -> "product container (front and back)"
+                    }
+                    val barcodeContext = if (!scannedBarcode.isNullOrBlank()) "The scanned barcode is: $scannedBarcode." else ""
+                    
                     text("""
-                        Analyze these photos of a $target.
+                        Analyze these photos of a $target. $barcodeContext
                         Extract all available information, especially the ingredients list if visible on the back, and return it in the following JSON format:
                         {
                             "name": "Product Name",
@@ -142,6 +157,7 @@ class BoxCaptureViewModel @Inject constructor(
                         }
                         Return ONLY the JSON block. If a field is unknown, omit it or use null. Be precise.
                         If this is a product container without a box, prioritize the brand and product name from the front, and ingredients/volume from the back.
+                        If a barcode is provided, use it to cross-reference your internal knowledge for higher accuracy.
                     """.trimIndent())
                 }
 
