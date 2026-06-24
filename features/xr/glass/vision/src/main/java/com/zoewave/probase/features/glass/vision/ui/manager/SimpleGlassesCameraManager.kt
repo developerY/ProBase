@@ -56,12 +56,12 @@ class SimpleGlassesCameraManager @Inject constructor(
     fun initialize(activity: ComponentActivity) {
         scope.launch {
             addLog("[INIT] Starting Initialization Sequence...")
-            Log.d(tag, "initialize() called with activity: ${activity::class.java.simpleName}")
+            Log.d(tag, "initialize() called with activity: ${activity::class.java.simpleName} (ID: ${System.identityHashCode(activity)})")
             
             val projectedContext = try {
                 addLog("[INIT] Creating ProjectedContext...")
                 ProjectedContext.createProjectedDeviceContext(activity).also {
-                    Log.d(tag, "ProjectedContext created successfully")
+                    Log.d(tag, "ProjectedContext created successfully for activity ID: ${System.identityHashCode(activity)}")
                 }
             } catch (e: Exception) {
                 val msg = "ERROR: Could not create context bridge: ${e.message}"
@@ -84,7 +84,6 @@ class SimpleGlassesCameraManager @Inject constructor(
                 }
                 
                 addLog("[INIT] Camera found. Building ResolutionSelector (640x480)...")
-                // AI Glasses optimized resolution (640x480) to manage thermal/battery
                 val targetResolution = Size(640, 480)
                 val resolutionStrategy = ResolutionStrategy(
                     targetResolution,
@@ -104,7 +103,7 @@ class SimpleGlassesCameraManager @Inject constructor(
                     addLog("[INIT] Unbinding previous use cases...")
                     cameraProvider.unbindAll()
 
-                    addLog("[INIT] Binding to lifecycle: ${activity::class.java.simpleName}...")
+                    addLog("[INIT] Binding to lifecycle: ${activity::class.java.simpleName} (ID: ${System.identityHashCode(activity)})...")
                     cameraProvider.bindToLifecycle(
                         activity,
                         cameraSelector,
@@ -114,8 +113,12 @@ class SimpleGlassesCameraManager @Inject constructor(
                     addLog("SUCCESS: Camera bound and ready at 640x480.")
                     Log.d(
                         tag,
-                        "Camera initialization complete and bound to lifecycle. ImageCapture instance: $imageCapture"
+                        "Camera initialization complete. ImageCapture instance: $imageCapture bound to Activity ID: ${System.identityHashCode(activity)}"
                     )
+                } catch (e: IllegalArgumentException) {
+                    val msg = "ERROR: Emulator Resolution Rejection (IllegalArgumentException): ${e.message}"
+                    addLog(msg)
+                    Log.e(tag, msg, e)
                 } catch (e: Exception) {
                     val msg = "ERROR: Lifecycle binding failed: ${e.message}"
                     addLog(msg)
@@ -127,6 +130,56 @@ class SimpleGlassesCameraManager @Inject constructor(
                 Log.e(tag, msg, e)
             }
         }
+    }
+
+    fun teardown() {
+        Log.d(tag, "teardown() called. Clearing ImageCapture state.")
+        imageCapture = null
+        _cameraSource.value = "Phone (Disconnected)"
+        addLog("[TEARDOWN] Camera Manager state cleared.")
+    }
+
+    fun runHardwareDiagnostic(activity: ComponentActivity) {
+        val diagTag = "XrDiagnosticTest"
+        Log.e(diagTag, "========================================================")
+        Log.e(diagTag, "STARTING XR EMULATOR CAMERA DIAGNOSTIC TEST")
+        Log.e(diagTag, "========================================================")
+
+        // 1. Test standard Phone Context
+        val phoneCameraProviderFuture = ProcessCameraProvider.getInstance(activity)
+        phoneCameraProviderFuture.addListener({
+            val phoneProvider = phoneCameraProviderFuture.get()
+            val hasPhoneCamera = phoneProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)
+            Log.e(diagTag, "1. PHONE CONTEXT TEST: hasCamera(DEFAULT_BACK) -> $hasPhoneCamera")
+
+            // 2. Test Projected Context (Glasses)
+            try {
+                val projectedContext = ProjectedContext.createProjectedDeviceContext(activity)
+                Log.e(diagTag, "2. ProjectedContext created successfully. The bridge is open.")
+
+                val glassesProviderFuture = ProcessCameraProvider.getInstance(projectedContext)
+                glassesProviderFuture.addListener({
+                    val glassesProvider = glassesProviderFuture.get()
+                    val hasGlassesCamera = glassesProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)
+
+                    Log.e(diagTag, "3. GLASSES CONTEXT TEST: hasCamera(DEFAULT_BACK) -> $hasGlassesCamera")
+
+                    Log.e(diagTag, "--------------------------------------------------------")
+                    if (!hasGlassesCamera) {
+                        Log.e(diagTag, ">>> CONCLUSION: THE EMULATOR LACKS A VIRTUAL PROJECTED CAMERA. <<<")
+                        Log.e(diagTag, ">>> Your code is flawless. The emulator simply cannot run this yet. <<<")
+                    } else {
+                        Log.e(diagTag, ">>> CONCLUSION: A projected camera WAS found! You are on real hardware! <<<")
+                    }
+                    Log.e(diagTag, "========================================================")
+
+                }, androidx.core.content.ContextCompat.getMainExecutor(activity))
+
+            } catch (e: Exception) {
+                Log.e(diagTag, "2. FAILED to create ProjectedContext. Are you running the XR Emulator?", e)
+            }
+
+        }, androidx.core.content.ContextCompat.getMainExecutor(activity))
     }
 
     fun takePicture() {
