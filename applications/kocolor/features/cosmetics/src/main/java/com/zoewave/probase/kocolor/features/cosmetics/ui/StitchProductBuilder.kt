@@ -208,8 +208,48 @@ fun StitchProductBuilder(
                 HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray.copy(alpha = 0.3f))
             }
 
+            // Quick Scan Card
             Surface(
-                onClick = { navTo(KoColorRoute.BoxCapture()) },
+                onClick = { navTo(KoColorRoute.BoxCapture(mode = "QUICK_BOX")) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = Color(0xFF22d3ee).copy(alpha = 0.05f),
+                border = BorderStroke(1.dp, Color(0xFF22d3ee).copy(alpha = 0.2f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFF22d3ee),
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.AutoAwesome, null, tint = Color.Black, modifier = Modifier.size(20.dp))
+                        }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.applications_kocolor_features_cosmetics_quick_scan_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0891b2)
+                        )
+                        Text(
+                            text = stringResource(R.string.applications_kocolor_features_cosmetics_quick_scan_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                    Icon(Icons.Default.ChevronRight, null, tint = Color.LightGray)
+                }
+            }
+
+            // Professional Scan Card (Full)
+            Surface(
+                onClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 color = Color(0xFF8B5E3C).copy(alpha = 0.05f),
