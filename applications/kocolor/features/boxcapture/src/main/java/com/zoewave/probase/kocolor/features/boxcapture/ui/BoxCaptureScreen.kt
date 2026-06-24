@@ -11,12 +11,15 @@ import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
@@ -57,6 +60,8 @@ import java.util.Locale
 sealed class BoxCaptureEvent {
     data class Capture(val uri: String) : BoxCaptureEvent()
     data class BarcodeScanned(val code: String) : BoxCaptureEvent()
+    data class UpdateDraft(val item: CosmeticItem) : BoxCaptureEvent()
+    data object ConfirmSave : BoxCaptureEvent()
     data object Retry : BoxCaptureEvent()
     data object Dismiss : BoxCaptureEvent()
     data class Success(val item: CosmeticItem) : BoxCaptureEvent()
@@ -189,6 +194,12 @@ internal fun BoxCaptureScreen(
                         uiState = ErrorViewUiState(uiState.message),
                         onEvent = { onEvent(BoxCaptureEvent.Retry) },
                         navTo = {}
+                    )
+                }
+                is BoxCaptureUiState.Reviewing -> {
+                    ReviewView(
+                        item = uiState.item,
+                        onEvent = onEvent
                     )
                 }
                 is BoxCaptureUiState.Success -> {
@@ -377,6 +388,117 @@ private fun CameraView(
 }
 
 data class AnalysisViewUiState(val progress: String)
+
+@Composable
+private fun ReviewView(
+    item: CosmeticItem,
+    onEvent: (BoxCaptureEvent) -> Unit
+) {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0f172a))
+            .verticalScroll(scrollState)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        Text(
+            "REVIEW PRODUCT",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+
+        // Front Image
+        Surface(
+            modifier = Modifier
+                .size(200.dp)
+                .clip(RoundedCornerShape(16.dp)),
+            color = Color.White.copy(alpha = 0.05f),
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
+        ) {
+            AsyncImage(
+                model = item.imageUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        ReviewTextField(
+            label = "Product Name",
+            value = item.name,
+            onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(name = it))) }
+        )
+
+        ReviewTextField(
+            label = "Brand",
+            value = item.brand,
+            onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(brand = it))) }
+        )
+
+        ReviewTextField(
+            label = "Barcode / Batch Code",
+            value = item.batchCode ?: "",
+            onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(batchCode = it))) }
+        )
+
+        ReviewTextField(
+            label = "Ingredients (Auto-Extracted)",
+            value = item.instructions ?: "", // Instructions used for ingredients text
+            onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(instructions = it))) },
+            singleLine = false,
+            minLines = 5
+        )
+
+        Spacer(Modifier.height(20.dp))
+
+        Button(
+            onClick = { onEvent(BoxCaptureEvent.ConfirmSave) },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22d3ee))
+        ) {
+            Text("CONFIRM & SAVE", color = Color.Black, fontWeight = FontWeight.Bold)
+        }
+        
+        TextButton(onClick = { onEvent(BoxCaptureEvent.Dismiss) }) {
+            Text("Discard", color = Color.White.copy(alpha = 0.6f))
+        }
+
+        Spacer(Modifier.height(40.dp))
+    }
+}
+
+@Composable
+private fun ReviewTextField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    singleLine: Boolean = true,
+    minLines: Int = 1
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(label, style = MaterialTheme.typography.labelSmall, color = Color(0xFF22d3ee), fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            singleLine = singleLine,
+            minLines = minLines,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedBorderColor = Color(0xFF22d3ee),
+                unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
+                cursorColor = Color(0xFF22d3ee)
+            )
+        )
+    }
+}
 
 @Composable
 private fun AnalysisView(
