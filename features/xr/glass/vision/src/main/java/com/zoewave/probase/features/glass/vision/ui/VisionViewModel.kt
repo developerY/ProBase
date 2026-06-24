@@ -2,6 +2,7 @@ package com.zoewave.probase.features.glass.vision.ui
 
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.ExperimentalLensFacing
 import androidx.lifecycle.ViewModel
@@ -12,6 +13,7 @@ import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.core.data.repository.GlassBridgeRepository
 import com.zoewave.probase.features.glass.vision.data.VisionRepository
 import com.zoewave.probase.features.glass.vision.ui.manager.SimpleGlassesCameraManager
+import com.zoewave.probase.features.glass.vision.ui.manager.runOfficialCameraTest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,6 +40,8 @@ sealed interface VisionUiEvent {
     data class CheckPermissions(val context: android.content.Context) : VisionUiEvent
     data object TriggerCapture : VisionUiEvent
     data class UpdatePermissionStatus(val granted: Boolean) : VisionUiEvent
+    data class RunDiagnostic(val activity: ComponentActivity) : VisionUiEvent
+    data class RunOfficialTest(val activity: ComponentActivity) : VisionUiEvent
 }
 
 @ExperimentalLensFacing
@@ -55,6 +59,8 @@ class VisionViewModel @Inject constructor(
     private val _isApiKeySet = MutableStateFlow(false)
     private val _isPermissionGranted = MutableStateFlow(false)
     private val _error = MutableStateFlow<String?>(null)
+
+    private var isCommanderInitialized = false
 
     val uiState: StateFlow<VisionUiState> = combine(
         repository.imageDescription,
@@ -88,6 +94,20 @@ class VisionViewModel @Inject constructor(
 
     init {
         checkStatus()
+    }
+
+    /**
+     * Initializes the ViewModel as the primary commander for bridge events.
+     * This should ONLY be called by the host Phone UI to avoid duplicate event listeners.
+     */
+    fun initializeAsHostCommander() {
+        if (isCommanderInitialized) {
+            Log.d("VisionVM", "[$instanceId] Host Commander already initialized. Skipping.")
+            return
+        }
+        
+        Log.d("VisionVM", "[$instanceId] Initializing as Host Commander (Listening to bridge)...")
+        isCommanderInitialized = true
         observeBridgeCommands()
         observeCapturedImages()
     }
@@ -111,6 +131,12 @@ class VisionViewModel @Inject constructor(
             is VisionUiEvent.UpdatePermissionStatus -> {
                 Log.d("VisionVM", "[$instanceId] Permission updated: ${event.granted}")
                 _isPermissionGranted.value = event.granted
+            }
+            is VisionUiEvent.RunDiagnostic -> {
+                cameraManager.runHardwareDiagnostic(event.activity)
+            }
+            is VisionUiEvent.RunOfficialTest -> {
+                runOfficialCameraTest(event.activity)
             }
         }
     }

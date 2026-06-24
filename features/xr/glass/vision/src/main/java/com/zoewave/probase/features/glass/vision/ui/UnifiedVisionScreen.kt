@@ -93,23 +93,39 @@ fun UnifiedVisionRoute(
     val context = LocalContext.current
     val activity = context as? androidx.activity.ComponentActivity
     val lifecycleOwner = LocalLifecycleOwner.current
+    val isGranted = cameraPermissionState.status.isGranted
 
-    // Initial sync
-    LaunchedEffect(cameraPermissionState.status.isGranted) {
-        viewModel.onEvent(VisionUiEvent.CheckPermissions(context))
+    // Cleanup singleton state when leaving the diagnostic hub
+    DisposableEffect(Unit) {
+        onDispose {
+            Log.d("VisionUI", "Leaving Diagnostic Hub. Tearing down camera manager.")
+            viewModel.cameraManager.teardown()
+        }
     }
 
-    // Refresh permission and camera status on Resume
+    // 1. Establish the Phone instance as the Commander
+    LaunchedEffect(Unit) {
+        Log.d("VisionUI", "Establishing Phone as Host Commander...")
+        viewModel.initializeAsHostCommander()
+    }
+
+    // 2. Bulletproof Initialization: Key on both Permission and Activity presence
+    LaunchedEffect(isGranted, activity) {
+        viewModel.onEvent(VisionUiEvent.CheckPermissions(context))
+        if (isGranted && activity != null) {
+            Log.d("VisionUI", "Permission is GRANTED and Activity is ready. FIRING INITIALIZE!")
+            viewModel.cameraManager.initialize(activity)
+        } else {
+            Log.d("VisionUI", "Initialization pending: isGranted=$isGranted, activity=${activity?.let { "Ready" } ?: "Null"}")
+        }
+    }
+
+    // Refresh status on Resume
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             Log.d("VisionUI", "UnifiedVisionRoute Lifecycle: $event")
             if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.onEvent(VisionUiEvent.CheckPermissions(context))
-                // Always try to initialize if camera permission is granted
-                if (activity != null && cameraPermissionState.status.isGranted) {
-                    Log.d("VisionUI", "Initializing camera from ON_RESUME")
-                    viewModel.cameraManager.initialize(activity)
-                }
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -143,6 +159,7 @@ fun UnifiedVisionScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val activity = context as? androidx.activity.ComponentActivity
     val logListState = rememberLazyListState()
 
     // Diagnostic state: Connectivity check
@@ -339,22 +356,57 @@ fun UnifiedVisionScreen(
                 }
 
                 // --- CONTROLS SECTION ---
-                Button(
-                    onClick = {
-                        Log.d("VisionUI", "CAPTURE_BUTTON_CLICKED (Phone UI)")
-                        if (!uiState.isPermissionGranted) {
-                            requestPhonePermission()
-                        } else {
-                            onEvent(VisionUiEvent.TriggerCapture)
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = CircleShape,
-                    enabled = !uiState.isCapturing && !uiState.isAnalyzing
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(Icons.Default.CameraAlt, contentDescription = null)
-                    Spacer(Modifier.width(12.dp))
-                    Text("CAPTURE IMAGE")
+                    Button(
+                        onClick = {
+                            Log.d("VisionUI", "CAPTURE_BUTTON_CLICKED (Phone UI)")
+                            if (!uiState.isPermissionGranted) {
+                                requestPhonePermission()
+                            } else {
+                                onEvent(VisionUiEvent.TriggerCapture)
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = CircleShape,
+                        enabled = !uiState.isCapturing && !uiState.isAnalyzing
+                    ) {
+                        Icon(Icons.Default.CameraAlt, contentDescription = null)
+                        Spacer(Modifier.width(12.dp))
+                        Text("CAPTURE IMAGE")
+                    }
+
+                    androidx.compose.material3.OutlinedButton(
+                        onClick = {
+                            activity?.let {
+                                onEvent(VisionUiEvent.RunDiagnostic(it))
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = CircleShape
+                    ) {
+                        Text("RUN HARDWARE DIAGNOSTIC")
+                    }
+
+                    androidx.compose.material3.OutlinedButton(
+                        onClick = {
+                            activity?.let {
+                                onEvent(VisionUiEvent.RunOfficialTest(it))
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = CircleShape
+                    ) {
+                        Text("RUN OFFICIAL SDK TEST")
+                    }
                 }
                 
                 if (uiState.error != null) {
