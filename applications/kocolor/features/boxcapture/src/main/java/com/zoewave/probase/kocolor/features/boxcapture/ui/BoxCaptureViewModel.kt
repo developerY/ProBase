@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -103,6 +104,7 @@ class BoxCaptureViewModel @Inject constructor(
     fun analyzePhotos(mode: CaptureMode) {
         viewModelScope.launch {
             val apiKey = aiSettings.getGeminiApiKey()
+            val modelName = aiSettings.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
             
             if (apiKey.isNullOrBlank()) {
                 runLocalAnalysis()
@@ -119,7 +121,7 @@ class BoxCaptureViewModel @Inject constructor(
                 }
 
                 val model = GenerativeModel(
-                    modelName = "gemini-1.5-pro",
+                    modelName = modelName,
                     apiKey = apiKey,
                     generationConfig = generationConfig {
                         responseMimeType = "application/json"
@@ -172,7 +174,17 @@ class BoxCaptureViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
-                _uiState.value = BoxCaptureUiState.Error("Analysis failed: ${e.localizedMessage}")
+                val errorMsg = when {
+                    e.message?.contains("404") == true -> "The AI model is currently unavailable or the model name is incorrect. Switching to local analysis..."
+                    e.message?.contains("MissingFieldException") == true -> "AI communication error. Please try again or use local analysis."
+                    else -> "Analysis failed: ${e.localizedMessage ?: "Unknown error"}"
+                }
+                
+                if (e.message?.contains("404") == true) {
+                    runLocalAnalysis()
+                } else {
+                    _uiState.value = BoxCaptureUiState.Error(errorMsg)
+                }
             }
         }
     }
