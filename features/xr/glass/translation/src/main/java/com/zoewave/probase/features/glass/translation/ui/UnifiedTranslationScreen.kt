@@ -254,6 +254,16 @@ fun UnifiedTranslationScreen(
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
+
+                    androidx.compose.material3.OutlinedButton(
+                        onClick = { viewModel.runMicDiagnostic(context) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = CircleShape
+                    ) {
+                        Text("RUN OFFICIAL MIC TEST")
+                    }
                 }
             }
         }
