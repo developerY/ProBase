@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
@@ -22,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -54,6 +56,10 @@ class BoxCaptureViewModel @Inject constructor(
     private val repository: CosmeticInventoryRepository,
     private val localAnalyzer: LocalProductAnalyzer
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "BoxCaptureViewModel"
+    }
 
     private val _uiState = MutableStateFlow<BoxCaptureUiState>(BoxCaptureUiState.Idle())
     val uiState: StateFlow<BoxCaptureUiState> = _uiState.asStateFlow()
@@ -103,8 +109,12 @@ class BoxCaptureViewModel @Inject constructor(
     fun analyzePhotos(mode: CaptureMode) {
         viewModelScope.launch {
             val apiKey = aiSettings.getGeminiApiKey()
+            val modelName = aiSettings.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
             
+            Log.d(TAG, "Starting analysis. Mode: $mode, Model: $modelName, Barcode: $scannedBarcode")
+
             if (apiKey.isNullOrBlank()) {
+                Log.w(TAG, "API Key is missing. Falling back to local analysis.")
                 runLocalAnalysis()
                 return@launch
             }
@@ -113,19 +123,23 @@ class BoxCaptureViewModel @Inject constructor(
             
             try {
                 val bitmaps = loadBitmaps()
+                Log.d(TAG, "Loaded ${bitmaps.size} bitmaps for analysis.")
+                
                 if (bitmaps.isEmpty()) {
+                    Log.e(TAG, "No valid images captured.")
                     _uiState.value = BoxCaptureUiState.Error("No valid images captured.")
                     return@launch
                 }
 
                 val model = GenerativeModel(
-                    modelName = "gemini-1.5-pro",
+                    modelName = modelName,
                     apiKey = apiKey,
                     generationConfig = generationConfig {
                         responseMimeType = "application/json"
                     }
                 )
 
+                // ... Prompt logic ...
                 val prompt = content {
                     bitmaps.forEach { image(it) }
                     val target = when (mode) {
@@ -161,18 +175,34 @@ class BoxCaptureViewModel @Inject constructor(
                     """.trimIndent())
                 }
 
+                Log.d(TAG, "Sending request to Gemini...")
                 val response = model.generateContent(prompt)
                 val jsonText = response.text
+                
                 if (jsonText != null) {
+                    Log.d(TAG, "Received response from Gemini: $jsonText")
                     val item = parseJsonToCosmeticItem(jsonText)
                     repository.saveCosmeticItem(item)
                     _uiState.value = BoxCaptureUiState.Success(item)
                 } else {
+                    Log.e(TAG, "Gemini returned null text in response.")
                     _uiState.value = BoxCaptureUiState.Error("Failed to extract data from images.")
                 }
 
             } catch (e: Exception) {
-                _uiState.value = BoxCaptureUiState.Error("Analysis failed: ${e.localizedMessage}")
+                Log.e(TAG, "Gemini Analysis Exception", e)
+                val errorMsg = when {
+                    e.message?.contains("404") == true -> "The AI model is currently unavailable or the model name is incorrect. Switching to local analysis..."
+                    e.message?.contains("MissingFieldException") == true -> "AI communication error. Please try again or use local analysis."
+                    else -> "Analysis failed: ${e.localizedMessage ?: "Unknown error"}"
+                }
+                
+                if (e.message?.contains("404") == true) {
+                    Log.i(TAG, "Triggering auto-fallback to local analysis due to 404.")
+                    runLocalAnalysis()
+                } else {
+                    _uiState.value = BoxCaptureUiState.Error(errorMsg)
+                }
             }
         }
     }
