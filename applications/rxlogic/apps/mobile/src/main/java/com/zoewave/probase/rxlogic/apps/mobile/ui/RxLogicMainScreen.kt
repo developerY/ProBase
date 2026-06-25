@@ -21,15 +21,11 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.zoewave.probase.rxlogic.features.daily.DailyEvent
 import com.zoewave.probase.rxlogic.features.daily.DailyScreen
-import com.zoewave.probase.rxlogic.features.daily.DailyUiState
 import com.zoewave.probase.rxlogic.features.daily.DailyViewModel
 import com.zoewave.probase.rxlogic.features.medications.MedicationsScreen
 import com.zoewave.probase.rxlogic.features.medications.MedicationsViewModel
-import com.zoewave.probase.rxlogic.features.settings.SettingsEvent
 import com.zoewave.probase.rxlogic.features.settings.SettingsScreen
-import com.zoewave.probase.rxlogic.features.settings.SettingsUiState
 import com.zoewave.probase.rxlogic.features.settings.SettingsViewModel
 import com.zoewave.probase.rxlogic.model.navigation.RxLogicRoute
 
@@ -70,6 +66,12 @@ fun RxLogicMainScreen(
                         uiState = settingsUiState,
                         onEvent = settingsViewModel::onEvent,
                         navTo = viewModel::navigateTo
+                    )
+                }
+                is RxLogicRoute.MedicationDetail -> NavEntry(route) {
+                    Text(
+                        text = "Medication Detail: ${route.medicationId}",
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }
