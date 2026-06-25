@@ -22,8 +22,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.xr.glimmer.GlimmerTheme
+import androidx.xr.projected.ProjectedDeviceController
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.probase.features.xr.glass.samples.ObjectRecognitionScreen
+import androidx.compose.runtime.LaunchedEffect
 import java.util.concurrent.Executors
 
 @OptIn(ExperimentalProjectedApi::class)
@@ -34,15 +36,27 @@ class ObjectRecognitionActivity : ComponentActivity() {
         
         setContent {
             var detectedObject by remember { mutableStateOf<String?>(null) }
+            var isVisualUiSupported by remember { mutableStateOf(false) }
+
+            LaunchedEffect(Unit) {
+                try {
+                    val controller = ProjectedDeviceController.create(this@ObjectRecognitionActivity)
+                    isVisualUiSupported = ProjectedCapabilities.hasDisplay(controller)
+                } catch (e: Exception) {
+                    isVisualUiSupported = false
+                }
+            }
 
             GlimmerTheme {
                 Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-                    ObjectRecognitionScreen(detectedObject = detectedObject)
+                    if (isVisualUiSupported) {
+                        ObjectRecognitionScreen(detectedObject = detectedObject)
+                    }
                 }
             }
 
             // In a real app, you would check permissions first
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            if (isVisualUiSupported && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 // For the demo, we use 'this' activity as the context for the camera
                 startGlassesObjectDetection(this, this) { label ->
                     detectedObject = label
