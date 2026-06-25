@@ -98,8 +98,8 @@ class BoxCaptureViewModel @Inject constructor(
     private fun onConfirmSave() {
         val item = (uiState.value as? BoxCaptureUiState.Reviewing)?.item ?: return
         viewModelScope.launch {
-            repository.saveCosmeticItem(item)
-            _uiState.value = BoxCaptureUiState.Success(item)
+            val savedId = repository.saveCosmeticItem(item)
+            _uiState.value = BoxCaptureUiState.Success(item.copy(id = savedId))
         }
     }
 

@@ -28,11 +28,12 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
         return obfRepository.fetchProductByBarcode(barcode)
     }
 
-    override suspend fun saveCosmeticItem(item: CosmeticItem) {
-        if (item.id == 0L) {
+    override suspend fun saveCosmeticItem(item: CosmeticItem): Long {
+        return if (item.id == 0L) {
             cosmeticDao.insertCosmetic(item.toEntity())
         } else {
             cosmeticDao.updateCosmetic(item.toEntity())
+            item.id
         }
     }
 
