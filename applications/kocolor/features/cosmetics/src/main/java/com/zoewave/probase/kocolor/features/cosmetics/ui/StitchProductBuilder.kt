@@ -1,26 +1,58 @@
 package com.zoewave.probase.kocolor.features.cosmetics.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Colorize
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Opacity
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -29,13 +61,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 import com.zoewave.probase.kocolor.features.cosmetics.R
-import com.zoewave.probase.kocolor.features.cosmetics.ui.components.*
-import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CategoryIconItem
+import com.zoewave.probase.kocolor.features.cosmetics.ui.components.CategoryIconUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Preview(showBackground = true)
@@ -146,48 +180,6 @@ fun StitchProductBuilder(
                 }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.applications_kocolor_features_cosmetics_barcode_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                OutlinedTextField(
-                    value = draft.batchCode ?: "",
-                    onValueChange = { onEvent(CosmeticsEvent.UpdateDraft(draft.copy(batchCode = it))) },
-                    placeholder = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_enter_barcode_manually)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    trailingIcon = {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 4.dp)) {
-                            when {
-                                uiState.isAnalyzing -> {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(20.dp),
-                                        strokeWidth = 2.dp,
-                                        color = Color(0xFF2196F3) 
-                                    )
-                                }
-                                uiState.lastScanFailed -> {
-                                    Icon(Icons.Default.Error, null, tint = Color.Red, modifier = Modifier.size(20.dp))
-                                }
-                                !draft.batchCode.isNullOrBlank() -> {
-                                    Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF4CAF50), modifier = Modifier.size(20.dp))
-                                }
-                                else -> {
-                                    Icon(Icons.Default.QrCode, null, tint = Color.Gray, modifier = Modifier.size(20.dp))
-                                }
-                            }
-
-                            IconButton(onClick = { navTo(KoColorRoute.BarcodeScanner) }) {
-                                Icon(Icons.Default.QrCodeScanner, null, tint = Color(0xFF8B5E3C))
-                            }
-                        }
-                    },
-                    isError = uiState.lastScanFailed,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = Color.White,
-                        focusedContainerColor = Color.White
-                    )
-                )
-            }
-            
             if (uiState.lastScanFailed) {
                 AlertDialog(
                     onDismissRequest = { onEvent(CosmeticsEvent.ResetScanState) },
@@ -202,87 +194,122 @@ fun StitchProductBuilder(
                 )
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray.copy(alpha = 0.3f))
-                Text(stringResource(R.string.applications_kocolor_features_cosmetics_or_divider), modifier = Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray.copy(alpha = 0.3f))
-            }
-
-            // Quick Scan Card
-            Surface(
-                onClick = { navTo(KoColorRoute.BoxCapture(mode = "QUICK_BOX")) },
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = Color(0xFF22d3ee).copy(alpha = 0.05f),
-                border = BorderStroke(1.dp, Color(0xFF22d3ee).copy(alpha = 0.2f))
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                // Barcode Scan
+                Surface(
+                    onClick = { navTo(KoColorRoute.BarcodeScanner) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFF6B7280).copy(alpha = 0.05f),
+                    border = BorderStroke(1.dp, Color(0xFF6B7280).copy(alpha = 0.2f))
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = Color(0xFF22d3ee),
-                        modifier = Modifier.size(40.dp)
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Default.AutoAwesome, null, tint = Color.Black, modifier = Modifier.size(20.dp))
+                        Surface(
+                            shape = CircleShape,
+                            color = Color(0xFF6B7280),
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.QrCodeScanner, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                        Column {
+                            Text(
+                                text = stringResource(R.string.applications_kocolor_features_cosmetics_barcode_scan_title),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF374151)
+                            )
+                            Text(
+                                text = "Scan UPC",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray,
+                                lineHeight = 12.sp
+                            )
                         }
                     }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_cosmetics_quick_scan_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF0891b2)
-                        )
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_cosmetics_quick_scan_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
-                        )
-                    }
-                    Icon(Icons.Default.ChevronRight, null, tint = Color.LightGray)
                 }
-            }
 
-            // Professional Scan Card (Full)
-            Surface(
-                onClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = Color(0xFF8B5E3C).copy(alpha = 0.05f),
-                border = BorderStroke(1.dp, Color(0xFF8B5E3C).copy(alpha = 0.2f))
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                // Pro Scan
+                Surface(
+                    onClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFF8B5E3C).copy(alpha = 0.05f),
+                    border = BorderStroke(1.dp, Color(0xFF8B5E3C).copy(alpha = 0.2f))
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = Color(0xFF8B5E3C),
-                        modifier = Modifier.size(40.dp)
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Default.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Surface(
+                            shape = CircleShape,
+                            color = Color(0xFF8B5E3C),
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                        Column {
+                            Text(
+                                text = stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_title),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF8B5E3C)
+                            )
+                            Text(
+                                text = "7-angle AI",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray,
+                                lineHeight = 12.sp
+                            )
                         }
                     }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF8B5E3C)
-                        )
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
-                        )
+                }
+
+                // Quick Scan
+                Surface(
+                    onClick = { navTo(KoColorRoute.BoxCapture(mode = "QUICK_BOX")) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFF22d3ee).copy(alpha = 0.05f),
+                    border = BorderStroke(1.dp, Color(0xFF22d3ee).copy(alpha = 0.2f))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = Color(0xFF22d3ee),
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.AutoAwesome, null, tint = Color.Black, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                        Column {
+                            Text(
+                                text = stringResource(R.string.applications_kocolor_features_cosmetics_quick_scan_title),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0891b2)
+                            )
+                            Text(
+                                text = "3-pic AI",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray,
+                                lineHeight = 12.sp
+                            )
+                        }
                     }
-                    Icon(Icons.Default.ChevronRight, null, tint = Color.LightGray)
                 }
             }
 

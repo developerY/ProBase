@@ -79,6 +79,7 @@
     <string name="applications_kocolor_features_cosmetics_add_product_image">ADD PRODUCT IMAGE</string>
     <string name="applications_kocolor_features_cosmetics_tap_to_upload">Tap to upload or take a photo</string>
     <string name="applications_kocolor_features_cosmetics_barcode_label">BARCODE</string>
+    <string name="applications_kocolor_features_cosmetics_barcode_scan_title">Bar Scan</string>
     <string name="applications_kocolor_features_cosmetics_enter_barcode_manually">Enter barcode manually...</string>
     <string name="applications_kocolor_features_cosmetics_product_not_found_title">Product Not Found</string>
     <string name="applications_kocolor_features_cosmetics_product_not_found_message">The barcode could not be found in our database. Please enter the details manually.</string>
@@ -239,9 +240,9 @@
     <string name="applications_kocolor_features_cosmetics_info_icon">i</string>
     <string name="applications_kocolor_features_cosmetics_expiring_desc">The following items in your collection are approaching their estimated expiry dates. Consider prioritizing their usage or planning for replacements.</string>
 
-    <string name="applications_kocolor_features_cosmetics_scan_box_title">Professional Scan</string>
+    <string name="applications_kocolor_features_cosmetics_scan_box_title">Pro Scan</string>
     <string name="applications_kocolor_features_cosmetics_scan_box_desc">7-angle full package analysis</string>
 
-    <string name="applications_kocolor_features_cosmetics_quick_scan_title">Quick Professional Scan</string>
+    <string name="applications_kocolor_features_cosmetics_quick_scan_title">Quk Scan</string>
     <string name="applications_kocolor_features_cosmetics_quick_scan_desc">3 pics + barcode (Fastest AI)</string>
 </resources>
