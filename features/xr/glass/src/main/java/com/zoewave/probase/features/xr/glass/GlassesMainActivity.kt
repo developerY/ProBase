@@ -14,7 +14,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.projected.ProjectedDeviceController
-import androidx.xr.projected.ProjectedDeviceController.Capability.Companion.CAPABILITY_VISUAL_UI
 import androidx.xr.projected.ProjectedDisplayController
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
 import com.zoewave.probase.core.data.repository.GlassBridgeRepository
@@ -115,7 +114,7 @@ class GlassesMainActivity : ComponentActivity() {
             try {
                 val projectedDeviceController = ProjectedDeviceController.create(this@GlassesMainActivity)
                 val connected = projectedDeviceController.capabilities.isNotEmpty()
-                isVisualUiSupported = projectedDeviceController.capabilities.contains(CAPABILITY_VISUAL_UI)
+                isVisualUiSupported = ProjectedCapabilities.hasDisplay(projectedDeviceController)
                 
                 // Keep repository update async as it might be state-driven
                 launch {

@@ -39,19 +39,19 @@ class LiveTranslationActivity : ComponentActivity() {
         
         setContent {
             val viewModel: TranslationViewModel = hiltViewModel()
-            var isGlassesConnected by remember { mutableStateOf(false) }
+            var isVisualUiSupported by remember { mutableStateOf(false) }
 
             // Check for glasses connection
             LaunchedEffect(Unit) {
                 try {
                     val controller = ProjectedDeviceController.create(this@LiveTranslationActivity)
-                    isGlassesConnected = controller.capabilities.isNotEmpty()
+                    isVisualUiSupported = ProjectedCapabilities.hasDisplay(controller)
                 } catch (e: Exception) {
-                    isGlassesConnected = false
+                    isVisualUiSupported = false
                 }
             }
 
-            if (isGlassesConnected) {
+            if (isVisualUiSupported) {
                 // RENDERED ON GLASSES
                 TranslationScreen(viewModel = viewModel)
                 
