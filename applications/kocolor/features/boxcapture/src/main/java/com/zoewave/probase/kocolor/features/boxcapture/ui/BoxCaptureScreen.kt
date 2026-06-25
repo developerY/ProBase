@@ -13,6 +13,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -23,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -402,72 +404,125 @@ private fun ReviewView(
             .verticalScroll(scrollState)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text(
-            "REVIEW PRODUCT",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
+            "PROFESSIONAL REVIEW",
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Black,
+            color = Color(0xFF22d3ee),
+            letterSpacing = 2.sp
         )
 
-        // Front Image
+        // Hero Image
         Surface(
             modifier = Modifier
-                .size(200.dp)
-                .clip(RoundedCornerShape(16.dp)),
+                .fillMaxWidth()
+                .height(240.dp)
+                .clip(RoundedCornerShape(24.dp)),
             color = Color.White.copy(alpha = 0.05f),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
         ) {
             AsyncImage(
                 model = item.imageUrl,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Fit
             )
         }
 
-        ReviewTextField(
-            label = "Product Name",
-            value = item.name,
-            onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(name = it))) }
-        )
+        // --- Core Identity ---
+        ReviewSection("Identity") {
+            ReviewTextField(label = "Product Name", value = item.name, onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(name = it))) })
+            ReviewTextField(label = "Brand", value = item.brand, onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(brand = it))) })
+            ReviewTextField(label = "Barcode / ID", value = item.batchCode ?: "", onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(batchCode = it))) })
+        }
 
-        ReviewTextField(
-            label = "Brand",
-            value = item.brand,
-            onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(brand = it))) }
-        )
+        // --- Categories & Facets ---
+        ReviewSection("Professional Facets") {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                ReviewTextField(label = "Macro", value = item.macroCategory.displayName, onValueChange = {}, enabled = false, modifier = Modifier.weight(1f))
+                ReviewTextField(label = "Micro", value = item.microCategory.displayName, onValueChange = {}, enabled = false, modifier = Modifier.weight(1f))
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                ReviewTextField(label = "Finish", value = item.finish.name, onValueChange = {}, enabled = false, modifier = Modifier.weight(1f))
+                ReviewTextField(label = "Base", value = item.chemistryBase.name, onValueChange = {}, enabled = false, modifier = Modifier.weight(1f))
+            }
+        }
 
-        ReviewTextField(
-            label = "Barcode / Batch Code",
-            value = item.batchCode ?: "",
-            onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(batchCode = it))) }
-        )
+        // --- Clinical & Safety ---
+        ReviewSection("Clinical Safety") {
+            ReviewTextField(label = "Hero Ingredient", value = item.heroIngredient ?: "None detected", onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(heroIngredient = it))) })
+            ReviewTextField(label = "Skin Compatibility", value = item.skinCompatibility ?: "Universal", onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(skinCompatibility = it))) })
+            
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text("Contains Fragrance", style = MaterialTheme.typography.bodyMedium, color = Color.White, modifier = Modifier.weight(1f))
+                Switch(checked = item.containsFragrance == true, onCheckedChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(containsFragrance = it))) })
+            }
+        }
 
-        ReviewTextField(
-            label = "Ingredients (Auto-Extracted)",
-            value = item.instructions ?: "", // Instructions used for ingredients text
-            onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(instructions = it))) },
-            singleLine = false,
-            minLines = 5
-        )
+        // --- Sustainability ---
+        ReviewSection("Sustainability") {
+            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                LabelToggle("Vegan", item.isVegan == true) { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(isVegan = it))) }
+                LabelToggle("Cruelty Free", item.isCrueltyFree == true) { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(isCrueltyFree = it))) }
+            }
+            ReviewTextField(label = "Eco Score", value = item.ecoScore ?: "C", onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(ecoScore = it))) })
+        }
 
-        Spacer(Modifier.height(20.dp))
+        // --- Technical Details ---
+        ReviewSection("Technical Details") {
+            ReviewTextField(
+                label = "Ingredients (Parsed & Cleaned)",
+                value = item.ingredients.joinToString(", "),
+                onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(ingredients = it.split(",").map { i -> i.trim() }))) },
+                singleLine = false,
+                minLines = 4
+            )
+            ReviewTextField(
+                label = "Application Guide",
+                value = item.instructions ?: "",
+                onValueChange = { onEvent(BoxCaptureEvent.UpdateDraft(item.copy(instructions = it))) },
+                singleLine = false,
+                minLines = 3
+            )
+        }
+
+        Spacer(Modifier.height(24.dp))
 
         Button(
             onClick = { onEvent(BoxCaptureEvent.ConfirmSave) },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(64.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22d3ee))
         ) {
-            Text("CONFIRM & SAVE", color = Color.Black, fontWeight = FontWeight.Bold)
+            Icon(Icons.Default.Check, null, tint = Color.Black)
+            Spacer(Modifier.width(12.dp))
+            Text("CONFIRM & ADD TO ATELIER", color = Color.Black, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
         }
         
         TextButton(onClick = { onEvent(BoxCaptureEvent.Dismiss) }) {
-            Text("Discard", color = Color.White.copy(alpha = 0.6f))
+            Text("DISCARD SESSION", color = Color.White.copy(alpha = 0.4f), fontWeight = FontWeight.Bold)
         }
 
-        Spacer(Modifier.height(40.dp))
+        Spacer(Modifier.height(60.dp))
+    }
+}
+
+@Composable
+private fun ReviewSection(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text(title.uppercase(), style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.5f), fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+        content()
+        HorizontalDivider(color = Color.White.copy(alpha = 0.05f))
+    }
+}
+
+@Composable
+private fun LabelToggle(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { onCheckedChange(!checked) }) {
+        Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = Color.White)
     }
 }
 
@@ -476,10 +531,12 @@ private fun ReviewTextField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
     singleLine: Boolean = true,
-    minLines: Int = 1
+    minLines: Int = 1,
+    enabled: Boolean = true
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier) {
         Text(label, style = MaterialTheme.typography.labelSmall, color = Color(0xFF22d3ee), fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
@@ -489,11 +546,15 @@ private fun ReviewTextField(
             shape = RoundedCornerShape(12.dp),
             singleLine = singleLine,
             minLines = minLines,
+            enabled = enabled,
+            textStyle = MaterialTheme.typography.bodyMedium,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = Color.White,
                 unfocusedTextColor = Color.White,
+                disabledTextColor = Color.White.copy(alpha = 0.6f),
                 focusedBorderColor = Color(0xFF22d3ee),
-                unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
+                unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                disabledBorderColor = Color.White.copy(alpha = 0.05f),
                 cursorColor = Color(0xFF22d3ee)
             )
         )

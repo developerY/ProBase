@@ -46,7 +46,19 @@ private data class ExtractedCosmetic(
     val batchCode: String? = null,
     val paoMonths: Int? = null,
     val price: Double? = null,
-    val volume: String? = null
+    val volume: String? = null,
+    
+    // Advanced Extraction
+    val ingredients: List<String> = emptyList(),
+    val heroIngredient: String? = null,
+    val skinCompatibility: String? = null,
+    val containsFragrance: Boolean? = null,
+    val ecoScore: String? = null,
+    val isVegan: Boolean? = null,
+    val isCrueltyFree: Boolean? = null,
+    val recyclingInstructions: String? = null,
+    val fdaClinicalWarnings: List<String> = emptyList(),
+    val fdaActiveIngredients: List<String> = emptyList()
 )
 
 @HiltViewModel
@@ -133,7 +145,7 @@ class BoxCaptureViewModel @Inject constructor(
                 return@launch
             }
 
-            _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Querying Gemini Cloud...")
+            _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Processing Images...")
             
             try {
                 val bitmaps = loadBitmaps()
@@ -145,6 +157,17 @@ class BoxCaptureViewModel @Inject constructor(
                     return@launch
                 }
 
+                // --- Hybrid Analysis: Local OCR for Ingredients ---
+                var localIngredientsOcr = ""
+                val ingredientsIndex = if (mode == CaptureMode.QUICK_BOX) 2 else 6 // Specific steps
+                if (capturedUris.size > ingredientsIndex) {
+                    val ingredientsBitmap = loadBitmapFromUri(Uri.parse(capturedUris[ingredientsIndex]))
+                    if (ingredientsBitmap != null) {
+                        Log.d(TAG, "Running local OCR on ingredients panel...")
+                        localIngredientsOcr = localAnalyzer.extractText(ingredientsBitmap)
+                    }
+                }
+
                 val model = GenerativeModel(
                     modelName = modelName,
                     apiKey = apiKey,
@@ -153,7 +176,6 @@ class BoxCaptureViewModel @Inject constructor(
                     }
                 )
 
-                // ... Prompt logic ...
                 val prompt = content {
                     bitmaps.forEach { image(it) }
                     val target = when (mode) {
@@ -162,30 +184,41 @@ class BoxCaptureViewModel @Inject constructor(
                         CaptureMode.PRODUCT -> "product container (front and back)"
                     }
                     val barcodeContext = if (!scannedBarcode.isNullOrBlank()) "The scanned barcode is: $scannedBarcode." else ""
+                    val ocrContext = if (localIngredientsOcr.isNotBlank()) "LOCAL OCR EXTRACTED TEXT FROM INGREDIENTS PANEL:\n$localIngredientsOcr\n---" else ""
                     
                     text("""
                         Analyze these photos of a $target. $barcodeContext
-                        Extract all available information, especially the ingredients list if visible on the back, and return it in the following JSON format:
+                        $ocrContext
+                        
+                        Extract all available information to fill a professional cosmetic database entry. Use the OCR text above to help identify specific ingredients correctly.
+                        Return ONLY the following JSON format:
                         {
                             "name": "Product Name",
                             "brand": "Brand Name",
-                            "macroCategory": "COMPLEXION|EYES|LIPS|SKINCARE|FRAGRANCE|OTHER",
-                            "microCategory": "FOUNDATION|CONCEALER|POWDER|EYESHADOW|LIPSTICK|SERUM|MOISTURIZER|CLEANSER|etc",
+                            "macroCategory": "PREP|COMPLEXION|DIMENSION|EYES|LIPS|HAIR|HYGIENE|ORAL|FRAGRANCE|GROOMING|TOOLS",
+                            "microCategory": "FOUNDATION|SPF|SERUM|CLEANSER|MOISTURIZER|TONER|LIPSTICK|etc",
                             "formulation": "LIQUID|CREAM|POWDER|GEL|STICK|PENCIL|BALM|OIL|SPRAY|FOAM|LOOSE_POWDER|PRESSED_POWDER|UNKNOWN",
                             "chemistryBase": "WATER|SILICONE|OIL|ALCOHOL|MINERAL|WAX|HYBRID|UNKNOWN",
                             "finish": "MATTE|SATIN|NATURAL|DEWY|GLOSSY|SHIMMER|METALLIC|SHEER|VELVET|UNKNOWN",
                             "coverage": "SHEER|LIGHT|MEDIUM|FULL|BUILDABLE|NOT_APPLICABLE",
-                            "shadeName": "Shade name if applicable",
-                            "colorHex": "#RRGGBB if applicable",
-                            "instructions": "Usage instructions",
-                            "batchCode": "Batch code if found",
+                            "shadeName": "Shade name",
+                            "colorHex": "#RRGGBB",
+                            "instructions": "Usage instructions for the application guide",
+                            "batchCode": "Barcode or batch code",
                             "paoMonths": 12,
-                            "price": 42.0,
-                            "volume": "30ml"
+                            "volume": "30ml",
+                            "ingredients": ["Water", "Glycerin", "..."],
+                            "heroIngredient": "Main active ingredient",
+                            "skinCompatibility": "e.g. Sensitive, Oily, All Skin Types",
+                            "containsFragrance": true,
+                            "ecoScore": "A|B|C|D|E",
+                            "isVegan": true,
+                            "isCrueltyFree": true,
+                            "recyclingInstructions": "How to recycle the packaging",
+                            "fdaClinicalWarnings": ["Warning 1", "..."],
+                            "fdaActiveIngredients": ["Active 1", "..."]
                         }
-                        Return ONLY the JSON block. If a field is unknown, omit it or use null. Be precise.
-                        If this is a product container without a box, prioritize the brand and product name from the front, and ingredients/volume from the back.
-                        If a barcode is provided, use it to cross-reference your internal knowledge for higher accuracy.
+                        Be extremely precise. If a field is unknown, use null.
                     """.trimIndent())
                 }
 
@@ -197,22 +230,11 @@ class BoxCaptureViewModel @Inject constructor(
                     Log.d(TAG, "Received response from Gemini: $jsonText")
                     var item = parseJsonToCosmeticItem(jsonText)
                     
-                    // Pre-fill Front Image and Barcode
+                    // Pre-fill Front Image and ensure Barcode is set
                     item = item.copy(
                         imageUrl = capturedUris.firstOrNull(),
                         batchCode = scannedBarcode ?: item.batchCode
                     )
-
-                    // Local OCR for Ingredients if in Quick Mode
-                    if (mode == CaptureMode.QUICK_BOX && capturedUris.size >= 3) {
-                        val ingredientsBitmap = loadBitmapFromUri(Uri.parse(capturedUris[2]))
-                        if (ingredientsBitmap != null) {
-                            val localIngredients = localAnalyzer.extractText(ingredientsBitmap)
-                            if (localIngredients.isNotBlank()) {
-                                item = item.copy(instructions = localIngredients) // Instructions used for ingredients in model
-                            }
-                        }
-                    }
 
                     _uiState.value = BoxCaptureUiState.Reviewing(item)
                 } else {
@@ -283,7 +305,7 @@ class BoxCaptureViewModel @Inject constructor(
             CosmeticItem(
                 name = extracted.name,
                 brand = extracted.brand,
-                macroCategory = try { MacroCategory.valueOf(extracted.macroCategory ?: "TOOLS") } catch (e: Exception) { MacroCategory.TOOLS },
+                macroCategory = try { MacroCategory.valueOf(extracted.macroCategory ?: "PREP") } catch (e: Exception) { MacroCategory.PREP },
                 microCategory = try { MicroCategory.valueOf(extracted.microCategory ?: "OTHER") } catch (e: Exception) { MicroCategory.OTHER },
                 formulation = try { Formulation.valueOf(extracted.formulation ?: "UNKNOWN") } catch (e: Exception) { Formulation.UNKNOWN },
                 chemistryBase = try { ChemistryBase.valueOf(extracted.chemistryBase ?: "UNKNOWN") } catch (e: Exception) { ChemistryBase.UNKNOWN },
@@ -296,9 +318,23 @@ class BoxCaptureViewModel @Inject constructor(
                 paoMonths = extracted.paoMonths,
                 price = extracted.price,
                 volume = extracted.volume,
-                timestamp = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis(),
+                
+                // Advanced fields
+                ingredients = extracted.ingredients,
+                heroIngredient = extracted.heroIngredient,
+                skinCompatibility = extracted.skinCompatibility,
+                containsFragrance = extracted.containsFragrance,
+                ecoScore = extracted.ecoScore,
+                isVegan = extracted.isVegan,
+                isCrueltyFree = extracted.isCrueltyFree,
+                recyclingInstructions = extracted.recyclingInstructions,
+                fdaClinicalWarnings = extracted.fdaClinicalWarnings,
+                fdaActiveIngredients = extracted.fdaActiveIngredients,
+                isFdaChecked = true
             )
         } catch (e: Exception) {
+            Log.e(TAG, "Error parsing Gemini response", e)
             // Fallback for partial or malformed JSON
             CosmeticItem(
                 name = "Extracted Product",
