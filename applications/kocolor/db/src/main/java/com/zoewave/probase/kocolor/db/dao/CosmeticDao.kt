@@ -27,7 +27,7 @@ interface CosmeticDao {
     fun getCosmeticById(id: Long): Flow<CosmeticItemEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCosmetic(item: CosmeticItemEntity)
+    suspend fun insertCosmetic(item: CosmeticItemEntity): Long
 
     @Update
     suspend fun updateCosmetic(item: CosmeticItemEntity)
