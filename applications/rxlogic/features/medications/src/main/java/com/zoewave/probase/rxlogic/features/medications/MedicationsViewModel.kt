@@ -59,6 +59,9 @@ class MedicationsViewModel @Inject constructor(
             is MedicationsEvent.OnShowAddDialog -> {
                 _showAddDialog.update { event.show }
             }
+
+            is MedicationsEvent.OnDeleteMedication -> TODO()
+            is MedicationsEvent.OnUpdateMedication -> TODO()
         }
     }
 
