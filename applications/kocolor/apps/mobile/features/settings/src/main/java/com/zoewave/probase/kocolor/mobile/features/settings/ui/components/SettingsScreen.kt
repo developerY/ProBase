@@ -241,7 +241,54 @@ fun AppSettingsCard(
                         onToggle = { onEvent(SettingsEvent.OnHydrationExpandedToggled(it)) },
                         onGoalChanged = { onEvent(SettingsEvent.OnHydrationGoalChanged(it)) }
                     )
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.Gray.copy(alpha = 0.1f))
+                    TemperatureUnitSetting(
+                        currentUnit = uiState.tempUnit,
+                        onUnitChanged = { onEvent(SettingsEvent.OnTempUnitChanged(it)) }
+                    )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun TemperatureUnitSetting(
+    currentUnit: String,
+    onUnitChanged: (String) -> Unit
+) {
+    Column {
+        Text("Temperature Unit", style = MaterialTheme.typography.bodyLarge)
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val units = listOf("CELSIUS", "FAHRENHEIT")
+            units.forEach { unit ->
+                val isSelected = currentUnit == unit
+                FilterChip(
+                    selected = isSelected,
+                    onClick = { onUnitChanged(unit) },
+                    label = { 
+                        Text(
+                            text = if (unit == "CELSIUS") "Celsius (°C)" else "Fahrenheit (°F)",
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        ) 
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        selectedLabelColor = MaterialTheme.colorScheme.primary,
+                        selectedLeadingIconColor = MaterialTheme.colorScheme.primary
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = isSelected,
+                        borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                        selectedBorderColor = MaterialTheme.colorScheme.primary
+                    )
+                )
             }
         }
     }

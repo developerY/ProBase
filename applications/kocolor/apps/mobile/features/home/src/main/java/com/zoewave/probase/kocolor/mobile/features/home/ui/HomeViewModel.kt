@@ -70,6 +70,7 @@ data class HomeUiState(
     val weather: LayeredWeatherUiState? = null,
     val locationName: String? = null,
     val isLocationFallback: Boolean = false,
+    val temperatureUnit: String = "CELSIUS",
     val headerBackgroundUrl: String? = null,
     val savedSuggestions: List<com.zoewave.probase.core.model.ritual.SavedAnalysis> = emptyList()
 )
@@ -164,6 +165,7 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = combine(
         fashionRepository.getProfile(),
         koColorSettings.hydrationGoalFlow,
+        koColorSettings.temperatureUnitFlow,
         _routines,
         cosmeticDao.getAllCosmetics(),
         clothingDao.getAllClothing(),
@@ -193,15 +195,16 @@ class HomeViewModel @Inject constructor(
     ) { array ->
         val profile = array[0] as FashionProfile?
         val hydrationGoal = array[1] as Double
-        val routines = array[2] as List<RoutineEntity>
-        val cosmetics = array[3] as List<CosmeticItemEntity>
-        val clothing = array[4] as List<ClothingItemEntity>
-        val tip = array[5] as String
-        val weather = array[6] as LayeredWeatherUiState?
-        val headerBg = array[7] as String?
-        val healthInfo = array[8] as Pair<Boolean, Triple<Float?, String?, Double>>
+        val tempUnit = array[2] as String
+        val routines = array[3] as List<RoutineEntity>
+        val cosmetics = array[4] as List<CosmeticItemEntity>
+        val clothing = array[5] as List<ClothingItemEntity>
+        val tip = array[6] as String
+        val weather = array[7] as LayeredWeatherUiState?
+        val headerBg = array[8] as String?
+        val healthInfo = array[9] as Pair<Boolean, Triple<Float?, String?, Double>>
         val (hasPerms, healthData) = healthInfo
-        val savedSuggestions = array[9] as List<com.zoewave.probase.core.model.ritual.SavedAnalysis>
+        val savedSuggestions = array[10] as List<com.zoewave.probase.core.model.ritual.SavedAnalysis>
 
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
@@ -225,6 +228,12 @@ class HomeViewModel @Inject constructor(
             stressLevel = 5 // Placeholder for now
         )
 
+        val processedWeather = weather?.let {
+            if (tempUnit == "FAHRENHEIT") {
+                it.copy(temperature = (it.temperature * 9 / 5) + 32)
+            } else it
+        }
+
         HomeUiState(
             fashionProfile = profile,
             morningRoutine = routines.find { it.time == RoutineTime.MORNING }?.toModel(),
@@ -247,8 +256,9 @@ class HomeViewModel @Inject constructor(
             hydrationLiters = healthData.third,
             hydrationGoalLiters = hydrationGoal,
             isHealthPermissionGranted = hasPerms,
-            weather = weather,
+            weather = processedWeather,
             locationName = weather?.locationName,
+            temperatureUnit = tempUnit,
             headerBackgroundUrl = headerBg,
             savedSuggestions = savedSuggestions,
             isLocationFallback = weather?.locationName == "Location could not be found"

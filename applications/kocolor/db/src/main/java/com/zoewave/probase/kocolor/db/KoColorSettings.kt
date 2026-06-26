@@ -30,6 +30,7 @@ class KoColorSettings @Inject constructor(
         val APP_THEME = stringPreferencesKey("app_theme")
         val COLOR_PALETTE = stringPreferencesKey("color_palette")
         val HYDRATION_GOAL = androidx.datastore.preferences.core.doublePreferencesKey("hydration_goal")
+        val TEMPERATURE_UNIT = stringPreferencesKey("temperature_unit")
     }
 
     val appThemeFlow: Flow<String> = context.dataStore.data.map { preferences ->
@@ -59,6 +60,16 @@ class KoColorSettings @Inject constructor(
     suspend fun saveHydrationGoal(goal: Double) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.HYDRATION_GOAL] = goal
+        }
+    }
+
+    val temperatureUnitFlow: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.TEMPERATURE_UNIT] ?: "CELSIUS"
+    }
+
+    suspend fun saveTemperatureUnit(unit: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TEMPERATURE_UNIT] = unit
         }
     }
 
