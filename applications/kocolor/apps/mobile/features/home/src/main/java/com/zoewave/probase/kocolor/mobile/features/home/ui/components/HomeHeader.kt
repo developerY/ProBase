@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -94,8 +95,8 @@ fun HomeHeader(
             if (expanded) {
                 LongHeader(
                     uiState = uiState,
-                    onLeftClick = { navTo(KoColorRoute.Weather) },
-                    onRightClick = { isExpanded = false }
+                    onWeatherClick = { navTo(KoColorRoute.Weather) },
+                    onCollapseClick = { isExpanded = false }
                 )
             } else {
                 ShortHeader(
@@ -123,30 +124,42 @@ private fun ShortHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onWeatherClick)
-                .padding(top = 28.dp, bottom = 8.dp),
+                .padding(top = 20.dp, bottom = 4.dp),
             contentAlignment = Alignment.Center
         ) {
+            // Weather Widget Container
             Box(
-                modifier = Modifier.size(110.dp),
+                modifier = Modifier.width(220.dp).height(120.dp),
                 contentAlignment = Alignment.Center
             ) {
-                // Cloud Icon with Premium Gradient and Shadow
+                // PREMIUM GRADIENT BORDER (Halo Glow) with Rounded Corners
+                Box(
+                    modifier = Modifier
+                        .size(width = 180.dp, height = 110.dp)
+                        .clip(RoundedCornerShape(40.dp)) // Soft rounded shadow container
+                        .background(
+                            brush = Brush.radialGradient(
+                                colors = listOf(Color.Black.copy(alpha = 0.12f), Color.Transparent),
+                                center = Offset.Unspecified,
+                                radius = 350f
+                            )
+                        )
+                )
+
+                // Cloud Icon with Premium Gradient - WIDER
                 Icon(
                     imageVector = Icons.Default.Cloud,
                     contentDescription = null,
                     modifier = Modifier
-                        .size(100.dp)
+                        .size(width = 160.dp, height = 100.dp)
                         .graphicsLayer {
                             alpha = 0.99f
-                            shadowElevation = 8f
-                            shape = CircleShape
-                            clip = false
                         }
                         .drawWithContent {
                             drawContent()
                             drawRect(
                                 brush = Brush.verticalGradient(
-                                    colors = listOf(Color.White, Color.White.copy(alpha = 0.4f))
+                                    colors = listOf(Color.White, Color.White.copy(alpha = 0.5f))
                                 ),
                                 blendMode = BlendMode.SrcIn
                             )
@@ -154,21 +167,21 @@ private fun ShortHeader(
                     tint = Color.Unspecified
                 )
 
-                // Temperature Text (Popping Bold Numbers with Shadow)
+                // Temperature Text (Popping Bolder Numbers with High Contrast)
                 Text(
                     text = "${uiState.weather?.temperature?.toInt() ?: 24}°",
                     style = MaterialTheme.typography.displayMedium.copy(
-                        fontSize = 42.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = (-1).sp,
+                        fontSize = 56.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = (-2.5).sp,
                         shadow = Shadow(
-                            color = Color.Black.copy(alpha = 0.15f),
+                            color = Color.Black.copy(alpha = 0.25f),
                             offset = Offset(0f, 4f),
-                            blurRadius = 10f
+                            blurRadius = 12f
                         )
                     ),
-                    color = Color(0xFF374151), // High contrast charcoal
-                    modifier = Modifier.align(Alignment.Center).padding(top = 10.dp)
+                    color = Color(0xFF1C1B1F),
+                    modifier = Modifier.align(Alignment.Center).padding(top = 14.dp)
                 )
 
                 // UV Badge (Accented purple circle with shadow)
@@ -177,9 +190,9 @@ private fun ShortHeader(
                     shape = CircleShape,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(top = 2.dp, end = 2.dp)
-                        .size(36.dp),
-                    shadowElevation = 6.dp
+                        .padding(top = 4.dp, end = 4.dp)
+                        .size(44.dp),
+                    shadowElevation = 8.dp
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -187,17 +200,17 @@ private fun ShortHeader(
                     ) {
                         Text(
                             text = "UV",
-                            fontSize = 8.sp,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
-                            lineHeight = 8.sp
+                            lineHeight = 10.sp
                         )
                         Text(
                             text = "${uiState.weather?.uvIndex?.toInt() ?: 8}",
-                            fontSize = 12.sp,
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Black,
                             color = Color.White,
-                            lineHeight = 12.sp
+                            lineHeight = 15.sp
                         )
                     }
                 }
@@ -205,12 +218,13 @@ private fun ShortHeader(
         }
 
         // BOTTOM HALF: Greeting words (Expand header)
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onExpandClick)
-                .padding(bottom = 28.dp),
-            contentAlignment = Alignment.Center
+                .padding(bottom = 20.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = if (uiState.isDaytime) "Radiant Morning." else "Deep Restoration.",
@@ -220,6 +234,13 @@ private fun ShortHeader(
                 color = Color(0xFF1F2937),
                 letterSpacing = (-0.5).sp
             )
+            Spacer(modifier = Modifier.width(8.dp))
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = "Expand Header",
+                tint = Color(0xFF1F2937).copy(alpha = 0.6f),
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
@@ -227,8 +248,8 @@ private fun ShortHeader(
 @Composable
 private fun LongHeader(
     uiState: HomeHeaderUiState,
-    onLeftClick: () -> Unit,
-    onRightClick: () -> Unit
+    onWeatherClick: () -> Unit,
+    onCollapseClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -245,7 +266,7 @@ private fun LongHeader(
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(12.dp))
-                    .clickable(onClick = onLeftClick)
+                    .clickable(onClick = onCollapseClick)
                     .padding(4.dp)
             ) {
                 Text(
@@ -272,7 +293,7 @@ private fun LongHeader(
                 modifier = Modifier
                     .size(28.dp)
                     .clip(CircleShape)
-                    .clickable(onClick = onRightClick)
+                    .clickable(onClick = onCollapseClick)
             )
         }
 
@@ -281,7 +302,7 @@ private fun LongHeader(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
-                .clickable(onClick = onLeftClick)
+                .clickable(onClick = onWeatherClick)
                 .padding(4.dp)
         ) {
             Text(
