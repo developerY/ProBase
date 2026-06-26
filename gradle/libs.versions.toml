@@ -5,10 +5,10 @@ android-minSdk = "34"
 android-targetSdk = "35"
 
 # -- Build Tools --
-agp = "9.4.0-alpha01"
+agp = "9.4.0-alpha02"
 kotlin = "2.3.0"
 # KSP version must match Kotlin version exactly
-ksp = "2.3.4"
+ksp = "2.3.6"
 
 # -- Android Libraries --
 coreKtx = "1.17.0"
