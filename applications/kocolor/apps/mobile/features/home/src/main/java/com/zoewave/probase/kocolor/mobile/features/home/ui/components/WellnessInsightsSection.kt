@@ -71,7 +71,11 @@ fun WellnessInsightsSection(
                     .fillMaxWidth()
                     .background(
                         brush = Brush.linearGradient(
-                            colors = listOf(Color(0xFFF0F4F8), Color(0xFFD9E2EC))
+                            colors = listOf(
+                                Color(0xFFF5EFFF), // Soft Lavender for Sleep
+                                Color(0xFFE0F2FF), // Soft Sky Blue for Hydration
+                                Color(0xFFE6F7ED)  // Soft Mint for Vitals
+                            )
                         )
                     )
                     .padding(24.dp)
