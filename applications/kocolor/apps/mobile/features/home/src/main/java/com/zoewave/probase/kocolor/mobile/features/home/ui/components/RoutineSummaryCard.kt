@@ -38,18 +38,20 @@ import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class RoutineSummaryUiState(
     val routine: BeautyRoutine,
-    val isDaytime: Boolean
+    val isDaytime: Boolean,
+    val displayTitle: String
 )
 
 @Composable
 fun RoutineSummaryCard(
     uiState: RoutineSummaryUiState,
     modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit,
+    onEvent: (Unit) -> Unit = {},
     navTo: (KoColorRoute) -> Unit
 ) {
     val routine = uiState.routine
     val isDaytime = uiState.isDaytime
+    val displayTitle = uiState.displayTitle
     val completedCount = routine.steps.count { it.isCompleted }
     val totalCount = routine.steps.size
     val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
@@ -78,7 +80,7 @@ fun RoutineSummaryCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isDaytime) "Morning Ritual" else "Evening Ritual",
+                        text = displayTitle,
                         style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
@@ -111,7 +113,7 @@ fun RoutineSummaryCard(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            text = if (isDaytime) "CURRENT RITUAL" else "EVENING RITUAL",
+                            text = "CURRENT RITUAL",
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Black,
@@ -159,7 +161,7 @@ fun RoutineSummaryCard(
                         color = Color.Black
                     )
                     Text(
-                        text = if (isDaytime) "Prepare for a balanced day ahead." else "Every step is an act of self-love.",
+                        text = if (displayTitle.contains("Morning", ignoreCase = true)) "Prepare for a balanced day ahead." else "Every step is an act of self-love.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Black.copy(alpha = 0.7f)
                     )

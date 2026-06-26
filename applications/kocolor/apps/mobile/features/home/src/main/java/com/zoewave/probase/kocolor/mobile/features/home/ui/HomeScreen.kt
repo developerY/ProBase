@@ -181,7 +181,7 @@ fun HomeScreen(
                             navTo = {}
                         )
                         RoutineSummaryCard(
-                            uiState = RoutineSummaryUiState(activeRoutine, uiState.isDaytime),
+                            uiState = RoutineSummaryUiState(activeRoutine, uiState.isDaytime, title),
                             onEvent = {},
                             navTo = navTo
                         )
