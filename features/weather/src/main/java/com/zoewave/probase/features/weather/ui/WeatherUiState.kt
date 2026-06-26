@@ -15,7 +15,8 @@ sealed class WeatherUiState {
         val weather: Weather,
         val settings: Map<String, List<String>>,
         val location: LatLng? = null,
-        val isLocationFallback: Boolean = false
+        val isLocationFallback: Boolean = false,
+        val tempUnit: String = "CELSIUS"
     ) : WeatherUiState()
 
     data class Error(val message: String) : WeatherUiState()

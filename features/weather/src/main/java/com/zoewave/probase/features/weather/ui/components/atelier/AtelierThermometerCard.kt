@@ -28,7 +28,8 @@ import kotlin.math.roundToInt
 @Composable
 fun AtelierThermometerCard(
     temp: Double,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    unit: String = "°C"
 ) {
     Card(
         modifier = modifier.height(280.dp),
@@ -85,7 +86,12 @@ fun AtelierThermometerCard(
                         )
 
                         // Draw Fill
-                        val fillPercentage = (temp.coerceIn(-20.0, 50.0) + 20) / 70.0
+                        val isFahrenheit = unit.contains("F")
+                        val minTemp = if (isFahrenheit) -4.0 else -20.0
+                        val maxTemp = if (isFahrenheit) 122.0 else 50.0
+                        val range = maxTemp - minTemp
+                        
+                        val fillPercentage = (temp.coerceIn(minTemp, maxTemp) - minTemp) / range
                         val fillHeight = stemHeight * fillPercentage.toFloat()
                         
                         drawRoundRect(
@@ -105,7 +111,7 @@ fun AtelierThermometerCard(
             }
 
             Text(
-                text = "${temp.roundToInt()}°C",
+                text = "${temp.roundToInt()}$unit",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif

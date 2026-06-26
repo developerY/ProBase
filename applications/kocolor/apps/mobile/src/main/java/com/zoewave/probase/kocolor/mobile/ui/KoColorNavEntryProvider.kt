@@ -467,9 +467,13 @@ fun koColorNavEntryProvider(
             )
         }
         is KoColorRoute.Weather -> NavEntry(route) {
+            val settingsViewModel: com.zoewave.probase.kocolor.mobile.features.settings.ui.SettingsViewModel = hiltViewModel()
+            val settingsState by settingsViewModel.uiState.collectAsStateWithLifecycle()
+
             WeatherUiRoute(
                 onBack = onBack,
-                onNavigateToSunIntelligence = { onNavigateTo(KoColorRoute.SunIntelligence) }
+                onNavigateToSunIntelligence = { onNavigateTo(KoColorRoute.SunIntelligence) },
+                tempUnit = settingsState.tempUnit
             )
         }
         is KoColorRoute.SunIntelligence -> NavEntry(route) {

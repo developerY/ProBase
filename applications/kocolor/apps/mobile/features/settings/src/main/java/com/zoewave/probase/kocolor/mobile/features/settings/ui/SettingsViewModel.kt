@@ -25,6 +25,7 @@ data class SettingsUiState(
     val isHydrationExpanded: Boolean = false,
     val currentTheme: String = "SYSTEM",
     val currentPalette: String = "CLASSIC",
+    val tempUnit: String = "CELSIUS",
     val hydrationGoal: Double = 2.7
 )
 
@@ -38,6 +39,7 @@ sealed class SettingsEvent {
     data class OnHydrationExpandedToggled(val expanded: Boolean) : SettingsEvent()
     data class OnThemeSelected(val theme: String) : SettingsEvent()
     data class OnPaletteSelected(val palette: String) : SettingsEvent()
+    data class OnTempUnitChanged(val unit: String) : SettingsEvent()
     data class OnHydrationGoalChanged(val goal: Double) : SettingsEvent()
     data object OnGenerateSampleCosmetics : SettingsEvent()
     data class InitializeWithSection(val section: String) : SettingsEvent()
@@ -57,8 +59,9 @@ class SettingsViewModel @Inject constructor(
         _expandState,
         koSettings.appThemeFlow,
         koSettings.colorPaletteFlow,
+        koSettings.temperatureUnitFlow,
         koSettings.hydrationGoalFlow
-    ) { expands, theme, palette, hydrationGoal ->
+    ) { expands, theme, palette, tempUnit, hydrationGoal ->
         SettingsUiState(
             isAiExpanded = expands[0],
             isAboutExpanded = expands[1],
@@ -69,6 +72,7 @@ class SettingsViewModel @Inject constructor(
             isHydrationExpanded = expands[6],
             currentTheme = theme,
             currentPalette = palette,
+            tempUnit = tempUnit,
             hydrationGoal = hydrationGoal
         )
     }.stateIn(
@@ -108,6 +112,11 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.OnPaletteSelected -> {
                 viewModelScope.launch {
                     koSettings.saveColorPalette(event.palette)
+                }
+            }
+            is SettingsEvent.OnTempUnitChanged -> {
+                viewModelScope.launch {
+                    koSettings.saveTemperatureUnit(event.unit)
                 }
             }
             is SettingsEvent.OnHydrationGoalChanged -> {

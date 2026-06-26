@@ -59,7 +59,8 @@ data class HomeHeaderUiState(
     val weather: LayeredWeatherUiState? = null,
     val locationName: String? = null,
     val isLocationFallback: Boolean = false,
-    val backgroundUrl: String? = null
+    val backgroundUrl: String? = null,
+    val tempUnit: String = "CELSIUS"
 )
 
 @Composable
@@ -169,7 +170,7 @@ private fun ShortHeader(
 
                 // Temperature Text (Popping Bolder Numbers with High Contrast)
                 Text(
-                    text = "${uiState.weather?.temperature?.toInt() ?: 24}°",
+                    text = "${uiState.weather?.temperature?.toInt() ?: 24}${if (uiState.tempUnit == "FAHRENHEIT") "°" else "°C"}",
                     style = MaterialTheme.typography.displayMedium.copy(
                         fontSize = 56.sp,
                         fontWeight = FontWeight.Black,
@@ -306,7 +307,7 @@ private fun LongHeader(
                 .padding(4.dp)
         ) {
             Text(
-                text = "${uiState.weather?.temperature?.toInt() ?: 20}°",
+                text = "${uiState.weather?.temperature?.toInt() ?: 20}${if (uiState.tempUnit == "FAHRENHEIT") "°" else "°C"}",
                 fontSize = 56.sp,
                 fontFamily = FontFamily.Serif,
                 color = Color(0xFF1C1B1F)
@@ -380,7 +381,8 @@ private fun HomeHeaderShortResponsivePreview() {
         Box(modifier = Modifier.padding(16.dp)) {
             HomeHeader(
                 uiState = HomeHeaderUiState(
-                    weather = LayeredWeatherUiState(temperature = 20.0, uvIndex = 8.0)
+                    weather = LayeredWeatherUiState(temperature = 24.0, uvIndex = 8.0),
+                    tempUnit = "FAHRENHEIT"
                 )
             )
         }
