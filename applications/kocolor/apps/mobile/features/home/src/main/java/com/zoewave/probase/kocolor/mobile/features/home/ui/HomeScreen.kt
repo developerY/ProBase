@@ -160,14 +160,6 @@ fun HomeScreen(
             }
 
             item {
-                QuickActions(
-                    uiState = Unit,
-                    onEvent = {},
-                    navTo = navTo
-                )
-            }
-
-            item {
                 val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
                 val activeRoutine = when {
                     hour in 5..9 -> uiState.morningRoutine
@@ -216,6 +208,14 @@ fun HomeScreen(
                         )
                     }
                 }
+            }
+
+            item {
+                QuickActions(
+                    uiState = Unit,
+                    onEvent = {},
+                    navTo = navTo
+                )
             }
             
             item {
