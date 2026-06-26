@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -64,14 +65,18 @@ fun HomeHeader(
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
-    // Lavender background matching image_2a7699.png
-    val containerColor = Color(0xFFE4E0F4)
+    // Premium gradient background matching image_266714.png
+    val gradientBrush = Brush.linearGradient(
+        colors = listOf(Color(0xFFF3E7FF), Color(0xFFD6C8F7), Color(0xFFC4B5FD)),
+        start = androidx.compose.ui.geometry.Offset.Zero,
+        end = androidx.compose.ui.geometry.Offset.Infinite
+    )
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(32.dp))
-            .background(containerColor)
+            .background(gradientBrush)
             .animateContentSize(animationSpec = tween(350))
     ) {
         AnimatedContent(
@@ -90,8 +95,8 @@ fun HomeHeader(
             } else {
                 ShortHeader(
                     uiState = uiState,
-                    onLeftClick = { navTo(KoColorRoute.Weather) },
-                    onRightClick = { isExpanded = true }
+                    onWeatherClick = { navTo(KoColorRoute.Weather) },
+                    onExpandClick = { isExpanded = true }
                 )
             }
         }
@@ -101,106 +106,91 @@ fun HomeHeader(
 @Composable
 private fun ShortHeader(
     uiState: HomeHeaderUiState,
-    onLeftClick: () -> Unit,
-    onRightClick: () -> Unit
+    onWeatherClick: () -> Unit,
+    onExpandClick: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // LEFT ZONE: Highly Interactive "Radiant Morning" bounding box
+        // TOP HALF: Weather Widget (Go to weather)
         Box(
             modifier = Modifier
-                .weight(1.2f)
-                .fillMaxHeight()
-                .clip(RoundedCornerShape(20.dp))
-                .clickable(onClick = onLeftClick) // Standard ripple bounded inside this quadrant
-                .padding(horizontal = 16.dp, vertical = 24.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Text(
-                text = if (uiState.isDaytime) "Radiant\nMorning." else "Deep\nRestoration.",
-                style = MaterialTheme.typography.displaySmall,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF1C1B1F),
-                lineHeight = 40.sp
-            )
-        }
-
-        // MIDDLE ZONE: Vertical divider line from image_2a7699.png
-        Box(
-            modifier = Modifier
-                .height(80.dp)
-                .width(1.dp)
-                .background(Color(0xFF1C1B1F).copy(alpha = 0.12f))
-        )
-
-        // RIGHT ZONE: Circular weather dial block
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp),
+                .fillMaxWidth()
+                .clickable(onClick = onWeatherClick)
+                .padding(top = 28.dp, bottom = 8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Surface(
-                modifier = Modifier
-                    .size(116.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onRightClick),
-                color = Color(0xFFFAF7EC), // Warm cream dial color
-                tonalElevation = 1.dp
+            Box(
+                modifier = Modifier.size(100.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(8.dp)
+                // Cloud Icon (Premium White/Frosted look)
+                Icon(
+                    imageVector = Icons.Default.Cloud,
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.85f),
+                    modifier = Modifier.size(86.dp)
+                )
+
+                // Temperature Text (Centered inside cloud)
+                Text(
+                    text = "${uiState.weather?.temperature?.toInt() ?: 24}°",
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 28.sp),
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF374151), // Dark charcoal
+                    modifier = Modifier.align(Alignment.Center).padding(top = 6.dp)
+                )
+
+                // UV Badge (Accented purple circle)
+                Surface(
+                    color = Color(0xFF9E84C1),
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 4.dp, end = 4.dp)
+                        .size(34.dp),
+                    shadowElevation = 1.dp
                 ) {
-                    // Weather Condition + Badge Row
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.WbSunny,
-                            contentDescription = null,
-                            tint = Color(0xFF1C1B1F),
-                            modifier = Modifier.size(16.dp)
+                        Text(
+                            text = "UV",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            lineHeight = 8.sp
                         )
-                        Surface(
-                            color = Color(0xFF1C1B1F).copy(alpha = 0.08f),
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
-                            Text(
-                                text = "HIGH",
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1C1B1F),
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                            )
-                        }
+                        Text(
+                            text = "${uiState.weather?.uvIndex?.toInt() ?: 8}",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White,
+                            lineHeight = 12.sp
+                        )
                     }
-
-                    // Temperature Text
-                    Text(
-                        text = "${uiState.weather?.temperature?.toInt() ?: 20}°",
-                        fontSize = 32.sp,
-                        fontFamily = FontFamily.Default,
-                        fontWeight = FontWeight.Normal,
-                        color = Color(0xFF1C1B1F)
-                    )
-
-                    // UV Metric Footer
-                    Text(
-                        text = "UV ${uiState.weather?.uvIndex?.toInt() ?: 8}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF1C1B1F).copy(alpha = 0.6f),
-                        fontWeight = FontWeight.Medium
-                    )
                 }
             }
+        }
+
+        // BOTTOM HALF: Greeting words (Expand header)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onExpandClick)
+                .padding(bottom = 28.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (uiState.isDaytime) "Radiant Morning." else "Deep Restoration.",
+                style = MaterialTheme.typography.titleLargeEmphasized,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF1F2937),
+                letterSpacing = (-0.3).sp
+            )
         }
     }
 }
