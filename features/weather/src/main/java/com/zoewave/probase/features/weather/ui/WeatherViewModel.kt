@@ -24,6 +24,16 @@ class WeatherViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
     val uiState: StateFlow<WeatherUiState> = _uiState
 
+    private val _tempUnit = MutableStateFlow("CELSIUS")
+
+    fun setTempUnit(unit: String) {
+        _tempUnit.value = unit
+        val current = _uiState.value
+        if (current is WeatherUiState.Success) {
+            _uiState.value = current.copy(tempUnit = unit)
+        }
+    }
+
     init {
         // Initialize the UI state by loading settings
         loadSettings()
@@ -102,7 +112,8 @@ class WeatherViewModel @Inject constructor(
                     weatherOpen = weatherResp,
                     environmentalContext = envContext,
                     locationString = weatherResp?.name ?: "Santa Barbara, US",
-                    isLocationFallback = isFallback
+                    isLocationFallback = isFallback,
+                    tempUnit = _tempUnit.value
                 )
             } catch (e: Exception) {
                 Log.e("Weather", "Failed to initialize real weather data", e)

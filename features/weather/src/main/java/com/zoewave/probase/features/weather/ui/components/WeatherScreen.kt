@@ -43,8 +43,12 @@ fun WeatherScreen(
     onBack: () -> Unit,
     onNavigateToSunIntelligence: () -> Unit,
     modifier: Modifier = Modifier,
+    tempUnit: String = "CELSIUS",
 ) {
-    val temp = weather?.main?.temp ?: 21.0
+    val tempCelsius = weather?.main?.temp ?: 21.0
+    val temp = if (tempUnit == "FAHRENHEIT") (tempCelsius * 9 / 5) + 32 else tempCelsius
+    val unitSuffix = if (tempUnit == "FAHRENHEIT") "°F" else "°C"
+
     val conditionText = weather?.weather?.firstOrNull()?.main ?: "Clear"
     val locationName = if (isLocationFallback) "Location could not be found" else (weather?.name ?: "Santa Barbara, US")
     val uvIndex = environmentalContext?.uvIndex ?: 0.0
@@ -111,7 +115,7 @@ fun WeatherScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${temp.toInt()}°C",
+                        text = "${temp.toInt()}$unitSuffix",
                         style = MaterialTheme.typography.displayLarge.copy(fontSize = 80.sp),
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Light,
@@ -146,6 +150,7 @@ fun WeatherScreen(
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         AtelierThermometerCard(
                             temp = temp,
+                            unit = unitSuffix,
                             modifier = Modifier.weight(1f)
                         )
                         AtelierWindCompassCard(

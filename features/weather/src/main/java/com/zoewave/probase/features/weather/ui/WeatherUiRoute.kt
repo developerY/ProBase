@@ -20,8 +20,13 @@ fun WeatherUiRoute(
     onBack: () -> Unit,
     onNavigateToSunIntelligence: () -> Unit,
     modifier: Modifier = Modifier,
+    tempUnit: String = "CELSIUS",
     viewModel: WeatherViewModel = hiltViewModel(),
 ) {
+    androidx.compose.runtime.LaunchedEffect(tempUnit) {
+        viewModel.setTempUnit(tempUnit)
+    }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     WeatherUiRoute(
@@ -61,6 +66,7 @@ internal fun WeatherUiRoute(
                 isLocationFallback = uiState.isLocationFallback,
                 settings = uiState.settings,
                 location = uiState.location,
+                tempUnit = uiState.tempUnit,
                 onEvent = onEvent,
                 onBack = onBack,
                 onNavigateToSunIntelligence = onNavigateToSunIntelligence,
