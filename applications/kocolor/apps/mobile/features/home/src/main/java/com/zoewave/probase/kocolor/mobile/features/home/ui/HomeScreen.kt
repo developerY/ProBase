@@ -2,63 +2,46 @@ package com.zoewave.probase.kocolor.mobile.features.home.ui
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.kocolor.mobile.features.home.R
+import com.zoewave.probase.kocolor.mobile.features.home.ui.components.BoutiqueCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CollectionHubCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.HomeHeader
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.HomeHeaderUiState
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
+import com.zoewave.probase.kocolor.mobile.features.home.ui.components.QuickActions
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryUiState
+import com.zoewave.probase.kocolor.mobile.features.home.ui.components.SectionTitle
+import com.zoewave.probase.kocolor.mobile.features.home.ui.components.SectionTitleUiState
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.WellnessInsightsSection
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.WellnessInsightsUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -248,131 +231,3 @@ fun HomeScreen(
     }
 }
 
-
-@Composable
-fun QuickActions(
-    uiState: Unit, 
-    modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit, 
-    navTo: (KoColorRoute) -> Unit
-) {
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        QuickActionCard(uiState = QuickActionUiState(stringResource(R.string.applications_kocolor_apps_mobile_features_home_analyze_style), stringResource(R.string.applications_kocolor_apps_mobile_features_home_ai_visual_analysis), Icons.Default.AutoAwesome, MaterialTheme.colorScheme.primary, KoColorRoute.StyleSimulator), modifier = Modifier.weight(1f), onEvent = {}, navTo = navTo)
-        QuickActionCard(uiState = QuickActionUiState(stringResource(R.string.applications_kocolor_apps_mobile_features_home_capture_product), stringResource(R.string.applications_kocolor_apps_mobile_features_home_gemini_scanner), Icons.Default.CameraAlt, MaterialTheme.colorScheme.secondary, KoColorRoute.Analyzer()), modifier = Modifier.weight(1f), onEvent = {}, navTo = navTo)
-    }
-}
-
-data class QuickActionUiState(val title: String, val subtitle: String, val icon: ImageVector, val color: Color, val route: KoColorRoute)
-
-@Composable
-fun QuickActionCard(
-    uiState: QuickActionUiState, 
-    modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit, 
-    navTo: (KoColorRoute) -> Unit
-) {
-    ElevatedCard(onClick = { navTo(uiState.route) }, modifier = modifier, shape = RoundedCornerShape(24.dp)) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Icon(uiState.icon, null, tint = uiState.color, modifier = Modifier.size(28.dp))
-            Spacer(Modifier.height(12.dp))
-            Text(text = uiState.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(text = uiState.subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-data class SectionTitleUiState(val title: String, val subtitle: String)
-
-@Composable
-fun SectionTitle(
-    uiState: SectionTitleUiState, 
-    modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit, 
-    navTo: (KoColorRoute) -> Unit
-) {
-    Column(modifier = modifier) {
-        Text(text = uiState.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
-        Text(text = uiState.subtitle.uppercase(), style = MaterialTheme.typography.labelSmall, letterSpacing = 2.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-}
-
-@Composable
-fun BoutiqueCard(
-    modifier: Modifier = Modifier, 
-    onEvent: (Unit) -> Unit, 
-    navTo: (KoColorRoute) -> Unit
-) {
-    val uriHandler = LocalUriHandler.current
-    ElevatedCard(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(440.dp)
-            .clickable { uriHandler.openUri("https://www.kocolor.com") },
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            AsyncImage(
-                model = R.drawable.boutique_bg,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-            
-            Surface(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                color = Color.White.copy(alpha = 0.9f),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_art_of_color),
-                        style = MaterialTheme.typography.labelSmall,
-                        letterSpacing = 2.sp,
-                        color = Color.Gray,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_boutique_title),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1A1A)
-                    )
-                    Text(
-                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_boutique_desc),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.DarkGray
-                    )
-                    
-                    Spacer(Modifier.height(16.dp))
-                    
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_enter_atelier),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF8D6E63)
-                        )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            tint = Color(0xFF8D6E63),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}

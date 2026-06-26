@@ -38,8 +38,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.kocolor.mobile.features.home.R
-import com.zoewave.probase.kocolor.mobile.features.home.ui.SectionTitle
-import com.zoewave.probase.kocolor.mobile.features.home.ui.SectionTitleUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class WellnessInsightsUiState(
