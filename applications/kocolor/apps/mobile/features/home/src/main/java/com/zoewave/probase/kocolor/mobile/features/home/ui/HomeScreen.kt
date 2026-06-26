@@ -2,33 +2,54 @@ package com.zoewave.probase.kocolor.mobile.features.home.ui
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material3.*
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
@@ -42,16 +63,15 @@ import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.zoewave.probase.features.health.core.SkinInsight
-import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherSquareCard
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CollectionHubCard
+import com.zoewave.probase.kocolor.mobile.features.home.ui.components.HomeHeader
+import com.zoewave.probase.kocolor.mobile.features.home.ui.components.HomeHeaderUiState
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryUiState
-import com.zoewave.probase.core.model.ritual.FashionProfile
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 
 @Preview(showBackground = true)
 @Composable
@@ -137,11 +157,11 @@ fun HomeScreen(
             item {
                 HomeHeader(
                     uiState = HomeHeaderUiState(
-                        uiState.fashionProfile, 
-                        uiState.isDaytime, 
-                        uiState.beautyTip, 
-                        uiState.weather, 
-                        uiState.locationName, 
+                        uiState.fashionProfile,
+                        uiState.isDaytime,
+                        uiState.beautyTip,
+                        uiState.weather,
+                        uiState.locationName,
                         uiState.isLocationFallback,
                         uiState.headerBackgroundUrl
                     ),
@@ -151,14 +171,6 @@ fun HomeScreen(
             }
 
             item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
                     WellnessInsightsSection(
                         uiState = WellnessInsightsUiState(
                             uiState.wellnessInsights,
@@ -167,11 +179,10 @@ fun HomeScreen(
                             uiState.hydrationGoalLiters,
                             uiState.isHealthPermissionGranted
                         ),
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         onEvent = {},
                         navTo = navTo
                     )
-                }
             }
 
             item {
@@ -246,116 +257,6 @@ fun HomeScreen(
     }
 }
 
-data class HomeHeaderUiState(
-    val fashionProfile: FashionProfile?,
-    val isDaytime: Boolean,
-    val beautyTip: String,
-    val weather: LayeredWeatherUiState? = null,
-    val locationName: String? = null,
-    val isLocationFallback: Boolean = false,
-    val backgroundUrl: String? = null
-)
-
-@Composable
-fun HomeHeader(
-    uiState: HomeHeaderUiState,
-    modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
-) {
-    val gradientColors = if (uiState.isDaytime) {
-        listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surface)
-    } else {
-        listOf(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.surfaceVariant)
-    }
-
-    val expressiveShape = RoundedCornerShape(topStart = 48.dp, topEnd = 12.dp, bottomEnd = 48.dp, bottomStart = 12.dp)
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(expressiveShape)
-            .background(Brush.linearGradient(colors = gradientColors))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), expressiveShape)
-    ) {
-        val bgRes = when {
-            uiState.weather?.conditions?.contains(com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherCondition.THUNDER) == true -> R.drawable.home_storm_bg
-            uiState.weather?.conditions?.contains(com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherCondition.RAINY) == true -> R.drawable.home_rainy_bg
-            uiState.weather?.conditions?.contains(com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherCondition.CLOUDY) == true -> R.drawable.home_cloudy_bg
-            else -> R.drawable.home_sunny_bg
-        }
-
-        AsyncImage(
-            model = bgRes,
-            contentDescription = null,
-            modifier = Modifier
-                .matchParentSize()
-                .alpha(0.4f)
-                .blur(16.dp),
-            contentScale = ContentScale.Crop
-        )
-
-        Column(
-            modifier = Modifier.padding(32.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = if (uiState.isDaytime) stringResource(R.string.applications_kocolor_apps_mobile_features_home_radiant_morning) else stringResource(R.string.applications_kocolor_apps_mobile_features_home_deep_restoration),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
-                )
-
-                LayeredWeatherSquareCard(
-                    uiState = uiState.weather?.copy(
-                        locationName = if (uiState.isLocationFallback) stringResource(R.string.applications_kocolor_apps_mobile_features_home_location_not_found) else uiState.locationName
-                    ),
-                    modifier = Modifier.padding(start = 16.dp).alpha(if (uiState.isLocationFallback) 0.6f else 1f),
-                    onClick = { navTo(KoColorRoute.Weather) }
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth().alpha(0.9f),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.Top
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AutoAwesome,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp).padding(top = 4.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = uiState.beautyTip,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontFamily = FontFamily.Serif,
-                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                    lineHeight = 28.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            if (uiState.fashionProfile != null) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(color = MaterialTheme.colorScheme.primary, shape = CircleShape) {
-                        Text(text = uiState.fashionProfile.seasonalType.name, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_undertone_format, uiState.fashionProfile.undertone.name.lowercase().replaceFirstChar { it.uppercase() }), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-        }
-    }
-}
-
 data class WellnessInsightsUiState(
     val insights: List<SkinInsight>,
     val sleepDuration: String?,
@@ -377,9 +278,19 @@ fun WellnessInsightsSection(
         ElevatedCard(
             modifier = Modifier.fillMaxWidth().clickable { navTo(KoColorRoute.Health) },
             shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+            colors = CardDefaults.elevatedCardColors(containerColor = Color.Transparent),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
         ) {
-            Column(modifier = Modifier.padding(24.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(Color(0xFFF0F4F8), Color(0xFFD9E2EC))
+                        )
+                    )
+                    .padding(24.dp)
+            ) {
                 if (!uiState.isPermissionGranted) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
                         Icon(Icons.Default.Lock, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
@@ -393,7 +304,7 @@ fun WellnessInsightsSection(
                         VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                         BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.WaterDrop, stringResource(R.string.applications_kocolor_apps_mobile_features_home_hydration), stringResource(R.string.applications_kocolor_apps_mobile_features_home_hydration_format, uiState.hydrationLiters), Color(0xFF2196F3)), modifier = Modifier.weight(1f), onEvent = {}, navTo = {})
                         VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.AutoAwesome, stringResource(R.string.applications_kocolor_apps_mobile_features_home_vitals), if (uiState.insights.isEmpty()) stringResource(R.string.applications_kocolor_apps_mobile_features_home_optimal) else stringResource(R.string.applications_kocolor_apps_mobile_features_home_alerts_format, uiState.insights.size), if (uiState.insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)), modifier = Modifier.weight(1f), onEvent = {}, navTo = {})
+                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.Favorite, stringResource(R.string.applications_kocolor_apps_mobile_features_home_vitals), if (uiState.insights.isEmpty()) stringResource(R.string.applications_kocolor_apps_mobile_features_home_optimal) else stringResource(R.string.applications_kocolor_apps_mobile_features_home_alerts_format, uiState.insights.size), if (uiState.insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)), modifier = Modifier.weight(1f), onEvent = {}, navTo = {})
                     }
                 }
             }
@@ -415,12 +326,61 @@ fun BioMarkerItem(
         horizontalAlignment = Alignment.CenterHorizontally, 
         verticalArrangement = Arrangement.Center
     ) {
-        Surface(color = uiState.color.copy(alpha = 0.1f), shape = CircleShape, modifier = Modifier.size(40.dp)) {
-            Box(contentAlignment = Alignment.Center) { Icon(uiState.icon, null, modifier = Modifier.size(18.dp), tint = uiState.color) }
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .drawBehind {
+                    drawCircle(
+                        color = uiState.color.copy(alpha = 0.12f),
+                        radius = size.maxDimension / 2 + 12f
+                    )
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                color = Color.White,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.size(48.dp),
+                shadowElevation = 2.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = uiState.icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = uiState.color
+                    )
+                }
+            }
+            
+            // Status Dot
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 2.dp, bottom = 2.dp)
+                    .size(10.dp)
+                    .background(uiState.color, CircleShape)
+                    .border(1.5.dp, Color.White, CircleShape)
+            )
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = uiState.label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), fontWeight = FontWeight.Bold, maxLines = 1)
-        Text(text = uiState.value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        Text(
+            text = uiState.label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            fontWeight = FontWeight.Bold,
+            maxLines = 1
+        )
+        
+        Text(
+            text = uiState.value,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Black,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1
+        )
     }
 }
 
