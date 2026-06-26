@@ -35,8 +35,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -122,35 +127,59 @@ private fun ShortHeader(
             contentAlignment = Alignment.Center
         ) {
             Box(
-                modifier = Modifier.size(100.dp),
+                modifier = Modifier.size(110.dp),
                 contentAlignment = Alignment.Center
             ) {
-                // Cloud Icon (Premium White/Frosted look)
+                // Cloud Icon with Premium Gradient and Shadow
                 Icon(
                     imageVector = Icons.Default.Cloud,
                     contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.85f),
-                    modifier = Modifier.size(86.dp)
+                    modifier = Modifier
+                        .size(100.dp)
+                        .graphicsLayer {
+                            alpha = 0.99f
+                            shadowElevation = 8f
+                            shape = CircleShape
+                            clip = false
+                        }
+                        .drawWithContent {
+                            drawContent()
+                            drawRect(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(Color.White, Color.White.copy(alpha = 0.4f))
+                                ),
+                                blendMode = BlendMode.SrcIn
+                            )
+                        },
+                    tint = Color.Unspecified
                 )
 
-                // Temperature Text (Centered inside cloud)
+                // Temperature Text (Popping Bold Numbers with Shadow)
                 Text(
                     text = "${uiState.weather?.temperature?.toInt() ?: 24}°",
-                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 28.sp),
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF374151), // Dark charcoal
-                    modifier = Modifier.align(Alignment.Center).padding(top = 6.dp)
+                    style = MaterialTheme.typography.displayMedium.copy(
+                        fontSize = 42.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = (-1).sp,
+                        shadow = Shadow(
+                            color = Color.Black.copy(alpha = 0.15f),
+                            offset = Offset(0f, 4f),
+                            blurRadius = 10f
+                        )
+                    ),
+                    color = Color(0xFF374151), // High contrast charcoal
+                    modifier = Modifier.align(Alignment.Center).padding(top = 10.dp)
                 )
 
-                // UV Badge (Accented purple circle)
+                // UV Badge (Accented purple circle with shadow)
                 Surface(
                     color = Color(0xFF9E84C1),
                     shape = CircleShape,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(top = 4.dp, end = 4.dp)
-                        .size(34.dp),
-                    shadowElevation = 1.dp
+                        .padding(top = 2.dp, end = 2.dp)
+                        .size(36.dp),
+                    shadowElevation = 6.dp
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -189,7 +218,7 @@ private fun ShortHeader(
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF1F2937),
-                letterSpacing = (-0.3).sp
+                letterSpacing = (-0.5).sp
             )
         }
     }
