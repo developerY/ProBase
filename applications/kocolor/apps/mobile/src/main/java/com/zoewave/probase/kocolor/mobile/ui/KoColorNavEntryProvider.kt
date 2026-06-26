@@ -23,8 +23,6 @@ import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverSc
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailUiState
-import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticEditScreen
-import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticEditUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsEvent
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticsViewModel
@@ -414,8 +412,13 @@ fun koColorNavEntryProvider(
         is KoColorRoute.CosmeticEdit -> NavEntry(route) {
             val viewModel: CosmeticsViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            CosmeticEditScreen(
-                uiState = CosmeticEditUiState(route.itemId, state.draftItem),
+            
+            androidx.compose.runtime.LaunchedEffect(route.itemId) {
+                viewModel.onEvent(CosmeticsEvent.InitializeEdit(route.itemId))
+            }
+
+            StitchProductBuilder(
+                uiState = state,
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
