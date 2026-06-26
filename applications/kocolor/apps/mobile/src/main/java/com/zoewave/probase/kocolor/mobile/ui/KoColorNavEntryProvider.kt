@@ -112,7 +112,7 @@ fun koColorNavEntryProvider(
                 uiState = state,
                 onEvent = { event ->
                     when (event) {
-                        is BoxCaptureEvent.Success -> onNavigateTo(KoColorRoute.CosmeticDetail(event.item.id))
+                        is BoxCaptureEvent.Success -> onBack()
                         BoxCaptureEvent.Dismiss -> onBack()
                         else -> viewModel.onEvent(event)
                     }

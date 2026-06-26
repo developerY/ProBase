@@ -34,12 +34,32 @@ import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.cosmetics.ui.components.AtelierExpandableSection
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Add Mode")
 @Composable
-private fun StitchProductBuilderPreview() {
+private fun StitchProductBuilderAddPreview() {
     MaterialTheme {
         StitchProductBuilder(
             uiState = CosmeticsUiState(),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Edit Mode")
+@Composable
+private fun StitchProductBuilderEditPreview() {
+    MaterialTheme {
+        StitchProductBuilder(
+            uiState = CosmeticsUiState(
+                draftItem = CosmeticItem(
+                    id = 1L,
+                    name = "Luminous Silk Foundation",
+                    brand = "Armani",
+                    macroCategory = MacroCategory.COMPLEXION,
+                    microCategory = MicroCategory.FOUNDATION
+                )
+            ),
             onEvent = {},
             navTo = {}
         )
@@ -67,6 +87,7 @@ fun StitchProductBuilder(
     var showChemistryMenu by remember { mutableStateOf(false) }
     var showFinishMenu by remember { mutableStateOf(false) }
     var showCoverageMenu by remember { mutableStateOf(false) }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
 
     val expandedSections = remember { 
         mutableStateMapOf<String, Boolean>().apply {
@@ -128,6 +149,32 @@ fun StitchProductBuilder(
         return
     }
 
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            confirmButton = {
+                TextButton(
+                    onClick = { 
+                        onEvent(CosmeticsEvent.DeleteItem(draft.id))
+                        showDeleteConfirmation = false
+                        navTo(KoColorRoute.Back)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
+                ) {
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_delete_button), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_cancel))
+                }
+            },
+            title = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_delete_confirm_title)) },
+            text = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_delete_confirm_message, draft.name)) },
+            shape = RoundedCornerShape(24.dp)
+        )
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -151,6 +198,9 @@ fun StitchProductBuilder(
                 },
                 actions = {
                     if (isEditMode) {
+                        IconButton(onClick = { showDeleteConfirmation = true }) {
+                            Icon(Icons.Default.DeleteOutline, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_delete_desc), tint = Color.Gray)
+                        }
                         IconButton(onClick = {
                             onEvent(CosmeticsEvent.UpdateItem(draft))
                             navTo(KoColorRoute.Back)

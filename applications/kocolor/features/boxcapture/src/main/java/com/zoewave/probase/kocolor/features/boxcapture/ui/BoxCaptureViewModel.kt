@@ -11,12 +11,18 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
-import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
+import com.zoewave.probase.core.model.ritual.ChemistryBase
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.Coverage
+import com.zoewave.probase.core.model.ritual.Finish
+import com.zoewave.probase.core.model.ritual.Formulation
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.features.boxcapture.data.LocalProductAnalyzer
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureStep
-import com.zoewave.probase.core.model.ritual.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -65,7 +71,7 @@ private data class ExtractedCosmetic(
 class BoxCaptureViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val aiSettings: AiConfigurationSettings,
-    private val repository: CosmeticInventoryRepository,
+    private val sessionRepository: FashionSessionRepository,
     private val localAnalyzer: LocalProductAnalyzer
 ) : ViewModel() {
 
@@ -83,23 +89,9 @@ class BoxCaptureViewModel @Inject constructor(
         when (event) {
             is BoxCaptureEvent.Capture -> onPhotoCaptured(event.uri)
             is BoxCaptureEvent.BarcodeScanned -> onBarcodeScanned(event.code)
-            is BoxCaptureEvent.UpdateDraft -> onUpdateDraft(event.item)
-            BoxCaptureEvent.ConfirmSave -> onConfirmSave()
             BoxCaptureEvent.Retry -> reset()
             BoxCaptureEvent.Dismiss -> { /* Handled in UI layer typically */ }
             is BoxCaptureEvent.Success -> { /* Handled in UI layer typically */ }
-        }
-    }
-
-    private fun onUpdateDraft(item: CosmeticItem) {
-        _uiState.value = BoxCaptureUiState.Reviewing(item)
-    }
-
-    private fun onConfirmSave() {
-        val item = (uiState.value as? BoxCaptureUiState.Reviewing)?.item ?: return
-        viewModelScope.launch {
-            val savedId = repository.saveCosmeticItem(item)
-            _uiState.value = BoxCaptureUiState.Success(item.copy(id = savedId))
         }
     }
 
@@ -236,7 +228,8 @@ class BoxCaptureViewModel @Inject constructor(
                         batchCode = scannedBarcode ?: item.batchCode
                     )
 
-                    _uiState.value = BoxCaptureUiState.Reviewing(item)
+                    sessionRepository.setCosmeticDraft(item)
+                    _uiState.value = BoxCaptureUiState.Success(item)
                 } else {
                     Log.e(TAG, "Gemini returned null text in response.")
                     _uiState.value = BoxCaptureUiState.Error("Failed to extract data from images.")
@@ -269,7 +262,7 @@ class BoxCaptureViewModel @Inject constructor(
                 return
             }
             val item = localAnalyzer.analyze(bitmaps)
-            repository.saveCosmeticItem(item)
+            sessionRepository.setCosmeticDraft(item)
             _uiState.value = BoxCaptureUiState.Success(item)
         } catch (e: Exception) {
             _uiState.value = BoxCaptureUiState.Error("Local analysis failed: ${e.localizedMessage}")
