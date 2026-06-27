@@ -108,7 +108,7 @@ fun BoutiqueCard(
                         Spacer(Modifier.height(24.dp))
                         
                         Surface(
-                            onClick = { uriHandler.openUri("https://www.kocolor.com") },
+                            onClick = {}, // uriHandler.openUri("https://www.kocolor.com") },
                             color = Color.Transparent,
                             modifier = Modifier.fillMaxWidth()
                         ) {
