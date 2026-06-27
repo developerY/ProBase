@@ -61,6 +61,13 @@ fun RoutinesScreen(
             contentPadding = PaddingValues(24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
+            val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+            val currentActiveTime = when {
+                hour in 5..9 -> RoutineTime.MORNING
+                hour in 10..19 -> RoutineTime.MEALS
+                else -> RoutineTime.EVENING
+            }
+
             item {
                 Column {
                     Text(
@@ -81,6 +88,7 @@ fun RoutinesScreen(
                 uiState.morningRoutine?.let { routine ->
                     HeroRitualCard(
                         uiState = routine,
+                        isActive = currentActiveTime == RoutineTime.MORNING,
                         onEvent = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) },
                         navTo = navTo
                     )
@@ -91,6 +99,7 @@ fun RoutinesScreen(
                 uiState.mealsRoutine?.let { routine ->
                     HeroRitualCard(
                         uiState = routine,
+                        isActive = currentActiveTime == RoutineTime.MEALS,
                         onEvent = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) },
                         navTo = navTo
                     )
@@ -101,6 +110,7 @@ fun RoutinesScreen(
                 uiState.eveningRoutine?.let { routine ->
                     HeroRitualCard(
                         uiState = routine,
+                        isActive = currentActiveTime == RoutineTime.EVENING,
                         onEvent = { onEvent(RoutinesEvent.ResetRoutine(routine.id)) },
                         navTo = navTo
                     )

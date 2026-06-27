@@ -5,8 +5,11 @@
     <string name="applications_kocolor_features_routines_serene_rituals">Serene Rituals.</string>
     <string name="applications_kocolor_features_routines_serene_rituals_desc">Daily acts of mindful care.</string>
     <string name="applications_kocolor_features_routines_morning_ritual">Morning Ritual</string>
+    <string name="applications_kocolor_features_routines_meals_ritual">Meals Ritual</string>
     <string name="applications_kocolor_features_routines_evening_ritual">Evening Ritual</string>
     <string name="applications_kocolor_features_routines_current_ritual">CURRENT RITUAL</string>
+    <string name="applications_kocolor_features_routines_morning_ritual_label">MORNING RITUAL</string>
+    <string name="applications_kocolor_features_routines_meals_ritual_label">MEALS RITUAL</string>
     <string name="applications_kocolor_features_routines_evening_ritual_label">EVENING RITUAL</string>
     <string name="applications_kocolor_features_routines_progress_format">%1$d/%2$d</string>
     <string name="applications_kocolor_features_routines_done">DONE</string>
@@ -17,7 +20,6 @@
     <string name="applications_kocolor_features_routines_insight_quote">\"Patience is the foundation of every lasting ritual.\"</string>
     <string name="applications_kocolor_features_routines_view_progress">VIEW PROGRESS</string>
     <string name="applications_kocolor_features_routines_save">Save</string>
-    <string name="applications_kocolor_features_routines_meals_ritual">Meals Ritual</string>
     <string name="applications_kocolor_features_routines_bio_sync_ritual">BIO-SYNC RITUAL</string>
     <string name="applications_kocolor_features_routines_meals_desc">Nourish your metabolism with precise biochemical timing.</string>
     <string name="applications_kocolor_features_routines_ritual_label">RITUAL</string>

@@ -55,6 +55,7 @@ private fun HeroRitualCardPreview() {
                     steps = emptyList(),
                     date = 0L
                 ),
+                isActive = true,
                 onEvent = {},
                 navTo = {}
             )
@@ -76,6 +77,7 @@ private fun DailyInsightBannerPreview() {
 fun HeroRitualCard(
     uiState: BeautyRoutine,
     modifier: Modifier = Modifier,
+    isActive: Boolean = false,
     onEvent: (RoutinesEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -91,11 +93,15 @@ fun HeroRitualCard(
         else -> routine.title
     }
 
-    val label = when (routine.time) {
-        RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_current_ritual)
-        RoutineTime.MEALS -> stringResource(R.string.applications_kocolor_features_routines_bio_sync_ritual)
-        RoutineTime.EVENING -> stringResource(R.string.applications_kocolor_features_routines_evening_ritual_label)
-        else -> stringResource(R.string.applications_kocolor_features_routines_ritual_label)
+    val label = if (isActive) {
+        stringResource(R.string.applications_kocolor_features_routines_current_ritual)
+    } else {
+        when (routine.time) {
+            RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_morning_ritual_label)
+            RoutineTime.MEALS -> stringResource(R.string.applications_kocolor_features_routines_meals_ritual_label)
+            RoutineTime.EVENING -> stringResource(R.string.applications_kocolor_features_routines_evening_ritual_label)
+            else -> stringResource(R.string.applications_kocolor_features_routines_ritual_label)
+        }
     }
 
     val description = when (routine.time) {
