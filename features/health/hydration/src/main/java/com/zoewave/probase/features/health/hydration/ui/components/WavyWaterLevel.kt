@@ -8,8 +8,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.math.sin
+
+@Preview(showBackground = true)
+@Composable
+private fun WavyWaterLevelPreview() {
+    WavyWaterLevel(progress = 0.6f)
+}
 
 @Composable
 fun WavyWaterLevel(

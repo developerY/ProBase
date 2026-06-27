@@ -2,7 +2,15 @@ package com.zoewave.probase.features.health.hydration.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -15,7 +23,33 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+
+@Preview(showBackground = true)
+@Composable
+private fun HydrationWaterDropCardPreviewEmpty() {
+    MaterialTheme {
+        HydrationWaterDropCard(
+            uiState = HydrationWaterDropUiState(currentLiters = 0.5, targetLiters = 2.0),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HydrationWaterDropCardPreviewFull() {
+    MaterialTheme {
+        HydrationWaterDropCard(
+            uiState = HydrationWaterDropUiState(currentLiters = 1.5, targetLiters = 2.0),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
 
 data class HydrationWaterDropUiState(
     val currentLiters: Double,
@@ -45,13 +79,13 @@ fun HydrationWaterDropCard(
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            listOf(Color(0xFF81D4FA).copy(alpha = 0.4f), Color(0xFFE1F5FE).copy(alpha = 0.2f))
+                            listOf(Color(0xFF039BE5).copy(alpha = 0.5f), Color(0xFFE1F5FE).copy(alpha = 0.3f))
                         )
                     )
             )
 
             Column(
-                modifier = Modifier.fillMaxSize().padding(32.dp),
+                modifier = Modifier.fillMaxSize().padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -59,24 +93,24 @@ fun HydrationWaterDropCard(
                     text = "Current Progress", 
                     style = MaterialTheme.typography.titleLarge,
                     fontFamily = FontFamily.Serif,
-                    color = Color.Black.copy(alpha = 0.7f)
+                    color = Color.Black.copy(alpha = 0.6f)
                 )
 
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(24.dp))
 
                 WaterDropVisual(
                     progress = progress,
-                    modifier = Modifier.size(220.dp)
+                    modifier = Modifier.size(300.dp)
                 )
 
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(24.dp))
 
                 Text(
                     text = "${(progress * 100).toInt()}%",
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Serif,
-                    color = Color.Black.copy(alpha = 0.8f)
+                    color = Color.Black.copy(alpha = 0.9f)
                 )
             }
         }

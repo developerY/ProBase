@@ -1,8 +1,20 @@
 package com.zoewave.probase.features.health.hydration.ui.components
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -12,28 +24,68 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlin.math.sin
 
+@Preview(showBackground = true)
+@Composable
+private fun WaterDropVisualPreview() {
+    Box(modifier = Modifier.size(200.dp)) {
+        WaterDropVisual(progress = 0.4f)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WaterDropLiquidContainerPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.background(Color.Gray).padding(16.dp)) {
+            WaterDropLiquidContainer(progress = 0.7f)
+        }
+    }
+}
+
 val WaterDropShape = GenericShape { size, _ ->
-    val width = size.width
-    val height = size.height
+    val w = size.width
+    val h = size.height
     
-    moveTo(width / 2f, 0f)
+    // Top Tip
+    moveTo(w / 2f, 0f)
+    
+    // Elegant neck to belly (narrower)
     cubicTo(
-        x1 = width * 0.1f, y1 = height * 0.4f,
-        x2 = 0f, y2 = height * 0.7f,
-        x3 = width / 2f, y3 = height
+        x1 = w * 0.5f, y1 = h * 0.1f,
+        x2 = w * 0.1f, y2 = h * 0.4f,
+        x3 = w * 0.1f, y3 = h * 0.65f
     )
+    
+    // Smoothly rounded base
     cubicTo(
-        x1 = width, y1 = height * 0.7f,
-        x2 = width * 0.9f, y2 = height * 0.4f,
-        x3 = width / 2f, y3 = 0f
+        x1 = w * 0.1f, y1 = h * 0.98f,
+        x2 = w * 0.9f, y2 = h * 0.98f,
+        x3 = w * 0.9f, y3 = h * 0.65f
     )
+    
+    // Right side back to tip
+    cubicTo(
+        x1 = w * 0.9f, y1 = h * 0.4f,
+        x2 = w * 0.5f, y2 = h * 0.1f,
+        x3 = w / 2f, y3 = 0f
+    )
+    
     close()
 }
 
@@ -53,35 +105,96 @@ fun WaterDropVisual(
         label = "wave_phase"
     )
 
+    val textMeasurer = rememberTextMeasurer()
+    val markerStyle = MaterialTheme.typography.labelSmall.copy(
+        fontSize = 15.sp,
+        color = Color.Black.copy(alpha = 0.45f),
+        fontWeight = FontWeight.Black,
+        letterSpacing = 1.sp
+    )
+
     Box(
-        modifier = modifier
-            .clip(WaterDropShape),
+        modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        // Background Glow/Glass
+        // 1. Outer Halo Glow (Not clipped)
         Canvas(modifier = Modifier.fillMaxSize()) {
+            val outlinePath = WaterDropShape.createOutline(size, layoutDirection, this).let { (it as Outline.Generic).path }
             drawPath(
-                path = Path().apply {
-                    val w = size.width
-                    val h = size.height
-                    moveTo(w / 2f, 0f)
-                    cubicTo(w * 0.1f, h * 0.4f, 0f, h * 0.7f, w / 2f, h)
-                    cubicTo(w, h * 0.7f, w * 0.9f, h * 0.4f, w / 2f, 0f)
-                    close()
-                },
+                path = outlinePath,
                 brush = Brush.radialGradient(
-                    colors = listOf(Color.White.copy(alpha = 0.2f), Color.Transparent),
+                    colors = listOf(Color(0xFFE1F5FE).copy(alpha = 0.5f), Color.Transparent),
                     center = center,
-                    radius = size.width / 2f
+                    radius = size.width / 1.1f
                 )
             )
         }
 
-        // Liquid Engine
-        WavyLiquidEngine(progress = progress, phase = phase)
+        // 2. The Water Drop Container (Clipped for Liquid)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(WaterDropShape)
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val outlinePath = WaterDropShape.createOutline(size, layoutDirection, this).let { (it as Outline.Generic).path }
+                
+                // Glass Body Fill
+                drawPath(
+                    path = outlinePath,
+                    color = Color.Black.copy(alpha = 0.06f)
+                )
 
-        // Specular Highlight
-        Canvas(modifier = Modifier.fillMaxSize().alpha(0.3f)) {
+                // Bold Outline
+                drawPath(
+                    path = outlinePath,
+                    color = Color(0xFF424242).copy(alpha = 0.25f),
+                    style = Stroke(width = 3.dp.toPx())
+                )
+            }
+
+            // Liquid Engine
+            WavyLiquidEngine(progress = progress, phase = phase)
+        }
+
+        // 3. Time Markers (Drawn on top, NOT clipped so numbers stay whole)
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+            // Lowered top marker to 0.85f to avoid the narrow tip
+            val markers = listOf(
+                "08:00" to 0.22f,
+                "12:00" to 0.50f,
+                "16:00" to 0.72f,
+                "20:00" to 0.88f
+            )
+
+            markers.forEach { (time, pos) ->
+                val y = h * (1f - pos)
+                val textLayoutResult = textMeasurer.measure(time, markerStyle)
+                val textWidth = textLayoutResult.size.width
+                val textHeight = textLayoutResult.size.height
+
+                // Gauge line (Subtle)
+                drawLine(
+                    color = Color.Black.copy(alpha = 0.06f),
+                    start = Offset(w * 0.25f, y),
+                    end = Offset(w * 0.75f, y),
+                    strokeWidth = 1.dp.toPx()
+                )
+
+                // Draw Time Text centered
+                drawText(
+                    textMeasurer = textMeasurer,
+                    text = time,
+                    style = markerStyle,
+                    topLeft = Offset(w / 2f - textWidth / 2f, y - textHeight / 2f)
+                )
+            }
+        }
+
+        // 4. Specular Highlight
+        Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
             val w = size.width
             val h = size.height
             val highlightPath = Path().apply {
@@ -91,7 +204,7 @@ fun WaterDropVisual(
             drawPath(
                 path = highlightPath,
                 color = Color.White,
-                style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+                style = Stroke(width = 5.dp.toPx(), cap = StrokeCap.Round)
             )
         }
     }
