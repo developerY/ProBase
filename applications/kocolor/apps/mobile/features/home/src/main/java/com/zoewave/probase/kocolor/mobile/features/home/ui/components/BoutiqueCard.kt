@@ -1,18 +1,19 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui.components
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -23,6 +24,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,73 +49,87 @@ fun BoutiqueCard(
     navTo: (KoColorRoute) -> Unit = {}
 ) {
     val uriHandler = LocalUriHandler.current
+    var isExpanded by remember { mutableStateOf(false) }
+
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .height(440.dp)
-            .clickable { uriHandler.openUri("https://www.kocolor.com") },
+            .animateContentSize()
+            .clickable { isExpanded = !isExpanded },
         shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.elevatedCardColors(containerColor = Color.White),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+            // Background Image - Stays strictly behind the white area
             AsyncImage(
-                model = R.drawable.boutique_bg,
+                model = R.drawable.kocolor_store_front,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.matchParentSize(),
+                alpha = 0.4f // Faded look matching mockup
             )
             
-            Surface(
+            // Premium Frosted Overlay
+            Box(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                color = Color.White.copy(alpha = 0.9f),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                    .matchParentSize()
+                    .background(Color.White.copy(alpha = 0.75f))
+            )
+
+            Column(
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_art_of_color),
-                        style = MaterialTheme.typography.labelSmall,
-                        letterSpacing = 2.sp,
-                        color = Color.Gray,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_boutique_title),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1A1A)
-                    )
-                    Text(
-                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_boutique_desc),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.DarkGray
-                    )
-                    
-                    Spacer(Modifier.height(16.dp))
-                    
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                Text(
+                    text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_art_of_color),
+                    style = MaterialTheme.typography.labelSmall,
+                    letterSpacing = 2.sp,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_boutique_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1A1A1A)
+                )
+
+                AnimatedVisibility(visible = isExpanded) {
+                    Column {
+                        Spacer(Modifier.height(8.dp))
                         Text(
-                            text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_enter_atelier),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF8D6E63)
+                            text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_boutique_desc),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.DarkGray
                         )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            tint = Color(0xFF8D6E63),
-                            modifier = Modifier.size(18.dp)
-                        )
+                        
+                        Spacer(Modifier.height(24.dp))
+                        
+                        Surface(
+                            onClick = {}, // uriHandler.openUri("https://www.kocolor.com") },
+                            color = Color.Transparent,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_enter_atelier),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF8D6E63)
+                                )
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = null,
+                                    tint = Color(0xFF8D6E63),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
