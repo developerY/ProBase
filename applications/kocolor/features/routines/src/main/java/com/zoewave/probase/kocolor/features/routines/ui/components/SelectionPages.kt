@@ -2,14 +2,27 @@ package com.zoewave.probase.kocolor.features.routines.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,12 +31,55 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.model.KoColorRoute
+
+@Preview(showBackground = true)
+@Composable
+private fun MacroSelectionPagePreview() {
+    MaterialTheme {
+        MacroSelectionPage(uiState = Unit, onEvent = {}, navTo = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MicroSelectionPagePreview() {
+    MaterialTheme {
+        MicroSelectionPage(uiState = MicroSelectionUiState(MacroCategory.PREP), onEvent = {}, navTo = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ItemSelectionPagePreview() {
+    MaterialTheme {
+        ItemSelectionPage(
+            uiState = ItemSelectionUiState(
+                items = listOf(
+                    CosmeticItem(id = 1, name = "Product 1", brand = "Brand A", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.CLEANSER),
+                    CosmeticItem(id = 2, name = "Product 2", brand = "Brand B", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.TONER)
+                ),
+                selectedIds = listOf(1)
+            ),
+            onEvent = {},
+            navTo = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SelectionRowPreview() {
+    MaterialTheme {
+        SelectionRow(uiState = "Skincare & Prep", onEvent = {}, navTo = {})
+    }
+}
 
 @Composable
 fun MacroSelectionPage(

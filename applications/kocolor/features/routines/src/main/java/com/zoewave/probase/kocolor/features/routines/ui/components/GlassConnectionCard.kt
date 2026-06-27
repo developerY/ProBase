@@ -24,8 +24,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.model.ritual.GlassButtonState
+
+@Preview(showBackground = true)
+@Composable
+private fun GlassConnectionCardPreview() {
+    MaterialTheme {
+        GlassConnectionCard(buttonState = GlassButtonState.READY_TO_START, onButtonClick = {})
+    }
+}
 
 @Composable
 fun GlassConnectionCard(

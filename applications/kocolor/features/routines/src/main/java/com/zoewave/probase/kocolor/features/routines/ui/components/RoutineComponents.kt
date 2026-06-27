@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -40,6 +41,36 @@ import com.zoewave.probase.core.model.ritual.RoutineTime
 import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesEvent
 import com.zoewave.probase.kocolor.model.KoColorRoute
+
+@Preview(showBackground = true)
+@Composable
+private fun HeroRitualCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            HeroRitualCard(
+                uiState = BeautyRoutine(
+                    id = 1,
+                    title = "Morning Ritual",
+                    time = RoutineTime.MORNING,
+                    steps = emptyList(),
+                    date = 0L
+                ),
+                onEvent = {},
+                navTo = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DailyInsightBannerPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            DailyInsightBanner(uiState = Unit, onEvent = {}, navTo = {})
+        }
+    }
+}
 
 @Composable
 fun HeroRitualCard(
