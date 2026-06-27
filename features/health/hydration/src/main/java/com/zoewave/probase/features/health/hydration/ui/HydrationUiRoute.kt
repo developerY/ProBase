@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.rounded.LocalCafe
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.WineBar
@@ -92,6 +93,11 @@ fun HydrationScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { onEvent(HydrationUiEvent.ResetProgress) }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Reset Today's Progress")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

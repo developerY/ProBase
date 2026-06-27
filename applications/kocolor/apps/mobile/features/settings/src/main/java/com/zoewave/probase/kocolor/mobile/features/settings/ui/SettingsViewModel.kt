@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
+import com.zoewave.probase.core.data.service.health.HealthSessionManager
 import com.zoewave.probase.core.model.ritual.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +42,7 @@ sealed class SettingsEvent {
     data class OnPaletteSelected(val palette: String) : SettingsEvent()
     data class OnTempUnitChanged(val unit: String) : SettingsEvent()
     data class OnHydrationGoalChanged(val goal: Double) : SettingsEvent()
+    data object OnResetHydrationProgress : SettingsEvent()
     data object OnGenerateSampleCosmetics : SettingsEvent()
     data class InitializeWithSection(val section: String) : SettingsEvent()
 }
@@ -48,7 +50,8 @@ sealed class SettingsEvent {
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val koSettings: KoColorSettings,
-    private val cosmeticDao: CosmeticDao
+    private val cosmeticDao: CosmeticDao,
+    private val healthSessionManager: HealthSessionManager
 ) : ViewModel() {
 
     private val _expandState = MutableStateFlow(
@@ -122,6 +125,11 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.OnHydrationGoalChanged -> {
                 viewModelScope.launch {
                     koSettings.saveHydrationGoal(event.goal)
+                }
+            }
+            SettingsEvent.OnResetHydrationProgress -> {
+                viewModelScope.launch {
+                    healthSessionManager.deleteTodayHydration()
                 }
             }
             SettingsEvent.OnGenerateSampleCosmetics -> {
