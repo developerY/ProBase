@@ -145,14 +145,19 @@ fun StyleHealthDashboard(
                         uiState = SummaryMetricUiState(
                             icon = Icons.Rounded.Favorite,
                             label = stringResource(R.string.applications_kocolor_apps_mobile_core_health_vitals),
-                            value = if (uiState.latestHeartRate != null) stringResource(R.string.applications_kocolor_apps_mobile_core_health_vitals_normal) else stringResource(R.string.applications_kocolor_apps_mobile_core_health_vitals_syncing),
-                            color = if (uiState.latestHeartRate != null) Color(0xFF4CAF50) else Color.Gray
+                            value = if (uiState.alerts.isEmpty()) stringResource(R.string.applications_kocolor_apps_mobile_core_health_optimal) 
+                                    else stringResource(R.string.applications_kocolor_apps_mobile_core_health_alerts_format, uiState.alerts.size),
+                            color = if (uiState.alerts.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)
                         ),
                         onEvent = {},
                         navTo = {}
                     )
                 }
             }
+        }
+
+        if (uiState.alerts.isNotEmpty()) {
+            SkinInsightsSection(uiState.alerts)
         }
 
         HydrationWaterDropCard(
@@ -229,6 +234,77 @@ data class SummaryMetricUiState(
     val value: String,
     val color: Color
 )
+
+@Composable
+private fun SkinInsightsSection(insights: List<com.zoewave.probase.features.health.core.SkinInsight>) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.applications_kocolor_apps_mobile_core_health_skin_insights),
+            style = MaterialTheme.typography.titleLarge,
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.Bold
+        )
+
+        insights.forEach { insight ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black.copy(alpha = 0.05f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(20.dp),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Surface(
+                        color = if (insight.severity > 0.7f) Color(0xFFF44336).copy(alpha = 0.1f) else Color(0xFFFF9800).copy(alpha = 0.1f),
+                        shape = CircleShape,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Rounded.Favorite,
+                                null,
+                                modifier = Modifier.size(20.dp),
+                                tint = if (insight.severity > 0.7f) Color(0xFFF44336) else Color(0xFFFF9800)
+                            )
+                        }
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            text = insight.trigger,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2C2420)
+                        )
+                        Text(
+                            text = insight.manifestation,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Surface(
+                            color = Color(0xFFF9F7F2),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = "✨ " + insight.recommendation,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(12.dp),
+                                color = Color(0xFF4A4444)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 private fun SummaryMetricItem(

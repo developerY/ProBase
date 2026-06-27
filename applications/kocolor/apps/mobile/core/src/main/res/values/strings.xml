@@ -42,4 +42,7 @@
     <string name="applications_kocolor_apps_mobile_core_health_bpm">BPM</string>
     <string name="applications_kocolor_apps_mobile_core_health_lx">LX</string>
     <string name="applications_kocolor_apps_mobile_core_health_sleep_duration_format">%1$dh %2$dm</string>
+    <string name="applications_kocolor_apps_mobile_core_health_skin_insights">Skin Insights</string>
+    <string name="applications_kocolor_apps_mobile_core_health_alerts_format">%1$d Alerts</string>
+    <string name="applications_kocolor_apps_mobile_core_health_optimal">Optimal</string>
 </resources>
