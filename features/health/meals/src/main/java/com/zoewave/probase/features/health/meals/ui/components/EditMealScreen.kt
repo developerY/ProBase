@@ -15,12 +15,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.features.health.meals.data.Meal
 import com.zoewave.probase.features.health.meals.data.MetabolicPhase
 import com.zoewave.probase.features.health.meals.data.NutritionInfo
 import com.zoewave.probase.features.health.meals.ui.BioOptimizedColors
+
+@Preview(showBackground = true)
+@Composable
+private fun EditMealScreenPreview() {
+    MaterialTheme {
+        EditMealScreen(
+            meal = Meal(
+                id = "1",
+                name = "Golden Turmeric Elixir",
+                description = "Anti-inflammatory morning tonic to kickstart mTOR and cellular signaling.",
+                scientificFocus = "Curcumin Bioavailability",
+                phase = MetabolicPhase.Morning,
+                nutrition = NutritionInfo(
+                    calories = 120,
+                    protein = 2f,
+                    carbs = 15f,
+                    fat = 5f
+                ),
+                ingredients = emptyList(),
+                steps = emptyList()
+            ),
+            onSave = {},
+            onBack = {}
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

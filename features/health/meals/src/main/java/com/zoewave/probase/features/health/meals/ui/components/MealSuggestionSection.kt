@@ -14,14 +14,53 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.features.health.meals.data.Meal
+import com.zoewave.probase.features.health.meals.data.MetabolicPhase
+import com.zoewave.probase.features.health.meals.data.NutritionInfo
 import com.zoewave.probase.features.health.meals.ui.BioOptimizedColors
 import com.zoewave.probase.features.health.meals.ui.MealsUiState
 import com.zoewave.probase.features.health.meals.ui.MealsViewModel
+
+@Preview(showBackground = true, backgroundColor = 0xFF020617)
+@Composable
+private fun MealSuggestionSectionPreview() {
+    MaterialTheme {
+        MealSuggestionSection(
+            uiState = MealsUiState.Success(
+                meals = listOf(
+                    Meal(
+                        id = "1",
+                        name = "Golden Turmeric Elixir",
+                        description = "Morning tonic",
+                        scientificFocus = "Anti-inflammatory",
+                        phase = MetabolicPhase.Morning,
+                        nutrition = NutritionInfo(120, 2f, 15f, 5f),
+                        ingredients = emptyList(),
+                        steps = emptyList()
+                    ),
+                    Meal(
+                        id = "2",
+                        name = "Quinoa Power Bowl",
+                        description = "Lunch bowl",
+                        scientificFocus = "Microbiome support",
+                        phase = MetabolicPhase.MidDay,
+                        nutrition = NutritionInfo(450, 15f, 60f, 12f),
+                        ingredients = emptyList(),
+                        steps = emptyList()
+                    )
+                )
+            ),
+            currentMealId = "1",
+            onMealSelected = {},
+            onNavigateToPreparation = {}
+        )
+    }
+}
 
 @Composable
 fun MealSuggestionSection(
@@ -32,7 +71,23 @@ fun MealSuggestionSection(
     viewModel: MealsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    MealSuggestionSection(
+        uiState = uiState,
+        currentMealId = currentMealId,
+        onMealSelected = onMealSelected,
+        onNavigateToPreparation = onNavigateToPreparation,
+        modifier = modifier
+    )
+}
 
+@Composable
+fun MealSuggestionSection(
+    uiState: MealsUiState,
+    currentMealId: String?,
+    onMealSelected: (String) -> Unit,
+    onNavigateToPreparation: (Meal) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -49,7 +104,7 @@ fun MealSuggestionSection(
             
             if (uiState is MealsUiState.Success) {
                 Text(
-                    text = "${(uiState as MealsUiState.Success).meals.size} Options",
+                    text = "${uiState.meals.size} Options",
                     style = MaterialTheme.typography.labelSmall,
                     color = BioOptimizedColors.Cyan400
                 )
@@ -61,7 +116,7 @@ fun MealSuggestionSection(
                 CircularProgressIndicator(modifier = Modifier.size(24.dp))
             }
             is MealsUiState.Success -> {
-                val meals = (uiState as MealsUiState.Success).meals
+                val meals = uiState.meals
                 
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
