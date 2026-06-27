@@ -98,17 +98,20 @@ fun BoutiqueCard(
 
                 AnimatedVisibility(visible = isExpanded) {
                     Column {
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(12.dp))
                         Text(
                             text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_boutique_desc),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.DarkGray
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                lineHeight = 22.sp,
+                                letterSpacing = 0.2.sp
+                            ),
+                            color = Color(0xFF4A4A4A)
                         )
                         
-                        Spacer(Modifier.height(24.dp))
+                        Spacer(Modifier.height(32.dp))
                         
                         Surface(
-                            onClick = {}, // uriHandler.openUri("https://www.kocolor.com") },
+                            onClick = {}, 
                             color = Color.Transparent,
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -118,15 +121,17 @@ fun BoutiqueCard(
                             ) {
                                 Text(
                                     text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_enter_atelier),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 1.sp
+                                    ),
                                     color = Color(0xFF8D6E63)
                                 )
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                     contentDescription = null,
                                     tint = Color(0xFF8D6E63),
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
                         }
