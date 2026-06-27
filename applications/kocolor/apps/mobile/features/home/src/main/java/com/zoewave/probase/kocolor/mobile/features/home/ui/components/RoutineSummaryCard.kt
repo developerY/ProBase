@@ -10,14 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,14 +27,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.kocolor.mobile.features.home.R
-import com.zoewave.probase.kocolor.features.routines.R as RoutinesR
 import com.zoewave.probase.core.model.ritual.BeautyRoutine
 import com.zoewave.probase.core.model.ritual.RoutineTime
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import com.zoewave.probase.kocolor.features.routines.R as RoutinesR
+
+@Preview(showBackground = true)
+@Composable
+private fun RoutineSummaryCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            RoutineSummaryCard(
+                uiState = RoutineSummaryUiState(
+                    routine = BeautyRoutine(
+                        title = "Morning Ritual",
+                        time = RoutineTime.MORNING,
+                        steps = emptyList(),
+                        date = 0L
+                    ),
+                    isDaytime = true,
+                    displayTitle = "Morning Ritual",
+                    displayDescription = "Prepare for a balanced day ahead."
+                ),
+                onEvent = {},
+                navTo = {}
+            )
+        }
+    }
+}
 
 data class RoutineSummaryUiState(
     val routine: BeautyRoutine,

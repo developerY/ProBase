@@ -35,10 +35,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
+
+@Preview(showBackground = true)
+@Composable
+private fun WellnessInsightsSectionPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            WellnessInsightsSection(
+                uiState = WellnessInsightsUiState(
+                    insights = emptyList(),
+                    sleepDuration = "7h 12m",
+                    hydrationLiters = 1.2,
+                    hydrationGoalLiters = 2.7,
+                    isPermissionGranted = true
+                ),
+                onEvent = {},
+                navTo = {}
+            )
+        }
+    }
+}
 
 data class WellnessInsightsUiState(
     val insights: List<SkinInsight>,
