@@ -21,9 +21,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.Air
+import androidx.compose.material.icons.rounded.Cloud
+import androidx.compose.material.icons.rounded.FlashOn
+import androidx.compose.material.icons.rounded.WaterDrop
+import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -49,6 +53,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.FashionProfile
+import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherCondition
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
@@ -147,25 +152,10 @@ private fun ShortHeader(
                         )
                 )
 
-                // Cloud Icon with Premium Gradient - WIDER
-                Icon(
-                    imageVector = Icons.Default.Cloud,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(width = 160.dp, height = 100.dp)
-                        .graphicsLayer {
-                            alpha = 0.99f
-                        }
-                        .drawWithContent {
-                            drawContent()
-                            drawRect(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(Color.White, Color.White.copy(alpha = 0.5f))
-                                ),
-                                blendMode = BlendMode.SrcIn
-                            )
-                        },
-                    tint = Color.Unspecified
+                // Dynamic Weather Icons with Premium Gradient
+                DynamicWeatherIcon(
+                    conditions = uiState.weather?.conditions ?: listOf(LayeredWeatherCondition.SUNNY),
+                    modifier = Modifier.size(width = 200.dp, height = 100.dp)
                 )
 
                 // Temperature Text (Popping Bolder Numbers with High Contrast)
@@ -247,6 +237,66 @@ private fun ShortHeader(
 }
 
 @Composable
+private fun DynamicWeatherIcon(
+    conditions: List<LayeredWeatherCondition>,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        conditions.forEachIndexed { index, condition ->
+            val icon = when (condition) {
+                LayeredWeatherCondition.SUNNY -> Icons.Rounded.WbSunny
+                LayeredWeatherCondition.CLOUDY -> Icons.Rounded.Cloud
+                LayeredWeatherCondition.RAINY -> Icons.Rounded.WaterDrop
+                LayeredWeatherCondition.THUNDER -> Icons.Rounded.FlashOn
+                LayeredWeatherCondition.WINDY -> Icons.Rounded.Air
+            }
+
+            val gradientColors = when (condition) {
+                LayeredWeatherCondition.SUNNY -> listOf(Color(0xFFFFD600), Color(0xFFFFA000).copy(alpha = 0.6f))
+                LayeredWeatherCondition.CLOUDY -> listOf(Color(0xFF90A4AE), Color(0xFF607D8B).copy(alpha = 0.6f))
+                LayeredWeatherCondition.RAINY -> listOf(Color(0xFF2196F3), Color(0xFF1976D2).copy(alpha = 0.6f))
+                LayeredWeatherCondition.THUNDER -> listOf(Color(0xFFFFC107), Color(0xFFFF8F00).copy(alpha = 0.6f))
+                LayeredWeatherCondition.WINDY -> listOf(Color(0xFF81D4FA), Color(0xFF03A9F4).copy(alpha = 0.6f))
+            }
+
+            val offset = when {
+                conditions.size > 1 -> {
+                    if (index == 0) Offset(-30f, -10f) else Offset(30f, 10f)
+                }
+                else -> Offset.Zero
+            }
+
+            val size = if (conditions.size > 1) 80.dp else 100.dp
+
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(size)
+                    .graphicsLayer {
+                        translationX = offset.x
+                        translationY = offset.y
+                        alpha = 0.99f
+                    }
+                    .drawWithContent {
+                        drawContent()
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                colors = gradientColors
+                            ),
+                            blendMode = BlendMode.SrcIn
+                        )
+                    },
+                tint = Color.Unspecified
+            )
+        }
+    }
+}
+
+@Composable
 private fun LongHeader(
     uiState: HomeHeaderUiState,
     onWeatherClick: () -> Unit,
@@ -288,7 +338,7 @@ private fun LongHeader(
             }
 
             Icon(
-                imageVector = Icons.Default.WbSunny,
+                imageVector = Icons.Default.KeyboardArrowUp,
                 contentDescription = "Collapse Header",
                 tint = Color(0xFF6A6577),
                 modifier = Modifier
@@ -373,6 +423,24 @@ private fun LongHeader(
 }
 
 // --- Preview Engine ---
+
+@Preview(showBackground = true, backgroundColor = 0xFFF8F7FA)
+@Composable
+private fun HomeHeaderPartlyCloudyPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            HomeHeader(
+                uiState = HomeHeaderUiState(
+                    weather = LayeredWeatherUiState(
+                        temperature = 22.0,
+                        uvIndex = 4.0,
+                        conditions = listOf(LayeredWeatherCondition.SUNNY, LayeredWeatherCondition.CLOUDY)
+                    )
+                )
+            )
+        }
+    }
+}
 
 @Preview(showBackground = true, backgroundColor = 0xFFF8F7FA)
 @Composable

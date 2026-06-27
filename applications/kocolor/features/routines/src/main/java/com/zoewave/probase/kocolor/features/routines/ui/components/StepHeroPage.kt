@@ -107,7 +107,7 @@ fun StepHeroPage(
                     value = journalDraft,
                     onValueChange = { journalDraft = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("How does your skin feel?") },
+                    placeholder = { Text("Add your notes...") },
                     minLines = 3
                 )
             },
