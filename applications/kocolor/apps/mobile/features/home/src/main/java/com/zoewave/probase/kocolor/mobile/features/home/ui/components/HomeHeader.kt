@@ -23,11 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.rounded.Air
-import androidx.compose.material.icons.rounded.Cloud
-import androidx.compose.material.icons.rounded.FlashOn
-import androidx.compose.material.icons.rounded.WaterDrop
-import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,13 +35,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -77,9 +69,26 @@ fun HomeHeader(
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
-    // Premium gradient background matching image_266714.png
+    // Dynamic background gradient based on weather mood
+    val weatherConditions = uiState.weather?.conditions ?: listOf(LayeredWeatherCondition.SUNNY)
+    val mainCondition = weatherConditions.firstOrNull() ?: LayeredWeatherCondition.SUNNY
+
+    val gradientColors = when (mainCondition) {
+        LayeredWeatherCondition.SUNNY -> {
+            if (uiState.isDaytime) {
+                listOf(Color(0xFFFFF9C4), Color(0xFFFFECB3), Color(0xFFFFE082)) // Sunny Morning/Day
+            } else {
+                listOf(Color(0xFF2C3E50), Color(0xFF4B79A1), Color(0xFF283E51)) // Clear Night
+            }
+        }
+        LayeredWeatherCondition.CLOUDY -> listOf(Color(0xFFECE9E6), Color(0xFFFFFFFF), Color(0xFFD7D2CC)) // Overcast Soft
+        LayeredWeatherCondition.RAINY -> listOf(Color(0xFF4B79A1), Color(0xFF283E51), Color(0xFF1F1C2C)) // Rain Mood
+        LayeredWeatherCondition.THUNDER -> listOf(Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)) // Stormy
+        LayeredWeatherCondition.WINDY -> listOf(Color(0xFFE0EAFC), Color(0xFFCFDEF3), Color(0xFFBBD2C5)) // Fresh/Airy
+    }
+
     val gradientBrush = Brush.linearGradient(
-        colors = listOf(Color(0xFFF3E7FF), Color(0xFFD6C8F7), Color(0xFFC4B5FD)),
+        colors = gradientColors,
         start = androidx.compose.ui.geometry.Offset.Zero,
         end = androidx.compose.ui.geometry.Offset.Infinite
     )
@@ -237,66 +246,6 @@ private fun ShortHeader(
 }
 
 @Composable
-private fun DynamicWeatherIcon(
-    conditions: List<LayeredWeatherCondition>,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        conditions.forEachIndexed { index, condition ->
-            val icon = when (condition) {
-                LayeredWeatherCondition.SUNNY -> Icons.Rounded.WbSunny
-                LayeredWeatherCondition.CLOUDY -> Icons.Rounded.Cloud
-                LayeredWeatherCondition.RAINY -> Icons.Rounded.WaterDrop
-                LayeredWeatherCondition.THUNDER -> Icons.Rounded.FlashOn
-                LayeredWeatherCondition.WINDY -> Icons.Rounded.Air
-            }
-
-            val gradientColors = when (condition) {
-                LayeredWeatherCondition.SUNNY -> listOf(Color(0xFFFFD600), Color(0xFFFFA000).copy(alpha = 0.6f))
-                LayeredWeatherCondition.CLOUDY -> listOf(Color(0xFF90A4AE), Color(0xFF607D8B).copy(alpha = 0.6f))
-                LayeredWeatherCondition.RAINY -> listOf(Color(0xFF2196F3), Color(0xFF1976D2).copy(alpha = 0.6f))
-                LayeredWeatherCondition.THUNDER -> listOf(Color(0xFFFFC107), Color(0xFFFF8F00).copy(alpha = 0.6f))
-                LayeredWeatherCondition.WINDY -> listOf(Color(0xFF81D4FA), Color(0xFF03A9F4).copy(alpha = 0.6f))
-            }
-
-            val offset = when {
-                conditions.size > 1 -> {
-                    if (index == 0) Offset(-30f, -10f) else Offset(30f, 10f)
-                }
-                else -> Offset.Zero
-            }
-
-            val size = if (conditions.size > 1) 80.dp else 100.dp
-
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(size)
-                    .graphicsLayer {
-                        translationX = offset.x
-                        translationY = offset.y
-                        alpha = 0.99f
-                    }
-                    .drawWithContent {
-                        drawContent()
-                        drawRect(
-                            brush = Brush.verticalGradient(
-                                colors = gradientColors
-                            ),
-                            blendMode = BlendMode.SrcIn
-                        )
-                    },
-                tint = Color.Unspecified
-            )
-        }
-    }
-}
-
-@Composable
 private fun LongHeader(
     uiState: HomeHeaderUiState,
     onWeatherClick: () -> Unit,
@@ -324,7 +273,7 @@ private fun LongHeader(
                     text = "CURRENT LOCATION",
                     style = MaterialTheme.typography.labelSmall,
                     letterSpacing = 1.5.sp,
-                    color = Color(0xFF6A6577),
+                    color = Color(0xFF6A6577).copy(alpha = 0.7f),
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -340,7 +289,7 @@ private fun LongHeader(
             Icon(
                 imageVector = Icons.Default.KeyboardArrowUp,
                 contentDescription = "Collapse Header",
-                tint = Color(0xFF6A6577),
+                tint = Color(0xFF6A6577).copy(alpha = 0.7f),
                 modifier = Modifier
                     .size(28.dp)
                     .clip(CircleShape)
@@ -451,6 +400,23 @@ private fun HomeHeaderShortResponsivePreview() {
                 uiState = HomeHeaderUiState(
                     weather = LayeredWeatherUiState(temperature = 24.0, uvIndex = 8.0),
                     tempUnit = "FAHRENHEIT"
+                )
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFF8F7FA)
+@Composable
+private fun HomeHeaderShortResponsivePreviewRain() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            HomeHeader(
+                uiState = HomeHeaderUiState(
+                    weather = LayeredWeatherUiState(temperature = 24.0, uvIndex = 8.0,
+                        conditions = listOf(LayeredWeatherCondition.RAINY, LayeredWeatherCondition.THUNDER)
+                    ),
+                    tempUnit = "FAHRENHEIT",
                 )
             )
         }
