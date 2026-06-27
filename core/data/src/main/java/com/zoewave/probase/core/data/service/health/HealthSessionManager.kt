@@ -620,15 +620,13 @@ class HealthSessionManager(private val context: Context) {
     }
 
     suspend fun readSleepSessions(): List<SleepSessionData> {
-        val lastDay = ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS)
-            .minusDays(1)
-            .withHour(12)
-        val firstDay = lastDay.minusDays(7)
+        val now = ZonedDateTime.now()
+        val firstDay = now.minusDays(7).truncatedTo(ChronoUnit.DAYS)
 
         val sessions = mutableListOf<SleepSessionData>()
         val sleepSessionRequest = ReadRecordsRequest(
             recordType = SleepSessionRecord::class,
-            timeRangeFilter = TimeRangeFilter.between(firstDay.toInstant(), lastDay.toInstant()),
+            timeRangeFilter = TimeRangeFilter.between(firstDay.toInstant(), now.toInstant()),
             ascendingOrder = false
         )
         val sleepSessions = healthConnectClient.readRecords(sleepSessionRequest)
