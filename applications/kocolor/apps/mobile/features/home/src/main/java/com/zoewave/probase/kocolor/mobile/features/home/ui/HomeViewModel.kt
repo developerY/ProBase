@@ -50,6 +50,9 @@ data class HomeUiState(
     val morningRoutine: BeautyRoutine? = null,
     val mealsRoutine: BeautyRoutine? = null,
     val eveningRoutine: BeautyRoutine? = null,
+    val currentRoutine: BeautyRoutine? = null,
+    val currentRoutineTitle: String? = null,
+    val currentRoutineDescription: String? = null,
     val popularCosmetics: List<CosmeticItem> = emptyList(),
     val popularClothing: List<ClothingItem> = emptyList(),
     val isDaytime: Boolean = true,
@@ -234,11 +237,24 @@ class HomeViewModel @Inject constructor(
             } else it
         }
 
+        val morning = routines.find { it.time == RoutineTime.MORNING }?.toModel()
+        val meals = routines.find { it.time == RoutineTime.MEALS }?.toModel()
+        val evening = routines.find { it.time == RoutineTime.EVENING }?.toModel()
+
+        val (currentRoutine, currentTitle, currentDesc) = when {
+            hour in 5..9 -> Triple(morning, "Morning Ritual", "Prepare for a balanced day ahead.")
+            hour in 10..19 -> Triple(meals, "Meals Ritual", "Nourish your metabolism with precise biochemical timing.")
+            else -> Triple(evening, "Evening Ritual", "Every step is an act of self-love.")
+        }
+
         HomeUiState(
             fashionProfile = profile,
-            morningRoutine = routines.find { it.time == RoutineTime.MORNING }?.toModel(),
-            mealsRoutine = routines.find { it.time == RoutineTime.MEALS }?.toModel(),
-            eveningRoutine = routines.find { it.time == RoutineTime.EVENING }?.toModel(),
+            morningRoutine = morning,
+            mealsRoutine = meals,
+            eveningRoutine = evening,
+            currentRoutine = currentRoutine,
+            currentRoutineTitle = currentTitle,
+            currentRoutineDescription = currentDesc,
             popularCosmetics = cosmetics.sortedByDescending { it.timestamp }.take(5).map { it.toModel() },
             popularClothing = clothing.sortedByDescending { it.timestamp }.take(5).map { it.toModel() },
             isDaytime = hour in 6..17,

@@ -3,9 +3,25 @@ package com.zoewave.probase.kocolor.features.routines.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,11 +35,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.model.ritual.BeautyRoutine
+import com.zoewave.probase.core.model.ritual.RoutineTime
 import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesEvent
-import com.zoewave.probase.core.model.ritual.BeautyRoutine
 import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.core.model.ritual.RoutineTime
 
 @Composable
 fun HeroRitualCard(
@@ -87,11 +103,11 @@ fun HeroRitualCard(
                     else -> R.drawable.night_routine_bg
                 },
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize().alpha(0.45f),
+                modifier = Modifier.fillMaxSize().alpha(0.35f),
                 contentScale = ContentScale.Crop
             )
             
-            Box(modifier = Modifier.fillMaxSize().background(bgBrush, alpha = 0.3f)) {
+            Box(modifier = Modifier.fillMaxSize().background(bgBrush, alpha = 0.7f)) {
                 Column(
                     modifier = Modifier.padding(28.dp).fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceBetween
