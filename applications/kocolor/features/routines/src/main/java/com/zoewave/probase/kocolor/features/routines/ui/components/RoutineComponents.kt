@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -41,10 +42,42 @@ import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesEvent
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
+@Preview(showBackground = true)
+@Composable
+private fun HeroRitualCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            HeroRitualCard(
+                uiState = BeautyRoutine(
+                    id = 1,
+                    title = "Morning Ritual",
+                    time = RoutineTime.MORNING,
+                    steps = emptyList(),
+                    date = 0L
+                ),
+                isActive = true,
+                onEvent = {},
+                navTo = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DailyInsightBannerPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            DailyInsightBanner(uiState = Unit, onEvent = {}, navTo = {})
+        }
+    }
+}
+
 @Composable
 fun HeroRitualCard(
     uiState: BeautyRoutine,
     modifier: Modifier = Modifier,
+    isActive: Boolean = false,
     onEvent: (RoutinesEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -60,11 +93,15 @@ fun HeroRitualCard(
         else -> routine.title
     }
 
-    val label = when (routine.time) {
-        RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_current_ritual)
-        RoutineTime.MEALS -> stringResource(R.string.applications_kocolor_features_routines_bio_sync_ritual)
-        RoutineTime.EVENING -> stringResource(R.string.applications_kocolor_features_routines_evening_ritual_label)
-        else -> stringResource(R.string.applications_kocolor_features_routines_ritual_label)
+    val label = if (isActive) {
+        stringResource(R.string.applications_kocolor_features_routines_current_ritual)
+    } else {
+        when (routine.time) {
+            RoutineTime.MORNING -> stringResource(R.string.applications_kocolor_features_routines_morning_ritual_label)
+            RoutineTime.MEALS -> stringResource(R.string.applications_kocolor_features_routines_meals_ritual_label)
+            RoutineTime.EVENING -> stringResource(R.string.applications_kocolor_features_routines_evening_ritual_label)
+            else -> stringResource(R.string.applications_kocolor_features_routines_ritual_label)
+        }
     }
 
     val description = when (routine.time) {

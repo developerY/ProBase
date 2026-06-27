@@ -36,11 +36,41 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
+
+@Preview(showBackground = true)
+@Composable
+private fun BoutiqueCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            BoutiqueCard(
+                onEvent = {},
+                navTo = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BoutiqueCardExpandedPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            // Since BoutiqueCard has its own internal expansion state, 
+            // a single preview can't easily show both without a click.
+            // But we can preview the layout structure.
+            BoutiqueCard(
+                onEvent = {},
+                navTo = {}
+            )
+        }
+    }
+}
 
 @Composable
 fun BoutiqueCard(

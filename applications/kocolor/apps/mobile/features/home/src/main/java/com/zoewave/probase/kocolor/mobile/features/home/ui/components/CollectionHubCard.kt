@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -28,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -36,6 +36,25 @@ import com.zoewave.probase.kocolor.mobile.features.home.ui.HomeUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.text.NumberFormat
 import java.util.Locale
+
+@Preview(showBackground = true)
+@Composable
+private fun CollectionHubCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            CollectionHubCard(
+                uiState = HomeUiState(
+                    totalVanityValue = 1250.0,
+                    totalWardrobeValue = 3400.0,
+                    totalCosmetics = 12,
+                    totalClothing = 24
+                ),
+                onEvent = {},
+                navTo = {}
+            )
+        }
+    }
+}
 
 @Composable
 fun CollectionHubCard(
