@@ -216,7 +216,8 @@ fun StyleHealthDashboard(
                         metrics = uiState.trackerMetrics
                     ),
                     modifier = Modifier.clickable {
-                        onEvent(HealthEvent.SyncTracker)
+                        // TODO: Setup tracker
+                        // onEvent(HealthEvent.SyncTracker)
                     },
                     onEvent = {},
                     navTo = {}
