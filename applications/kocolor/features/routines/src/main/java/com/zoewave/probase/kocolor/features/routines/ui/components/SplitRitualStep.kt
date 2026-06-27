@@ -3,14 +3,27 @@ package com.zoewave.probase.kocolor.features.routines.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,10 +33,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.core.model.ritual.CosmeticItem
-import com.zoewave.probase.kocolor.model.KoColorRoute
 import com.zoewave.probase.core.model.ritual.RoutineStep
+import com.zoewave.probase.kocolor.features.routines.R
+import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class SplitRitualStepUiState(
     val step: RoutineStep,
@@ -113,7 +126,7 @@ fun SplitRitualStep(
                     .padding(start = 20.dp, top = 20.dp, bottom = 20.dp, end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f).alpha(if (hasAmountInfo) 1f else 0.5f)) {
+                Column(modifier = Modifier.weight(1f).alpha(if (hasAmountInfo || linkedProduct != null) 1f else 0.5f)) {
                     Text(
                         text = step.title,
                         style = MaterialTheme.typography.titleMedium,
@@ -121,9 +134,14 @@ fun SplitRitualStep(
                         modifier = Modifier.alpha(if (isCompleted) 0.6f else 1f)
                     )
                     Text(
-                        text = if (hasAmountInfo) stringResource(R.string.applications_kocolor_features_routines_remaining_format_percent, (fillLevel * 100).toInt()) else stringResource(R.string.applications_kocolor_features_routines_missing_consumption),
+                        text = when {
+                            hasAmountInfo -> stringResource(R.string.applications_kocolor_features_routines_remaining_format_percent, (fillLevel * 100).toInt())
+                            linkedProduct != null -> linkedProduct.name
+                            else -> step.subtitle ?: ""
+                        },
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (hasAmountInfo) statusColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        color = if (hasAmountInfo) statusColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        maxLines = 1
                     )
                 }
 
