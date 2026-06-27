@@ -2,6 +2,7 @@ package com.zoewave.probase.features.health.hydration.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.data.repository.HydrationSettings
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,7 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HydrationViewModel @Inject constructor(
-    private val healthSessionManager: HealthSessionManager
+    private val healthSessionManager: HealthSessionManager,
+    private val hydrationSettings: HydrationSettings
 ) : ViewModel() {
 
     private val refreshTrigger = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -29,11 +31,12 @@ class HydrationViewModel @Inject constructor(
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<HydrationUiState> = combine(
         refreshTrigger.onStart { emit(Unit) },
-        isSmartAlertsEnabled
-    ) { _, enabled ->
-        enabled
-    }.flatMapLatest { enabled ->
-        getDailyHydrationFlow(enabled)
+        isSmartAlertsEnabled,
+        hydrationSettings.hydrationGoalFlow
+    ) { _, enabled, goal ->
+        enabled to goal
+    }.flatMapLatest { (enabled, goal) ->
+        getDailyHydrationFlow(enabled, goal)
     }
         .stateIn(
             scope = viewModelScope,
@@ -41,7 +44,7 @@ class HydrationViewModel @Inject constructor(
             initialValue = HydrationUiState.Loading
         )
 
-    private fun getDailyHydrationFlow(isSmartAlertsEnabled: Boolean) = flow {
+    private fun getDailyHydrationFlow(isSmartAlertsEnabled: Boolean, targetLiters: Double) = flow {
         val now = Instant.now()
         val startOfDay = now.truncatedTo(ChronoUnit.DAYS)
         val records = healthSessionManager.readHydration(startOfDay, now)
@@ -55,7 +58,6 @@ class HydrationViewModel @Inject constructor(
         }.sortedByDescending { it.timestamp }
 
         val currentLiters = logs.sumOf { it.amountLiters }
-        val targetLiters = 2.7
         val nextReminder = calculateNextReminder(currentLiters, targetLiters)
         
         emit(HydrationUiState.Success(

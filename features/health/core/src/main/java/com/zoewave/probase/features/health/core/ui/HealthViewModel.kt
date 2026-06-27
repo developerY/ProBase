@@ -17,6 +17,7 @@ import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.units.Volume
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.data.repository.HydrationSettings
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
 import com.zoewave.probase.core.data.repository.bluetoothLE.BluetoothLeRepository
 import com.zoewave.probase.core.model.ble.GattConnectionState
@@ -45,20 +46,26 @@ class HealthViewModel @Inject constructor(
     val healthSessionManager: HealthSessionManager,
     private val wellnessEngine: com.zoewave.probase.features.health.core.WellnessCorrelationEngine,
     private val syncRideUseCase: SyncRideUseCase,
-    private val bleRepository: BluetoothLeRepository
+    private val bleRepository: BluetoothLeRepository,
+    private val hydrationSettings: HydrationSettings
 ) : ViewModel() {
 
     // 2. State & Events
     private val _uiState = MutableStateFlow<HealthUiState>(HealthUiState.Uninitialized)
     val uiState = _uiState.asStateFlow()
 
-    private val _hydrationGoal = MutableStateFlow(2.7)
-
     private val _sideEffect = MutableSharedFlow<HealthSideEffect>()
     val sideEffect = _sideEffect.asSharedFlow()
 
     init {
         observeTrackerConnection()
+        observeHydrationGoal()
+    }
+
+    private fun observeHydrationGoal() {
+        hydrationSettings.hydrationGoalFlow
+            .onEach { initialLoad() }
+            .launchIn(viewModelScope)
     }
 
     private fun observeTrackerConnection() {
@@ -142,8 +149,9 @@ class HealthViewModel @Inject constructor(
     // --- Private Actions ---
 
     private fun updateHydrationGoal(goal: Double) {
-        _hydrationGoal.value = goal
-        initialLoad()
+        viewModelScope.launch {
+            hydrationSettings.saveHydrationGoal(goal)
+        }
     }
 
     private fun logHydration(liters: Double) {
@@ -277,7 +285,7 @@ class HealthViewModel @Inject constructor(
                         latestHeartRate = latestHR,
                         todaySteps = stepsMap[today] ?: 0L,
                         todayCalories = calMap[today] ?: 0.0,
-                        hydrationGoal = _hydrationGoal.value,
+                        hydrationGoal = hydrationSettings.hydrationGoalFlow.first(),
                         bleConnectionState = bleState,
                         trackerMetrics = bleChars.associate { it.description to it.value }
                     )
