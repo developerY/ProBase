@@ -33,13 +33,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.kocolor.mobile.features.home.R
+import com.zoewave.probase.kocolor.features.routines.R as RoutinesR
 import com.zoewave.probase.core.model.ritual.BeautyRoutine
+import com.zoewave.probase.core.model.ritual.RoutineTime
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class RoutineSummaryUiState(
     val routine: BeautyRoutine,
     val isDaytime: Boolean,
-    val displayTitle: String
+    val displayTitle: String,
+    val displayDescription: String
 )
 
 @Composable
@@ -52,6 +55,7 @@ fun RoutineSummaryCard(
     val routine = uiState.routine
     val isDaytime = uiState.isDaytime
     val displayTitle = uiState.displayTitle
+    val displayDescription = uiState.displayDescription
     val completedCount = routine.steps.count { it.isCompleted }
     val totalCount = routine.steps.size
     val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
@@ -64,9 +68,13 @@ fun RoutineSummaryCard(
     ) {
         Box(modifier = Modifier.fillMaxWidth().height(260.dp)) {
             AsyncImage(
-                model = if (isDaytime) R.drawable.morning_routine_bg else R.drawable.night_routine_bg,
+                model = when (routine.time) {
+                    RoutineTime.MORNING -> RoutinesR.drawable.morning_routine_bg
+                    RoutineTime.MEALS -> RoutinesR.drawable.meals_ritual_bg
+                    else -> RoutinesR.drawable.night_routine_bg
+                },
                 contentDescription = null,
-                modifier = Modifier.matchParentSize().alpha(0.5f),
+                modifier = Modifier.matchParentSize().alpha(0.35f),
                 contentScale = ContentScale.Crop
             )
             
@@ -161,7 +169,7 @@ fun RoutineSummaryCard(
                         color = Color.Black
                     )
                     Text(
-                        text = if (displayTitle.contains("Morning", ignoreCase = true)) "Prepare for a balanced day ahead." else "Every step is an act of self-love.",
+                        text = displayDescription,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Black.copy(alpha = 0.7f)
                     )

@@ -160,28 +160,23 @@ fun HomeScreen(
             }
 
             item {
-                val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
-                val activeRoutine = when {
-                    hour in 5..9 -> uiState.morningRoutine
-                    hour in 10..19 -> uiState.mealsRoutine
-                    else -> uiState.eveningRoutine
-                }
-                
-                val title = when {
-                    hour in 5..9 -> stringResource(R.string.applications_kocolor_apps_mobile_features_home_morning_ritual_default)
-                    hour in 10..19 -> stringResource(R.string.applications_kocolor_apps_mobile_features_home_meals_ritual_default)
-                    else -> stringResource(R.string.applications_kocolor_apps_mobile_features_home_evening_ritual_default)
-                }
-                
-                if (activeRoutine != null) {
+                if (uiState.currentRoutine != null && uiState.currentRoutineTitle != null && uiState.currentRoutineDescription != null) {
                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                         SectionTitle(
-                            uiState = SectionTitleUiState(title, stringResource(R.string.applications_kocolor_apps_mobile_features_home_biosynced_ritual)), 
+                            uiState = SectionTitleUiState(
+                                uiState.currentRoutineTitle, 
+                                stringResource(R.string.applications_kocolor_apps_mobile_features_home_biosynced_ritual)
+                            ), 
                             onEvent = {}, 
                             navTo = {}
                         )
                         RoutineSummaryCard(
-                            uiState = RoutineSummaryUiState(activeRoutine, uiState.isDaytime, title),
+                            uiState = RoutineSummaryUiState(
+                                uiState.currentRoutine, 
+                                uiState.isDaytime, 
+                                uiState.currentRoutineTitle,
+                                uiState.currentRoutineDescription
+                            ),
                             onEvent = {},
                             navTo = navTo
                         )
