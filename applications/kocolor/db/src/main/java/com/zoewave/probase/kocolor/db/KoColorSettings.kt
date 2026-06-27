@@ -7,9 +7,10 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.zoewave.probase.core.data.repository.AiConfigurationSettings
+import com.zoewave.probase.core.data.repository.HydrationSettings
 import com.zoewave.probase.core.data.repository.SecureApiKeyRepository
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureSettings
-import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -22,7 +23,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 class KoColorSettings @Inject constructor(
     @ApplicationContext private val context: Context,
     private val secureApiKeyRepository: SecureApiKeyRepository
-) : AiConfigurationSettings, SmartCaptureSettings {
+) : AiConfigurationSettings, SmartCaptureSettings, HydrationSettings {
 
     private object PreferencesKeys {
         val IS_AI_ENABLED = booleanPreferencesKey("is_ai_enabled")
@@ -53,11 +54,11 @@ class KoColorSettings @Inject constructor(
         }
     }
 
-    val hydrationGoalFlow: Flow<Double> = context.dataStore.data.map { preferences ->
+    override val hydrationGoalFlow: Flow<Double> = context.dataStore.data.map { preferences ->
         preferences[PreferencesKeys.HYDRATION_GOAL] ?: 2.7 // Updated default as requested
     }
 
-    suspend fun saveHydrationGoal(goal: Double) {
+    override suspend fun saveHydrationGoal(goal: Double) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.HYDRATION_GOAL] = goal
         }
