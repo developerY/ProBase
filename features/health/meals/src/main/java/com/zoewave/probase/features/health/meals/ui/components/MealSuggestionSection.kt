@@ -56,8 +56,7 @@ private fun MealSuggestionSectionPreview() {
                 )
             ),
             currentMealId = "1",
-            onMealSelected = {},
-            onNavigateToPreparation = {}
+            onMealSelected = {}
         )
     }
 }
@@ -65,8 +64,7 @@ private fun MealSuggestionSectionPreview() {
 @Composable
 fun MealSuggestionSection(
     currentMealId: String?,
-    onMealSelected: (String) -> Unit,
-    onNavigateToPreparation: (Meal) -> Unit,
+    onMealSelected: (Meal) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MealsViewModel = hiltViewModel()
 ) {
@@ -75,7 +73,6 @@ fun MealSuggestionSection(
         uiState = uiState,
         currentMealId = currentMealId,
         onMealSelected = onMealSelected,
-        onNavigateToPreparation = onNavigateToPreparation,
         modifier = modifier
     )
 }
@@ -84,8 +81,7 @@ fun MealSuggestionSection(
 fun MealSuggestionSection(
     uiState: MealsUiState,
     currentMealId: String?,
-    onMealSelected: (String) -> Unit,
-    onNavigateToPreparation: (Meal) -> Unit,
+    onMealSelected: (Meal) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -129,8 +125,7 @@ fun MealSuggestionSection(
                             MealCard(
                                 meal = meal,
                                 onClick = { 
-                                    onMealSelected(meal.id)
-                                    onNavigateToPreparation(meal)
+                                    onMealSelected(meal)
                                 },
                                 modifier = Modifier.width(320.dp)
                             )

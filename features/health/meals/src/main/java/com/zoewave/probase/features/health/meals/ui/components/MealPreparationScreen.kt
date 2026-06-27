@@ -58,6 +58,7 @@ private fun MealPreparationScreenPreview() {
             onStepClick = {},
             onNext = {},
             onPrevious = {},
+            onFinish = {},
             onBack = {}
         )
     }
@@ -71,6 +72,7 @@ fun MealPreparationScreen(
     onStepClick: (Int) -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
+    onFinish: () -> Unit,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -168,7 +170,13 @@ fun MealPreparationScreen(
                     }
                     
                     Button(
-                        onClick = onNext,
+                        onClick = {
+                            if (currentStepIndex == meal.steps.size - 1) {
+                                onFinish()
+                            } else {
+                                onNext()
+                            }
+                        },
                         modifier = Modifier.weight(1f).height(56.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = BioOptimizedColors.Cyan400,

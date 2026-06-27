@@ -46,6 +46,7 @@ import com.zoewave.probase.features.health.meals.ui.components.MealPreparationSc
 @Composable
 fun MealsUiRoute(
     onBack: () -> Unit,
+    onNavigateToHome: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MealsViewModel = hiltViewModel(),
 ) {
@@ -55,6 +56,7 @@ fun MealsUiRoute(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         onBack = onBack,
+        onNavigateToHome = onNavigateToHome,
         modifier = modifier
     )
 }
@@ -64,6 +66,7 @@ internal fun MealsUiRoute(
     uiState: MealsUiState,
     onEvent: (MealsUiEvent) -> Unit,
     onBack: () -> Unit,
+    onNavigateToHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (uiState) {
@@ -85,6 +88,7 @@ internal fun MealsUiRoute(
                     onStepClick = { onEvent(MealsUiEvent.SetPreparationStep(it)) },
                     onNext = { onEvent(MealsUiEvent.SetPreparationStep(uiState.currentPreparationStep + 1)) },
                     onPrevious = { onEvent(MealsUiEvent.SetPreparationStep(uiState.currentPreparationStep - 1)) },
+                    onFinish = { onNavigateToHome() },
                     onBack = { onEvent(MealsUiEvent.StartCooking(null)) }
                 )
             } else if (uiState.editingMeal != null) {
