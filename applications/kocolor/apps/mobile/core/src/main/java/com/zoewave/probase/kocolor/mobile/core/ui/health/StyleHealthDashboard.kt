@@ -102,7 +102,7 @@ fun StyleHealthDashboard(
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = stringResource(R.string.applications_kocolor_apps_mobile_core_health_style_inside_out),
+                text = stringResource(R.string.applications_kocolor_apps_mobile_core_health_beauty_inside_out),
                 style = MaterialTheme.typography.labelSmall,
                 letterSpacing = 2.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
