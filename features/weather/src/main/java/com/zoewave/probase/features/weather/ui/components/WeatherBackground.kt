@@ -6,6 +6,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+
+@Preview(showBackground = true, widthDp = 200, heightDp = 200)
+@Composable
+fun WeatherBackgroundSunnyPreview() {
+    WeatherBackground(condition = "Sunny")
+}
+
+@Preview(showBackground = true, widthDp = 200, heightDp = 200)
+@Composable
+fun WeatherBackgroundRainyPreview() {
+    WeatherBackground(condition = "Rain")
+}
 
 @Composable
 fun WeatherBackground(

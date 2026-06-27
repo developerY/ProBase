@@ -45,8 +45,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.FashionProfile
+import com.zoewave.probase.features.weather.ui.components.layered.DynamicWeatherIcon
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherCondition
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
+import com.zoewave.probase.features.weather.ui.components.layered.WeatherMoodGradient
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 data class HomeHeaderUiState(
@@ -72,25 +74,12 @@ fun HomeHeader(
     // Dynamic background gradient based on weather mood
     val weatherConditions = uiState.weather?.conditions ?: listOf(LayeredWeatherCondition.SUNNY)
     val mainCondition = weatherConditions.firstOrNull() ?: LayeredWeatherCondition.SUNNY
-
-    val gradientColors = when (mainCondition) {
-        LayeredWeatherCondition.SUNNY -> {
-            if (uiState.isDaytime) {
-                listOf(Color(0xFFFFF9C4), Color(0xFFFFECB3), Color(0xFFFFE082)) // Sunny Morning/Day
-            } else {
-                listOf(Color(0xFF2C3E50), Color(0xFF4B79A1), Color(0xFF283E51)) // Clear Night
-            }
-        }
-        LayeredWeatherCondition.CLOUDY -> listOf(Color(0xFFECE9E6), Color(0xFFFFFFFF), Color(0xFFD7D2CC)) // Overcast Soft
-        LayeredWeatherCondition.RAINY -> listOf(Color(0xFF4B79A1), Color(0xFF283E51), Color(0xFF1F1C2C)) // Rain Mood
-        LayeredWeatherCondition.THUNDER -> listOf(Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)) // Stormy
-        LayeredWeatherCondition.WINDY -> listOf(Color(0xFFE0EAFC), Color(0xFFCFDEF3), Color(0xFFBBD2C5)) // Fresh/Airy
-    }
+    val gradientColors = WeatherMoodGradient.getColors(mainCondition, uiState.isDaytime)
 
     val gradientBrush = Brush.linearGradient(
         colors = gradientColors,
-        start = androidx.compose.ui.geometry.Offset.Zero,
-        end = androidx.compose.ui.geometry.Offset.Infinite
+        start = Offset.Zero,
+        end = Offset.Infinite
     )
 
     Box(

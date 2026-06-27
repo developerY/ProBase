@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.mobile.features.home.ui.components
+package com.zoewave.probase.features.weather.ui.components.layered
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -26,12 +26,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherCondition
 
 @Composable
 fun DynamicWeatherIcon(
     conditions: List<LayeredWeatherCondition>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "WeatherAnimations")
     

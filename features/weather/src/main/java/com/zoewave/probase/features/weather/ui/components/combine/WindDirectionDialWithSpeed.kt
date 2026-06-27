@@ -17,8 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.cos
-//import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.sin
 
 /**
@@ -31,14 +31,15 @@ fun WindDirectionDialWithSpeed(
     modifier: Modifier = Modifier
 ) {
     // 1) Create an infinite transition for the wiggle
-    val infiniteTransition = rememberInfiniteTransition()
+    val infiniteTransition = rememberInfiniteTransition(label = "WindWiggle")
     val wiggleOffset by infiniteTransition.animateFloat(
         initialValue = -3f,
         targetValue = 3f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 1000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
-        )
+        ),
+        label = "Wiggle"
     )
 
     // 2) Combine the base degree with the wiggle offset
@@ -123,12 +124,12 @@ fun WindDirectionDialWithSpeed(
     }
 }
 
-/*
-@Preview
+@Preview(showBackground = true, widthDp = 100, heightDp = 100)
 @Composable
 fun WindDirectionDialWithSpeedPreview() {
     val degree = 180
     val speed = 10.2
-    WindDirectionDialWithSpeed(degree = degree, speed = speed)
+    MaterialTheme {
+        WindDirectionDialWithSpeed(degree = degree, speed = speed)
+    }
 }
-*/

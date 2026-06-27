@@ -6,9 +6,19 @@ import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+fun WeatherIconPreview() {
+    MaterialTheme {
+        WeatherIcon(condition = "Rain")
+    }
+}
 
 @Composable
 fun WeatherIcon(

@@ -22,10 +22,50 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.core.model.weather.EnvironmentalContext
+
+@Preview(showBackground = true)
+@Composable
+fun SunIntelligenceScreenLoadingPreview() {
+    MaterialTheme {
+        SunIntelligenceScreen(
+            uiState = SunIntelligenceUiState.Loading,
+            onEvent = {},
+            onBack = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SunIntelligenceScreenSuccessPreview() {
+    val sampleEnv = EnvironmentalContext(
+        temperature = 24.5,
+        humidity = 52.0,
+        uvIndex = 8.4,
+        isDay = true,
+        weatherCode = 0,
+        hourlyUV = listOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.2, 1.5, 3.5, 6.0, 8.0, 9.5, 10.0, 9.0, 7.5, 5.0, 2.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    )
+
+    MaterialTheme {
+        SunIntelligenceScreen(
+            uiState = SunIntelligenceUiState.Success(
+                context = sampleEnv,
+                isLocationFallback = false,
+                isTimerActive = true,
+                reapplicationTimeRemaining = 4500000L // 1h 15m
+            ),
+            onEvent = {},
+            onBack = {}
+        )
+    }
+}
 
 @Composable
 fun SunIntelligenceScreen(
