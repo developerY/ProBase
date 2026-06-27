@@ -233,11 +233,9 @@ fun StepHeroPage(
             item {
                 MealSuggestionSection(
                     currentMealId = step.linkedMealId,
-                    onMealSelected = { mealId ->
-                        onEvent(RoutinesEvent.LinkMeal(routineId, step.id, mealId))
-                    },
-                    onNavigateToPreparation = { meal ->
-                        navTo(KoColorRoute.MealsHub(mealId = meal.id, isCooking = true))
+                    onMealSelected = { meal ->
+                        onEvent(RoutinesEvent.LinkMeal(routineId, step.id, meal.id))
+                        navTo(KoColorRoute.MealsHub(mealId = meal.id, isCooking = false))
                     }
                 )
             }

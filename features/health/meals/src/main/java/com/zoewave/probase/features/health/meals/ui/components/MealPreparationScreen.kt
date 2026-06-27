@@ -20,12 +20,49 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.features.health.meals.data.Meal
 import com.zoewave.probase.features.health.meals.data.MealStep
+import com.zoewave.probase.features.health.meals.data.MetabolicPhase
+import com.zoewave.probase.features.health.meals.data.NutritionInfo
 import com.zoewave.probase.features.health.meals.ui.BioOptimizedColors
+
+@Preview(showBackground = true)
+@Composable
+private fun MealPreparationScreenPreview() {
+    MaterialTheme {
+        MealPreparationScreen(
+            meal = Meal(
+                id = "1",
+                name = "Golden Turmeric Elixir",
+                description = "Anti-inflammatory morning tonic to kickstart mTOR and cellular signaling.",
+                scientificFocus = "Curcumin Bioavailability",
+                phase = MetabolicPhase.Morning,
+                nutrition = NutritionInfo(
+                    calories = 120,
+                    protein = 2f,
+                    carbs = 15f,
+                    fat = 5f
+                ),
+                ingredients = emptyList(),
+                steps = listOf(
+                    MealStep(1, "Warm the coconut milk gently on low heat."),
+                    MealStep(2, "Whisk in turmeric, black pepper, and ginger until fully integrated."),
+                    MealStep(3, "Pour into a ceramic mug and consume while warm.")
+                )
+            ),
+            currentStepIndex = 1,
+            onStepClick = {},
+            onNext = {},
+            onPrevious = {},
+            onFinish = {},
+            onBack = {}
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +72,7 @@ fun MealPreparationScreen(
     onStepClick: (Int) -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
+    onFinish: () -> Unit,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -132,7 +170,13 @@ fun MealPreparationScreen(
                     }
                     
                     Button(
-                        onClick = onNext,
+                        onClick = {
+                            if (currentStepIndex == meal.steps.size - 1) {
+                                onFinish()
+                            } else {
+                                onNext()
+                            }
+                        },
                         modifier = Modifier.weight(1f).height(56.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = BioOptimizedColors.Cyan400,

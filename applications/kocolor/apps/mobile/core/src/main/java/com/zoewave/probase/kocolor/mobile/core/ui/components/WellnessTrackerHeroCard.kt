@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -31,11 +32,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -89,6 +92,7 @@ fun WellnessTrackerHeroCard(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .alpha(0.6f) // Dimmed to indicate inactive
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
@@ -107,6 +111,7 @@ fun WellnessTrackerHeroCard(
                     .fillMaxWidth(0.8f)
                     .height(60.dp)
                     .clip(CircleShape)
+                    .alpha(0.5f) // Dimmed
                     .background(
                         Brush.linearGradient(
                             colors = listOf(Color(0xFF232526), Color(0xFF414345))
@@ -123,6 +128,25 @@ fun WellnessTrackerHeroCard(
                         .graphicsLayer(scaleX = pulse, scaleY = pulse)
                         .shadow(12.dp, CircleShape, ambientColor = coreColor, spotColor = coreColor)
                         .background(coreColor, CircleShape)
+                )
+            }
+
+            // Coming Soon Badge
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp),
+                color = Color.White.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
+            ) {
+                Text(
+                    text = "COMING SOON",
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
                 )
             }
 

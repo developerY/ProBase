@@ -83,7 +83,10 @@ fun featureInventoryEntryProvider(
 
             is FeatureInventory.HealthMeals -> {
                 FeatureScaffold(title = "Health Meals", onBack = navigateBack) {
-                    MealsUiRoute(onBack = navigateBack)
+                    MealsUiRoute(
+                        onBack = navigateBack,
+                        onNavigateToHome = { navigateBack() } // In inventory, home is the list
+                    )
                 }
             }
 

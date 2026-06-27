@@ -135,6 +135,23 @@ class HealthSessionManager(private val context: Context) {
         ).records
 
     /**
+     * Deletes hydration records for today (manual reset).
+     */
+    suspend fun deleteTodayHydration() {
+        val now = Instant.now()
+        val startOfDay = now.truncatedTo(ChronoUnit.DAYS)
+        try {
+            healthConnectClient.deleteRecords(
+                HydrationRecord::class,
+                TimeRangeFilter.between(startOfDay, now)
+            )
+            Log.d(TAG, "Successfully reset today's hydration progress")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to reset today's hydration progress", e)
+        }
+    }
+
+    /**
      * Reads hydration records for a specific time range.
      */
     suspend fun readHydration(start: Instant, end: Instant): List<HydrationRecord> =

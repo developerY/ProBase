@@ -100,6 +100,12 @@ class HydrationViewModel @Inject constructor(
                     refreshTrigger.emit(Unit)
                 }
             }
+            HydrationUiEvent.ResetProgress -> {
+                viewModelScope.launch {
+                    healthSessionManager.deleteTodayHydration()
+                    refreshTrigger.emit(Unit)
+                }
+            }
             is HydrationUiEvent.ToggleSmartAlerts -> {
                 isSmartAlertsEnabled.value = event.enabled
             }

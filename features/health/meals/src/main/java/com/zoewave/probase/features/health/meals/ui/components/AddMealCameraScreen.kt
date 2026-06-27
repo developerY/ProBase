@@ -9,7 +9,7 @@ import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.Preview
+import androidx.camera.core.Preview as CameraPreview
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
@@ -53,6 +53,18 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
+import androidx.compose.ui.tooling.preview.Preview
+
+@Preview(showBackground = true)
+@Composable
+private fun AddMealCameraScreenPreview() {
+    MaterialTheme {
+        AddMealCameraScreen(
+            onCapture = {},
+            onBack = {}
+        )
+    }
+}
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -66,7 +78,7 @@ fun AddMealCameraScreen(
 
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
 
-    val previewUseCase = remember { Preview.Builder().build() }
+    val previewUseCase = remember { CameraPreview.Builder().build() }
     val imageCaptureUseCase = remember { ImageCapture.Builder().build() }
 
     var surfaceRequest by remember { mutableStateOf<SurfaceRequest?>(null) }

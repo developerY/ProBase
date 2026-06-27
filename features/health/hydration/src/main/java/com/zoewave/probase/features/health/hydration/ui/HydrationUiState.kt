@@ -22,5 +22,6 @@ data class HydrationLog(
 sealed interface HydrationUiEvent {
     data class AddWater(val liters: Double) : HydrationUiEvent
     data object Refresh : HydrationUiEvent
+    data object ResetProgress : HydrationUiEvent
     data class ToggleSmartAlerts(val enabled: Boolean) : HydrationUiEvent
 }

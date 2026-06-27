@@ -502,7 +502,10 @@ fun koColorNavEntryProvider(
                 }
             }
 
-            MealsUiRoute(onBack = onBack)
+            MealsUiRoute(
+                onBack = onBack,
+                onNavigateToHome = { onNavigateTo(KoColorRoute.Home) }
+            )
         }
         is KoColorRoute.NailLab -> NavEntry(route) {
             com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute(
