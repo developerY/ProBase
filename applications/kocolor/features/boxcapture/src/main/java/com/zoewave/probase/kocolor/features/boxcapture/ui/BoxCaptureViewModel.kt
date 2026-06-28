@@ -92,18 +92,38 @@ class BoxCaptureViewModel @Inject constructor(
             BoxCaptureEvent.Retry -> reset()
             BoxCaptureEvent.Dismiss -> { /* Handled in UI layer typically */ }
             is BoxCaptureEvent.Success -> { /* Handled in UI layer typically */ }
+            is BoxCaptureEvent.DeletePhoto -> {
+                if (event.index in capturedUris.indices) {
+                    capturedUris.removeAt(event.index)
+                    refreshStep()
+                }
+            }
+            is BoxCaptureEvent.ChangeMode -> {
+                val currentMode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_PRO
+                if (currentMode != event.mode) {
+                    // Only reset if we actually change
+                    capturedUris.clear()
+                    _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), CaptureStep.getStepsForMode(event.mode).first(), event.mode)
+                }
+            }
         }
     }
 
+    private fun refreshStep() {
+        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_PRO
+        val currentStep = getNextStep(mode) ?: CaptureStep.BARCODE // Fallback
+        _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), currentStep, mode)
+    }
+
     fun setMode(modeString: String) {
-        val mode = try { CaptureMode.valueOf(modeString) } catch (e: Exception) { CaptureMode.BOX }
+        val mode = try { CaptureMode.valueOf(modeString) } catch (e: Exception) { CaptureMode.BOX_PRO }
         reset() // Ensure clean state when switching modes
         _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), CaptureStep.getStepsForMode(mode).first(), mode)
     }
 
     private fun onPhotoCaptured(uri: String) {
         capturedUris.add(uri)
-        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
+        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_PRO
         val nextStep = getNextStep(mode)
         if (nextStep != null) {
             _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), nextStep, mode)
@@ -114,7 +134,7 @@ class BoxCaptureViewModel @Inject constructor(
 
     private fun onBarcodeScanned(code: String) {
         scannedBarcode = code
-        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.QUICK_BOX
+        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_QUICK
         analyzePhotos(mode)
     }
 
@@ -151,7 +171,7 @@ class BoxCaptureViewModel @Inject constructor(
 
                 // --- Hybrid Analysis: Local OCR for Ingredients ---
                 var localIngredientsOcr = ""
-                val ingredientsIndex = if (mode == CaptureMode.QUICK_BOX) 2 else 6 // Specific steps
+                val ingredientsIndex = if (mode == CaptureMode.BOX_QUICK) 2 else 6 // Specific steps
                 if (capturedUris.size > ingredientsIndex) {
                     val ingredientsBitmap = loadBitmapFromUri(Uri.parse(capturedUris[ingredientsIndex]))
                     if (ingredientsBitmap != null) {
@@ -171,8 +191,8 @@ class BoxCaptureViewModel @Inject constructor(
                 val prompt = content {
                     bitmaps.forEach { image(it) }
                     val target = when (mode) {
-                        CaptureMode.BOX -> "product box from all sides"
-                        CaptureMode.QUICK_BOX -> "essential product box angles"
+                        CaptureMode.BOX_PRO -> "product box from all sides"
+                        CaptureMode.BOX_QUICK -> "essential product box angles"
                         CaptureMode.PRODUCT -> "product container (front and back)"
                     }
                     val barcodeContext = if (!scannedBarcode.isNullOrBlank()) "The scanned barcode is: $scannedBarcode." else ""
@@ -252,6 +272,7 @@ class BoxCaptureViewModel @Inject constructor(
             }
         }
     }
+
 
     private suspend fun runLocalAnalysis() {
         _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Running Local AI (Offline)...")
@@ -340,7 +361,7 @@ class BoxCaptureViewModel @Inject constructor(
     }
 
     fun reset() {
-        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
+        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_PRO
         capturedUris.clear()
         _uiState.value = BoxCaptureUiState.Idle(emptyList(), CaptureStep.getStepsForMode(mode).first(), mode)
     }

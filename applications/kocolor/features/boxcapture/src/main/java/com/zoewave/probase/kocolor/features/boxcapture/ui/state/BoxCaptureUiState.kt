@@ -6,7 +6,7 @@ sealed interface BoxCaptureUiState {
     data class Idle(
         val capturedUris: List<String> = emptyList(),
         val currentStep: CaptureStep = CaptureStep.FRONT,
-        val mode: CaptureMode = CaptureMode.BOX
+        val mode: CaptureMode = CaptureMode.BOX_PRO
     ) : BoxCaptureUiState
 
     data class Analyzing(
@@ -24,7 +24,7 @@ sealed interface BoxCaptureUiState {
 }
 
 enum class CaptureMode {
-    BOX, PRODUCT, QUICK_BOX
+    BOX_PRO, BOX_QUICK, PRODUCT
 }
 
 enum class CaptureStep(val boxLabel: String, val productLabel: String = boxLabel) {
@@ -44,9 +44,9 @@ enum class CaptureStep(val boxLabel: String, val productLabel: String = boxLabel
     companion object {
         fun getStepsForMode(mode: CaptureMode): List<CaptureStep> {
             return when (mode) {
-                CaptureMode.BOX -> listOf(FRONT, BACK, LEFT, RIGHT, TOP, BOTTOM, INGREDIENTS)
-                CaptureMode.PRODUCT -> listOf(FRONT, BACK)
-                CaptureMode.QUICK_BOX -> listOf(FRONT, BACK, INGREDIENTS, BARCODE)
+                CaptureMode.BOX_PRO -> listOf(FRONT, BACK, LEFT, RIGHT, TOP, BOTTOM, BARCODE)
+                CaptureMode.BOX_QUICK -> listOf(FRONT, BACK, INGREDIENTS, BARCODE)
+                CaptureMode.PRODUCT -> listOf(FRONT, BACK, BARCODE)
             }
         }
     }

@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -230,7 +231,7 @@ fun StitchProductBuilder(
                     .padding(24.dp)
                     .fillMaxWidth()
                     .aspectRatio(1.5f)
-                    .clickable { navTo(KoColorRoute.Camera("inventory_item")) },
+                    .clickable { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
                 shape = RoundedCornerShape(12.dp),
                 color = Color(0xFFFBF8F5),
                 border = BorderStroke(1.dp, Color(0xFFF0F0F0))
@@ -255,11 +256,13 @@ fun StitchProductBuilder(
 
             // Capture Row
             Row(
-                modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 CaptureButton(
-                    title = stringResource(R.string.applications_kocolor_features_cosmetics_barcode_scan_title),
+                    title = "Bar Scan",
                     subtitle = "Scan UPC",
                     icon = Icons.Default.QrCodeScanner,
                     color = Color(0xFF6B7280),
@@ -267,19 +270,19 @@ fun StitchProductBuilder(
                     modifier = Modifier.weight(1f)
                 )
                 CaptureButton(
-                    title = stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_title),
-                    subtitle = "7-angle AI",
+                    title = "Box Scan",
+                    subtitle = "3 or 7 pics",
                     icon = Icons.Default.AutoAwesome,
                     color = atelierBrown,
-                    onClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
+                    onClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX_QUICK")) },
                     modifier = Modifier.weight(1f)
                 )
                 CaptureButton(
-                    title = stringResource(R.string.applications_kocolor_features_cosmetics_quick_scan_title),
-                    subtitle = "3-pic AI",
-                    icon = Icons.Default.AutoAwesome,
-                    color = Color(0xFF22d3ee),
-                    onClick = { navTo(KoColorRoute.BoxCapture(mode = "QUICK_BOX")) },
+                    title = "No Box",
+                    subtitle = "2-pic AI",
+                    icon = Icons.Default.PhotoCamera,
+                    color = Color(0xFFf472b6),
+                    onClick = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },
                     modifier = Modifier.weight(1f)
                 )
             }

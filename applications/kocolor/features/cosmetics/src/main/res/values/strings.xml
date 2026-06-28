@@ -245,4 +245,7 @@
 
     <string name="applications_kocolor_features_cosmetics_quick_scan_title">Quk Scan</string>
     <string name="applications_kocolor_features_cosmetics_quick_scan_desc">3 pics + barcode (Fastest AI)</string>
+
+    <string name="applications_kocolor_features_cosmetics_no_box_scan_title">No Box</string>
+    <string name="applications_kocolor_features_cosmetics_no_box_scan_desc">2-pic AI (front/back)</string>
 </resources>

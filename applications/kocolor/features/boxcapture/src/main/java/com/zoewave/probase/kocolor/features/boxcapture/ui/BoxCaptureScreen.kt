@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -84,6 +85,8 @@ sealed class BoxCaptureEvent {
     data object Retry : BoxCaptureEvent()
     data object Dismiss : BoxCaptureEvent()
     data class Success(val item: CosmeticItem) : BoxCaptureEvent()
+    data class DeletePhoto(val index: Int) : BoxCaptureEvent()
+    data class ChangeMode(val mode: CaptureMode) : BoxCaptureEvent()
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -311,6 +314,28 @@ private fun CameraView(
                         fontWeight = FontWeight.Bold
                     )
                 }
+
+                if (uiState.mode == CaptureMode.BOX_PRO || uiState.mode == CaptureMode.BOX_QUICK) {
+                    Surface(
+                        color = Color.White.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(24.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    ) {
+                        Row(modifier = Modifier.padding(4.dp)) {
+                            CaptureModeChip(
+                                label = "3",
+                                isSelected = uiState.mode == CaptureMode.BOX_QUICK,
+                                onClick = { onEvent(BoxCaptureEvent.ChangeMode(CaptureMode.BOX_QUICK)) }
+                            )
+                            CaptureModeChip(
+                                label = "7",
+                                isSelected = uiState.mode == CaptureMode.BOX_PRO,
+                                onClick = { onEvent(BoxCaptureEvent.ChangeMode(CaptureMode.BOX_PRO)) }
+                            )
+                        }
+                    }
+                }
+
                 IconButton(
                     onClick = { onEvent(BoxCaptureEvent.Dismiss) },
                     modifier = Modifier.background(Color(0x33000000), CircleShape)
@@ -328,17 +353,33 @@ private fun CameraView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LazyRow(
-                modifier = Modifier.fillMaxWidth().height(60.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth().height(80.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
-                items(uiState.capturedUris) { uri ->
-                    AsyncImage(
-                        model = uri,
-                        contentDescription = null,
-                        modifier = Modifier.size(60.dp).clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Crop
-                    )
+                items(uiState.capturedUris.size) { index ->
+                    Box(modifier = Modifier.size(70.dp)) {
+                        AsyncImage(
+                            model = uiState.capturedUris[index],
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                        IconButton(
+                            onClick = { onEvent(BoxCaptureEvent.DeletePhoto(index)) },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .size(24.dp)
+                                .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                        ) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = Color.White,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
                 }
             }
 
@@ -395,7 +436,13 @@ private fun CameraView(
             }
             
             Spacer(modifier = Modifier.height(12.dp))
-            val captureLabel = if (uiState.mode == CaptureMode.BOX) stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_box) else stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_product)
+            val captureLabel = when (uiState.mode) {
+                CaptureMode.BOX_PRO -> stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_box)
+                CaptureMode.BOX_QUICK -> if (uiState.step == CaptureStep.INGREDIENTS) 
+                    stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_ingredients)
+                    else stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_box)
+                CaptureMode.PRODUCT -> stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_product)
+            }
             Text(captureLabel, color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.labelSmall)
         }
     }
@@ -472,6 +519,29 @@ private fun ErrorView(
         Spacer(modifier = Modifier.height(32.dp))
         Button(onClick = onEvent, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFf472b6))) {
             Text(stringResource(R.string.applications_kocolor_features_boxcapture_try_again), color = Color.White)
+        }
+    }
+}
+
+@Composable
+private fun CaptureModeChip(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        color = if (isSelected) Color(0xFF22d3ee) else Color.Transparent,
+        shape = CircleShape,
+        modifier = Modifier.size(36.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Bold,
+                color = if (isSelected) Color.Black else Color.White
+            )
         }
     }
 }
