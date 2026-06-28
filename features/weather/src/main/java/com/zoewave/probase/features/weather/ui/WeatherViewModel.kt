@@ -35,50 +35,26 @@ class WeatherViewModel @Inject constructor(
     }
 
     init {
-        // Initialize the UI state by loading settings
-        loadSettings()
+        // Initialize the UI state by fetching current weather
+        fetchCurrentWeather()
     }
-
-    /**
-     * Called when the user presses a button to fetch the weather from OpenWeather API.
-     */
-    fun onFetchWeatherClicked() {
-        viewModelScope.launch {
-            val currentState = _uiState.value
-            if (currentState is WeatherUiState.Success) {
-                val city = currentState.locationString  // e.g., "Santa Barbara, US"
-                try {
-                    val response = weatherRepo.openCurrentWeatherByCity(city)
-                    Log.d("Weather", "API call success: $response")
-                    _uiState.value = currentState.copy(weatherOpen = response)
-                } catch (e: Exception) {
-                    Log.e("Weather", "API call failed", e)
-                    // Optionally update UI state with an error.
-                }
-            } else {
-                Log.w("Weather", "UI state not ready for API call.")
-            }
-        }
-    }
-
 
     /**
      * Handle various events (Load, Update, Delete).
      */
     fun onEvent(event: WeatherEvent) {
         when (event) {
-            is WeatherEvent.LoadBike -> loadSettings()
+            WeatherEvent.Refresh -> fetchCurrentWeather()
             is WeatherEvent.UpdateSetting -> updateSetting(event.settingKey, event.settingValue)
             is WeatherEvent.DeleteAllEntries -> deleteAllEntries()
-            is WeatherEvent.FetchWeather -> onFetchWeatherClicked()  // Handle the fetch weather event
+            WeatherEvent.FetchWeather -> fetchCurrentWeather()
         }
     }
 
-
     /**
-     * Loads or simulates loading initial settings/data.
+     * Loads current weather data based on location.
      */
-    private fun loadSettings() {
+    private fun fetchCurrentWeather() {
         viewModelScope.launch {
             _uiState.value = WeatherUiState.Loading
             try {

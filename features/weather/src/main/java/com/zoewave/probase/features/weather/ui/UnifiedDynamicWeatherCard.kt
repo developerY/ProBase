@@ -20,14 +20,99 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
+import com.zoewave.probase.core.model.weather.Clouds
+import com.zoewave.probase.core.model.weather.Coord
+import com.zoewave.probase.core.model.weather.Main
 import com.zoewave.probase.core.model.weather.OpenWeatherResponse
+import com.zoewave.probase.core.model.weather.Rain
+import com.zoewave.probase.core.model.weather.Snow
+import com.zoewave.probase.core.model.weather.Sys
+import com.zoewave.probase.core.model.weather.WeatherOne
+import com.zoewave.probase.core.model.weather.Wind
 import com.zoewave.probase.features.weather.ui.components.WeatherIcon
 import com.zoewave.probase.features.weather.ui.components.backgrounds.WeatherBackgroundAnimation
 import com.zoewave.probase.features.weather.ui.components.combine.WeatherConditionUnif
 import com.zoewave.probase.features.weather.ui.components.combine.WindDirectionDialWithSpeed
 import kotlin.math.roundToLong
 
-// Assume these composables are imported from their respective files:
+@Preview
+@Composable
+fun UnifiedDynamicWeatherCardPreview() {
+    val openWeatherResponse = OpenWeatherResponse(
+        coord = Coord(lon = 139.0, lat = 35.0),
+        weather = listOf(
+            WeatherOne(
+                id = 800,
+                main = "Clear",
+                description = "clear sky",
+                icon = "01d"
+            )
+        ),
+        base = "stations",
+        main = Main(
+            temp = 20.5,
+            feels_like = 20.0,
+            temp_min = 18.0,
+            temp_max = 22.0,
+            pressure = 1010,
+            humidity = 60
+        ),
+        visibility = 10000,
+        wind = Wind(speed = 5.0, deg = 180, gust = 6.0),
+        clouds = Clouds(all = 0),
+        rain = null,
+        snow = null,
+        dt = 1678886400,
+        sys = Sys(type = 1, id = 8000, country = "JP", sunrise = 1678876800, sunset = 1678920000),
+        timezone = 32400,
+        id = 1851632,
+        name = "Shuzenji",
+        cod = 200
+    )
+
+    UnifiedDynamicWeatherCard(response = openWeatherResponse)
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun UnifiedDynamicWeatherCardRainyPreview() {
+    val openWeatherResponse = OpenWeatherResponse(
+        coord = Coord(lon = 139.0, lat = 35.0),
+        weather = listOf(
+            WeatherOne(
+                id = 500,
+                main = "Rain",
+                description = "light rain",
+                icon = "10d"
+            )
+        ),
+        base = "stations",
+        main = Main(
+            temp = 20.5,
+            feels_like = 20.0,
+            temp_min = 18.0,
+            temp_max = 22.0,
+            pressure = 1010,
+            humidity = 80
+        ),
+        visibility = 10000,
+        wind = Wind(speed = 5.0, deg = 180, gust = 6.0),
+        clouds = Clouds(all = 90),
+        rain = Rain(`1h` = 2.5, `3h` = 5.0),
+        snow = null,
+        dt = 1678886400,
+        sys = Sys(type = 1, id = 8000, country = "JP", sunrise = 1678876800, sunset = 1678920000),
+        timezone = 32400,
+        id = 1851632,
+        name = "Shuzenji",
+        cod = 200
+    )
+
+    // This unified card will choose the rainy layout (rain effect, etc.)
+    UnifiedDynamicWeatherCard(response = openWeatherResponse)
+}
 
 @Composable
 fun UnifiedDynamicWeatherCard(
@@ -112,83 +197,3 @@ fun UnifiedDynamicWeatherCard(
         }
     }
 }
-
-/*
-@Preview
-@Composable
-fun UnifiedDynamicWeatherCardPreview() {
-    val openWeatherResponse = OpenWeatherResponse(
-        coord = Coord(lon = 139.0, lat = 35.0),
-        weather = listOf(
-            WeatherOne(
-                id = 800,
-                main = "Clear",
-                description = "clear sky",
-                icon = "01d"
-            )
-        ),
-        base = "stations",
-        main = Main(
-            temp = 20.5,
-            feels_like = 20.0,
-            temp_min = 18.0,
-            temp_max = 22.0,
-            pressure = 1010,
-            humidity = 60
-        ),
-        visibility = 10000,
-        wind = com.zoewave.probase.core.model.weather.Wind(speed = 5.0, deg = 180, gust = 6.0),
-        clouds = Clouds(all = 0),
-        rain = Rain(null, null),
-        snow = Snow(null, null),
-        dt = 1678886400,
-        sys = Sys(type = 1, id = 8000, country = "JP", sunrise = 1678876800, sunset = 1678920000),
-        timezone = 32400,
-        id = 1851632,
-        name = "Shuzenji",
-        cod = 200
-    )
-
-    UnifiedDynamicWeatherCard(response = openWeatherResponse)
-}
-
-
-/*@Preview(showBackground = true)
-@Composable
-fun UnifiedDynamicWeatherCardRainyPreview() {
-    val openWeatherResponse = OpenWeatherResponse(
-        coord = Coord(lon = 139.0, lat = 35.0),
-        weather = listOf(
-            WeatherOne(
-                id = 500,
-                main = "Rain",
-                description = "light rain",
-                icon = "10d"
-            )
-        ),
-        base = "stations",
-        main = Main(
-            temp = 20.5,
-            feels_like = 20.0,
-            temp_min = 18.0,
-            temp_max = 22.0,
-            pressure = 1010,
-            humidity = 80
-        ),
-        visibility = 10000,
-        wind = Wind(speed = 5.0, deg = 180, gust = 6.0),
-        clouds = Clouds(all = 90),
-        rain = Rain(`1h` = 2.5, `3h` = 5.0),
-        snow = Snow(`1h` = null, `3h` = null),
-        dt = 1678886400,
-        sys = Sys(type = 1, id = 8000, country = "JP", sunrise = 1678876800, sunset = 1678920000),
-        timezone = 32400,
-        id = 1851632,
-        name = "Shuzenji",
-        cod = 200
-    )
-
-    // This unified card will choose the rainy layout (rain effect, etc.)
-    UnifiedDynamicWeatherCard(response = openWeatherResponse)
-}
-*/

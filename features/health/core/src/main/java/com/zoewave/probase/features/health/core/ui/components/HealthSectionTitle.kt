@@ -1,24 +1,22 @@
-package com.zoewave.probase.kocolor.mobile.features.home.ui.components
+package com.zoewave.probase.features.health.core.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import com.zoewave.probase.kocolor.model.KoColorRoute
 
-data class SectionTitleUiState(val title: String, val subtitle: String)
+data class HealthSectionTitleUiState(val title: String, val subtitle: String)
 
 @Composable
-fun SectionTitle(
-    uiState: SectionTitleUiState,
+fun HealthSectionTitle(
+    uiState: HealthSectionTitleUiState,
     modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit = {},
-    navTo: (KoColorRoute) -> Unit = {}
 ) {
     Column(modifier = modifier) {
         Text(
@@ -38,10 +36,10 @@ fun SectionTitle(
 
 @Preview(showBackground = true)
 @Composable
-private fun SectionTitlePreview() {
+private fun HealthSectionTitlePreview() {
     MaterialTheme {
-        SectionTitle(
-            uiState = SectionTitleUiState("Title", "Subtitle")
+        HealthSectionTitle(
+            uiState = HealthSectionTitleUiState("Bio-Markers", "Style from the inside out")
         )
     }
 }

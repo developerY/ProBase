@@ -6,7 +6,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.features.weather.ui.components.combine.WeatherConditionUnif
+
+@Preview(showBackground = true, widthDp = 200, heightDp = 400)
+@Composable
+fun WeatherBackgroundAnimationSunnyPreview() {
+    WeatherBackgroundAnimation(weatherCondition = WeatherConditionUnif.SUNNY)
+}
+
+@Preview(showBackground = true, widthDp = 200, heightDp = 400)
+@Composable
+fun WeatherBackgroundAnimationRainyPreview() {
+    WeatherBackgroundAnimation(weatherCondition = WeatherConditionUnif.RAINY)
+}
 
 @Composable
 fun WeatherBackgroundAnimation(

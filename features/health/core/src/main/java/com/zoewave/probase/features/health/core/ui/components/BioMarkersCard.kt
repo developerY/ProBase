@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.mobile.features.home.ui.components
+package com.zoewave.probase.features.health.core.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,54 +33,40 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.zoewave.probase.features.health.core.SkinInsight
-import com.zoewave.probase.kocolor.mobile.features.home.R
-import com.zoewave.probase.kocolor.model.KoColorRoute
 
-@Preview(showBackground = true)
-@Composable
-private fun WellnessInsightsSectionPreview() {
-    MaterialTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            WellnessInsightsSection(
-                uiState = WellnessInsightsUiState(
-                    insights = emptyList(),
-                    sleepDuration = "7h 12m",
-                    hydrationLiters = 1.2,
-                    hydrationGoalLiters = 2.7,
-                    isPermissionGranted = true
-                ),
-                onEvent = {},
-                navTo = {}
-            )
-        }
-    }
-}
-
-data class WellnessInsightsUiState(
-    val insights: List<SkinInsight>,
-    val sleepDuration: String?,
-    val hydrationLiters: Double,
-    val hydrationGoalLiters: Double,
-    val isPermissionGranted: Boolean
+data class BioMarkersUiState(
+    val insights: List<SkinInsight> = emptyList(),
+    val sleepDuration: String? = null,
+    val hydrationLiters: Double = 0.0,
+    val hydrationGoalLiters: Double = 2.0,
+    val isPermissionGranted: Boolean = true,
+    val title: String = "Bio-Markers",
+    val subtitle: String = "Style from the inside out"
 )
 
 @Composable
-fun WellnessInsightsSection(
-    uiState: WellnessInsightsUiState,
-    modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+fun BioMarkersCard(
+    uiState: BioMarkersUiState,
+    onClick: () -> Unit,
+    onGrantPermissionsClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        SectionTitle(uiState = SectionTitleUiState(stringResource(R.string.applications_kocolor_apps_mobile_features_home_bio_markers), stringResource(R.string.applications_kocolor_apps_mobile_features_home_style_inside_out)), onEvent = {}, navTo = {})
+        HealthSectionTitle(
+            uiState = HealthSectionTitleUiState(uiState.title, uiState.subtitle)
+        )
 
         ElevatedCard(
-            modifier = Modifier.fillMaxWidth().clickable { navTo(KoColorRoute.Health) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    if (uiState.isPermissionGranted) onClick() else onGrantPermissionsClick()
+                },
             shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.elevatedCardColors(containerColor = Color.Transparent),
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
@@ -100,19 +86,71 @@ fun WellnessInsightsSection(
                     .padding(24.dp)
             ) {
                 if (!uiState.isPermissionGranted) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
-                        Icon(Icons.Default.Lock, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                         Spacer(modifier = Modifier.height(12.dp))
-                        Text(text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_sync_health), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text(text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_connect_vitals), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            text = "Sync Health Data",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Connect vitals to personalize your experience",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 } else {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.Bedtime, stringResource(R.string.applications_kocolor_apps_mobile_features_home_sleep), uiState.sleepDuration ?: "--", Color(0xFF9C27B0)), modifier = Modifier.weight(1f), onEvent = {}, navTo = {})
-                        VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.WaterDrop, stringResource(R.string.applications_kocolor_apps_mobile_features_home_hydration), stringResource(R.string.applications_kocolor_apps_mobile_features_home_hydration_format, uiState.hydrationLiters), Color(0xFF2196F3)), modifier = Modifier.weight(1f), onEvent = {}, navTo = {})
-                        VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        BioMarkerItem(uiState = BioMarkerUiState(Icons.Default.Favorite, stringResource(R.string.applications_kocolor_apps_mobile_features_home_vitals), if (uiState.insights.isEmpty()) stringResource(R.string.applications_kocolor_apps_mobile_features_home_optimal) else stringResource(R.string.applications_kocolor_apps_mobile_features_home_alerts_format, uiState.insights.size), if (uiState.insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)), modifier = Modifier.weight(1f), onEvent = {}, navTo = {})
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        BioMarkerItem(
+                            uiState = BioMarkerUiState(
+                                Icons.Default.Bedtime,
+                                "Sleep",
+                                uiState.sleepDuration ?: "--",
+                                Color(0xFF9C27B0)
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+                        VerticalDivider(
+                            modifier = Modifier.height(48.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                        )
+                        BioMarkerItem(
+                            uiState = BioMarkerUiState(
+                                Icons.Default.WaterDrop,
+                                "Hydration",
+                                "%.1fL".format(uiState.hydrationLiters),
+                                Color(0xFF2196F3)
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+                        VerticalDivider(
+                            modifier = Modifier.height(48.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                        )
+                        BioMarkerItem(
+                            uiState = BioMarkerUiState(
+                                Icons.Default.Favorite,
+                                "Vitals",
+                                if (uiState.insights.isEmpty()) "Optimal" else "${uiState.insights.size} Alerts",
+                                if (uiState.insights.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
             }
@@ -120,14 +158,17 @@ fun WellnessInsightsSection(
     }
 }
 
-data class BioMarkerUiState(val icon: ImageVector, val label: String, val value: String, val color: Color)
+data class BioMarkerUiState(
+    val icon: ImageVector,
+    val label: String,
+    val value: String,
+    val color: Color
+)
 
 @Composable
-fun BioMarkerItem(
+private fun BioMarkerItem(
     uiState: BioMarkerUiState,
-    modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
@@ -189,5 +230,25 @@ fun BioMarkerItem(
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BioMarkersCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            BioMarkersCard(
+                uiState = BioMarkersUiState(
+                    insights = emptyList(),
+                    sleepDuration = "7h 12m",
+                    hydrationLiters = 1.2,
+                    hydrationGoalLiters = 2.7,
+                    isPermissionGranted = true
+                ),
+                onClick = {},
+                onGrantPermissionsClick = {}
+            )
+        }
     }
 }

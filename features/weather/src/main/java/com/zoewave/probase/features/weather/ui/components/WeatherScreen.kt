@@ -20,16 +20,68 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.google.android.gms.maps.model.LatLng
 import com.zoewave.probase.features.weather.R
+import com.zoewave.probase.core.model.weather.Clouds
+import com.zoewave.probase.core.model.weather.Coord
+import com.zoewave.probase.core.model.weather.EnvironmentalContext
+import com.zoewave.probase.core.model.weather.Main
 import com.zoewave.probase.core.model.weather.OpenWeatherResponse
+import com.zoewave.probase.core.model.weather.Sys
+import com.zoewave.probase.core.model.weather.WeatherOne
+import com.zoewave.probase.core.model.weather.Wind
 import com.zoewave.probase.features.weather.ui.WeatherEvent
 import com.zoewave.probase.features.weather.ui.components.atelier.*
 import com.zoewave.probase.features.weather.ui.components.combine.WeatherConditionUnif
 import java.time.LocalDate
+
+@Preview(showBackground = true)
+@Composable
+fun WeatherScreenPreview() {
+    val sampleWeather = OpenWeatherResponse(
+        coord = Coord(lon = -119.7, lat = 34.42),
+        weather = listOf(WeatherOne(id = 800, main = "Clear", description = "clear sky", icon = "01d")),
+        base = "stations",
+        main = Main(temp = 22.0, feels_like = 21.5, temp_min = 20.0, temp_max = 24.0, pressure = 1012, humidity = 45),
+        visibility = 10000,
+        wind = Wind(speed = 3.5, deg = 240, gust = 5.0),
+        clouds = Clouds(all = 0),
+        rain = null,
+        snow = null,
+        dt = 1678886400,
+        sys = Sys(type = 1, id = 8000, country = "US", sunrise = 1678876800, sunset = 1678920000),
+        timezone = -25200,
+        id = 5392323,
+        name = "Santa Barbara",
+        cod = 200
+    )
+
+    val sampleEnv = EnvironmentalContext(
+        temperature = 22.0,
+        humidity = 45.0,
+        uvIndex = 6.2,
+        isDay = true,
+        weatherCode = 1,
+        hourlyUV = listOf(0.0, 0.0, 0.0, 0.5, 2.0, 4.5, 6.0, 7.5, 8.0, 7.0, 5.5, 3.5, 1.5, 0.5, 0.0)
+    )
+
+    MaterialTheme {
+        WeatherScreen(
+            weather = sampleWeather,
+            environmentalContext = sampleEnv,
+            isLocationFallback = false,
+            settings = emptyMap(),
+            location = LatLng(34.42, -119.7),
+            onEvent = {},
+            onBack = {},
+            onNavigateToSunIntelligence = {}
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

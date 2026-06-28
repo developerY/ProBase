@@ -216,15 +216,7 @@ class RoutinesViewModel @Inject constructor(
 
     private fun toggleStep(routineId: Long, stepId: String) {
         viewModelScope.launch {
-            val morning = uiState.value.morningRoutine
-            val meals = uiState.value.mealsRoutine
-            val evening = uiState.value.eveningRoutine
-            val routine = when {
-                morning?.id == routineId -> morning
-                meals?.id == routineId -> meals
-                evening?.id == routineId -> evening
-                else -> null
-            } ?: return@launch
+            val routine = getRoutine(routineId) ?: return@launch
             
             val updatedSteps = routine.steps.map { step ->
                 if (step.id == stepId) {
@@ -293,15 +285,7 @@ class RoutinesViewModel @Inject constructor(
     }
 
     private fun linkMealToStep(routineId: Long, stepId: String, mealId: String?) {
-        val morning = uiState.value.morningRoutine
-        val meals = uiState.value.mealsRoutine
-        val evening = uiState.value.eveningRoutine
-        val routine = when {
-            morning?.id == routineId -> morning
-            meals?.id == routineId -> meals
-            evening?.id == routineId -> evening
-            else -> null
-        } ?: return
+        val routine = getRoutine(routineId) ?: return
 
         val updatedSteps = routine.steps.map { step ->
             if (step.id == stepId) step.copy(linkedMealId = mealId) else step
@@ -310,8 +294,7 @@ class RoutinesViewModel @Inject constructor(
     }
 
     private fun reorderSteps(routineId: Long, fromIndex: Int, toIndex: Int) {
-        val currentRoutine = (uiState.value.morningRoutine ?: uiState.value.eveningRoutine)?.takeIf { it.id == routineId }
-            ?: return
+        val currentRoutine = getRoutine(routineId) ?: return
         
         val updatedSteps = currentRoutine.steps.toMutableList().apply {
             val item = removeAt(fromIndex)
@@ -325,8 +308,7 @@ class RoutinesViewModel @Inject constructor(
 
     private fun resetRoutine(routineId: Long) {
         viewModelScope.launch {
-            val routine = (uiState.value.morningRoutine ?: uiState.value.eveningRoutine)?.takeIf { it.id == routineId }
-                ?: return@launch
+            val routine = getRoutine(routineId) ?: return@launch
             
             val resetSteps = routine.steps.map { it.copy(isCompleted = false) }
             routineDao.updateRoutine(routine.copy(steps = resetSteps).toEntity())
@@ -370,7 +352,13 @@ class RoutinesViewModel @Inject constructor(
     }
 
     private fun getRoutine(routineId: Long): BeautyRoutine? {
-        return if (uiState.value.morningRoutine?.id == routineId) uiState.value.morningRoutine 
-               else uiState.value.eveningRoutine?.takeIf { it.id == routineId }
+        return with(uiState.value) {
+            when (routineId) {
+                morningRoutine?.id -> morningRoutine
+                mealsRoutine?.id -> mealsRoutine
+                eveningRoutine?.id -> eveningRoutine
+                else -> null
+            }
+        }
     }
 }

@@ -18,11 +18,42 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.features.weather.ui.components.backgrounds.Raindrop
 import com.zoewave.probase.features.weather.ui.components.snow.Snowflake
 import kotlin.math.roundToInt
+
+@Preview(showBackground = true, backgroundColor = 0xFFF9F7F2)
+@Composable
+fun AtelierHydrometeorCardRainPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            AtelierHydrometeorCard(
+                label = "Rain Volume",
+                value = 2.5,
+                isRain = true,
+                isActive = true
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFF9F7F2)
+@Composable
+fun AtelierHydrometeorCardSnowPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            AtelierHydrometeorCard(
+                label = "Snow Volume",
+                value = 1.2,
+                isRain = false,
+                isActive = true
+            )
+        }
+    }
+}
 
 @Composable
 fun AtelierHydrometeorCard(

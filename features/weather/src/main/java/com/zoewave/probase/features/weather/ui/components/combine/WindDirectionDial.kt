@@ -8,8 +8,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.cos
 import kotlin.math.sin
+
+@Preview(showBackground = true, widthDp = 100, heightDp = 100)
+@Composable
+fun WindDirectionDialUniPreview() {
+    WindDirectionDialUni(degree = 45f)
+}
 
 @Composable
 fun WindDirectionDialUni(

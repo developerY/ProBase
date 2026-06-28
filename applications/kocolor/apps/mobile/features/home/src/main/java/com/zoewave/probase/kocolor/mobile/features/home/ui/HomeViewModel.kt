@@ -7,8 +7,9 @@ import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
-import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherCondition
+import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherMapper
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
+import com.zoewave.probase.features.weather.ui.components.layered.WeatherAdvice
 import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.features.health.core.WellnessCorrelationEngine
 import com.zoewave.probase.kocolor.data.FashionRepository
@@ -352,28 +353,11 @@ class HomeViewModel @Inject constructor(
         isFallback: Boolean
     ) {
         if (response != null && envContext != null) {
-            val conditions = mutableListOf<LayeredWeatherCondition>()
-            val main = response.weather.firstOrNull()?.main ?: ""
-            when {
-                main.contains("Cloud", true) -> conditions.add(LayeredWeatherCondition.CLOUDY)
-                main.contains("Rain", true) -> conditions.add(LayeredWeatherCondition.RAINY)
-                main.contains("Thunder", true) -> conditions.add(LayeredWeatherCondition.THUNDER)
-                else -> conditions.add(LayeredWeatherCondition.SUNNY)
-            }
-            if (response.wind.speed > 5.0) conditions.add(LayeredWeatherCondition.WINDY)
-            
-            _weather.value = LayeredWeatherUiState(
-                temperature = response.main.temp,
-                uvIndex = envContext.uvIndex,
-                conditions = conditions,
-                locationName = if (isFallback) "Location could not be found" else response.name
-            )
+            _weather.value = LayeredWeatherMapper.mapToUiState(response, envContext, isFallback)
 
             // Environmental Trigger Logic
-            if (envContext.uvIndex > 3.0) {
-                _beautyTip.value = "☀️ High UV detected. Prioritize SPF in your ritual today."
-            } else if (envContext.humidity < 30.0) {
-                _beautyTip.value = "💧 Low humidity. Use a humectant to retain moisture."
+            WeatherAdvice.getBeautyAdvice(envContext)?.let { advice ->
+                _beautyTip.value = advice
             }
         }
     }

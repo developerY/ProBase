@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.mobile.features.home.ui.components
+package com.zoewave.probase.features.weather.ui.components.layered
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
@@ -21,9 +21,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -36,26 +35,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.FashionProfile
-import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
-import com.zoewave.probase.kocolor.model.KoColorRoute
 
-data class HomeHeaderUiState(
+data class AtmosphericHeaderUiState(
     val fashionProfile: FashionProfile? = null,
     val isDaytime: Boolean = true,
-    val beautyTip: String = "",
+    val tip: String = "",
     val weather: LayeredWeatherUiState? = null,
     val locationName: String? = null,
     val isLocationFallback: Boolean = false,
@@ -64,19 +58,22 @@ data class HomeHeaderUiState(
 )
 
 @Composable
-fun HomeHeader(
-    uiState: HomeHeaderUiState,
+fun AtmosphericHeaderCard(
+    uiState: AtmosphericHeaderUiState,
+    onWeatherClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit = {},
-    navTo: (KoColorRoute) -> Unit = {}
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
-    // Premium gradient background matching image_266714.png
+    // Dynamic background gradient based on weather mood
+    val weatherConditions = uiState.weather?.conditions ?: listOf(LayeredWeatherCondition.SUNNY)
+    val mainCondition = weatherConditions.firstOrNull() ?: LayeredWeatherCondition.SUNNY
+    val gradientColors = WeatherMoodGradient.getColors(mainCondition, uiState.isDaytime)
+
     val gradientBrush = Brush.linearGradient(
-        colors = listOf(Color(0xFFF3E7FF), Color(0xFFD6C8F7), Color(0xFFC4B5FD)),
-        start = androidx.compose.ui.geometry.Offset.Zero,
-        end = androidx.compose.ui.geometry.Offset.Infinite
+        colors = gradientColors,
+        start = Offset.Zero,
+        end = Offset.Infinite
     )
 
     Box(
@@ -96,13 +93,13 @@ fun HomeHeader(
             if (expanded) {
                 LongHeader(
                     uiState = uiState,
-                    onWeatherClick = { navTo(KoColorRoute.Weather) },
+                    onWeatherClick = onWeatherClick,
                     onCollapseClick = { isExpanded = false }
                 )
             } else {
                 ShortHeader(
                     uiState = uiState,
-                    onWeatherClick = { navTo(KoColorRoute.Weather) },
+                    onWeatherClick = onWeatherClick,
                     onExpandClick = { isExpanded = true }
                 )
             }
@@ -112,7 +109,7 @@ fun HomeHeader(
 
 @Composable
 private fun ShortHeader(
-    uiState: HomeHeaderUiState,
+    uiState: AtmosphericHeaderUiState,
     onWeatherClick: () -> Unit,
     onExpandClick: () -> Unit
 ) {
@@ -120,7 +117,7 @@ private fun ShortHeader(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // TOP HALF: Weather Widget (Go to weather)
+        // TOP HALF: Weather Widget
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -147,25 +144,10 @@ private fun ShortHeader(
                         )
                 )
 
-                // Cloud Icon with Premium Gradient - WIDER
-                Icon(
-                    imageVector = Icons.Default.Cloud,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(width = 160.dp, height = 100.dp)
-                        .graphicsLayer {
-                            alpha = 0.99f
-                        }
-                        .drawWithContent {
-                            drawContent()
-                            drawRect(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(Color.White, Color.White.copy(alpha = 0.5f))
-                                ),
-                                blendMode = BlendMode.SrcIn
-                            )
-                        },
-                    tint = Color.Unspecified
+                // Dynamic Weather Icons with Premium Gradient
+                DynamicWeatherIcon(
+                    conditions = uiState.weather?.conditions ?: listOf(LayeredWeatherCondition.SUNNY),
+                    modifier = Modifier.size(width = 200.dp, height = 100.dp)
                 )
 
                 // Temperature Text (Popping Bolder Numbers with High Contrast)
@@ -229,7 +211,7 @@ private fun ShortHeader(
         ) {
             Text(
                 text = if (uiState.isDaytime) "Radiant Morning." else "Deep Restoration.",
-                style = MaterialTheme.typography.titleLargeEmphasized,
+                style = MaterialTheme.typography.titleLarge,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF1F2937),
@@ -248,7 +230,7 @@ private fun ShortHeader(
 
 @Composable
 private fun LongHeader(
-    uiState: HomeHeaderUiState,
+    uiState: AtmosphericHeaderUiState,
     onWeatherClick: () -> Unit,
     onCollapseClick: () -> Unit
 ) {
@@ -274,7 +256,7 @@ private fun LongHeader(
                     text = "CURRENT LOCATION",
                     style = MaterialTheme.typography.labelSmall,
                     letterSpacing = 1.5.sp,
-                    color = Color(0xFF6A6577),
+                    color = Color(0xFF6A6577).copy(alpha = 0.7f),
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -288,9 +270,9 @@ private fun LongHeader(
             }
 
             Icon(
-                imageVector = Icons.Default.WbSunny,
+                imageVector = Icons.Default.KeyboardArrowUp,
                 contentDescription = "Collapse Header",
-                tint = Color(0xFF6A6577),
+                tint = Color(0xFF6A6577).copy(alpha = 0.7f),
                 modifier = Modifier
                     .size(28.dp)
                     .clip(CircleShape)
@@ -362,7 +344,7 @@ private fun LongHeader(
                     }
                 }
                 Text(
-                    text = uiState.beautyTip.ifBlank { "High UV. Reapply your mineral SPF every 2 hours and stay in the shade during peak sun." },
+                    text = uiState.tip.ifBlank { "High UV detected. Prioritize SPF in your ritual today." },
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFF49454F),
                     lineHeight = 20.sp
@@ -376,14 +358,35 @@ private fun LongHeader(
 
 @Preview(showBackground = true, backgroundColor = 0xFFF8F7FA)
 @Composable
-private fun HomeHeaderShortResponsivePreview() {
+private fun AtmosphericHeaderCardPreview() {
     MaterialTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            HomeHeader(
-                uiState = HomeHeaderUiState(
+            AtmosphericHeaderCard(
+                uiState = AtmosphericHeaderUiState(
                     weather = LayeredWeatherUiState(temperature = 24.0, uvIndex = 8.0),
                     tempUnit = "FAHRENHEIT"
-                )
+                ),
+                onWeatherClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFF8F7FA)
+@Composable
+private fun AtmosphericHeaderCardRainyPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            AtmosphericHeaderCard(
+                uiState = AtmosphericHeaderUiState(
+                    weather = LayeredWeatherUiState(
+                        temperature = 24.0, 
+                        uvIndex = 8.0,
+                        conditions = listOf(LayeredWeatherCondition.RAINY, LayeredWeatherCondition.THUNDER)
+                    ),
+                    tempUnit = "FAHRENHEIT",
+                ),
+                onWeatherClick = {}
             )
         }
     }
