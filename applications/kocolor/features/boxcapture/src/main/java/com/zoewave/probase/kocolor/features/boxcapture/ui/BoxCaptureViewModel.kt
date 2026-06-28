@@ -84,6 +84,8 @@ class BoxCaptureViewModel @Inject constructor(
 
     private val capturedUris = mutableListOf<String>()
     private var scannedBarcode: String? = null
+    private var localIngredientsOcr: String = ""
+    private var localInstructionsOcr: String = ""
 
     fun onEvent(event: BoxCaptureEvent) {
         when (event) {
@@ -106,11 +108,18 @@ class BoxCaptureViewModel @Inject constructor(
                     _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), CaptureStep.getStepsForMode(event.mode).first(), event.mode)
                 }
             }
+            BoxCaptureEvent.SubmitToAi -> {
+                val mode = (uiState.value as? BoxCaptureUiState.Review)?.mode ?: CaptureMode.BOX_PRO
+                analyzePhotos(mode)
+            }
         }
     }
 
     private fun refreshStep() {
-        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_PRO
+        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: 
+                   (uiState.value as? BoxCaptureUiState.Review)?.mode ?:
+                   CaptureMode.BOX_PRO
+        
         val currentStep = getNextStep(mode) ?: CaptureStep.BARCODE // Fallback
         _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), currentStep, mode)
     }
@@ -128,14 +137,45 @@ class BoxCaptureViewModel @Inject constructor(
         if (nextStep != null) {
             _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), nextStep, mode)
         } else {
-            analyzePhotos(mode)
+            prepareReview(mode)
         }
     }
 
     private fun onBarcodeScanned(code: String) {
         scannedBarcode = code
         val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_QUICK
-        analyzePhotos(mode)
+        prepareReview(mode)
+    }
+
+    private fun prepareReview(mode: CaptureMode) {
+        viewModelScope.launch {
+            _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Performing Local OCR...")
+            
+            localIngredientsOcr = if (mode == CaptureMode.BOX_QUICK || mode == CaptureMode.BOX_PRO) {
+                // Index 2 for Quick, Index 6 for Pro (based on CaptureStep lists)
+                val idx = if (mode == CaptureMode.BOX_QUICK) 2 else 6
+                if (idx in capturedUris.indices) {
+                    loadBitmapFromUri(Uri.parse(capturedUris[idx]))?.let { 
+                        localAnalyzer.extractText(it) 
+                    } ?: ""
+                } else ""
+            } else ""
+
+            localInstructionsOcr = if (mode == CaptureMode.BOX_PRO && capturedUris.size > 1) {
+                // Back side usually contains instructions
+                loadBitmapFromUri(Uri.parse(capturedUris[1]))?.let {
+                    localAnalyzer.extractText(it)
+                } ?: ""
+            } else ""
+
+            _uiState.value = BoxCaptureUiState.Review(
+                capturedUris = capturedUris.toList(),
+                barcode = scannedBarcode,
+                ingredientsOcr = localIngredientsOcr,
+                instructionsOcr = localInstructionsOcr,
+                mode = mode
+            )
+        }
     }
 
     private fun getNextStep(mode: CaptureMode): CaptureStep? {
@@ -169,17 +209,6 @@ class BoxCaptureViewModel @Inject constructor(
                     return@launch
                 }
 
-                // --- Hybrid Analysis: Local OCR for Ingredients ---
-                var localIngredientsOcr = ""
-                val ingredientsIndex = if (mode == CaptureMode.BOX_QUICK) 2 else 6 // Specific steps
-                if (capturedUris.size > ingredientsIndex) {
-                    val ingredientsBitmap = loadBitmapFromUri(Uri.parse(capturedUris[ingredientsIndex]))
-                    if (ingredientsBitmap != null) {
-                        Log.d(TAG, "Running local OCR on ingredients panel...")
-                        localIngredientsOcr = localAnalyzer.extractText(ingredientsBitmap)
-                    }
-                }
-
                 val model = GenerativeModel(
                     modelName = modelName,
                     apiKey = apiKey,
@@ -196,13 +225,15 @@ class BoxCaptureViewModel @Inject constructor(
                         CaptureMode.PRODUCT -> "product container (front and back)"
                     }
                     val barcodeContext = if (!scannedBarcode.isNullOrBlank()) "The scanned barcode is: $scannedBarcode." else ""
-                    val ocrContext = if (localIngredientsOcr.isNotBlank()) "LOCAL OCR EXTRACTED TEXT FROM INGREDIENTS PANEL:\n$localIngredientsOcr\n---" else ""
+                    val ingredientsContext = if (localIngredientsOcr.isNotBlank()) "LOCAL OCR EXTRACTED TEXT FROM INGREDIENTS PANEL:\n$localIngredientsOcr\n---" else ""
+                    val instructionsContext = if (localInstructionsOcr.isNotBlank()) "LOCAL OCR EXTRACTED TEXT FROM INSTRUCTIONS/BACK PANEL:\n$localInstructionsOcr\n---" else ""
                     
                     text("""
                         Analyze these photos of a $target. $barcodeContext
-                        $ocrContext
+                        $ingredientsContext
+                        $instructionsContext
                         
-                        Extract all available information to fill a professional cosmetic database entry. Use the OCR text above to help identify specific ingredients correctly.
+                        Extract all available information to fill a professional cosmetic database entry. Use the OCR text above to help identify specific ingredients and instructions correctly.
                         Return ONLY the following JSON format:
                         {
                             "name": "Product Name",
@@ -361,8 +392,13 @@ class BoxCaptureViewModel @Inject constructor(
     }
 
     fun reset() {
-        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_PRO
+        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: 
+                   (uiState.value as? BoxCaptureUiState.Review)?.mode ?:
+                   CaptureMode.BOX_PRO
         capturedUris.clear()
+        scannedBarcode = null
+        localIngredientsOcr = ""
+        localInstructionsOcr = ""
         _uiState.value = BoxCaptureUiState.Idle(emptyList(), CaptureStep.getStepsForMode(mode).first(), mode)
     }
 }

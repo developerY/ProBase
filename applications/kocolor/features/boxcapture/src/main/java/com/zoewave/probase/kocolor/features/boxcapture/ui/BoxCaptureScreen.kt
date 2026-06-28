@@ -12,6 +12,7 @@ import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,18 +22,23 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -58,6 +64,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
@@ -87,6 +94,7 @@ sealed class BoxCaptureEvent {
     data class Success(val item: CosmeticItem) : BoxCaptureEvent()
     data class DeletePhoto(val index: Int) : BoxCaptureEvent()
     data class ChangeMode(val mode: CaptureMode) : BoxCaptureEvent()
+    data object SubmitToAi : BoxCaptureEvent()
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -211,6 +219,18 @@ internal fun BoxCaptureScreen(
                         navTo = {}
                     )
                 }
+                is BoxCaptureUiState.Review -> {
+                    ReviewView(
+                        uiState = ReviewViewUiState(
+                            capturedUris = uiState.capturedUris,
+                            barcode = uiState.barcode,
+                            ingredientsOcr = uiState.ingredientsOcr,
+                            instructionsOcr = uiState.instructionsOcr
+                        ),
+                        onEvent = onEvent,
+                        navTo = navTo
+                    )
+                }
                 is BoxCaptureUiState.Error -> {
                     ErrorView(
                         uiState = ErrorViewUiState(uiState.message),
@@ -301,8 +321,9 @@ private fun CameraView(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
+                    val stepIndex = CaptureStep.getStepsForMode(uiState.mode).indexOf(uiState.step)
                     Text(
-                        text = stringResource(R.string.applications_kocolor_features_boxcapture_step_format, CaptureStep.getStepsForMode(uiState.mode).indexOf(uiState.step) + 1, totalSteps),
+                        text = stringResource(R.string.applications_kocolor_features_boxcapture_step_format, stepIndex + 1, totalSteps),
                         color = Color.White,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
@@ -357,10 +378,10 @@ private fun CameraView(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
-                items(uiState.capturedUris.size) { index ->
+                itemsIndexed(uiState.capturedUris) { index, uri ->
                     Box(modifier = Modifier.size(70.dp)) {
                         AsyncImage(
-                            model = uiState.capturedUris[index],
+                            model = uri,
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
                             contentScale = ContentScale.Crop
@@ -396,7 +417,7 @@ private fun CameraView(
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22d3ee))
                 ) {
-                    Icon(Icons.Default.AutoAwesome, null, tint = Color.Black)
+                    Icon(Icons.Default.QrCodeScanner, null, tint = Color.Black)
                     Spacer(Modifier.width(8.dp))
                     Text("START BARCODE SCAN", color = Color.Black, fontWeight = FontWeight.Bold)
                 }
@@ -444,6 +465,165 @@ private fun CameraView(
                 CaptureMode.PRODUCT -> stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_product)
             }
             Text(captureLabel, color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
+data class ReviewViewUiState(
+    val capturedUris: List<String>,
+    val barcode: String?,
+    val ingredientsOcr: String,
+    val instructionsOcr: String
+)
+
+@Composable
+private fun ReviewView(
+    uiState: ReviewViewUiState,
+    modifier: Modifier = Modifier,
+    onEvent: (BoxCaptureEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color(0xFF0f172a))
+            .padding(24.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Capture Review",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+            IconButton(onClick = { onEvent(BoxCaptureEvent.Dismiss) }) {
+                Icon(Icons.Default.Close, null, tint = Color.White)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            item {
+                ReviewSection(title = "Captured Photos (${uiState.capturedUris.size})") {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        itemsIndexed(uiState.capturedUris) { index, uri ->
+                            Box {
+                                AsyncImage(
+                                    model = uri,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                                IconButton(
+                                    onClick = { onEvent(BoxCaptureEvent.DeletePhoto(index)) },
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(4.dp)
+                                        .size(24.dp)
+                                        .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                                ) {
+                                    Icon(Icons.Default.Delete, null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                ReviewSection(title = "Barcode Intelligence") {
+                    Surface(
+                        color = Color.White.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.QrCodeScanner, null, tint = Color(0xFF22d3ee))
+                            Spacer(Modifier.width(16.dp))
+                            Text(
+                                text = uiState.barcode ?: "Not scanned",
+                                color = if (uiState.barcode != null) Color.White else Color.Gray,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+            }
+
+            item {
+                ReviewSection(title = "Local Analysis: Ingredients") {
+                    OcrTextArea(text = uiState.ingredientsOcr)
+                }
+            }
+
+            item {
+                ReviewSection(title = "Local Analysis: Instructions") {
+                    OcrTextArea(text = uiState.instructionsOcr)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = { onEvent(BoxCaptureEvent.SubmitToAi) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22d3ee))
+        ) {
+            Icon(Icons.Default.AutoAwesome, null, tint = Color.Black)
+            Spacer(Modifier.width(12.dp))
+            Text("FINALIZE WITH GEMINI AI", color = Color.Black, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+        }
+    }
+}
+
+@Composable
+private fun ReviewSection(title: String, content: @Composable () -> Unit) {
+    Column {
+        Text(
+            text = title.uppercase(),
+            color = Color(0xFF22d3ee),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.sp
+        )
+        Spacer(Modifier.height(12.dp))
+        content()
+    }
+}
+
+@Composable
+private fun OcrTextArea(text: String) {
+    Surface(
+        color = Color.White.copy(alpha = 0.05f),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 200.dp)
+    ) {
+        val scroll = rememberScrollState()
+        Box(modifier = Modifier.padding(16.dp).verticalScroll(scroll)) {
+            Text(
+                text = if (text.isBlank()) "No text detected locally." else text,
+                color = if (text.isBlank()) Color.Gray else Color.White,
+                style = MaterialTheme.typography.bodySmall,
+                lineHeight = 18.sp
+            )
         }
     }
 }
