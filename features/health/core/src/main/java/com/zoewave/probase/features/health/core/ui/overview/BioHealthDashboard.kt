@@ -67,7 +67,7 @@ fun BioHealthDashboard(
     onNavigateToNutrition: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val today = LocalDate.now().toString()
+    val today = java.time.LocalDate.now().toString()
     val hydrationVolume = uiState.weeklyHydration[today] ?: 0.0
     val hydrationGoal = uiState.hydrationGoal
     val lastSleep = uiState.sleepSessions.firstOrNull()

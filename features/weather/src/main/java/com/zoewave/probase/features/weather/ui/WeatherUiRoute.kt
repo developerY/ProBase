@@ -102,8 +102,8 @@ fun WeatherUiRouteSuccessPreview() {
 
 @Composable
 fun WeatherUiRoute(
-    onBack: () -> Unit,
     onNavigateToSunIntelligence: () -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     tempUnit: String = "CELSIUS",
     viewModel: WeatherViewModel = hiltViewModel(),
@@ -146,12 +146,7 @@ internal fun WeatherUiRoute(
 
         is WeatherUiState.Success -> {
             WeatherScreen(
-                weather = uiState.weatherOpen,
-                environmentalContext = uiState.environmentalContext,
-                isLocationFallback = uiState.isLocationFallback,
-                settings = uiState.settings,
-                location = uiState.location,
-                tempUnit = uiState.tempUnit,
+                uiState = uiState,
                 onEvent = onEvent,
                 onBack = onBack,
                 onNavigateToSunIntelligence = onNavigateToSunIntelligence,

@@ -69,14 +69,36 @@ internal fun MealsUiRoute(
     onNavigateToHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    Scaffold(
+        modifier = modifier,
+        containerColor = BioOptimizedColors.Slate950
+    ) { padding ->
+        MealsContent(
+            uiState = uiState,
+            onEvent = onEvent,
+            onBack = onBack,
+            onNavigateToHome = onNavigateToHome,
+            modifier = Modifier.padding(padding)
+        )
+    }
+}
+
+@Composable
+private fun MealsContent(
+    uiState: MealsUiState,
+    onEvent: (MealsUiEvent) -> Unit,
+    onBack: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     when (uiState) {
         MealsUiState.Loading -> {
-            Box(Modifier.fillMaxSize().background(BioOptimizedColors.Slate950), contentAlignment = Alignment.Center) {
+            Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = BioOptimizedColors.Cyan400)
             }
         }
         is MealsUiState.Error -> {
-            Box(Modifier.fillMaxSize().background(BioOptimizedColors.Slate950), contentAlignment = Alignment.Center) {
+            Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(uiState.message, color = BioOptimizedColors.Pink400)
             }
         }
@@ -115,7 +137,7 @@ internal fun MealsUiRoute(
                     uiState = uiState,
                     onEvent = onEvent,
                     onBack = onBack,
-                    modifier = modifier
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }

@@ -35,6 +35,7 @@ import com.zoewave.probase.core.model.weather.Sys
 import com.zoewave.probase.core.model.weather.WeatherOne
 import com.zoewave.probase.core.model.weather.Wind
 import com.zoewave.probase.features.weather.ui.WeatherEvent
+import com.zoewave.probase.features.weather.ui.WeatherUiState
 import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericHydrometeorCard
 import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericThermometerCard
 import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericUVGaugeCard
@@ -74,11 +75,16 @@ fun WeatherScreenPreview() {
 
     MaterialTheme {
         WeatherScreen(
-            weather = sampleWeather,
-            environmentalContext = sampleEnv,
-            isLocationFallback = false,
-            settings = emptyMap(),
-            location = LatLng(34.42, -119.7),
+            uiState = WeatherUiState.Success(
+                weatherOpen = sampleWeather,
+                environmentalContext = sampleEnv,
+                locationString = "Santa Barbara, US",
+                weather = com.zoewave.probase.core.model.weather.Weather(22.0, "Clear sky", "Santa Barbara", null),
+                settings = emptyMap(),
+                location = LatLng(34.42, -119.7),
+                isLocationFallback = false,
+                tempUnit = "CELSIUS"
+            ),
             onEvent = {},
             onBack = {},
             onNavigateToSunIntelligence = {}
@@ -89,17 +95,17 @@ fun WeatherScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherScreen(
-    weather: OpenWeatherResponse?,
-    environmentalContext: com.zoewave.probase.core.model.weather.EnvironmentalContext?,
-    isLocationFallback: Boolean,
-    settings: Map<String, List<String>>,
-    location: LatLng?,
+    uiState: WeatherUiState.Success,
     onEvent: (WeatherEvent) -> Unit,
     onBack: () -> Unit,
     onNavigateToSunIntelligence: () -> Unit,
-    modifier: Modifier = Modifier,
-    tempUnit: String = "CELSIUS",
+    modifier: Modifier = Modifier
 ) {
+    val weather = uiState.weatherOpen
+    val environmentalContext = uiState.environmentalContext
+    val isLocationFallback = uiState.isLocationFallback
+    val tempUnit = uiState.tempUnit
+
     val tempCelsius = weather?.main?.temp ?: 21.0
     val temp = if (tempUnit == "FAHRENHEIT") (tempCelsius * 9 / 5) + 32 else tempCelsius
     val unitSuffix = if (tempUnit == "FAHRENHEIT") "°F" else "°C"

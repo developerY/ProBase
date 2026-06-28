@@ -43,26 +43,9 @@ fun NutritionUiRoute(
     )
 }
 
-@Composable
-internal fun NutritionUiRoute(
-    uiState: NutritionUiState,
-    onEvent: (NutritionUiEvent) -> Unit,
-    onBack: () -> Unit,
-    onNavigateToKnowledgeHub: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    NutritionScreen(
-        uiState = uiState,
-        onEvent = onEvent,
-        onBack = onBack,
-        onNavigateToKnowledgeHub = onNavigateToKnowledgeHub,
-        modifier = modifier
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NutritionScreen(
+internal fun NutritionUiRoute(
     uiState: NutritionUiState,
     onEvent: (NutritionUiEvent) -> Unit,
     onBack: () -> Unit,
@@ -95,54 +78,68 @@ fun NutritionScreen(
         containerColor = Color.Transparent,
         modifier = modifier
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFFF9F7F2), Color.White)
-                    )
+        NutritionContent(
+            uiState = uiState,
+            onEvent = onEvent,
+            onNavigateToKnowledgeHub = onNavigateToKnowledgeHub,
+            modifier = Modifier.padding(padding)
+        )
+    }
+}
+
+@Composable
+private fun NutritionContent(
+    uiState: NutritionUiState,
+    onEvent: (NutritionUiEvent) -> Unit,
+    onNavigateToKnowledgeHub: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFFF9F7F2), Color.White)
                 )
-                .padding(padding)
-        ) {
-            when (uiState) {
-                NutritionUiState.Loading -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+            )
+    ) {
+        when (uiState) {
+            NutritionUiState.Loading -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-                is NutritionUiState.Error -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(uiState.message, color = MaterialTheme.colorScheme.error)
-                    }
+            }
+            is NutritionUiState.Error -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(uiState.message, color = MaterialTheme.colorScheme.error)
                 }
-                is NutritionUiState.Success -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        val routine: BeautyRoutine = uiState.routine
-                        
-                        BioNutritionRitualHeader(
-                            completedCount = routine.steps.count { it.isCompleted },
-                            totalCount = routine.steps.size,
-                            nextWindow = uiState.nextMetabolicWindow
+            }
+            is NutritionUiState.Success -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    val routine: BeautyRoutine = uiState.routine
+                    
+                    BioNutritionRitualHeader(
+                        completedCount = routine.steps.count { it.isCompleted },
+                        totalCount = routine.steps.size,
+                        nextWindow = uiState.nextMetabolicWindow
+                    )
+
+                    routine.steps.forEach { step ->
+                        BioNutritionRitualStep(
+                            step = step,
+                            onToggle = { onEvent(NutritionUiEvent.ToggleStage(step.id)) },
+                            onKnowledgeHub = { onNavigateToKnowledgeHub(step.id) }
                         )
-
-                        routine.steps.forEach { step: RoutineStep ->
-                            BioNutritionRitualStep(
-                                step = step,
-                                onToggle = { onEvent(NutritionUiEvent.ToggleStage(step.id)) },
-                                onKnowledgeHub = { onNavigateToKnowledgeHub(step.id) }
-                            )
-                        }
-
-                        Spacer(Modifier.height(48.dp))
                     }
+
+                    Spacer(Modifier.height(48.dp))
                 }
             }
         }
