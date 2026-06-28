@@ -1,6 +1,6 @@
 <resources>
-    <string name="store_boutique_title">Atelier Boutique</string>
-    <string name="store_boutique_subtitle">THE ART OF COLOR</string>
-    <string name="store_boutique_description">Enter our curated boutique where science meets aesthetics. Discover limited edition metabolic supplements and bio-synced color palettes designed for your specific biological profile.</string>
-    <string name="store_enter_atelier">ENTER ATELIER</string>
+    <string name="applications_kocolor_features_store_boutique_title">Atelier Boutique</string>
+    <string name="applications_kocolor_features_store_boutique_subtitle">THE ART OF COLOR</string>
+    <string name="applications_kocolor_features_store_boutique_description">Enter our curated boutique where science meets aesthetics. Discover limited edition metabolic supplements and bio-synced color palettes designed for your specific biological profile.</string>
+    <string name="applications_kocolor_features_store_enter_atelier">ENTER ATELIER</string>
 </resources>
