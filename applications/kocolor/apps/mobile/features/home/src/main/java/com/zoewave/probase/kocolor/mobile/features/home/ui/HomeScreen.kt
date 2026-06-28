@@ -37,8 +37,9 @@ import com.zoewave.probase.features.health.core.ui.components.BioRoutineSummaryU
 import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericHeaderCard
 import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericHeaderUiState
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
+import com.zoewave.probase.kocolor.features.store.ui.StoreEvent
+import com.zoewave.probase.kocolor.features.store.ui.components.BioStoreCard
 import com.zoewave.probase.kocolor.mobile.features.home.R
-import com.zoewave.probase.kocolor.mobile.features.home.ui.components.BoutiqueCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CollectionHubCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.QuickActions
@@ -222,10 +223,16 @@ fun HomeScreen(
             }
             
             item {
-                BoutiqueCard(
-                    modifier = Modifier.padding(top = 16.dp),
-                    onEvent = {},
-                    navTo = {}
+                BioStoreCard(
+                    uiState = uiState.storeUiState,
+                    onEvent = { event ->
+                        when (event) {
+                            StoreEvent.ToggleExpansion -> onEvent(HomeEvent.ToggleStoreExpansion)
+                            StoreEvent.EnterStore -> { /* TODO */ }
+                        }
+                    },
+                    navTo = navTo,
+                    modifier = Modifier.padding(top = 16.dp)
                 )
             }
             

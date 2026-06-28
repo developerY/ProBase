@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.mobile.features.home.ui.components
+package com.zoewave.probase.kocolor.features.store.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -24,80 +24,45 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.kocolor.mobile.features.home.R
+import com.zoewave.probase.kocolor.features.store.R
+import com.zoewave.probase.kocolor.features.store.ui.StoreEvent
+import com.zoewave.probase.kocolor.features.store.ui.StoreUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
-@Preview(showBackground = true)
 @Composable
-private fun BoutiqueCardPreview() {
-    MaterialTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            BoutiqueCard(
-                onEvent = {},
-                navTo = {}
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun BoutiqueCardExpandedPreview() {
-    MaterialTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            // Since BoutiqueCard has its own internal expansion state, 
-            // a single preview can't easily show both without a click.
-            // But we can preview the layout structure.
-            BoutiqueCard(
-                onEvent = {},
-                navTo = {}
-            )
-        }
-    }
-}
-
-@Composable
-fun BoutiqueCard(
-    modifier: Modifier = Modifier, 
-    onEvent: (Unit) -> Unit = {}, 
-    navTo: (KoColorRoute) -> Unit = {}
+fun BioStoreCard(
+    uiState: StoreUiState,
+    onEvent: (StoreEvent) -> Unit,
+    navTo: (KoColorRoute) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val uriHandler = LocalUriHandler.current
-    var isExpanded by remember { mutableStateOf(false) }
-
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
             .animateContentSize()
-            .clickable { isExpanded = !isExpanded },
+            .clickable { onEvent(StoreEvent.ToggleExpansion) },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = Color.White),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
     ) {
         Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-            // Background Image - Stays strictly behind the white area
+            // Background Image
             AsyncImage(
-                model = R.drawable.kocolor_store_front,
+                model = uiState.backgroundModel ?: R.drawable.kocolor_store_front,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
-                alpha = 0.4f // Faded look matching mockup
+                alpha = 0.4f
             )
             
             // Premium Frosted Overlay
@@ -112,25 +77,25 @@ fun BoutiqueCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_art_of_color),
+                    text = uiState.subtitle,
                     style = MaterialTheme.typography.labelSmall,
                     letterSpacing = 2.sp,
                     color = Color.Gray,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_boutique_title),
+                    text = uiState.title,
                     style = MaterialTheme.typography.headlineMedium,
                     fontFamily = FontFamily.Serif,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1A1A1A)
                 )
 
-                AnimatedVisibility(visible = isExpanded) {
+                AnimatedVisibility(visible = uiState.isExpanded) {
                     Column {
                         Spacer(Modifier.height(12.dp))
                         Text(
-                            text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_boutique_desc),
+                            text = uiState.description,
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 lineHeight = 22.sp,
                                 letterSpacing = 0.2.sp
@@ -141,7 +106,7 @@ fun BoutiqueCard(
                         Spacer(Modifier.height(32.dp))
                         
                         Surface(
-                            onClick = {}, 
+                            onClick = { onEvent(StoreEvent.EnterStore) }, 
                             color = Color.Transparent,
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -150,7 +115,7 @@ fun BoutiqueCard(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_enter_atelier),
+                                    text = "ENTER ATELIER",
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Black,
                                         letterSpacing = 1.sp
@@ -168,6 +133,34 @@ fun BoutiqueCard(
                     }
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BioStoreCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            BioStoreCard(
+                uiState = StoreUiState(),
+                onEvent = {},
+                navTo = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BioStoreCardExpandedPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            BioStoreCard(
+                uiState = StoreUiState(isExpanded = true),
+                onEvent = {},
+                navTo = {}
+            )
         }
     }
 }
