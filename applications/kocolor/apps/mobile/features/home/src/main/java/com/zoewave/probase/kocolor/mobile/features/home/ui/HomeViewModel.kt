@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.weather.AtmosphericRepository
 import com.zoewave.probase.core.model.ritual.BeautyRoutine
+import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.FashionProfile
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.core.model.ritual.RoutineTime
 import com.zoewave.probase.core.model.weather.AtmosphericState
 import com.zoewave.probase.features.health.core.SkinInsight
@@ -22,8 +25,6 @@ import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
-import com.zoewave.probase.kocolor.db.data.ClothingDefaults
-import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
@@ -113,34 +114,12 @@ class HomeViewModel @Inject constructor(
             atmosphericRepository.fetchWeatherIfNeeded()
         }
         initializeTip()
-        viewModelScope.launch {
-            if (cosmeticDao.getAllCosmetics().first().isEmpty()) {
-                initializeDefaultCosmetics()
-            }
-        }
-        viewModelScope.launch {
-            if (clothingDao.getAllClothing().first().isEmpty()) {
-                initializeDefaultClothing()
-            }
-        }
     }
 
     private fun initializeTip() {
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         _beautyTip.value = if (hour in 5..17) RoutineDefaults.morningAdvice.random() 
         else RoutineDefaults.eveningAdvice.random()
-    }
-
-    private suspend fun initializeDefaultCosmetics() {
-        for (item in CosmeticDefaults.getDefaultCosmetics()) {
-            cosmeticDao.insertCosmetic(item)
-        }
-    }
-
-    private suspend fun initializeDefaultClothing() {
-        for (item in ClothingDefaults.getDefaultClothing()) {
-            clothingDao.insertClothing(item)
-        }
     }
 
     private val _routines = _currentDate.flatMapLatest { date ->
@@ -187,6 +166,26 @@ class HomeViewModel @Inject constructor(
             LayeredWeatherMapper.mapToUiState(it, atmosphericState.environmentalContext!!, atmosphericState.isFallback)
         }
         
+        val popularCosmetics = if (cosmetics.isEmpty()) {
+            listOf(
+                CosmeticItem(name = "Serum Placeholder", brand = "Sample", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.SERUM, isPlaceholder = true),
+                CosmeticItem(name = "Cream Placeholder", brand = "Sample", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.MOISTURIZER, isPlaceholder = true),
+                CosmeticItem(name = "SPF Placeholder", brand = "Sample", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.SPF, isPlaceholder = true)
+            )
+        } else {
+            cosmetics.sortedByDescending { it.timestamp }.take(5).map { it.toModel() }
+        }
+
+        val popularClothing = if (clothing.isEmpty()) {
+            listOf(
+                ClothingItem(name = "T-Shirt Placeholder", brand = "Sample", category = ClothingCategory.TOPS, isPlaceholder = true),
+                ClothingItem(name = "Jeans Placeholder", brand = "Sample", category = ClothingCategory.BOTTOMS, isPlaceholder = true),
+                ClothingItem(name = "Jacket Placeholder", brand = "Sample", category = ClothingCategory.TOPS, isPlaceholder = true)
+            )
+        } else {
+            clothing.sortedByDescending { it.timestamp }.take(5).map { it.toModel() }
+        }
+
         val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         val clothingByCategory = clothing.groupBy { it.category.name }.mapValues { it.value.size }
 
@@ -212,13 +211,13 @@ class HomeViewModel @Inject constructor(
             currentRoutine = activeRitual.routine,
             currentRoutineTitle = activeRitual.title,
             currentRoutineDescription = activeRitual.description,
-            popularCosmetics = cosmetics.sortedByDescending { it.timestamp }.take(5).map { it.toModel() },
-            popularClothing = clothing.sortedByDescending { it.timestamp }.take(5).map { it.toModel() },
+            popularCosmetics = popularCosmetics,
+            popularClothing = popularClothing,
             isDaytime = activeRitual.isDaytime,
             isLoadingRoutines = routineEntities.isEmpty(),
             beautyTip = tip,
-            totalCosmetics = cosmetics.size,
-            totalClothing = clothing.size,
+            totalCosmetics = if (cosmetics.isEmpty()) 3 else cosmetics.size,
+            totalClothing = if (clothing.isEmpty()) 3 else clothing.size,
             totalVanityValue = totalVanityValue,
             totalWardrobeValue = totalWardrobeValue,
             expiringCosmeticsCount = expiringCount,

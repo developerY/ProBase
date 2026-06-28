@@ -5,11 +5,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -28,8 +30,13 @@ fun CosmeticProductGridCard(
     val item = uiState
     val onClick = { navTo(KoColorRoute.CosmeticDetail(item.id)) }
     Card(
-        modifier = Modifier.fillMaxWidth().aspectRatio(0.75f).clickable { onClick() },
-        shape = RoundedCornerShape(24.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(0.75f)
+            .clickable(enabled = !item.isPlaceholder) { onClick() }
+            .alpha(if (item.isPlaceholder) 0.5f else 1.0f),
+        shape = RoundedCornerShape(24.dp),
+        colors = if (item.isPlaceholder) CardDefaults.cardColors(containerColor = Color.LightGray) else CardDefaults.cardColors()
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (item.imageUrl != null) {

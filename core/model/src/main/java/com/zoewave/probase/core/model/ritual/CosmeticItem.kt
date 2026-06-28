@@ -274,7 +274,8 @@ data class CosmeticItem(
     val fdaClinicalWarnings: List<String> = emptyList(),
     val fdaTopReactions: List<String> = emptyList(),
     val fdaActiveIngredients: List<String> = emptyList(),
-    val isFdaChecked: Boolean = false
+    val isFdaChecked: Boolean = false,
+    val isPlaceholder: Boolean = false
 ) {
     /** 
      * Calculated estimated expiration based on PAO and opened date. 

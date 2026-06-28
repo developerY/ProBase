@@ -17,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Settings
@@ -143,7 +142,7 @@ fun SettingsScreen(
                 navTo = navTo
             )
 
-            Card(
+            /*Card(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
                     android.util.Log.d("SettingsScreen", "Google XR Test clicked")
@@ -165,7 +164,7 @@ fun SettingsScreen(
                         Text("Launch standard Google " + "First Activity" + " example", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-            }
+            }*/
 
             Card(
                 modifier = Modifier.fillMaxWidth(),

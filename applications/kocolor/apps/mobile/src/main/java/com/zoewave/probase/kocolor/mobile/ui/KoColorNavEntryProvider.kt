@@ -507,7 +507,7 @@ fun koColorNavEntryProvider(
                 onNavigateToHome = { onNavigateTo(KoColorRoute.Home) }
             )
         }
-        is KoColorRoute.NailLab -> NavEntry(route) {
+        /* is KoColorRoute.NailLab -> NavEntry(route) {
             com.zoewave.probase.features.ar.naillab.ui.NailLabUiRoute(
                 uiState = com.zoewave.probase.features.ar.naillab.ui.NailLabInitialUiState(route.colorHex, route.finish),
                 onEvent = {},
@@ -520,7 +520,7 @@ fun koColorNavEntryProvider(
                 onEvent = {},
                 navTo = onNavigateTo
             )
-        }
+        }*/
         is KoColorRoute.QRScanner -> NavEntry(route) {
             QRCodeScannerScreen(onCodeScanned = { onCodeScanned(it); onBack() })
         }

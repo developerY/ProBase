@@ -45,9 +45,11 @@ fun WardrobeCard(
     val contentColor = if (isDark) Color.White else Color.Black
 
     ElevatedCard(
-        modifier = modifier.clickable { navTo(KoColorRoute.WardrobeDetail(uiState.id)) },
+        modifier = modifier
+            .clickable(enabled = !uiState.isPlaceholder) { navTo(KoColorRoute.WardrobeDetail(uiState.id)) }
+            .alpha(if (uiState.isPlaceholder) 0.5f else 1.0f),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = bgColor)
+        colors = CardDefaults.elevatedCardColors(containerColor = if (uiState.isPlaceholder) Color.LightGray else bgColor)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.imageUrl != null) {
