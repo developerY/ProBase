@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.mobile.core.ui.health
+package com.zoewave.probase.features.health.core.ui.overview
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -43,7 +43,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,23 +50,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.features.health.core.ui.HealthEvent
 import com.zoewave.probase.features.health.core.ui.HealthUiState
+import com.zoewave.probase.features.health.core.ui.components.BioElementTrackerCard
+import com.zoewave.probase.features.health.core.ui.components.BioElementTrackerUiState
 import com.zoewave.probase.features.health.hydration.ui.components.HydrationWaterDropCard
 import com.zoewave.probase.features.health.hydration.ui.components.HydrationWaterDropUiState
-import com.zoewave.probase.kocolor.mobile.core.R
-import com.zoewave.probase.kocolor.mobile.core.ui.components.WellnessTrackerHeroCard
-import com.zoewave.probase.kocolor.mobile.core.ui.components.WellnessTrackerHeroUiState
-import com.zoewave.probase.kocolor.mobile.core.ui.theme.KoColorTheme
-import com.zoewave.probase.kocolor.model.KoColorRoute
 import java.time.LocalDate
 
 @Composable
-fun StyleHealthDashboard(
+fun BioHealthDashboard(
     uiState: HealthUiState.Success,
-    modifier: Modifier = Modifier,
     onEvent: (HealthEvent) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    onNavigateToHydration: () -> Unit,
+    onNavigateToNutrition: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val today = LocalDate.now().toString()
     val hydration = uiState.weeklyHydration[today] ?: 0.0
@@ -83,7 +81,7 @@ fun StyleHealthDashboard(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.applications_kocolor_apps_mobile_core_health_title),
+            text = "Biological Health",
             style = MaterialTheme.typography.displaySmall,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
@@ -96,13 +94,13 @@ fun StyleHealthDashboard(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = stringResource(R.string.applications_kocolor_apps_mobile_core_health_bio_markers),
+                text = "Bio-Markers",
                 style = MaterialTheme.typography.titleLarge,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = stringResource(R.string.applications_kocolor_apps_mobile_core_health_beauty_inside_out),
+                text = "BEAUTY FROM THE INSIDE OUT",
                 style = MaterialTheme.typography.labelSmall,
                 letterSpacing = 2.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
@@ -120,37 +118,24 @@ fun StyleHealthDashboard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SummaryMetricItem(
-                        uiState = SummaryMetricUiState(
-                            icon = Icons.Rounded.Bedtime,
-                            label = stringResource(R.string.applications_kocolor_apps_mobile_core_health_sleep),
-                            value = lastSleep?.let { stringResource(R.string.applications_kocolor_apps_mobile_core_health_sleep_duration_format, it.duration?.toHours() ?: 0, it.duration?.toMinutes()?.rem(60) ?: 0) } ?: "--",
-                            color = Color(0xFF9C27B0)
-                        ),
-                        onEvent = {},
-                        navTo = {}
+                        icon = Icons.Rounded.Bedtime,
+                        label = "Sleep",
+                        value = lastSleep?.let { "${it.duration?.toHours()}h ${it.duration?.toMinutes()?.rem(60)}m" } ?: "--",
+                        color = Color(0xFF9C27B0)
                     )
                     VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                     SummaryMetricItem(
-                        uiState = SummaryMetricUiState(
-                            icon = Icons.Rounded.WaterDrop,
-                            label = stringResource(R.string.applications_kocolor_apps_mobile_core_health_hydration),
-                            value = "%.1fL".format(hydration),
-                            color = Color(0xFF2196F3)
-                        ),
-                        onEvent = {},
-                        navTo = {}
+                        icon = Icons.Rounded.WaterDrop,
+                        label = "Hydration",
+                        value = "%.1fL".format(hydration),
+                        color = Color(0xFF2196F3)
                     )
                     VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                     SummaryMetricItem(
-                        uiState = SummaryMetricUiState(
-                            icon = Icons.Rounded.Favorite,
-                            label = stringResource(R.string.applications_kocolor_apps_mobile_core_health_vitals),
-                            value = if (uiState.alerts.isEmpty()) stringResource(R.string.applications_kocolor_apps_mobile_core_health_optimal) 
-                                    else stringResource(R.string.applications_kocolor_apps_mobile_core_health_alerts_format, uiState.alerts.size),
-                            color = if (uiState.alerts.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)
-                        ),
-                        onEvent = {},
-                        navTo = {}
+                        icon = Icons.Rounded.Favorite,
+                        label = "Vitals",
+                        value = if (uiState.alerts.isEmpty()) "Optimal" else "${uiState.alerts.size} Alerts",
+                        color = if (uiState.alerts.isEmpty()) Color(0xFF4CAF50) else Color(0xFFF44336)
                     )
                 }
             }
@@ -162,7 +147,7 @@ fun StyleHealthDashboard(
 
         HydrationWaterDropCard(
             uiState = HydrationWaterDropUiState(hydration, hydrationGoal),
-            onEvent = { navTo(KoColorRoute.Hydration) },
+            onEvent = { onNavigateToHydration() },
             navTo = {}
         )
 
@@ -171,15 +156,15 @@ fun StyleHealthDashboard(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = stringResource(R.string.applications_kocolor_apps_mobile_core_health_activity),
+                text = "Activity",
                 style = MaterialTheme.typography.titleLarge,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.Bold
             )
             ActivityMetricsSection(
-                uiState = ActivityMetricsUiState(uiState.todaySteps, uiState.todayCalories),
-                onEvent = {},
-                navTo = navTo
+                steps = uiState.todaySteps,
+                calories = uiState.todayCalories,
+                onNutritionClick = onNavigateToNutrition
             )
         }
 
@@ -192,7 +177,7 @@ fun StyleHealthDashboard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = stringResource(R.string.applications_kocolor_apps_mobile_core_health_element_tracker),
+                    text = "ELEMENT TRACKER",
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 2.sp,
@@ -210,17 +195,15 @@ fun StyleHealthDashboard(
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
-                WellnessTrackerHeroCard(
-                    uiState = WellnessTrackerHeroUiState(
+                BioElementTrackerCard(
+                    uiState = BioElementTrackerUiState(
                         connectionState = uiState.bleConnectionState,
                         metrics = uiState.trackerMetrics
                     ),
                     modifier = Modifier.clickable {
                         // TODO: Setup tracker
                         // onEvent(HealthEvent.SyncTracker)
-                    },
-                    onEvent = {},
-                    navTo = {}
+                    }
                 )
             }
         }
@@ -229,21 +212,14 @@ fun StyleHealthDashboard(
     }
 }
 
-data class SummaryMetricUiState(
-    val icon: ImageVector,
-    val label: String,
-    val value: String,
-    val color: Color
-)
-
 @Composable
-private fun SkinInsightsSection(insights: List<com.zoewave.probase.features.health.core.SkinInsight>) {
+private fun SkinInsightsSection(insights: List<SkinInsight>) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = stringResource(R.string.applications_kocolor_apps_mobile_core_health_skin_insights),
+            text = "Insights",
             style = MaterialTheme.typography.titleLarge,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold
@@ -309,76 +285,60 @@ private fun SkinInsightsSection(insights: List<com.zoewave.probase.features.heal
 
 @Composable
 private fun SummaryMetricItem(
-    uiState: SummaryMetricUiState,
-    modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    icon: ImageVector,
+    label: String,
+    value: String,
+    color: Color,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Surface(color = uiState.color.copy(alpha = 0.1f), shape = CircleShape, modifier = Modifier.size(40.dp)) {
-            Box(contentAlignment = Alignment.Center) { Icon(uiState.icon, null, modifier = Modifier.size(18.dp), tint = uiState.color) }
+        Surface(color = color.copy(alpha = 0.1f), shape = CircleShape, modifier = Modifier.size(40.dp)) {
+            Box(contentAlignment = Alignment.Center) { Icon(icon, null, modifier = Modifier.size(18.dp), tint = color) }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = uiState.label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), fontWeight = FontWeight.Bold, maxLines = 1)
-        Text(text = uiState.value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), fontWeight = FontWeight.Bold, maxLines = 1)
+        Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
     }
 }
-
-data class ActivityMetricsUiState(
-    val steps: Long,
-    val calories: Double
-)
 
 @Composable
 private fun ActivityMetricsSection(
-    uiState: ActivityMetricsUiState,
+    steps: Long,
+    calories: Double,
+    onNutritionClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
 ) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         ActivityCard(
-            uiState = ActivityCardUiState(
-                label = stringResource(R.string.applications_kocolor_apps_mobile_core_health_steps),
-                value = "${uiState.steps}",
-                unit = stringResource(R.string.applications_kocolor_apps_mobile_core_health_today)
-            ),
-            modifier = Modifier.weight(1f),
-            onEvent = {},
-            navTo = {}
+            label = "Steps",
+            value = "$steps",
+            unit = "today",
+            modifier = Modifier.weight(1f)
         )
         ActivityCard(
-            uiState = ActivityCardUiState(
-                label = stringResource(R.string.applications_kocolor_apps_mobile_core_health_calories),
-                value = "${uiState.calories.toInt()}",
-                unit = stringResource(R.string.applications_kocolor_apps_mobile_core_health_kcal)
-            ),
+            label = "Calories",
+            value = "${calories.toInt()}",
+            unit = "kcal",
             modifier = Modifier.weight(1f),
-            onEvent = { navTo(KoColorRoute.Nutrition()) },
-            navTo = navTo
+            onClick = onNutritionClick
         )
     }
 }
 
-data class ActivityCardUiState(
-    val label: String,
-    val value: String,
-    val unit: String
-)
-
 @Composable
 private fun ActivityCard(
-    uiState: ActivityCardUiState,
+    label: String,
+    value: String,
+    unit: String,
     modifier: Modifier = Modifier,
-    onEvent: () -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    onClick: (() -> Unit)? = null
 ) {
-    val hasData = uiState.value != "0" && uiState.value != "0.0" && uiState.value != "--"
+    val hasData = value != "0" && value != "0.0" && value != "--"
     Card(
         modifier = modifier
             .aspectRatio(1f)
             .alpha(if (hasData) 1f else 0.7f)
-            .clickable { onEvent() },
+            .let { if (onClick != null) it.clickable { onClick() } else it },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black.copy(alpha = 0.08f))
@@ -388,11 +348,11 @@ private fun ActivityCard(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(uiState.label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(12.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = uiState.value,
+                    text = value,
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Serif,
@@ -401,7 +361,7 @@ private fun ActivityCard(
                     overflow = TextOverflow.Visible
                 )
                 Text(
-                    text = if (hasData) uiState.unit.lowercase() else stringResource(R.string.applications_kocolor_apps_mobile_core_health_no_data),
+                    text = if (hasData) unit.lowercase() else "no data",
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray,
                     letterSpacing = 1.sp
@@ -413,17 +373,17 @@ private fun ActivityCard(
 
 @Preview(showBackground = true)
 @Composable
-private fun StyleHealthDashboardPreview() {
-    KoColorTheme {
-        StyleHealthDashboard(
+private fun BioHealthDashboardPreview() {
+    MaterialTheme {
+        BioHealthDashboard(
             uiState = HealthUiState.Success(
                 sessions = emptyList(),
                 weeklyHydration = mapOf(LocalDate.now().toString() to 1.5),
                 sleepSessions = emptyList(),
                 alerts = listOf(
-                    com.zoewave.probase.features.health.core.SkinInsight(
+                    SkinInsight(
                         trigger = "Sleep Deprivation",
-                        manifestation = "Puffiness & Dark Circles",
+                        manifestation = "Puffiness \u0026 Dark Circles",
                         recommendation = "Use a caffeine-based eye serum and increase water intake to reduce visible signs of fatigue.",
                         severity = 0.8f
                     )
@@ -434,7 +394,8 @@ private fun StyleHealthDashboardPreview() {
                 hydrationGoal = 2.7
             ),
             onEvent = {},
-            navTo = {}
+            onNavigateToHydration = {},
+            onNavigateToNutrition = {}
         )
     }
 }

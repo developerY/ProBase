@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.probase.features.health.core.ui.HealthEvent
 import com.zoewave.probase.features.health.core.ui.HealthSideEffect
 import com.zoewave.probase.features.health.core.ui.HealthUiState
+import com.zoewave.probase.features.health.core.ui.overview.BioHealthDashboard
 import com.zoewave.probase.features.health.core.ui.settings.HealthConnectionStatus
 import com.zoewave.probase.kocolor.mobile.core.R
 import com.zoewave.probase.kocolor.mobile.core.ui.theme.KoColorTheme
@@ -156,10 +157,11 @@ fun HealthContent(
                         modifier = Modifier.fillMaxWidth().padding(16.dp)
                     )
                 } else {
-                    StyleHealthDashboard(
+                    BioHealthDashboard(
                         uiState = state,
                         onEvent = onEvent,
-                        navTo = navTo
+                        onNavigateToHydration = { navTo(KoColorRoute.Hydration) },
+                        onNavigateToNutrition = { navTo(KoColorRoute.Nutrition()) }
                     )
                 }
             }

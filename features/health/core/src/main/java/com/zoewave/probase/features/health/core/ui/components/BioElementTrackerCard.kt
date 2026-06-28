@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.mobile.core.ui.components
+package com.zoewave.probase.features.health.core.ui.components
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -45,26 +45,22 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ble.GattConnectionState
-import com.zoewave.probase.kocolor.mobile.core.R
-import com.zoewave.probase.kocolor.model.KoColorRoute
 
-data class WellnessTrackerHeroUiState(
+data class BioElementTrackerUiState(
     val connectionState: GattConnectionState,
     val metrics: Map<String, String>
 )
 
 @Composable
-fun WellnessTrackerHeroCard(
-    uiState: WellnessTrackerHeroUiState,
+fun BioElementTrackerCard(
+    uiState: BioElementTrackerUiState,
     modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    onClick: () -> Unit = {}
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "ElementPulse")
     val pulse by infiniteTransition.animateFloat(
@@ -85,7 +81,8 @@ fun WellnessTrackerHeroCard(
             .height(200.dp)
             .shadow(16.dp, RoundedCornerShape(32.dp)),
         shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Black)
+        colors = CardDefaults.cardColors(containerColor = Color.Black),
+        onClick = onClick
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             // Bio-Element Background Gradient
@@ -164,14 +161,14 @@ fun WellnessTrackerHeroCard(
                 ) {
                     Column {
                         Text(
-                            text = stringResource(R.string.applications_kocolor_apps_mobile_core_health_element_tracker),
+                            text = "ELEMENT TRACKER",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White.copy(alpha = 0.6f),
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 2.sp
                         )
                         Text(
-                            text = if (isConnected) stringResource(R.string.applications_kocolor_apps_mobile_core_health_element_tracker_synced) else stringResource(R.string.applications_kocolor_apps_mobile_core_health_element_tracker_awaiting),
+                            text = if (isConnected) "Synced" else "Awaiting Sync",
                             style = MaterialTheme.typography.titleMedium,
                             color = Color.White,
                             fontWeight = FontWeight.Black
@@ -192,42 +189,30 @@ fun WellnessTrackerHeroCard(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         TrackerMetric(
-                            uiState = TrackerMetricUiState(
-                                label = stringResource(R.string.applications_kocolor_apps_mobile_core_health_heart),
-                                value = uiState.metrics["Temperature"]?.substringBefore("°") ?: "--",
-                                unit = stringResource(R.string.applications_kocolor_apps_mobile_core_health_bpm),
-                                icon = Icons.Default.Favorite,
-                                color = Color(0xFFFF4E50)
-                            ),
-                            onEvent = {},
-                            navTo = {}
+                            label = "Fire",
+                            value = uiState.metrics["Temperature"]?.substringBefore("°") ?: "--",
+                            unit = "BPM",
+                            icon = Icons.Default.Favorite,
+                            color = Color(0xFFFF4E50)
                         )
                         TrackerMetric(
-                            uiState = TrackerMetricUiState(
-                                label = stringResource(R.string.applications_kocolor_apps_mobile_core_health_vital),
-                                value = uiState.metrics["Lux"]?.substringAfter(":")?.trim() ?: "--",
-                                unit = stringResource(R.string.applications_kocolor_apps_mobile_core_health_lx),
-                                icon = Icons.Default.LightMode,
-                                color = Color(0xFFFFD600)
-                            ),
-                            onEvent = {},
-                            navTo = {}
+                            label = "Light",
+                            value = uiState.metrics["Lux"]?.substringAfter(":")?.trim() ?: "--",
+                            unit = "LX",
+                            icon = Icons.Default.LightMode,
+                            color = Color(0xFFFFD600)
                         )
                         TrackerMetric(
-                            uiState = TrackerMetricUiState(
-                                label = stringResource(R.string.applications_kocolor_apps_mobile_core_health_air),
-                                value = uiState.metrics["Humidity"]?.substringAfter(":")?.substringBefore("%")?.trim() ?: "--",
-                                unit = "%",
-                                icon = Icons.Default.Air,
-                                color = Color(0xFF00C9FF)
-                            ),
-                            onEvent = {},
-                            navTo = {}
+                            label = "Air",
+                            value = uiState.metrics["Humidity"]?.substringAfter(":")?.substringBefore("%")?.trim() ?: "--",
+                            unit = "%",
+                            icon = Icons.Default.Air,
+                            color = Color(0xFF00C9FF)
                         )
                     }
                 } else {
                     Text(
-                        text = stringResource(R.string.applications_kocolor_apps_mobile_core_health_element_tracker_initiate),
+                        text = "Tap to initiate bio-element correlation",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.White.copy(alpha = 0.4f),
                         modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -238,53 +223,43 @@ fun WellnessTrackerHeroCard(
     }
 }
 
-data class TrackerMetricUiState(
-    val label: String,
-    val value: String,
-    val unit: String,
-    val icon: ImageVector,
-    val color: Color
-)
-
 @Composable
 private fun TrackerMetric(
-    uiState: TrackerMetricUiState,
-    modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit,
-    navTo: (KoColorRoute) -> Unit
+    label: String,
+    value: String,
+    unit: String,
+    icon: ImageVector,
+    color: Color,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(uiState.icon, null, modifier = Modifier.size(16.dp), tint = uiState.color)
+        Icon(icon, null, modifier = Modifier.size(16.dp), tint = color)
         Spacer(modifier = Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(text = uiState.value, style = MaterialTheme.typography.titleLarge, color = Color.White, fontWeight = FontWeight.Black)
+            Text(text = value, style = MaterialTheme.typography.titleLarge, color = Color.White, fontWeight = FontWeight.Black)
             Spacer(modifier = Modifier.width(2.dp))
-            Text(text = uiState.unit, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.5f), modifier = Modifier.padding(bottom = 2.dp))
+            Text(text = unit, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.5f), modifier = Modifier.padding(bottom = 2.dp))
         }
-        Text(text = uiState.label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.4f), fontWeight = FontWeight.Bold)
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.4f), fontWeight = FontWeight.Bold)
     }
 }
 
 @Preview
 @Composable
-private fun WellnessTrackerHeroCardPreview() {
+private fun BioElementTrackerCardPreview() {
     MaterialTheme {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            WellnessTrackerHeroCard(
-                uiState = WellnessTrackerHeroUiState(
+        Column(modifier = Modifier.padding(16.dp).background(Color(0xFFF9F7F2)), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            BioElementTrackerCard(
+                uiState = BioElementTrackerUiState(
                     connectionState = GattConnectionState.Connected,
                     metrics = mapOf("Temperature" to "72°C", "Lux" to "Lux: 450.0", "Humidity" to "Humidity: 45.0%")
-                ),
-                onEvent = {},
-                navTo = {}
+                )
             )
-            WellnessTrackerHeroCard(
-                uiState = WellnessTrackerHeroUiState(
+            BioElementTrackerCard(
+                uiState = BioElementTrackerUiState(
                     connectionState = GattConnectionState.Disconnected,
                     metrics = emptyMap()
-                ),
-                onEvent = {},
-                navTo = {}
+                )
             )
         }
     }
