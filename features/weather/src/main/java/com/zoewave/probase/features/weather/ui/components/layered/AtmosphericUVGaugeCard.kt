@@ -26,11 +26,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.features.weather.R
 
 @Preview(showBackground = true, backgroundColor = 0xFFF9F7F2)
 @Composable
@@ -50,16 +52,16 @@ fun AtmosphericUVGaugeCard(
 ) {
     val level = uvIndex.toInt()
     val levelText = when {
-        level < 3 -> "Low"
-        level < 6 -> "Moderate"
-        level < 8 -> "High"
-        level < 11 -> "Very High"
-        else -> "Extreme"
+        level < 3 -> stringResource(R.string.features_weather_uv_level_low)
+        level < 6 -> stringResource(R.string.features_weather_uv_level_moderate)
+        level < 8 -> stringResource(R.string.features_weather_uv_level_high)
+        level < 11 -> stringResource(R.string.features_weather_uv_level_very_high)
+        else -> stringResource(R.string.features_weather_uv_level_extreme)
     }
     val recommendation = when {
-        level < 3 -> "Standard care"
-        level < 8 -> "Broad-spectrum SPF 30+ recommended"
-        else -> "Broad-spectrum SPF 50+ required"
+        level < 3 -> stringResource(R.string.features_weather_uv_rec_standard)
+        level < 8 -> stringResource(R.string.features_weather_uv_rec_spf30)
+        else -> stringResource(R.string.features_weather_uv_rec_spf50)
     }
 
     Card(
@@ -128,7 +130,7 @@ fun AtmosphericUVGaugeCard(
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "Level $level - $levelText",
+                    text = stringResource(R.string.features_weather_uv_level_format, level, levelText),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Serif

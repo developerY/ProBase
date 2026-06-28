@@ -1,0 +1,30 @@
+<resources>
+    <string name="features_health_nutrition_ritual_title">Daily Bio-Sync</string>
+    <string name="features_health_nutrition_ritual_label">MEALS RITUAL</string>
+    <string name="features_health_nutrition_ritual_done">DONE</string>
+    <string name="features_health_nutrition_ritual_desc">Synchronize your metabolic windows with the endogenous central clock for optimal nutrient partitioning.</string>
+    <string name="features_health_nutrition_ritual_next_window">Next Window: %1$s</string>
+
+    <string name="features_health_nutrition_hub_title">Metabolic Meals</string>
+    <string name="features_health_nutrition_hub_subtitle">BioOptimized Protocols</string>
+    <string name="features_health_nutrition_hub_tagline">SYNC YOUR FEEDING WITH METABOLIC PEAKS</string>
+    <string name="features_health_nutrition_hub_options_format">%1$d Options</string>
+    <string name="features_health_nutrition_hub_suggestions">MEAL SUGGESTIONS</string>
+    <string name="features_health_nutrition_hub_no_suggestions">No suggestions available.</string>
+
+    <string name="features_health_nutrition_action_add_meal">Add Meal</string>
+    <string name="features_health_nutrition_action_edit_protocol">Edit Protocol</string>
+    <string name="features_health_nutrition_action_start_cooking">Start Cooking</string>
+    <string name="features_health_nutrition_action_save">Save</string>
+    <string name="features_health_nutrition_action_delete">DELETE</string>
+    <string name="features_health_nutrition_action_cancel">CANCEL</string>
+
+    <string name="features_health_nutrition_label_protocol_name">Protocol Name</string>
+    <string name="features_health_nutrition_label_scientific_focus">Scientific Focus</string>
+    <string name="features_health_nutrition_label_bio_rationale">Biological Rationale</string>
+    <string name="features_health_nutrition_label_metabolic_phase">Metabolic Phase</string>
+    <string name="features_health_nutrition_label_nutritional_matrix">Nutritional Matrix</string>
+    <string name="features_health_nutrition_label_physiological_impact">Physiological Impact</string>
+    <string name="features_health_nutrition_label_metabolic_matrix">Metabolic Matrix</string>
+    <string name="features_health_nutrition_label_protocol_execution">Protocol Execution</string>
+</resources>

@@ -33,9 +33,11 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.health.core.R
 import com.zoewave.probase.features.health.core.SkinInsight
 
 data class BioMarkersUiState(
@@ -43,9 +45,7 @@ data class BioMarkersUiState(
     val sleepDuration: String? = null,
     val hydrationLiters: Double = 0.0,
     val hydrationGoalLiters: Double = 2.0,
-    val isPermissionGranted: Boolean = true,
-    val title: String = "Bio-Markers",
-    val subtitle: String = "Style from the inside out"
+    val isPermissionGranted: Boolean = true
 )
 
 @Composable
@@ -57,7 +57,10 @@ fun BioMarkersCard(
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         HealthSectionTitle(
-            uiState = HealthSectionTitleUiState(uiState.title, uiState.subtitle)
+            uiState = HealthSectionTitleUiState(
+                stringResource(R.string.features_health_core_bio_markers_title),
+                stringResource(R.string.features_health_core_bio_markers_subtitle)
+            )
         )
 
         ElevatedCard(
@@ -99,12 +102,12 @@ fun BioMarkersCard(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Sync Health Data",
+                            text = stringResource(R.string.features_health_core_sync_health_data),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Connect vitals to personalize your experience",
+                            text = stringResource(R.string.features_health_core_connect_vitals_desc),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -77,14 +78,14 @@ fun BioStoreCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = uiState.subtitle,
+                    text = stringResource(R.string.store_boutique_subtitle),
                     style = MaterialTheme.typography.labelSmall,
                     letterSpacing = 2.sp,
                     color = Color.Gray,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = uiState.title,
+                    text = stringResource(R.string.store_boutique_title),
                     style = MaterialTheme.typography.headlineMedium,
                     fontFamily = FontFamily.Serif,
                     fontWeight = FontWeight.Bold,
@@ -95,7 +96,7 @@ fun BioStoreCard(
                     Column {
                         Spacer(Modifier.height(12.dp))
                         Text(
-                            text = uiState.description,
+                            text = stringResource(R.string.store_boutique_description),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 lineHeight = 22.sp,
                                 letterSpacing = 0.2.sp
@@ -115,7 +116,7 @@ fun BioStoreCard(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    text = "ENTER ATELIER",
+                                    text = stringResource(R.string.store_enter_atelier),
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Black,
                                         letterSpacing = 1.sp

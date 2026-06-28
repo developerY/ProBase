@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -50,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.features.health.core.R
 import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.features.health.core.ui.HealthEvent
 import com.zoewave.probase.features.health.core.ui.HealthUiState
@@ -81,7 +83,7 @@ fun BioHealthDashboard(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Biological Health",
+            text = stringResource(R.string.features_health_core_dashboard_biological_health),
             style = MaterialTheme.typography.displaySmall,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
@@ -94,13 +96,13 @@ fun BioHealthDashboard(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Bio-Markers",
+                text = stringResource(R.string.features_health_core_bio_markers_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "BEAUTY FROM THE INSIDE OUT",
+                text = stringResource(R.string.features_health_core_dashboard_beauty_inside_out),
                 style = MaterialTheme.typography.labelSmall,
                 letterSpacing = 2.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
@@ -156,7 +158,7 @@ fun BioHealthDashboard(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Activity",
+                text = stringResource(R.string.features_health_core_dashboard_activity),
                 style = MaterialTheme.typography.titleLarge,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.Bold
@@ -219,7 +221,7 @@ private fun SkinInsightsSection(insights: List<SkinInsight>) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Insights",
+            text = stringResource(R.string.features_health_core_dashboard_insights),
             style = MaterialTheme.typography.titleLarge,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold
@@ -310,15 +312,15 @@ private fun ActivityMetricsSection(
 ) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         ActivityCard(
-            label = "Steps",
+            label = stringResource(R.string.features_health_core_dashboard_steps),
             value = "$steps",
-            unit = "today",
+            unit = stringResource(R.string.features_health_core_dashboard_today),
             modifier = Modifier.weight(1f)
         )
         ActivityCard(
-            label = "Calories",
+            label = stringResource(R.string.features_health_core_dashboard_calories),
             value = "${calories.toInt()}",
-            unit = "kcal",
+            unit = stringResource(R.string.features_health_core_dashboard_kcal),
             modifier = Modifier.weight(1f),
             onClick = onNutritionClick
         )
@@ -361,7 +363,7 @@ private fun ActivityCard(
                     overflow = TextOverflow.Visible
                 )
                 Text(
-                    text = if (hasData) unit.lowercase() else "no data",
+                    text = if (hasData) unit.lowercase() else stringResource(R.string.features_health_core_no_data),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray,
                     letterSpacing = 1.sp

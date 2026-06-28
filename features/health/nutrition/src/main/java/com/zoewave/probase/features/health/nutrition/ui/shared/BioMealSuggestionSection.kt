@@ -10,12 +10,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.features.health.nutrition.R
 import com.zoewave.probase.features.health.nutrition.data.Meal
 import com.zoewave.probase.features.health.nutrition.data.MetabolicPhase
 import com.zoewave.probase.features.health.nutrition.data.NutritionInfo
@@ -88,7 +90,7 @@ fun BioMealSuggestionSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "MEAL SUGGESTIONS",
+                text = stringResource(R.string.features_health_nutrition_hub_suggestions),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Black,
                 color = Color.Gray,
@@ -97,7 +99,7 @@ fun BioMealSuggestionSection(
             
             if (uiState is MealsUiState.Success) {
                 Text(
-                    text = "${uiState.meals.size} Options",
+                    text = stringResource(R.string.features_health_nutrition_hub_options_format, uiState.meals.size),
                     style = MaterialTheme.typography.labelSmall,
                     color = BioOptimizedColors.Cyan400
                 )
@@ -140,7 +142,7 @@ fun BioMealSuggestionSection(
                 }
             }
             else -> {
-                Text("No suggestions available.", color = Color.Gray)
+                Text(stringResource(R.string.features_health_nutrition_hub_no_suggestions), color = Color.Gray)
             }
         }
     }

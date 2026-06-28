@@ -1,0 +1,23 @@
+<resources>
+    <string name="features_health_hydration_title">Hydration Tracking</string>
+    <string name="features_health_hydration_cd_back">Back</string>
+    <string name="features_health_hydration_cd_reset">Reset Today\'s Progress</string>
+    <string name="features_health_hydration_goal_format">of %.1fL goal</string>
+    <string name="features_health_hydration_add_glass">+250ml</string>
+    <string name="features_health_hydration_label_glass">GLASS</string>
+    <string name="features_health_hydration_add_bottle">+500ml</string>
+    <string name="features_health_hydration_label_bottle">BOTTLE</string>
+    <string name="features_health_hydration_custom_amount">Custom Amount</string>
+    <string name="features_health_hydration_reminder">Reminder</string>
+    <string name="features_health_hydration_smart_alerts">Hydration Smart Alerts</string>
+    <string name="features_health_hydration_smart_alerts_desc">Smart reminders to help you reach your daily goal based on your activity and weather.</string>
+    <string name="features_health_hydration_next_interval">Next ideal interval: %1$s</string>
+    <string name="features_health_hydration_recent_logs">RECENT LOGS</string>
+    <string name="features_health_hydration_ml_format">%1$d ml</string>
+    <string name="features_health_hydration_current_progress">Current Progress</string>
+    <string name="features_health_hydration_percent_format">%1$d%%</string>
+    <string name="features_health_hydration_label">Hydration</string>
+    <string name="features_health_hydration_action_cancel">Cancel</string>
+    <string name="features_health_hydration_action_custom">+ Custom Amount</string>
+    <string name="features_health_hydration_action_log">Log Amount</string>
+</resources>

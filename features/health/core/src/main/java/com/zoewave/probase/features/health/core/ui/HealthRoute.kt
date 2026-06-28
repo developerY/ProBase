@@ -150,18 +150,18 @@ private fun PermissionsNotGrantedScreen(onEnableClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = stringResource(R.string.features_health_health_route_permissions_required_title),
+            text = stringResource(R.string.features_health_core_health_route_permissions_required_title),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = stringResource(R.string.features_health_health_route_permissions_required_message),
+            text = stringResource(R.string.features_health_core_health_route_permissions_required_message),
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onEnableClick) {
-            Text(stringResource(R.string.features_health_health_route_action_grant_permissions))
+            Text(stringResource(R.string.features_health_core_health_route_action_grant_permissions))
         }
     }
 }

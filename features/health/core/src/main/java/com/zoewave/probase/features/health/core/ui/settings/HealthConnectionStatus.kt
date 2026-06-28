@@ -50,7 +50,7 @@ fun HealthConnectionStatus(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = stringResource(R.string.features_health_access_granted),
+                text = stringResource(R.string.features_health_core_access_granted),
                 style = MaterialTheme.typography.labelLarge,
                 color = Color(0xFF1B5E20)
             )
@@ -62,7 +62,7 @@ fun HealthConnectionStatus(
             onClick = { onEvent(HealthEvent.ManagePermissions) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(stringResource(R.string.features_health_health_route_action_manage_permissions))
+            Text(stringResource(R.string.features_health_core_health_route_action_manage_permissions))
         }
     }
 }

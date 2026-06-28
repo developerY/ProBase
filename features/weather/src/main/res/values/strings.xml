@@ -4,4 +4,28 @@
     <string name="features_weather_action_fetch">Fetch Weather</string>
     <string name="features_weather_cd_sunny">Sunny</string>
     <string name="features_weather_temp_c_format">%1$.1f&#176;C</string>
+
+    <string name="features_weather_atmospheric_greeting_day">Radiant Morning.</string>
+    <string name="features_weather_atmospheric_greeting_night">Deep Restoration.</string>
+    <string name="features_weather_atmospheric_current_location">CURRENT LOCATION</string>
+    <string name="features_weather_atmospheric_high_uv_tip">High UV detected. Prioritize SPF in your ritual today.</string>
+
+    <!-- UV Gauge -->
+    <string name="features_weather_uv_level_low">Low</string>
+    <string name="features_weather_uv_level_moderate">Moderate</string>
+    <string name="features_weather_uv_level_high">High</string>
+    <string name="features_weather_uv_level_very_high">Very High</string>
+    <string name="features_weather_uv_level_extreme">Extreme</string>
+    <string name="features_weather_uv_rec_standard">Standard care</string>
+    <string name="features_weather_uv_rec_spf30">Broad-spectrum SPF 30+ recommended</string>
+    <string name="features_weather_uv_rec_spf50">Broad-spectrum SPF 50+ required</string>
+    <string name="features_weather_uv_level_format">Level %1$d - %2$s</string>
+
+    <!-- Atmospheric Metrics -->
+    <string name="features_weather_metric_temperature">Temperature</string>
+    <string name="features_weather_metric_wind">Wind</string>
+    <string name="features_weather_metric_rain_volume">Rain Volume</string>
+    <string name="features_weather_metric_snow_volume">Snow Volume</string>
+    <string name="features_weather_metric_unit_mm">mm</string>
+    <string name="features_weather_metric_unit_ms">m/s</string>
 </resources>

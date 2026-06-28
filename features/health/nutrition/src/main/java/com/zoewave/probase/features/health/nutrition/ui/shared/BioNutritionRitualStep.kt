@@ -15,9 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.model.ritual.RoutineStep
+import com.zoewave.probase.features.health.nutrition.R
 
 @Composable
 fun BioNutritionRitualStep(
@@ -81,7 +83,7 @@ fun BioNutritionRitualStep(
                         modifier = Modifier.alpha(if (isCompleted) 0.6f else 1f)
                     )
                     Text(
-                        text = step.subtitle ?: "Metabolic Protocol",
+                        text = step.subtitle ?: stringResource(R.string.features_health_nutrition_label_metabolic_matrix),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )

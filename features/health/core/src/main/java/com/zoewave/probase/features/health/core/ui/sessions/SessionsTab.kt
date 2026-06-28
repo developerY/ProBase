@@ -62,13 +62,13 @@ fun SessionsTab(
                     .padding(vertical = 16.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.features_health_debug_tools_title),
+                    text = stringResource(R.string.features_health_core_debug_tools_title),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = stringResource(R.string.features_health_debug_tools_description),
+                    text = stringResource(R.string.features_health_core_debug_tools_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -81,7 +81,7 @@ fun SessionsTab(
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.features_health_action_add_test_ride))
+                    Text(stringResource(R.string.features_health_core_action_add_test_ride))
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))

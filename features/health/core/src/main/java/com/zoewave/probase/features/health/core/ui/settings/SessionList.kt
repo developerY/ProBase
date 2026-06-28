@@ -30,7 +30,7 @@ fun SessionList(
                 ZonedDateTime.ofInstant(session.startTime, session.startZoneOffset),
                 ZonedDateTime.ofInstant(session.endTime, session.endZoneOffset),
                 session.metadata.id,
-                session.title ?: stringResource(R.string.features_health_no_title),
+                session.title ?: stringResource(R.string.features_health_core_no_title),
                 onDetailsClick = { uid ->
                     navTo("exercise_session_detail/$uid")
                 },

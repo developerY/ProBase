@@ -29,7 +29,7 @@ fun SettingsTab(
         modifier = modifier.fillMaxSize()
     ) {
         Text(
-            text = stringResource(R.string.features_health_settings_title),
+            text = stringResource(R.string.features_health_core_settings_title),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 24.dp)
         )

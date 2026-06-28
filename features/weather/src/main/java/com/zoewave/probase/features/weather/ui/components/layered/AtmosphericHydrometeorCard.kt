@@ -16,11 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.features.weather.R
 
 @Preview(showBackground = true, backgroundColor = 0xFFF9F7F2)
 @Composable
@@ -28,7 +30,7 @@ fun AtmosphericHydrometeorCardRainPreview() {
     MaterialTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             AtmosphericHydrometeorCard(
-                label = "Rain Volume",
+                label = stringResource(R.string.features_weather_metric_rain_volume),
                 value = 2.5,
                 isRain = true,
                 isActive = true
@@ -43,7 +45,7 @@ fun AtmosphericHydrometeorCardSnowPreview() {
     MaterialTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             AtmosphericHydrometeorCard(
-                label = "Snow Volume",
+                label = stringResource(R.string.features_weather_metric_snow_volume),
                 value = 1.2,
                 isRain = false,
                 isActive = true
@@ -124,7 +126,7 @@ fun AtmosphericHydrometeorCard(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "${"%.1f".format(value)} mm",
+                    text = "${"%.1f".format(value)} ${stringResource(R.string.features_weather_metric_unit_mm)}",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Serif

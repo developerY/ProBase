@@ -152,9 +152,7 @@ fun HomeScreen(
                         sleepDuration = uiState.lastNightSleepDuration,
                         hydrationLiters = uiState.hydrationLiters,
                         hydrationGoalLiters = uiState.hydrationGoalLiters,
-                        isPermissionGranted = uiState.isHealthPermissionGranted,
-                        title = stringResource(R.string.applications_kocolor_apps_mobile_features_home_bio_markers),
-                        subtitle = stringResource(R.string.applications_kocolor_apps_mobile_features_home_style_inside_out)
+                        isPermissionGranted = uiState.isHealthPermissionGranted
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { navTo(KoColorRoute.Health) },

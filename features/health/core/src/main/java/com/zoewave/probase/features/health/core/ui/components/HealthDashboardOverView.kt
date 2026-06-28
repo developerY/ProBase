@@ -40,9 +40,9 @@ import com.zoewave.probase.features.health.core.ui.sessions.SessionDetailDialog
 import com.zoewave.probase.features.health.core.ui.settings.HealthConnectionStatus
 
 private enum class HealthTabOverView(val labelRes: Int, val icon: ImageVector) {
-    Settings(R.string.features_health_health_route_enable_health_connect_title, Icons.Default.Settings),
-    Data(R.string.features_health_overview_label, Icons.Default.DateRange),
-    Sessions(R.string.features_health_sessions_label, Icons.Default.List)
+    Settings(R.string.features_health_core_health_route_enable_health_connect_title, Icons.Default.Settings),
+    Data(R.string.features_health_core_overview_label, Icons.Default.DateRange),
+    Sessions(R.string.features_health_core_sessions_label, Icons.Default.List)
 }
 
 @Composable
@@ -87,17 +87,17 @@ fun HealthDashboardOverView(
                 HealthTabOverView.Data -> { /* ... same as before ... */
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                         GenericWeeklyChart(
-                            stringResource(R.string.features_health_steps_label),
+                            stringResource(R.string.features_health_core_steps_label),
                             state.weeklySteps.mapValues { it.value.toDouble() },
                             MaterialTheme.colorScheme.primary
                         ) { "${it.toInt()}" }
                         GenericWeeklyChart(
-                            stringResource(R.string.features_health_calories_label),
+                            stringResource(R.string.features_health_core_calories_label),
                             state.weeklyCalories,
                             Color(0xFFFF9800)
                         ) { "${it.toInt()}" }
                         GenericWeeklyChart(
-                            stringResource(R.string.features_health_distance_label),
+                            stringResource(R.string.features_health_core_distance_label),
                             state.weeklyDistance,
                             Color(0xFF03A9F4)
                         ) { String.format("%.1f", it / 1000) }
@@ -107,14 +107,14 @@ fun HealthDashboardOverView(
                 HealthTabOverView.Sessions -> {
                     Column(modifier = Modifier.fillMaxSize()) {
                         Text(
-                            text = stringResource(R.string.features_health_recent_sessions_title),
+                            text = stringResource(R.string.features_health_core_recent_sessions_title),
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
                         if (state.sessions.isEmpty()) {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text(stringResource(R.string.features_health_no_recent_activities), color = Color.Gray)
+                                Text(stringResource(R.string.features_health_core_no_recent_activities), color = Color.Gray)
                             }
                         } else {
                             LazyColumn(

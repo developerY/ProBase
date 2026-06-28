@@ -13,11 +13,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.features.health.nutrition.R
 import com.zoewave.probase.features.health.nutrition.data.Meal
 import com.zoewave.probase.features.health.nutrition.data.MetabolicPhase
 import com.zoewave.probase.features.health.nutrition.data.NutritionInfo
@@ -75,10 +77,10 @@ fun EditMealScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Protocol", color = Color.White, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.features_health_nutrition_action_edit_protocol), color = Color.White, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.features_health_nutrition_action_cancel), tint = Color.White)
                     }
                 },
                 actions = {
@@ -97,7 +99,7 @@ fun EditMealScreen(
                         )
                         onSave(updatedMeal)
                     }) {
-                        Icon(Icons.Default.Check, contentDescription = "Save", tint = accentColor)
+                        Icon(Icons.Default.Check, contentDescription = stringResource(R.string.features_health_nutrition_action_save), tint = accentColor)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = BioOptimizedColors.Slate950)
@@ -114,13 +116,13 @@ fun EditMealScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             // Basic Info
-            BioTextField(label = "Protocol Name", value = name, onValueChange = { name = it })
-            BioTextField(label = "Scientific Focus", value = scientificFocus, onValueChange = { scientificFocus = it }, color = accentColor)
-            BioTextField(label = "Biological Rationale", value = description, onValueChange = { description = it }, singleLine = false)
+            BioTextField(label = stringResource(R.string.features_health_nutrition_label_protocol_name), value = name, onValueChange = { name = it })
+            BioTextField(label = stringResource(R.string.features_health_nutrition_label_scientific_focus), value = scientificFocus, onValueChange = { scientificFocus = it }, color = accentColor)
+            BioTextField(label = stringResource(R.string.features_health_nutrition_label_bio_rationale), value = description, onValueChange = { description = it }, singleLine = false)
 
             // Metabolic Phase Selection
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Metabolic Phase", style = MaterialTheme.typography.labelSmall, color = Color(0xFF94a3b8))
+                Text(stringResource(R.string.features_health_nutrition_label_metabolic_phase), style = MaterialTheme.typography.labelSmall, color = Color(0xFF94a3b8))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     PhaseChip(
                         phase = MetabolicPhase.Morning,
@@ -148,7 +150,7 @@ fun EditMealScreen(
 
             // Nutrition Matrix
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Nutritional Matrix", style = MaterialTheme.typography.labelSmall, color = Color(0xFF94a3b8))
+                Text(stringResource(R.string.features_health_nutrition_label_nutritional_matrix), style = MaterialTheme.typography.labelSmall, color = Color(0xFF94a3b8))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     BioMetricField(label = "CAL", value = calories, onValueChange = { calories = it }, modifier = Modifier.weight(1f))
                     BioMetricField(label = "PRO (g)", value = protein, onValueChange = { protein = it }, modifier = Modifier.weight(1f), color = accentColor)
