@@ -30,6 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.zoewave.probase.features.health.core.ui.components.BioMarkersCard
+import com.zoewave.probase.features.health.core.ui.components.BioMarkersUiState
 import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericHeaderCard
 import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericHeaderUiState
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
@@ -42,8 +44,6 @@ import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSum
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryUiState
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.SectionTitle
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.SectionTitleUiState
-import com.zoewave.probase.kocolor.mobile.features.home.ui.components.WellnessInsightsSection
-import com.zoewave.probase.kocolor.mobile.features.home.ui.components.WellnessInsightsUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Preview(showBackground = true)
@@ -144,18 +144,20 @@ fun HomeScreen(
             }
 
             item {
-                    WellnessInsightsSection(
-                        uiState = WellnessInsightsUiState(
-                            uiState.wellnessInsights,
-                            uiState.lastNightSleepDuration,
-                            uiState.hydrationLiters,
-                            uiState.hydrationGoalLiters,
-                            uiState.isHealthPermissionGranted
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        onEvent = {},
-                        navTo = navTo
-                    )
+                BioMarkersCard(
+                    uiState = BioMarkersUiState(
+                        insights = uiState.wellnessInsights,
+                        sleepDuration = uiState.lastNightSleepDuration,
+                        hydrationLiters = uiState.hydrationLiters,
+                        hydrationGoalLiters = uiState.hydrationGoalLiters,
+                        isPermissionGranted = uiState.isHealthPermissionGranted,
+                        title = stringResource(R.string.applications_kocolor_apps_mobile_features_home_bio_markers),
+                        subtitle = stringResource(R.string.applications_kocolor_apps_mobile_features_home_style_inside_out)
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { navTo(KoColorRoute.Health) },
+                    onGrantPermissionsClick = { navTo(KoColorRoute.Health) }
+                )
             }
 
             item {
