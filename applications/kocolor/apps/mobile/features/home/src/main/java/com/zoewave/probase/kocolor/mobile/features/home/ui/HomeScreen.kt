@@ -179,9 +179,9 @@ fun HomeScreen(
                                 totalCount = uiState.currentRoutine.steps.size,
                                 isDaytime = uiState.isDaytime,
                                 backgroundModel = when (uiState.currentRoutine.time) {
-                                    com.zoewave.probase.core.model.ritual.RoutineTime.MORNING -> RoutinesR.drawable.morning_routine_bg
-                                    com.zoewave.probase.core.model.ritual.RoutineTime.MEALS -> RoutinesR.drawable.meals_ritual_bg
-                                    else -> RoutinesR.drawable.night_routine_bg
+                                    com.zoewave.probase.core.model.ritual.RoutineTime.MORNING -> RoutinesR.drawable.applications_kocolor_features_routines_morning_routine_bg
+                                    com.zoewave.probase.core.model.ritual.RoutineTime.MEALS -> RoutinesR.drawable.applications_kocolor_features_routines_meals_ritual_bg
+                                    else -> RoutinesR.drawable.applications_kocolor_features_routines_night_routine_bg
                                 }
                             ),
                             onClick = { navTo(KoColorRoute.RoutineDetail(uiState.currentRoutine.id)) },

@@ -135,9 +135,9 @@ fun HeroRitualCard(
         Box(modifier = Modifier.fillMaxSize()) {
             AsyncImage(
                 model = when (routine.time) {
-                    RoutineTime.MORNING -> R.drawable.morning_routine_bg
-                    RoutineTime.MEALS -> R.drawable.meals_ritual_bg
-                    else -> R.drawable.night_routine_bg
+                    RoutineTime.MORNING -> R.drawable.applications_kocolor_features_routines_morning_routine_bg
+                    RoutineTime.MEALS -> R.drawable.applications_kocolor_features_routines_meals_ritual_bg
+                    else -> R.drawable.applications_kocolor_features_routines_night_routine_bg
                 },
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize().alpha(0.35f),
