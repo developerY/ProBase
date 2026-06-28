@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.health.meals.ui
+package com.zoewave.probase.features.health.nutrition.ui.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -37,11 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.features.health.meals.ui.components.AddMealCameraScreen
-import com.zoewave.probase.features.health.meals.ui.components.BioMealCard
-import com.zoewave.probase.features.health.meals.ui.components.EditMealScreen
-import com.zoewave.probase.features.health.meals.ui.components.MealDetailScreen
-import com.zoewave.probase.features.health.meals.ui.components.MealPreparationScreen
+import com.zoewave.probase.features.health.nutrition.ui.shared.AddMealCameraScreen
+import com.zoewave.probase.features.health.nutrition.ui.shared.BioMealCard
+import com.zoewave.probase.features.health.nutrition.ui.shared.EditMealScreen
+import com.zoewave.probase.features.health.nutrition.ui.shared.MealDetailScreen
+import com.zoewave.probase.features.health.nutrition.ui.shared.MealPreparationScreen
 
 @Composable
 fun MealsUiRoute(

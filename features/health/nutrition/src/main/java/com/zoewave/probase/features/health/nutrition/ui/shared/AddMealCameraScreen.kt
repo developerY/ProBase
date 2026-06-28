@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.health.meals.ui.components
+package com.zoewave.probase.features.health.nutrition.ui.shared
 
 import android.content.Context
 import android.net.Uri
@@ -47,7 +47,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.zoewave.probase.features.health.meals.ui.BioOptimizedColors
+import com.zoewave.probase.features.health.nutrition.ui.shared.BioOptimizedColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File

@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.health.nutrition.ui.components
+package com.zoewave.probase.features.health.nutrition.ui.shared
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape

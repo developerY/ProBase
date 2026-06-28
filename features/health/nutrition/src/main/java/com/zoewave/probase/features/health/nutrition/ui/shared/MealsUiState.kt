@@ -1,6 +1,6 @@
-package com.zoewave.probase.features.health.meals.ui
+package com.zoewave.probase.features.health.nutrition.ui.shared
 
-import com.zoewave.probase.features.health.meals.data.Meal
+import com.zoewave.probase.features.health.nutrition.data.Meal
 
 sealed interface MealsUiState {
     data object Loading : MealsUiState

@@ -47,7 +47,7 @@ dependencies {
     // This connects your MainActivity to the Feature code we just wrote.
     implementation(project(":features:nav3"))
     implementation(project(":features:health"))
-    implementation(project(":features:health:meals"))
+    implementation(project(":features:health:nutrition"))
     implementation(project(":features:ble"))
     implementation(project(":features:weather"))
     implementation(project(":features:readers:nfc"))

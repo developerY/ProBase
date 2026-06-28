@@ -1,11 +1,11 @@
-package com.zoewave.probase.features.health.meals.ui
+package com.zoewave.probase.features.health.nutrition.ui.shared
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zoewave.probase.features.health.meals.data.Meal
-import com.zoewave.probase.features.health.meals.data.MealsRepository
-import com.zoewave.probase.features.health.meals.data.MetabolicPhase
-import com.zoewave.probase.features.health.meals.data.NutritionInfo
+import com.zoewave.probase.features.health.nutrition.data.Meal
+import com.zoewave.probase.features.health.nutrition.data.MealsRepository
+import com.zoewave.probase.features.health.nutrition.data.MetabolicPhase
+import com.zoewave.probase.features.health.nutrition.data.NutritionInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

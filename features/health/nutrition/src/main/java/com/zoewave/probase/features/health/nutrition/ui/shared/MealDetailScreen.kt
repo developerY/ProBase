@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.health.meals.ui.components
+package com.zoewave.probase.features.health.nutrition.ui.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -46,12 +46,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.features.health.meals.data.Ingredient
-import com.zoewave.probase.features.health.meals.data.Meal
-import com.zoewave.probase.features.health.meals.data.MealStep
-import com.zoewave.probase.features.health.meals.data.MetabolicPhase
-import com.zoewave.probase.features.health.meals.data.NutritionInfo
-import com.zoewave.probase.features.health.meals.ui.BioOptimizedColors
+import com.zoewave.probase.features.health.nutrition.data.Ingredient
+import com.zoewave.probase.features.health.nutrition.data.Meal
+import com.zoewave.probase.features.health.nutrition.data.MealStep
+import com.zoewave.probase.features.health.nutrition.data.MetabolicPhase
+import com.zoewave.probase.features.health.nutrition.data.NutritionInfo
+import com.zoewave.probase.features.health.nutrition.ui.shared.BioOptimizedColors
 
 @Preview(showBackground = true)
 @Composable

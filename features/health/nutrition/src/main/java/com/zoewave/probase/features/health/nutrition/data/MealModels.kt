@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.health.meals.data
+package com.zoewave.probase.features.health.nutrition.data
 
 import kotlinx.serialization.Serializable
 

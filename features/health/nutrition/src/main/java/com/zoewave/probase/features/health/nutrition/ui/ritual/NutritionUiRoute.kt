@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.health.nutrition.ui
+package com.zoewave.probase.features.health.nutrition.ui.ritual
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.features.health.nutrition.ui.components.BioNutritionRitualHeader
-import com.zoewave.probase.features.health.nutrition.ui.components.BioNutritionRitualStep
+import com.zoewave.probase.features.health.nutrition.ui.shared.BioNutritionRitualHeader
+import com.zoewave.probase.features.health.nutrition.ui.shared.BioNutritionRitualStep
 import com.zoewave.probase.core.model.ritual.BeautyRoutine
 import com.zoewave.probase.core.model.ritual.RoutineStep
 import com.zoewave.probase.kocolor.model.KoColorRoute

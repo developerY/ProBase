@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.health.nutrition.ui
+package com.zoewave.probase.features.health.nutrition.ui.ritual
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

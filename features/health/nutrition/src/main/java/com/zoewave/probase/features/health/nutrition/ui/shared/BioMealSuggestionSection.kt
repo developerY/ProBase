@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.health.meals.ui.components
+package com.zoewave.probase.features.health.nutrition.ui.shared
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -16,12 +16,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zoewave.probase.features.health.meals.data.Meal
-import com.zoewave.probase.features.health.meals.data.MetabolicPhase
-import com.zoewave.probase.features.health.meals.data.NutritionInfo
-import com.zoewave.probase.features.health.meals.ui.BioOptimizedColors
-import com.zoewave.probase.features.health.meals.ui.MealsUiState
-import com.zoewave.probase.features.health.meals.ui.MealsViewModel
+import com.zoewave.probase.features.health.nutrition.data.Meal
+import com.zoewave.probase.features.health.nutrition.data.MetabolicPhase
+import com.zoewave.probase.features.health.nutrition.data.NutritionInfo
+import com.zoewave.probase.features.health.nutrition.ui.shared.BioOptimizedColors
+import com.zoewave.probase.features.health.nutrition.ui.shared.MealsUiState
+import com.zoewave.probase.features.health.nutrition.ui.shared.MealsViewModel
 
 @Preview(showBackground = true, backgroundColor = 0xFF020617)
 @Composable
