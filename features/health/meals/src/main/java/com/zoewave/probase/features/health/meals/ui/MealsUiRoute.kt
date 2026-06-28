@@ -38,8 +38,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.features.health.meals.ui.components.AddMealCameraScreen
+import com.zoewave.probase.features.health.meals.ui.components.BioMealCard
 import com.zoewave.probase.features.health.meals.ui.components.EditMealScreen
-import com.zoewave.probase.features.health.meals.ui.components.MealCard
 import com.zoewave.probase.features.health.meals.ui.components.MealDetailScreen
 import com.zoewave.probase.features.health.meals.ui.components.MealPreparationScreen
 
@@ -181,7 +181,7 @@ private fun MealsListScreen(
             }
 
             items(uiState.meals) { meal ->
-                MealCard(
+                BioMealCard(
                     meal = meal,
                     onClick = { onEvent(MealsUiEvent.SelectMeal(meal)) }
                 )

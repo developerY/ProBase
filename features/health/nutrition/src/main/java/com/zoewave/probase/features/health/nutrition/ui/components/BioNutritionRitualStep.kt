@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.zoewave.probase.core.model.ritual.RoutineStep
 
 @Composable
-fun NutritionRitualStep(
+fun BioNutritionRitualStep(
     step: RoutineStep,
     onToggle: () -> Unit,
     onKnowledgeHub: () -> Unit,

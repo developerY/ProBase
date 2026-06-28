@@ -1,34 +1,27 @@
 package com.zoewave.probase.features.health.nutrition.ui.components
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material.icons.rounded.Science
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.features.health.nutrition.data.NutritionStage
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun NutritionStageCard(
+fun BioNutritionStageCard(
     stage: NutritionStage,
     modifier: Modifier = Modifier
 ) {
@@ -100,6 +93,28 @@ fun NutritionStageCard(
                     )
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFF9F7F2)
+@Composable
+private fun BioNutritionStageCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            BioNutritionStageCard(
+                stage = NutritionStage(
+                    id = "1",
+                    title = "Metabolic Priming",
+                    subtitle = "mTOR Activation",
+                    scientificBody = "Scientific focus on mTOR signaling pathway...",
+                    suggestedMealTitle = "Golden Turmeric Elixir",
+                    suggestedMealSubtitle = "Anti-inflammatory",
+                    suggestedMealBody = "A light morning drink to prepare the system...",
+                    startTime = "07:00",
+                    endTime = "09:00"
+                )
+            )
         }
     }
 }

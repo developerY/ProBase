@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -27,18 +26,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.features.health.meals.data.Ingredient
 import com.zoewave.probase.features.health.meals.data.Meal
-import com.zoewave.probase.features.health.meals.data.MealStep
 import com.zoewave.probase.features.health.meals.data.MetabolicPhase
 import com.zoewave.probase.features.health.meals.data.NutritionInfo
 import com.zoewave.probase.features.health.meals.ui.BioOptimizedColors
 
 @Preview(showBackground = true, backgroundColor = 0xFF020617)
 @Composable
-private fun MealCardPreview() {
+private fun BioMealCardPreview() {
     MaterialTheme {
-        MealCard(
+        BioMealCard(
             meal = Meal(
                 id = "1",
                 name = "Golden Turmeric Elixir",
@@ -60,7 +57,7 @@ private fun MealCardPreview() {
 }
 
 @Composable
-fun MealCard(
+fun BioMealCard(
     meal: Meal,
     onClick: () -> Unit,
     modifier: Modifier = Modifier

@@ -114,9 +114,9 @@ fun EditMealScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             // Basic Info
-            AtelierTextField(label = "Protocol Name", value = name, onValueChange = { name = it })
-            AtelierTextField(label = "Scientific Focus", value = scientificFocus, onValueChange = { scientificFocus = it }, color = accentColor)
-            AtelierTextField(label = "Biological Rationale", value = description, onValueChange = { description = it }, singleLine = false)
+            BioTextField(label = "Protocol Name", value = name, onValueChange = { name = it })
+            BioTextField(label = "Scientific Focus", value = scientificFocus, onValueChange = { scientificFocus = it }, color = accentColor)
+            BioTextField(label = "Biological Rationale", value = description, onValueChange = { description = it }, singleLine = false)
 
             // Metabolic Phase Selection
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -150,10 +150,10 @@ fun EditMealScreen(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Nutritional Matrix", style = MaterialTheme.typography.labelSmall, color = Color(0xFF94a3b8))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    AtelierMetricField(label = "CAL", value = calories, onValueChange = { calories = it }, modifier = Modifier.weight(1f))
-                    AtelierMetricField(label = "PRO (g)", value = protein, onValueChange = { protein = it }, modifier = Modifier.weight(1f), color = accentColor)
-                    AtelierMetricField(label = "CHO (g)", value = carbs, onValueChange = { carbs = it }, modifier = Modifier.weight(1f))
-                    AtelierMetricField(label = "FAT (g)", value = fat, onValueChange = { fat = it }, modifier = Modifier.weight(1f))
+                    BioMetricField(label = "CAL", value = calories, onValueChange = { calories = it }, modifier = Modifier.weight(1f))
+                    BioMetricField(label = "PRO (g)", value = protein, onValueChange = { protein = it }, modifier = Modifier.weight(1f), color = accentColor)
+                    BioMetricField(label = "CHO (g)", value = carbs, onValueChange = { carbs = it }, modifier = Modifier.weight(1f))
+                    BioMetricField(label = "FAT (g)", value = fat, onValueChange = { fat = it }, modifier = Modifier.weight(1f))
                 }
             }
             
@@ -163,7 +163,7 @@ fun EditMealScreen(
 }
 
 @Composable
-private fun AtelierTextField(
+private fun BioTextField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
@@ -189,7 +189,7 @@ private fun AtelierTextField(
 }
 
 @Composable
-private fun AtelierMetricField(
+private fun BioMetricField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,

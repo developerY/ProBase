@@ -3,15 +3,12 @@ package com.zoewave.probase.features.health.meals.ui.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,9 +25,9 @@ import com.zoewave.probase.features.health.meals.ui.MealsViewModel
 
 @Preview(showBackground = true, backgroundColor = 0xFF020617)
 @Composable
-private fun MealSuggestionSectionPreview() {
+private fun BioMealSuggestionSectionPreview() {
     MaterialTheme {
-        MealSuggestionSection(
+        BioMealSuggestionSection(
             uiState = MealsUiState.Success(
                 meals = listOf(
                     Meal(
@@ -62,14 +59,14 @@ private fun MealSuggestionSectionPreview() {
 }
 
 @Composable
-fun MealSuggestionSection(
+fun BioMealSuggestionSection(
     currentMealId: String?,
     onMealSelected: (Meal) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MealsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    MealSuggestionSection(
+    BioMealSuggestionSection(
         uiState = uiState,
         currentMealId = currentMealId,
         onMealSelected = onMealSelected,
@@ -78,7 +75,7 @@ fun MealSuggestionSection(
 }
 
 @Composable
-fun MealSuggestionSection(
+fun BioMealSuggestionSection(
     uiState: MealsUiState,
     currentMealId: String?,
     onMealSelected: (Meal) -> Unit,
@@ -122,7 +119,7 @@ fun MealSuggestionSection(
                         val isSelected = meal.id == currentMealId
                         
                         Box(contentAlignment = Alignment.TopEnd) {
-                            MealCard(
+                            BioMealCard(
                                 meal = meal,
                                 onClick = { 
                                     onMealSelected(meal)
