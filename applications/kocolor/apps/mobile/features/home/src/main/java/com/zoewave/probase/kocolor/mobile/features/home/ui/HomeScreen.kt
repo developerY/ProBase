@@ -30,12 +30,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericHeaderCard
+import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericHeaderUiState
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.BoutiqueCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CollectionHubCard
-import com.zoewave.probase.kocolor.mobile.features.home.ui.components.HomeHeader
-import com.zoewave.probase.kocolor.mobile.features.home.ui.components.HomeHeaderUiState
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.QuickActions
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryCard
@@ -128,19 +128,18 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             item {
-                HomeHeader(
-                    uiState = HomeHeaderUiState(
-                        uiState.fashionProfile,
-                        uiState.isDaytime,
-                        uiState.beautyTip,
-                        uiState.weather,
-                        uiState.locationName,
-                        uiState.isLocationFallback,
-                        uiState.headerBackgroundUrl,
-                        uiState.temperatureUnit
+                AtmosphericHeaderCard(
+                    uiState = AtmosphericHeaderUiState(
+                        fashionProfile = uiState.fashionProfile,
+                        isDaytime = uiState.isDaytime,
+                        tip = uiState.beautyTip,
+                        weather = uiState.weather,
+                        locationName = uiState.locationName,
+                        isLocationFallback = uiState.isLocationFallback,
+                        backgroundUrl = uiState.headerBackgroundUrl,
+                        tempUnit = uiState.temperatureUnit
                     ),
-                    onEvent = {},
-                    navTo = navTo
+                    onWeatherClick = { navTo(KoColorRoute.Weather) }
                 )
             }
 

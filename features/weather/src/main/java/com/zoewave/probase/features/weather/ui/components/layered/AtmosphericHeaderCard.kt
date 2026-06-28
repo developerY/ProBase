@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.mobile.features.home.ui.components
+package com.zoewave.probase.features.weather.ui.components.layered
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
@@ -45,16 +45,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.FashionProfile
-import com.zoewave.probase.features.weather.ui.components.layered.DynamicWeatherIcon
-import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherCondition
-import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
-import com.zoewave.probase.features.weather.ui.components.layered.WeatherMoodGradient
-import com.zoewave.probase.kocolor.model.KoColorRoute
 
-data class HomeHeaderUiState(
+data class AtmosphericHeaderUiState(
     val fashionProfile: FashionProfile? = null,
     val isDaytime: Boolean = true,
-    val beautyTip: String = "",
+    val tip: String = "",
     val weather: LayeredWeatherUiState? = null,
     val locationName: String? = null,
     val isLocationFallback: Boolean = false,
@@ -63,11 +58,10 @@ data class HomeHeaderUiState(
 )
 
 @Composable
-fun HomeHeader(
-    uiState: HomeHeaderUiState,
+fun AtmosphericHeaderCard(
+    uiState: AtmosphericHeaderUiState,
+    onWeatherClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit = {},
-    navTo: (KoColorRoute) -> Unit = {}
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -99,13 +93,13 @@ fun HomeHeader(
             if (expanded) {
                 LongHeader(
                     uiState = uiState,
-                    onWeatherClick = { navTo(KoColorRoute.Weather) },
+                    onWeatherClick = onWeatherClick,
                     onCollapseClick = { isExpanded = false }
                 )
             } else {
                 ShortHeader(
                     uiState = uiState,
-                    onWeatherClick = { navTo(KoColorRoute.Weather) },
+                    onWeatherClick = onWeatherClick,
                     onExpandClick = { isExpanded = true }
                 )
             }
@@ -115,7 +109,7 @@ fun HomeHeader(
 
 @Composable
 private fun ShortHeader(
-    uiState: HomeHeaderUiState,
+    uiState: AtmosphericHeaderUiState,
     onWeatherClick: () -> Unit,
     onExpandClick: () -> Unit
 ) {
@@ -123,7 +117,7 @@ private fun ShortHeader(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // TOP HALF: Weather Widget (Go to weather)
+        // TOP HALF: Weather Widget
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -217,7 +211,7 @@ private fun ShortHeader(
         ) {
             Text(
                 text = if (uiState.isDaytime) "Radiant Morning." else "Deep Restoration.",
-                style = MaterialTheme.typography.titleLargeEmphasized,
+                style = MaterialTheme.typography.titleLarge,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF1F2937),
@@ -236,7 +230,7 @@ private fun ShortHeader(
 
 @Composable
 private fun LongHeader(
-    uiState: HomeHeaderUiState,
+    uiState: AtmosphericHeaderUiState,
     onWeatherClick: () -> Unit,
     onCollapseClick: () -> Unit
 ) {
@@ -350,7 +344,7 @@ private fun LongHeader(
                     }
                 }
                 Text(
-                    text = uiState.beautyTip.ifBlank { "High UV. Reapply your mineral SPF every 2 hours and stay in the shade during peak sun." },
+                    text = uiState.tip.ifBlank { "High UV detected. Prioritize SPF in your ritual today." },
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFF49454F),
                     lineHeight = 20.sp
@@ -364,32 +358,15 @@ private fun LongHeader(
 
 @Preview(showBackground = true, backgroundColor = 0xFFF8F7FA)
 @Composable
-private fun HomeHeaderPartlyCloudyPreview() {
+private fun AtmosphericHeaderCardPreview() {
     MaterialTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            HomeHeader(
-                uiState = HomeHeaderUiState(
-                    weather = LayeredWeatherUiState(
-                        temperature = 22.0,
-                        uvIndex = 4.0,
-                        conditions = listOf(LayeredWeatherCondition.SUNNY, LayeredWeatherCondition.CLOUDY)
-                    )
-                )
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFF8F7FA)
-@Composable
-private fun HomeHeaderShortResponsivePreview() {
-    MaterialTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            HomeHeader(
-                uiState = HomeHeaderUiState(
+            AtmosphericHeaderCard(
+                uiState = AtmosphericHeaderUiState(
                     weather = LayeredWeatherUiState(temperature = 24.0, uvIndex = 8.0),
                     tempUnit = "FAHRENHEIT"
-                )
+                ),
+                onWeatherClick = {}
             )
         }
     }
@@ -397,16 +374,19 @@ private fun HomeHeaderShortResponsivePreview() {
 
 @Preview(showBackground = true, backgroundColor = 0xFFF8F7FA)
 @Composable
-private fun HomeHeaderShortResponsivePreviewRain() {
+private fun AtmosphericHeaderCardRainyPreview() {
     MaterialTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            HomeHeader(
-                uiState = HomeHeaderUiState(
-                    weather = LayeredWeatherUiState(temperature = 24.0, uvIndex = 8.0,
+            AtmosphericHeaderCard(
+                uiState = AtmosphericHeaderUiState(
+                    weather = LayeredWeatherUiState(
+                        temperature = 24.0, 
+                        uvIndex = 8.0,
                         conditions = listOf(LayeredWeatherCondition.RAINY, LayeredWeatherCondition.THUNDER)
                     ),
                     tempUnit = "FAHRENHEIT",
-                )
+                ),
+                onWeatherClick = {}
             )
         }
     }
