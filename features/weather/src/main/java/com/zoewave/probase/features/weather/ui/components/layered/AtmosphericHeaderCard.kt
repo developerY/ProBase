@@ -39,12 +39,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ritual.FashionProfile
+import com.zoewave.probase.features.weather.R
 
 data class AtmosphericHeaderUiState(
     val fashionProfile: FashionProfile? = null,
@@ -210,7 +213,7 @@ private fun ShortHeader(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (uiState.isDaytime) "Radiant Morning." else "Deep Restoration.",
+                text = if (uiState.isDaytime) stringResource(R.string.features_weather_atmospheric_greeting_day) else stringResource(R.string.features_weather_atmospheric_greeting_night),
                 style = MaterialTheme.typography.titleLarge,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold,
@@ -253,7 +256,7 @@ private fun LongHeader(
                     .padding(4.dp)
             ) {
                 Text(
-                    text = "CURRENT LOCATION",
+                    text = stringResource(R.string.features_weather_atmospheric_current_location),
                     style = MaterialTheme.typography.labelSmall,
                     letterSpacing = 1.5.sp,
                     color = Color(0xFF6A6577).copy(alpha = 0.7f),
@@ -344,7 +347,7 @@ private fun LongHeader(
                     }
                 }
                 Text(
-                    text = uiState.tip.ifBlank { "High UV detected. Prioritize SPF in your ritual today." },
+                    text = uiState.tip.ifBlank { stringResource(R.string.features_weather_atmospheric_high_uv_tip) },
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFF49454F),
                     lineHeight = 20.sp

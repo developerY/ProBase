@@ -14,6 +14,7 @@ import com.zoewave.probase.features.health.core.domain.GetActiveRitualUseCase
 import com.zoewave.probase.features.health.core.domain.GetHealthSummaryUseCase
 import com.zoewave.probase.features.health.core.domain.HealthSummary
 import com.zoewave.probase.features.health.core.domain.LogHydrationUseCase
+import com.zoewave.probase.kocolor.features.store.ui.StoreUiState
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherMapper
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.kocolor.data.FashionRepository
@@ -71,6 +72,7 @@ data class HomeUiState(
     val isLocationFallback: Boolean = false,
     val temperatureUnit: String = "CELSIUS",
     val headerBackgroundUrl: String? = null,
+    val storeUiState: StoreUiState = StoreUiState(),
     val savedSuggestions: List<com.zoewave.probase.core.model.ritual.SavedAnalysis> = emptyList()
 )
 
@@ -79,6 +81,7 @@ sealed class HomeEvent {
     data object RefreshTip : HomeEvent()
     data class LogHydration(val volumeLiters: Double) : HomeEvent()
     data object RefreshWeather : HomeEvent()
+    data object ToggleStoreExpansion : HomeEvent()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -103,6 +106,7 @@ class HomeViewModel @Inject constructor(
     }.timeInMillis)
 
     private val _beautyTip = MutableStateFlow("")
+    private val _isStoreExpanded = MutableStateFlow(false)
 
     init {
         viewModelScope.launch {
@@ -159,6 +163,7 @@ class HomeViewModel @Inject constructor(
         cosmeticDao.getAllCosmetics(),
         clothingDao.getAllClothing(),
         _beautyTip,
+        _isStoreExpanded,
         atmosphericRepository.atmosphericState,
         getHealthSummaryUseCase(),
         fashionRepository.getSavedSuggestions()
@@ -170,9 +175,10 @@ class HomeViewModel @Inject constructor(
         val cosmetics = array[4] as List<CosmeticItemEntity>
         val clothing = array[5] as List<ClothingItemEntity>
         val tip = array[6] as String
-        val atmosphericState = array[7] as AtmosphericState
-        val healthSummary = array[8] as HealthSummary
-        val savedSuggestions = array[9] as List<com.zoewave.probase.core.model.ritual.SavedAnalysis>
+        val isStoreExpanded = array[7] as Boolean
+        val atmosphericState = array[8] as AtmosphericState
+        val healthSummary = array[9] as HealthSummary
+        val savedSuggestions = array[10] as List<com.zoewave.probase.core.model.ritual.SavedAnalysis>
 
         val routines = routineEntities.map { it.toModel() }
         val activeRitual = getActiveRitualUseCase(routines)
@@ -226,6 +232,7 @@ class HomeViewModel @Inject constructor(
             weather = processedWeather,
             locationName = weather?.locationName,
             temperatureUnit = tempUnit,
+            storeUiState = StoreUiState(isExpanded = isStoreExpanded),
             savedSuggestions = savedSuggestions,
             isLocationFallback = weather?.locationName == "Location could not be found"
         )
@@ -295,6 +302,9 @@ class HomeViewModel @Inject constructor(
                 viewModelScope.launch {
                     atmosphericRepository.refreshWeather()
                 }
+            }
+            HomeEvent.ToggleStoreExpansion -> {
+                _isStoreExpanded.value = !_isStoreExpanded.value
             }
         }
     }

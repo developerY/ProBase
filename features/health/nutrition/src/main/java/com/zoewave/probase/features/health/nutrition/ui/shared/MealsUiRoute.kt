@@ -31,12 +31,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.features.health.nutrition.R
 import com.zoewave.probase.features.health.nutrition.ui.shared.AddMealCameraScreen
 import com.zoewave.probase.features.health.nutrition.ui.shared.BioMealCard
 import com.zoewave.probase.features.health.nutrition.ui.shared.EditMealScreen
@@ -155,7 +157,7 @@ private fun MealsListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Metabolic Meals", color = Color.White, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.features_health_nutrition_hub_title), color = Color.White, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
@@ -187,14 +189,14 @@ private fun MealsListScreen(
             item {
                 Column {
                     Text(
-                        text = "BioOptimized Protocols",
+                        text = stringResource(R.string.features_health_nutrition_hub_subtitle),
                         style = MaterialTheme.typography.headlineMedium,
                         color = Color.White,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "SYNC YOUR FEEDING WITH METABOLIC PEAKS",
+                        text = stringResource(R.string.features_health_nutrition_hub_tagline),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color(0xFF94a3b8),
                         letterSpacing = 1.sp

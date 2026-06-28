@@ -26,12 +26,14 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zoewave.probase.features.health.hydration.R
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -85,19 +87,19 @@ fun HydrationScreen(
             CenterAlignedTopAppBar(
                 title = { 
                     Text(
-                        text = "Hydration Tracking", 
+                        text = stringResource(R.string.features_health_hydration_title), 
                         fontFamily = FontFamily.Serif, 
                         fontWeight = FontWeight.Bold
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.features_health_hydration_cd_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { onEvent(HydrationUiEvent.ResetProgress) }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Reset Today's Progress")
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.features_health_hydration_cd_reset))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -156,7 +158,7 @@ fun HydrationScreen(
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = "of %.1fL goal".format(uiState.targetLiters),
+                                        text = stringResource(R.string.features_health_hydration_goal_format, uiState.targetLiters),
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                                         textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
@@ -178,15 +180,15 @@ fun HydrationScreen(
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             QuickHydrationButton(
-                                label = "+250ml",
-                                subLabel = "GLASS",
+                                label = stringResource(R.string.features_health_hydration_add_glass),
+                                subLabel = stringResource(R.string.features_health_hydration_label_glass),
                                 icon = Icons.Rounded.LocalCafe,
                                 modifier = Modifier.weight(1f),
                                 onClick = { onEvent(HydrationUiEvent.AddWater(0.25)) }
                             )
                             QuickHydrationButton(
-                                label = "+500ml",
-                                subLabel = "BOTTLE",
+                                label = stringResource(R.string.features_health_hydration_add_bottle),
+                                subLabel = stringResource(R.string.features_health_hydration_label_bottle),
                                 icon = Icons.Rounded.WineBar,
                                 modifier = Modifier.weight(1f),
                                 onClick = { onEvent(HydrationUiEvent.AddWater(0.5)) }
@@ -206,7 +208,7 @@ fun HydrationScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp), tint = Color.Black.copy(alpha = 0.6f))
                                     Spacer(Modifier.width(8.dp))
-                                    Text("Custom Amount", fontWeight = FontWeight.Bold, letterSpacing = 1.sp, color = Color.Black.copy(alpha = 0.7f))
+                                    Text(stringResource(R.string.features_health_hydration_custom_amount), fontWeight = FontWeight.Bold, letterSpacing = 1.sp, color = Color.Black.copy(alpha = 0.7f))
                                 }
                             }
                         }
@@ -217,7 +219,7 @@ fun HydrationScreen(
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             Text(
-                                text = "Reminder",
+                                text = stringResource(R.string.features_health_hydration_reminder),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontFamily = FontFamily.Serif,
                                 fontWeight = FontWeight.Bold
@@ -234,14 +236,14 @@ fun HydrationScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text("Hydration Smart Alerts", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                        Text(stringResource(R.string.features_health_hydration_smart_alerts), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                                         Switch(
                                             checked = uiState.isSmartAlertsEnabled, 
                                             onCheckedChange = { onEvent(HydrationUiEvent.ToggleSmartAlerts(it)) }
                                         )
                                     }
                                     Text(
-                                        text = "Smart reminders to help you reach your daily goal based on your activity and weather.",
+                                        text = stringResource(R.string.features_health_hydration_smart_alerts_desc),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color.Gray
                                     )
@@ -252,7 +254,7 @@ fun HydrationScreen(
                                             Icon(Icons.Rounded.Settings, null, modifier = Modifier.size(14.dp), tint = Color.Gray)
                                             Spacer(Modifier.width(8.dp))
                                             Text(
-                                                text = "Next ideal interval: ${uiState.nextReminderTime}",
+                                                text = stringResource(R.string.features_health_hydration_next_interval, uiState.nextReminderTime),
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.primary
                                             )
@@ -268,7 +270,7 @@ fun HydrationScreen(
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             Text(
-                                text = "RECENT LOGS",
+                                text = stringResource(R.string.features_health_hydration_recent_logs),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 1.sp,
@@ -342,7 +344,7 @@ fun HydrationLogItem(log: HydrationLog) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "${(log.amountLiters * 1000).toInt()} ml", 
+                text = stringResource(R.string.features_health_hydration_ml_format, (log.amountLiters * 1000).toInt()), 
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif

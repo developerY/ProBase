@@ -41,11 +41,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.features.health.nutrition.R
 import com.zoewave.probase.features.health.nutrition.data.Ingredient
 import com.zoewave.probase.features.health.nutrition.data.Meal
 import com.zoewave.probase.features.health.nutrition.data.MealStep
@@ -115,12 +117,12 @@ fun MealDetailScreen(
                     showDeleteConfirmation = false
                     onDelete() 
                 }) {
-                    Text("DELETE", color = BioOptimizedColors.Pink400, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.features_health_nutrition_action_delete), color = BioOptimizedColors.Pink400, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text("CANCEL", color = Color.White)
+                    Text(stringResource(R.string.features_health_nutrition_action_cancel), color = Color.White)
                 }
             },
             containerColor = BioOptimizedColors.Slate900,
@@ -208,7 +210,7 @@ fun MealDetailScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Scientific Focus",
+                        text = stringResource(R.string.features_health_nutrition_label_scientific_focus),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color(0xFF94a3b8)
                     )
@@ -238,7 +240,7 @@ fun MealDetailScreen(
                     Spacer(modifier = Modifier.height(32.dp))
                     
                     Text(
-                        text = "Physiological Impact",
+                        text = stringResource(R.string.features_health_nutrition_label_physiological_impact),
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White
                     )
@@ -252,7 +254,7 @@ fun MealDetailScreen(
                     Spacer(modifier = Modifier.height(32.dp))
                     
                     Text(
-                        text = "Metabolic Matrix",
+                        text = stringResource(R.string.features_health_nutrition_label_metabolic_matrix),
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White
                     )
@@ -276,7 +278,7 @@ fun MealDetailScreen(
             item {
                 Spacer(modifier = Modifier.height(32.dp))
                 Text(
-                    text = "Protocol Execution",
+                    text = stringResource(R.string.features_health_nutrition_label_protocol_execution),
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White,
                     modifier = Modifier.padding(horizontal = 24.dp)
@@ -322,7 +324,7 @@ fun MealDetailScreen(
                 ) {
                     Icon(Icons.Default.Restaurant, null)
                     Spacer(Modifier.width(12.dp))
-                    Text("Start Cooking", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.features_health_nutrition_action_start_cooking), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
                 }
                 Spacer(modifier = Modifier.height(48.dp))
             }

@@ -21,10 +21,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.weather.R
 
 @Preview(showBackground = true, backgroundColor = 0xFFF9F7F2)
 @Composable
@@ -54,7 +56,7 @@ fun AtmosphericWindCompassCard(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Wind",
+                text = stringResource(R.string.features_weather_metric_wind),
                 style = MaterialTheme.typography.labelLarge,
                 color = Color.Black.copy(alpha = 0.7f),
                 fontFamily = FontFamily.Serif
@@ -99,7 +101,7 @@ fun AtmosphericWindCompassCard(
             }
 
             Text(
-                text = "${degree}° - ${"%.1f".format(speed)} m/s",
+                text = "${degree}° - ${"%.1f".format(speed)} ${stringResource(R.string.features_weather_metric_unit_ms)}",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif

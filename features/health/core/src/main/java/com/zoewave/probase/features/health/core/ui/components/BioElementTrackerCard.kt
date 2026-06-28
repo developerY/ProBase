@@ -45,11 +45,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoewave.probase.core.model.ble.GattConnectionState
+import com.zoewave.probase.features.health.core.R
 
 data class BioElementTrackerUiState(
     val connectionState: GattConnectionState,
@@ -161,14 +163,14 @@ fun BioElementTrackerCard(
                 ) {
                     Column {
                         Text(
-                            text = "ELEMENT TRACKER",
+                            text = stringResource(R.string.features_health_core_element_tracker_title),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White.copy(alpha = 0.6f),
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 2.sp
                         )
                         Text(
-                            text = if (isConnected) "Synced" else "Awaiting Sync",
+                            text = if (isConnected) stringResource(R.string.features_health_core_element_tracker_synced) else stringResource(R.string.features_health_core_element_tracker_awaiting),
                             style = MaterialTheme.typography.titleMedium,
                             color = Color.White,
                             fontWeight = FontWeight.Black
@@ -212,7 +214,7 @@ fun BioElementTrackerCard(
                     }
                 } else {
                     Text(
-                        text = "Tap to initiate bio-element correlation",
+                        text = stringResource(R.string.features_health_core_element_tracker_prompt),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.White.copy(alpha = 0.4f),
                         modifier = Modifier.align(Alignment.CenterHorizontally)

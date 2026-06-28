@@ -48,11 +48,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.features.health.hydration.R
 
 @Preview(showBackground = true)
 @Composable
@@ -112,7 +114,7 @@ fun HydrationGlassCard(
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
                 Text(
-                    text = "Hydration", 
+                    text = stringResource(R.string.features_health_hydration_label), 
                     style = MaterialTheme.typography.titleLarge, 
                     fontFamily = FontFamily.Serif,
                     color = Color(0xFF2C2420).copy(alpha = 0.7f)
@@ -137,7 +139,7 @@ fun HydrationGlassCard(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Text(
-                                text = "of %.1fL goal".format(goal),
+                                text = stringResource(R.string.features_health_hydration_goal_format, goal),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                                 letterSpacing = 1.sp,
@@ -161,15 +163,15 @@ fun HydrationGlassCard(
                 ) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         QuickHydrationButton(
-                            label = "+250ml",
-                            subLabel = "Glass",
+                            label = stringResource(R.string.features_health_hydration_add_glass),
+                            subLabel = stringResource(R.string.features_health_hydration_label_glass),
                             icon = Icons.Rounded.LocalCafe,
                             modifier = Modifier.weight(1f),
                             onClick = { onAdd(0.25) }
                         )
                         QuickHydrationButton(
-                            label = "+500ml",
-                            subLabel = "Bottle",
+                            label = stringResource(R.string.features_health_hydration_add_bottle),
+                            subLabel = stringResource(R.string.features_health_hydration_label_bottle),
                             icon = Icons.Rounded.WineBar,
                             modifier = Modifier.weight(1f),
                             onClick = { onAdd(0.5) }
@@ -199,7 +201,7 @@ fun HydrationGlassCard(
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = if (showCustomSlider) "Cancel" else "+ Custom Amount", 
+                                    text = if (showCustomSlider) stringResource(R.string.features_health_hydration_action_cancel) else stringResource(R.string.features_health_hydration_action_custom), 
                                     fontWeight = FontWeight.Bold, 
                                     style = MaterialTheme.typography.labelMedium
                                 )
@@ -221,7 +223,7 @@ fun HydrationGlassCard(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "${customAmount.toInt()} ml",
+                                    text = stringResource(R.string.features_health_hydration_ml_format, customAmount.toInt()),
                                     style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Black,
                                     fontFamily = FontFamily.Serif
@@ -247,7 +249,7 @@ fun HydrationGlassCard(
                                     shape = RoundedCornerShape(20.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))
                                 ) {
-                                    Text("Log Amount", fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.features_health_hydration_action_log), fontWeight = FontWeight.Bold)
                                 }
                             }
                         }

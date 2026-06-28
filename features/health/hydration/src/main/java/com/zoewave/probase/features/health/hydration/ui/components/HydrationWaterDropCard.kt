@@ -21,10 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zoewave.probase.features.health.hydration.R
 
 @Preview(showBackground = true)
 @Composable
@@ -90,7 +92,7 @@ fun HydrationWaterDropCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Current Progress", 
+                    text = stringResource(R.string.features_health_hydration_current_progress), 
                     style = MaterialTheme.typography.titleLarge,
                     fontFamily = FontFamily.Serif,
                     color = Color.Black.copy(alpha = 0.6f)
@@ -106,7 +108,7 @@ fun HydrationWaterDropCard(
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    text = "${(progress * 100).toInt()}%",
+                    text = stringResource(R.string.features_health_hydration_percent_format, (progress * 100).toInt()),
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Serif,

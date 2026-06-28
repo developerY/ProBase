@@ -25,12 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.features.health.core.R
 
 data class BioRoutineSummaryUiState(
     val title: String,
@@ -97,7 +99,7 @@ fun BioRoutineSummaryCard(
                         Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = Icons.Rounded.Layers,
-                                contentDescription = "Manage Rituals",
+                                contentDescription = stringResource(R.string.features_health_core_manage_rituals),
                                 tint = Color.Black.copy(alpha = 0.7f),
                                 modifier = Modifier.size(24.dp)
                             )
@@ -115,7 +117,7 @@ fun BioRoutineSummaryCard(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            text = "CURRENT RITUAL",
+                            text = stringResource(R.string.features_health_core_current_ritual),
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Black,
@@ -146,7 +148,7 @@ fun BioRoutineSummaryCard(
                                 color = Color.Black
                             )
                             Text(
-                                text = "DONE",
+                                text = stringResource(R.string.features_health_core_done),
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Black.copy(alpha = 0.5f)
@@ -157,7 +159,7 @@ fun BioRoutineSummaryCard(
 
                 Column {
                     Text(
-                        text = "Ritual Active",
+                        text = stringResource(R.string.features_health_core_ritual_active),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
