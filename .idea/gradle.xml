@@ -184,7 +184,6 @@
             <option value="$PROJECT_DIR$/features/health/cgm" />
             <option value="$PROJECT_DIR$/features/health/core" />
             <option value="$PROJECT_DIR$/features/health/hydration" />
-            <option value="$PROJECT_DIR$/features/health/meals" />
             <option value="$PROJECT_DIR$/features/health/nutrition" />
             <option value="$PROJECT_DIR$/features/microphone" />
             <option value="$PROJECT_DIR$/features/nav3" />

@@ -55,7 +55,7 @@ import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.RoutineStep
 import com.zoewave.probase.core.model.ritual.RoutineTime
-import com.zoewave.probase.features.health.meals.ui.components.MealSuggestionSection
+import com.zoewave.probase.features.health.nutrition.ui.shared.BioMealSuggestionSection
 import com.zoewave.probase.kocolor.features.routines.R
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesEvent
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -231,7 +231,7 @@ fun StepHeroPage(
 
         if (routineTime == RoutineTime.MEALS) {
             item {
-                MealSuggestionSection(
+                BioMealSuggestionSection(
                     currentMealId = step.linkedMealId,
                     onMealSelected = { meal ->
                         onEvent(RoutinesEvent.LinkMeal(routineId, step.id, meal.id))

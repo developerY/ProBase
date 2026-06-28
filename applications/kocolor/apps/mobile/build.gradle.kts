@@ -83,7 +83,6 @@ dependencies {
     implementation(project(":features:health:core"))
     implementation(project(":features:health:hydration"))
     implementation(project(":features:health:nutrition"))
-    implementation(project(":features:health:meals"))
     implementation(project(":features:weather"))
     implementation(project(":features:readers:barcode"))
     implementation(project(":features:readers:qrscanner"))

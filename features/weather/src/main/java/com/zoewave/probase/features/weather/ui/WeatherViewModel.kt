@@ -1,126 +1,83 @@
 package com.zoewave.probase.features.weather.ui
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zoewave.probase.core.data.repository.travel.LocationRepository
+import com.zoewave.probase.core.data.repository.weather.AtmosphericRepository
 import com.zoewave.probase.core.database.BaseProRepo
+import com.zoewave.probase.core.model.weather.AtmosphericState
 import com.zoewave.probase.core.model.weather.Weather
-import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
-    private val weatherRepo: WeatherRepo,
-    private val repository: BaseProRepo,
-    private val locationRepository: LocationRepository
+    private val atmosphericRepository: AtmosphericRepository,
+    private val repository: BaseProRepo
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
-    val uiState: StateFlow<WeatherUiState> = _uiState
 
     private val _tempUnit = MutableStateFlow("CELSIUS")
 
+    val uiState: StateFlow<WeatherUiState> = combine(
+        atmosphericRepository.atmosphericState,
+        _tempUnit
+    ) { state, unit ->
+        val weather = state.weather
+        if (weather == null) {
+            WeatherUiState.Loading
+        } else {
+            WeatherUiState.Success(
+                weatherOpen = weather,
+                environmentalContext = state.environmentalContext,
+                locationString = weather.name,
+                weather = Weather(
+                    temperature = weather.main.temp,
+                    description = weather.weather.firstOrNull()?.description ?: "Clear",
+                    location = weather.name,
+                    iconUrl = ""
+                ),
+                settings = emptyMap(),
+                location = null, // LatLng if needed
+                isLocationFallback = state.isFallback,
+                tempUnit = unit
+            )
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = WeatherUiState.Loading
+    )
+
     fun setTempUnit(unit: String) {
         _tempUnit.value = unit
-        val current = _uiState.value
-        if (current is WeatherUiState.Success) {
-            _uiState.value = current.copy(tempUnit = unit)
-        }
     }
 
     init {
-        // Initialize the UI state by fetching current weather
-        fetchCurrentWeather()
+        viewModelScope.launch {
+            atmosphericRepository.fetchWeatherIfNeeded()
+        }
     }
 
-    /**
-     * Handle various events (Load, Update, Delete).
-     */
     fun onEvent(event: WeatherEvent) {
         when (event) {
-            WeatherEvent.Refresh -> fetchCurrentWeather()
-            is WeatherEvent.UpdateSetting -> updateSetting(event.settingKey, event.settingValue)
-            is WeatherEvent.DeleteAllEntries -> deleteAllEntries()
-            WeatherEvent.FetchWeather -> fetchCurrentWeather()
-        }
-    }
-
-    /**
-     * Loads current weather data based on location.
-     */
-    private fun fetchCurrentWeather() {
-        viewModelScope.launch {
-            _uiState.value = WeatherUiState.Loading
-            try {
-                // 1. Get real location coords with 5s timeout
-                val latLng = kotlinx.coroutines.withTimeoutOrNull(5000) {
-                    locationRepository.updateLocation()
-                    locationRepository.currentLocation.first { it != null }
+            WeatherEvent.Refresh, WeatherEvent.FetchWeather -> {
+                viewModelScope.launch {
+                    atmosphericRepository.refreshWeather()
                 }
-
-                val isFallback = latLng == null
-                val lat = latLng?.latitude ?: 34.4208 // Santa Barbara
-                val lon = latLng?.longitude ?: -119.6982
-                
-                // 2. Fetch real data
-                val weatherResp = weatherRepo.openCurrentWeatherByCoords(lat, lon)
-                val envContext = weatherRepo.getEnvironmentalContext(lat, lon)
-
-                _uiState.value = WeatherUiState.Success(
-                    weather = Weather(
-                        temperature = weatherResp?.main?.temp ?: 22.5,
-                        description = weatherResp?.weather?.firstOrNull()?.description ?: "Sunny",
-                        iconUrl = "",
-                        location = if (isFallback) "Location could not be found" else (weatherResp?.name ?: "San Francisco, CA")
-                    ),
-                    settings = mapOf(
-                        "Theme" to listOf("Light", "Dark", "System Default"),
-                        "Language" to listOf("English", "Spanish", "French"),
-                        "Notifications" to listOf("Enabled", "Disabled")
-                    ),
-                    location = latLng,
-                    weatherOpen = weatherResp,
-                    environmentalContext = envContext,
-                    locationString = weatherResp?.name ?: "Santa Barbara, US",
-                    isLocationFallback = isFallback,
-                    tempUnit = _tempUnit.value
-                )
-            } catch (e: Exception) {
-                Log.e("Weather", "Failed to initialize real weather data", e)
-                _uiState.value = WeatherUiState.Error("Environment data unavailable.")
             }
-        }
-    }
-
-    /**
-     * Updates a specific setting in the UI state.
-     */
-    private fun updateSetting(key: String, value: String) {
-        viewModelScope.launch {
-            val currentState = _uiState.value
-            if (currentState is WeatherUiState.Success) {
-                val updatedSettings = currentState.settings.toMutableMap().apply {
-                    // Modify your settings as needed
-                    this[key] = listOf(value)
+            is WeatherEvent.UpdateSetting -> {
+                // Handle settings if needed
+            }
+            WeatherEvent.DeleteAllEntries -> {
+                viewModelScope.launch {
+                    repository.deleteAll()
                 }
-                _uiState.value = currentState.copy(settings = updatedSettings)
             }
-        }
-    }
-
-    /**
-     * Deletes all entries in your repository (example usage).
-     */
-    private fun deleteAllEntries() {
-        viewModelScope.launch {
-            repository.deleteAll()
-            Log.d("Weather", "All entries deleted from repository.")
         }
     }
 }

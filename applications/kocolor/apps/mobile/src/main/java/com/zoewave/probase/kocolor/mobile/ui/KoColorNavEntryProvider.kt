@@ -8,6 +8,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.xr.projected.ProjectedContext
 import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import com.zoewave.probase.features.health.nutrition.ui.shared.MealsUiEvent
+import com.zoewave.probase.features.health.nutrition.ui.shared.MealsUiRoute
+import com.zoewave.probase.features.health.nutrition.ui.shared.MealsUiState
+import com.zoewave.probase.features.health.nutrition.ui.shared.MealsViewModel
 import com.zoewave.probase.features.readers.barcode.ui.BarcodeScannerScreen
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
@@ -46,10 +50,6 @@ import com.zoewave.probase.kocolor.features.routines.ui.RoutineDetailUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorScreen
 import com.zoewave.probase.kocolor.features.routines.ui.RoutineEditorUiState
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesUiRoute
-import com.zoewave.probase.features.health.meals.ui.MealsUiEvent
-import com.zoewave.probase.features.health.meals.ui.MealsUiRoute
-import com.zoewave.probase.features.health.meals.ui.MealsUiState
-import com.zoewave.probase.features.health.meals.ui.MealsViewModel
 import com.zoewave.probase.kocolor.features.routines.ui.RoutinesViewModel
 import com.zoewave.probase.kocolor.mobile.core.ui.health.HealthUiRoute
 import com.zoewave.probase.kocolor.mobile.features.color.ui.ColorDetailScreen
@@ -477,7 +477,7 @@ fun koColorNavEntryProvider(
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             val routineId = state.mealsRoutine?.id ?: 0L
             
-            com.zoewave.probase.features.health.nutrition.ui.NutritionUiRoute(
+            com.zoewave.probase.features.health.nutrition.ui.ritual.NutritionUiRoute(
                 onBack = onBack,
                 onNavigateToKnowledgeHub = { stepId -> 
                     onNavigateTo(KoColorRoute.RoutineEditor(routineId, stepId))
