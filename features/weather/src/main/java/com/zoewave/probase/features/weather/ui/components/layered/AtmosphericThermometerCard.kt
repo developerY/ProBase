@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.weather.ui.components.atelier
+package com.zoewave.probase.features.weather.ui.components.layered
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
@@ -35,16 +35,16 @@ import kotlin.math.roundToInt
 
 @Preview(showBackground = true, backgroundColor = 0xFFF9F7F2)
 @Composable
-fun AtelierThermometerCardPreview() {
+fun AtmosphericThermometerCardPreview() {
     MaterialTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            AtelierThermometerCard(temp = 22.0)
+            AtmosphericThermometerCard(temp = 22.0)
         }
     }
 }
 
 @Composable
-fun AtelierThermometerCard(
+fun AtmosphericThermometerCard(
     temp: Double,
     modifier: Modifier = Modifier,
     unit: String = "°C"

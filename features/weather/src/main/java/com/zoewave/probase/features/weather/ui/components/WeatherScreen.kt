@@ -35,7 +35,10 @@ import com.zoewave.probase.core.model.weather.Sys
 import com.zoewave.probase.core.model.weather.WeatherOne
 import com.zoewave.probase.core.model.weather.Wind
 import com.zoewave.probase.features.weather.ui.WeatherEvent
-import com.zoewave.probase.features.weather.ui.components.atelier.*
+import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericHydrometeorCard
+import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericThermometerCard
+import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericUVGaugeCard
+import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericWindCompassCard
 import com.zoewave.probase.features.weather.ui.components.combine.WeatherConditionUnif
 import java.time.LocalDate
 
@@ -200,12 +203,12 @@ fun WeatherScreen(
                     )
                     
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        AtelierThermometerCard(
+                        AtmosphericThermometerCard(
                             temp = temp,
                             unit = unitSuffix,
                             modifier = Modifier.weight(1f)
                         )
-                        AtelierWindCompassCard(
+                        AtmosphericWindCompassCard(
                             degree = weather?.wind?.deg ?: 269,
                             speed = weather?.wind?.speed ?: 5.0,
                             modifier = Modifier.weight(1f)
@@ -214,7 +217,7 @@ fun WeatherScreen(
                 }
 
                 // 3. UV Intensity Gauge
-                AtelierUVGaugeCard(
+                AtmosphericUVGaugeCard(
                     uvIndex = uvIndex,
                     onClick = onNavigateToSunIntelligence
                 )
@@ -230,14 +233,14 @@ fun WeatherScreen(
                     )
 
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        AtelierHydrometeorCard(
+                        AtmosphericHydrometeorCard(
                             label = "Rain Volume",
                             value = weather?.rain?.`1h` ?: 0.0,
                             isRain = true,
                             isActive = isRainActive,
                             modifier = Modifier.weight(1f)
                         )
-                        AtelierHydrometeorCard(
+                        AtmosphericHydrometeorCard(
                             label = "Snow Volume",
                             value = weather?.snow?.`1h` ?: 0.0,
                             isRain = false,

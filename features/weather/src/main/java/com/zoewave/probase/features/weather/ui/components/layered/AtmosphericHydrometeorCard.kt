@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.weather.ui.components.atelier
+package com.zoewave.probase.features.weather.ui.components.layered
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -21,16 +21,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoewave.probase.features.weather.ui.components.backgrounds.Raindrop
-import com.zoewave.probase.features.weather.ui.components.snow.Snowflake
-import kotlin.math.roundToInt
 
 @Preview(showBackground = true, backgroundColor = 0xFFF9F7F2)
 @Composable
-fun AtelierHydrometeorCardRainPreview() {
+fun AtmosphericHydrometeorCardRainPreview() {
     MaterialTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            AtelierHydrometeorCard(
+            AtmosphericHydrometeorCard(
                 label = "Rain Volume",
                 value = 2.5,
                 isRain = true,
@@ -42,10 +39,10 @@ fun AtelierHydrometeorCardRainPreview() {
 
 @Preview(showBackground = true, backgroundColor = 0xFFF9F7F2)
 @Composable
-fun AtelierHydrometeorCardSnowPreview() {
+fun AtmosphericHydrometeorCardSnowPreview() {
     MaterialTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            AtelierHydrometeorCard(
+            AtmosphericHydrometeorCard(
                 label = "Snow Volume",
                 value = 1.2,
                 isRain = false,
@@ -56,7 +53,7 @@ fun AtelierHydrometeorCardSnowPreview() {
 }
 
 @Composable
-fun AtelierHydrometeorCard(
+fun AtmosphericHydrometeorCard(
     label: String,
     value: Double,
     isRain: Boolean,

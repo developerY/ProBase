@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.weather.ui.components.atelier
+package com.zoewave.probase.features.weather.ui.components.layered
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -34,16 +34,16 @@ import androidx.compose.ui.unit.sp
 
 @Preview(showBackground = true, backgroundColor = 0xFFF9F7F2)
 @Composable
-fun AtelierUVGaugeCardPreview() {
+fun AtmosphericUVGaugeCardPreview() {
     MaterialTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            AtelierUVGaugeCard(uvIndex = 6.2)
+            AtmosphericUVGaugeCard(uvIndex = 6.2)
         }
     }
 }
 
 @Composable
-fun AtelierUVGaugeCard(
+fun AtmosphericUVGaugeCard(
     uvIndex: Double,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}

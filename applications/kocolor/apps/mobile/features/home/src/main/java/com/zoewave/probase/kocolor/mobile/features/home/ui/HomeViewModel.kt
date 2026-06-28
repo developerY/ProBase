@@ -1,18 +1,22 @@
 package com.zoewave.probase.kocolor.mobile.features.home.ui
 
-import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.permission.HealthPermission
-import androidx.health.connect.client.records.HydrationRecord
-import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zoewave.probase.core.data.service.health.HealthSessionManager
+import com.zoewave.probase.core.model.ritual.BeautyRoutine
+import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.FashionProfile
+import com.zoewave.probase.core.model.ritual.RoutineTime
+import com.zoewave.probase.features.health.core.SkinInsight
+import com.zoewave.probase.features.health.core.domain.GetActiveRitualUseCase
+import com.zoewave.probase.features.health.core.domain.GetHealthSummaryUseCase
+import com.zoewave.probase.features.health.core.domain.HealthSummary
+import com.zoewave.probase.features.health.core.domain.LogHydrationUseCase
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherMapper
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.features.weather.ui.components.layered.WeatherAdvice
-import com.zoewave.probase.features.health.core.SkinInsight
-import com.zoewave.probase.features.health.core.WellnessCorrelationEngine
 import com.zoewave.probase.kocolor.data.FashionRepository
+import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
@@ -22,11 +26,6 @@ import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
 import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
-import com.zoewave.probase.core.model.ritual.BeautyRoutine
-import com.zoewave.probase.core.model.ritual.ClothingItem
-import com.zoewave.probase.core.model.ritual.CosmeticItem
-import com.zoewave.probase.core.model.ritual.FashionProfile
-import com.zoewave.probase.core.model.ritual.RoutineTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,14 +34,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -93,11 +87,12 @@ class HomeViewModel @Inject constructor(
     private val routineDao: RoutineDao,
     private val cosmeticDao: CosmeticDao,
     private val clothingDao: ClothingDao,
-    private val wellnessEngine: WellnessCorrelationEngine,
-    private val healthSessionManager: HealthSessionManager,
+    private val getHealthSummaryUseCase: GetHealthSummaryUseCase,
+    private val getActiveRitualUseCase: GetActiveRitualUseCase,
+    private val logHydrationUseCase: LogHydrationUseCase,
     private val weatherRepo: com.zoewave.probase.core.network.repository.weather.WeatherRepo,
     private val locationRepository: com.zoewave.probase.core.data.repository.travel.LocationRepository,
-    private val koColorSettings: com.zoewave.probase.kocolor.db.KoColorSettings
+    private val koColorSettings: KoColorSettings
 ) : ViewModel() {
 
     private val _currentDate = MutableStateFlow(Calendar.getInstance().apply {
@@ -107,39 +102,28 @@ class HomeViewModel @Inject constructor(
         set(Calendar.MILLISECOND, 0)
     }.timeInMillis)
 
-    private val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    private val activeRoutineTime = when {
-        hour in 5..9 -> RoutineTime.MORNING
-        hour in 10..19 -> RoutineTime.MEALS
-        else -> RoutineTime.EVENING
-    }
-    
-    private val isDaytime = activeRoutineTime != RoutineTime.EVENING
-
-    private val _beautyTip = MutableStateFlow(
-        if (activeRoutineTime == RoutineTime.MORNING) RoutineDefaults.morningAdvice.random() 
-        else RoutineDefaults.eveningAdvice.random()
-    )
-
+    private val _beautyTip = MutableStateFlow("")
     private val _weather = MutableStateFlow<LayeredWeatherUiState?>(null)
-    private val _headerBackgroundUrl = MutableStateFlow<String?>(null)
 
     init {
         fetchWeather()
+        initializeTip()
         viewModelScope.launch {
-            cosmeticDao.getAllCosmetics().first().let {
-                if (it.isEmpty()) {
-                    initializeDefaultCosmetics()
-                }
+            if (cosmeticDao.getAllCosmetics().first().isEmpty()) {
+                initializeDefaultCosmetics()
             }
         }
         viewModelScope.launch {
-            clothingDao.getAllClothing().first().let {
-                if (it.isEmpty()) {
-                    initializeDefaultClothing()
-                }
+            if (clothingDao.getAllClothing().first().isEmpty()) {
+                initializeDefaultClothing()
             }
         }
+    }
+
+    private fun initializeTip() {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        _beautyTip.value = if (hour in 5..17) RoutineDefaults.morningAdvice.random() 
+        else RoutineDefaults.eveningAdvice.random()
     }
 
     private suspend fun initializeDefaultCosmetics() {
@@ -166,26 +150,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private val healthDataFlow = healthSessionManager.availability.flatMapLatest { availability ->
-        if (availability == HealthConnectClient.SDK_AVAILABLE) {
-            val permissions = setOf(
-                HealthPermission.getReadPermission(SleepSessionRecord::class),
-                HealthPermission.getReadPermission(HydrationRecord::class),
-                HealthPermission.getWritePermission(HydrationRecord::class)
-            )
-            flow {
-                val hasPerms = healthSessionManager.hasAllPermissions(permissions)
-                if (hasPerms) {
-                    emit(hasPerms to getHealthData())
-                } else {
-                    emit(false to Triple(null as Float?, null as String?, 0.0))
-                }
-            }
-        } else {
-            flowOf(false to Triple(null as Float?, null as String?, 0.0))
-        }
-    }
-
     val uiState: StateFlow<HomeUiState> = combine(
         fashionRepository.getProfile(),
         koColorSettings.hydrationGoalFlow,
@@ -195,22 +159,22 @@ class HomeViewModel @Inject constructor(
         clothingDao.getAllClothing(),
         _beautyTip,
         _weather,
-        healthDataFlow,
+        getHealthSummaryUseCase(),
         fashionRepository.getSavedSuggestions()
     ) { array ->
         val profile = array[0] as FashionProfile?
         val hydrationGoal = array[1] as Double
         val tempUnit = array[2] as String
-        val routines = array[3] as List<RoutineEntity>
+        val routineEntities = array[3] as List<RoutineEntity>
         val cosmetics = array[4] as List<CosmeticItemEntity>
         val clothing = array[5] as List<ClothingItemEntity>
         val tip = array[6] as String
         val weather = array[7] as LayeredWeatherUiState?
-        val healthInfo = array[8] as Pair<Boolean, Triple<Float?, String?, Double>>
+        val healthSummary = array[8] as HealthSummary
         val savedSuggestions = array[9] as List<com.zoewave.probase.core.model.ritual.SavedAnalysis>
 
-        val (hasPerms, healthData) = healthInfo
-        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        val routines = routineEntities.map { it.toModel() }
+        val activeRitual = getActiveRitualUseCase(routines)
         
         val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         val clothingByCategory = clothing.groupBy { it.category.name }.mapValues { it.value.size }
@@ -224,39 +188,23 @@ class HomeViewModel @Inject constructor(
             val item = entity.toModel()
             item.estimatedExpiry?.let { expiry -> (expiry - now) in 0..thirtyDaysInMillis } ?: false
         }
-        
-        val insights = wellnessEngine.analyzeTriggers(
-            sleepHours = healthData.first ?: 8f,
-            sugarIntake = "Medium",
-            stressLevel = 5
-        )
 
         val processedWeather = weather?.let {
             if (tempUnit == "FAHRENHEIT") it.copy(temperature = (it.temperature * 9 / 5) + 32) else it
         }
 
-        val morning = routines.find { it.time == RoutineTime.MORNING }?.toModel()
-        val meals = routines.find { it.time == RoutineTime.MEALS }?.toModel()
-        val evening = routines.find { it.time == RoutineTime.EVENING }?.toModel()
-
-        val (currentRoutine, currentTitle, currentDesc) = when {
-            hour in 5..9 -> Triple(morning, "Morning Ritual", "Prepare for a balanced day ahead.")
-            hour in 10..19 -> Triple(meals, "Meals Ritual", "Nourish your metabolism with precise biochemical timing.")
-            else -> Triple(evening, "Evening Ritual", "Every step is an act of self-love.")
-        }
-
         HomeUiState(
             fashionProfile = profile,
-            morningRoutine = morning,
-            mealsRoutine = meals,
-            eveningRoutine = evening,
-            currentRoutine = currentRoutine,
-            currentRoutineTitle = currentTitle,
-            currentRoutineDescription = currentDesc,
+            morningRoutine = routines.find { it.time == RoutineTime.MORNING },
+            mealsRoutine = routines.find { it.time == RoutineTime.MEALS },
+            eveningRoutine = routines.find { it.time == RoutineTime.EVENING },
+            currentRoutine = activeRitual.routine,
+            currentRoutineTitle = activeRitual.title,
+            currentRoutineDescription = activeRitual.description,
             popularCosmetics = cosmetics.sortedByDescending { it.timestamp }.take(5).map { it.toModel() },
             popularClothing = clothing.sortedByDescending { it.timestamp }.take(5).map { it.toModel() },
-            isDaytime = hour in 6..17,
-            isLoadingRoutines = routines.isEmpty(),
+            isDaytime = activeRitual.isDaytime,
+            isLoadingRoutines = routineEntities.isEmpty(),
             beautyTip = tip,
             totalCosmetics = cosmetics.size,
             totalClothing = clothing.size,
@@ -265,11 +213,11 @@ class HomeViewModel @Inject constructor(
             expiringCosmeticsCount = expiringCount,
             cosmeticsByGroup = cosmeticsByGroup,
             clothingByCategory = clothingByCategory,
-            wellnessInsights = insights,
-            lastNightSleepDuration = healthData.second,
-            hydrationLiters = healthData.third,
+            wellnessInsights = healthSummary.insights,
+            lastNightSleepDuration = healthSummary.sleepDurationLabel,
+            hydrationLiters = healthSummary.hydrationLiters,
             hydrationGoalLiters = hydrationGoal,
-            isHealthPermissionGranted = hasPerms,
+            isHealthPermissionGranted = healthSummary.hasPermissions,
             weather = processedWeather,
             locationName = weather?.locationName,
             temperatureUnit = tempUnit,
@@ -282,59 +230,22 @@ class HomeViewModel @Inject constructor(
         initialValue = HomeUiState()
     )
 
-    private suspend fun getHealthData(): Triple<Float?, String?, Double> {
-        val now = Instant.now()
-        val startOfDay = ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS).toInstant()
-
-        val sleepData = try {
-            val sleepSessions = healthSessionManager.readSleepSessions()
-            val lastNight = sleepSessions.firstOrNull()
-            if (lastNight != null) {
-                val hours = (lastNight.duration?.toMinutes() ?: 0L) / 60f
-                val durationStr = "${(hours).toInt()}h ${lastNight.duration?.toMinutes()?.rem(60)}m"
-                hours to durationStr
-            } else {
-                null to null
-            }
-        } catch (e: Exception) {
-            null to null
-        }
-
-        val hydration = try {
-            healthSessionManager.readTotalHydration(startOfDay, now)?.inLiters ?: 0.0
-        } catch (e: Exception) {
-            0.0
-        }
-
-        return Triple(sleepData.first, sleepData.second, hydration)
-    }
-
     private fun fetchWeather() {
         viewModelScope.launch {
             try {
-                // 1. Attempt to get GPS coordinates with a 5s timeout
                 val latLng = kotlinx.coroutines.withTimeoutOrNull(5000) {
                     locationRepository.updateLocation()
                     locationRepository.currentLocation.first { it != null }
                 }
                 
                 if (latLng != null) {
-                    // 2. Fetch weather by real coords
                     val response = weatherRepo.openCurrentWeatherByCoords(latLng.latitude, latLng.longitude)
-                    
-                    // 3. Get environmental context (UV, humidity)
                     val envContext = weatherRepo.getEnvironmentalContext(latLng.latitude, latLng.longitude)
-
                     updateWeatherState(response, envContext, isFallback = false)
                 } else {
-                    // 4. Fallback to Santa Barbara if GPS fails or times out
-                    android.util.Log.d("HomeViewModel", "GPS timeout/unavailable. Falling back to Santa Barbara.")
                     val fallbackCity = "Santa Barbara, US"
                     val response = weatherRepo.openCurrentWeatherByCity(fallbackCity)
-                    
-                    val envContext = response?.coord?.let { 
-                        weatherRepo.getEnvironmentalContext(it.lat, it.lon)
-                    }
+                    val envContext = response?.coord?.let { weatherRepo.getEnvironmentalContext(it.lat, it.lon) }
                     updateWeatherState(response, envContext, isFallback = true)
                 }
             } catch (e: Exception) {
@@ -350,8 +261,6 @@ class HomeViewModel @Inject constructor(
     ) {
         if (response != null && envContext != null) {
             _weather.value = LayeredWeatherMapper.mapToUiState(response, envContext, isFallback)
-
-            // Environmental Trigger Logic
             WeatherAdvice.getBeautyAdvice(envContext)?.let { advice ->
                 _beautyTip.value = advice
             }
@@ -391,7 +300,6 @@ class HomeViewModel @Inject constructor(
     private fun patchRoutineMetadata(entities: List<RoutineEntity>) {
         viewModelScope.launch {
             entities.forEach { entity ->
-                // Identify mislabeled meals routines: 5 steps but labeled as Evening
                 if (entity.time == RoutineTime.EVENING && entity.steps.size == 5) {
                     routineDao.updateRoutine(entity.copy(
                         title = "Meals Routine",
@@ -406,12 +314,13 @@ class HomeViewModel @Inject constructor(
         when (event) {
             is HomeEvent.ToggleStep -> toggleStep(event.routine, event.stepId)
             HomeEvent.RefreshTip -> {
-                _beautyTip.value = if (isDaytime) RoutineDefaults.morningAdvice.random() 
+                val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+                _beautyTip.value = if (hour in 5..17) RoutineDefaults.morningAdvice.random() 
                 else RoutineDefaults.eveningAdvice.random()
             }
             is HomeEvent.LogHydration -> {
                 viewModelScope.launch {
-                    healthSessionManager.insertHydration(event.volumeLiters)
+                    logHydrationUseCase(event.volumeLiters)
                 }
             }
             HomeEvent.RefreshWeather -> fetchWeather()

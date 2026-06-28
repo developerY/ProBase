@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.weather.ui.components.atelier
+package com.zoewave.probase.features.weather.ui.components.layered
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,17 +28,16 @@ import androidx.compose.ui.unit.dp
 
 @Preview(showBackground = true, backgroundColor = 0xFFF9F7F2)
 @Composable
-fun AtelierWindCompassCardPreview() {
+fun AtmosphericWindCompassCardPreview() {
     MaterialTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            AtelierWindCompassCard(degree = 240, speed = 3.5)
+            AtmosphericWindCompassCard(degree = 240, speed = 3.5)
         }
     }
 }
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
-fun AtelierWindCompassCard(
+fun AtmosphericWindCompassCard(
     degree: Int,
     speed: Double,
     modifier: Modifier = Modifier
