@@ -50,8 +50,7 @@ data class ClothingItem(
     val koColorGroup: String? = null,     // Semantic group
 
     // --- Usage & Performance ---
-    val usageCount: Int = 0,
-    val isPlaceholder: Boolean = false
+    val usageCount: Int = 0
 ) {
     /** Cost per single wear. */
     val costPerUse: Double?

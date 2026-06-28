@@ -391,13 +391,8 @@ fun RecentClothingCard(uiState: ClothingItem, modifier: Modifier = Modifier, onE
     val item = uiState
     val onClick = { navTo(KoColorRoute.WardrobeDetail(item.id)) }
     Card(
-        modifier = modifier
-            .width(220.dp)
-            .aspectRatio(0.8f)
-            .clickable(enabled = !item.isPlaceholder) { onClick() }
-            .alpha(if (item.isPlaceholder) 0.5f else 1.0f),
-        shape = RoundedCornerShape(28.dp),
-        colors = if (item.isPlaceholder) CardDefaults.cardColors(containerColor = Color.LightGray) else CardDefaults.cardColors()
+        modifier = modifier.width(220.dp).aspectRatio(0.8f).clickable { onClick() },
+        shape = RoundedCornerShape(28.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (item.imageUrl != null) {

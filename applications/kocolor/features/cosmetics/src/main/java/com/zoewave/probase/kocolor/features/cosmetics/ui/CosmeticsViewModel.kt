@@ -6,19 +6,30 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
-import com.zoewave.probase.kocolor.data.mapper.toEntity
-import com.zoewave.probase.kocolor.data.mapper.toModel
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.Finish
+import com.zoewave.probase.core.model.ritual.Formulation
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
-import com.zoewave.probase.core.model.ritual.*
-import com.zoewave.probase.kocolor.features.fda.data.repository.FdaRepository
-import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 import com.zoewave.probase.kocolor.features.cosmetics.R
+import com.zoewave.probase.kocolor.features.fda.data.repository.FdaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -159,18 +170,9 @@ class CosmeticsViewModel @Inject constructor(
         val scanFailed = array[9] as Boolean
         val uvVal = array[10] as Double
 
-        val displayedItems = if (models.isEmpty()) {
-            listOf(
-                CosmeticItem(name = "Serum Placeholder", brand = "Placeholder", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.SERUM, isPlaceholder = true),
-                CosmeticItem(name = "Foundation Placeholder", brand = "Placeholder", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, isPlaceholder = true),
-                CosmeticItem(name = "Blush Placeholder", brand = "Placeholder", macroCategory = MacroCategory.DIMENSION, microCategory = MicroCategory.BLUSH, isPlaceholder = true),
-                CosmeticItem(name = "Lipstick Placeholder", brand = "Placeholder", macroCategory = MacroCategory.LIPS, microCategory = MicroCategory.LIPSTICK, isPlaceholder = true)
-            )
-        } else models
-
-        val groupStats = displayedItems.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
+        val groupStats = models.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         
-        val categoryMetadata = displayedItems.groupBy { it.macroCategory.displayName }.mapValues { (name, items) ->
+        val categoryMetadata = models.groupBy { it.macroCategory.displayName }.mapValues { (name, items) ->
             val macro = items.firstOrNull()?.macroCategory
             val representativeItem = items.filter { it.imageUrl != null }.maxByOrNull { it.usageCount } ?: items.maxByOrNull { it.usageCount }
             val brands = items.map { it.brand }.groupBy { it }.mapValues { it.value.size }
@@ -179,8 +181,8 @@ class CosmeticsViewModel @Inject constructor(
             val averageFill = if (fillLevels.isEmpty()) null else fillLevels.average()
 
             CategoryMetadata(
-                itemCount = if (models.isEmpty()) 1 else items.size,
-                totalValue = if (models.isEmpty()) 0.0 else items.sumOf { it.price ?: 0.0 },
+                itemCount = items.size,
+                totalValue = items.sumOf { it.price ?: 0.0 },
                 representativeImageUrl = representativeItem?.imageUrl,
                 representativeColorHex = representativeItem?.colorHex,
                 leadingBrand = leadingBrand,
@@ -196,7 +198,7 @@ class CosmeticsViewModel @Inject constructor(
             } ?: false
         }
 
-        val filtered = displayedItems.filter {
+        val filtered = models.filter {
             it.name.contains(query, ignoreCase = true) || 
             it.brand.contains(query, ignoreCase = true) ||
             it.microCategory.displayName.contains(query, ignoreCase = true) ||
@@ -211,7 +213,7 @@ class CosmeticsViewModel @Inject constructor(
         }
 
         CosmeticsUiState(
-            items = displayedItems,
+            items = models,
             filteredItems = filtered,
             isLoading = false,
             capturedImageUri = draft.imageUrl,
@@ -220,7 +222,7 @@ class CosmeticsViewModel @Inject constructor(
             draftItem = draft,
             searchQuery = query,
             sortOption = sort,
-            totalCosmetics = if (models.isEmpty()) 4 else models.size,
+            totalCosmetics = models.size,
             expiringCosmeticsCount = expiringCount,
             cosmeticsByGroup = groupStats,
             categoriesMetadata = categoryMetadata,

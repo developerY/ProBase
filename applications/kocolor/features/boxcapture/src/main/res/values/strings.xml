@@ -7,6 +7,7 @@
     <string name="applications_kocolor_features_boxcapture_close">Close</string>
     <string name="applications_kocolor_features_boxcapture_tap_to_capture_box">TAP TO CAPTURE BOX</string>
     <string name="applications_kocolor_features_boxcapture_tap_to_capture_product">TAP TO CAPTURE PRODUCT</string>
+    <string name="applications_kocolor_features_boxcapture_tap_to_capture_ingredients">CAPTURE INGREDIENTS</string>
     <string name="applications_kocolor_features_boxcapture_gemini_analyzing">GEMINI ANALYZING</string>
     <string name="applications_kocolor_features_boxcapture_local_analyzing">LOCAL AI ANALYZING</string>
     <string name="applications_kocolor_features_boxcapture_offline_mode_desc">OFFLINE MODE: Accuracy may be lower. You can refine details after extraction.</string>
