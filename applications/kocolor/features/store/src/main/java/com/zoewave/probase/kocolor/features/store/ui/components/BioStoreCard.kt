@@ -59,7 +59,7 @@ fun BioStoreCard(
         Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
             // Background Image
             AsyncImage(
-                model = uiState.backgroundModel ?: R.drawable.kocolor_store_front,
+                model = uiState.backgroundModel ?: R.drawable.applications_kocolor_features_store_kocolor_store_front,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
@@ -78,14 +78,14 @@ fun BioStoreCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.store_boutique_subtitle),
+                    text = stringResource(R.string.applications_kocolor_features_store_boutique_subtitle),
                     style = MaterialTheme.typography.labelSmall,
                     letterSpacing = 2.sp,
                     color = Color.Gray,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = stringResource(R.string.store_boutique_title),
+                    text = stringResource(R.string.applications_kocolor_features_store_boutique_title),
                     style = MaterialTheme.typography.headlineMedium,
                     fontFamily = FontFamily.Serif,
                     fontWeight = FontWeight.Bold,
@@ -96,7 +96,7 @@ fun BioStoreCard(
                     Column {
                         Spacer(Modifier.height(12.dp))
                         Text(
-                            text = stringResource(R.string.store_boutique_description),
+                            text = stringResource(R.string.applications_kocolor_features_store_boutique_description),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 lineHeight = 22.sp,
                                 letterSpacing = 0.2.sp
@@ -116,7 +116,7 @@ fun BioStoreCard(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    text = stringResource(R.string.store_enter_atelier),
+                                    text = stringResource(R.string.applications_kocolor_features_store_enter_atelier),
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Black,
                                         letterSpacing = 1.sp

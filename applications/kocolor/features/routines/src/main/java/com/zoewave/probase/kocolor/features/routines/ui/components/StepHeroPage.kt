@@ -93,9 +93,9 @@ fun StepHeroPage(
 
     // Default hero image
     val heroImageUrl = when (routineTime) {
-        RoutineTime.MORNING -> R.drawable.morning_routine_bg
-        RoutineTime.MEALS -> R.drawable.meals_ritual_bg
-        else -> R.drawable.night_routine_bg
+        RoutineTime.MORNING -> R.drawable.applications_kocolor_features_routines_morning_routine_bg
+        RoutineTime.MEALS -> R.drawable.applications_kocolor_features_routines_meals_ritual_bg
+        else -> R.drawable.applications_kocolor_features_routines_night_routine_bg
     }
 
     if (showJournalDialog) {
