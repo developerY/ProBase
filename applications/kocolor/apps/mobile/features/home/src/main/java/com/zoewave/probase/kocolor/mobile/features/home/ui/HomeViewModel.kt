@@ -4,12 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.weather.AtmosphericRepository
 import com.zoewave.probase.core.model.ritual.BeautyRoutine
-import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.FashionProfile
-import com.zoewave.probase.core.model.ritual.MacroCategory
-import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.core.model.ritual.RoutineTime
 import com.zoewave.probase.core.model.weather.AtmosphericState
 import com.zoewave.probase.features.health.core.SkinInsight
@@ -17,7 +14,6 @@ import com.zoewave.probase.features.health.core.domain.GetActiveRitualUseCase
 import com.zoewave.probase.features.health.core.domain.GetHealthSummaryUseCase
 import com.zoewave.probase.features.health.core.domain.HealthSummary
 import com.zoewave.probase.features.health.core.domain.LogHydrationUseCase
-import com.zoewave.probase.kocolor.features.store.ui.StoreUiState
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherMapper
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
 import com.zoewave.probase.kocolor.data.FashionRepository
@@ -29,13 +25,13 @@ import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
 import com.zoewave.probase.kocolor.features.routines.data.RoutineDefaults
+import com.zoewave.probase.kocolor.features.store.ui.StoreUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -165,26 +161,18 @@ class HomeViewModel @Inject constructor(
         val weather = atmosphericState.weather?.let {
             LayeredWeatherMapper.mapToUiState(it, atmosphericState.environmentalContext!!, atmosphericState.isFallback)
         }
-        
-        val popularCosmetics = if (cosmetics.isEmpty()) {
-            listOf(
-                CosmeticItem(name = "Serum Placeholder", brand = "Sample", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.SERUM, isPlaceholder = true),
-                CosmeticItem(name = "Cream Placeholder", brand = "Sample", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.MOISTURIZER, isPlaceholder = true),
-                CosmeticItem(name = "SPF Placeholder", brand = "Sample", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.SPF, isPlaceholder = true)
-            )
-        } else {
-            cosmetics.sortedByDescending { it.timestamp }.take(5).map { it.toModel() }
-        }
 
-        val popularClothing = if (clothing.isEmpty()) {
-            listOf(
-                ClothingItem(name = "T-Shirt Placeholder", brand = "Sample", category = ClothingCategory.TOPS, isPlaceholder = true),
-                ClothingItem(name = "Jeans Placeholder", brand = "Sample", category = ClothingCategory.BOTTOMS, isPlaceholder = true),
-                ClothingItem(name = "Jacket Placeholder", brand = "Sample", category = ClothingCategory.TOPS, isPlaceholder = true)
-            )
-        } else {
-            clothing.sortedByDescending { it.timestamp }.take(5).map { it.toModel() }
-        }
+        // cosmetics.sortedByDescending { it.timestamp }.take(5).map { it.toModel() }
+        val popularCosmetics = cosmetics
+            .sortedByDescending { it.timestamp }
+            .take(5)
+            .map { it.toModel()}
+
+
+        val popularClothing = clothing
+            .sortedByDescending { it.timestamp }
+            .take(5)
+            .map { it.toModel() }
 
         val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         val clothingByCategory = clothing.groupBy { it.category.name }.mapValues { it.value.size }
@@ -216,8 +204,8 @@ class HomeViewModel @Inject constructor(
             isDaytime = activeRitual.isDaytime,
             isLoadingRoutines = routineEntities.isEmpty(),
             beautyTip = tip,
-            totalCosmetics = if (cosmetics.isEmpty()) 3 else cosmetics.size,
-            totalClothing = if (clothing.isEmpty()) 3 else clothing.size,
+            totalCosmetics = cosmetics.size,
+            totalClothing = clothing.size,
             totalVanityValue = totalVanityValue,
             totalWardrobeValue = totalWardrobeValue,
             expiringCosmeticsCount = expiringCount,

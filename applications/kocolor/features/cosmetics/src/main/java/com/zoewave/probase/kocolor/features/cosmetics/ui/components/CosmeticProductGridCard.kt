@@ -30,13 +30,8 @@ fun CosmeticProductGridCard(
     val item = uiState
     val onClick = { navTo(KoColorRoute.CosmeticDetail(item.id)) }
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(0.75f)
-            .clickable(enabled = !item.isPlaceholder) { onClick() }
-            .alpha(if (item.isPlaceholder) 0.5f else 1.0f),
-        shape = RoundedCornerShape(24.dp),
-        colors = if (item.isPlaceholder) CardDefaults.cardColors(containerColor = Color.LightGray) else CardDefaults.cardColors()
+        modifier = Modifier.fillMaxWidth().aspectRatio(0.75f).clickable { onClick() },
+        shape = RoundedCornerShape(24.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (item.imageUrl != null) {
