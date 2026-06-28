@@ -166,6 +166,26 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private val healthDataFlow = healthSessionManager.availability.flatMapLatest { availability ->
+        if (availability == HealthConnectClient.SDK_AVAILABLE) {
+            val permissions = setOf(
+                HealthPermission.getReadPermission(SleepSessionRecord::class),
+                HealthPermission.getReadPermission(HydrationRecord::class),
+                HealthPermission.getWritePermission(HydrationRecord::class)
+            )
+            flow {
+                val hasPerms = healthSessionManager.hasAllPermissions(permissions)
+                if (hasPerms) {
+                    emit(hasPerms to getHealthData())
+                } else {
+                    emit(false to Triple(null as Float?, null as String?, 0.0))
+                }
+            }
+        } else {
+            flowOf(false to Triple(null as Float?, null as String?, 0.0))
+        }
+    }
+
     val uiState: StateFlow<HomeUiState> = combine(
         fashionRepository.getProfile(),
         koColorSettings.hydrationGoalFlow,
@@ -175,26 +195,7 @@ class HomeViewModel @Inject constructor(
         clothingDao.getAllClothing(),
         _beautyTip,
         _weather,
-        _headerBackgroundUrl,
-        healthSessionManager.availability.flatMapLatest { availability ->
-            if (availability == HealthConnectClient.SDK_AVAILABLE) {
-                flow {
-                    val permissions = setOf(
-                        HealthPermission.getReadPermission(SleepSessionRecord::class),
-                        HealthPermission.getReadPermission(HydrationRecord::class),
-                        HealthPermission.getWritePermission(HydrationRecord::class)
-                    )
-                    val hasPerms = healthSessionManager.hasAllPermissions(permissions)
-                    if (hasPerms) {
-                        emit(hasPerms to getHealthData())
-                    } else {
-                        emit(false to Triple(null as Float?, null as String?, 0.0))
-                    }
-                }
-            } else {
-                flowOf(false to Triple(null as Float?, null as String?, 0.0))
-            }
-        },
+        healthDataFlow,
         fashionRepository.getSavedSuggestions()
     ) { array ->
         val profile = array[0] as FashionProfile?
@@ -205,37 +206,33 @@ class HomeViewModel @Inject constructor(
         val clothing = array[5] as List<ClothingItemEntity>
         val tip = array[6] as String
         val weather = array[7] as LayeredWeatherUiState?
-        val headerBg = array[8] as String?
-        val healthInfo = array[9] as Pair<Boolean, Triple<Float?, String?, Double>>
-        val (hasPerms, healthData) = healthInfo
-        val savedSuggestions = array[10] as List<com.zoewave.probase.core.model.ritual.SavedAnalysis>
+        val healthInfo = array[8] as Pair<Boolean, Triple<Float?, String?, Double>>
+        val savedSuggestions = array[9] as List<com.zoewave.probase.core.model.ritual.SavedAnalysis>
 
+        val (hasPerms, healthData) = healthInfo
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        
         val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         val clothingByCategory = clothing.groupBy { it.category.name }.mapValues { it.value.size }
 
         val totalVanityValue = cosmetics.sumOf { it.price ?: 0.0 }
         val totalWardrobeValue = clothing.sumOf { it.price ?: 0.0 }
 
-        val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
         val now = System.currentTimeMillis()
+        val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
         val expiringCount = cosmetics.count { entity ->
             val item = entity.toModel()
-            item.estimatedExpiry?.let { expiry ->
-                (expiry - now) in 0..thirtyDaysInMillis
-            } ?: false
+            item.estimatedExpiry?.let { expiry -> (expiry - now) in 0..thirtyDaysInMillis } ?: false
         }
         
         val insights = wellnessEngine.analyzeTriggers(
             sleepHours = healthData.first ?: 8f,
-            sugarIntake = "Medium", // Placeholder for now
-            stressLevel = 5 // Placeholder for now
+            sugarIntake = "Medium",
+            stressLevel = 5
         )
 
         val processedWeather = weather?.let {
-            if (tempUnit == "FAHRENHEIT") {
-                it.copy(temperature = (it.temperature * 9 / 5) + 32)
-            } else it
+            if (tempUnit == "FAHRENHEIT") it.copy(temperature = (it.temperature * 9 / 5) + 32) else it
         }
 
         val morning = routines.find { it.time == RoutineTime.MORNING }?.toModel()
@@ -276,7 +273,6 @@ class HomeViewModel @Inject constructor(
             weather = processedWeather,
             locationName = weather?.locationName,
             temperatureUnit = tempUnit,
-            headerBackgroundUrl = headerBg,
             savedSuggestions = savedSuggestions,
             isLocationFallback = weather?.locationName == "Location could not be found"
         )

@@ -32,6 +32,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.zoewave.probase.features.health.core.ui.components.BioMarkersCard
 import com.zoewave.probase.features.health.core.ui.components.BioMarkersUiState
+import com.zoewave.probase.features.health.core.ui.components.BioRoutineSummaryCard
+import com.zoewave.probase.features.health.core.ui.components.BioRoutineSummaryUiState
 import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericHeaderCard
 import com.zoewave.probase.features.weather.ui.components.layered.AtmosphericHeaderUiState
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
@@ -40,11 +42,10 @@ import com.zoewave.probase.kocolor.mobile.features.home.ui.components.BoutiqueCa
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.CollectionHubCard
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.LuxuryBrandLogo
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.QuickActions
-import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryCard
-import com.zoewave.probase.kocolor.mobile.features.home.ui.components.RoutineSummaryUiState
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.SectionTitle
 import com.zoewave.probase.kocolor.mobile.features.home.ui.components.SectionTitleUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
+import com.zoewave.probase.kocolor.features.routines.R as RoutinesR
 
 @Preview(showBackground = true)
 @Composable
@@ -171,15 +172,21 @@ fun HomeScreen(
                             onEvent = {}, 
                             navTo = {}
                         )
-                        RoutineSummaryCard(
-                            uiState = RoutineSummaryUiState(
-                                uiState.currentRoutine, 
-                                uiState.isDaytime, 
-                                uiState.currentRoutineTitle,
-                                uiState.currentRoutineDescription
+                        BioRoutineSummaryCard(
+                            uiState = BioRoutineSummaryUiState(
+                                title = uiState.currentRoutineTitle,
+                                description = uiState.currentRoutineDescription,
+                                completedCount = uiState.currentRoutine.steps.count { it.isCompleted },
+                                totalCount = uiState.currentRoutine.steps.size,
+                                isDaytime = uiState.isDaytime,
+                                backgroundModel = when (uiState.currentRoutine.time) {
+                                    com.zoewave.probase.core.model.ritual.RoutineTime.MORNING -> RoutinesR.drawable.morning_routine_bg
+                                    com.zoewave.probase.core.model.ritual.RoutineTime.MEALS -> RoutinesR.drawable.meals_ritual_bg
+                                    else -> RoutinesR.drawable.night_routine_bg
+                                }
                             ),
-                            onEvent = {},
-                            navTo = navTo
+                            onClick = { navTo(KoColorRoute.RoutineDetail(uiState.currentRoutine.id)) },
+                            onLayersClick = { navTo(KoColorRoute.Routines) }
                         )
                     }
                 }

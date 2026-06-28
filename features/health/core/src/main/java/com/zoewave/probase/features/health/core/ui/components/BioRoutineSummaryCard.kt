@@ -1,4 +1,4 @@
-package com.zoewave.probase.kocolor.mobile.features.home.ui.components
+package com.zoewave.probase.features.health.core.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,74 +31,46 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.core.model.ritual.BeautyRoutine
-import com.zoewave.probase.core.model.ritual.RoutineTime
-import com.zoewave.probase.kocolor.model.KoColorRoute
-import com.zoewave.probase.kocolor.features.routines.R as RoutinesR
 
-@Preview(showBackground = true)
-@Composable
-private fun RoutineSummaryCardPreview() {
-    MaterialTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            RoutineSummaryCard(
-                uiState = RoutineSummaryUiState(
-                    routine = BeautyRoutine(
-                        title = "Morning Ritual",
-                        time = RoutineTime.MORNING,
-                        steps = emptyList(),
-                        date = 0L
-                    ),
-                    isDaytime = true,
-                    displayTitle = "Morning Ritual",
-                    displayDescription = "Prepare for a balanced day ahead."
-                ),
-                onEvent = {},
-                navTo = {}
-            )
-        }
-    }
-}
-
-data class RoutineSummaryUiState(
-    val routine: BeautyRoutine,
-    val isDaytime: Boolean,
-    val displayTitle: String,
-    val displayDescription: String
+data class BioRoutineSummaryUiState(
+    val title: String,
+    val description: String,
+    val completedCount: Int,
+    val totalCount: Int,
+    val isDaytime: Boolean = true,
+    val backgroundModel: Any? = null
 )
 
 @Composable
-fun RoutineSummaryCard(
-    uiState: RoutineSummaryUiState,
-    modifier: Modifier = Modifier,
-    onEvent: (Unit) -> Unit = {},
-    navTo: (KoColorRoute) -> Unit
+fun BioRoutineSummaryCard(
+    uiState: BioRoutineSummaryUiState,
+    onClick: () -> Unit,
+    onLayersClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val routine = uiState.routine
-    val isDaytime = uiState.isDaytime
-    val displayTitle = uiState.displayTitle
-    val displayDescription = uiState.displayDescription
-    val completedCount = routine.steps.count { it.isCompleted }
-    val totalCount = routine.steps.size
-    val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
-    val cardColor = if (isDaytime) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) else MaterialTheme.colorScheme.surfaceVariant
+    val progress = if (uiState.totalCount > 0) uiState.completedCount.toFloat() / uiState.totalCount else 0f
+    val cardColor = if (uiState.isDaytime) {
+        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
 
     Surface(
-        modifier = modifier.fillMaxWidth().clickable { navTo(KoColorRoute.RoutineDetail(routine.id)) },
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(32.dp),
         color = cardColor
     ) {
         Box(modifier = Modifier.fillMaxWidth().height(260.dp)) {
-            AsyncImage(
-                model = when (routine.time) {
-                    RoutineTime.MORNING -> RoutinesR.drawable.morning_routine_bg
-                    RoutineTime.MEALS -> RoutinesR.drawable.meals_ritual_bg
-                    else -> RoutinesR.drawable.night_routine_bg
-                },
-                contentDescription = null,
-                modifier = Modifier.matchParentSize().alpha(0.35f),
-                contentScale = ContentScale.Crop
-            )
+            if (uiState.backgroundModel != null) {
+                AsyncImage(
+                    model = uiState.backgroundModel,
+                    contentDescription = null,
+                    modifier = Modifier.matchParentSize().alpha(0.35f),
+                    contentScale = ContentScale.Crop
+                )
+            }
             
             Column(
                 modifier = Modifier.padding(28.dp).fillMaxSize(),
@@ -110,7 +82,7 @@ fun RoutineSummaryCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = displayTitle,
+                        text = uiState.title,
                         style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
@@ -120,12 +92,12 @@ fun RoutineSummaryCard(
                     Surface(
                         color = Color.Black.copy(alpha = 0.1f),
                         shape = CircleShape,
-                        onClick = { navTo(KoColorRoute.Routines) }
+                        onClick = onLayersClick
                     ) {
                         Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = Icons.Rounded.Layers,
-                                contentDescription = "General Rituals",
+                                contentDescription = "Manage Rituals",
                                 tint = Color.Black.copy(alpha = 0.7f),
                                 modifier = Modifier.size(24.dp)
                             )
@@ -168,7 +140,7 @@ fun RoutineSummaryCard(
                         )
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "$completedCount/$totalCount",
+                                text = "${uiState.completedCount}/${uiState.totalCount}",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Black,
                                 color = Color.Black
@@ -185,18 +157,38 @@ fun RoutineSummaryCard(
 
                 Column {
                     Text(
-                        text = "15 mins duration",
+                        text = "Ritual Active",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
                     Text(
-                        text = displayDescription,
+                        text = uiState.description,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Black.copy(alpha = 0.7f)
                     )
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BioRoutineSummaryCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            BioRoutineSummaryCard(
+                uiState = BioRoutineSummaryUiState(
+                    title = "Morning Ritual",
+                    description = "Prepare for a balanced day ahead.",
+                    completedCount = 3,
+                    totalCount = 5,
+                    isDaytime = true
+                ),
+                onClick = {},
+                onLayersClick = {}
+            )
         }
     }
 }

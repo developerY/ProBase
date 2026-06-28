@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:ui"))
     implementation(project(":features:health:cgm"))
+    implementation(project(":features:health:hydration"))
 
     // --- 2. Core Android ---
     implementation(libs.androidx.core.ktx)
@@ -29,6 +30,7 @@ dependencies {
     // Note: 'library.compose' plugin handles the BOM and basic tooling.
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.coil.compose)
 
     // Legacy Material (Only keep if you use Theme.MaterialComponents or XML)
     // implementation(libs.material.legacy)

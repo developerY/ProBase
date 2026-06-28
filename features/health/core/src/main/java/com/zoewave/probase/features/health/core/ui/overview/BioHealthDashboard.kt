@@ -68,7 +68,7 @@ fun BioHealthDashboard(
     modifier: Modifier = Modifier,
 ) {
     val today = LocalDate.now().toString()
-    val hydration = uiState.weeklyHydration[today] ?: 0.0
+    val hydrationVolume = uiState.weeklyHydration[today] ?: 0.0
     val hydrationGoal = uiState.hydrationGoal
     val lastSleep = uiState.sleepSessions.firstOrNull()
     var showTracker by remember { mutableStateOf(false) }
@@ -127,7 +127,7 @@ fun BioHealthDashboard(
                     SummaryMetricItem(
                         icon = Icons.Rounded.WaterDrop,
                         label = "Hydration",
-                        value = "%.1fL".format(hydration),
+                        value = "%.1fL".format(hydrationVolume),
                         color = Color(0xFF2196F3)
                     )
                     VerticalDivider(modifier = Modifier.height(48.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
@@ -146,7 +146,7 @@ fun BioHealthDashboard(
         }
 
         HydrationWaterDropCard(
-            uiState = HydrationWaterDropUiState(hydration, hydrationGoal),
+            uiState = HydrationWaterDropUiState(hydrationVolume, hydrationGoal),
             onEvent = { onNavigateToHydration() },
             navTo = {}
         )
@@ -178,7 +178,7 @@ fun BioHealthDashboard(
             ) {
                 Text(
                     text = "ELEMENT TRACKER",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 2.sp,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
