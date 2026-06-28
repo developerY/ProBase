@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
-import com.zoewave.probase.kocolor.db.data.ClothingDefaults
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -89,40 +88,25 @@ class WardrobeViewModel @Inject constructor(
                 }
             }
             .launchIn(viewModelScope)
-
-        // 3. Defaults check
-        viewModelScope.launch {
-            wardrobeRepository.getAllClothing().first().let {
-                if (it.isEmpty()) {
-                    initializeDefaultClothing()
-                }
-            }
-        }
-    }
-
-    private suspend fun initializeDefaultClothing() {
-        for (itemEntity in ClothingDefaults.getDefaultClothing()) {
-            // Mapping default entities to models for repository save
-            val item = ClothingItem(
-                name = itemEntity.name,
-                brand = itemEntity.brand,
-                category = itemEntity.category,
-                colorHex = itemEntity.colorHex,
-                imageUrl = itemEntity.imageUrl,
-                price = itemEntity.price
-            )
-            wardrobeRepository.saveClothingItem(item)
-        }
     }
 
     val uiState: StateFlow<WardrobeUiState> = combine(
         wardrobeRepository.getAllClothing(),
         _draftItem
     ) { models, draft ->
+        val displayedItems = if (models.isEmpty()) {
+            listOf(
+                ClothingItem(name = "Archival Blazer", brand = "Placeholder", category = ClothingCategory.TOPS, isPlaceholder = true),
+                ClothingItem(name = "Structural Trouser", brand = "Placeholder", category = ClothingCategory.BOTTOMS, isPlaceholder = true),
+                ClothingItem(name = "Performance Loafer", brand = "Placeholder", category = ClothingCategory.SHOES, isPlaceholder = true),
+                ClothingItem(name = "Curated Accessory", brand = "Placeholder", category = ClothingCategory.ACCESSORIES, isPlaceholder = true)
+            )
+        } else models
+
         val totalInvestment = models.sumOf { it.price ?: 0.0 }
-        val itemsByCategory = models.groupBy { it.category.name }.mapValues { it.value.size }
+        val itemsByCategory = displayedItems.groupBy { it.category.name }.mapValues { it.value.size }
         
-        val categoryMetadata = models.groupBy { it.category.name }.mapValues { (name, items) ->
+        val categoryMetadata = displayedItems.groupBy { it.category.name }.mapValues { (name, items) ->
             val cat = items.firstOrNull()?.category
             val representativeItem = items.filter { it.imageUrl != null }.maxByOrNull { it.timestamp } ?: items.maxByOrNull { it.timestamp }
             val brands = items.mapNotNull { it.brand }.groupBy { it }.mapValues { it.value.size }
@@ -131,8 +115,8 @@ class WardrobeViewModel @Inject constructor(
             val averageUsage = if (usages.isEmpty()) null else usages.average()
 
             CategoryMetadata(
-                itemCount = items.size,
-                totalValue = items.sumOf { it.price ?: 0.0 },
+                itemCount = if (models.isEmpty()) 1 else items.size,
+                totalValue = if (models.isEmpty()) 0.0 else items.sumOf { it.price ?: 0.0 },
                 representativeImageUrl = representativeItem?.imageUrl,
                 representativeColorHex = representativeItem?.colorHex,
                 leadingBrand = leadingBrand,
@@ -142,11 +126,11 @@ class WardrobeViewModel @Inject constructor(
         }
 
         WardrobeUiState(
-            items = models,
+            items = displayedItems,
             isLoading = false,
             draftItem = draft,
             totalInvestment = totalInvestment,
-            totalItems = models.size,
+            totalItems = if (models.isEmpty()) 4 else models.size,
             itemsByCategory = itemsByCategory,
             categoriesMetadata = categoryMetadata
         )

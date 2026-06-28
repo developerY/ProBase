@@ -191,24 +191,22 @@ fun HomeScreen(
                 }
             }
 
-            if (uiState.totalCosmetics > 0 || uiState.totalClothing > 0) {
-                item {
-                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        SectionTitle(
-                            uiState = SectionTitleUiState(
-                                stringResource(R.string.applications_kocolor_apps_mobile_features_home_the_hub), 
-                                stringResource(R.string.applications_kocolor_apps_mobile_features_home_unified_archive)
-                            ), 
-                            onEvent = {}, 
-                            navTo = {}
-                        )
-                        CollectionHubCard(
-                            uiState = uiState, 
-                            modifier = Modifier,
-                            onEvent = {}, 
-                            navTo = navTo
-                        )
-                    }
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    SectionTitle(
+                        uiState = SectionTitleUiState(
+                            stringResource(R.string.applications_kocolor_apps_mobile_features_home_the_hub), 
+                            stringResource(R.string.applications_kocolor_apps_mobile_features_home_unified_archive)
+                        ), 
+                        onEvent = {}, 
+                        navTo = {}
+                    )
+                    CollectionHubCard(
+                        uiState = uiState, 
+                        modifier = Modifier,
+                        onEvent = {}, 
+                        navTo = navTo
+                    )
                 }
             }
 

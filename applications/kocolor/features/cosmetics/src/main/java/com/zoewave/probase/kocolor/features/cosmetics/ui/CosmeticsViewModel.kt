@@ -10,7 +10,6 @@ import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
-import com.zoewave.probase.kocolor.db.data.CosmeticDefaults
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.kocolor.features.fda.data.repository.FdaRepository
@@ -104,13 +103,6 @@ class CosmeticsViewModel @Inject constructor(
 
     init {
         fetchWeather()
-        viewModelScope.launch {
-            cosmeticRepository.getAllCosmetics().first().let {
-                if (it.isEmpty()) {
-                    initializeDefaultCosmetics()
-                }
-            }
-        }
 
         // Initialize session draft if empty
         if (sessionRepository.cosmeticDraft.value == null) {
@@ -142,12 +134,6 @@ class CosmeticsViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private suspend fun initializeDefaultCosmetics() {
-        for (item in CosmeticDefaults.getDefaultCosmetics()) {
-            cosmeticRepository.saveCosmeticItem(item.toModel())
-        }
-    }
-
     val uiState: StateFlow<CosmeticsUiState> = combine(
         cosmeticRepository.getAllCosmetics(),
         _isAnalyzing,
@@ -173,9 +159,18 @@ class CosmeticsViewModel @Inject constructor(
         val scanFailed = array[9] as Boolean
         val uvVal = array[10] as Double
 
-        val groupStats = models.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
+        val displayedItems = if (models.isEmpty()) {
+            listOf(
+                CosmeticItem(name = "Serum Placeholder", brand = "Placeholder", macroCategory = MacroCategory.PREP, microCategory = MicroCategory.SERUM, isPlaceholder = true),
+                CosmeticItem(name = "Foundation Placeholder", brand = "Placeholder", macroCategory = MacroCategory.COMPLEXION, microCategory = MicroCategory.FOUNDATION, isPlaceholder = true),
+                CosmeticItem(name = "Blush Placeholder", brand = "Placeholder", macroCategory = MacroCategory.DIMENSION, microCategory = MicroCategory.BLUSH, isPlaceholder = true),
+                CosmeticItem(name = "Lipstick Placeholder", brand = "Placeholder", macroCategory = MacroCategory.LIPS, microCategory = MicroCategory.LIPSTICK, isPlaceholder = true)
+            )
+        } else models
+
+        val groupStats = displayedItems.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         
-        val categoryMetadata = models.groupBy { it.macroCategory.displayName }.mapValues { (name, items) ->
+        val categoryMetadata = displayedItems.groupBy { it.macroCategory.displayName }.mapValues { (name, items) ->
             val macro = items.firstOrNull()?.macroCategory
             val representativeItem = items.filter { it.imageUrl != null }.maxByOrNull { it.usageCount } ?: items.maxByOrNull { it.usageCount }
             val brands = items.map { it.brand }.groupBy { it }.mapValues { it.value.size }
@@ -184,8 +179,8 @@ class CosmeticsViewModel @Inject constructor(
             val averageFill = if (fillLevels.isEmpty()) null else fillLevels.average()
 
             CategoryMetadata(
-                itemCount = items.size,
-                totalValue = items.sumOf { it.price ?: 0.0 },
+                itemCount = if (models.isEmpty()) 1 else items.size,
+                totalValue = if (models.isEmpty()) 0.0 else items.sumOf { it.price ?: 0.0 },
                 representativeImageUrl = representativeItem?.imageUrl,
                 representativeColorHex = representativeItem?.colorHex,
                 leadingBrand = leadingBrand,
@@ -201,7 +196,7 @@ class CosmeticsViewModel @Inject constructor(
             } ?: false
         }
 
-        val filtered = models.filter {
+        val filtered = displayedItems.filter {
             it.name.contains(query, ignoreCase = true) || 
             it.brand.contains(query, ignoreCase = true) ||
             it.microCategory.displayName.contains(query, ignoreCase = true) ||
@@ -216,7 +211,7 @@ class CosmeticsViewModel @Inject constructor(
         }
 
         CosmeticsUiState(
-            items = models,
+            items = displayedItems,
             filteredItems = filtered,
             isLoading = false,
             capturedImageUri = draft.imageUrl,
@@ -225,7 +220,7 @@ class CosmeticsViewModel @Inject constructor(
             draftItem = draft,
             searchQuery = query,
             sortOption = sort,
-            totalCosmetics = models.size,
+            totalCosmetics = if (models.isEmpty()) 4 else models.size,
             expiringCosmeticsCount = expiringCount,
             cosmeticsByGroup = groupStats,
             categoriesMetadata = categoryMetadata,

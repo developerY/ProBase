@@ -1,13 +1,8 @@
 package com.zoewave.probase.kocolor.model
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Insights
-import androidx.compose.material.icons.filled.Inventory
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
@@ -128,11 +123,11 @@ sealed class KoColorRoute {
     @Serializable
     data class CosmeticEdit(val itemId: Long) : KoColorRoute()
 
-    @Serializable
+    /*@Serializable
     data class NailLab(val colorHex: String, val finish: String) : KoColorRoute()
 
     @Serializable
-    data class FaceLab(val colorHex: String, val category: String) : KoColorRoute()
+    data class FaceLab(val colorHex: String, val category: String) : KoColorRoute()*/
 
     @Serializable
     data class Camera(val target: String) : KoColorRoute()
