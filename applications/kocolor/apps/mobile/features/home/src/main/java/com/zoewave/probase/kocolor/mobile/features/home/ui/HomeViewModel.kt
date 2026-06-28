@@ -2,11 +2,13 @@ package com.zoewave.probase.kocolor.mobile.features.home.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zoewave.probase.core.data.repository.weather.AtmosphericRepository
 import com.zoewave.probase.core.model.ritual.BeautyRoutine
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.FashionProfile
 import com.zoewave.probase.core.model.ritual.RoutineTime
+import com.zoewave.probase.core.model.weather.AtmosphericState
 import com.zoewave.probase.features.health.core.SkinInsight
 import com.zoewave.probase.features.health.core.domain.GetActiveRitualUseCase
 import com.zoewave.probase.features.health.core.domain.GetHealthSummaryUseCase
@@ -14,7 +16,6 @@ import com.zoewave.probase.features.health.core.domain.HealthSummary
 import com.zoewave.probase.features.health.core.domain.LogHydrationUseCase
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherMapper
 import com.zoewave.probase.features.weather.ui.components.layered.LayeredWeatherUiState
-import com.zoewave.probase.features.weather.ui.components.layered.WeatherAdvice
 import com.zoewave.probase.kocolor.data.FashionRepository
 import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
@@ -90,8 +91,7 @@ class HomeViewModel @Inject constructor(
     private val getHealthSummaryUseCase: GetHealthSummaryUseCase,
     private val getActiveRitualUseCase: GetActiveRitualUseCase,
     private val logHydrationUseCase: LogHydrationUseCase,
-    private val weatherRepo: com.zoewave.probase.core.network.repository.weather.WeatherRepo,
-    private val locationRepository: com.zoewave.probase.core.data.repository.travel.LocationRepository,
+    private val atmosphericRepository: AtmosphericRepository,
     private val koColorSettings: KoColorSettings
 ) : ViewModel() {
 
@@ -103,10 +103,11 @@ class HomeViewModel @Inject constructor(
     }.timeInMillis)
 
     private val _beautyTip = MutableStateFlow("")
-    private val _weather = MutableStateFlow<LayeredWeatherUiState?>(null)
 
     init {
-        fetchWeather()
+        viewModelScope.launch {
+            atmosphericRepository.fetchWeatherIfNeeded()
+        }
         initializeTip()
         viewModelScope.launch {
             if (cosmeticDao.getAllCosmetics().first().isEmpty()) {
@@ -158,7 +159,7 @@ class HomeViewModel @Inject constructor(
         cosmeticDao.getAllCosmetics(),
         clothingDao.getAllClothing(),
         _beautyTip,
-        _weather,
+        atmosphericRepository.atmosphericState,
         getHealthSummaryUseCase(),
         fashionRepository.getSavedSuggestions()
     ) { array ->
@@ -169,12 +170,16 @@ class HomeViewModel @Inject constructor(
         val cosmetics = array[4] as List<CosmeticItemEntity>
         val clothing = array[5] as List<ClothingItemEntity>
         val tip = array[6] as String
-        val weather = array[7] as LayeredWeatherUiState?
+        val atmosphericState = array[7] as AtmosphericState
         val healthSummary = array[8] as HealthSummary
         val savedSuggestions = array[9] as List<com.zoewave.probase.core.model.ritual.SavedAnalysis>
 
         val routines = routineEntities.map { it.toModel() }
         val activeRitual = getActiveRitualUseCase(routines)
+        
+        val weather = atmosphericState.weather?.let {
+            LayeredWeatherMapper.mapToUiState(it, atmosphericState.environmentalContext!!, atmosphericState.isFallback)
+        }
         
         val cosmeticsByGroup = cosmetics.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         val clothingByCategory = clothing.groupBy { it.category.name }.mapValues { it.value.size }
@@ -229,43 +234,6 @@ class HomeViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeUiState()
     )
-
-    private fun fetchWeather() {
-        viewModelScope.launch {
-            try {
-                val latLng = kotlinx.coroutines.withTimeoutOrNull(5000) {
-                    locationRepository.updateLocation()
-                    locationRepository.currentLocation.first { it != null }
-                }
-                
-                if (latLng != null) {
-                    val response = weatherRepo.openCurrentWeatherByCoords(latLng.latitude, latLng.longitude)
-                    val envContext = weatherRepo.getEnvironmentalContext(latLng.latitude, latLng.longitude)
-                    updateWeatherState(response, envContext, isFallback = false)
-                } else {
-                    val fallbackCity = "Santa Barbara, US"
-                    val response = weatherRepo.openCurrentWeatherByCity(fallbackCity)
-                    val envContext = response?.coord?.let { weatherRepo.getEnvironmentalContext(it.lat, it.lon) }
-                    updateWeatherState(response, envContext, isFallback = true)
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("HomeViewModel", "Error fetching weather", e)
-            }
-        }
-    }
-
-    private fun updateWeatherState(
-        response: com.zoewave.probase.core.model.weather.OpenWeatherResponse?,
-        envContext: com.zoewave.probase.core.model.weather.EnvironmentalContext?,
-        isFallback: Boolean
-    ) {
-        if (response != null && envContext != null) {
-            _weather.value = LayeredWeatherMapper.mapToUiState(response, envContext, isFallback)
-            WeatherAdvice.getBeautyAdvice(envContext)?.let { advice ->
-                _beautyTip.value = advice
-            }
-        }
-    }
 
     private fun initializeDay(date: Long, existing: List<RoutineEntity> = emptyList()) {
         val existingTimes = existing.map { it.time }.toSet()
@@ -323,7 +291,11 @@ class HomeViewModel @Inject constructor(
                     logHydrationUseCase(event.volumeLiters)
                 }
             }
-            HomeEvent.RefreshWeather -> fetchWeather()
+            HomeEvent.RefreshWeather -> {
+                viewModelScope.launch {
+                    atmosphericRepository.refreshWeather()
+                }
+            }
         }
     }
 
