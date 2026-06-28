@@ -14,6 +14,14 @@ sealed interface BoxCaptureUiState {
         val progress: String = "Initializing AI..."
     ) : BoxCaptureUiState
 
+    data class Review(
+        val capturedUris: List<String>,
+        val barcode: String?,
+        val ingredientsOcr: String = "",
+        val instructionsOcr: String = "",
+        val mode: CaptureMode
+    ) : BoxCaptureUiState
+
     data class Success(
         val item: CosmeticItem
     ) : BoxCaptureUiState
