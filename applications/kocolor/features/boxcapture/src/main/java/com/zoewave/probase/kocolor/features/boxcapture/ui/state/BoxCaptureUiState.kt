@@ -19,7 +19,8 @@ sealed interface BoxCaptureUiState {
         val barcode: String?,
         val ingredientsOcr: String = "",
         val instructionsOcr: String = "",
-        val mode: CaptureMode
+        val mode: CaptureMode,
+        val enrichmentData: CosmeticItem? = null
     ) : BoxCaptureUiState
 
     data class Success(

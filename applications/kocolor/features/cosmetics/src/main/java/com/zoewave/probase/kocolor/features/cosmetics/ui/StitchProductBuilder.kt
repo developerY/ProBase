@@ -263,9 +263,9 @@ fun StitchProductBuilder(
             ) {
                 CaptureButton(
                     title = "Bar Scan",
-                    subtitle = "Scan UPC",
+                    subtitle = if (uiState.lastScanFailed) "Not Found" else "Scan UPC",
                     icon = Icons.Default.QrCodeScanner,
-                    color = Color(0xFF6B7280),
+                    color = if (uiState.lastScanFailed) Color(0xFFEF4444) else Color(0xFF6B7280),
                     onClick = { navTo(KoColorRoute.BarcodeScanner) },
                     modifier = Modifier.weight(1f)
                 )

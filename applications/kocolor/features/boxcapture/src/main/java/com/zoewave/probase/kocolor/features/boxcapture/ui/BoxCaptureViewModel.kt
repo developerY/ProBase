@@ -18,6 +18,7 @@ import com.zoewave.probase.core.model.ritual.Finish
 import com.zoewave.probase.core.model.ritual.Formulation
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.features.boxcapture.data.LocalProductAnalyzer
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
@@ -71,6 +72,7 @@ private data class ExtractedCosmetic(
 class BoxCaptureViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val aiSettings: AiConfigurationSettings,
+    private val cosmeticRepository: CosmeticInventoryRepository,
     private val sessionRepository: FashionSessionRepository,
     private val localAnalyzer: LocalProductAnalyzer
 ) : ViewModel() {
@@ -84,6 +86,7 @@ class BoxCaptureViewModel @Inject constructor(
 
     private val capturedUris = mutableListOf<String>()
     private var scannedBarcode: String? = null
+    private var obfEnrichmentData: CosmeticItem? = null
     private var localIngredientsOcr: String = ""
     private var localInstructionsOcr: String = ""
 
@@ -147,8 +150,37 @@ class BoxCaptureViewModel @Inject constructor(
 
     private fun onBarcodeScanned(code: String) {
         scannedBarcode = code
-        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_QUICK
-        prepareReview(mode)
+        viewModelScope.launch {
+            // First attempt to find in online database to skip AI if possible
+            _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Searching online database...")
+            
+            val result = cosmeticRepository.fetchProductByBarcode(code)
+            result.onSuccess { obfItem ->
+                // Confidence Check: Do we have ingredients?
+                val hasIngredients = obfItem.ingredients.isNotEmpty()
+                val isComplete = hasIngredients && obfItem.name.isNotBlank() && obfItem.brand.isNotBlank()
+
+                if (isComplete) {
+                    Log.d(TAG, "Product found in OBF with high confidence! Skipping Gemini analysis.")
+                    val item = obfItem.copy(
+                        imageUrl = capturedUris.firstOrNull(),
+                        batchCode = code
+                    )
+                    sessionRepository.setCosmeticDraft(item)
+                    _uiState.value = BoxCaptureUiState.Success(item)
+                } else {
+                    Log.i(TAG, "Product found in OBF but incomplete (missing ingredients). Proceeding to AI enrichment.")
+                    obfEnrichmentData = obfItem
+                    val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_QUICK
+                    prepareReview(mode)
+                }
+            }.onFailure {
+                Log.i(TAG, "Product not found in OBF. Proceeding to AI review.")
+                obfEnrichmentData = null
+                val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_QUICK
+                prepareReview(mode)
+            }
+        }
     }
 
     private fun prepareReview(mode: CaptureMode) {
@@ -177,7 +209,8 @@ class BoxCaptureViewModel @Inject constructor(
                 barcode = scannedBarcode,
                 ingredientsOcr = localIngredientsOcr,
                 instructionsOcr = localInstructionsOcr,
-                mode = mode
+                mode = mode,
+                enrichmentData = obfEnrichmentData
             )
         }
     }
@@ -229,15 +262,27 @@ class BoxCaptureViewModel @Inject constructor(
                         CaptureMode.PRODUCT -> "product container (front and back)"
                     }
                     val barcodeContext = if (!scannedBarcode.isNullOrBlank()) "The scanned barcode is: $scannedBarcode." else ""
+                    
+                    val enrichmentContext = obfEnrichmentData?.let {
+                        """
+                        CONFIRMED DATABASE INFO:
+                        - Brand: ${it.brand}
+                        - Name: ${it.name}
+                        - Category: ${it.macroCategory.displayName} / ${it.microCategory.displayName}
+                        Please focus your visual analysis on extracting the MISSING details like full ingredients and specific instructions.
+                        """.trimIndent()
+                    } ?: ""
+
                     val ingredientsContext = if (localIngredientsOcr.isNotBlank()) "LOCAL OCR EXTRACTED TEXT FROM INGREDIENTS PANEL:\n$localIngredientsOcr\n---" else ""
                     val instructionsContext = if (localInstructionsOcr.isNotBlank()) "LOCAL OCR EXTRACTED TEXT FROM INSTRUCTIONS/BACK PANEL:\n$localInstructionsOcr\n---" else ""
                     
                     text("""
                         Analyze these photos of a $target. $barcodeContext
+                        $enrichmentContext
                         $ingredientsContext
                         $instructionsContext
                         
-                        Extract all available information to fill a professional cosmetic database entry. Use the OCR text above to help identify specific ingredients and instructions correctly.
+                        Extract all available information to fill a professional cosmetic database entry. Use the confirmed database info and OCR text above to help identify specific ingredients and instructions correctly.
                         Return ONLY the following JSON format:
                         {
                             "name": "Product Name",
@@ -401,6 +446,7 @@ class BoxCaptureViewModel @Inject constructor(
                    CaptureMode.BOX_PRO
         capturedUris.clear()
         scannedBarcode = null
+        obfEnrichmentData = null
         localIngredientsOcr = ""
         localInstructionsOcr = ""
         _uiState.value = BoxCaptureUiState.Idle(emptyList(), CaptureStep.getStepsForMode(mode).first(), mode)

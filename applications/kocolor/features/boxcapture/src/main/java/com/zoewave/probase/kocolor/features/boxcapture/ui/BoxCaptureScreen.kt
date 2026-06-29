@@ -227,7 +227,8 @@ internal fun BoxCaptureScreen(
                             capturedUris = uiState.capturedUris,
                             barcode = uiState.barcode,
                             ingredientsOcr = uiState.ingredientsOcr,
-                            instructionsOcr = uiState.instructionsOcr
+                            instructionsOcr = uiState.instructionsOcr,
+                            enrichmentData = uiState.enrichmentData
                         ),
                         onEvent = onEvent,
                         navTo = navTo
@@ -486,7 +487,8 @@ data class ReviewViewUiState(
     val capturedUris: List<String>,
     val barcode: String?,
     val ingredientsOcr: String,
-    val instructionsOcr: String
+    val instructionsOcr: String,
+    val enrichmentData: CosmeticItem? = null
 )
 
 @Composable
@@ -561,15 +563,37 @@ private fun ReviewView(
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.QrCodeScanner, null, tint = Color(0xFF22d3ee))
-                            Spacer(Modifier.width(16.dp))
-                            Text(
-                                text = uiState.barcode ?: "Not scanned",
-                                color = if (uiState.barcode != null) Color.White else Color.Gray,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium
-                            )
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.QrCodeScanner, null, tint = Color(0xFF22d3ee))
+                                Spacer(Modifier.width(16.dp))
+                                Text(
+                                    text = uiState.barcode ?: "Not scanned",
+                                    color = if (uiState.barcode != null) Color.White else Color.Gray,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            
+                            uiState.enrichmentData?.let { 
+                                Spacer(Modifier.height(12.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color(0xFF22d3ee).copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                                        .padding(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.AutoAwesome, null, tint = Color(0xFF22d3ee), modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = "Database hit: ${it.brand} ${it.name}",
+                                        color = Color(0xFF22d3ee),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
                         }
                     }
                 }
