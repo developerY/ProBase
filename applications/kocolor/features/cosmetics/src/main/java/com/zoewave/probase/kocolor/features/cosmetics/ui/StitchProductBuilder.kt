@@ -4,20 +4,63 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -28,7 +71,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.core.model.ritual.ChemistryBase
+import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.Coverage
+import com.zoewave.probase.core.model.ritual.Finish
+import com.zoewave.probase.core.model.ritual.Formulation
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
@@ -178,6 +227,20 @@ fun StitchProductBuilder(
         )
     }
 
+    if (uiState.lastScanFailed) {
+        AlertDialog(
+            onDismissRequest = { onEvent(CosmeticsEvent.ResetScanState) },
+            confirmButton = {
+                TextButton(onClick = { onEvent(CosmeticsEvent.ResetScanState) }) {
+                    Text(stringResource(R.string.applications_kocolor_features_cosmetics_ok), fontWeight = FontWeight.Bold)
+                }
+            },
+            title = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_product_not_found_title)) },
+            text = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_product_not_found_message)) },
+            shape = RoundedCornerShape(24.dp)
+        )
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -253,6 +316,35 @@ fun StitchProductBuilder(
                             Text(stringResource(R.string.applications_kocolor_features_cosmetics_add_product_image), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                         }
                     }
+
+                    // --- Scan Status Overlay ---
+                    uiState.scanStatus?.let { status ->
+                        Surface(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(16.dp),
+                            color = Color.Black.copy(alpha = 0.7f),
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                if (uiState.isAnalyzing) {
+                                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = Color.White)
+                                } else {
+                                    Icon(
+                                        imageVector = if (uiState.lastScanFailed) Icons.Default.ErrorOutline else Icons.Default.Info,
+                                        contentDescription = null,
+                                        tint = if (uiState.lastScanFailed) Color.Red else Color(0xFF22d3ee),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                                Text(status, color = Color.White, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
                 }
             }
 
@@ -266,6 +358,7 @@ fun StitchProductBuilder(
                 CaptureButton(
                     title = "Bar Scan",
                     subtitle = when {
+                        uiState.isAnalyzing -> "Analyzing..."
                         uiState.lastScanFailed -> "Not Found"
                         uiState.isScanIncomplete -> "Enrich Data"
                         else -> "Scan UPC"
@@ -274,10 +367,15 @@ fun StitchProductBuilder(
                     color = when {
                         uiState.lastScanFailed -> Color(0xFFEF4444) // Red
                         uiState.isScanIncomplete -> Color(0xFFF59E0B) // Yellow/Amber
+                        uiState.isAnalyzing -> Color(0xFF22d3ee) // Cyan
                         else -> Color(0xFF6B7280) // Gray
                     },
-                    onClick = { navTo(KoColorRoute.BarcodeScanner) },
-                    modifier = Modifier.weight(1f)
+                    onClick = { 
+                        onEvent(CosmeticsEvent.ResetScanState)
+                        navTo(KoColorRoute.BarcodeScanner) 
+                    },
+                    modifier = Modifier.weight(1f),
+                    isLoading = uiState.isAnalyzing
                 )
                 CaptureButton(
                     title = "Box Scan",
@@ -568,7 +666,8 @@ private fun CaptureButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     color: Color,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false
 ) {
     Surface(
         onClick = onClick,
@@ -580,7 +679,11 @@ private fun CaptureButton(
         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Surface(shape = CircleShape, color = color, modifier = Modifier.size(32.dp)) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, null, tint = if (isColorDark(color)) Color.White else Color.Black, modifier = Modifier.size(16.dp))
+                    if (isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = Color.White)
+                    } else {
+                        Icon(icon, null, tint = if (isColorDark(color)) Color.White else Color.Black, modifier = Modifier.size(16.dp))
+                    }
                 }
             }
             Column {

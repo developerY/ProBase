@@ -9,6 +9,10 @@ import javax.inject.Singleton
 
 @Singleton
 class FashionSessionRepository @Inject constructor() {
+    enum class ScanStatus {
+        IDLE, ANALYZING, SUCCESS, INCOMPLETE, FAILED
+    }
+
     private val _faceUri = MutableStateFlow<String?>(null)
     val faceUri: StateFlow<String?> = _faceUri.asStateFlow()
 
@@ -26,6 +30,9 @@ class FashionSessionRepository @Inject constructor() {
 
     private val _lastScannedCode = MutableStateFlow<String?>(null)
     val lastScannedCode: StateFlow<String?> = _lastScannedCode.asStateFlow()
+
+    private val _scanState = MutableStateFlow(ScanStatus.IDLE)
+    val scanState: StateFlow<ScanStatus> = _scanState.asStateFlow()
 
     private val _location = MutableStateFlow<String?>(null)
     val location: StateFlow<String?> = _location.asStateFlow()
@@ -63,6 +70,11 @@ class FashionSessionRepository @Inject constructor() {
         _lastScannedCode.value = code
     }
 
+    fun setScanState(status: ScanStatus) {
+        Log.d("KoColorSession", "Setting Scan State: $status")
+        _scanState.value = status
+    }
+
     fun setCosmeticDraft(item: com.zoewave.probase.core.model.ritual.CosmeticItem?) {
         Log.d("KoColorSession", "Setting Cosmetic Draft: ${item?.name}")
         _cosmeticDraft.value = item
@@ -75,6 +87,8 @@ class FashionSessionRepository @Inject constructor() {
         _shoesUri.value = null
         _clothesUri.value = null
         _capturedItemUri.value = null
+        _lastScannedCode.value = null
         _cosmeticDraft.value = null
+        _scanState.value = ScanStatus.IDLE
     }
 }

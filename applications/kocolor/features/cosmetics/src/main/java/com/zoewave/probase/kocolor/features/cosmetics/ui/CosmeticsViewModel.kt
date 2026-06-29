@@ -53,7 +53,6 @@ data class CosmeticsUiState(
     val filteredItems: List<CosmeticItem> = emptyList(),
     val isLoading: Boolean = true,
     val capturedImageUri: String? = null,
-    val isAnalyzing: Boolean = false,
     val aiResult: CosmeticItem? = null,
     val draftItem: CosmeticItem = CosmeticItem(
         name = "", 
@@ -69,13 +68,15 @@ data class CosmeticsUiState(
     val categoriesMetadata: Map<String, CategoryMetadata> = emptyMap(),
     val categoryFilter: String? = null,
     val scanStatus: String? = null,
-    val isScanSuccessful: Boolean = false,
-    val isScanIncomplete: Boolean = false,
-    val lastScanFailed: Boolean = false,
+    val scanState: FashionSessionRepository.ScanStatus = FashionSessionRepository.ScanStatus.IDLE,
     val isObfContributionEnabled: Boolean = false,
     val uvIndex: Double = 0.0
 ) {
     val canContributeToObf: Boolean get() = !draftItem.batchCode.isNullOrBlank()
+    val isScanSuccessful: Boolean get() = scanState == FashionSessionRepository.ScanStatus.SUCCESS
+    val isScanIncomplete: Boolean get() = scanState == FashionSessionRepository.ScanStatus.INCOMPLETE
+    val lastScanFailed: Boolean get() = scanState == FashionSessionRepository.ScanStatus.FAILED
+    val isAnalyzing: Boolean get() = scanState == FashionSessionRepository.ScanStatus.ANALYZING
 }
 
 sealed class CosmeticsEvent {
@@ -108,16 +109,12 @@ class CosmeticsViewModel @Inject constructor(
     private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
-    private val _isAnalyzing = MutableStateFlow(false)
     private val _aiResult = MutableStateFlow<CosmeticItem?>(null)
     private val _searchQuery = MutableStateFlow("")
     private val _sortOption = MutableStateFlow(SortOption.NEWEST)
     private val _categoryFilter = MutableStateFlow<String?>(null)
     private val _scanStatus = MutableStateFlow<String?>(null)
-    private val _isScanSuccessful = MutableStateFlow(false)
-    private val _isScanIncomplete = MutableStateFlow(false)
     private val _isObfContributionEnabled = MutableStateFlow(false)
-    private val _lastScanFailed = MutableStateFlow(false)
     private val _uvIndex = MutableStateFlow(0.0)
 
     init {
@@ -155,32 +152,26 @@ class CosmeticsViewModel @Inject constructor(
 
     val uiState: StateFlow<CosmeticsUiState> = combine(
         cosmeticRepository.getAllCosmetics(),
-        _isAnalyzing,
         _aiResult,
         sessionRepository.cosmeticDraft.filterNotNull(),
+        sessionRepository.scanState,
         _searchQuery,
         _sortOption,
         _categoryFilter,
         _scanStatus,
-        _isScanSuccessful,
-        _isScanIncomplete,
         _isObfContributionEnabled,
-        _lastScanFailed,
         _uvIndex
     ) { array ->
         val models = array[0] as List<CosmeticItem>
-        val analyzing = array[1] as Boolean
-        val aiResult = array[2] as CosmeticItem?
-        val draft = array[3] as CosmeticItem
+        val aiResult = array[1] as CosmeticItem?
+        val draft = array[2] as CosmeticItem
+        val scanState = array[3] as FashionSessionRepository.ScanStatus
         val query = array[4] as String
         val sort = array[5] as SortOption
         val filter = array[6] as String?
         val scanStatus = array[7] as String?
-        val scanSuccessful = array[8] as Boolean
-        val scanIncomplete = array[9] as Boolean
-        val contributionEnabled = array[10] as Boolean
-        val scanFailed = array[11] as Boolean
-        val uvVal = array[12] as Double
+        val contributionEnabled = array[8] as Boolean
+        val uvVal = array[9] as Double
 
         val groupStats = models.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         
@@ -229,7 +220,6 @@ class CosmeticsViewModel @Inject constructor(
             filteredItems = filtered,
             isLoading = false,
             capturedImageUri = draft.imageUrl,
-            isAnalyzing = analyzing,
             aiResult = aiResult,
             draftItem = draft,
             searchQuery = query,
@@ -240,10 +230,8 @@ class CosmeticsViewModel @Inject constructor(
             categoriesMetadata = categoryMetadata,
             categoryFilter = filter,
             scanStatus = scanStatus,
-            isScanSuccessful = scanSuccessful,
-            isScanIncomplete = scanIncomplete,
+            scanState = scanState,
             isObfContributionEnabled = contributionEnabled,
-            lastScanFailed = scanFailed,
             uvIndex = uvVal
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, CosmeticsUiState())
@@ -258,9 +246,6 @@ class CosmeticsViewModel @Inject constructor(
                 }
 
                 sessionRepository.reset()
-                _isScanSuccessful.value = false
-                _isScanIncomplete.value = false
-                _lastScanFailed.value = false
                 _scanStatus.value = null
             }
             is CosmeticsEvent.UpdateItem -> updateItem(event.item)
@@ -294,7 +279,7 @@ class CosmeticsViewModel @Inject constructor(
                              currentDraft.imageUrl == null && 
                              currentDraft.batchCode == null)
                 
-                if (!isEmpty || _isAnalyzing.value || _isScanSuccessful.value) return
+                if (!isEmpty || sessionRepository.scanState.value == FashionSessionRepository.ScanStatus.ANALYZING || sessionRepository.scanState.value == FashionSessionRepository.ScanStatus.SUCCESS) return
                 
                 val macro = MacroCategory.entries.firstOrNull { 
                     it.displayName.contains(event.categoryFilter ?: "", ignoreCase = true) 
@@ -319,16 +304,11 @@ class CosmeticsViewModel @Inject constructor(
                 _isObfContributionEnabled.value = event.enabled
             }
             CosmeticsEvent.ResetScanState -> {
-                _isScanSuccessful.value = false
-                _isScanIncomplete.value = false
-                _lastScanFailed.value = false
+                sessionRepository.setScanState(FashionSessionRepository.ScanStatus.IDLE)
                 _scanStatus.value = null
             }
             CosmeticsEvent.CancelDiscovery -> {
                 sessionRepository.reset()
-                _isScanSuccessful.value = false
-                _isScanIncomplete.value = false
-                _lastScanFailed.value = false
                 _scanStatus.value = null
             }
         }
@@ -348,10 +328,8 @@ class CosmeticsViewModel @Inject constructor(
 
     private fun fetchObfProduct(code: String) {
         viewModelScope.launch {
-            _isAnalyzing.value = true
+            sessionRepository.setScanState(FashionSessionRepository.ScanStatus.ANALYZING)
             _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_searching_obf)
-            _lastScanFailed.value = false
-            _isScanIncomplete.value = false
             
             updateSessionDraft { it.copy(batchCode = code) }
             
@@ -410,16 +388,15 @@ class CosmeticsViewModel @Inject constructor(
                 val isComplete = hasIngredients && obfItem.name.isNotBlank() && obfItem.brand.isNotBlank()
 
                 if (isComplete) {
-                    _isScanSuccessful.value = true
+                    sessionRepository.setScanState(FashionSessionRepository.ScanStatus.SUCCESS)
                 } else {
-                    _isScanIncomplete.value = true
+                    sessionRepository.setScanState(FashionSessionRepository.ScanStatus.INCOMPLETE)
                     _scanStatus.value = "Incomplete data. Scan box to enrich."
                 }
             }.onFailure {
                 _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_product_not_found_obf)
-                _lastScanFailed.value = true
+                sessionRepository.setScanState(FashionSessionRepository.ScanStatus.FAILED)
             }
-            _isAnalyzing.value = false
             
             delay(3000)
             _scanStatus.value = null
@@ -447,7 +424,7 @@ class CosmeticsViewModel @Inject constructor(
     private fun scanWithGemini() {
         val uri = sessionRepository.cosmeticDraft.value?.imageUrl ?: return
         viewModelScope.launch {
-            _isAnalyzing.value = true
+            sessionRepository.setScanState(FashionSessionRepository.ScanStatus.ANALYZING)
             _aiResult.value = null
             
             val apiKey = aiSettings.getGeminiApiKey()
@@ -479,10 +456,14 @@ class CosmeticsViewModel @Inject constructor(
                                 finish = if (aiItem.finish != Finish.UNKNOWN) aiItem.finish else current.finish
                             )
                         }
+                        sessionRepository.setScanState(FashionSessionRepository.ScanStatus.SUCCESS)
+                    } ?: run {
+                        sessionRepository.setScanState(FashionSessionRepository.ScanStatus.FAILED)
                     }
                 }
+            } else {
+                sessionRepository.setScanState(FashionSessionRepository.ScanStatus.IDLE)
             }
-            _isAnalyzing.value = false
         }
     }
 
