@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.cosmetics.ui
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -69,9 +70,13 @@ data class CosmeticsUiState(
     val categoryFilter: String? = null,
     val scanStatus: String? = null,
     val isScanSuccessful: Boolean = false,
+    val isScanIncomplete: Boolean = false,
     val lastScanFailed: Boolean = false,
+    val isObfContributionEnabled: Boolean = false,
     val uvIndex: Double = 0.0
-)
+) {
+    val canContributeToObf: Boolean get() = !draftItem.batchCode.isNullOrBlank()
+}
 
 sealed class CosmeticsEvent {
     data class AddItem(val item: CosmeticItem) : CosmeticsEvent()
@@ -87,6 +92,7 @@ sealed class CosmeticsEvent {
     data class InitializeEdit(val itemId: Long) : CosmeticsEvent()
     data class InitializeAdd(val categoryFilter: String?) : CosmeticsEvent()
     data class HandleScanResult(val code: String) : CosmeticsEvent()
+    data class OnObfContributionToggled(val enabled: Boolean) : CosmeticsEvent()
     data object ResetScanState : CosmeticsEvent()
     data object CancelDiscovery : CosmeticsEvent()
 }
@@ -109,6 +115,8 @@ class CosmeticsViewModel @Inject constructor(
     private val _categoryFilter = MutableStateFlow<String?>(null)
     private val _scanStatus = MutableStateFlow<String?>(null)
     private val _isScanSuccessful = MutableStateFlow(false)
+    private val _isScanIncomplete = MutableStateFlow(false)
+    private val _isObfContributionEnabled = MutableStateFlow(false)
     private val _lastScanFailed = MutableStateFlow(false)
     private val _uvIndex = MutableStateFlow(0.0)
 
@@ -155,6 +163,8 @@ class CosmeticsViewModel @Inject constructor(
         _categoryFilter,
         _scanStatus,
         _isScanSuccessful,
+        _isScanIncomplete,
+        _isObfContributionEnabled,
         _lastScanFailed,
         _uvIndex
     ) { array ->
@@ -167,8 +177,10 @@ class CosmeticsViewModel @Inject constructor(
         val filter = array[6] as String?
         val scanStatus = array[7] as String?
         val scanSuccessful = array[8] as Boolean
-        val scanFailed = array[9] as Boolean
-        val uvVal = array[10] as Double
+        val scanIncomplete = array[9] as Boolean
+        val contributionEnabled = array[10] as Boolean
+        val scanFailed = array[11] as Boolean
+        val uvVal = array[12] as Double
 
         val groupStats = models.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         
@@ -229,6 +241,8 @@ class CosmeticsViewModel @Inject constructor(
             categoryFilter = filter,
             scanStatus = scanStatus,
             isScanSuccessful = scanSuccessful,
+            isScanIncomplete = scanIncomplete,
+            isObfContributionEnabled = contributionEnabled,
             lastScanFailed = scanFailed,
             uvIndex = uvVal
         )
@@ -238,8 +252,14 @@ class CosmeticsViewModel @Inject constructor(
         when (event) {
             is CosmeticsEvent.AddItem -> {
                 addItem(event.item)
+                
+                if (_isObfContributionEnabled.value && !event.item.batchCode.isNullOrBlank()) {
+                    contributeToObf(event.item)
+                }
+
                 sessionRepository.reset()
                 _isScanSuccessful.value = false
+                _isScanIncomplete.value = false
                 _lastScanFailed.value = false
                 _scanStatus.value = null
             }
@@ -295,17 +315,29 @@ class CosmeticsViewModel @Inject constructor(
             CosmeticsEvent.ScanWithGemini -> scanWithGemini()
             CosmeticsEvent.ClearCapturedImage -> sessionRepository.setCapturedItemUri(null)
             is CosmeticsEvent.HandleScanResult -> fetchObfProduct(event.code)
+            is CosmeticsEvent.OnObfContributionToggled -> {
+                _isObfContributionEnabled.value = event.enabled
+            }
             CosmeticsEvent.ResetScanState -> {
                 _isScanSuccessful.value = false
+                _isScanIncomplete.value = false
                 _lastScanFailed.value = false
                 _scanStatus.value = null
             }
             CosmeticsEvent.CancelDiscovery -> {
                 sessionRepository.reset()
                 _isScanSuccessful.value = false
+                _isScanIncomplete.value = false
                 _lastScanFailed.value = false
                 _scanStatus.value = null
             }
+        }
+    }
+
+    private fun contributeToObf(item: CosmeticItem) {
+        viewModelScope.launch {
+            Log.d("CosmeticsVM", "Contributing ${item.name} to OBF...")
+            // Actual implementation would call repository.contribute(item)
         }
     }
 
@@ -319,6 +351,7 @@ class CosmeticsViewModel @Inject constructor(
             _isAnalyzing.value = true
             _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_searching_obf)
             _lastScanFailed.value = false
+            _isScanIncomplete.value = false
             
             updateSessionDraft { it.copy(batchCode = code) }
             
@@ -372,7 +405,16 @@ class CosmeticsViewModel @Inject constructor(
                     }
                 }
                 
-                _isScanSuccessful.value = true
+                // --- Confidence Threshold Logic ---
+                val hasIngredients = obfItem.ingredients.isNotEmpty()
+                val isComplete = hasIngredients && obfItem.name.isNotBlank() && obfItem.brand.isNotBlank()
+
+                if (isComplete) {
+                    _isScanSuccessful.value = true
+                } else {
+                    _isScanIncomplete.value = true
+                    _scanStatus.value = "Incomplete data. Scan box to enrich."
+                }
             }.onFailure {
                 _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_product_not_found_obf)
                 _lastScanFailed.value = true

@@ -133,7 +133,18 @@ class BoxCaptureViewModel @Inject constructor(
 
     fun setMode(modeString: String) {
         val mode = try { CaptureMode.valueOf(modeString) } catch (e: Exception) { CaptureMode.BOX_PRO }
-        reset() // Ensure clean state when switching modes
+        
+        // Peek at existing draft for enrichment context
+        val existingDraft = sessionRepository.cosmeticDraft.value
+        val hasExistingBarcode = !existingDraft?.batchCode.isNullOrBlank()
+        
+        reset(keepBarcode = hasExistingBarcode) 
+        
+        if (hasExistingBarcode) {
+            scannedBarcode = existingDraft.batchCode
+            obfEnrichmentData = existingDraft
+        }
+
         _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), CaptureStep.getStepsForMode(mode).first(), mode)
     }
 
@@ -440,13 +451,15 @@ class BoxCaptureViewModel @Inject constructor(
         }
     }
 
-    fun reset() {
+    fun reset(keepBarcode: Boolean = false) {
         val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: 
                    (uiState.value as? BoxCaptureUiState.Review)?.mode ?:
                    CaptureMode.BOX_PRO
         capturedUris.clear()
-        scannedBarcode = null
-        obfEnrichmentData = null
+        if (!keepBarcode) {
+            scannedBarcode = null
+            obfEnrichmentData = null
+        }
         localIngredientsOcr = ""
         localInstructionsOcr = ""
         _uiState.value = BoxCaptureUiState.Idle(emptyList(), CaptureStep.getStepsForMode(mode).first(), mode)

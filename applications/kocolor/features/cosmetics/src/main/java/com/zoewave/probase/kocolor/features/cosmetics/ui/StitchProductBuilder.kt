@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -20,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -263,9 +265,17 @@ fun StitchProductBuilder(
             ) {
                 CaptureButton(
                     title = "Bar Scan",
-                    subtitle = if (uiState.lastScanFailed) "Not Found" else "Scan UPC",
+                    subtitle = when {
+                        uiState.lastScanFailed -> "Not Found"
+                        uiState.isScanIncomplete -> "Enrich Data"
+                        else -> "Scan UPC"
+                    },
                     icon = Icons.Default.QrCodeScanner,
-                    color = if (uiState.lastScanFailed) Color(0xFFEF4444) else Color(0xFF6B7280),
+                    color = when {
+                        uiState.lastScanFailed -> Color(0xFFEF4444) // Red
+                        uiState.isScanIncomplete -> Color(0xFFF59E0B) // Yellow/Amber
+                        else -> Color(0xFF6B7280) // Gray
+                    },
                     onClick = { navTo(KoColorRoute.BarcodeScanner) },
                     modifier = Modifier.weight(1f)
                 )
@@ -499,7 +509,16 @@ fun StitchProductBuilder(
                 }
             }
 
-            Spacer(Modifier.height(40.dp))
+            Spacer(Modifier.height(32.dp))
+
+            // Online Contribution Toggle
+            if (!isEditMode) {
+                ObfContributionSwitch(
+                    uiState = uiState,
+                    onEvent = onEvent
+                )
+                Spacer(Modifier.height(16.dp))
+            }
 
             if (!isEditMode) {
                 Button(
@@ -680,6 +699,57 @@ private fun AtelierDatePicker(initialDate: Long, onDateSelected: (Long) -> Unit,
 @Composable private fun CoverageMenu(expanded: Boolean, onDismiss: () -> Unit, onSelect: (Coverage) -> Unit) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         Coverage.entries.forEach { c -> DropdownMenuItem(text = { Text(c.name.lowercase().replace("_", " ").capitalize()) }, onClick = { onSelect(c); onDismiss() }) }
+    }
+}
+
+@Composable
+private fun ObfContributionSwitch(
+    uiState: CosmeticsUiState,
+    modifier: Modifier = Modifier,
+    onEvent: (CosmeticsEvent) -> Unit
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .toggleable(
+                value = uiState.isObfContributionEnabled,
+                enabled = uiState.canContributeToObf,
+                role = Role.Switch,
+                onValueChange = { onEvent(CosmeticsEvent.OnObfContributionToggled(it)) }
+            )
+            .background(Color(0xFFF9FAFB), RoundedCornerShape(12.dp))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Save & Add to Online DB",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = if (uiState.canContributeToObf) {
+                    Color.Black
+                } else {
+                    Color.Gray
+                }
+            )
+            Text(
+                text = if (uiState.canContributeToObf) {
+                    "Contribute this scan to the community."
+                } else {
+                    "Barcode required to contribute."
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Gray
+            )
+        }
+        
+        Switch(
+            checked = uiState.isObfContributionEnabled,
+            onCheckedChange = null,
+            enabled = uiState.canContributeToObf
+        )
     }
 }
 
