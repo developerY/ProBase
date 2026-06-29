@@ -23,3 +23,6 @@ google-services-ylabz.json
 google-services-zoewave.json
 /.kotlin/
 /.idea/
+
+# Rust Backend Isolation
+/server/target/
