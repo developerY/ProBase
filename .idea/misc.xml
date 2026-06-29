@@ -16,6 +16,7 @@
       <file path="$PROJECT_DIR$/features/xr/glass/docs" />
       <file path="$PROJECT_DIR$/features/xr/glass/translation/docs" />
       <file path="$PROJECT_DIR$/features/xr/glass/vision/doc" />
+      <file path="$PROJECT_DIR$/server" />
     </excludeRoots>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
