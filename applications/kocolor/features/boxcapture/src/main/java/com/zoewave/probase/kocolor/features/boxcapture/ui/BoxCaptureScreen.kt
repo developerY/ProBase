@@ -45,6 +45,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -95,6 +96,7 @@ sealed class BoxCaptureEvent {
     data class DeletePhoto(val index: Int) : BoxCaptureEvent()
     data class ChangeMode(val mode: CaptureMode) : BoxCaptureEvent()
     data object SubmitToAi : BoxCaptureEvent()
+    data object SkipBarcode : BoxCaptureEvent()
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -407,19 +409,30 @@ private fun CameraView(
             Spacer(modifier = Modifier.height(24.dp))
 
             if (uiState.step == CaptureStep.BARCODE) {
-                Button(
-                    onClick = {
-                        scanner.startScan()
-                            .addOnSuccessListener { barcode ->
-                                barcode.rawValue?.let { onEvent(BoxCaptureEvent.BarcodeScanned(it)) }
-                            }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22d3ee))
-                ) {
-                    Icon(Icons.Default.QrCodeScanner, null, tint = Color.Black)
-                    Spacer(Modifier.width(8.dp))
-                    Text("START BARCODE SCAN", color = Color.Black, fontWeight = FontWeight.Bold)
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Button(
+                        onClick = {
+                            scanner.startScan()
+                                .addOnSuccessListener { barcode ->
+                                    barcode.rawValue?.let { onEvent(BoxCaptureEvent.BarcodeScanned(it)) }
+                                }
+                        },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22d3ee))
+                    ) {
+                        Icon(Icons.Default.QrCodeScanner, null, tint = Color.Black)
+                        Spacer(Modifier.width(8.dp))
+                        Text("START BARCODE SCAN", color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
+                    
+                    OutlinedButton(
+                        onClick = { onEvent(BoxCaptureEvent.SkipBarcode) },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                    ) {
+                        Text("NO BARCODE / SKIP", fontWeight = FontWeight.SemiBold)
+                    }
                 }
             } else {
                 Button(

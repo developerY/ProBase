@@ -112,6 +112,10 @@ class BoxCaptureViewModel @Inject constructor(
                 val mode = (uiState.value as? BoxCaptureUiState.Review)?.mode ?: CaptureMode.BOX_PRO
                 analyzePhotos(mode)
             }
+            BoxCaptureEvent.SkipBarcode -> {
+                val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_PRO
+                prepareReview(mode)
+            }
         }
     }
 
