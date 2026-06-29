@@ -227,19 +227,19 @@ fun StitchProductBuilder(
         )
     }
 
-    if (uiState.lastScanFailed) {
+    /*if (uiState.lastScanFailed && uiState.scanStatus != null) {
         AlertDialog(
-            onDismissRequest = { onEvent(CosmeticsEvent.ResetScanState) },
+            onDismissRequest = { onEvent(CosmeticsEvent.AcknowledgeErrorDialog) },
             confirmButton = {
-                TextButton(onClick = { onEvent(CosmeticsEvent.ResetScanState) }) {
+                TextButton(onClick = { onEvent(CosmeticsEvent.AcknowledgeErrorDialog) }) {
                     Text(stringResource(R.string.applications_kocolor_features_cosmetics_ok), fontWeight = FontWeight.Bold)
                 }
             },
             title = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_product_not_found_title)) },
-            text = { Text(stringResource(R.string.applications_kocolor_features_cosmetics_product_not_found_message)) },
+            text = { Text(uiState.scanStatus ?: "") },
             shape = RoundedCornerShape(24.dp)
         )
-    }
+    }*/
 
     Scaffold(
         topBar = {
