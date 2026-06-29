@@ -45,6 +45,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -95,6 +96,7 @@ sealed class BoxCaptureEvent {
     data class DeletePhoto(val index: Int) : BoxCaptureEvent()
     data class ChangeMode(val mode: CaptureMode) : BoxCaptureEvent()
     data object SubmitToAi : BoxCaptureEvent()
+    data object SkipBarcode : BoxCaptureEvent()
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -225,7 +227,8 @@ internal fun BoxCaptureScreen(
                             capturedUris = uiState.capturedUris,
                             barcode = uiState.barcode,
                             ingredientsOcr = uiState.ingredientsOcr,
-                            instructionsOcr = uiState.instructionsOcr
+                            instructionsOcr = uiState.instructionsOcr,
+                            enrichmentData = uiState.enrichmentData
                         ),
                         onEvent = onEvent,
                         navTo = navTo
@@ -407,19 +410,30 @@ private fun CameraView(
             Spacer(modifier = Modifier.height(24.dp))
 
             if (uiState.step == CaptureStep.BARCODE) {
-                Button(
-                    onClick = {
-                        scanner.startScan()
-                            .addOnSuccessListener { barcode ->
-                                barcode.rawValue?.let { onEvent(BoxCaptureEvent.BarcodeScanned(it)) }
-                            }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22d3ee))
-                ) {
-                    Icon(Icons.Default.QrCodeScanner, null, tint = Color.Black)
-                    Spacer(Modifier.width(8.dp))
-                    Text("START BARCODE SCAN", color = Color.Black, fontWeight = FontWeight.Bold)
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Button(
+                        onClick = {
+                            scanner.startScan()
+                                .addOnSuccessListener { barcode ->
+                                    barcode.rawValue?.let { onEvent(BoxCaptureEvent.BarcodeScanned(it)) }
+                                }
+                        },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22d3ee))
+                    ) {
+                        Icon(Icons.Default.QrCodeScanner, null, tint = Color.Black)
+                        Spacer(Modifier.width(8.dp))
+                        Text("START BARCODE SCAN", color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
+                    
+                    OutlinedButton(
+                        onClick = { onEvent(BoxCaptureEvent.SkipBarcode) },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                    ) {
+                        Text("NO BARCODE / SKIP", fontWeight = FontWeight.SemiBold)
+                    }
                 }
             } else {
                 Button(
@@ -473,7 +487,8 @@ data class ReviewViewUiState(
     val capturedUris: List<String>,
     val barcode: String?,
     val ingredientsOcr: String,
-    val instructionsOcr: String
+    val instructionsOcr: String,
+    val enrichmentData: CosmeticItem? = null
 )
 
 @Composable
@@ -548,15 +563,37 @@ private fun ReviewView(
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.QrCodeScanner, null, tint = Color(0xFF22d3ee))
-                            Spacer(Modifier.width(16.dp))
-                            Text(
-                                text = uiState.barcode ?: "Not scanned",
-                                color = if (uiState.barcode != null) Color.White else Color.Gray,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium
-                            )
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.QrCodeScanner, null, tint = Color(0xFF22d3ee))
+                                Spacer(Modifier.width(16.dp))
+                                Text(
+                                    text = uiState.barcode ?: "Not scanned",
+                                    color = if (uiState.barcode != null) Color.White else Color.Gray,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            
+                            uiState.enrichmentData?.let { 
+                                Spacer(Modifier.height(12.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color(0xFF22d3ee).copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                                        .padding(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.AutoAwesome, null, tint = Color(0xFF22d3ee), modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = "Database hit: ${it.brand} ${it.name}",
+                                        color = Color(0xFF22d3ee),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
                         }
                     }
                 }
