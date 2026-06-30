@@ -5,6 +5,7 @@ import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Update
+import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -21,7 +22,7 @@ interface CosmeticDao {
     fun getAllCosmeticsFEFO(): Flow<List<CosmeticItemEntity>>
 
     @Query("SELECT * FROM cosmetic_items WHERE microCategory = :microCategory ORDER BY timestamp DESC")
-    fun getCosmeticsByMicroCategory(microCategory: String): Flow<List<CosmeticItemEntity>>
+    fun getCosmeticsByMicroCategory(microCategory: MicroCategory): Flow<List<CosmeticItemEntity>>
 
     @Query("SELECT * FROM cosmetic_items WHERE id = :id")
     fun getCosmeticById(id: Long): Flow<CosmeticItemEntity?>

@@ -55,6 +55,34 @@ fun CosmeticItemEntity.toModel(): CosmeticItem = CosmeticItem(
     isFdaChecked = isFdaChecked
 )
 
+/**
+ * Maps the rich [CosmeticItem] model to a flat payload suitable for 
+ * uploading to the Open Beauty Facts (OBF) community database.
+ */
+fun CosmeticItem.toObfPayload(): Map<String, String> {
+    return mutableMapOf<String, String>().apply {
+        put("product_name", name)
+        put("brands", brand)
+        put("barcode", batchCode ?: "")
+        put("ingredients_text", ingredients.joinToString(", "))
+        put("quantity", volume ?: "")
+        put("categories", "${macroCategory.displayName}, ${microCategory.displayName}")
+        
+        // Technical facets flattened back to readable tags
+        val tags = mutableListOf<String>()
+        if (formulation != com.zoewave.probase.core.model.ritual.Formulation.UNKNOWN) tags.add(formulation.name.lowercase())
+        if (finish != com.zoewave.probase.core.model.ritual.Finish.UNKNOWN) tags.add(finish.name.lowercase())
+        if (chemistryBase != com.zoewave.probase.core.model.ritual.ChemistryBase.UNKNOWN) tags.add(chemistryBase.name.lowercase())
+        
+        if (tags.isNotEmpty()) {
+            put("labels", tags.joinToString(", "))
+        }
+
+        if (isVegan == true) put("labels", (get("labels")?.let { "$it, " } ?: "") + "vegan")
+        if (isCrueltyFree == true) put("labels", (get("labels")?.let { "$it, " } ?: "") + "cruelty-free")
+    }
+}
+
 fun CosmeticItem.toEntity(): CosmeticItemEntity = CosmeticItemEntity(
     id = id,
     name = name,
