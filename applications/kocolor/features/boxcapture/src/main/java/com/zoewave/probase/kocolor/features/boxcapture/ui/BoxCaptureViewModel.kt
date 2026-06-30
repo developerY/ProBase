@@ -351,7 +351,14 @@ class BoxCaptureViewModel @Inject constructor(
                         CaptureMode.PRODUCT -> "product container (front and back)"
                     }
                     val barcodeContext = if (!scannedBarcode.isNullOrBlank()) "The scanned barcode is: $scannedBarcode." else ""
-                    val colorContext = if (!manualColor.isNullOrBlank()) "The confirmed hex color code is: $manualColor." else "Analyze the photos and estimate the most accurate hex code of the actual makeup shade."
+                    val colorContext = if (!manualColor.isNullOrBlank()) {
+                        """
+                        USER COLOR HINT: The user sampled the color $manualColor from the photo.
+                        CRITICAL INSTRUCTION: Use this hint as a starting point, but VALIDATE it against the visual evidence and your internal knowledge of this specific product's shade. If the user's hex code appears incorrect due to lighting or sampling error, you MUST provide the true, accurate hex code for this makeup shade.
+                        """.trimIndent()
+                    } else {
+                        "Analyze the photos and identify the most accurate representative hex code for this specific product and shade name."
+                    }
                     
                     val enrichmentContext = obfEnrichmentData?.let {
                         """
