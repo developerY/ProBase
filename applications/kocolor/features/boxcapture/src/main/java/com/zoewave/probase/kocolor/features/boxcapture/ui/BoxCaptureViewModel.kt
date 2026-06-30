@@ -64,8 +64,9 @@ private data class ExtractedCosmetic(
     val isVegan: Boolean? = null,
     val isCrueltyFree: Boolean? = null,
     val recyclingInstructions: String? = null,
-    val fdaClinicalWarnings: List<String> = emptyList(),
-    val fdaActiveIngredients: List<String> = emptyList()
+    val printedWarnings: List<String> = emptyList(),
+    val activeIngredients: List<String> = emptyList(),
+    val userColorOverridden: Boolean = false
 )
 
 @HiltViewModel
@@ -406,10 +407,12 @@ class BoxCaptureViewModel @Inject constructor(
                             "isVegan": true,
                             "isCrueltyFree": true,
                             "recyclingInstructions": "How to recycle the packaging",
-                            "fdaClinicalWarnings": ["Warning 1", "..."],
-                            "fdaActiveIngredients": ["Active 1", "..."]
+                            "printedWarnings": ["Warning 1", "..."],
+                            "activeIngredients": ["Active 1", "..."],
+                            "userColorOverridden": true
                         }
-                        Be extremely precise, especially with the colorHex code. If a field is unknown, use null.
+                        Be extremely precise, especially with the colorHex code. If you override the user's color hint, set "userColorOverridden" to true.
+                        If a field is unknown, use null.
                     """.trimIndent())
                 }
 
@@ -523,8 +526,8 @@ class BoxCaptureViewModel @Inject constructor(
                 isVegan = extracted.isVegan,
                 isCrueltyFree = extracted.isCrueltyFree,
                 recyclingInstructions = extracted.recyclingInstructions,
-                fdaClinicalWarnings = extracted.fdaClinicalWarnings,
-                fdaActiveIngredients = extracted.fdaActiveIngredients,
+                fdaClinicalWarnings = extracted.printedWarnings,
+                fdaActiveIngredients = extracted.activeIngredients,
                 isFdaChecked = true
             )
         } catch (e: Exception) {
