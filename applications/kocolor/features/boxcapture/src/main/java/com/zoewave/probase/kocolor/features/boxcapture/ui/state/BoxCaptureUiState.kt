@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.boxcapture.ui.state
 
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 
 sealed interface BoxCaptureUiState {

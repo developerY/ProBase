@@ -20,7 +20,7 @@ import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
-import com.zoewave.probase.kocolor.features.boxcapture.data.LocalProductAnalyzer
+import com.zoewave.probase.kocolor.features.analyzer.data.LocalProductAnalyzer
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureStep
@@ -156,17 +156,6 @@ class BoxCaptureViewModel @Inject constructor(
         if (current.currentStep.isSkippable) {
             capturedUris.add("") 
             
-            if (current.currentStep == CaptureStep.COLOR) {
-                // Moving past COLOR without a photo
-                val nextStep = getNextStep(current.mode)
-                if (nextStep != null) {
-                    _uiState.value = current.copy(capturedUris = capturedUris.toList(), currentStep = nextStep)
-                } else {
-                    prepareReview(current.mode)
-                }
-                return
-            }
-
             val nextStep = getNextStep(current.mode)
             if (nextStep != null) {
                 _uiState.value = current.copy(capturedUris = capturedUris.toList(), currentStep = nextStep)
@@ -395,18 +384,18 @@ class BoxCaptureViewModel @Inject constructor(
                             "coverage": "SHEER|LIGHT|MEDIUM|FULL|BUILDABLE|NOT_APPLICABLE",
                             "shadeName": "Shade name",
                             "colorHex": "#RRGGBB",
-                            "instructions": "Usage instructions for the application guide",
-                            "batchCode": "Barcode or batch code",
+                            "instructions": "Usage instructions extracted from the back panel",
+                            "batchCode": "Barcode or manufacturer batch code",
                             "paoMonths": 12,
                             "volume": "30ml",
-                            "ingredients": ["Water", "Glycerin", "..."],
+                            "ingredients": ["Water", "Glycerin", "Phenoxyethanol", "..."],
                             "heroIngredient": "Main active ingredient",
                             "skinCompatibility": "e.g. Sensitive, Oily, All Skin Types",
                             "containsFragrance": true,
                             "ecoScore": "A|B|C|D|E",
                             "isVegan": true,
                             "isCrueltyFree": true,
-                            "recyclingInstructions": "How to recycle the packaging",
+                            "recyclingInstructions": "Packaging disposal guide",
                             "printedWarnings": ["Warning 1", "..."],
                             "activeIngredients": ["Active 1", "..."],
                             "userColorOverridden": true

@@ -31,6 +31,10 @@ dependencies {
     implementation("androidx.palette:palette-ktx:1.0.0")
     implementation(libs.kotlinx.serialization.json)
 
+    // ML Kit
+    implementation(libs.mlkit.text.recognition)
+    implementation(libs.kotlinx.coroutines.play.services)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.truth)
