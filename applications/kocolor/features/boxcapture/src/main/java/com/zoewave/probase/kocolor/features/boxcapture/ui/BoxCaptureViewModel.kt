@@ -126,14 +126,14 @@ class BoxCaptureViewModel @Inject constructor(
                     _uiState.value = current.copy(extractedColorHex = event.hex)
                 } else if (uiState.value is BoxCaptureUiState.ColorConfirmation) {
                     val cc = uiState.value as BoxCaptureUiState.ColorConfirmation
-                    _uiState.value = cc.copy(suggestedColorHex = event.hex)
+                    _uiState.value = cc.copy(selectedColorHex = event.hex)
                 }
             }
             BoxCaptureEvent.ConfirmColor -> {
                 val current = (uiState.value as? BoxCaptureUiState.ColorConfirmation) ?: return
                 val nextStep = getNextStep(current.mode)
                 if (nextStep != null) {
-                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, current.suggestedColorHex)
+                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, current.selectedColorHex)
                 } else {
                     prepareReview(current.mode)
                 }
@@ -208,13 +208,14 @@ class BoxCaptureViewModel @Inject constructor(
         val mode = current.mode
         
         if (current.currentStep == CaptureStep.COLOR) {
-            // Auto-extract color from the photo
+            // Auto-extract color palette from the photo
             viewModelScope.launch {
                 val bitmap = loadBitmapFromUri(Uri.parse(uri))
-                val colorHex = if (bitmap != null) localAnalyzer.extractDominantColor(bitmap) else "#808080"
+                val suggestedColors = if (bitmap != null) localAnalyzer.extractColorPalette(bitmap) else listOf("#808080")
                 _uiState.value = BoxCaptureUiState.ColorConfirmation(
                     capturedUris = capturedUris.toList(),
-                    suggestedColorHex = colorHex,
+                    suggestedColors = suggestedColors,
+                    selectedColorHex = suggestedColors.firstOrNull() ?: "#808080",
                     mode = mode
                 )
             }
@@ -272,7 +273,6 @@ class BoxCaptureViewModel @Inject constructor(
             val steps = CaptureStep.getStepsForMode(mode)
             val ingredientsIdx = steps.indexOf(CaptureStep.INGREDIENTS)
             val instructionsIdx = steps.indexOf(CaptureStep.INSTRUCTIONS)
-            val colorIdx = steps.indexOf(CaptureStep.COLOR)
 
             localIngredientsOcr = if (ingredientsIdx != -1 && ingredientsIdx in capturedUris.indices) {
                 val uri = capturedUris[ingredientsIdx]
@@ -351,7 +351,7 @@ class BoxCaptureViewModel @Inject constructor(
                         CaptureMode.PRODUCT -> "product container (front and back)"
                     }
                     val barcodeContext = if (!scannedBarcode.isNullOrBlank()) "The scanned barcode is: $scannedBarcode." else ""
-                    val colorContext = if (!manualColor.isNullOrBlank()) "The user-selected product color is: $manualColor." else "Please identify the best representative color for this product from the photos."
+                    val colorContext = if (!manualColor.isNullOrBlank()) "The confirmed hex color code is: $manualColor." else "Analyze the photos and estimate the most accurate hex code of the actual makeup shade."
                     
                     val enrichmentContext = obfEnrichmentData?.let {
                         """
@@ -367,6 +367,7 @@ class BoxCaptureViewModel @Inject constructor(
                     val instructionsContext = if (localInstructionsOcr.isNotBlank()) "LOCAL OCR EXTRACTED TEXT FROM INSTRUCTIONS/BACK PANEL:\n$localInstructionsOcr\n---" else ""
                     
                     text("""
+                        You are a professional cosmetic analyzer for the "KoColor Boutique" app. 
                         Analyze these photos of a $target. $barcodeContext
                         $enrichmentContext
                         $colorContext
@@ -401,7 +402,7 @@ class BoxCaptureViewModel @Inject constructor(
                             "fdaClinicalWarnings": ["Warning 1", "..."],
                             "fdaActiveIngredients": ["Active 1", "..."]
                         }
-                        Be extremely precise. If a field is unknown, use null.
+                        Be extremely precise, especially with the colorHex code. If a field is unknown, use null.
                     """.trimIndent())
                 }
 

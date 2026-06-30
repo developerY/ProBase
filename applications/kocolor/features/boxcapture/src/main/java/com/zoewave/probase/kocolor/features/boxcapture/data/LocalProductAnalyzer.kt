@@ -36,39 +36,51 @@ class LocalProductAnalyzer @Inject constructor() {
     }
 
     /**
-     * Extracts the dominant color from the center of the bitmap.
-     * Useful for giving a "guess" during the Product Color step.
+     * Extracts a palette of dominant colors from the bitmap.
+     * Samples different regions to give the user better options.
      */
-    fun extractDominantColor(bitmap: Bitmap): String {
-        val centerX = bitmap.width / 2
-        val centerY = bitmap.height / 2
-        val radius = (bitmap.width * 0.1f).toInt().coerceAtLeast(10)
+    fun extractColorPalette(bitmap: Bitmap): List<String> {
+        val width = bitmap.width
+        val height = bitmap.height
+        
+        // Sample points: Center, Center-Top, Center-Bottom, Left-Mid, Right-Mid
+        val points = listOf(
+            Pair(width / 2, height / 2),
+            Pair(width / 2, height / 3),
+            Pair(width / 2, (height * 2) / 3),
+            Pair(width / 3, height / 2),
+            Pair((width * 2) / 3, height / 2)
+        )
 
-        // Sample a small 20x20 area in the center
-        var rTotal = 0L
-        var gTotal = 0L
-        var bTotal = 0L
-        var count = 0
+        val palette = mutableSetOf<String>()
+        val radius = (width * 0.05f).toInt().coerceAtLeast(5)
 
-        for (x in (centerX - radius)..(centerX + radius)) {
-            for (y in (centerY - radius)..(centerY + radius)) {
-                if (x in 0 until bitmap.width && y in 0 until bitmap.height) {
-                    val pixel = bitmap.getPixel(x, y)
-                    rTotal += android.graphics.Color.red(pixel)
-                    gTotal += android.graphics.Color.green(pixel)
-                    bTotal += android.graphics.Color.blue(pixel)
-                    count++
+        for (point in points) {
+            val (centerX, centerY) = point
+            var rTotal = 0L
+            var gTotal = 0L
+            var bTotal = 0L
+            var count = 0
+
+            for (x in (centerX - radius)..(centerX + radius)) {
+                for (y in (centerY - radius)..(centerY + radius)) {
+                    if (x in 0 until width && y in 0 until height) {
+                        val pixel = bitmap.getPixel(x, y)
+                        rTotal += android.graphics.Color.red(pixel)
+                        gTotal += android.graphics.Color.green(pixel)
+                        bTotal += android.graphics.Color.blue(pixel)
+                        count++
+                    }
                 }
+            }
+
+            if (count > 0) {
+                val hex = String.format("#%02X%02X%02X", (rTotal / count).toInt(), (gTotal / count).toInt(), (bTotal / count).toInt())
+                palette.add(hex)
             }
         }
 
-        if (count == 0) return "#808080"
-
-        val r = (rTotal / count).toInt()
-        val g = (gTotal / count).toInt()
-        val b = (bTotal / count).toInt()
-
-        return String.format("#%02X%02X%02X", r, g, b)
+        return palette.toList().take(5)
     }
 
     private fun heuristicGuess(text: String): CosmeticItem {
