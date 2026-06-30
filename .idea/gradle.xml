@@ -180,6 +180,7 @@
             <option value="$PROJECT_DIR$/features/ble" />
             <option value="$PROJECT_DIR$/features/calendar" />
             <option value="$PROJECT_DIR$/features/camera" />
+            <option value="$PROJECT_DIR$/features/camera/productcapture" />
             <option value="$PROJECT_DIR$/features/compliance" />
             <option value="$PROJECT_DIR$/features/graphics" />
             <option value="$PROJECT_DIR$/features/health" />
