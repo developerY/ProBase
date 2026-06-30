@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:data"))
     implementation(project(":features:ai:configuration"))
+    implementation(project(":features:graphics"))
 
     implementation(libs.google.generative.ai)
 
