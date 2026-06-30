@@ -71,6 +71,8 @@ sealed class BoxCaptureEvent {
     data object SkipBarcode : BoxCaptureEvent()
     data object SkipStep : BoxCaptureEvent()
     data class OnColorSelected(val hex: String) : BoxCaptureEvent()
+    data object ConfirmColor : BoxCaptureEvent()
+    data object ClearColor : BoxCaptureEvent()
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -194,6 +196,15 @@ internal fun BoxCaptureScreen(
                         uiState = AnalysisViewUiState(uiState.progress),
                         onEvent = {},
                         navTo = {}
+                    )
+                }
+                is BoxCaptureUiState.ColorConfirmation -> {
+                    ColorConfirmationView(
+                        uiState = ColorConfirmationViewUiState(
+                            photoUri = uiState.capturedUris.last { it.isNotBlank() },
+                            suggestedColorHex = uiState.suggestedColorHex
+                        ),
+                        onEvent = onEvent
                     )
                 }
                 is BoxCaptureUiState.Review -> {
@@ -726,6 +737,116 @@ private fun OcrTextArea(text: String) {
         }
     }
 }
+
+data class ColorConfirmationViewUiState(
+    val photoUri: String,
+    val suggestedColorHex: String
+)
+
+@Composable
+private fun ColorConfirmationView(
+    uiState: ColorConfirmationViewUiState,
+    onEvent: (BoxCaptureEvent) -> Unit
+) {
+    var showColorPicker by remember { mutableStateOf(false) }
+
+    if (showColorPicker) {
+        ColorPickerDialog(
+            initialColor = parseColor(uiState.suggestedColorHex),
+            onColorSelected = { 
+                onEvent(BoxCaptureEvent.OnColorSelected(it.toHex())) 
+                showColorPicker = false
+            },
+            onDismissRequest = { showColorPicker = false },
+            title = "Refine Product Color"
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0f172a))
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "AI Color Analysis",
+            color = Color.White,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "Dominant shade detected from photo",
+            color = Color.White.copy(alpha = 0.6f),
+            style = MaterialTheme.typography.bodySmall
+        )
+        
+        Spacer(Modifier.height(32.dp))
+
+        Box(
+            modifier = Modifier
+                .size(260.dp)
+                .clip(RoundedCornerShape(32.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
+        ) {
+            AsyncImage(
+                model = uiState.photoUri,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+            
+            // Color Circle Overlay
+            Surface(
+                color = parseColor(uiState.suggestedColorHex),
+                shape = CircleShape,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(100.dp)
+                    .border(4.dp, Color.White, CircleShape),
+                shadowElevation = 8.dp
+            ) {}
+        }
+
+        Spacer(Modifier.height(48.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedButton(
+                onClick = { onEvent(BoxCaptureEvent.ClearColor) },
+                modifier = Modifier.weight(1f).height(56.dp),
+                border = borderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+            ) {
+                Text("CLEAR")
+            }
+
+            IconButton(
+                onClick = { showColorPicker = true },
+                modifier = Modifier.size(56.dp).background(Color.White.copy(alpha = 0.05f), CircleShape)
+            ) {
+                Icon(Icons.Default.Palette, null, tint = Color(0xFF22d3ee))
+            }
+
+            Button(
+                onClick = { onEvent(BoxCaptureEvent.ConfirmColor) },
+                modifier = Modifier.weight(1f).height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22d3ee))
+            ) {
+                Text("USE COLOR", color = Color.Black, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun borderStroke(width: androidx.compose.ui.unit.Dp, color: Color) = androidx.compose.foundation.BorderStroke(width, color)
 
 data class AnalysisViewUiState(val progress: String)
 

@@ -15,6 +15,12 @@ sealed interface BoxCaptureUiState {
         val progress: String = "Initializing AI..."
     ) : BoxCaptureUiState
 
+    data class ColorConfirmation(
+        val capturedUris: List<String>,
+        val suggestedColorHex: String,
+        val mode: CaptureMode
+    ) : BoxCaptureUiState
+
     data class Review(
         val capturedUris: List<String>,
         val barcode: String?,

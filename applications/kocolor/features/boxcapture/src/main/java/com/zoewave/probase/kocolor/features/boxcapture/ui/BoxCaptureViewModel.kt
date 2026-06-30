@@ -124,6 +124,27 @@ class BoxCaptureViewModel @Inject constructor(
                 val current = (uiState.value as? BoxCaptureUiState.Idle)
                 if (current != null) {
                     _uiState.value = current.copy(extractedColorHex = event.hex)
+                } else if (uiState.value is BoxCaptureUiState.ColorConfirmation) {
+                    val cc = uiState.value as BoxCaptureUiState.ColorConfirmation
+                    _uiState.value = cc.copy(suggestedColorHex = event.hex)
+                }
+            }
+            BoxCaptureEvent.ConfirmColor -> {
+                val current = (uiState.value as? BoxCaptureUiState.ColorConfirmation) ?: return
+                val nextStep = getNextStep(current.mode)
+                if (nextStep != null) {
+                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, current.suggestedColorHex)
+                } else {
+                    prepareReview(current.mode)
+                }
+            }
+            BoxCaptureEvent.ClearColor -> {
+                val current = (uiState.value as? BoxCaptureUiState.ColorConfirmation) ?: return
+                val nextStep = getNextStep(current.mode)
+                if (nextStep != null) {
+                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, null)
+                } else {
+                    prepareReview(current.mode)
                 }
             }
         }
@@ -132,10 +153,19 @@ class BoxCaptureViewModel @Inject constructor(
     private fun skipStep() {
         val current = (uiState.value as? BoxCaptureUiState.Idle) ?: return
         if (current.currentStep.isSkippable) {
-            // Add a placeholder/empty URI to keep track of steps if needed, 
-            // but here we can just move to the next step.
-            // Actually, let's add an empty string to capturedUris to maintain index-to-step mapping
             capturedUris.add("") 
+            
+            if (current.currentStep == CaptureStep.COLOR) {
+                // Moving past COLOR without a photo
+                val nextStep = getNextStep(current.mode)
+                if (nextStep != null) {
+                    _uiState.value = current.copy(capturedUris = capturedUris.toList(), currentStep = nextStep)
+                } else {
+                    prepareReview(current.mode)
+                }
+                return
+            }
+
             val nextStep = getNextStep(current.mode)
             if (nextStep != null) {
                 _uiState.value = current.copy(capturedUris = capturedUris.toList(), currentStep = nextStep)
@@ -148,6 +178,7 @@ class BoxCaptureViewModel @Inject constructor(
     private fun refreshStep() {
         val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: 
                    (uiState.value as? BoxCaptureUiState.Review)?.mode ?:
+                   (uiState.value as? BoxCaptureUiState.ColorConfirmation)?.mode ?:
                    CaptureMode.BOX
         
         val currentStep = getNextStep(mode) ?: CaptureStep.BARCODE // Fallback
@@ -175,6 +206,21 @@ class BoxCaptureViewModel @Inject constructor(
         capturedUris.add(uri)
         val current = (uiState.value as? BoxCaptureUiState.Idle) ?: return
         val mode = current.mode
+        
+        if (current.currentStep == CaptureStep.COLOR) {
+            // Auto-extract color from the photo
+            viewModelScope.launch {
+                val bitmap = loadBitmapFromUri(Uri.parse(uri))
+                val colorHex = if (bitmap != null) localAnalyzer.extractDominantColor(bitmap) else "#808080"
+                _uiState.value = BoxCaptureUiState.ColorConfirmation(
+                    capturedUris = capturedUris.toList(),
+                    suggestedColorHex = colorHex,
+                    mode = mode
+                )
+            }
+            return
+        }
+
         val nextStep = getNextStep(mode)
         if (nextStep != null) {
             _uiState.value = current.copy(capturedUris = capturedUris.toList(), currentStep = nextStep)
