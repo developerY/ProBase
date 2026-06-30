@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Checkroom
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MonetizationOn
@@ -73,11 +74,20 @@ fun WardrobeLandingScreen(
                 }
             )
         },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navTo(KoColorRoute.ClothingCapture) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = Color.White
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Clothing")
+            }
+        },
         modifier = modifier
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(24.dp),
+            contentPadding = PaddingValues(bottom = 100.dp, start = 24.dp, end = 24.dp, top = 24.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             item {

@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -71,20 +72,17 @@ fun WardrobeScreen(
                     IconButton(onClick = { navTo(KoColorRoute.WardrobeColorVerification) }) {
                         Icon(Icons.Default.Palette, contentDescription = stringResource(R.string.applications_kocolor_features_inventory_test_colors))
                     }
-                    IconButton(onClick = { 
-                        val newEssential = context.getString(R.string.applications_kocolor_features_inventory_new_essential)
-                        onEvent(WardrobeEvent.AddItem(
-                            ClothingItem(
-                                name = newEssential,
-                                category = ClothingCategory.TOPS,
-                                colorHex = "#FFFFFF"
-                            )
-                        ))
-                    }) {
-                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.applications_kocolor_features_inventory_add))
-                    }
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navTo(KoColorRoute.ClothingCapture) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = Color.White
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Clothing")
+            }
         }
     ) { padding ->
         if (uiState.isLoading) {

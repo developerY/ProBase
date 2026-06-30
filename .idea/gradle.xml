@@ -95,6 +95,7 @@
             <option value="$PROJECT_DIR$/applications/kocolor/features/analyzer" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/boxcapture" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/chemicals" />
+            <option value="$PROJECT_DIR$/applications/kocolor/features/clothingcapture" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/colors" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/cosmetics" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/fda" />

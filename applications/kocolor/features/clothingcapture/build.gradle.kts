@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.zoewave.probase.kocolor.features.boxcapture"
+    namespace = "com.zoewave.probase.kocolor.features.clothingcapture"
 }
 
 dependencies {

@@ -22,6 +22,9 @@ import com.zoewave.probase.kocolor.features.analyzer.ui.AnalyzerViewModel
 import com.zoewave.probase.kocolor.features.boxcapture.ui.BoxCaptureEvent
 import com.zoewave.probase.kocolor.features.boxcapture.ui.BoxCaptureUiRoute
 import com.zoewave.probase.kocolor.features.boxcapture.ui.BoxCaptureViewModel
+import com.zoewave.probase.kocolor.features.clothingcapture.ui.ClothingCaptureEvent
+import com.zoewave.probase.kocolor.features.clothingcapture.ui.ClothingCaptureUiRoute
+import com.zoewave.probase.kocolor.features.clothingcapture.ui.ClothingCaptureViewModel
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticAnalyticsScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverUiState
@@ -42,6 +45,7 @@ import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeDetailScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeDetailUiState
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEditScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEditUiState
+import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeEvent
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeLandingScreen
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeRoute
 import com.zoewave.probase.kocolor.features.inventory.ui.WardrobeViewModel
@@ -102,6 +106,7 @@ fun koColorNavEntryProvider(
         }
         is KoColorRoute.BoxCapture -> NavEntry(route) {
             val viewModel: BoxCaptureViewModel = hiltViewModel()
+            val wardrobeViewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
 
             androidx.compose.runtime.LaunchedEffect(route.mode) {
@@ -114,6 +119,26 @@ fun koColorNavEntryProvider(
                     when (event) {
                         is BoxCaptureEvent.Success -> onBack()
                         BoxCaptureEvent.Dismiss -> onBack()
+                        else -> viewModel.onEvent(event)
+                    }
+                },
+                navTo = onNavigateTo
+            )
+        }
+        is KoColorRoute.ClothingCapture -> NavEntry(route) {
+            val viewModel: ClothingCaptureViewModel = hiltViewModel()
+            val wardrobeViewModel: WardrobeViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+            ClothingCaptureUiRoute(
+                uiState = state,
+                onEvent = { event ->
+                    when (event) {
+                        is ClothingCaptureEvent.Success -> {
+                            wardrobeViewModel.onEvent(WardrobeEvent.AddItem(event.item))
+                            onBack()
+                        }
+                        ClothingCaptureEvent.Dismiss -> onBack()
                         else -> viewModel.onEvent(event)
                     }
                 },
