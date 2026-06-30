@@ -13,19 +13,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -34,28 +22,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,6 +45,9 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
+import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
+import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 import com.zoewave.probase.kocolor.features.boxcapture.R
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode
@@ -97,6 +69,10 @@ sealed class BoxCaptureEvent {
     data class ChangeMode(val mode: CaptureMode) : BoxCaptureEvent()
     data object SubmitToAi : BoxCaptureEvent()
     data object SkipBarcode : BoxCaptureEvent()
+    data object SkipStep : BoxCaptureEvent()
+    data class OnColorSelected(val hex: String) : BoxCaptureEvent()
+    data object ConfirmColor : BoxCaptureEvent()
+    data object ClearColor : BoxCaptureEvent()
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -208,7 +184,8 @@ internal fun BoxCaptureScreen(
                         uiState = CameraViewUiState(
                             step = uiState.currentStep,
                             capturedUris = uiState.capturedUris,
-                            mode = uiState.mode
+                            mode = uiState.mode,
+                            extractedColorHex = uiState.extractedColorHex
                         ),
                         onEvent = onEvent,
                         navTo = navTo
@@ -221,6 +198,15 @@ internal fun BoxCaptureScreen(
                         navTo = {}
                     )
                 }
+                is BoxCaptureUiState.ColorConfirmation -> {
+                    ColorConfirmationView(
+                        uiState = ColorConfirmationViewUiState(
+                            photoUri = uiState.capturedUris.last { it.isNotBlank() },
+                            suggestedColorHex = uiState.suggestedColorHex
+                        ),
+                        onEvent = onEvent
+                    )
+                }
                 is BoxCaptureUiState.Review -> {
                     ReviewView(
                         uiState = ReviewViewUiState(
@@ -228,7 +214,8 @@ internal fun BoxCaptureScreen(
                             barcode = uiState.barcode,
                             ingredientsOcr = uiState.ingredientsOcr,
                             instructionsOcr = uiState.instructionsOcr,
-                            enrichmentData = uiState.enrichmentData
+                            enrichmentData = uiState.enrichmentData,
+                            manualColorHex = uiState.manualColorHex
                         ),
                         onEvent = onEvent,
                         navTo = navTo
@@ -252,7 +239,8 @@ internal fun BoxCaptureScreen(
 data class CameraViewUiState(
     val step: CaptureStep,
     val capturedUris: List<String>,
-    val mode: CaptureMode
+    val mode: CaptureMode,
+    val extractedColorHex: String? = null
 )
 
 @Composable
@@ -265,6 +253,7 @@ private fun CameraView(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
+    var showColorPicker by remember { mutableStateOf(false) }
 
     val scanner = remember(context) {
         val options = GmsBarcodeScannerOptions.Builder()
@@ -307,7 +296,21 @@ private fun CameraView(
         }
     }
 
-    val totalSteps = CaptureStep.getStepsForMode(uiState.mode).size
+    val steps = CaptureStep.getStepsForMode(uiState.mode)
+    val totalSteps = steps.size
+    val stepIndex = steps.indexOf(uiState.step)
+
+    if (showColorPicker) {
+        ColorPickerDialog(
+            initialColor = uiState.extractedColorHex?.let { parseColor(it) } ?: Color.Gray,
+            onColorSelected = { 
+                onEvent(BoxCaptureEvent.OnColorSelected(it.toHex()))
+                showColorPicker = false
+            },
+            onDismissRequest = { showColorPicker = false },
+            title = "Identify Product Color"
+        )
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
@@ -316,6 +319,7 @@ private fun CameraView(
                 CameraXViewfinder(surfaceRequest = sr, modifier = Modifier.fillMaxSize())
             }
 
+            // Top Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -324,7 +328,6 @@ private fun CameraView(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    val stepIndex = CaptureStep.getStepsForMode(uiState.mode).indexOf(uiState.step)
                     Text(
                         text = stringResource(R.string.applications_kocolor_features_boxcapture_step_format, stepIndex + 1, totalSteps),
                         color = Color.White,
@@ -332,32 +335,11 @@ private fun CameraView(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = uiState.step.getLabel(uiState.mode).uppercase(),
+                        text = uiState.step.label.uppercase(),
                         color = Color(0xFF22d3ee),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
-                }
-
-                if (uiState.mode == CaptureMode.BOX_PRO || uiState.mode == CaptureMode.BOX_QUICK) {
-                    Surface(
-                        color = Color.White.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(24.dp),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    ) {
-                        Row(modifier = Modifier.padding(4.dp)) {
-                            CaptureModeChip(
-                                label = "3",
-                                isSelected = uiState.mode == CaptureMode.BOX_QUICK,
-                                onClick = { onEvent(BoxCaptureEvent.ChangeMode(CaptureMode.BOX_QUICK)) }
-                            )
-                            CaptureModeChip(
-                                label = "7",
-                                isSelected = uiState.mode == CaptureMode.BOX_PRO,
-                                onClick = { onEvent(BoxCaptureEvent.ChangeMode(CaptureMode.BOX_PRO)) }
-                            )
-                        }
-                    }
                 }
 
                 IconButton(
@@ -366,6 +348,19 @@ private fun CameraView(
                 ) {
                     Icon(Icons.Default.Close, contentDescription = stringResource(R.string.applications_kocolor_features_boxcapture_close), tint = Color.White)
                 }
+            }
+
+            // Color Picker Overlay for Step 5
+            if (uiState.step == CaptureStep.COLOR) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(100.dp)
+                        .border(2.dp, Color.White, CircleShape)
+                        .padding(4.dp)
+                        .background(uiState.extractedColorHex?.let { parseColor(it) } ?: Color.Transparent, CircleShape)
+                        .clip(CircleShape)
+                )
             }
         }
 
@@ -382,26 +377,39 @@ private fun CameraView(
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
                 itemsIndexed(uiState.capturedUris) { index, uri ->
-                    Box(modifier = Modifier.size(70.dp)) {
-                        AsyncImage(
-                            model = uri,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                        IconButton(
-                            onClick = { onEvent(BoxCaptureEvent.DeletePhoto(index)) },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .size(24.dp)
-                                .background(Color.Black.copy(alpha = 0.6f), CircleShape)
-                        ) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = "Delete",
-                                tint = Color.White,
-                                modifier = Modifier.size(14.dp)
+                    if (uri.isNotBlank()) {
+                        Box(modifier = Modifier.size(70.dp)) {
+                            AsyncImage(
+                                model = uri,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                                contentScale = ContentScale.Crop
                             )
+                            IconButton(
+                                onClick = { onEvent(BoxCaptureEvent.DeletePhoto(index)) },
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .size(24.dp)
+                                    .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                            ) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Delete",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        // Placeholder for skipped steps
+                        Box(
+                            modifier = Modifier
+                                .size(70.dp)
+                                .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Skipped", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                         }
                     }
                 }
@@ -436,47 +444,81 @@ private fun CameraView(
                     }
                 }
             } else {
-                Button(
-                    onClick = {
-                        coroutineScope.launch(Dispatchers.IO) {
-                            val file = createFile(context)
-                            val options = ImageCapture.OutputFileOptions.Builder(file).build()
-                            imageCaptureUseCase.takePicture(
-                                options,
-                                ContextCompat.getMainExecutor(context),
-                                object : ImageCapture.OnImageSavedCallback {
-                                    override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                                        onEvent(BoxCaptureEvent.Capture(Uri.fromFile(file).toString()))
-                                    }
-
-                                    override fun onError(exception: ImageCaptureException) {
-                                        Log.e("BoxCapture", "Capture failed", exception)
-                                    }
-                                }
-                            )
-                        }
-                    },
-                    modifier = Modifier.size(80.dp),
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                    contentPadding = PaddingValues(0.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        Icons.Default.CameraAlt,
-                        contentDescription = "Capture",
-                        tint = Color.Black,
-                        modifier = Modifier.size(32.dp)
-                    )
+                    if (uiState.step.isSkippable) {
+                        TextButton(
+                            onClick = { onEvent(BoxCaptureEvent.SkipStep) },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.SkipNext, null, tint = Color.White.copy(alpha = 0.7f))
+                            Spacer(Modifier.width(8.dp))
+                            Text("SKIP STEP", color = Color.White.copy(alpha = 0.7f))
+                        }
+                    } else {
+                        Spacer(Modifier.weight(1f))
+                    }
+
+                    Button(
+                        onClick = {
+                            coroutineScope.launch(Dispatchers.IO) {
+                                val file = createFile(context)
+                                val options = ImageCapture.OutputFileOptions.Builder(file).build()
+                                imageCaptureUseCase.takePicture(
+                                    options,
+                                    ContextCompat.getMainExecutor(context),
+                                    object : ImageCapture.OnImageSavedCallback {
+                                        override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                            onEvent(BoxCaptureEvent.Capture(Uri.fromFile(file).toString()))
+                                        }
+
+                                        override fun onError(exception: ImageCaptureException) {
+                                            Log.e("BoxCapture", "Capture failed", exception)
+                                        }
+                                    }
+                                )
+                            }
+                        },
+                        modifier = Modifier.size(80.dp),
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.CameraAlt,
+                            contentDescription = "Capture",
+                            tint = Color.Black,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+
+                    if (uiState.step == CaptureStep.COLOR) {
+                        IconButton(
+                            onClick = { showColorPicker = true },
+                            modifier = Modifier
+                                .weight(1f)
+                                .size(56.dp)
+                                .background(Color.White.copy(alpha = 0.1f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.Palette, null, tint = Color(0xFF22d3ee))
+                        }
+                    } else {
+                        Spacer(Modifier.weight(1f))
+                    }
                 }
             }
             
             Spacer(modifier = Modifier.height(12.dp))
-            val captureLabel = when (uiState.mode) {
-                CaptureMode.BOX_PRO -> stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_box)
-                CaptureMode.BOX_QUICK -> if (uiState.step == CaptureStep.INGREDIENTS) 
-                    stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_ingredients)
-                    else stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_box)
-                CaptureMode.PRODUCT -> stringResource(R.string.applications_kocolor_features_boxcapture_tap_to_capture_product)
+            val captureLabel = when (uiState.step) {
+                CaptureStep.FRONT -> "Capture the product front"
+                CaptureStep.BACK -> "Capture the ingredients or info panel"
+                CaptureStep.INGREDIENTS -> "Ensure the ingredients list is clear"
+                CaptureStep.INSTRUCTIONS -> "Capture usage instructions (if any)"
+                CaptureStep.COLOR -> "Capture the best representation of product color"
+                CaptureStep.BARCODE -> "Final step: Scan the barcode"
             }
             Text(captureLabel, color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.labelSmall)
         }
@@ -488,7 +530,8 @@ data class ReviewViewUiState(
     val barcode: String?,
     val ingredientsOcr: String,
     val instructionsOcr: String,
-    val enrichmentData: CosmeticItem? = null
+    val enrichmentData: CosmeticItem? = null,
+    val manualColorHex: String? = null
 )
 
 @Composable
@@ -527,30 +570,60 @@ private fun ReviewView(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             item {
-                ReviewSection(title = "Captured Photos (${uiState.capturedUris.size})") {
+                ReviewSection(title = "Captured Photos (${uiState.capturedUris.filter { it.isNotBlank() }.size})") {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         itemsIndexed(uiState.capturedUris) { index, uri ->
-                            Box {
-                                AsyncImage(
-                                    model = uri,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(100.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
-                                    contentScale = ContentScale.Crop
-                                )
-                                IconButton(
-                                    onClick = { onEvent(BoxCaptureEvent.DeletePhoto(index)) },
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .padding(4.dp)
-                                        .size(24.dp)
-                                        .background(Color.Black.copy(alpha = 0.6f), CircleShape)
-                                ) {
-                                    Icon(Icons.Default.Delete, null, tint = Color.White, modifier = Modifier.size(14.dp))
+                            if (uri.isNotBlank()) {
+                                Box {
+                                    AsyncImage(
+                                        model = uri,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(100.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                    IconButton(
+                                        onClick = { onEvent(BoxCaptureEvent.DeletePhoto(index)) },
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(4.dp)
+                                            .size(24.dp)
+                                            .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                                    ) {
+                                        Icon(Icons.Default.Delete, null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                    }
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            item {
+                ReviewSection(title = "Color Identity") {
+                    Surface(
+                        color = Color.White.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                color = uiState.manualColorHex?.let { parseColor(it) } ?: Color.Transparent,
+                                shape = CircleShape,
+                                modifier = Modifier.size(40.dp).border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                            ) {
+                                if (uiState.manualColorHex == null) {
+                                    Icon(Icons.Default.AutoAwesome, null, tint = Color.Gray, modifier = Modifier.padding(8.dp))
+                                }
+                            }
+                            Spacer(Modifier.width(16.dp))
+                            Text(
+                                text = uiState.manualColorHex ?: "AI will identify color from photos",
+                                color = if (uiState.manualColorHex != null) Color.White else Color.Gray,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
                     }
                 }
@@ -664,6 +737,116 @@ private fun OcrTextArea(text: String) {
         }
     }
 }
+
+data class ColorConfirmationViewUiState(
+    val photoUri: String,
+    val suggestedColorHex: String
+)
+
+@Composable
+private fun ColorConfirmationView(
+    uiState: ColorConfirmationViewUiState,
+    onEvent: (BoxCaptureEvent) -> Unit
+) {
+    var showColorPicker by remember { mutableStateOf(false) }
+
+    if (showColorPicker) {
+        ColorPickerDialog(
+            initialColor = parseColor(uiState.suggestedColorHex),
+            onColorSelected = { 
+                onEvent(BoxCaptureEvent.OnColorSelected(it.toHex())) 
+                showColorPicker = false
+            },
+            onDismissRequest = { showColorPicker = false },
+            title = "Refine Product Color"
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0f172a))
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "AI Color Analysis",
+            color = Color.White,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "Dominant shade detected from photo",
+            color = Color.White.copy(alpha = 0.6f),
+            style = MaterialTheme.typography.bodySmall
+        )
+        
+        Spacer(Modifier.height(32.dp))
+
+        Box(
+            modifier = Modifier
+                .size(260.dp)
+                .clip(RoundedCornerShape(32.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
+        ) {
+            AsyncImage(
+                model = uiState.photoUri,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+            
+            // Color Circle Overlay
+            Surface(
+                color = parseColor(uiState.suggestedColorHex),
+                shape = CircleShape,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(100.dp)
+                    .border(4.dp, Color.White, CircleShape),
+                shadowElevation = 8.dp
+            ) {}
+        }
+
+        Spacer(Modifier.height(48.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedButton(
+                onClick = { onEvent(BoxCaptureEvent.ClearColor) },
+                modifier = Modifier.weight(1f).height(56.dp),
+                border = borderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+            ) {
+                Text("CLEAR")
+            }
+
+            IconButton(
+                onClick = { showColorPicker = true },
+                modifier = Modifier.size(56.dp).background(Color.White.copy(alpha = 0.05f), CircleShape)
+            ) {
+                Icon(Icons.Default.Palette, null, tint = Color(0xFF22d3ee))
+            }
+
+            Button(
+                onClick = { onEvent(BoxCaptureEvent.ConfirmColor) },
+                modifier = Modifier.weight(1f).height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22d3ee))
+            ) {
+                Text("USE COLOR", color = Color.Black, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun borderStroke(width: androidx.compose.ui.unit.Dp, color: Color) = androidx.compose.foundation.BorderStroke(width, color)
 
 data class AnalysisViewUiState(val progress: String)
 

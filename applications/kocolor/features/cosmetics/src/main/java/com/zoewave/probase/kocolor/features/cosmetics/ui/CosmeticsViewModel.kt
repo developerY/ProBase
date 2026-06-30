@@ -94,6 +94,7 @@ sealed class CosmeticsEvent {
     data class InitializeAdd(val categoryFilter: String?) : CosmeticsEvent()
     data class HandleScanResult(val code: String) : CosmeticsEvent()
     data class OnObfContributionToggled(val enabled: Boolean) : CosmeticsEvent()
+    data object AcknowledgeErrorDialog : CosmeticsEvent()
     data object ResetScanState : CosmeticsEvent()
     data object CancelDiscovery : CosmeticsEvent()
 }
@@ -248,7 +249,11 @@ class CosmeticsViewModel @Inject constructor(
                 sessionRepository.reset()
                 _scanStatus.value = null
             }
-            is CosmeticsEvent.UpdateItem -> updateItem(event.item)
+            is CosmeticsEvent.UpdateItem -> {
+                updateItem(event.item)
+                sessionRepository.reset()
+                _scanStatus.value = null
+            }
             is CosmeticsEvent.DeleteItem -> deleteItem(event.id)
             is CosmeticsEvent.UseItem -> useItem(event.id)
             is CosmeticsEvent.UpdateDraft -> {
@@ -277,7 +282,8 @@ class CosmeticsViewModel @Inject constructor(
                 val isEmpty = currentDraft == null || (currentDraft.name.isBlank() && 
                              currentDraft.brand.isBlank() && 
                              currentDraft.imageUrl == null && 
-                             currentDraft.batchCode == null)
+                             currentDraft.batchCode == null &&
+                             currentDraft.id == 0L)
                 
                 if (!isEmpty || sessionRepository.scanState.value == FashionSessionRepository.ScanStatus.ANALYZING || sessionRepository.scanState.value == FashionSessionRepository.ScanStatus.SUCCESS) return
                 
@@ -302,6 +308,9 @@ class CosmeticsViewModel @Inject constructor(
             is CosmeticsEvent.HandleScanResult -> fetchObfProduct(event.code)
             is CosmeticsEvent.OnObfContributionToggled -> {
                 _isObfContributionEnabled.value = event.enabled
+            }
+            CosmeticsEvent.AcknowledgeErrorDialog -> {
+                _scanStatus.value = null
             }
             CosmeticsEvent.ResetScanState -> {
                 sessionRepository.setScanState(FashionSessionRepository.ScanStatus.IDLE)
@@ -397,9 +406,6 @@ class CosmeticsViewModel @Inject constructor(
                 _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_product_not_found_obf)
                 sessionRepository.setScanState(FashionSessionRepository.ScanStatus.FAILED)
             }
-            
-            delay(3000)
-            _scanStatus.value = null
         }
     }
 

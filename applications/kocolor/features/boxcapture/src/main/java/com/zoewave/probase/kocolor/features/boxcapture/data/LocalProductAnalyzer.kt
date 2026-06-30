@@ -35,6 +35,42 @@ class LocalProductAnalyzer @Inject constructor() {
         }
     }
 
+    /**
+     * Extracts the dominant color from the center of the bitmap.
+     * Useful for giving a "guess" during the Product Color step.
+     */
+    fun extractDominantColor(bitmap: Bitmap): String {
+        val centerX = bitmap.width / 2
+        val centerY = bitmap.height / 2
+        val radius = (bitmap.width * 0.1f).toInt().coerceAtLeast(10)
+
+        // Sample a small 20x20 area in the center
+        var rTotal = 0L
+        var gTotal = 0L
+        var bTotal = 0L
+        var count = 0
+
+        for (x in (centerX - radius)..(centerX + radius)) {
+            for (y in (centerY - radius)..(centerY + radius)) {
+                if (x in 0 until bitmap.width && y in 0 until bitmap.height) {
+                    val pixel = bitmap.getPixel(x, y)
+                    rTotal += android.graphics.Color.red(pixel)
+                    gTotal += android.graphics.Color.green(pixel)
+                    bTotal += android.graphics.Color.blue(pixel)
+                    count++
+                }
+            }
+        }
+
+        if (count == 0) return "#808080"
+
+        val r = (rTotal / count).toInt()
+        val g = (gTotal / count).toInt()
+        val b = (bTotal / count).toInt()
+
+        return String.format("#%02X%02X%02X", r, g, b)
+    }
+
     private fun heuristicGuess(text: String): CosmeticItem {
         val lines = text.lines().map { it.trim() }.filter { it.isNotBlank() }
         

@@ -104,7 +104,7 @@ class BoxCaptureViewModel @Inject constructor(
                 }
             }
             is BoxCaptureEvent.ChangeMode -> {
-                val currentMode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_PRO
+                val currentMode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
                 if (currentMode != event.mode) {
                     // Only reset if we actually change
                     capturedUris.clear()
@@ -112,12 +112,65 @@ class BoxCaptureViewModel @Inject constructor(
                 }
             }
             BoxCaptureEvent.SubmitToAi -> {
-                val mode = (uiState.value as? BoxCaptureUiState.Review)?.mode ?: CaptureMode.BOX_PRO
+                val mode = (uiState.value as? BoxCaptureUiState.Review)?.mode ?: CaptureMode.BOX
                 analyzePhotos(mode)
             }
             BoxCaptureEvent.SkipBarcode -> {
-                val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_PRO
+                val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
                 prepareReview(mode)
+            }
+            BoxCaptureEvent.SkipStep -> skipStep()
+            is BoxCaptureEvent.OnColorSelected -> {
+                val current = (uiState.value as? BoxCaptureUiState.Idle)
+                if (current != null) {
+                    _uiState.value = current.copy(extractedColorHex = event.hex)
+                } else if (uiState.value is BoxCaptureUiState.ColorConfirmation) {
+                    val cc = uiState.value as BoxCaptureUiState.ColorConfirmation
+                    _uiState.value = cc.copy(suggestedColorHex = event.hex)
+                }
+            }
+            BoxCaptureEvent.ConfirmColor -> {
+                val current = (uiState.value as? BoxCaptureUiState.ColorConfirmation) ?: return
+                val nextStep = getNextStep(current.mode)
+                if (nextStep != null) {
+                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, current.suggestedColorHex)
+                } else {
+                    prepareReview(current.mode)
+                }
+            }
+            BoxCaptureEvent.ClearColor -> {
+                val current = (uiState.value as? BoxCaptureUiState.ColorConfirmation) ?: return
+                val nextStep = getNextStep(current.mode)
+                if (nextStep != null) {
+                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, null)
+                } else {
+                    prepareReview(current.mode)
+                }
+            }
+        }
+    }
+
+    private fun skipStep() {
+        val current = (uiState.value as? BoxCaptureUiState.Idle) ?: return
+        if (current.currentStep.isSkippable) {
+            capturedUris.add("") 
+            
+            if (current.currentStep == CaptureStep.COLOR) {
+                // Moving past COLOR without a photo
+                val nextStep = getNextStep(current.mode)
+                if (nextStep != null) {
+                    _uiState.value = current.copy(capturedUris = capturedUris.toList(), currentStep = nextStep)
+                } else {
+                    prepareReview(current.mode)
+                }
+                return
+            }
+
+            val nextStep = getNextStep(current.mode)
+            if (nextStep != null) {
+                _uiState.value = current.copy(capturedUris = capturedUris.toList(), currentStep = nextStep)
+            } else {
+                prepareReview(current.mode)
             }
         }
     }
@@ -125,14 +178,15 @@ class BoxCaptureViewModel @Inject constructor(
     private fun refreshStep() {
         val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: 
                    (uiState.value as? BoxCaptureUiState.Review)?.mode ?:
-                   CaptureMode.BOX_PRO
+                   (uiState.value as? BoxCaptureUiState.ColorConfirmation)?.mode ?:
+                   CaptureMode.BOX
         
         val currentStep = getNextStep(mode) ?: CaptureStep.BARCODE // Fallback
         _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), currentStep, mode)
     }
 
     fun setMode(modeString: String) {
-        val mode = try { CaptureMode.valueOf(modeString) } catch (e: Exception) { CaptureMode.BOX_PRO }
+        val mode = try { CaptureMode.valueOf(modeString) } catch (e: Exception) { CaptureMode.BOX }
         
         // Peek at existing draft for enrichment context
         val existingDraft = sessionRepository.cosmeticDraft.value
@@ -150,10 +204,26 @@ class BoxCaptureViewModel @Inject constructor(
 
     private fun onPhotoCaptured(uri: String) {
         capturedUris.add(uri)
-        val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_PRO
+        val current = (uiState.value as? BoxCaptureUiState.Idle) ?: return
+        val mode = current.mode
+        
+        if (current.currentStep == CaptureStep.COLOR) {
+            // Auto-extract color from the photo
+            viewModelScope.launch {
+                val bitmap = loadBitmapFromUri(Uri.parse(uri))
+                val colorHex = if (bitmap != null) localAnalyzer.extractDominantColor(bitmap) else "#808080"
+                _uiState.value = BoxCaptureUiState.ColorConfirmation(
+                    capturedUris = capturedUris.toList(),
+                    suggestedColorHex = colorHex,
+                    mode = mode
+                )
+            }
+            return
+        }
+
         val nextStep = getNextStep(mode)
         if (nextStep != null) {
-            _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), nextStep, mode)
+            _uiState.value = current.copy(capturedUris = capturedUris.toList(), currentStep = nextStep)
         } else {
             prepareReview(mode)
         }
@@ -174,7 +244,7 @@ class BoxCaptureViewModel @Inject constructor(
                 if (isComplete) {
                     Log.d(TAG, "Product found in OBF with high confidence! Skipping Gemini analysis.")
                     val item = obfItem.copy(
-                        imageUrl = capturedUris.firstOrNull(),
+                        imageUrl = capturedUris.firstOrNull { it.isNotBlank() },
                         batchCode = code
                     )
                     sessionRepository.setCosmeticDraft(item)
@@ -182,13 +252,13 @@ class BoxCaptureViewModel @Inject constructor(
                 } else {
                     Log.i(TAG, "Product found in OBF but incomplete (missing ingredients). Proceeding to AI enrichment.")
                     obfEnrichmentData = obfItem
-                    val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_QUICK
+                    val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
                     prepareReview(mode)
                 }
             }.onFailure {
                 Log.i(TAG, "Product not found in OBF. Proceeding to AI review.")
                 obfEnrichmentData = null
-                val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX_QUICK
+                val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
                 prepareReview(mode)
             }
         }
@@ -198,22 +268,27 @@ class BoxCaptureViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Performing Local OCR...")
             
-            localIngredientsOcr = if (mode == CaptureMode.BOX_QUICK || mode == CaptureMode.BOX_PRO) {
-                // Index 2 for Quick, Index 6 for Pro (based on CaptureStep lists)
-                val idx = if (mode == CaptureMode.BOX_QUICK) 2 else 6
-                if (idx in capturedUris.indices) {
-                    loadBitmapFromUri(Uri.parse(capturedUris[idx]))?.let { 
-                        localAnalyzer.extractText(it) 
-                    } ?: ""
+            // Re-map capturedUris to steps to find the right index
+            val steps = CaptureStep.getStepsForMode(mode)
+            val ingredientsIdx = steps.indexOf(CaptureStep.INGREDIENTS)
+            val instructionsIdx = steps.indexOf(CaptureStep.INSTRUCTIONS)
+            val colorIdx = steps.indexOf(CaptureStep.COLOR)
+
+            localIngredientsOcr = if (ingredientsIdx != -1 && ingredientsIdx in capturedUris.indices) {
+                val uri = capturedUris[ingredientsIdx]
+                if (uri.isNotBlank()) {
+                    loadBitmapFromUri(Uri.parse(uri))?.let { localAnalyzer.extractText(it) } ?: ""
                 } else ""
             } else ""
 
-            localInstructionsOcr = if (mode == CaptureMode.BOX_PRO && capturedUris.size > 1) {
-                // Back side usually contains instructions
-                loadBitmapFromUri(Uri.parse(capturedUris[1]))?.let {
-                    localAnalyzer.extractText(it)
-                } ?: ""
+            localInstructionsOcr = if (instructionsIdx != -1 && instructionsIdx in capturedUris.indices) {
+                val uri = capturedUris[instructionsIdx]
+                if (uri.isNotBlank()) {
+                    loadBitmapFromUri(Uri.parse(uri))?.let { localAnalyzer.extractText(it) } ?: ""
+                } else ""
             } else ""
+
+            val manualColor = (uiState.value as? BoxCaptureUiState.Idle)?.extractedColorHex
 
             _uiState.value = BoxCaptureUiState.Review(
                 capturedUris = capturedUris.toList(),
@@ -221,7 +296,8 @@ class BoxCaptureViewModel @Inject constructor(
                 ingredientsOcr = localIngredientsOcr,
                 instructionsOcr = localInstructionsOcr,
                 mode = mode,
-                enrichmentData = obfEnrichmentData
+                enrichmentData = obfEnrichmentData,
+                manualColorHex = manualColor
             )
         }
     }
@@ -237,7 +313,10 @@ class BoxCaptureViewModel @Inject constructor(
             val apiKey = aiSettings.getGeminiApiKey()
             val modelName = aiSettings.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
             
-            Log.d(TAG, "Starting analysis. Mode: $mode, Model: $modelName, Barcode: $scannedBarcode")
+            val currentReview = (uiState.value as? BoxCaptureUiState.Review)
+            val manualColor = currentReview?.manualColorHex
+
+            Log.d(TAG, "Starting analysis. Mode: $mode, Model: $modelName, Barcode: $scannedBarcode, Color: $manualColor")
 
             if (apiKey.isNullOrBlank()) {
                 Log.w(TAG, "API Key is missing. Falling back to local analysis.")
@@ -268,11 +347,11 @@ class BoxCaptureViewModel @Inject constructor(
                 val prompt = content {
                     bitmaps.forEach { image(it) }
                     val target = when (mode) {
-                        CaptureMode.BOX_PRO -> "product box from all sides"
-                        CaptureMode.BOX_QUICK -> "essential product box angles"
+                        CaptureMode.BOX -> "product box from multiple sides"
                         CaptureMode.PRODUCT -> "product container (front and back)"
                     }
                     val barcodeContext = if (!scannedBarcode.isNullOrBlank()) "The scanned barcode is: $scannedBarcode." else ""
+                    val colorContext = if (!manualColor.isNullOrBlank()) "The user-selected product color is: $manualColor." else "Please identify the best representative color for this product from the photos."
                     
                     val enrichmentContext = obfEnrichmentData?.let {
                         """
@@ -290,6 +369,7 @@ class BoxCaptureViewModel @Inject constructor(
                     text("""
                         Analyze these photos of a $target. $barcodeContext
                         $enrichmentContext
+                        $colorContext
                         $ingredientsContext
                         $instructionsContext
                         
@@ -333,10 +413,11 @@ class BoxCaptureViewModel @Inject constructor(
                     Log.d(TAG, "Received response from Gemini: $jsonText")
                     var item = parseJsonToCosmeticItem(jsonText)
                     
-                    // Pre-fill Front Image and ensure Barcode is set
+                    // Pre-fill Front Image and ensure Barcode/Color is set
                     item = item.copy(
-                        imageUrl = capturedUris.firstOrNull(),
-                        batchCode = scannedBarcode ?: item.batchCode
+                        imageUrl = capturedUris.firstOrNull { it.isNotBlank() },
+                        batchCode = scannedBarcode ?: item.batchCode,
+                        colorHex = manualColor ?: item.colorHex
                     )
 
                     sessionRepository.setCosmeticDraft(item)
@@ -382,7 +463,7 @@ class BoxCaptureViewModel @Inject constructor(
     }
 
     private suspend fun loadBitmaps(): List<Bitmap> = withContext(Dispatchers.IO) {
-        capturedUris.mapNotNull { uriString ->
+        capturedUris.filter { it.isNotBlank() }.mapNotNull { uriString ->
             loadBitmapFromUri(Uri.parse(uriString))
         }
     }
@@ -454,7 +535,7 @@ class BoxCaptureViewModel @Inject constructor(
     fun reset(keepBarcode: Boolean = false) {
         val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: 
                    (uiState.value as? BoxCaptureUiState.Review)?.mode ?:
-                   CaptureMode.BOX_PRO
+                   CaptureMode.BOX
         capturedUris.clear()
         if (!keepBarcode) {
             scannedBarcode = null
