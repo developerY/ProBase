@@ -68,6 +68,12 @@ To solve lifecycle wipes during the heavy transition from the external Google Ba
 - **Offline First**: The system remains zero-footprint and purely local by default.
 
 
+## 6. AI-Driven Color Calibration**
+To combat inaccurate color sampling caused by environmental lighting and shadows, the color extraction pipeline has been shifted from a deterministic to a probabilistic model:
+
+- **Guided Sampling:** The manual UI color picker (sampling reticle) now functions strictly as a "User Color Hint" rather than a hardcoded truth.
+- **The Discrepancy Rule:** The system utilizes Gemini's crossmodal reasoning to evaluate the user's color hint against the physical packaging and embedded industry knowledge. If a discrepancy is detected (e.g., the reticle sampled a shadow), the AI overrides the user input and returns the true, accurate cosmetic hex code.
+- **Consistent Persona:** The LLM is anchored as a "Professional Cosmetic Analyzer" to prioritize technical accuracy over simply validating the user's manual input.
 
 ---
 
