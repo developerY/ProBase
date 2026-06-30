@@ -1,33 +1,43 @@
 package com.zoewave.probase.features.glass.translation.ui
 
 import android.Manifest
+import android.app.Activity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.xr.glimmer.GlimmerTheme
-import androidx.xr.glimmer.Text
-import androidx.xr.glimmer.Icon
-import androidx.xr.glimmer.IconButton
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.foundation.shape.CircleShape
-import androidx.xr.glimmer.DepthEffect
-import androidx.xr.projected.experimental.ExperimentalProjectedApi
-import android.app.Activity
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.xr.glimmer.GlimmerTheme
+import androidx.xr.glimmer.Icon
+import androidx.xr.glimmer.IconButton
+import androidx.xr.glimmer.Text
 import androidx.xr.projected.ProjectedDisplayController
 import androidx.xr.projected.ProjectedDisplayController.PresentationMode
-import java.util.function.Consumer
-import androidx.compose.ui.platform.LocalContext
+import androidx.xr.projected.experimental.ExperimentalProjectedApi
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 
 /**
  * A Glimmer-optimized translation screen for AI Glasses (Display Glasses).
@@ -60,9 +70,29 @@ fun TranslationScreen(
         }
     }
 
+    TranslationScreenContent(
+        uiState = uiState,
+        visualsOn = visualsOn,
+        onMicClick = {
+            if (micPermissionState.status.isGranted) {
+                if (uiState.isListening) viewModel.stopListening() else viewModel.startListening()
+            } else {
+                micPermissionState.launchPermissionRequest()
+            }
+        }
+    )
+}
+
+@Composable
+private fun TranslationScreenContent(
+    uiState: TranslationUiState,
+    visualsOn: Boolean,
+    onMicClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     GlimmerTheme {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .background(Color.Black), // Transparent on glasses
             contentAlignment = Alignment.BottomCenter
@@ -86,7 +116,7 @@ fun TranslationScreen(
                 // Error indicator
                 if (uiState.error != null) {
                     Text(
-                        text = uiState.error!!,
+                        text = uiState.error,
                         color = Color.Red,
                         style = GlimmerTheme.typography.bodySmall
                     )
@@ -120,13 +150,7 @@ fun TranslationScreen(
 
                 // Glimmer-native IconButton for touchpad support
                 IconButton(
-                    onClick = {
-                        if (micPermissionState.status.isGranted) {
-                            if (uiState.isListening) viewModel.stopListening() else viewModel.startListening()
-                        } else {
-                            micPermissionState.launchPermissionRequest()
-                        }
-                    },
+                    onClick = onMicClick,
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Icon(
@@ -138,4 +162,35 @@ fun TranslationScreen(
             }
         }
     }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun TranslationScreenPreview() {
+    val sampleState = TranslationUiState(
+        transcribedText = "Hello, how are you?",
+        translatedText = "Hola, ¿cómo estás?",
+        isListening = false,
+        isTranslating = false
+    )
+    TranslationScreenContent(
+        uiState = sampleState,
+        visualsOn = true,
+        onMicClick = {}
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun TranslationScreenListeningPreview() {
+    val sampleState = TranslationUiState(
+        transcribedText = "Good morning",
+        isListening = true,
+        isTranslating = false
+    )
+    TranslationScreenContent(
+        uiState = sampleState,
+        visualsOn = true,
+        onMicClick = {}
+    )
 }
