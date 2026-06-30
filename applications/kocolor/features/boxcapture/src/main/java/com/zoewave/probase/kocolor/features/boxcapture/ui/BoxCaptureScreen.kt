@@ -202,7 +202,8 @@ internal fun BoxCaptureScreen(
                     ColorConfirmationView(
                         uiState = ColorConfirmationViewUiState(
                             photoUri = uiState.capturedUris.last { it.isNotBlank() },
-                            suggestedColorHex = uiState.suggestedColorHex
+                            suggestedColors = uiState.suggestedColors,
+                            selectedColorHex = uiState.selectedColorHex
                         ),
                         onEvent = onEvent
                     )
@@ -740,7 +741,8 @@ private fun OcrTextArea(text: String) {
 
 data class ColorConfirmationViewUiState(
     val photoUri: String,
-    val suggestedColorHex: String
+    val suggestedColors: List<String>,
+    val selectedColorHex: String
 )
 
 @Composable
@@ -752,7 +754,7 @@ private fun ColorConfirmationView(
 
     if (showColorPicker) {
         ColorPickerDialog(
-            initialColor = parseColor(uiState.suggestedColorHex),
+            initialColor = parseColor(uiState.selectedColorHex),
             onColorSelected = { 
                 onEvent(BoxCaptureEvent.OnColorSelected(it.toHex())) 
                 showColorPicker = false
@@ -777,7 +779,7 @@ private fun ColorConfirmationView(
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Dominant shade detected from photo",
+            text = "Select the best shade from the photo",
             color = Color.White.copy(alpha = 0.6f),
             style = MaterialTheme.typography.bodySmall
         )
@@ -797,9 +799,9 @@ private fun ColorConfirmationView(
                 contentScale = ContentScale.Crop
             )
             
-            // Color Circle Overlay
+            // Selected Color Circle Overlay
             Surface(
-                color = parseColor(uiState.suggestedColorHex),
+                color = parseColor(uiState.selectedColorHex),
                 shape = CircleShape,
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -809,7 +811,32 @@ private fun ColorConfirmationView(
             ) {}
         }
 
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(32.dp))
+
+        // Color Options Palette
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth().height(60.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp)
+        ) {
+            itemsIndexed(uiState.suggestedColors) { _, hex ->
+                val isSelected = hex == uiState.selectedColorHex
+                Surface(
+                    onClick = { onEvent(BoxCaptureEvent.OnColorSelected(hex)) },
+                    color = parseColor(hex),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .size(50.dp)
+                        .border(
+                            width = if (isSelected) 2.dp else 1.dp,
+                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                ) {}
+            }
+        }
+
+        Spacer(Modifier.height(32.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),

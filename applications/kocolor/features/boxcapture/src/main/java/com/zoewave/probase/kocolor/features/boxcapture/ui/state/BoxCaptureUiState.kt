@@ -17,7 +17,8 @@ sealed interface BoxCaptureUiState {
 
     data class ColorConfirmation(
         val capturedUris: List<String>,
-        val suggestedColorHex: String,
+        val suggestedColors: List<String>,
+        val selectedColorHex: String,
         val mode: CaptureMode
     ) : BoxCaptureUiState
 
