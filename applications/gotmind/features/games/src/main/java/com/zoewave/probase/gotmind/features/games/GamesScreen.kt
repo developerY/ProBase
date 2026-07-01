@@ -20,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import com.zoewave.probase.gotmind.model.GotMindRoute
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,10 +29,13 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun GamesScreen(
-    onNav: (String) -> Unit
+    uiState: GamesUiState,
+    modifier: Modifier = Modifier,
+    onEvent: (GamesEvent) -> Unit,
+    navTo: (GotMindRoute) -> Unit
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
@@ -55,7 +60,7 @@ fun GamesScreen(
 
         // --- MemBlox (Active) ---
         Button(
-            onClick = { onNav("MEMBLOX") },
+            onClick = { navTo(GotMindRoute.MemBlox) },
             modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
@@ -70,7 +75,7 @@ fun GamesScreen(
 
         // --- SoundMind (Active) ---
         Button(
-            onClick = { onNav("SOUNDMIND") },
+            onClick = { navTo(GotMindRoute.SoundMind) },
             modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
@@ -135,5 +140,17 @@ fun PlaceholderGameButton(title: String) {
                 fontWeight = FontWeight.Bold
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun GamesScreenPreview() {
+    MaterialTheme {
+        GamesScreen(
+            uiState = GamesUiState,
+            onEvent = {},
+            navTo = {}
+        )
     }
 }

@@ -16,6 +16,7 @@ android {
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:util"))
+    implementation(project(":applications:gotmind:model"))
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation3.runtime)
 }

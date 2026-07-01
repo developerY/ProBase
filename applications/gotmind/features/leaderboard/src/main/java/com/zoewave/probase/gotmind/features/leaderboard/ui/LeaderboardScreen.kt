@@ -48,10 +48,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.gotmind.database.MemBloxScoreEntity
 import com.zoewave.probase.gotmind.database.MindWaveScoreEntity
 import com.zoewave.probase.gotmind.features.leaderboard.R
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
+import com.zoewave.probase.gotmind.model.GotMindRoute
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -59,17 +61,16 @@ import java.util.Locale
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun LeaderboardScreen(
-    membloxScores: List<MemBloxScoreEntity>,
-    mindwaveScores: List<MindWaveScoreEntity>,
-    onBack: () -> Unit = {},
-    onClearMemBlox: () -> Unit = {},
-    onClearMindWave: () -> Unit = {}
+    uiState: LeaderboardUiState,
+    modifier: Modifier = Modifier,
+    onEvent: (LeaderboardEvent) -> Unit,
+    navTo: (GotMindRoute) -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(Color(0xFF0F0F0F))
             .statusBarsPadding()
@@ -77,7 +78,7 @@ fun LeaderboardScreen(
             .padding(top = 24.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            IconButton(onClick = onBack) {
+            IconButton(onClick = { navTo(GotMindRoute.Back) }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
                     contentDescription = null, 
@@ -95,7 +96,7 @@ fun LeaderboardScreen(
                 modifier = Modifier.weight(1f)
             )
             
-            val currentScores = if (selectedTab == 0) membloxScores else mindwaveScores
+            val currentScores = if (selectedTab == 0) uiState.membloxScores else uiState.mindwaveScores
             if (currentScores.isNotEmpty()) {
                 IconButton(onClick = { showDeleteConfirm = true }) {
                     Icon(Icons.Default.DeleteSweep, contentDescription = null, tint = Color.Gray)
@@ -125,7 +126,7 @@ fun LeaderboardScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        val currentList = if (selectedTab == 0) membloxScores else mindwaveScores
+        val currentList = if (selectedTab == 0) uiState.membloxScores else uiState.mindwaveScores
         if (currentList.isEmpty()) {
             Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
@@ -157,7 +158,7 @@ fun LeaderboardScreen(
             text = { Text(stringResource(R.string.applications_gotmind_features_leaderboard_clear_confirm)) },
             confirmButton = {
                 TextButton(onClick = {
-                    if (selectedTab == 0) onClearMemBlox() else onClearMindWave()
+                    if (selectedTab == 0) onEvent(LeaderboardEvent.ClearMemBlox) else onEvent(LeaderboardEvent.ClearMindWave)
                     showDeleteConfirm = false
                 }) {
                     Text(stringResource(R.string.applications_gotmind_features_leaderboard_clear_all), color = Color.Red, fontWeight = FontWeight.Bold)
@@ -168,6 +169,18 @@ fun LeaderboardScreen(
                     Text(stringResource(R.string.applications_gotmind_features_leaderboard_cancel), color = Color.Gray)
                 }
             }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun LeaderboardScreenPreview() {
+    MaterialTheme {
+        LeaderboardScreen(
+            uiState = LeaderboardUiState(),
+            onEvent = {},
+            navTo = {}
         )
     }
 }

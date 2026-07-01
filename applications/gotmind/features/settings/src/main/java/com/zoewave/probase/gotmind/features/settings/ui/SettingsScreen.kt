@@ -60,8 +60,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.gotmind.features.memblox.MemBloxEvent
-import com.zoewave.probase.gotmind.features.memblox.MemBloxState
 import com.zoewave.probase.gotmind.features.settings.R
 import com.zoewave.probase.gotmind.model.AppTheme
 import com.zoewave.probase.gotmind.model.ColorPalette
@@ -71,6 +71,7 @@ import com.zoewave.probase.gotmind.model.MindWaveMode
 import com.zoewave.probase.gotmind.model.NodeShape
 import com.zoewave.probase.gotmind.model.InstrumentType
 import com.zoewave.probase.gotmind.model.GameSettings
+import com.zoewave.probase.gotmind.model.GotMindRoute
 import java.util.Locale
 
 @Composable
@@ -238,15 +239,17 @@ fun SettingsSwitchField(
 
 @Composable
 fun SettingsScreen(
-    gameSettings: GameSettings = GameSettings(),
-    themeSettings: ThemeSettings = ThemeSettings(),
-    firebaseId: String = "",
-    onMemBloxEvent: (MemBloxEvent) -> Unit = {},
-    onSettingsEvent: (SettingsEvent) -> Unit = {},
-    onBack: () -> Unit = {}
+    uiState: SettingsUiState,
+    modifier: Modifier = Modifier,
+    onEvent: (SettingsScreenEvent) -> Unit,
+    navTo: (GotMindRoute) -> Unit
 ) {
+    val gameSettings = uiState.gameSettings
+    val themeSettings = uiState.themeSettings
+    val firebaseId = uiState.firebaseId
+
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(Color(0xFF0F0F0F))
             .statusBarsPadding()
@@ -260,7 +263,7 @@ fun SettingsScreen(
                 .padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) {
+            IconButton(onClick = { navTo(GotMindRoute.Back) }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -290,7 +293,7 @@ fun SettingsScreen(
                         AppTheme.LIGHT to stringResource(R.string.applications_gotmind_features_settings_theme_light),
                         AppTheme.DARK to stringResource(R.string.applications_gotmind_features_settings_theme_dark)
                     ),
-                    onSelected = { onSettingsEvent(SettingsEvent.SetTheme(it)) }
+                    onSelected = { onEvent(SettingsScreenEvent.Settings(SettingsEvent.SetTheme(it))) }
                 )
 
                 SettingsDropdownField(
@@ -304,7 +307,7 @@ fun SettingsScreen(
                         ColorPalette.OCEAN to stringResource(R.string.applications_gotmind_features_settings_palette_ocean),
                         ColorPalette.MATERIAL_EXPRESSIVE to stringResource(R.string.applications_gotmind_features_settings_palette_expressive)
                     ),
-                    onSelected = { onSettingsEvent(SettingsEvent.SetPalette(it)) }
+                    onSelected = { onEvent(SettingsScreenEvent.Settings(SettingsEvent.SetPalette(it))) }
                 )
             }
         }
@@ -321,14 +324,14 @@ fun SettingsScreen(
                     title = stringResource(R.string.applications_gotmind_features_settings_haptic_title),
                     subtitle = stringResource(R.string.applications_gotmind_features_settings_haptic_subtitle),
                     checked = gameSettings.hapticsEnabled,
-                    onCheckedChange = { onMemBloxEvent(MemBloxEvent.SetHapticsEnabled(it)) }
+                    onCheckedChange = { onEvent(SettingsScreenEvent.MemBlox(MemBloxEvent.SetHapticsEnabled(it))) }
                 )
                 HorizontalDivider(color = Color.White.copy(alpha = 0.05f))
                 SettingsSwitchField(
                     title = stringResource(R.string.applications_gotmind_features_settings_sound_title),
                     subtitle = stringResource(R.string.applications_gotmind_features_settings_sound_subtitle),
                     checked = gameSettings.soundEnabled,
-                    onCheckedChange = { onMemBloxEvent(MemBloxEvent.SetSoundEnabled(it)) }
+                    onCheckedChange = { onEvent(SettingsScreenEvent.MemBlox(MemBloxEvent.SetSoundEnabled(it))) }
                 )
             }
         }
@@ -350,7 +353,7 @@ fun SettingsScreen(
                     MindWaveMode.HARMONIC_ARC to stringResource(R.string.applications_gotmind_features_settings_mindwave_arc),
                     MindWaveMode.HARMONIC_RING to stringResource(R.string.applications_gotmind_features_settings_mindwave_ring)
                 ),
-                onSelected = { onSettingsEvent(SettingsEvent.SetMindWaveMode(it)) }
+                onSelected = { onEvent(SettingsScreenEvent.Settings(SettingsEvent.SetMindWaveMode(it))) }
             )
 
             SettingsDropdownField(
@@ -361,7 +364,7 @@ fun SettingsScreen(
                     NodeShape.CIRCLE to stringResource(R.string.applications_gotmind_features_settings_mw_node_shape_circle),
                     NodeShape.PIANO_KEY to stringResource(R.string.applications_gotmind_features_settings_mw_node_shape_piano)
                 ),
-                onSelected = { onSettingsEvent(SettingsEvent.SetMindWaveNodeShape(it)) }
+                onSelected = { onEvent(SettingsScreenEvent.Settings(SettingsEvent.SetMindWaveNodeShape(it))) }
             )
 
             SettingsDropdownField(
@@ -373,14 +376,14 @@ fun SettingsScreen(
                     InstrumentType.RETRO_8BIT to stringResource(R.string.applications_gotmind_features_settings_mw_instrument_retro),
                     InstrumentType.ZEN_TRIANGLE to stringResource(R.string.applications_gotmind_features_settings_mw_instrument_zen)
                 ),
-                onSelected = { onSettingsEvent(SettingsEvent.SetInstrument(it)) }
+                onSelected = { onEvent(SettingsScreenEvent.Settings(SettingsEvent.SetInstrument(it))) }
             )
 
             SettingsSwitchField(
                 title = stringResource(R.string.applications_gotmind_features_settings_mw_song_master),
                 subtitle = stringResource(R.string.applications_gotmind_features_settings_mw_song_master_desc),
                 checked = gameSettings.songMasterEnabled,
-                onCheckedChange = { onSettingsEvent(SettingsEvent.SetSongMaster(it)) }
+                onCheckedChange = { onEvent(SettingsScreenEvent.Settings(SettingsEvent.SetSongMaster(it))) }
             )
         }
 
@@ -393,7 +396,7 @@ fun SettingsScreen(
                 subtitle = stringResource(com.zoewave.probase.gotmind.features.memblox.R.string.applications_gotmind_features_memblox_engine_mode_desc),
                 checked = gameSettings.engineType == MemBloxEngineType.FALLING,
                 onCheckedChange = { isFalling: Boolean ->
-                    onMemBloxEvent(MemBloxEvent.SetEngineType(if (isFalling) MemBloxEngineType.FALLING else MemBloxEngineType.STATIC))
+                    onEvent(SettingsScreenEvent.MemBlox(MemBloxEvent.SetEngineType(if (isFalling) MemBloxEngineType.FALLING else MemBloxEngineType.STATIC)))
                 }
             )
 
@@ -402,7 +405,7 @@ fun SettingsScreen(
                 value = gameSettings.gameSpeed,
                 valueRange = 0.5f..2.0f,
                 steps = 15,
-                onValueChange = { onMemBloxEvent(MemBloxEvent.UpdateSpeed(it)) },
+                onValueChange = { onEvent(SettingsScreenEvent.MemBlox(MemBloxEvent.UpdateSpeed(it))) },
                 valueLabel = String.format(Locale.getDefault(), "%.1f", gameSettings.gameSpeed) + "x"
             )
 
@@ -412,7 +415,7 @@ fun SettingsScreen(
                     value = gameSettings.dropHeight.toFloat(),
                     valueRange = 1f..10f,
                     steps = 9,
-                    onValueChange = { onMemBloxEvent(MemBloxEvent.UpdateDropHeight(it.toInt())) },
+                    onValueChange = { onEvent(SettingsScreenEvent.MemBlox(MemBloxEvent.UpdateDropHeight(it.toInt()))) },
                     valueLabel = "${gameSettings.dropHeight}"
                 )
 
@@ -421,7 +424,7 @@ fun SettingsScreen(
                     value = gameSettings.dropDurationMillis.toFloat(),
                     valueRange = 1000f..10000f,
                     steps = 18,
-                    onValueChange = { onMemBloxEvent(MemBloxEvent.UpdateDropDuration(it.toInt())) },
+                    onValueChange = { onEvent(SettingsScreenEvent.MemBlox(MemBloxEvent.UpdateDropDuration(it.toInt()))) },
                     valueLabel = String.format(Locale.getDefault(), "%.1f", gameSettings.dropDurationMillis / 1000f) + "s"
                 )
             }
@@ -479,5 +482,17 @@ fun SettingsScreen(
         }
         
         Spacer(modifier = Modifier.height(48.dp))
+    }
+}
+
+@Preview
+@Composable
+private fun SettingsScreenPreview() {
+    MaterialTheme {
+        SettingsScreen(
+            uiState = SettingsUiState(),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }

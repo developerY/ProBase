@@ -13,17 +13,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zoewave.probase.gotmind.mobile.R
-import com.zoewave.probase.gotmind.mobile.ui.GameViewModel
+import com.zoewave.probase.gotmind.model.GotMindRoute
 
 @Composable
-fun GameScreen(viewModel: GameViewModel) {
-    val gameState by viewModel.gameState.collectAsState()
-    val topScores by viewModel.topScores.collectAsState()
+fun GameScreen(
+    uiState: GotMindClassicUiState,
+    modifier: Modifier = Modifier,
+    onEvent: (GotMindClassicEvent) -> Unit,
+    navTo: (GotMindRoute) -> Unit
+) {
+    val gameState = uiState.game
+    val topScores = uiState.topScores
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -35,7 +41,7 @@ fun GameScreen(viewModel: GameViewModel) {
                 style = MaterialTheme.typography.headlineLarge
             )
             Text(text = stringResource(R.string.classic_score_label, gameState.currentScore))
-            Button(onClick = { viewModel.resetGame() }) {
+            Button(onClick = { onEvent(GotMindClassicEvent.ResetGame) }) {
                 Text(stringResource(R.string.classic_restart))
             }
         } else {
@@ -44,10 +50,10 @@ fun GameScreen(viewModel: GameViewModel) {
                 style = MaterialTheme.typography.headlineMedium
             )
             Text(text = stringResource(R.string.classic_current_score, gameState.currentScore))
-            Button(onClick = { viewModel.onScoreUpdate(10) }, modifier = Modifier.padding(top = 16.dp)) {
+            Button(onClick = { onEvent(GotMindClassicEvent.ScoreUpdate(10)) }, modifier = Modifier.padding(top = 16.dp)) {
                 Text(stringResource(R.string.classic_tap_to_score))
             }
-            Button(onClick = { viewModel.onGameOver() }, modifier = Modifier.padding(top = 8.dp)) {
+            Button(onClick = { onEvent(GotMindClassicEvent.GameOver) }, modifier = Modifier.padding(top = 8.dp)) {
                 Text(stringResource(R.string.classic_end_game))
             }
         }
@@ -60,5 +66,17 @@ fun GameScreen(viewModel: GameViewModel) {
         topScores.forEach { score ->
             Text(text = "${score.value}")
         }
+    }
+}
+
+@Preview
+@Composable
+private fun GameScreenPreview() {
+    MaterialTheme {
+        GameScreen(
+            uiState = GotMindClassicUiState(),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
