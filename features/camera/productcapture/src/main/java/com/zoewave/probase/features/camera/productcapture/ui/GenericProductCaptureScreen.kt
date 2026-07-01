@@ -37,6 +37,9 @@ import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -86,6 +89,13 @@ internal fun GenericProductCaptureScreen(
     val coroutineScope = rememberCoroutineScope()
     
     val currentStep = config.steps.getOrNull(currentStepIndex) ?: return
+
+    val scanner = remember(context) {
+        val options = GmsBarcodeScannerOptions.Builder()
+            .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+            .build()
+        GmsBarcodeScanning.getClient(context, options)
+    }
 
     val previewUseCase = remember { Preview.Builder().build() }
     val imageCaptureUseCase = remember { ImageCapture.Builder().build() }
@@ -225,8 +235,14 @@ internal fun GenericProductCaptureScreen(
                         Spacer(Modifier.weight(1f))
                     }
 
-                    Button(
-                        onClick = {
+                Button(
+                    onClick = {
+                        if (currentStep.isBarcodeStep) {
+                            scanner.startScan()
+                                .addOnSuccessListener { barcode ->
+                                    barcode.rawValue?.let { onEvent(ProductCaptureUiEvent.BarcodeScanned(it)) }
+                                }
+                        } else {
                             coroutineScope.launch(Dispatchers.IO) {
                                 val file = createFile(context)
                                 val options = ImageCapture.OutputFileOptions.Builder(file).build()
@@ -237,20 +253,28 @@ internal fun GenericProductCaptureScreen(
                                         override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                                             onEvent(ProductCaptureUiEvent.Capture(Uri.fromFile(file).toString()))
                                         }
+
                                         override fun onError(exception: ImageCaptureException) {
                                             Log.e("GenericCapture", "Capture failed", exception)
                                         }
                                     }
                                 )
                             }
-                        },
-                        modifier = Modifier.size(80.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                        contentPadding = PaddingValues(0.dp)
-                    ) {
+                        }
+                    },
+                    modifier = if (currentStep.isBarcodeStep) Modifier.fillMaxWidth().height(56.dp) else Modifier.size(80.dp),
+                    shape = if (currentStep.isBarcodeStep) RoundedCornerShape(12.dp) else CircleShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = if (currentStep.isBarcodeStep) config.themeColor else Color.White),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    if (currentStep.isBarcodeStep) {
+                        Icon(Icons.Default.QrCodeScanner, null, tint = Color.Black)
+                        Spacer(Modifier.width(8.dp))
+                        Text("START BARCODE SCAN", color = Color.Black, fontWeight = FontWeight.Bold)
+                    } else {
                         Icon(Icons.Default.CameraAlt, null, tint = Color.Black, modifier = Modifier.size(32.dp))
                     }
+                }
                     
                     Spacer(Modifier.weight(1f))
                 }

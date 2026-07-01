@@ -146,6 +146,7 @@ internal fun ClothingCaptureScreen(
                         is ProductCaptureUiEvent.DeletePhoto -> onEvent(ClothingCaptureEvent.DeletePhoto(event.index))
                         ProductCaptureUiEvent.Close -> onEvent(ClothingCaptureEvent.Dismiss)
                         is ProductCaptureUiEvent.OnPriceChanged -> onEvent(ClothingCaptureEvent.OnPriceChanged(event.price))
+                        is ProductCaptureUiEvent.BarcodeScanned -> { /* Not used in clothing flow */ }
                     }
                 },
                 modifier = modifier
