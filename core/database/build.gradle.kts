@@ -27,6 +27,7 @@ dependencies {
 
     // --- Core Android ---
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.room.common)
     // Note: 'appcompat' and 'material.legacy' are usually not needed in a pure data module
     // unless you are using specific Android resource classes.
     // implementation(libs.androidx.appcompat)
