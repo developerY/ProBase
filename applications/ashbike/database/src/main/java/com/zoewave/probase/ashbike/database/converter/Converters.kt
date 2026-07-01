@@ -1,30 +1,22 @@
 package com.zoewave.probase.ashbike.database.converter
 
-import android.net.Uri
-import androidx.core.net.toUri
-import androidx.room3.TypeConverter
-
-//import kotlinx.datetime.LocalDateTime
+import androidx.room3.ColumnTypeConverter
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 
 class Converters {
-
-    /*@TypeConverter
-    fun fromTimestrap(dateString: String?): LocalDateTime? {
-        return dateString?.let { LocalDateTime.parse(dateString) }
+    @ColumnTypeConverter
+    fun fromTimestamp(value: Long?): LocalDateTime? {
+        return value?.let {
+            Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
+        }
     }
 
-    @TypeConverter
-    fun toDateString(date: LocalDateTime?): String? {
-        return date?.toString()
-    }*/
-
-    @TypeConverter
-    fun fromString(value: String?): Uri? {
-        return if (value == null) null else value.toUri()
-    }
-
-    @TypeConverter
-    fun toString(uri: Uri?): String? {
-        return uri?.toString()
+    @ColumnTypeConverter
+    fun dateToTimestamp(date: LocalDateTime?): Long? {
+        return date?.toInstant(TimeZone.currentSystemDefault())?.toEpochMilliseconds()
     }
 }

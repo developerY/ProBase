@@ -2,7 +2,7 @@ package com.zoewave.probase.ashbike.database
 
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
-import androidx.room3.TypeConverters
+import androidx.room3.ColumnTypeConverters
 import com.zoewave.probase.ashbike.database.converter.Converters
 
 @Database(
@@ -10,7 +10,7 @@ import com.zoewave.probase.ashbike.database.converter.Converters
     version = 1,
     exportSchema = false
 )
-@TypeConverters(Converters::class)
+@ColumnTypeConverters(Converters::class)
 @Suppress("ROOM_MISSING_CONSTRUCTED_BY")
 abstract class BikeRideDatabase : RoomDatabase() {
     abstract val bikeRideDao: BikeRideDao

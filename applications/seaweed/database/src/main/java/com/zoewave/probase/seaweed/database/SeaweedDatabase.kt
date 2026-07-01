@@ -2,7 +2,7 @@ package com.zoewave.probase.seaweed.database
 
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
-import androidx.room3.TypeConverters
+import androidx.room3.ColumnTypeConverters
 import com.zoewave.probase.seaweed.database.converter.ExpenseConverters
 
 @Database(
@@ -18,7 +18,7 @@ import com.zoewave.probase.seaweed.database.converter.ExpenseConverters
     version = 1,
     exportSchema = false
 )
-@TypeConverters(ExpenseConverters::class)
+@ColumnTypeConverters(ExpenseConverters::class)
 @Suppress("ROOM_MISSING_CONSTRUCTED_BY")
 abstract class SeaweedDatabase : RoomDatabase() {
     abstract val transactionDao: TransactionDao

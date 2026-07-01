@@ -34,6 +34,7 @@ dependencies {
     // --- DataStore ---
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.core)
+    implementation(libs.kotlinx.datetime)
 
     // --- Hilt & Room ---
     // Dependencies are AUTOMATICALLY added by the plugins above:

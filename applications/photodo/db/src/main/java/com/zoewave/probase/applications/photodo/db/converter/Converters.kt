@@ -2,7 +2,7 @@ package com.zoewave.probase.applications.photodo.db.converter
 
 import android.net.Uri
 import androidx.core.net.toUri
-import androidx.room3.TypeConverter
+import androidx.room3.ColumnTypeConverter
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.model.Category
 import kotlin.time.Instant
@@ -11,34 +11,34 @@ import kotlin.time.Instant
 class PhotoDoConverters {
 
     // --- Date/Time ---
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromTimestamp(value: Long?): Instant? {
         return value?.let { Instant.fromEpochMilliseconds(it) }
     }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun dateToTimestamp(date: Instant?): Long? {
         return date?.toEpochMilliseconds()
     }
 
     // --- URIs ---
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromUri(uri: Uri?): String? {
         return uri?.toString()
     }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toUri(uriString: String?): Uri? {
         return uriString?.toUri()
     }
 
     // --- String Lists ---
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromStringList(list: List<String>?): String? {
         return list?.joinToString(separator = ",")
     }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toStringList(data: String?): List<String>? {
         return data?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
     }
