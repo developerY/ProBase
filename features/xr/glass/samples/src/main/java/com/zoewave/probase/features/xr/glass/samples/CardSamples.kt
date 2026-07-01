@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.xr.glimmer.ActionCard
 import androidx.xr.glimmer.Button
 import androidx.xr.glimmer.Card
 import androidx.xr.glimmer.GlimmerTheme
@@ -32,11 +33,11 @@ fun CardSamples() {
             Text("This card is interactive and provides visual feedback when focused/clicked.")
         }
 
-        Card(
+        ActionCard(
             title = { Text("Card with Action") },
             action = { Button(onClick = {}) { Text("Action") } }
         ) {
-            Text("This card has an explicit action button in the header.")
+            Text("This card has an explicit action button at the bottom.")
         }
     }
 }

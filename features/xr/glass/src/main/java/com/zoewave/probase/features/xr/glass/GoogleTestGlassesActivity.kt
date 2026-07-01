@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.xr.glimmer.ActionCard
 import androidx.xr.glimmer.Button
-import androidx.xr.glimmer.Card
 import androidx.xr.glimmer.GlimmerTheme
 import androidx.xr.glimmer.ListItem
 import androidx.xr.glimmer.Text
@@ -134,7 +134,7 @@ fun GoogleTestHomeScreen(
         contentAlignment = Alignment.Center
     ) {
         if (isVisualUiSupported) {
-            Card(
+            ActionCard(
                 title = { Text("Android XR Test") },
                 action = {
                     Button(onClick = onClose) {
