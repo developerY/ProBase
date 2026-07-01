@@ -90,6 +90,8 @@ class BoxCaptureViewModel @Inject constructor(
     private var obfEnrichmentData: CosmeticItem? = null
     private var localIngredientsOcr: String = ""
     private var localInstructionsOcr: String = ""
+    private var sessionManualPrice: Double? = null
+    private var sessionManualColor: String? = null
 
     fun onEvent(event: BoxCaptureEvent) {
         when (event) {
@@ -122,6 +124,7 @@ class BoxCaptureViewModel @Inject constructor(
             }
             BoxCaptureEvent.SkipStep -> skipStep()
             is BoxCaptureEvent.OnColorSelected -> {
+                sessionManualColor = event.hex
                 val current = (uiState.value as? BoxCaptureUiState.Idle)
                 if (current != null) {
                     _uiState.value = current.copy(extractedColorHex = event.hex)
@@ -132,32 +135,36 @@ class BoxCaptureViewModel @Inject constructor(
             }
             BoxCaptureEvent.ConfirmColor -> {
                 val current = (uiState.value as? BoxCaptureUiState.ColorConfirmation) ?: return
+                sessionManualColor = current.selectedColorHex
                 val nextStep = getNextStep(current.mode)
                 if (nextStep != null) {
-                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, current.selectedColorHex, manualPrice)
+                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, sessionManualColor, sessionManualPrice)
                 } else {
                     prepareReview(current.mode)
                 }
             }
             BoxCaptureEvent.ClearColor -> {
+                sessionManualColor = null
                 val current = (uiState.value as? BoxCaptureUiState.ColorConfirmation) ?: return
                 val nextStep = getNextStep(current.mode)
                 if (nextStep != null) {
-                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, null, manualPrice)
+                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, null, sessionManualPrice)
                 } else {
                     prepareReview(current.mode)
                 }
             }
             BoxCaptureEvent.ConfirmPrice -> {
                 val current = (uiState.value as? BoxCaptureUiState.PriceConfirmation) ?: return
+                sessionManualPrice = current.detectedPrice
                 val nextStep = getNextStep(current.mode)
                 if (nextStep != null) {
-                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, extractedColorHex, current.detectedPrice)
+                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, sessionManualColor, sessionManualPrice)
                 } else {
                     prepareReview(current.mode)
                 }
             }
             is BoxCaptureEvent.OnPriceChanged -> {
+                sessionManualPrice = event.price
                 val current = (uiState.value as? BoxCaptureUiState.PriceConfirmation)
                 if (current != null) {
                     _uiState.value = current.copy(detectedPrice = event.price)
@@ -166,9 +173,6 @@ class BoxCaptureViewModel @Inject constructor(
         }
     }
 
-    private val manualPrice: Double? get() = (uiState.value as? BoxCaptureUiState.Idle)?.manualPrice
-    private val extractedColorHex: String? get() = (uiState.value as? BoxCaptureUiState.Idle)?.extractedColorHex
-
     private fun skipStep() {
         val current = (uiState.value as? BoxCaptureUiState.Idle) ?: return
         if (current.currentStep.isSkippable) {
@@ -176,7 +180,7 @@ class BoxCaptureViewModel @Inject constructor(
             
             val nextStep = getNextStep(current.mode)
             if (nextStep != null) {
-                _uiState.value = current.copy(capturedUris = capturedUris.toList(), currentStep = nextStep)
+                _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), nextStep, current.mode, sessionManualColor, sessionManualPrice)
             } else {
                 prepareReview(current.mode)
             }
@@ -187,10 +191,11 @@ class BoxCaptureViewModel @Inject constructor(
         val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: 
                    (uiState.value as? BoxCaptureUiState.Review)?.mode ?:
                    (uiState.value as? BoxCaptureUiState.ColorConfirmation)?.mode ?:
+                   (uiState.value as? BoxCaptureUiState.PriceConfirmation)?.mode ?:
                    CaptureMode.BOX
         
         val currentStep = getNextStep(mode) ?: CaptureStep.BARCODE // Fallback
-        _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), currentStep, mode)
+        _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), currentStep, mode, sessionManualColor, sessionManualPrice)
     }
 
     fun setMode(modeString: String) {
@@ -246,7 +251,7 @@ class BoxCaptureViewModel @Inject constructor(
 
         val nextStep = getNextStep(mode)
         if (nextStep != null) {
-            _uiState.value = current.copy(capturedUris = capturedUris.toList(), currentStep = nextStep)
+            _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), nextStep, mode, sessionManualColor, sessionManualPrice)
         } else {
             prepareReview(mode)
         }
@@ -310,8 +315,6 @@ class BoxCaptureViewModel @Inject constructor(
                 } else ""
             } else ""
 
-            val manualColor = (uiState.value as? BoxCaptureUiState.Idle)?.extractedColorHex
-
             _uiState.value = BoxCaptureUiState.Review(
                 capturedUris = capturedUris.toList(),
                 barcode = scannedBarcode,
@@ -319,7 +322,8 @@ class BoxCaptureViewModel @Inject constructor(
                 instructionsOcr = localInstructionsOcr,
                 mode = mode,
                 enrichmentData = obfEnrichmentData,
-                manualColorHex = manualColor
+                manualColorHex = sessionManualColor,
+                price = sessionManualPrice
             )
         }
     }
@@ -337,8 +341,9 @@ class BoxCaptureViewModel @Inject constructor(
             
             val currentReview = (uiState.value as? BoxCaptureUiState.Review)
             val manualColor = currentReview?.manualColorHex
+            val capturedPrice = currentReview?.price
 
-            Log.d(TAG, "Starting analysis. Mode: $mode, Model: $modelName, Barcode: $scannedBarcode, Color: $manualColor")
+            Log.d(TAG, "Starting analysis. Mode: $mode, Model: $modelName, Barcode: $scannedBarcode, Color: $manualColor, Price: $capturedPrice")
 
             if (apiKey.isNullOrBlank()) {
                 Log.w(TAG, "API Key is missing. Falling back to local analysis.")
@@ -450,7 +455,7 @@ class BoxCaptureViewModel @Inject constructor(
                         imageUrl = capturedUris.firstOrNull { it.isNotBlank() },
                         batchCode = scannedBarcode ?: item.batchCode,
                         colorHex = manualColor ?: item.colorHex,
-                        price = manualPrice ?: item.price
+                        price = capturedPrice ?: item.price
                     )
 
                     sessionRepository.setCosmeticDraft(item)

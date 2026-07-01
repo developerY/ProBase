@@ -379,7 +379,7 @@ fun StitchProductBuilder(
                 )
                 CaptureButton(
                     title = "Box Scan",
-                    subtitle = "6-step AI",
+                    subtitle = "7-step AI",
                     icon = Icons.Default.AutoAwesome,
                     color = atelierBrown,
                     onClick = { navTo(KoColorRoute.BoxCapture(mode = "BOX")) },
@@ -387,7 +387,7 @@ fun StitchProductBuilder(
                 )
                 CaptureButton(
                     title = "Product Scan",
-                    subtitle = "4-step AI",
+                    subtitle = "5-step AI",
                     icon = Icons.Default.PhotoCamera,
                     color = Color(0xFFf472b6),
                     onClick = { navTo(KoColorRoute.BoxCapture(mode = "PRODUCT")) },

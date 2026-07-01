@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:camera:productcapture"))
     implementation(project(":features:graphics"))
+    implementation(project(":applications:kocolor:features:chemicals"))
 
     implementation(libs.google.generative.ai)
 
