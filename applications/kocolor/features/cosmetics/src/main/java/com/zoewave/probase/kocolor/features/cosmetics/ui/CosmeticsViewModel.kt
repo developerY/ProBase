@@ -16,6 +16,7 @@ import com.zoewave.probase.core.network.repository.weather.WeatherRepo
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
+import com.zoewave.probase.kocolor.features.chemicals.domain.repository.ChemicalRepository
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.fda.data.repository.FdaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -105,6 +106,7 @@ class CosmeticsViewModel @Inject constructor(
     private val cosmeticRepository: CosmeticInventoryRepository,
     private val sessionRepository: FashionSessionRepository,
     private val fdaRepository: FdaRepository,
+    private val chemicalRepository: ChemicalRepository,
     private val weatherRepo: WeatherRepo,
     private val analyzerEngine: AnalyzerEngine,
     private val aiSettings: AiConfigurationSettings
@@ -380,6 +382,10 @@ class CosmeticsViewModel @Inject constructor(
                     val topReactions = fdaRepository.getTopReactions(draft.brand, draft.name)
                     val label = fdaRepository.getDrugLabel(code)
 
+                    // ASYNC CHEMICAL INTELLIGENCE (PubChem)
+                    val topIngredient = obfItem.ingredients.firstOrNull()
+                    val chemicalInfo = topIngredient?.let { chemicalRepository.getChemicalInfo(it).getOrNull() }
+
                     updateSessionDraft { current ->
                         current.copy(
                             fdaRecallStatus = recall?.status,
@@ -387,7 +393,10 @@ class CosmeticsViewModel @Inject constructor(
                             fdaTopReactions = topReactions,
                             fdaClinicalWarnings = label?.warnings ?: emptyList(),
                             fdaActiveIngredients = label?.active_ingredient ?: emptyList(),
-                            isFdaChecked = true
+                            isFdaChecked = true,
+                            // Enrich with chemDB info if found
+                            heroIngredient = chemicalInfo?.name ?: current.heroIngredient,
+                            notes = (current.notes ?: "") + (chemicalInfo?.safetyHazards?.joinToString("\n")?.let { "\nSafety: $it" } ?: "")
                         )
                     }
                 }

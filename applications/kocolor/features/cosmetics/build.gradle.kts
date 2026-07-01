@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":features:graphics"))
     implementation(project(":features:obf"))
     implementation(project(":applications:kocolor:features:fda"))
+    implementation(project(":applications:kocolor:features:chemicals"))
 
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.activity.compose)
