@@ -2,7 +2,7 @@ package com.zoewave.probase.kocolor.db
 
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
-import androidx.room3.TypeConverters
+import androidx.room3.ColumnTypeConverters
 import com.zoewave.probase.kocolor.db.converter.FashionConverters
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
@@ -29,7 +29,7 @@ import com.zoewave.probase.kocolor.db.entity.SavedSuggestionEntity
     version = 6,
     exportSchema = false
 )
-@TypeConverters(FashionConverters::class)
+@ColumnTypeConverters(FashionConverters::class)
 @Suppress("ROOM_MISSING_CONSTRUCTED_BY")
 abstract class KoColorDatabase : RoomDatabase() {
     abstract val fashionProfileDao: FashionProfileDao

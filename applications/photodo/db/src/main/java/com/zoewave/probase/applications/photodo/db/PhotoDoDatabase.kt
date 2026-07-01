@@ -3,7 +3,7 @@ package com.zoewave.probase.applications.photodo.db
 import androidx.room3.AutoMigration
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
-import androidx.room3.TypeConverters
+import androidx.room3.ColumnTypeConverters
 import com.zoewave.probase.applications.photodo.db.converter.PhotoDoConverters
 import com.zoewave.probase.applications.photodo.db.entity.CategoryEntity
 import com.zoewave.probase.applications.photodo.db.entity.ExpenseEntity
@@ -29,7 +29,7 @@ import com.zoewave.probase.applications.photodo.db.entity.time.TimeLogEntity
         // We keep the version at 4 to maintain database compatibility.
     ]
 )
-@TypeConverters(PhotoDoConverters::class)
+@ColumnTypeConverters(PhotoDoConverters::class)
 @Suppress("ROOM_MISSING_CONSTRUCTED_BY")
 abstract class PhotoDoDB : RoomDatabase() {
     abstract fun photoDoDao(): PhotoDoDao

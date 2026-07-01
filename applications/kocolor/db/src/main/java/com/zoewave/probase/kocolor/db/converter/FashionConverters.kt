@@ -1,6 +1,6 @@
 package com.zoewave.probase.kocolor.db.converter
 
-import androidx.room3.TypeConverter
+import androidx.room3.ColumnTypeConverter
 import com.zoewave.probase.kocolor.db.entity.InventoryType
 import com.zoewave.probase.core.model.ritual.*
 import kotlinx.serialization.encodeToString
@@ -9,93 +9,93 @@ import kotlinx.serialization.json.Json
 class FashionConverters {
     private val json = Json { ignoreUnknownKeys = true }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromFashionAdvice(value: FashionAdvice): String = json.encodeToString(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toFashionAdvice(value: String): FashionAdvice = json.decodeFromString<FashionAdvice>(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromInventoryMetadata(value: InventoryMetadata?): String? = value?.let { json.encodeToString(it) }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toInventoryMetadata(value: String?): InventoryMetadata? = value?.let { json.decodeFromString<InventoryMetadata>(it) }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromSeasonalType(value: SeasonalType): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toSeasonalType(value: String): SeasonalType = try { SeasonalType.valueOf(value) } catch (e: Exception) { SeasonalType.UNKNOWN }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromUndertone(value: Undertone): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toUndertone(value: String): Undertone = try { Undertone.valueOf(value) } catch (e: Exception) { Undertone.UNKNOWN }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromInventoryType(value: InventoryType): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toInventoryType(value: String): InventoryType = try { InventoryType.valueOf(value) } catch (e: Exception) { InventoryType.CLOTHES }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromStringList(value: List<String>): String = json.encodeToString(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toStringList(value: String): List<String> = try { json.decodeFromString<List<String>>(value) } catch (e: Exception) { emptyList() }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromRoutineStepList(value: List<RoutineStep>): String = json.encodeToString(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toRoutineStepList(value: String): List<RoutineStep> = try { json.decodeFromString<List<RoutineStep>>(value) } catch (e: Exception) { emptyList() }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromRoutineTime(value: RoutineTime): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toRoutineTime(value: String): RoutineTime = try { RoutineTime.valueOf(value) } catch (e: Exception) { RoutineTime.OTHER }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromMacroCategory(value: MacroCategory): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toMacroCategory(value: String): MacroCategory = try { MacroCategory.valueOf(value) } catch (e: Exception) { MacroCategory.TOOLS }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromMicroCategory(value: MicroCategory): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toMicroCategory(value: String): MicroCategory = try { MicroCategory.valueOf(value) } catch (e: Exception) { MicroCategory.OTHER }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromFormulation(value: Formulation): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toFormulation(value: String): Formulation = try { Formulation.valueOf(value) } catch (e: Exception) { Formulation.UNKNOWN }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromChemistryBase(value: ChemistryBase): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toChemistryBase(value: String): ChemistryBase = try { ChemistryBase.valueOf(value) } catch (e: Exception) { ChemistryBase.UNKNOWN }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromFinish(value: Finish): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toFinish(value: String): Finish = try { Finish.valueOf(value) } catch (e: Exception) { Finish.UNKNOWN }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromCoverage(value: Coverage): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toCoverage(value: String): Coverage = try { Coverage.valueOf(value) } catch (e: Exception) { Coverage.NOT_APPLICABLE }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromClothingCategory(value: ClothingCategory): String = value.name
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toClothingCategory(value: String): ClothingCategory = try { ClothingCategory.valueOf(value) } catch (e: Exception) { ClothingCategory.OTHER }
 }
