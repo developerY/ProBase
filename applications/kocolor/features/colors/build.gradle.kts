@@ -1,6 +1,7 @@
 plugins {
     id("composetemplate.android.library")
     id("composetemplate.android.hilt")
+    id("composetemplate.kotlin.serialization")
 }
 
 android {
@@ -13,7 +14,8 @@ dependencies {
     implementation(project(":core:util"))
 
     implementation(libs.squareup.retrofit)
-    implementation(libs.squareup.retrofit.converter.gson)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.retrofit.kotlinx.serialization.converter)
     implementation(libs.squareup.okhttp)
     implementation(libs.squareup.okhttp3.logging.interceptor)
 

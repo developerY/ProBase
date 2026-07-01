@@ -1,39 +1,24 @@
 package com.zoewave.probase.kocolor.features.colors.data.repository
 
-import com.zoewave.probase.kocolor.features.colors.data.remote.ColorApi
-import com.zoewave.probase.kocolor.features.colors.domain.model.ColorInfo
+import com.zoewave.probase.kocolor.features.colors.data.remote.ColorApiService
 import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorRepository
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class ColorRepositoryImpl @Inject constructor(
-    private val colorApi: ColorApi
+    private val apiService: ColorApiService
 ) : ColorRepository {
 
-    override suspend fun getColorDetails(hex: String): Result<ColorInfo> {
-        return try {
-            val cleanHex = hex.removePrefix("#")
-            val colorResponse = colorApi.getColorById(cleanHex)
-            
-            if (colorResponse.isSuccessful && colorResponse.body() != null) {
-                val colorData = colorResponse.body()!!
-                
-                // Fetch complementary palette
-                val schemeResponse = colorApi.getColorScheme(cleanHex, "complement")
-                val paletteData = schemeResponse.body()?.colors?.map { it.hex.value } ?: emptyList()
+    override suspend fun getColorName(hex: String): Result<String> = runCatching {
+        val cleanHex = hex.removePrefix("#")
+        val response = apiService.getColorId(cleanHex)
+        response.name.value
+    }
 
-                val info = ColorInfo(
-                    hex = colorData.hex.value,
-                    name = colorData.name.value,
-                    // Standardized color name and a mock Pantone match for implementation purposes
-                    pantoneMatch = "PANTONE ${colorData.name.value.uppercase().replace(" ", "-")}",
-                    complementaryPalette = paletteData
-                )
-                Result.success(info)
-            } else {
-                Result.failure(Exception("Failed to fetch color data: ${colorResponse.message()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun getColorScheme(hex: String, mode: String): Result<List<String>> = runCatching {
+        val cleanHex = hex.removePrefix("#")
+        val response = apiService.getColorScheme(cleanHex, mode)
+        response.colors.map { it.hex.value }
     }
 }

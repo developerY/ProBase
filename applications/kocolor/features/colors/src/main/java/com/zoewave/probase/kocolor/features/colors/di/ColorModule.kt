@@ -1,33 +1,59 @@
 package com.zoewave.probase.kocolor.features.colors.di
 
-import com.zoewave.probase.kocolor.features.colors.data.remote.ColorApi
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.zoewave.probase.kocolor.features.colors.data.remote.ColorApiService
 import com.zoewave.probase.kocolor.features.colors.data.repository.ColorRepositoryImpl
 import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorRepository
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object ColorModule {
 
-    @Provides
-    @Singleton
-    fun provideColorApi(): ColorApi {
-        return Retrofit.Builder()
-            .baseUrl(ColorApi.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(ColorApi::class.java)
+    private val json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
     }
 
     @Provides
     @Singleton
-    fun provideColorRepository(api: ColorApi): ColorRepository {
-        return ColorRepositoryImpl(api)
+    fun provideColorApiService(): ColorApiService {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        val httpClient = OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+
+        val contentType = "application/json".toMediaType()
+
+        return Retrofit.Builder()
+            .baseUrl(ColorApiService.BASE_URL)
+            .client(httpClient)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+            .create(ColorApiService::class.java)
     }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class ColorRepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindColorRepository(
+        impl: ColorRepositoryImpl
+    ): ColorRepository
 }
