@@ -17,6 +17,10 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.coil.compose)
 
+    // ML Kit & Scanning
+    implementation(libs.gms.play.services.code.scanner)
+    implementation(libs.kotlinx.coroutines.play.services)
+
     // CameraX
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)

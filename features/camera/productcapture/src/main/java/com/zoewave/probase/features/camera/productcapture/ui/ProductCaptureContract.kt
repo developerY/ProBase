@@ -12,6 +12,7 @@ data class CaptureStepConfig(
     val label: String,
     val hint: String,
     val isSkippable: Boolean = false,
+    val isBarcodeStep: Boolean = false,
     val icon: ImageVector? = null,
     val viewfinderOverlay: @Composable () -> Unit = {}
 )
@@ -31,4 +32,5 @@ sealed interface ProductCaptureUiEvent {
     data class DeletePhoto(val index: Int) : ProductCaptureUiEvent
     data object Close : ProductCaptureUiEvent
     data class OnPriceChanged(val price: Double) : ProductCaptureUiEvent
+    data class BarcodeScanned(val code: String) : ProductCaptureUiEvent
 }

@@ -120,6 +120,7 @@ internal fun BoxCaptureScreen(
                             label = step.label,
                             hint = getHintForStep(step),
                             isSkippable = step.isSkippable,
+                            isBarcodeStep = step == CaptureStep.BARCODE,
                             viewfinderOverlay = {
                                 if (step == CaptureStep.COLOR) {
                                     Box(
@@ -148,6 +149,7 @@ internal fun BoxCaptureScreen(
                         is ProductCaptureUiEvent.DeletePhoto -> onEvent(BoxCaptureEvent.DeletePhoto(event.index))
                         ProductCaptureUiEvent.Close -> onEvent(BoxCaptureEvent.Dismiss)
                         is ProductCaptureUiEvent.OnPriceChanged -> onEvent(BoxCaptureEvent.OnPriceChanged(event.price))
+                        is ProductCaptureUiEvent.BarcodeScanned -> onEvent(BoxCaptureEvent.BarcodeScanned(event.code))
                     }
                 },
                 modifier = modifier
