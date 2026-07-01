@@ -2,7 +2,18 @@ package com.zoewave.probase.kocolor.features.clothingcapture.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -11,9 +22,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,10 +51,11 @@ import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationUi
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationView
 import com.zoewave.probase.features.camera.productcapture.ui.ErrorView
 import com.zoewave.probase.features.camera.productcapture.ui.GenericProductCaptureUiRoute
+import com.zoewave.probase.features.camera.productcapture.ui.PriceConfirmationUiState
+import com.zoewave.probase.features.camera.productcapture.ui.PriceConfirmationView
 import com.zoewave.probase.features.camera.productcapture.ui.ProductCaptureSessionConfig
 import com.zoewave.probase.features.camera.productcapture.ui.ProductCaptureUiEvent
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
-import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureStep
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureUiState
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -49,6 +71,8 @@ sealed interface ClothingCaptureEvent {
     data class OnColorSelected(val hex: String) : ClothingCaptureEvent
     data object ConfirmColor : ClothingCaptureEvent
     data object ClearColor : ClothingCaptureEvent
+    data object ConfirmPrice : ClothingCaptureEvent
+    data class OnPriceChanged(val price: Double) : ClothingCaptureEvent
 }
 
 @Composable
@@ -84,7 +108,7 @@ internal fun ClothingCaptureScreen(
     when (uiState) {
         is ClothingCaptureUiState.Idle -> {
             val steps = ClothingCaptureStep.ALL
-            val config = remember(uiState.extractedColorHex) {
+            val config = remember<ProductCaptureSessionConfig>(uiState.extractedColorHex) {
                 ProductCaptureSessionConfig(
                     title = "Capture Clothing",
                     steps = steps.map { step ->
@@ -121,6 +145,7 @@ internal fun ClothingCaptureScreen(
                         ProductCaptureUiEvent.SkipStep -> onEvent(ClothingCaptureEvent.SkipStep)
                         is ProductCaptureUiEvent.DeletePhoto -> onEvent(ClothingCaptureEvent.DeletePhoto(event.index))
                         ProductCaptureUiEvent.Close -> onEvent(ClothingCaptureEvent.Dismiss)
+                        is ProductCaptureUiEvent.OnPriceChanged -> onEvent(ClothingCaptureEvent.OnPriceChanged(event.price))
                     }
                 },
                 modifier = modifier
@@ -142,12 +167,24 @@ internal fun ClothingCaptureScreen(
                 themeColor = themePink
             )
         }
+        is ClothingCaptureUiState.PriceConfirmation -> {
+            PriceConfirmationView(
+                uiState = PriceConfirmationUiState(
+                    detectedPrice = uiState.detectedPrice,
+                    themeColor = themePink
+                ),
+                onPriceChanged = { onEvent(ClothingCaptureEvent.OnPriceChanged(it)) },
+                onConfirm = { onEvent(ClothingCaptureEvent.ConfirmPrice) },
+                onManualEntry = { onEvent(ClothingCaptureEvent.OnPriceChanged(0.0)) }
+            )
+        }
         is ClothingCaptureUiState.Review -> {
             ReviewView(
                 uiState = ReviewViewUiState(
                     capturedUris = uiState.capturedUris,
                     labelsOcr = uiState.labelsOcr,
-                    manualColorHex = uiState.manualColorHex
+                    manualColorHex = uiState.manualColorHex,
+                    price = uiState.price
                 ),
                 onEvent = onEvent,
                 themeColor = themePink
@@ -164,13 +201,15 @@ private fun getHintForStep(step: ClothingCaptureStep): String = when (step) {
     ClothingCaptureStep.FRONT -> "Capture the front silhouette"
     ClothingCaptureStep.BACK -> "Capture the overall back view"
     ClothingCaptureStep.LABEL -> "Capture the brand and care label"
+    ClothingCaptureStep.PRICE -> "Align the price tag within the frame"
     ClothingCaptureStep.COLOR -> "Capture the truest representation of fabric color"
 }
 
 data class ReviewViewUiState(
     val capturedUris: List<String>,
     val labelsOcr: String,
-    val manualColorHex: String? = null
+    val manualColorHex: String? = null,
+    val price: Double? = null
 )
 
 @Composable
@@ -261,6 +300,31 @@ private fun ReviewView(
                                 text = uiState.manualColorHex ?: "AI will identify color from photos",
                                 color = if (uiState.manualColorHex != null) Color.White else Color.Gray,
                                 style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+            }
+
+            item {
+                ReviewSection(title = "Price Analysis", themeColor = themeColor) {
+                    Surface(
+                        color = Color.White.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "$",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = themeColor
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                text = uiState.price?.let { String.format("%.2f", it) } ?: "Not captured",
+                                color = if (uiState.price != null) Color.White else Color.Gray,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }

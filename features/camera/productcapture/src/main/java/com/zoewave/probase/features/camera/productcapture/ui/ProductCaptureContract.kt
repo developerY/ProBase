@@ -30,4 +30,5 @@ sealed interface ProductCaptureUiEvent {
     data object SkipStep : ProductCaptureUiEvent
     data class DeletePhoto(val index: Int) : ProductCaptureUiEvent
     data object Close : ProductCaptureUiEvent
+    data class OnPriceChanged(val price: Double) : ProductCaptureUiEvent
 }

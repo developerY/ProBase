@@ -8,8 +8,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +23,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import java.util.Locale
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.features.graphics.colorpicker.util.toHex
@@ -189,6 +193,117 @@ fun ColorConfirmationView(
                 colors = ButtonDefaults.buttonColors(containerColor = themeColor)
             ) {
                 Text("USE COLOR", color = Color.Black, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+data class PriceConfirmationUiState(
+    val detectedPrice: Double,
+    val themeColor: Color = Color(0xFF22d3ee)
+)
+
+@Composable
+fun PriceConfirmationView(
+    uiState: PriceConfirmationUiState,
+    onPriceChanged: (Double) -> Unit,
+    onConfirm: () -> Unit,
+    onManualEntry: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0f172a).copy(alpha = 0.8f))
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom
+    ) {
+        Surface(
+            color = Color(0xFF1e293b),
+            shape = RoundedCornerShape(24.dp, 24.dp, 0.dp, 0.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(40.dp)
+                        .height(4.dp)
+                        .background(Color.Gray.copy(alpha = 0.5f), CircleShape)
+                )
+                
+                Spacer(Modifier.height(24.dp))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Black.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        "DETECTED PRICE",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.Bottom) {
+                            Text(
+                                "$",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = uiState.themeColor,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            Text(
+                                String.format(Locale.US, "%.2f", uiState.detectedPrice),
+                                style = MaterialTheme.typography.displayMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .background(Color.White.copy(alpha = 0.05f), CircleShape)
+                                .padding(horizontal = 4.dp)
+                        ) {
+                            IconButton(onClick = { onPriceChanged((uiState.detectedPrice - 1.0).coerceAtLeast(0.0)) }) {
+                                Icon(Icons.Default.Remove, null, tint = Color.White)
+                            }
+                            Box(modifier = Modifier.width(1.dp).height(24.dp).background(Color.White.copy(alpha = 0.1f)))
+                            IconButton(onClick = { onPriceChanged(uiState.detectedPrice + 1.0) }) {
+                                Icon(Icons.Default.Add, null, tint = Color.White)
+                            }
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(24.dp))
+
+                Button(
+                    onClick = onConfirm,
+                    modifier = Modifier.fillMaxWidth().height(64.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = uiState.themeColor)
+                ) {
+                    Text("Capture & Confirm", color = Color.Black, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.width(8.dp))
+                    Icon(Icons.Default.CheckCircle, null, tint = Color.Black)
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                TextButton(onClick = onManualEntry) {
+                    Text("Enter Manually", color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.bodyMedium)
+                }
             }
         }
     }

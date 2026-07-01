@@ -82,7 +82,7 @@ class ClothingCaptureViewModel @Inject constructor(
                 val current = (uiState.value as? ClothingCaptureUiState.ColorConfirmation) ?: return
                 val nextStep = getNextStep()
                 if (nextStep != null) {
-                    _uiState.value = ClothingCaptureUiState.Idle(current.capturedUris, nextStep, current.selectedColorHex)
+                    _uiState.value = ClothingCaptureUiState.Idle(current.capturedUris, nextStep, current.selectedColorHex, manualPrice)
                 } else {
                     prepareReview()
                 }
@@ -91,13 +91,31 @@ class ClothingCaptureViewModel @Inject constructor(
                 val current = (uiState.value as? ClothingCaptureUiState.ColorConfirmation) ?: return
                 val nextStep = getNextStep()
                 if (nextStep != null) {
-                    _uiState.value = ClothingCaptureUiState.Idle(current.capturedUris, nextStep, null)
+                    _uiState.value = ClothingCaptureUiState.Idle(current.capturedUris, nextStep, null, manualPrice)
                 } else {
                     prepareReview()
                 }
             }
+            ClothingCaptureEvent.ConfirmPrice -> {
+                val current = (uiState.value as? ClothingCaptureUiState.PriceConfirmation) ?: return
+                val nextStep = getNextStep()
+                if (nextStep != null) {
+                    _uiState.value = ClothingCaptureUiState.Idle(current.capturedUris, nextStep, extractedColorHex, current.detectedPrice)
+                } else {
+                    prepareReview()
+                }
+            }
+            is ClothingCaptureEvent.OnPriceChanged -> {
+                val current = (uiState.value as? ClothingCaptureUiState.PriceConfirmation)
+                if (current != null) {
+                    _uiState.value = current.copy(detectedPrice = event.price)
+                }
+            }
         }
     }
+
+    private val manualPrice: Double? get() = (uiState.value as? ClothingCaptureUiState.Idle)?.manualPrice
+    private val extractedColorHex: String? get() = (uiState.value as? ClothingCaptureUiState.Idle)?.extractedColorHex
 
     private fun skipStep() {
         val current = (uiState.value as? ClothingCaptureUiState.Idle) ?: return
@@ -129,6 +147,18 @@ class ClothingCaptureViewModel @Inject constructor(
                     capturedUris = capturedUris.toList(),
                     suggestedColors = suggestedColors,
                     selectedColorHex = suggestedColors.firstOrNull() ?: "#808080"
+                )
+            }
+            return
+        }
+
+        if (current.currentStep == ClothingCaptureStep.PRICE) {
+            viewModelScope.launch {
+                val bitmap = loadBitmapFromUri(Uri.parse(uri))
+                val detectedPrice = if (bitmap != null) localAnalyzer.extractPrice(bitmap) ?: 0.0 else 0.0
+                _uiState.value = ClothingCaptureUiState.PriceConfirmation(
+                    capturedUris = capturedUris.toList(),
+                    detectedPrice = detectedPrice
                 )
             }
             return
@@ -233,7 +263,8 @@ class ClothingCaptureViewModel @Inject constructor(
                 if (jsonText != null) {
                     val item = parseJsonToClothingItem(jsonText).copy(
                         imageUrl = capturedUris.firstOrNull { it.isNotBlank() },
-                        colorHex = manualColor ?: "#FFFFFF" 
+                        colorHex = manualColor ?: "#FFFFFF",
+                        price = manualPrice
                     )
                     _uiState.value = ClothingCaptureUiState.Success(item)
                 } else {
@@ -294,6 +325,6 @@ class ClothingCaptureViewModel @Inject constructor(
     fun reset() {
         capturedUris.clear()
         localLabelsOcr = ""
-        _uiState.value = ClothingCaptureUiState.Idle()
+        _uiState.value = ClothingCaptureUiState.Idle(emptyList(), ClothingCaptureStep.FRONT, null, null)
     }
 }

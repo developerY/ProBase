@@ -151,7 +151,11 @@ internal fun GenericProductCaptureScreen(
 
                 // Custom Step Viewfinder Overlay
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    currentStep.viewfinderOverlay()
+                    if (currentStep.id.contains("PRICE", ignoreCase = true)) {
+                        PriceScanningOverlay(config.themeColor)
+                    } else {
+                        currentStep.viewfinderOverlay()
+                    }
                 }
             }
 
@@ -255,6 +259,27 @@ internal fun GenericProductCaptureScreen(
                 Text(currentStep.hint, color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.labelSmall)
             }
         }
+    }
+}
+
+@Composable
+private fun PriceScanningOverlay(themeColor: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            "ALIGN PRICE WITHIN FRAME",
+            color = Color.White,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp
+        )
+        Spacer(Modifier.height(16.dp))
+        Box(
+            modifier = Modifier
+                .width(280.dp)
+                .height(120.dp)
+                .border(2.dp, themeColor.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+        )
     }
 }
 

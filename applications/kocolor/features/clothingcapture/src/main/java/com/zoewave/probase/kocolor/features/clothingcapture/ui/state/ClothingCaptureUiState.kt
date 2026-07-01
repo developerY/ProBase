@@ -6,7 +6,8 @@ sealed interface ClothingCaptureUiState {
     data class Idle(
         val capturedUris: List<String> = emptyList(),
         val currentStep: ClothingCaptureStep = ClothingCaptureStep.FRONT,
-        val extractedColorHex: String? = null
+        val extractedColorHex: String? = null,
+        val manualPrice: Double? = null
     ) : ClothingCaptureUiState
 
     data class Analyzing(
@@ -20,10 +21,16 @@ sealed interface ClothingCaptureUiState {
         val selectedColorHex: String
     ) : ClothingCaptureUiState
 
+    data class PriceConfirmation(
+        val capturedUris: List<String>,
+        val detectedPrice: Double
+    ) : ClothingCaptureUiState
+
     data class Review(
         val capturedUris: List<String>,
         val labelsOcr: String = "",
-        val manualColorHex: String? = null
+        val manualColorHex: String? = null,
+        val price: Double? = null
     ) : ClothingCaptureUiState
 
     data class Success(
@@ -42,6 +49,7 @@ enum class ClothingCaptureStep(
     FRONT("Front View"),
     BACK("Back View"),
     LABEL("Label / Care Side", isSkippable = true),
+    PRICE("Scan Price Tag", isSkippable = true),
     COLOR("Product Color", isSkippable = true);
 
     companion object {
