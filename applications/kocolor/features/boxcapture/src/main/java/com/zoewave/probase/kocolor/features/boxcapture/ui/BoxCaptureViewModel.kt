@@ -134,7 +134,7 @@ class BoxCaptureViewModel @Inject constructor(
                 val current = (uiState.value as? BoxCaptureUiState.ColorConfirmation) ?: return
                 val nextStep = getNextStep(current.mode)
                 if (nextStep != null) {
-                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, current.selectedColorHex)
+                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, current.selectedColorHex, manualPrice)
                 } else {
                     prepareReview(current.mode)
                 }
@@ -143,13 +143,31 @@ class BoxCaptureViewModel @Inject constructor(
                 val current = (uiState.value as? BoxCaptureUiState.ColorConfirmation) ?: return
                 val nextStep = getNextStep(current.mode)
                 if (nextStep != null) {
-                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, null)
+                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, null, manualPrice)
                 } else {
                     prepareReview(current.mode)
                 }
             }
+            BoxCaptureEvent.ConfirmPrice -> {
+                val current = (uiState.value as? BoxCaptureUiState.PriceConfirmation) ?: return
+                val nextStep = getNextStep(current.mode)
+                if (nextStep != null) {
+                    _uiState.value = BoxCaptureUiState.Idle(current.capturedUris, nextStep, current.mode, extractedColorHex, current.detectedPrice)
+                } else {
+                    prepareReview(current.mode)
+                }
+            }
+            is BoxCaptureEvent.OnPriceChanged -> {
+                val current = (uiState.value as? BoxCaptureUiState.PriceConfirmation)
+                if (current != null) {
+                    _uiState.value = current.copy(detectedPrice = event.price)
+                }
+            }
         }
     }
+
+    private val manualPrice: Double? get() = (uiState.value as? BoxCaptureUiState.Idle)?.manualPrice
+    private val extractedColorHex: String? get() = (uiState.value as? BoxCaptureUiState.Idle)?.extractedColorHex
 
     private fun skipStep() {
         val current = (uiState.value as? BoxCaptureUiState.Idle) ?: return
@@ -206,6 +224,20 @@ class BoxCaptureViewModel @Inject constructor(
                     capturedUris = capturedUris.toList(),
                     suggestedColors = suggestedColors,
                     selectedColorHex = suggestedColors.firstOrNull() ?: "#808080",
+                    mode = mode
+                )
+            }
+            return
+        }
+
+        if (current.currentStep == CaptureStep.PRICE) {
+            // Auto-extract price from the photo
+            viewModelScope.launch {
+                val bitmap = loadBitmapFromUri(Uri.parse(uri))
+                val detectedPrice = if (bitmap != null) localAnalyzer.extractPrice(bitmap) ?: 0.0 else 0.0
+                _uiState.value = BoxCaptureUiState.PriceConfirmation(
+                    capturedUris = capturedUris.toList(),
+                    detectedPrice = detectedPrice,
                     mode = mode
                 )
             }
@@ -417,7 +449,8 @@ class BoxCaptureViewModel @Inject constructor(
                     item = item.copy(
                         imageUrl = capturedUris.firstOrNull { it.isNotBlank() },
                         batchCode = scannedBarcode ?: item.batchCode,
-                        colorHex = manualColor ?: item.colorHex
+                        colorHex = manualColor ?: item.colorHex,
+                        price = manualPrice ?: item.price
                     )
 
                     sessionRepository.setCosmeticDraft(item)
@@ -543,6 +576,6 @@ class BoxCaptureViewModel @Inject constructor(
         }
         localIngredientsOcr = ""
         localInstructionsOcr = ""
-        _uiState.value = BoxCaptureUiState.Idle(emptyList(), CaptureStep.getStepsForMode(mode).first(), mode)
+        _uiState.value = BoxCaptureUiState.Idle(emptyList(), CaptureStep.getStepsForMode(mode).first(), mode, null, null)
     }
 }

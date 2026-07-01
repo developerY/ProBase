@@ -52,6 +52,8 @@ import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationUi
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationView
 import com.zoewave.probase.features.camera.productcapture.ui.ErrorView
 import com.zoewave.probase.features.camera.productcapture.ui.GenericProductCaptureUiRoute
+import com.zoewave.probase.features.camera.productcapture.ui.PriceConfirmationUiState
+import com.zoewave.probase.features.camera.productcapture.ui.PriceConfirmationView
 import com.zoewave.probase.features.camera.productcapture.ui.ProductCaptureSessionConfig
 import com.zoewave.probase.features.camera.productcapture.ui.ProductCaptureUiEvent
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
@@ -74,6 +76,8 @@ sealed interface BoxCaptureEvent {
     data class OnColorSelected(val hex: String) : BoxCaptureEvent
     data object ConfirmColor : BoxCaptureEvent
     data object ClearColor : BoxCaptureEvent
+    data object ConfirmPrice : BoxCaptureEvent
+    data class OnPriceChanged(val price: Double) : BoxCaptureEvent
 }
 
 @Composable
@@ -107,7 +111,7 @@ internal fun BoxCaptureScreen(
     when (uiState) {
         is BoxCaptureUiState.Idle -> {
             val steps = CaptureStep.getStepsForMode(uiState.mode)
-            val config = remember(uiState.mode, uiState.extractedColorHex) {
+            val config = remember<ProductCaptureSessionConfig>(uiState.mode, uiState.extractedColorHex) {
                 ProductCaptureSessionConfig(
                     title = "Capture Product",
                     steps = steps.map { step ->
@@ -143,6 +147,7 @@ internal fun BoxCaptureScreen(
                         ProductCaptureUiEvent.SkipStep -> onEvent(BoxCaptureEvent.SkipStep)
                         is ProductCaptureUiEvent.DeletePhoto -> onEvent(BoxCaptureEvent.DeletePhoto(event.index))
                         ProductCaptureUiEvent.Close -> onEvent(BoxCaptureEvent.Dismiss)
+                        is ProductCaptureUiEvent.OnPriceChanged -> onEvent(BoxCaptureEvent.OnPriceChanged(event.price))
                     }
                 },
                 modifier = modifier
@@ -163,6 +168,16 @@ internal fun BoxCaptureScreen(
                 onClear = { onEvent(BoxCaptureEvent.ClearColor) }
             )
         }
+        is BoxCaptureUiState.PriceConfirmation -> {
+            PriceConfirmationView(
+                uiState = PriceConfirmationUiState(
+                    detectedPrice = uiState.detectedPrice
+                ),
+                onPriceChanged = { onEvent(BoxCaptureEvent.OnPriceChanged(it)) },
+                onConfirm = { onEvent(BoxCaptureEvent.ConfirmPrice) },
+                onManualEntry = { onEvent(BoxCaptureEvent.OnPriceChanged(0.0)) } 
+            )
+        }
         is BoxCaptureUiState.Review -> {
             ReviewView(
                 uiState = ReviewViewUiState(
@@ -171,7 +186,8 @@ internal fun BoxCaptureScreen(
                     ingredientsOcr = uiState.ingredientsOcr,
                     instructionsOcr = uiState.instructionsOcr,
                     enrichmentData = uiState.enrichmentData,
-                    manualColorHex = uiState.manualColorHex
+                    manualColorHex = uiState.manualColorHex,
+                    price = uiState.price
                 ),
                 onEvent = onEvent
             )
@@ -188,6 +204,7 @@ private fun getHintForStep(step: CaptureStep): String = when (step) {
     CaptureStep.BACK -> "Capture the product back"
     CaptureStep.INGREDIENTS -> "Ensure the ingredients list is clear"
     CaptureStep.INSTRUCTIONS -> "Capture usage instructions (if any)"
+    CaptureStep.PRICE -> "Align the price tag within the frame"
     CaptureStep.COLOR -> "Capture the best representation of product color"
     CaptureStep.BARCODE -> "Final step: Scan the barcode"
 }
@@ -198,7 +215,8 @@ data class ReviewViewUiState(
     val ingredientsOcr: String,
     val instructionsOcr: String,
     val enrichmentData: CosmeticItem? = null,
-    val manualColorHex: String? = null
+    val manualColorHex: String? = null,
+    val price: Double? = null
 )
 
 @Composable
@@ -288,6 +306,31 @@ private fun ReviewView(
                                 text = uiState.manualColorHex ?: "AI will identify color from photos",
                                 color = if (uiState.manualColorHex != null) Color.White else Color.Gray,
                                 style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+            }
+
+            item {
+                ReviewSection(title = "Price Analysis") {
+                    Surface(
+                        color = Color.White.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "$",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = Color(0xFF22d3ee)
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                text = uiState.price?.let { String.format("%.2f", it) } ?: "Not captured",
+                                color = if (uiState.price != null) Color.White else Color.Gray,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }

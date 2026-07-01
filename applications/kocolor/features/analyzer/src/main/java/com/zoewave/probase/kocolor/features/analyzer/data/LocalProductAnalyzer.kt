@@ -83,6 +83,16 @@ class LocalProductAnalyzer @Inject constructor() {
         return palette.toList().take(5)
     }
 
+    /**
+     * Extracts a price value from the bitmap using local OCR.
+     * Looks for patterns like "$24.00", "24.99", etc.
+     */
+    suspend fun extractPrice(bitmap: Bitmap): Double? {
+        val text = extractText(bitmap)
+        val regex = Regex("""\$?\s?(\d+\.\d{2})""")
+        return regex.find(text)?.groupValues?.get(1)?.toDoubleOrNull()
+    }
+
     private fun heuristicGuess(text: String): CosmeticItem {
         val lines = text.lines().map { it.trim() }.filter { it.isNotBlank() }
         

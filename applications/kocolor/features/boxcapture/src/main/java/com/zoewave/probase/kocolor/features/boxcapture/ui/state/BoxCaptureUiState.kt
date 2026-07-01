@@ -8,7 +8,8 @@ sealed interface BoxCaptureUiState {
         val capturedUris: List<String> = emptyList(),
         val currentStep: CaptureStep = CaptureStep.FRONT,
         val mode: CaptureMode = CaptureMode.BOX,
-        val extractedColorHex: String? = null
+        val extractedColorHex: String? = null,
+        val manualPrice: Double? = null
     ) : BoxCaptureUiState
 
     data class Analyzing(
@@ -23,6 +24,12 @@ sealed interface BoxCaptureUiState {
         val mode: CaptureMode
     ) : BoxCaptureUiState
 
+    data class PriceConfirmation(
+        val capturedUris: List<String>,
+        val detectedPrice: Double,
+        val mode: CaptureMode
+    ) : BoxCaptureUiState
+
     data class Review(
         val capturedUris: List<String>,
         val barcode: String?,
@@ -30,7 +37,8 @@ sealed interface BoxCaptureUiState {
         val instructionsOcr: String = "",
         val mode: CaptureMode,
         val enrichmentData: CosmeticItem? = null,
-        val manualColorHex: String? = null
+        val manualColorHex: String? = null,
+        val price: Double? = null
     ) : BoxCaptureUiState
 
     data class Success(
@@ -54,14 +62,15 @@ enum class CaptureStep(
     BACK("Back / Info Side"),
     INGREDIENTS("Ingredients List"),
     INSTRUCTIONS("Instructions / Info", isSkippable = true),
+    PRICE("Scan Price Tag", isSkippable = true),
     COLOR("Product Color", isSkippable = true),
     BARCODE("Barcode Scan");
 
     companion object {
         fun getStepsForMode(mode: CaptureMode): List<CaptureStep> {
             return when (mode) {
-                CaptureMode.BOX -> listOf(FRONT, BACK, INGREDIENTS, INSTRUCTIONS, COLOR, BARCODE)
-                CaptureMode.PRODUCT -> listOf(FRONT, BACK, COLOR, BARCODE)
+                CaptureMode.BOX -> listOf(FRONT, BACK, INGREDIENTS, INSTRUCTIONS, PRICE, COLOR, BARCODE)
+                CaptureMode.PRODUCT -> listOf(FRONT, BACK, PRICE, COLOR, BARCODE)
             }
         }
     }
