@@ -86,15 +86,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.gotmind.database.MemBloxScoreEntity
 import com.zoewave.probase.gotmind.features.memblox.HapticSignal
 import com.zoewave.probase.gotmind.features.memblox.MatchGhost
 import com.zoewave.probase.gotmind.features.memblox.MemBloxEvent
 import com.zoewave.probase.gotmind.features.memblox.MemBloxState
+import com.zoewave.probase.gotmind.features.memblox.MemBloxUiState
 import com.zoewave.probase.gotmind.features.memblox.PowerUpType
 import com.zoewave.probase.gotmind.features.memblox.R
 import com.zoewave.probase.gotmind.features.memblox.ScorePopup
 import com.zoewave.probase.gotmind.model.MemBloxEngineType
+import com.zoewave.probase.gotmind.model.GotMindRoute
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
 import kotlinx.coroutines.launch
@@ -106,19 +109,19 @@ import kotlin.random.Random
 
 @Composable
 fun MemBloxScreen(
-    uiState: MemBloxState,
-    topScores: List<MemBloxScoreEntity>,
-    engineType: MemBloxEngineType,
-    onNav: (String) -> Unit,
-    onEvent: (MemBloxEvent) -> Unit
+    uiState: MemBloxUiState,
+    modifier: Modifier = Modifier,
+    onEvent: (MemBloxEvent) -> Unit,
+    navTo: (GotMindRoute) -> Unit
 ) {
+    val game = uiState.game
     var showAnalytics by remember { mutableStateOf(false) }
 
     val haptic = LocalHapticFeedback.current
 
     // Haptic Feedback Observer
-    LaunchedEffect(uiState.lastHapticSignal) {
-        uiState.lastHapticSignal?.let { signal ->
+    LaunchedEffect(game.lastHapticSignal) {
+        game.lastHapticSignal?.let { signal ->
             when (signal) {
                 HapticSignal.LIGHT -> haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 HapticSignal.MEDIUM -> haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -128,7 +131,7 @@ fun MemBloxScreen(
         }
     }
 
-    if (!uiState.isStarted) {
+    if (!game.isStarted) {
         DifficultySelectionScreen(
             onDifficultySelected = { onEvent(MemBloxEvent.StartGame(it)) }
         )
@@ -137,18 +140,18 @@ fun MemBloxScreen(
 
     // Screenshake Offset
     val shakeX by animateFloatAsState(
-        targetValue = if (uiState.shakeIntensity > 0 || uiState.isStressed) (Random.nextFloat() - 0.5f) * (uiState.shakeIntensity + 1f) * 10 else 0f,
+        targetValue = if (game.shakeIntensity > 0 || game.isStressed) (Random.nextFloat() - 0.5f) * (game.shakeIntensity + 1f) * 10 else 0f,
         animationSpec = spring(stiffness = Spring.StiffnessHigh),
         label = "ShakeX"
     )
     val shakeY by animateFloatAsState(
-        targetValue = if (uiState.shakeIntensity > 0 || uiState.isStressed) (Random.nextFloat() - 0.5f) * (uiState.shakeIntensity + 1f) * 10 else 0f,
+        targetValue = if (game.shakeIntensity > 0 || game.isStressed) (Random.nextFloat() - 0.5f) * (game.shakeIntensity + 1f) * 10 else 0f,
         animationSpec = spring(stiffness = Spring.StiffnessHigh),
         label = "ShakeY"
     )
 
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
-        ParticleBackground(speedFactor = if (uiState.isFrenzy) 3f else 1f)
+    Box(modifier = modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
+        ParticleBackground(speedFactor = if (game.isFrenzy) 3f else 1f)
 
         Column(modifier = Modifier.fillMaxSize()) {
             // 1. Ultra-Slim Header (Top Fixed HUD)
@@ -168,7 +171,7 @@ fun MemBloxScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = { onNav("BACK") },
+                        onClick = { navTo(GotMindRoute.Back) },
                         modifier = Modifier.size(36.dp).background(Color.White.copy(alpha = 0.1f), CircleShape)
                     ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.applications_gotmind_features_memblox_back), modifier = Modifier.size(20.dp), tint = Color.White)
@@ -176,12 +179,12 @@ fun MemBloxScreen(
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = uiState.score.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = if (uiState.isFrenzy) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary)
+                            Text(text = game.score.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = if (game.isFrenzy) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary)
                             Text(text = stringResource(R.string.applications_gotmind_features_memblox_score), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                         }
                         Spacer(modifier = Modifier.width(24.dp))
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = stringResource(R.string.applications_gotmind_features_memblox_pairs_format, uiState.pairsMatched, uiState.targetPairs), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(text = stringResource(R.string.applications_gotmind_features_memblox_pairs_format, game.pairsMatched, game.targetPairs), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
                             Text(text = stringResource(R.string.applications_gotmind_features_memblox_pairs), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                         }
                     }
@@ -205,12 +208,12 @@ fun MemBloxScreen(
                             .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                             .padding(16.dp)
                     ) {
-                        val loadPct = if (uiState.cols * uiState.rows > 0) (uiState.peakBoardBlocks * 100 / (uiState.cols * uiState.rows)) else 0
-                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_hit_rate), stringResource(R.string.applications_gotmind_features_memblox_percent_format, (uiState.matchAccuracy * 100).toInt()))
-                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_best_streak), "${uiState.bestMatchStreak}")
-                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_avg_match_time), String.format(Locale.getDefault(), "%.1fs", uiState.avgMatchTimeMs / 1000f))
+                        val loadPct = if (game.cols * game.rows > 0) (game.peakBoardBlocks * 100 / (game.cols * game.rows)) else 0
+                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_hit_rate), stringResource(R.string.applications_gotmind_features_memblox_percent_format, (game.matchAccuracy * 100).toInt()))
+                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_best_streak), "${game.bestMatchStreak}")
+                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_avg_match_time), String.format(Locale.getDefault(), "%.1fs", game.avgMatchTimeMs / 1000f))
                         AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_peak_board_load), "$loadPct%")
-                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_solubility), "${(uiState.successfulMatches * 100 / (uiState.totalClicks.coerceAtLeast(1)))}%")
+                        AnalyticsRow(stringResource(R.string.applications_gotmind_features_memblox_solubility), "${(game.successfulMatches * 100 / (game.totalClicks.coerceAtLeast(1)))}%")
 
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(
@@ -220,7 +223,7 @@ fun MemBloxScreen(
                             Button(
                                 onClick = { 
                                     onEvent(MemBloxEvent.ResetToSelection)
-                                    onNav("BACK") 
+                                    navTo(GotMindRoute.Back) 
                                 },
                                 modifier = Modifier.weight(1f).height(40.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.2f), contentColor = Color.Red),
@@ -236,15 +239,15 @@ fun MemBloxScreen(
                                 onClick = { onEvent(MemBloxEvent.TogglePause) },
                                 modifier = Modifier.weight(1f).height(40.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (uiState.isPaused) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.1f),
-                                    contentColor = if (uiState.isPaused) MaterialTheme.colorScheme.primary else Color.White
+                                    containerColor = if (game.isPaused) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.1f),
+                                    contentColor = if (game.isPaused) MaterialTheme.colorScheme.primary else Color.White
                                 ),
                                 shape = RoundedCornerShape(8.dp),
                                 contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
                             ) {
-                                Icon(if (uiState.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(if (game.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text(if (uiState.isPaused) stringResource(R.string.applications_gotmind_features_memblox_resume) else stringResource(R.string.applications_gotmind_features_memblox_pause), style = MaterialTheme.typography.labelLarge)
+                                Text(if (game.isPaused) stringResource(R.string.applications_gotmind_features_memblox_resume) else stringResource(R.string.applications_gotmind_features_memblox_pause), style = MaterialTheme.typography.labelLarge)
                             }
                         }
                     }
@@ -252,13 +255,13 @@ fun MemBloxScreen(
             }
 
             // 2. Progress Line
-            val progress by animateFloatAsState(targetValue = uiState.pairsMatched.toFloat() / uiState.targetPairs, animationSpec = tween(500))
+            val progress by animateFloatAsState(targetValue = game.pairsMatched.toFloat() / game.targetPairs, animationSpec = tween(500))
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(2.dp),
-                color = if (uiState.isFrenzy) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary,
+                color = if (game.isFrenzy) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary,
                 trackColor = Color.Transparent,
                 strokeCap = StrokeCap.Butt
             )
@@ -270,71 +273,71 @@ fun MemBloxScreen(
                     .fillMaxWidth()
                     .offset { IntOffset(shakeX.roundToInt(), shakeY.roundToInt()) }
             ) {
-                val blockSize = maxWidth / uiState.cols
-                val blockHeight = maxHeight / uiState.rows
+                val blockSize = maxWidth / game.cols
+                val blockHeight = maxHeight / game.rows
 
-                uiState.grid.forEach { block ->
+                game.grid.forEach { block ->
                     key(block.id) {
-                        val nukingColor = uiState.nukingBlockIds[block.id]
-                        val isHinted = uiState.hintedBlockIds.contains(block.id)
+                        val nukingColor = game.nukingBlockIds[block.id]
+                        val isHinted = game.hintedBlockIds.contains(block.id)
                         MemBloxBlockRender(
                             block = block,
                             blockSize = blockSize,
                             blockHeight = blockHeight,
-                            isRevealed = uiState.isRevealed,
-                            isInitiallyRevealed = uiState.initiallyRevealedBlockIds.contains(block.id),
-                            isFallingMode = engineType == MemBloxEngineType.FALLING,
+                            isRevealed = game.isRevealed,
+                            isInitiallyRevealed = game.initiallyRevealedBlockIds.contains(block.id),
+                            isFallingMode = uiState.engineType == MemBloxEngineType.FALLING,
                             nukingColor = nukingColor?.let { Color(it) },
                             isHinted = isHinted,
-                            dropHeight = uiState.dropHeight,
-                            dropDurationMillis = uiState.dropDurationMillis,
+                            dropHeight = game.dropHeight,
+                            dropDurationMillis = game.dropDurationMillis,
                             onClick = { onEvent(MemBloxEvent.BlockClick(block)) }
                         )
                     }
                 }
 
-                if (uiState.isStressed) StressVignette()
-                if (uiState.frostAlpha > 0) FrostOverlay(alpha = uiState.frostAlpha)
-                if (uiState.isSlowed) Box(modifier = Modifier.fillMaxSize().background(Color(0xFFFFD54F).copy(alpha = 0.1f)))
+                if (game.isStressed) StressVignette()
+                if (game.frostAlpha > 0) FrostOverlay(alpha = game.frostAlpha)
+                if (game.isSlowed) Box(modifier = Modifier.fillMaxSize().background(Color(0xFFFFD54F).copy(alpha = 0.1f)))
 
-                uiState.activeShockwaves.forEach { shock ->
+                game.activeShockwaves.forEach { shock ->
                     key(shock.id) {
                         ShockwaveRenderer(centerX = blockSize * shock.col + (blockSize / 2), centerY = blockHeight * shock.row + (blockHeight / 2))
                     }
                 }
 
-                uiState.matchGhosts.forEach { ghost ->
+                game.matchGhosts.forEach { ghost ->
                     key(ghost.id) {
                         MatchGhostRenderer(ghost = ghost, blockSize = blockSize, blockHeight = blockHeight)
                     }
                 }
 
-                uiState.confettiBursts.forEach { burst ->
+                game.confettiBursts.forEach { burst ->
                     key(burst.id) {
                         ConfettiBurstRenderer(centerX = blockSize * burst.col + (blockSize / 2), centerY = blockHeight * burst.row + (blockHeight / 2))
                     }
                 }
 
-                uiState.floatingTexts.forEach { effect ->
+                game.floatingTexts.forEach { effect ->
                     key(effect.id) {
                         FloatingTextRenderer(effect = effect, blockSize = blockSize, blockHeight = blockHeight)
                     }
                 }
 
-                uiState.floatingScores.forEach { popup ->
+                game.floatingScores.forEach { popup ->
                     key(popup.id) {
                         ScorePopupRenderer(popup = popup, blockSize = blockSize, blockHeight = blockHeight)
                     }
                 }
 
                 // Combo & Frenzy Announcer
-                if (uiState.combo > 1) {
+                if (game.combo > 1) {
                     Box(modifier = Modifier.fillMaxSize().padding(top = 20.dp), contentAlignment = Alignment.TopCenter) {
                         Text(
-                            text = if (uiState.isFrenzy) stringResource(R.string.applications_gotmind_features_memblox_frenzy) else stringResource(R.string.applications_gotmind_features_memblox_combo, uiState.multiplier),
+                            text = if (game.isFrenzy) stringResource(R.string.applications_gotmind_features_memblox_frenzy) else stringResource(R.string.applications_gotmind_features_memblox_combo, game.multiplier),
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Black,
-                            color = if (uiState.isFrenzy) Color(0xFFE91E63) else Color(0xFFFF5722),
+                            color = if (game.isFrenzy) Color(0xFFE91E63) else Color(0xFFFF5722),
                             modifier = Modifier
                                 .background(Color.Black.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
                                 .padding(horizontal = 16.dp, vertical = 4.dp)
@@ -342,10 +345,10 @@ fun MemBloxScreen(
                     }
                 }
 
-                if (uiState.isGameOver || uiState.isVictory) {
+                if (game.isGameOver || game.isVictory) {
                     EndGameOverlay(
-                        state = uiState, 
-                        onRetry = { onEvent(MemBloxEvent.StartGame(uiState.difficulty)) }, 
+                        state = game, 
+                        onRetry = { onEvent(MemBloxEvent.StartGame(game.difficulty)) }, 
                         onRetrySelection = { onEvent(MemBloxEvent.ResetToSelection) }
                     )
                 }
@@ -362,8 +365,8 @@ fun MemBloxScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 PowerUpType.entries.forEach { type ->
-                    val count = uiState.powerUps[type] ?: 0
-                    val isAvailable = count > 0 && !uiState.isGameOver && !uiState.isVictory && !uiState.isPaused
+                    val count = game.powerUps[type] ?: 0
+                    val isAvailable = count > 0 && !game.isGameOver && !game.isVictory && !game.isPaused
                     ElevatedAssistChip(
                         onClick = { onEvent(MemBloxEvent.UsePowerUp(type)) },
                         label = { Text("${stringResource(type.labelResId)} ($count)", style = MaterialTheme.typography.labelSmall, color = if (isAvailable) Color.White else Color.Gray) },
@@ -379,6 +382,18 @@ fun MemBloxScreen(
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun MemBloxScreenPreview() {
+    MaterialTheme {
+        MemBloxScreen(
+            uiState = MemBloxUiState(),
+            onEvent = {},
+            navTo = {}
+        )
     }
 }
 

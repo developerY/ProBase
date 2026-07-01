@@ -72,19 +72,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import com.zoewave.probase.gotmind.features.mindwave.HapticSignal
 import com.zoewave.probase.gotmind.features.mindwave.MindWaveEvent
 import com.zoewave.probase.gotmind.features.mindwave.MindWaveState
 import com.zoewave.probase.gotmind.features.mindwave.Node
 import com.zoewave.probase.gotmind.features.mindwave.R
 import com.zoewave.probase.gotmind.model.MindWaveMode
+import com.zoewave.probase.gotmind.model.GotMindRoute
 import kotlin.random.Random
 
 @Composable
 fun MindWaveScreen(
     uiState: MindWaveState,
-    onNav: (String) -> Unit,
-    onEvent: (MindWaveEvent) -> Unit
+    modifier: Modifier = Modifier,
+    onEvent: (MindWaveEvent) -> Unit,
+    navTo: (GotMindRoute) -> Unit
 ) {
     var showControls by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
@@ -109,7 +112,7 @@ fun MindWaveScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
+    Box(modifier = modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
         MindWaveBackground()
         
         Column(
@@ -131,7 +134,7 @@ fun MindWaveScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { onNav("BACK") },
+                    onClick = { navTo(GotMindRoute.Back) },
                     modifier = Modifier.size(36.dp).background(Color.White.copy(alpha = 0.1f), CircleShape)
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
@@ -174,7 +177,7 @@ fun MindWaveScreen(
                         Button(
                             onClick = { 
                                 onEvent(MindWaveEvent.ResetGame)
-                                onNav("BACK") 
+                                navTo(GotMindRoute.Back) 
                             },
                             modifier = Modifier.weight(1f).height(40.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.2f), contentColor = Color.Red),
@@ -371,10 +374,22 @@ fun MindWaveScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { onNav("BACK") }) {
+                TextButton(onClick = { navTo(GotMindRoute.Back) }) {
                     Text(stringResource(R.string.applications_gotmind_features_mindwave_back_hub), color = Color.Gray)
                 }
             }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun MindWaveScreenPreview() {
+    MaterialTheme {
+        MindWaveScreen(
+            uiState = MindWaveState(),
+            onEvent = {},
+            navTo = {}
         )
     }
 }

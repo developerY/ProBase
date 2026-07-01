@@ -1,5 +1,7 @@
 package com.zoewave.probase.gotmind.features.memblox
 
+import com.zoewave.probase.gotmind.database.MemBloxScoreEntity
+import com.zoewave.probase.gotmind.model.MemBloxEngineType
 import com.zoewave.probase.gotmind.model.memblox.MemBloxBlock
 import com.zoewave.probase.gotmind.model.memblox.MemBloxDifficulty
 import java.util.UUID
@@ -119,4 +121,10 @@ data class MemBloxState(
     val dropDurationMillis: Int = 5000,
     val hapticsEnabled: Boolean = true,
     val soundEnabled: Boolean = true
+)
+
+data class MemBloxUiState(
+    val game: MemBloxState = MemBloxState(),
+    val topScores: List<MemBloxScoreEntity> = emptyList(),
+    val engineType: MemBloxEngineType = MemBloxEngineType.STATIC
 )

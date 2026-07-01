@@ -46,24 +46,8 @@ import com.zoewave.probase.gotmind.mobile.ui.theme.GotMindTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
 
-@Serializable
-sealed interface GotMindRoute {
-    // Top Level Tabs
-    @Serializable data object Games : GotMindRoute
-    @Serializable data object Leaderboard : GotMindRoute
-    @Serializable data object Settings : GotMindRoute
-
-    // Fullscreen Game Screens
-    @Serializable data object GotMindClassic : GotMindRoute
-    @Serializable data object MemBlox : GotMindRoute
-    @Serializable data object SoundMind : GotMindRoute
-}
-
-data class TopLevelDestination(
-    val route: GotMindRoute,
-    val icon: ImageVector,
-    val labelResId: Int
-)
+import com.zoewave.probase.gotmind.model.GotMindRoute
+import com.zoewave.probase.gotmind.model.TopLevelDestination
 
 val topLevelDestinations = listOf(
     TopLevelDestination(GotMindRoute.Games, Icons.Default.Games, R.string.nav_games),
@@ -124,16 +108,25 @@ class MainActivity : ComponentActivity() {
                                 rememberViewModelStoreNavEntryDecorator()
                             ),
                             entryProvider = { route ->
+                                val navigateTo: (GotMindRoute) -> Unit = { dest ->
+                                    if (dest == GotMindRoute.Back) {
+                                        if (backStack.size > 1) backStack.removeLastOrNull()
+                                    } else {
+                                        if (dest != route) {
+                                            if (dest in topLevelDestinations.map { it.route }) {
+                                                backStack.clear()
+                                            }
+                                            backStack.add(dest)
+                                        }
+                                    }
+                                }
+
                                 NavEntry(route) {
                                     when (route) {
                                         GotMindRoute.Games -> GamesScreen(
-                                            onNav = { dest -> 
-                                                when (dest) {
-                                                    "CLASSIC" -> backStack.add(GotMindRoute.GotMindClassic)
-                                                    "MEMBLOX" -> backStack.add(GotMindRoute.MemBlox)
-                                                    "SOUNDMIND" -> backStack.add(GotMindRoute.SoundMind)
-                                                }
-                                            }
+                                            uiState = com.zoewave.probase.gotmind.features.games.GamesUiState,
+                                            onEvent = {},
+                                            navTo = navigateTo
                                         )
                                         GotMindRoute.Leaderboard -> {
                                             val memBloxVm: MemBloxViewModel = hiltViewModel()
@@ -142,27 +135,55 @@ class MainActivity : ComponentActivity() {
                                             val mindWaveScores by mindWaveVm.topScores.collectAsState()
                                             
                                             LeaderboardScreen(
-                                                membloxScores = memBloxScores,
-                                                mindwaveScores = mindWaveScores,
-                                                onClearMemBlox = { memBloxVm.handleEvent(MemBloxEvent.ClearHallOfFame) },
-                                                onClearMindWave = { mindWaveVm.handleEvent(MindWaveEvent.ClearHallOfFame) }
+                                                uiState = com.zoewave.probase.gotmind.features.leaderboard.ui.LeaderboardUiState(
+                                                    membloxScores = memBloxScores,
+                                                    mindwaveScores = mindWaveScores
+                                                ),
+                                                onEvent = { event ->
+                                                    when (event) {
+                                                        com.zoewave.probase.gotmind.features.leaderboard.ui.LeaderboardEvent.ClearMemBlox -> memBloxVm.handleEvent(MemBloxEvent.ClearHallOfFame)
+                                                        com.zoewave.probase.gotmind.features.leaderboard.ui.LeaderboardEvent.ClearMindWave -> mindWaveVm.handleEvent(MindWaveEvent.ClearHallOfFame)
+                                                    }
+                                                },
+                                                navTo = navigateTo
                                             )
                                         }
                                         GotMindRoute.Settings -> {
                                             val memBloxVm: MemBloxViewModel = hiltViewModel()
                                             SettingsScreen(
-                                                gameSettings = gameSettings,
-                                                themeSettings = themeSettings,
-                                                firebaseId = firebaseId,
-                                                onMemBloxEvent = { memBloxVm.handleEvent(it) },
-                                                onSettingsEvent = { settingsVm.handleEvent(it) },
-                                                onBack = { if (backStack.size > 1) backStack.removeLastOrNull() }
+                                                uiState = com.zoewave.probase.gotmind.features.settings.ui.SettingsUiState(
+                                                    gameSettings = gameSettings,
+                                                    themeSettings = themeSettings,
+                                                    firebaseId = firebaseId
+                                                ),
+                                                onEvent = { event ->
+                                                    when (event) {
+                                                        is com.zoewave.probase.gotmind.features.settings.ui.SettingsScreenEvent.Settings -> settingsVm.handleEvent(event.event)
+                                                        is com.zoewave.probase.gotmind.features.settings.ui.SettingsScreenEvent.MemBlox -> memBloxVm.handleEvent(event.event)
+                                                    }
+                                                },
+                                                navTo = navigateTo
                                             )
                                         }
                                         
                                         GotMindRoute.GotMindClassic -> {
                                             val viewModel: GameViewModel = hiltViewModel()
-                                            GameScreen(viewModel = viewModel)
+                                            val state by viewModel.gameState.collectAsState()
+                                            val topScores by viewModel.topScores.collectAsState()
+                                            GameScreen(
+                                                uiState = com.zoewave.probase.gotmind.mobile.ui.components.GotMindClassicUiState(
+                                                    game = state,
+                                                    topScores = topScores
+                                                ),
+                                                onEvent = { event ->
+                                                    when (event) {
+                                                        com.zoewave.probase.gotmind.mobile.ui.components.GotMindClassicEvent.GameOver -> viewModel.onGameOver()
+                                                        com.zoewave.probase.gotmind.mobile.ui.components.GotMindClassicEvent.ResetGame -> viewModel.resetGame()
+                                                        is com.zoewave.probase.gotmind.mobile.ui.components.GotMindClassicEvent.ScoreUpdate -> viewModel.onScoreUpdate(event.delta)
+                                                    }
+                                                },
+                                                navTo = navigateTo
+                                            )
                                         }
                                         GotMindRoute.MemBlox -> {
                                             val viewModel: MemBloxViewModel = hiltViewModel()
@@ -170,11 +191,13 @@ class MainActivity : ComponentActivity() {
                                             val topScores by viewModel.topScores.collectAsState()
                                             val engineType by viewModel.engineType.collectAsState()
                                             MemBloxScreen(
-                                                uiState = state,
-                                                topScores = topScores,
-                                                engineType = engineType,
-                                                onNav = { if (it == "BACK") backStack.removeLastOrNull() },
-                                                onEvent = { event -> viewModel.handleEvent(event) }
+                                                uiState = com.zoewave.probase.gotmind.features.memblox.MemBloxUiState(
+                                                    game = state,
+                                                    topScores = topScores,
+                                                    engineType = engineType
+                                                ),
+                                                onEvent = { event -> viewModel.handleEvent(event) },
+                                                navTo = navigateTo
                                             )
                                         }
                                         GotMindRoute.SoundMind -> {
@@ -182,10 +205,11 @@ class MainActivity : ComponentActivity() {
                                             val state by viewModel.uiState.collectAsState()
                                             MindWaveScreen(
                                                 uiState = state,
-                                                onNav = { if (it == "BACK") backStack.removeLastOrNull() },
-                                                onEvent = { event -> viewModel.handleEvent(event) }
+                                                onEvent = { event -> viewModel.handleEvent(event) },
+                                                navTo = navigateTo
                                             )
                                         }
+                                        GotMindRoute.Back -> { /* Back is a signal, not a destination */ }
                                     }
                                 }
                             }
