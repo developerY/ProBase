@@ -1,5 +1,7 @@
 plugins {
     id("composetemplate.android.library")
+    id("composetemplate.android.hilt")
+    id("composetemplate.kotlin.serialization")
 }
 
 android {
@@ -8,8 +10,17 @@ android {
 
 dependencies {
     // This is a container module. Sub-modules are listed below for visibility.
-    // It doesn't necessarily need to depend on them if nothing uses this module directly.
-    // However, typically the 'app' or other modules will depend on the sub-modules directly.
     api(project(":features:health:core"))
     api(project(":features:health:cgm"))
+
+    implementation(libs.squareup.retrofit)
+    implementation(libs.squareup.okhttp)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.retrofit.kotlinx.serialization.converter)
+    implementation(libs.hilt.android)
+    implementation(libs.kotlinx.coroutines.core)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
