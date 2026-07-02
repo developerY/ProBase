@@ -101,6 +101,7 @@
             <option value="$PROJECT_DIR$/applications/kocolor/features/fda" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/inventory" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/makeupapi" />
+            <option value="$PROJECT_DIR$/applications/kocolor/features/obf" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/products" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/routines" />
             <option value="$PROJECT_DIR$/applications/kocolor/features/stitch" />
@@ -191,7 +192,6 @@
             <option value="$PROJECT_DIR$/features/health/nutrition" />
             <option value="$PROJECT_DIR$/features/microphone" />
             <option value="$PROJECT_DIR$/features/nav3" />
-            <option value="$PROJECT_DIR$/features/obf" />
             <option value="$PROJECT_DIR$/features/payment" />
             <option value="$PROJECT_DIR$/features/payment/googlepay" />
             <option value="$PROJECT_DIR$/features/payment/stripe" />

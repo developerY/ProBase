@@ -11,7 +11,7 @@ The backbone of the product identification system. It is a crowdsourced, open-so
     *   Retrieval of basic product identity (Name, Brand, volume).
     *   Sourcing high-resolution product images (`image_front_url`).
     *   Providing raw ingredient lists and allergen tags.
-*   **Key Mapping:** Categories like `en:lipsticks` are mapped to the app's internal `ClothingCategory` or `MicroCategory` enums.
+*   **Integration:** Standalone network module `:applications:kocolor:features:obf` using Retrofit and GSON. Provides the base product data used as context for other extraction layers.
 
 ## 2. OpenFDA (FDA Public API)
 Used to provide official clinical safety data and regulatory status for products, especially those classified as Over-The-Counter (OTC) drugs in the US (e.g., SPF, acne treatments).

@@ -22,7 +22,7 @@ dependencies {
     implementation(project(":features:camera:productcapture"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:graphics"))
-    implementation(project(":features:obf"))
+    implementation(project(":applications:kocolor:features:obf"))
     implementation(project(":applications:kocolor:features:fda"))
     implementation(project(":applications:kocolor:features:chemicals"))
     implementation(project(":applications:kocolor:features:makeupapi"))

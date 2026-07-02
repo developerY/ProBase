@@ -1,6 +1,6 @@
 package com.zoewave.probase.kocolor.features.inventory.data.repository
 
-import com.zoewave.probase.features.obf.data.repository.ObfRepository
+import com.zoewave.probase.kocolor.features.obf.data.repository.ObfRepository
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
