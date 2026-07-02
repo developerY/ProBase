@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.obf.data.remote
+package com.zoewave.probase.kocolor.features.obf.data.remote
 
 import com.google.gson.annotations.SerializedName
 import retrofit2.Response

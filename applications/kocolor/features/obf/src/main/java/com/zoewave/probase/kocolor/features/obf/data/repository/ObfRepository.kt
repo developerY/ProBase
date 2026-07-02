@@ -1,7 +1,7 @@
-package com.zoewave.probase.features.obf.data.repository
+package com.zoewave.probase.kocolor.features.obf.data.repository
 
-import com.zoewave.probase.features.obf.data.mapper.ObfTaxonomyMapper
-import com.zoewave.probase.features.obf.data.remote.OpenBeautyFactsApi
+import com.zoewave.probase.kocolor.features.obf.data.mapper.ObfTaxonomyMapper
+import com.zoewave.probase.kocolor.features.obf.data.remote.OpenBeautyFactsApi
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

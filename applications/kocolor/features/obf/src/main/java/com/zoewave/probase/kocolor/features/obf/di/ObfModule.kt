@@ -1,6 +1,6 @@
-package com.zoewave.probase.features.obf.di
+package com.zoewave.probase.kocolor.features.obf.di
 
-import com.zoewave.probase.features.obf.data.remote.OpenBeautyFactsApi
+import com.zoewave.probase.kocolor.features.obf.data.remote.OpenBeautyFactsApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

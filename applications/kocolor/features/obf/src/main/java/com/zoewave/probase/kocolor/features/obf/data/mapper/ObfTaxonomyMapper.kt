@@ -1,4 +1,4 @@
-package com.zoewave.probase.features.obf.data.mapper
+package com.zoewave.probase.kocolor.features.obf.data.mapper
 
 import com.zoewave.probase.core.model.ritual.*
 

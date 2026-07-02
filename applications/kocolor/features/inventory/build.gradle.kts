@@ -18,7 +18,7 @@ dependencies {
     implementation(project(":applications:kocolor:data"))
     implementation(project(":applications:kocolor:apps:mobile:features:color"))
     implementation(project(":features:graphics"))
-    implementation(project(":features:obf"))
+    implementation(project(":applications:kocolor:features:obf"))
 
     // MediaPipe
     implementation(libs.mediapipe.vision)
