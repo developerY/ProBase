@@ -339,11 +339,10 @@ class BoxCaptureViewModel @Inject constructor(
             val apiKey = aiSettings.getGeminiApiKey()
             val modelName = aiSettings.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
             
-            val currentReview = (uiState.value as? BoxCaptureUiState.Review)
-            val manualColor = currentReview?.manualColorHex
-            val capturedPrice = currentReview?.price
+            val capturedPrice = sessionManualPrice
+            val capturedColor = sessionManualColor
 
-            Log.d(TAG, "Starting analysis. Mode: $mode, Model: $modelName, Barcode: $scannedBarcode, Color: $manualColor, Price: $capturedPrice")
+            Log.d(TAG, "Starting analysis. Mode: $mode, Model: $modelName, Barcode: $scannedBarcode, Color: $capturedColor, Price: $capturedPrice")
 
             if (apiKey.isNullOrBlank()) {
                 Log.w(TAG, "API Key is missing. Falling back to local analysis.")
@@ -378,9 +377,9 @@ class BoxCaptureViewModel @Inject constructor(
                         CaptureMode.PRODUCT -> "product container (front and back)"
                     }
                     val barcodeContext = if (!scannedBarcode.isNullOrBlank()) "The scanned barcode is: $scannedBarcode." else ""
-                    val colorContext = if (!manualColor.isNullOrBlank()) {
+                    val colorContext = if (!capturedColor.isNullOrBlank()) {
                         """
-                        USER COLOR HINT: The user sampled the color $manualColor from the photo.
+                        USER COLOR HINT: The user sampled the color $capturedColor from the photo.
                         CRITICAL INSTRUCTION: Use this hint as a starting point, but VALIDATE it against the visual evidence and your internal knowledge of this specific product's shade. If the user's hex code appears incorrect due to lighting or sampling error, you MUST provide the true, accurate hex code for this makeup shade.
                         """.trimIndent()
                     } else {
@@ -454,7 +453,7 @@ class BoxCaptureViewModel @Inject constructor(
                     item = item.copy(
                         imageUrl = capturedUris.firstOrNull { it.isNotBlank() },
                         batchCode = scannedBarcode ?: item.batchCode,
-                        colorHex = manualColor ?: item.colorHex,
+                        colorHex = capturedColor ?: item.colorHex,
                         price = capturedPrice ?: item.price
                     )
 

@@ -50,7 +50,16 @@ A privacy-first, open-source weather API that requires zero API keys.
     *   **Humidity & Air Quality:** Providing environmental context (temperature, humidity) to refine product recommendations based on formulation (e.g., suggesting water-based vs. occlusive products).
 *   **Integration:** Queried directly via `OpenMeteoService` in the `core:network` module, leveraging local device coordinates for maximum privacy.
 
-## 6. Google Gemini AI (Generative AI)
+## 6. Makeup API
+A free REST API providing detailed information about color cosmetics, including specific formulation tags (e.g., "Vegan", "Hypoallergenic").
+
+*   **Base URL:** `http://makeup-api.herokuapp.com/api/v1/`
+*   **Purpose:**
+    *   **Catalog Discovery:** Searching for products by brand, type, or category to help users populate their collection.
+    *   **Formulation Filtering:** Identifying products with specific attributes (Vegan, Cruelty-Free, etc.) via the `tag_list`.
+*   **Integration:** REST client using Retrofit and `kotlinx-serialization` in the `:kocolor:features:cosmetics` module. Allows cleartext traffic for this domain.
+
+## 7. Google Gemini AI (Generative AI)
 A multimodal large language model used to bridge the gap between raw data (OCR/OBF) and a premium editorial experience.
 
 *   **SDK:** `com.google.ai.client.generativeai` (Google AI SDK for Android)
