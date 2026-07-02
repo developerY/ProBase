@@ -69,7 +69,7 @@ A multimodal large language model used to bridge the gap between raw data (OCR/O
     *   **Fashion Persona:** Specifically tuned for garment analysis in the `ClothingCapture` workflow.
     *   **Color Validation:** Correlating user-sampled hex codes with visual evidence to ensure high-fidelity color matching.
 
-## 7. Google ML Kit (Local On-Device Intelligence)
+## 8. Google ML Kit (Local On-Device Intelligence)
 While not a "web service" in the traditional sense, these libraries provide the intelligence layer for real-time interaction.
 
 *   **Libraries:**
@@ -80,10 +80,19 @@ While not a "web service" in the traditional sense, these libraries provide the 
     *   **Price Extraction:** Recognizing currency patterns on price tags for the budgeting features.
     *   **Barcode Scanning:** Handling the high-speed barcode detection used to trigger OBF lookups.
 
-## 8. Local Analytics Engine (Heuristic Mapper)
+## 9. Local Analytics Engine (Heuristic Mapper)
 A proprietary set of Kotlin classes (`ObfTaxonomyMapper`, `LocalProductAnalyzer`) that runs offline.
 
 *   **Purpose:**
     *   Mapping OBF ingredient IDs (e.g., `en:dimethicone`) to clinical categories (e.g., `Silicone-Based`).
     *   Calculating "Cost Per Use" and "Remaining Value" based on local usage telemetry.
     *   Generating "Works Well With" recommendations by matching color palettes across the inventory.
+
+## 10. Discovery Health Monitoring
+A specialized diagnostic interface used to visualize real-time connectivity and response status for all integrated services.
+
+*   **Location:** Access via the "Cloud" icon on the Vanity Landing page or automatically displayed during the `ANALYZING` state of product capture.
+*   **Purpose:**
+    *   **Transparency:** Showing users exactly which servers are being accessed (OBF, FDA, PubChem, etc.).
+    *   **Real-time Feedback:** Visualizing successes (green check) or failures (red x) as they happen.
+    *   **System Diagnostics:** Helping developers and users identify if a specific API is down or if a network error has occurred.
