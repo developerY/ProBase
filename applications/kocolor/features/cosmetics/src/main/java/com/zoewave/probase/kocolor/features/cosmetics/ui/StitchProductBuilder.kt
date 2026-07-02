@@ -78,6 +78,7 @@ import com.zoewave.probase.core.model.ritual.Finish
 import com.zoewave.probase.core.model.ritual.Formulation
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.features.camera.productcapture.ui.DiscoveryStatusScreen
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
@@ -197,6 +198,14 @@ fun StitchProductBuilder(
             uiState = uiState,
             onEvent = onEvent,
             navTo = navTo
+        )
+        return
+    }
+
+    if (!isEditMode && uiState.isAnalyzing) {
+        DiscoveryStatusScreen(
+            status = uiState.discoveryStatus,
+            onBack = { onEvent(CosmeticsEvent.CancelDiscovery) }
         )
         return
     }

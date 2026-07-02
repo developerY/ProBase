@@ -46,10 +46,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.CosmeticItem
-import com.zoewave.probase.features.camera.productcapture.ui.AnalysisView
 import com.zoewave.probase.features.camera.productcapture.ui.CaptureStepConfig
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationUiState
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationView
+import com.zoewave.probase.features.camera.productcapture.ui.DiscoveryStatusScreen
 import com.zoewave.probase.features.camera.productcapture.ui.ErrorView
 import com.zoewave.probase.features.camera.productcapture.ui.GenericProductCaptureUiRoute
 import com.zoewave.probase.features.camera.productcapture.ui.PriceConfirmationUiState
@@ -83,6 +83,7 @@ sealed interface BoxCaptureEvent {
 @Composable
 fun BoxCaptureUiRoute(
     uiState: BoxCaptureUiState,
+    discoveryStatus: com.zoewave.probase.core.model.network.DiscoveryStatus,
     modifier: Modifier = Modifier,
     onEvent: (BoxCaptureEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
@@ -95,6 +96,7 @@ fun BoxCaptureUiRoute(
 
     BoxCaptureScreen(
         uiState = uiState,
+        discoveryStatus = discoveryStatus,
         modifier = modifier,
         onEvent = onEvent,
         navTo = navTo
@@ -104,6 +106,7 @@ fun BoxCaptureUiRoute(
 @Composable
 internal fun BoxCaptureScreen(
     uiState: BoxCaptureUiState,
+    discoveryStatus: com.zoewave.probase.core.model.network.DiscoveryStatus,
     modifier: Modifier = Modifier,
     onEvent: (BoxCaptureEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
@@ -156,7 +159,7 @@ internal fun BoxCaptureScreen(
             )
         }
         is BoxCaptureUiState.Analyzing -> {
-            AnalysisView(uiState.progress)
+            DiscoveryStatusScreen(status = discoveryStatus)
         }
         is BoxCaptureUiState.ColorConfirmation -> {
             ColorConfirmationView(

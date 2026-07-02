@@ -71,6 +71,7 @@ dependencies {
     implementation(project(":applications:kocolor:features:stitch"))
     implementation(project(":applications:kocolor:features:boxcapture"))
     implementation(project(":applications:kocolor:features:clothingcapture"))
+    implementation(project(":features:camera:productcapture"))
     implementation(project(":applications:kocolor:features:inventory"))
     implementation(project(":applications:kocolor:features:routines"))
     implementation(project(":applications:kocolor:features:cosmetics"))

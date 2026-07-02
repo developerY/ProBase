@@ -26,6 +26,7 @@ import com.zoewave.probase.kocolor.features.clothingcapture.ui.ClothingCaptureEv
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.ClothingCaptureUiRoute
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.ClothingCaptureViewModel
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticAnalyticsScreen
+import com.zoewave.probase.features.camera.productcapture.ui.DiscoveryStatusScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverScreen
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticCategoryCoverUiState
 import com.zoewave.probase.kocolor.features.cosmetics.ui.CosmeticDetailScreen
@@ -106,8 +107,8 @@ fun koColorNavEntryProvider(
         }
         is KoColorRoute.BoxCapture -> NavEntry(route) {
             val viewModel: BoxCaptureViewModel = hiltViewModel()
-            val wardrobeViewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val discoveryStatus by viewModel.discoveryStatus.collectAsStateWithLifecycle()
 
             androidx.compose.runtime.LaunchedEffect(route.mode) {
                 viewModel.setMode(route.mode)
@@ -115,6 +116,7 @@ fun koColorNavEntryProvider(
 
             BoxCaptureUiRoute(
                 uiState = state,
+                discoveryStatus = discoveryStatus,
                 onEvent = { event ->
                     when (event) {
                         is BoxCaptureEvent.Success -> onBack()
@@ -129,9 +131,11 @@ fun koColorNavEntryProvider(
             val viewModel: ClothingCaptureViewModel = hiltViewModel()
             val wardrobeViewModel: WardrobeViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val discoveryStatus by viewModel.discoveryStatus.collectAsStateWithLifecycle()
 
             ClothingCaptureUiRoute(
                 uiState = state,
+                discoveryStatus = discoveryStatus,
                 onEvent = { event ->
                     when (event) {
                         is ClothingCaptureEvent.Success -> {
@@ -259,6 +263,11 @@ fun koColorNavEntryProvider(
                 onEvent = viewModel::onEvent,
                 navTo = onNavigateTo
             )
+        }
+        is KoColorRoute.DiscoveryStatus -> NavEntry(route) {
+            val viewModel: DiscoveryStatusViewModel = hiltViewModel()
+            val status by viewModel.discoveryStatus.collectAsStateWithLifecycle()
+            DiscoveryStatusScreen(status = status, onBack = onBack)
         }
         is KoColorRoute.CosmeticAnalytics -> NavEntry(route) {
             val viewModel: CosmeticsViewModel = hiltViewModel()

@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":applications:kocolor:model"))
     implementation(project(":applications:kocolor:data"))
     implementation(project(":applications:kocolor:features:analyzer"))
+    implementation(project(":applications:kocolor:features:colors"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:camera:productcapture"))
     implementation(project(":features:graphics"))

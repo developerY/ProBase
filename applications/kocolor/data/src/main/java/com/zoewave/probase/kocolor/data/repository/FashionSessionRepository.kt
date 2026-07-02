@@ -1,9 +1,12 @@
 package com.zoewave.probase.kocolor.data.repository
 
 import android.util.Log
+import com.zoewave.probase.core.model.network.DiscoveryStatus
+import com.zoewave.probase.core.model.network.ServiceStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -12,6 +15,9 @@ class FashionSessionRepository @Inject constructor() {
     enum class ScanStatus {
         IDLE, ANALYZING, SUCCESS, INCOMPLETE, FAILED
     }
+
+    private val _discoveryStatus = MutableStateFlow(DiscoveryStatus())
+    val discoveryStatus: StateFlow<DiscoveryStatus> = _discoveryStatus.asStateFlow()
 
     private val _faceUri = MutableStateFlow<String?>(null)
     val faceUri: StateFlow<String?> = _faceUri.asStateFlow()
@@ -39,6 +45,24 @@ class FashionSessionRepository @Inject constructor() {
 
     private val _cosmeticDraft = MutableStateFlow<com.zoewave.probase.core.model.ritual.CosmeticItem?>(null)
     val cosmeticDraft: StateFlow<com.zoewave.probase.core.model.ritual.CosmeticItem?> = _cosmeticDraft.asStateFlow()
+
+    fun setDiscoveryStatus(status: DiscoveryStatus) {
+        _discoveryStatus.value = status
+    }
+
+    fun updateServiceStatus(service: String, status: ServiceStatus) {
+        _discoveryStatus.update { current ->
+            when (service.lowercase()) {
+                "obf" -> current.copy(obf = status)
+                "fda" -> current.copy(fda = status)
+                "chemdb" -> current.copy(chemDb = status)
+                "colorapi" -> current.copy(colorApi = status)
+                "gemini" -> current.copy(gemini = status)
+                "makeupapi" -> current.copy(makeupApi = status)
+                else -> current
+            }
+        }
+    }
 
     fun setFaceUri(uri: String?) {
         Log.d("KoColorSession", "Setting Face URI: $uri")

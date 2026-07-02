@@ -45,10 +45,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.ritual.ClothingItem
-import com.zoewave.probase.features.camera.productcapture.ui.AnalysisView
 import com.zoewave.probase.features.camera.productcapture.ui.CaptureStepConfig
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationUiState
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationView
+import com.zoewave.probase.features.camera.productcapture.ui.DiscoveryStatusScreen
 import com.zoewave.probase.features.camera.productcapture.ui.ErrorView
 import com.zoewave.probase.features.camera.productcapture.ui.GenericProductCaptureUiRoute
 import com.zoewave.probase.features.camera.productcapture.ui.PriceConfirmationUiState
@@ -78,6 +78,7 @@ sealed interface ClothingCaptureEvent {
 @Composable
 fun ClothingCaptureUiRoute(
     uiState: ClothingCaptureUiState,
+    discoveryStatus: com.zoewave.probase.core.model.network.DiscoveryStatus,
     modifier: Modifier = Modifier,
     onEvent: (ClothingCaptureEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
@@ -90,6 +91,7 @@ fun ClothingCaptureUiRoute(
 
     ClothingCaptureScreen(
         uiState = uiState,
+        discoveryStatus = discoveryStatus,
         modifier = modifier,
         onEvent = onEvent,
         navTo = navTo
@@ -99,6 +101,7 @@ fun ClothingCaptureUiRoute(
 @Composable
 internal fun ClothingCaptureScreen(
     uiState: ClothingCaptureUiState,
+    discoveryStatus: com.zoewave.probase.core.model.network.DiscoveryStatus,
     modifier: Modifier = Modifier,
     onEvent: (ClothingCaptureEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
@@ -153,7 +156,7 @@ internal fun ClothingCaptureScreen(
             )
         }
         is ClothingCaptureUiState.Analyzing -> {
-            AnalysisView(uiState.progress, themeColor = themePink)
+            DiscoveryStatusScreen(status = discoveryStatus)
         }
         is ClothingCaptureUiState.ColorConfirmation -> {
             ColorConfirmationView(

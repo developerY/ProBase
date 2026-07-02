@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
@@ -78,6 +79,9 @@ fun VanityLandingScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { navTo(KoColorRoute.DiscoveryStatus) }) {
+                        Icon(Icons.Default.CloudDone, contentDescription = "Discovery Health")
+                    }
                     IconButton(onClick = { navTo(KoColorRoute.BoxCapture()) }) { 
                         Icon(Icons.Default.AutoAwesome, contentDescription = stringResource(R.string.applications_kocolor_features_cosmetics_scan_box_title)) 
                     }
