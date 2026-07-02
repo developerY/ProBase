@@ -10,10 +10,13 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
+import com.zoewave.probase.core.model.network.DiscoveryStatus
+import com.zoewave.probase.core.model.network.ServiceStatus
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.features.analyzer.data.LocalProductAnalyzer
+import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorRepository
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureStep
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -46,8 +50,11 @@ class ClothingCaptureViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val aiSettings: AiConfigurationSettings,
     private val sessionRepository: FashionSessionRepository,
-    private val localAnalyzer: LocalProductAnalyzer
+    private val localAnalyzer: LocalProductAnalyzer,
+    private val colorRepository: ColorRepository
 ) : ViewModel() {
+
+    val discoveryStatus = sessionRepository.discoveryStatus
 
     private val _uiState = MutableStateFlow<ClothingCaptureUiState>(ClothingCaptureUiState.Idle())
     val uiState: StateFlow<ClothingCaptureUiState> = _uiState.asStateFlow()
@@ -217,6 +224,7 @@ class ClothingCaptureViewModel @Inject constructor(
             }
 
             _uiState.value = ClothingCaptureUiState.Analyzing(capturedUris.toList(), "Identifying Garment...")
+            sessionRepository.updateServiceStatus("gemini", ServiceStatus.ACCESSING)
             
             try {
                 val bitmaps = loadBitmaps()
@@ -266,17 +274,35 @@ class ClothingCaptureViewModel @Inject constructor(
                 val jsonText = response.text
                 
                 if (jsonText != null) {
+                    sessionRepository.updateServiceStatus("gemini", ServiceStatus.SUCCESS)
                     val item = parseJsonToClothingItem(jsonText).copy(
                         imageUrl = capturedUris.firstOrNull { it.isNotBlank() },
                         colorHex = manualColor ?: "#FFFFFF",
                         price = capturedPrice
                     )
+                    
+                    // --- Color API Enrichment ---
+                    val colorToIdentify = manualColor ?: item.colorHex
+                    if (!colorToIdentify.isNullOrBlank()) {
+                        viewModelScope.launch {
+                            sessionRepository.updateServiceStatus("colorapi", ServiceStatus.ACCESSING)
+                            val nameResult = colorRepository.getColorName(colorToIdentify)
+                            nameResult.onSuccess {
+                                sessionRepository.updateServiceStatus("colorapi", ServiceStatus.SUCCESS)
+                            }.onFailure {
+                                sessionRepository.updateServiceStatus("colorapi", ServiceStatus.FAILED)
+                            }
+                        }
+                    }
+
                     _uiState.value = ClothingCaptureUiState.Success(item)
                 } else {
+                    sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED)
                     _uiState.value = ClothingCaptureUiState.Error("Failed to extract data from images.")
                 }
 
             } catch (e: Exception) {
+                sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED)
                 _uiState.value = ClothingCaptureUiState.Error("Analysis failed: ${e.localizedMessage}")
             }
         }
@@ -330,6 +356,9 @@ class ClothingCaptureViewModel @Inject constructor(
     fun reset() {
         capturedUris.clear()
         localLabelsOcr = ""
+        sessionManualPrice = null
+        sessionManualColor = null
+        sessionRepository.setDiscoveryStatus(DiscoveryStatus())
         _uiState.value = ClothingCaptureUiState.Idle(emptyList(), ClothingCaptureStep.FRONT, null, null)
     }
 }

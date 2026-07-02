@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
+import com.zoewave.probase.core.model.network.ServiceStatus
 import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.Finish
 import com.zoewave.probase.core.model.ritual.Formulation
@@ -19,19 +20,11 @@ import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.kocolor.features.chemicals.domain.repository.ChemicalRepository
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.fda.data.repository.FdaRepository
+import com.zoewave.probase.kocolor.features.cosmetics.domain.repository.MakeupRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -70,6 +63,7 @@ data class CosmeticsUiState(
     val categoryFilter: String? = null,
     val scanStatus: String? = null,
     val scanState: FashionSessionRepository.ScanStatus = FashionSessionRepository.ScanStatus.IDLE,
+    val discoveryStatus: com.zoewave.probase.core.model.network.DiscoveryStatus = com.zoewave.probase.core.model.network.DiscoveryStatus(),
     val isObfContributionEnabled: Boolean = false,
     val uvIndex: Double = 0.0
 ) {
@@ -107,6 +101,7 @@ class CosmeticsViewModel @Inject constructor(
     private val sessionRepository: FashionSessionRepository,
     private val fdaRepository: FdaRepository,
     private val chemicalRepository: ChemicalRepository,
+    private val makeupRepository: MakeupRepository,
     private val weatherRepo: WeatherRepo,
     private val analyzerEngine: AnalyzerEngine,
     private val aiSettings: AiConfigurationSettings
@@ -158,6 +153,7 @@ class CosmeticsViewModel @Inject constructor(
         _aiResult,
         sessionRepository.cosmeticDraft.filterNotNull(),
         sessionRepository.scanState,
+        sessionRepository.discoveryStatus,
         _searchQuery,
         _sortOption,
         _categoryFilter,
@@ -169,12 +165,13 @@ class CosmeticsViewModel @Inject constructor(
         val aiResult = array[1] as CosmeticItem?
         val draft = array[2] as CosmeticItem
         val scanState = array[3] as FashionSessionRepository.ScanStatus
-        val query = array[4] as String
-        val sort = array[5] as SortOption
-        val filter = array[6] as String?
-        val scanStatus = array[7] as String?
-        val contributionEnabled = array[8] as Boolean
-        val uvVal = array[9] as Double
+        val discStatus = array[4] as com.zoewave.probase.core.model.network.DiscoveryStatus
+        val query = array[5] as String
+        val sort = array[6] as SortOption
+        val filter = array[7] as String?
+        val scanStatus = array[8] as String?
+        val contributionEnabled = array[9] as Boolean
+        val uvVal = array[10] as Double
 
         val groupStats = models.groupBy { it.macroCategory.displayName }.mapValues { it.value.size }
         
@@ -234,6 +231,7 @@ class CosmeticsViewModel @Inject constructor(
             categoryFilter = filter,
             scanStatus = scanStatus,
             scanState = scanState,
+            discoveryStatus = discStatus,
             isObfContributionEnabled = contributionEnabled,
             uvIndex = uvVal
         )
@@ -340,6 +338,7 @@ class CosmeticsViewModel @Inject constructor(
     private fun fetchObfProduct(code: String) {
         viewModelScope.launch {
             sessionRepository.setScanState(FashionSessionRepository.ScanStatus.ANALYZING)
+            sessionRepository.updateServiceStatus("obf", ServiceStatus.ACCESSING)
             _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_searching_obf)
             
             updateSessionDraft { it.copy(batchCode = code) }
@@ -347,6 +346,7 @@ class CosmeticsViewModel @Inject constructor(
             val result = cosmeticRepository.fetchProductByBarcode(code)
             
             result.onSuccess { obfItem ->
+                sessionRepository.updateServiceStatus("obf", ServiceStatus.SUCCESS)
                 _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_product_found_format, obfItem.name)
                 
                 updateSessionDraft { current ->
@@ -376,15 +376,38 @@ class CosmeticsViewModel @Inject constructor(
                 
                 // ASYNC CLINICAL SAFETY FETCH (FDA)
                 viewModelScope.launch {
+                    sessionRepository.updateServiceStatus("fda", ServiceStatus.ACCESSING)
                     val draft = sessionRepository.cosmeticDraft.value ?: return@launch
                     val recall = fdaRepository.getRecalls(draft.brand, draft.name)
                     val eventCount = fdaRepository.getAdverseEventsCount(draft.brand, draft.name)
                     val topReactions = fdaRepository.getTopReactions(draft.brand, draft.name)
                     val label = fdaRepository.getDrugLabel(code)
 
+                    if (recall != null || eventCount > 0 || label != null) {
+                        sessionRepository.updateServiceStatus("fda", ServiceStatus.SUCCESS)
+                    } else {
+                        sessionRepository.updateServiceStatus("fda", ServiceStatus.FAILED)
+                    }
+
                     // ASYNC CHEMICAL INTELLIGENCE (PubChem)
+                    sessionRepository.updateServiceStatus("chemdb", ServiceStatus.ACCESSING)
                     val topIngredient = obfItem.ingredients.firstOrNull()
                     val chemicalInfo = topIngredient?.let { chemicalRepository.getChemicalInfo(it).getOrNull() }
+
+                    if (chemicalInfo != null) {
+                        sessionRepository.updateServiceStatus("chemdb", ServiceStatus.SUCCESS)
+                    } else {
+                        sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED)
+                    }
+
+                    // ASYNC CATALOG CONTEXT (Makeup API)
+                    sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.ACCESSING)
+                    val catalogResult = makeupRepository.searchProducts(brand = draft.brand)
+                    catalogResult.onSuccess {
+                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.SUCCESS)
+                    }.onFailure {
+                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.FAILED)
+                    }
 
                     updateSessionDraft { current ->
                         current.copy(
@@ -412,6 +435,7 @@ class CosmeticsViewModel @Inject constructor(
                     _scanStatus.value = "Incomplete data. Scan box to enrich."
                 }
             }.onFailure {
+                sessionRepository.updateServiceStatus("obf", ServiceStatus.FAILED)
                 _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_product_not_found_obf)
                 sessionRepository.setScanState(FashionSessionRepository.ScanStatus.FAILED)
             }
@@ -440,6 +464,7 @@ class CosmeticsViewModel @Inject constructor(
         val uri = sessionRepository.cosmeticDraft.value?.imageUrl ?: return
         viewModelScope.launch {
             sessionRepository.setScanState(FashionSessionRepository.ScanStatus.ANALYZING)
+            sessionRepository.updateServiceStatus("gemini", ServiceStatus.ACCESSING)
             _aiResult.value = null
             
             val apiKey = aiSettings.getGeminiApiKey()
@@ -453,30 +478,33 @@ class CosmeticsViewModel @Inject constructor(
                     )
                     _aiResult.value = result
                     
-                    result?.let { aiItem ->
+                    if (result != null) {
+                        sessionRepository.updateServiceStatus("gemini", ServiceStatus.SUCCESS)
                         updateSessionDraft { current ->
                             current.copy(
-                                name = if (current.name.isBlank()) aiItem.name else current.name,
-                                brand = if (current.brand.isBlank()) aiItem.brand else current.brand,
-                                macroCategory = if (aiItem.macroCategory != MacroCategory.TOOLS) aiItem.macroCategory else current.macroCategory,
-                                microCategory = if (aiItem.microCategory != MicroCategory.AI_PENDING) aiItem.microCategory else current.microCategory,
-                                colorHex = current.colorHex ?: aiItem.colorHex,
-                                shadeName = current.shadeName ?: aiItem.shadeName,
+                                name = if (current.name.isBlank()) result.name else current.name,
+                                brand = if (current.brand.isBlank()) result.brand else current.brand,
+                                macroCategory = if (result.macroCategory != MacroCategory.TOOLS) result.macroCategory else current.macroCategory,
+                                microCategory = if (result.microCategory != MicroCategory.AI_PENDING) result.microCategory else current.microCategory,
+                                colorHex = current.colorHex ?: result.colorHex,
+                                shadeName = current.shadeName ?: result.shadeName,
                                 
                                 // Carry over AI discovered facets
-                                heroIngredient = aiItem.heroIngredient ?: current.heroIngredient,
-                                ingredients = aiItem.ingredients.takeIf { it.isNotEmpty() } ?: current.ingredients,
-                                containsFragrance = aiItem.containsFragrance ?: current.containsFragrance,
-                                formulation = if (aiItem.formulation != Formulation.UNKNOWN) aiItem.formulation else current.formulation,
-                                finish = if (aiItem.finish != Finish.UNKNOWN) aiItem.finish else current.finish
+                                heroIngredient = result.heroIngredient ?: current.heroIngredient,
+                                ingredients = result.ingredients.takeIf { it.isNotEmpty() } ?: current.ingredients,
+                                containsFragrance = result.containsFragrance ?: current.containsFragrance,
+                                formulation = if (result.formulation != Formulation.UNKNOWN) result.formulation else current.formulation,
+                                finish = if (result.finish != Finish.UNKNOWN) result.finish else current.finish
                             )
                         }
                         sessionRepository.setScanState(FashionSessionRepository.ScanStatus.SUCCESS)
-                    } ?: run {
+                    } else {
+                        sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED)
                         sessionRepository.setScanState(FashionSessionRepository.ScanStatus.FAILED)
                     }
                 }
             } else {
+                sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED)
                 sessionRepository.setScanState(FashionSessionRepository.ScanStatus.IDLE)
             }
         }
