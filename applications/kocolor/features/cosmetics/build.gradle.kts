@@ -30,6 +30,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
+    implementation(libs.squareup.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization.converter)
+    implementation(libs.squareup.okhttp)
+    implementation(libs.squareup.okhttp3.logging.interceptor)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.collections.immutable)
 }

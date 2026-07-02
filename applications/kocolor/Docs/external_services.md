@@ -32,7 +32,34 @@ A comprehensive database of chemical molecules and their activities against biol
     *   **Molecular Data:** Retrieving molecular formulas, weights, and physical properties for advanced analysis.
 *   **Integration:** Enriches the `CosmeticItem` with deep safety data beyond basic manufacturer warnings. Currently integrated into the `CosmeticsViewModel` to fetch safety hazards for the hero ingredient.
 
-## 4. Google Gemini AI (Generative AI)
+## 4. The Color API
+A free, public REST API for color information and color theory mathematics.
+
+*   **Base URL:** `https://www.thecolorapi.com/`
+*   **Purpose:**
+    *   **Shade Naming:** Translating raw hex codes (from Gemini or user sampling) into human-readable color names (e.g., "Mauve").
+    *   **Harmonious Palettes:** Generating mathematically derived color schemes (Analogic, Complement, Triad) to power the "Works Well With" coordination engine.
+*   **Integration:** Keyless GET requests within the `ColorRepository` in the `:kocolor:features:colors` module.
+
+## 5. Open-Meteo (Keyless Weather & Environment)
+A privacy-first, open-source weather API that requires zero API keys.
+
+*   **Base URL:** `https://api.open-meteo.com/v1/`
+*   **Purpose:**
+    *   **UV Index & Sun Exposure:** Retrieving real-time UV levels to trigger dynamic skincare alerts (e.g., SPF reminders).
+    *   **Humidity & Air Quality:** Providing environmental context (temperature, humidity) to refine product recommendations based on formulation (e.g., suggesting water-based vs. occlusive products).
+*   **Integration:** Queried directly via `OpenMeteoService` in the `core:network` module, leveraging local device coordinates for maximum privacy.
+
+## 6. Makeup API
+A free REST API providing detailed information about color cosmetics, including specific formulation tags (e.g., "Vegan", "Hypoallergenic").
+
+*   **Base URL:** `http://makeup-api.herokuapp.com/api/v1/`
+*   **Purpose:**
+    *   **Catalog Discovery:** Searching for products by brand, type, or category to help users populate their collection.
+    *   **Formulation Filtering:** Identifying products with specific attributes (Vegan, Cruelty-Free, etc.) via the `tag_list`.
+*   **Integration:** REST client using Retrofit and `kotlinx-serialization` in the `:kocolor:features:cosmetics` module. Allows cleartext traffic for this domain.
+
+## 7. Google Gemini AI (Generative AI)
 A multimodal large language model used to bridge the gap between raw data (OCR/OBF) and a premium editorial experience.
 
 *   **SDK:** `com.google.ai.client.generativeai` (Google AI SDK for Android)
@@ -42,7 +69,7 @@ A multimodal large language model used to bridge the gap between raw data (OCR/O
     *   **Fashion Persona:** Specifically tuned for garment analysis in the `ClothingCapture` workflow.
     *   **Color Validation:** Correlating user-sampled hex codes with visual evidence to ensure high-fidelity color matching.
 
-## 4. Google ML Kit (Local On-Device Intelligence)
+## 7. Google ML Kit (Local On-Device Intelligence)
 While not a "web service" in the traditional sense, these libraries provide the intelligence layer for real-time interaction.
 
 *   **Libraries:**
@@ -53,7 +80,7 @@ While not a "web service" in the traditional sense, these libraries provide the 
     *   **Price Extraction:** Recognizing currency patterns on price tags for the budgeting features.
     *   **Barcode Scanning:** Handling the high-speed barcode detection used to trigger OBF lookups.
 
-## 5. Local Analytics Engine (Heuristic Mapper)
+## 8. Local Analytics Engine (Heuristic Mapper)
 A proprietary set of Kotlin classes (`ObfTaxonomyMapper`, `LocalProductAnalyzer`) that runs offline.
 
 *   **Purpose:**
