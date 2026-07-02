@@ -20,7 +20,7 @@ import com.zoewave.probase.kocolor.features.analyzer.data.AnalyzerEngine
 import com.zoewave.probase.kocolor.features.chemicals.domain.repository.ChemicalRepository
 import com.zoewave.probase.kocolor.features.cosmetics.R
 import com.zoewave.probase.kocolor.features.fda.data.repository.FdaRepository
-import com.zoewave.probase.kocolor.features.cosmetics.domain.repository.MakeupRepository
+import com.zoewave.probase.kocolor.features.makeupapi.domain.repository.MakeupRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay

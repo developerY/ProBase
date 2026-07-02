@@ -1,8 +1,8 @@
-package com.zoewave.probase.kocolor.features.cosmetics.data.repository
+package com.zoewave.probase.kocolor.features.makeupapi.data.repository
 
-import com.zoewave.probase.kocolor.features.cosmetics.data.remote.MakeupApiService
-import com.zoewave.probase.kocolor.features.cosmetics.data.remote.model.MakeupProductDto
-import com.zoewave.probase.kocolor.features.cosmetics.domain.repository.MakeupRepository
+import com.zoewave.probase.kocolor.features.makeupapi.data.remote.MakeupApiService
+import com.zoewave.probase.kocolor.features.makeupapi.data.remote.model.MakeupProductDto
+import com.zoewave.probase.kocolor.features.makeupapi.domain.repository.MakeupRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 

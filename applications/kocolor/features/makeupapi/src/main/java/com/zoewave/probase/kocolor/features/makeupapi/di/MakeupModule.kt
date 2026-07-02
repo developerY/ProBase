@@ -1,9 +1,9 @@
-package com.zoewave.probase.kocolor.features.cosmetics.di
+package com.zoewave.probase.kocolor.features.makeupapi.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.zoewave.probase.kocolor.features.cosmetics.data.remote.MakeupApiService
-import com.zoewave.probase.kocolor.features.cosmetics.data.repository.MakeupRepositoryImpl
-import com.zoewave.probase.kocolor.features.cosmetics.domain.repository.MakeupRepository
+import com.zoewave.probase.kocolor.features.makeupapi.data.remote.MakeupApiService
+import com.zoewave.probase.kocolor.features.makeupapi.data.repository.MakeupRepositoryImpl
+import com.zoewave.probase.kocolor.features.makeupapi.domain.repository.MakeupRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

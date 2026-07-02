@@ -1,6 +1,6 @@
-package com.zoewave.probase.kocolor.features.cosmetics.domain.repository
+package com.zoewave.probase.kocolor.features.makeupapi.domain.repository
 
-import com.zoewave.probase.kocolor.features.cosmetics.data.remote.model.MakeupProductDto
+import com.zoewave.probase.kocolor.features.makeupapi.data.remote.model.MakeupProductDto
 
 interface MakeupRepository {
     suspend fun searchProducts(

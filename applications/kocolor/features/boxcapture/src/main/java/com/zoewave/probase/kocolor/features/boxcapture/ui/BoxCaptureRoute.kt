@@ -6,7 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zoewave.probase.core.model.ritual.CosmeticItem
-import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
 fun BoxCaptureRoute(
@@ -21,9 +20,11 @@ fun BoxCaptureRoute(
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val discoveryStatus by viewModel.discoveryStatus.collectAsStateWithLifecycle()
 
     BoxCaptureUiRoute(
         uiState = uiState,
+        discoveryStatus = discoveryStatus,
         modifier = modifier,
         onEvent = { event ->
             when (event) {

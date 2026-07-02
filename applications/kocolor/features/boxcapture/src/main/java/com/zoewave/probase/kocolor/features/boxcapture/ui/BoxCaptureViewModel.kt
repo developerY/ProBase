@@ -25,7 +25,7 @@ import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.features.analyzer.data.LocalProductAnalyzer
 import com.zoewave.probase.kocolor.features.chemicals.domain.repository.ChemicalRepository
 import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorRepository
-import com.zoewave.probase.kocolor.features.cosmetics.domain.repository.MakeupRepository
+import com.zoewave.probase.kocolor.features.makeupapi.domain.repository.MakeupRepository
 import com.zoewave.probase.kocolor.features.fda.data.repository.FdaRepository
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.BoxCaptureUiState
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.CaptureMode

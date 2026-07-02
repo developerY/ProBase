@@ -1,6 +1,6 @@
-package com.zoewave.probase.kocolor.features.cosmetics.data.remote
+package com.zoewave.probase.kocolor.features.makeupapi.data.remote
 
-import com.zoewave.probase.kocolor.features.cosmetics.data.remote.model.MakeupProductDto
+import com.zoewave.probase.kocolor.features.makeupapi.data.remote.model.MakeupProductDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
