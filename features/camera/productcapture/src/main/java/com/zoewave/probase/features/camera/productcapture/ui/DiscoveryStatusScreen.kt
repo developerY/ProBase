@@ -58,6 +58,7 @@ fun DiscoveryStatusScreen(
 ) {
     val services = when (mode) {
         DiscoveryMode.DETERMINISTIC -> listOf(
+            ServiceInfo("Local AI", "Standardizing OCR", status.localAi),
             ServiceInfo("Open Beauty Facts", "Barcode Lookup", status.obf),
             ServiceInfo("OpenFDA", "Safety & Recalls", status.fda),
             ServiceInfo("chemDB (PubChem)", "Ingredient Hazards", status.chemDb),

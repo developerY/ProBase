@@ -88,6 +88,16 @@ A proprietary set of Kotlin classes (`ObfTaxonomyMapper`, `LocalProductAnalyzer`
     *   Calculating "Cost Per Use" and "Remaining Value" based on local usage telemetry.
     *   Generating "Works Well With" recommendations by matching color palettes across the inventory.
 
+## 9. Local AI Engine (On-Device Gemini Nano)
+Leverages the phone's hardware acceleration for real-time data cleanup and standardization.
+
+*   **Model:** `gemini-nano` (via Android AICore)
+*   **Module:** `:features:ai:local`
+*   **Purpose:**
+    *   **OCR Standardization:** Taking messy, fragmented local OCR text and extracting clean "Brand" and "Product Name" fields.
+    *   **Trust Anchor Preparation:** Providing high-quality input strings for the deterministic server lookups (OBF, Makeup API), significantly reducing 404 errors caused by raw OCR noise.
+*   **Integration:** Runs entirely on-device, respecting the privacy-first boundary before any network calls are made.
+
 ## 10. Discovery Health Monitoring
 A specialized diagnostic interface used to visualize real-time connectivity and response status for all integrated services.
 
@@ -95,4 +105,5 @@ A specialized diagnostic interface used to visualize real-time connectivity and 
 *   **Purpose:**
     *   **Transparency:** Showing users exactly which servers are being accessed (OBF, FDA, PubChem, etc.).
     *   **Real-time Feedback:** Visualizing successes (green check) or failures (red x) as they happen.
+    *   **Thinking Indicators:** Features pulsing spinners next to services actively being "thought about" by the engine.
     *   **System Diagnostics:** Helping developers and users identify if a specific API is down or if a network error has occurred.

@@ -22,6 +22,7 @@ import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
+import com.zoewave.probase.features.ai.local.data.LocalAiEngine
 import com.zoewave.probase.kocolor.features.analyzer.data.LocalProductAnalyzer
 import com.zoewave.probase.kocolor.features.chemicals.domain.repository.ChemicalRepository
 import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorRepository
@@ -82,6 +83,7 @@ class BoxCaptureViewModel @Inject constructor(
     private val cosmeticRepository: CosmeticInventoryRepository,
     private val sessionRepository: FashionSessionRepository,
     private val localAnalyzer: LocalProductAnalyzer,
+    private val localAi: LocalAiEngine,
     private val fdaRepository: FdaRepository,
     private val chemicalRepository: ChemicalRepository,
     private val colorRepository: ColorRepository,
@@ -287,35 +289,51 @@ class BoxCaptureViewModel @Inject constructor(
             // Transition to Discovery Health Screen
             _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Orchestrating Discovery...", mode)
             
+            // 1. Try OBF first
             sessionRepository.updateServiceStatus("obf", ServiceStatus.ACCESSING, "Querying barcode: $code")
+            val obfResult = cosmeticRepository.fetchProductByBarcode(code)
             
-            val result = cosmeticRepository.fetchProductByBarcode(code)
-            result.onSuccess { obfItem ->
+            var brand: String? = null
+            var name: String? = null
+            var topIngredient: String? = null
+
+            obfResult.onSuccess { obfItem ->
                 sessionRepository.updateServiceStatus("obf", ServiceStatus.SUCCESS, "Found: ${obfItem.name}")
                 obfEnrichmentData = obfItem
-                
-                // --- Start Parallel Enrichment with confirmed OBF data ---
-                startBackgroundEnrichment(obfItem.brand, obfItem.name, code, obfItem.ingredients.firstOrNull())
-                
+                brand = obfItem.brand
+                name = obfItem.name
+                topIngredient = obfItem.ingredients.firstOrNull()
             }.onFailure {
                 sessionRepository.updateServiceStatus("obf", ServiceStatus.FAILED, "Barcode not in OBF.")
-                obfEnrichmentData = null
+            }
+
+            // 2. Local AI Cleanup (Always run or only on OBF failure/incomplete?)
+            // Let's run it if OBF failed or data is thin
+            if (brand.isNullOrBlank() || name.isNullOrBlank()) {
+                sessionRepository.updateServiceStatus("localai", ServiceStatus.ACCESSING, "Synthesizing OCR text...")
+                val ocrData = performDeepOcr()
+                val localAiResult = localAi.standardizeOcrText(ocrData.ingredientsOcr + "\n" + ocrData.instructionsOcr)
                 
-                // --- FALLBACK: Try to get Brand/Name from local OCR results ---
-                viewModelScope.launch {
-                    val ocrData = performDeepOcr()
-                    val fallbackBrand = extractBrandFromText(ocrData.ingredientsOcr + " " + ocrData.instructionsOcr)
-                    
-                    if (!fallbackBrand.isNullOrBlank()) {
-                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.ACCESSING, "Found brand in OCR: $fallbackBrand")
-                        startBackgroundEnrichment(fallbackBrand, "", code, null)
-                    } else {
-                        // Mark others as failed due to no context
-                        sessionRepository.updateServiceStatus("fda", ServiceStatus.FAILED, "No product context identified.")
-                        sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED, "No ingredient data.")
-                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.FAILED, "Unknown brand.")
-                    }
+                if (!localAiResult.brand.isNullOrBlank()) {
+                    sessionRepository.updateServiceStatus("localai", ServiceStatus.SUCCESS, "Found: ${localAiResult.brand}")
+                    brand = localAiResult.brand
+                    name = localAiResult.productName
+                    topIngredient = localAiResult.ingredients.firstOrNull() ?: topIngredient
+                } else {
+                    sessionRepository.updateServiceStatus("localai", ServiceStatus.FAILED, "No brand identified.")
                 }
+            } else {
+                sessionRepository.updateServiceStatus("localai", ServiceStatus.SUCCESS, "Using OBF context.")
+            }
+
+            // 3. Parallel Server Enrichment
+            if (!brand.isNullOrBlank()) {
+                startBackgroundEnrichment(brand, name ?: "", code, topIngredient)
+            } else {
+                // Final hard fail for others
+                sessionRepository.updateServiceStatus("fda", ServiceStatus.FAILED, "No product context.")
+                sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED, "No ingredient context.")
+                sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.FAILED, "Unknown brand.")
             }
         }
     }
@@ -384,11 +402,6 @@ class BoxCaptureViewModel @Inject constructor(
     }
 
     private data class OcrResults(val ingredientsOcr: String, val instructionsOcr: String)
-
-    private fun extractBrandFromText(text: String): String? {
-        // Very simple heuristic: look for known brands or capitalized words at start
-        return if (text.isNotBlank()) text.split(" ").firstOrNull { it.length > 2 && it[0].isUpperCase() } else null
-    }
 
     private fun prepareReview(mode: CaptureMode) {
         viewModelScope.launch {
