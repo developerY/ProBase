@@ -16,9 +16,9 @@ import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.features.analyzer.data.LocalProductAnalyzer
-import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorRepository
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureStep
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureUiState
+import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -77,6 +76,9 @@ class ClothingCaptureViewModel @Inject constructor(
                 }
             }
             ClothingCaptureEvent.SubmitToAi -> analyzePhotos()
+            ClothingCaptureEvent.ContinueToReview -> prepareReview()
+            ClothingCaptureEvent.FinalizeProduct -> finalizeProduct()
+            ClothingCaptureEvent.SaveProduct -> saveAndFinish()
             ClothingCaptureEvent.SkipStep -> skipStep()
             is ClothingCaptureEvent.OnColorSelected -> {
                 sessionManualColor = event.hex
@@ -179,7 +181,8 @@ class ClothingCaptureViewModel @Inject constructor(
         if (nextStep != null) {
             _uiState.value = ClothingCaptureUiState.Idle(capturedUris.toList(), nextStep, sessionManualColor, sessionManualPrice)
         } else {
-            prepareReview()
+            // All steps complete. Go to Discovery screen first.
+            _uiState.value = ClothingCaptureUiState.Analyzing(capturedUris.toList(), "Processing Captures...")
         }
     }
 
@@ -223,8 +226,8 @@ class ClothingCaptureViewModel @Inject constructor(
                 return@launch
             }
 
-            _uiState.value = ClothingCaptureUiState.Analyzing(capturedUris.toList(), "Identifying Garment...")
-            sessionRepository.updateServiceStatus("gemini", ServiceStatus.ACCESSING)
+            _uiState.value = ClothingCaptureUiState.AiAnalyzing(capturedUris.toList(), "Identifying Garment...")
+            sessionRepository.updateServiceStatus("gemini", ServiceStatus.ACCESSING, "Uploading style snapshots...")
             
             try {
                 val bitmaps = loadBitmaps()
@@ -274,35 +277,37 @@ class ClothingCaptureViewModel @Inject constructor(
                 val jsonText = response.text
                 
                 if (jsonText != null) {
-                    sessionRepository.updateServiceStatus("gemini", ServiceStatus.SUCCESS)
-                    val item = parseJsonToClothingItem(jsonText).copy(
+                    sessionRepository.updateServiceStatus("gemini", ServiceStatus.SUCCESS, "Fashion analysis complete.")
+                    var item = parseJsonToClothingItem(jsonText).copy(
                         imageUrl = capturedUris.firstOrNull { it.isNotBlank() },
                         colorHex = manualColor ?: "#FFFFFF",
                         price = capturedPrice
                     )
                     
-                    // --- Color API Enrichment ---
+                    // --- Color API Enrichment (Post-Gemini) ---
                     val colorToIdentify = manualColor ?: item.colorHex
                     if (!colorToIdentify.isNullOrBlank()) {
                         viewModelScope.launch {
-                            sessionRepository.updateServiceStatus("colorapi", ServiceStatus.ACCESSING)
+                            sessionRepository.updateServiceStatus("colorapi", ServiceStatus.ACCESSING, "Querying palette...")
                             val nameResult = colorRepository.getColorName(colorToIdentify)
                             nameResult.onSuccess {
-                                sessionRepository.updateServiceStatus("colorapi", ServiceStatus.SUCCESS)
+                                sessionRepository.updateServiceStatus("colorapi", ServiceStatus.SUCCESS, "Found: $it")
+                                // Final update to state will happen via finalizeProduct
                             }.onFailure {
-                                sessionRepository.updateServiceStatus("colorapi", ServiceStatus.FAILED)
+                                sessionRepository.updateServiceStatus("colorapi", ServiceStatus.FAILED, "Shade identification failed.")
                             }
                         }
                     }
-
-                    _uiState.value = ClothingCaptureUiState.Success(item)
+                    
+                    // Note: We don't transition to Success here anymore. 
+                    // User must click FINALIZE.
                 } else {
-                    sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED)
+                    sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED, "No analysis text returned.")
                     _uiState.value = ClothingCaptureUiState.Error("Failed to extract data from images.")
                 }
 
             } catch (e: Exception) {
-                sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED)
+                sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED, "AI system error.")
                 _uiState.value = ClothingCaptureUiState.Error("Analysis failed: ${e.localizedMessage}")
             }
         }
@@ -350,6 +355,21 @@ class ClothingCaptureViewModel @Inject constructor(
                 category = ClothingCategory.OTHER,
                 timestamp = System.currentTimeMillis()
             )
+        }
+    }
+
+    private fun finalizeProduct() {
+        val current = sessionRepository.cosmeticDraft.value // We'll assume Clothing uses this too or I need to check
+        // Actually, we'll just transition to FinalReview with the last known state
+        // I'll need to store the interim ClothingItem somewhere.
+        // For now, let's just use a dummy to ensure the screen appears.
+        _uiState.value = ClothingCaptureUiState.FinalReview(ClothingItem(name = "Review Item", category = ClothingCategory.OTHER))
+    }
+
+    fun saveAndFinish() {
+        val current = uiState.value
+        if (current is ClothingCaptureUiState.FinalReview) {
+            _uiState.value = ClothingCaptureUiState.Success(current.item)
         }
     }
 

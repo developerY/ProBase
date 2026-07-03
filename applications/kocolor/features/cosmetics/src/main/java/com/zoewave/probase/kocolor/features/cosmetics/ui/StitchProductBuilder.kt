@@ -78,6 +78,7 @@ import com.zoewave.probase.core.model.ritual.Finish
 import com.zoewave.probase.core.model.ritual.Formulation
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.MicroCategory
+import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.features.camera.productcapture.ui.DiscoveryStatusScreen
 import com.zoewave.probase.features.graphics.colorpicker.ui.ColorPickerDialog
 import com.zoewave.probase.features.graphics.colorpicker.util.isColorDark
@@ -205,7 +206,20 @@ fun StitchProductBuilder(
     if (!isEditMode && uiState.isAnalyzing) {
         DiscoveryStatusScreen(
             status = uiState.discoveryStatus,
-            onBack = { onEvent(CosmeticsEvent.CancelDiscovery) }
+            mode = com.zoewave.probase.features.camera.productcapture.ui.DiscoveryMode.DETERMINISTIC,
+            onBack = { onEvent(CosmeticsEvent.CancelDiscovery) },
+            onNext = { onEvent(CosmeticsEvent.ContinueToReview) }
+        )
+        return
+    }
+
+    if (!isEditMode && uiState.scanState == FashionSessionRepository.ScanStatus.ANALYZING && uiState.aiResult == null) {
+        // This is the Gemini phase
+        DiscoveryStatusScreen(
+            status = uiState.discoveryStatus,
+            mode = com.zoewave.probase.features.camera.productcapture.ui.DiscoveryMode.AI_SYNTHESIS,
+            onBack = { onEvent(CosmeticsEvent.CancelDiscovery) },
+            onNext = { /* Final logic */ }
         )
         return
     }

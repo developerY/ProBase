@@ -31,6 +31,7 @@ import com.zoewave.probase.features.graphics.colorpicker.util.toHex
 @Composable
 fun AnalysisView(
     progress: String,
+    statusNote: String? = null,
     themeColor: Color = Color(0xFF22d3ee)
 ) {
     Column(
@@ -41,6 +42,21 @@ fun AnalysisView(
         CircularProgressIndicator(color = themeColor)
         Spacer(modifier = Modifier.height(24.dp))
         Text(progress, color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        
+        statusNote?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Surface(
+                color = Color.White.copy(alpha = 0.05f),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = it,
+                    color = themeColor.copy(alpha = 0.8f),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                )
+            }
+        }
     }
 }
 

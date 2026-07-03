@@ -91,6 +91,7 @@ sealed class CosmeticsEvent {
     data class OnObfContributionToggled(val enabled: Boolean) : CosmeticsEvent()
     data object AcknowledgeErrorDialog : CosmeticsEvent()
     data object ResetScanState : CosmeticsEvent()
+    data object ContinueToReview : CosmeticsEvent()
     data object CancelDiscovery : CosmeticsEvent()
 }
 
@@ -320,6 +321,9 @@ class CosmeticsViewModel @Inject constructor(
                 sessionRepository.reset()
                 _scanStatus.value = null
             }
+            CosmeticsEvent.ContinueToReview -> {
+                sessionRepository.setScanState(FashionSessionRepository.ScanStatus.SUCCESS)
+            }
         }
     }
 
@@ -338,7 +342,7 @@ class CosmeticsViewModel @Inject constructor(
     private fun fetchObfProduct(code: String) {
         viewModelScope.launch {
             sessionRepository.setScanState(FashionSessionRepository.ScanStatus.ANALYZING)
-            sessionRepository.updateServiceStatus("obf", ServiceStatus.ACCESSING)
+            sessionRepository.updateServiceStatus("obf", ServiceStatus.ACCESSING, "Querying barcode: $code")
             _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_searching_obf)
             
             updateSessionDraft { it.copy(batchCode = code) }
@@ -346,7 +350,7 @@ class CosmeticsViewModel @Inject constructor(
             val result = cosmeticRepository.fetchProductByBarcode(code)
             
             result.onSuccess { obfItem ->
-                sessionRepository.updateServiceStatus("obf", ServiceStatus.SUCCESS)
+                sessionRepository.updateServiceStatus("obf", ServiceStatus.SUCCESS, "Found: ${obfItem.name}")
                 _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_product_found_format, obfItem.name)
                 
                 updateSessionDraft { current ->
@@ -376,7 +380,7 @@ class CosmeticsViewModel @Inject constructor(
                 
                 // ASYNC CLINICAL SAFETY FETCH (FDA)
                 viewModelScope.launch {
-                    sessionRepository.updateServiceStatus("fda", ServiceStatus.ACCESSING)
+                    sessionRepository.updateServiceStatus("fda", ServiceStatus.ACCESSING, "Checking clinical recalls...")
                     val draft = sessionRepository.cosmeticDraft.value ?: return@launch
                     val recall = fdaRepository.getRecalls(draft.brand, draft.name)
                     val eventCount = fdaRepository.getAdverseEventsCount(draft.brand, draft.name)
@@ -384,29 +388,29 @@ class CosmeticsViewModel @Inject constructor(
                     val label = fdaRepository.getDrugLabel(code)
 
                     if (recall != null || eventCount > 0 || label != null) {
-                        sessionRepository.updateServiceStatus("fda", ServiceStatus.SUCCESS)
+                        sessionRepository.updateServiceStatus("fda", ServiceStatus.SUCCESS, "Safety data verified.")
                     } else {
-                        sessionRepository.updateServiceStatus("fda", ServiceStatus.FAILED)
+                        sessionRepository.updateServiceStatus("fda", ServiceStatus.FAILED, "No clinical data found.")
                     }
 
                     // ASYNC CHEMICAL INTELLIGENCE (PubChem)
-                    sessionRepository.updateServiceStatus("chemdb", ServiceStatus.ACCESSING)
+                    sessionRepository.updateServiceStatus("chemdb", ServiceStatus.ACCESSING, "Analyzing ${obfItem.ingredients.firstOrNull() ?: "ingredients"}...")
                     val topIngredient = obfItem.ingredients.firstOrNull()
                     val chemicalInfo = topIngredient?.let { chemicalRepository.getChemicalInfo(it).getOrNull() }
 
                     if (chemicalInfo != null) {
-                        sessionRepository.updateServiceStatus("chemdb", ServiceStatus.SUCCESS)
+                        sessionRepository.updateServiceStatus("chemdb", ServiceStatus.SUCCESS, "Hazards: ${chemicalInfo.safetyHazards.size} detected.")
                     } else {
-                        sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED)
+                        sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED, "No hazard data found.")
                     }
 
                     // ASYNC CATALOG CONTEXT (Makeup API)
-                    sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.ACCESSING)
+                    sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.ACCESSING, "Matching brand: ${draft.brand}")
                     val catalogResult = makeupRepository.searchProducts(brand = draft.brand)
                     catalogResult.onSuccess {
-                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.SUCCESS)
+                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.SUCCESS, "Found ${it.size} catalog matches.")
                     }.onFailure {
-                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.FAILED)
+                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.FAILED, "Brand not in catalog.")
                     }
 
                     updateSessionDraft { current ->
@@ -429,13 +433,13 @@ class CosmeticsViewModel @Inject constructor(
                 val isComplete = hasIngredients && obfItem.name.isNotBlank() && obfItem.brand.isNotBlank()
 
                 if (isComplete) {
-                    sessionRepository.setScanState(FashionSessionRepository.ScanStatus.SUCCESS)
+                    // We stay in ANALYZING (Discovery screen) until CONTINUE is pressed
+                    Log.d("CosmeticsVM", "Data complete. Staying on Discovery screen.")
                 } else {
-                    sessionRepository.setScanState(FashionSessionRepository.ScanStatus.INCOMPLETE)
                     _scanStatus.value = "Incomplete data. Scan box to enrich."
                 }
             }.onFailure {
-                sessionRepository.updateServiceStatus("obf", ServiceStatus.FAILED)
+                sessionRepository.updateServiceStatus("obf", ServiceStatus.FAILED, "Product not found in OBF.")
                 _scanStatus.value = context.getString(R.string.applications_kocolor_features_cosmetics_product_not_found_obf)
                 sessionRepository.setScanState(FashionSessionRepository.ScanStatus.FAILED)
             }
@@ -464,7 +468,7 @@ class CosmeticsViewModel @Inject constructor(
         val uri = sessionRepository.cosmeticDraft.value?.imageUrl ?: return
         viewModelScope.launch {
             sessionRepository.setScanState(FashionSessionRepository.ScanStatus.ANALYZING)
-            sessionRepository.updateServiceStatus("gemini", ServiceStatus.ACCESSING)
+            sessionRepository.updateServiceStatus("gemini", ServiceStatus.ACCESSING, "Uploading image to Gemini...")
             _aiResult.value = null
             
             val apiKey = aiSettings.getGeminiApiKey()
@@ -479,7 +483,7 @@ class CosmeticsViewModel @Inject constructor(
                     _aiResult.value = result
                     
                     if (result != null) {
-                        sessionRepository.updateServiceStatus("gemini", ServiceStatus.SUCCESS)
+                        sessionRepository.updateServiceStatus("gemini", ServiceStatus.SUCCESS, "Analysis complete.")
                         updateSessionDraft { current ->
                             current.copy(
                                 name = if (current.name.isBlank()) result.name else current.name,
@@ -499,12 +503,12 @@ class CosmeticsViewModel @Inject constructor(
                         }
                         sessionRepository.setScanState(FashionSessionRepository.ScanStatus.SUCCESS)
                     } else {
-                        sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED)
+                        sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED, "AI returned null.")
                         sessionRepository.setScanState(FashionSessionRepository.ScanStatus.FAILED)
                     }
                 }
             } else {
-                sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED)
+                sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED, "API Key missing.")
                 sessionRepository.setScanState(FashionSessionRepository.ScanStatus.IDLE)
             }
         }
