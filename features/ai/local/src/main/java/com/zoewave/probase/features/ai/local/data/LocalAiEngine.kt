@@ -29,10 +29,10 @@ class LocalAiEngine @Inject constructor() {
 
     /**
      * Uses on-device LLM (Gemini Nano) to clean up and standardize raw OCR text.
-     * This is crucial for making reliable server lookups in the next step.
+     * Returns Result.failure(UnsupportedOperationException) if hardware bypass is needed.
      */
-    suspend fun standardizeOcrText(rawText: String): LocalStandardizedData = withContext(Dispatchers.Default) {
-        if (rawText.isBlank()) return@withContext LocalStandardizedData()
+    suspend fun standardizeOcrText(rawText: String): Result<LocalStandardizedData> = withContext(Dispatchers.Default) {
+        if (rawText.isBlank()) return@withContext Result.success(LocalStandardizedData())
 
         try {
             val prompt = """
@@ -47,27 +47,16 @@ class LocalAiEngine @Inject constructor() {
             """.trimIndent()
 
             val response = localModel.generateContent(prompt)
-            val jsonText = response.text ?: return@withContext LocalStandardizedData()
+            val jsonText = response.text ?: return@withContext Result.success(LocalStandardizedData())
 
             // Handle potential LLM markdown artifacts
             val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
             val fullJson = "{$cleanedJson}"
 
-            json.decodeFromString<LocalStandardizedData>(fullJson)
+            Result.success(json.decodeFromString<LocalStandardizedData>(fullJson))
         } catch (e: Exception) {
-            android.util.Log.w("LocalAiEngine", "Local AI failed or unsupported: ${e.message}")
-            // Fallback to simple heuristic if local LLM is unavailable
-            heuristicFallback(rawText)
+            android.util.Log.w("LocalAiEngine", "Local AI hardware bypass triggered: ${e.message}")
+            Result.failure(e)
         }
-    }
-
-    private fun heuristicFallback(text: String): LocalStandardizedData {
-        val lines = text.lines().filter { it.isNotBlank() }
-        val brand = lines.firstOrNull { it.all { c -> c.isUpperCase() || c.isWhitespace() } }
-        val name = lines.find { it.length > 5 && it != brand }
-        return LocalStandardizedData(
-            brand = brand,
-            productName = name
-        )
     }
 }
