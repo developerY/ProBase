@@ -33,8 +33,17 @@ sealed interface ClothingCaptureUiState {
         val price: Double? = null
     ) : ClothingCaptureUiState
 
+    data class FinalReview(
+        val item: ClothingItem
+    ) : ClothingCaptureUiState
+
     data class Success(
         val item: ClothingItem
+    ) : ClothingCaptureUiState
+
+    data class AiAnalyzing(
+        val capturedUris: List<String>,
+        val progress: String = "Identifying with Gemini..."
     ) : ClothingCaptureUiState
 
     data class Error(

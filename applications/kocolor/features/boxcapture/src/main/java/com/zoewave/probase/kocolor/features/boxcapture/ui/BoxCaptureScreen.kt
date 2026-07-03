@@ -33,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -45,7 +46,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.model.network.ServiceStatus
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.features.camera.productcapture.ui.AnalysisView
 import com.zoewave.probase.features.camera.productcapture.ui.CaptureStepConfig
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationUiState
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationView
@@ -73,6 +76,9 @@ sealed interface BoxCaptureEvent {
     data object SubmitToAi : BoxCaptureEvent
     data object SkipBarcode : BoxCaptureEvent
     data object SkipStep : BoxCaptureEvent
+    data object ContinueToReview : BoxCaptureEvent
+    data object FinalizeProduct : BoxCaptureEvent
+    data object SaveProduct : BoxCaptureEvent
     data class OnColorSelected(val hex: String) : BoxCaptureEvent
     data object ConfirmColor : BoxCaptureEvent
     data object ClearColor : BoxCaptureEvent
@@ -159,7 +165,20 @@ internal fun BoxCaptureScreen(
             )
         }
         is BoxCaptureUiState.Analyzing -> {
-            DiscoveryStatusScreen(status = discoveryStatus)
+            DiscoveryStatusScreen(
+                status = discoveryStatus,
+                mode = com.zoewave.probase.features.camera.productcapture.ui.DiscoveryMode.DETERMINISTIC,
+                onBack = { onEvent(BoxCaptureEvent.Retry) },
+                onNext = { onEvent(BoxCaptureEvent.ContinueToReview) }
+            )
+        }
+        is BoxCaptureUiState.AiAnalyzing -> {
+            DiscoveryStatusScreen(
+                status = discoveryStatus,
+                mode = com.zoewave.probase.features.camera.productcapture.ui.DiscoveryMode.AI_SYNTHESIS,
+                onBack = { onEvent(BoxCaptureEvent.Retry) },
+                onNext = { onEvent(BoxCaptureEvent.FinalizeProduct) }
+            )
         }
         is BoxCaptureUiState.ColorConfirmation -> {
             ColorConfirmationView(
@@ -200,7 +219,87 @@ internal fun BoxCaptureScreen(
         is BoxCaptureUiState.Error -> {
             ErrorView(uiState.message, onRetry = { onEvent(BoxCaptureEvent.Retry) })
         }
+        is BoxCaptureUiState.FinalReview -> {
+            // Re-use the existing StitchProductBuilder or a custom final view
+            // For now, we'll show a finalized summary
+            FinalValidationView(
+                item = uiState.item,
+                onSave = { onEvent(BoxCaptureEvent.SaveProduct) },
+                onCancel = { onEvent(BoxCaptureEvent.Dismiss) }
+            )
+        }
         is BoxCaptureUiState.Success -> {}
+    }
+}
+
+@Composable
+private fun FinalValidationView(
+    item: com.zoewave.probase.core.model.ritual.CosmeticItem,
+    onSave: () -> Unit,
+    onCancel: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0f172a))
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            "Final Synthesis",
+            color = Color.White,
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold,
+            fontFamily = androidx.compose.ui.text.font.FontFamily.Serif
+        )
+        Text(
+            "AI has finalized the product details",
+            color = Color.White.copy(alpha = 0.6f),
+            style = MaterialTheme.typography.bodyMedium
+        )
+        
+        Spacer(Modifier.height(48.dp))
+        
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color.White.copy(alpha = 0.05f),
+            shape = RoundedCornerShape(24.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(item.brand.uppercase(), color = Color(0xFF34d399), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
+                Text(item.name, color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                
+                Spacer(Modifier.height(16.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .background(item.colorHex?.let { parseColor(it) } ?: Color.Gray, CircleShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(item.shadeName ?: "Unknown Shade", color = Color.White, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+        }
+        
+        Spacer(Modifier.height(48.dp))
+        
+        Button(
+            onClick = onSave,
+            modifier = Modifier.fillMaxWidth().height(64.dp),
+            shape = RoundedCornerShape(32.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF34d399))
+        ) {
+            Text("ADD TO COLLECTION", color = Color.Black, fontWeight = FontWeight.Bold)
+        }
+        
+        TextButton(onClick = onCancel, modifier = Modifier.padding(top = 16.dp)) {
+            Text("DISCARD", color = Color.Red.copy(alpha = 0.7f))
+        }
     }
 }
 

@@ -11,7 +11,7 @@ The backbone of the product identification system. It is a crowdsourced, open-so
     *   Retrieval of basic product identity (Name, Brand, volume).
     *   Sourcing high-resolution product images (`image_front_url`).
     *   Providing raw ingredient lists and allergen tags.
-*   **Integration:** Standalone network module `:applications:kocolor:features:obf` using Retrofit and GSON. Provides the base product data used as context for other extraction layers.
+*   **Key Mapping:** Categories like `en:lipsticks` are mapped to the app's internal `ClothingCategory` or `MicroCategory` enums.
 
 ## 2. OpenFDA (FDA Public API)
 Used to provide official clinical safety data and regulatory status for products, especially those classified as Over-The-Counter (OTC) drugs in the US (e.g., SPF, acne treatments).
@@ -57,7 +57,7 @@ A free REST API providing detailed information about color cosmetics, including 
 *   **Purpose:**
     *   **Catalog Discovery:** Searching for products by brand, type, or category to help users populate their collection.
     *   **Formulation Filtering:** Identifying products with specific attributes (Vegan, Cruelty-Free, etc.) via the `tag_list`.
-*   **Integration:** REST client using Retrofit and `kotlinx-serialization` in the `:kocolor:features:cosmetics` module. Allows cleartext traffic for this domain.
+*   **Integration:** Standalone network module `:applications:kocolor:features:makeupapi` using Retrofit and `kotlinx-serialization`. Allows cleartext traffic for this domain.
 
 ## 7. Google Gemini AI (Generative AI)
 A multimodal large language model used to bridge the gap between raw data (OCR/OBF) and a premium editorial experience.

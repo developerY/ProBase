@@ -14,7 +14,8 @@ sealed interface BoxCaptureUiState {
 
     data class Analyzing(
         val capturedUris: List<String>,
-        val progress: String = "Initializing AI..."
+        val progress: String = "Initializing AI...",
+        val mode: CaptureMode = CaptureMode.BOX
     ) : BoxCaptureUiState
 
     data class ColorConfirmation(
@@ -41,8 +42,17 @@ sealed interface BoxCaptureUiState {
         val price: Double? = null
     ) : BoxCaptureUiState
 
+    data class FinalReview(
+        val item: CosmeticItem
+    ) : BoxCaptureUiState
+
     data class Success(
         val item: CosmeticItem
+    ) : BoxCaptureUiState
+
+    data class AiAnalyzing(
+        val capturedUris: List<String>,
+        val progress: String = "Synthesizing with Gemini..."
     ) : BoxCaptureUiState
 
     data class Error(

@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.data.repository
 
 import android.util.Log
 import com.zoewave.probase.core.model.network.DiscoveryStatus
+import com.zoewave.probase.core.model.network.ServiceHealth
 import com.zoewave.probase.core.model.network.ServiceStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,15 +51,16 @@ class FashionSessionRepository @Inject constructor() {
         _discoveryStatus.value = status
     }
 
-    fun updateServiceStatus(service: String, status: ServiceStatus) {
+    fun updateServiceStatus(service: String, status: ServiceStatus, note: String? = null) {
         _discoveryStatus.update { current ->
+            val health = ServiceHealth(status, note)
             when (service.lowercase()) {
-                "obf" -> current.copy(obf = status)
-                "fda" -> current.copy(fda = status)
-                "chemdb" -> current.copy(chemDb = status)
-                "colorapi" -> current.copy(colorApi = status)
-                "gemini" -> current.copy(gemini = status)
-                "makeupapi" -> current.copy(makeupApi = status)
+                "obf" -> current.copy(obf = health)
+                "fda" -> current.copy(fda = health)
+                "chemdb" -> current.copy(chemDb = health)
+                "colorapi" -> current.copy(colorApi = health)
+                "gemini" -> current.copy(gemini = health)
+                "makeupapi" -> current.copy(makeupApi = health)
                 else -> current
             }
         }

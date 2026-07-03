@@ -135,6 +135,14 @@ class BoxCaptureViewModel @Inject constructor(
                 prepareReview(mode)
             }
             BoxCaptureEvent.SkipStep -> skipStep()
+            BoxCaptureEvent.ContinueToReview -> {
+                val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: 
+                           (uiState.value as? BoxCaptureUiState.Analyzing)?.mode ?: // Error state or transition
+                           CaptureMode.BOX
+                prepareReview(mode)
+            }
+            BoxCaptureEvent.FinalizeProduct -> finalizeProduct()
+            BoxCaptureEvent.SaveProduct -> saveAndFinish()
             is BoxCaptureEvent.OnColorSelected -> {
                 sessionManualColor = event.hex
                 val current = (uiState.value as? BoxCaptureUiState.Idle)
@@ -265,109 +273,128 @@ class BoxCaptureViewModel @Inject constructor(
         if (nextStep != null) {
             _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), nextStep, mode, sessionManualColor, sessionManualPrice)
         } else {
-            prepareReview(mode)
+            // All steps complete. Go to Discovery screen first.
+            _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Processing Captures...", mode)
+            // If we have a barcode from earlier, we'd normally trigger lookup here if not already done.
+            // But usually BARCODE is the last step and handled by onBarcodeScanned.
         }
     }
 
     private fun onBarcodeScanned(code: String) {
         scannedBarcode = code
         viewModelScope.launch {
-            // First attempt to find in online database to skip AI if possible
-            _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Searching online database...")
-            sessionRepository.updateServiceStatus("obf", ServiceStatus.ACCESSING)
+            val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
+            // Transition to Discovery Health Screen
+            _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Orchestrating Discovery...", mode)
+            
+            sessionRepository.updateServiceStatus("obf", ServiceStatus.ACCESSING, "Querying barcode: $code")
             
             val result = cosmeticRepository.fetchProductByBarcode(code)
             result.onSuccess { obfItem ->
-                sessionRepository.updateServiceStatus("obf", ServiceStatus.SUCCESS)
+                sessionRepository.updateServiceStatus("obf", ServiceStatus.SUCCESS, "Found: ${obfItem.name}")
+                obfEnrichmentData = obfItem
                 
-                // ASYNC CLINICAL SAFETY FETCH (FDA)
-                viewModelScope.launch {
-                    sessionRepository.updateServiceStatus("fda", ServiceStatus.ACCESSING)
-                    val recall = fdaRepository.getRecalls(obfItem.brand, obfItem.name)
-                    val eventCount = fdaRepository.getAdverseEventsCount(obfItem.brand, obfItem.name)
-                    val label = fdaRepository.getDrugLabel(code)
-
-                    if (recall != null || eventCount > 0 || label != null) {
-                        sessionRepository.updateServiceStatus("fda", ServiceStatus.SUCCESS)
-                    } else {
-                        sessionRepository.updateServiceStatus("fda", ServiceStatus.FAILED)
-                    }
-                }
-
-                // ASYNC CHEMICAL INTELLIGENCE (PubChem)
-                viewModelScope.launch {
-                    sessionRepository.updateServiceStatus("chemdb", ServiceStatus.ACCESSING)
-                    val topIngredient = obfItem.ingredients.firstOrNull()
-                    val chemicalInfo = topIngredient?.let { chemicalRepository.getChemicalInfo(it).getOrNull() }
-
-                    if (chemicalInfo != null) {
-                        sessionRepository.updateServiceStatus("chemdb", ServiceStatus.SUCCESS)
-                    } else {
-                        sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED)
-                    }
-                }
-
-                // ASYNC CATALOG CONTEXT (Makeup API)
-                viewModelScope.launch {
-                    sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.ACCESSING)
-                    val catalogResult = makeupRepository.searchProducts(brand = obfItem.brand)
-                    catalogResult.onSuccess {
-                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.SUCCESS)
-                    }.onFailure {
-                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.FAILED)
-                    }
-                }
-
-                // Confidence Check: Do we have ingredients?
-                val hasIngredients = obfItem.ingredients.isNotEmpty()
-                val isComplete = hasIngredients && obfItem.name.isNotBlank() && obfItem.brand.isNotBlank()
-
-                if (isComplete) {
-                    Log.d(TAG, "Product found in OBF with high confidence! Skipping Gemini analysis.")
-                    val item = obfItem.copy(
-                        imageUrl = capturedUris.firstOrNull { it.isNotBlank() },
-                        batchCode = code
-                    )
-                    sessionRepository.setCosmeticDraft(item)
-                    _uiState.value = BoxCaptureUiState.Success(item)
-                } else {
-                    Log.i(TAG, "Product found in OBF but incomplete (missing ingredients). Proceeding to AI enrichment.")
-                    obfEnrichmentData = obfItem
-                    val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
-                    prepareReview(mode)
-                }
+                // --- Start Parallel Enrichment with confirmed OBF data ---
+                startBackgroundEnrichment(obfItem.brand, obfItem.name, code, obfItem.ingredients.firstOrNull())
+                
             }.onFailure {
-                sessionRepository.updateServiceStatus("obf", ServiceStatus.FAILED)
-                Log.i(TAG, "Product not found in OBF. Proceeding to AI review.")
+                sessionRepository.updateServiceStatus("obf", ServiceStatus.FAILED, "Barcode not in OBF.")
                 obfEnrichmentData = null
-                val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
-                prepareReview(mode)
+                
+                // --- FALLBACK: Try to get Brand/Name from local OCR results ---
+                viewModelScope.launch {
+                    val ocrData = performDeepOcr()
+                    val fallbackBrand = extractBrandFromText(ocrData.ingredientsOcr + " " + ocrData.instructionsOcr)
+                    
+                    if (!fallbackBrand.isNullOrBlank()) {
+                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.ACCESSING, "Found brand in OCR: $fallbackBrand")
+                        startBackgroundEnrichment(fallbackBrand, "", code, null)
+                    } else {
+                        // Mark others as failed due to no context
+                        sessionRepository.updateServiceStatus("fda", ServiceStatus.FAILED, "No product context identified.")
+                        sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED, "No ingredient data.")
+                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.FAILED, "Unknown brand.")
+                    }
+                }
             }
         }
     }
 
+    private fun startBackgroundEnrichment(brand: String, name: String, barcode: String, topIngredient: String?) {
+        // FDA Clinical Safety
+        viewModelScope.launch {
+            sessionRepository.updateServiceStatus("fda", ServiceStatus.ACCESSING, "Checking clinical status...")
+            val recall = fdaRepository.getRecalls(brand, name)
+            val eventCount = fdaRepository.getAdverseEventsCount(brand, name)
+            val label = fdaRepository.getDrugLabel(barcode)
+
+            if (recall != null || eventCount > 0 || label != null) {
+                sessionRepository.updateServiceStatus("fda", ServiceStatus.SUCCESS, "Safety data verified.")
+            } else {
+                sessionRepository.updateServiceStatus("fda", ServiceStatus.FAILED, "No clinical data found.")
+            }
+        }
+
+        // Chemical Intelligence
+        viewModelScope.launch {
+            if (topIngredient != null) {
+                sessionRepository.updateServiceStatus("chemdb", ServiceStatus.ACCESSING, "Analyzing $topIngredient...")
+                val chemicalInfo = chemicalRepository.getChemicalInfo(topIngredient).getOrNull()
+                if (chemicalInfo != null) {
+                    sessionRepository.updateServiceStatus("chemdb", ServiceStatus.SUCCESS, "Hazards: ${chemicalInfo.safetyHazards.size} identified.")
+                } else {
+                    sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED, "Ingredient hazards unknown.")
+                }
+            } else {
+                sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED, "No ingredient context.")
+            }
+        }
+
+        // Makeup API Catalog
+        viewModelScope.launch {
+            sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.ACCESSING, "Matching brand: $brand")
+            val catalogResult = makeupRepository.searchProducts(brand = brand)
+            catalogResult.onSuccess {
+                sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.SUCCESS, "Matched ${it.size} catalog items.")
+            }.onFailure {
+                sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.FAILED, "Brand not in catalog.")
+            }
+        }
+    }
+
+    private suspend fun performDeepOcr(): OcrResults {
+        val steps = (uiState.value as? BoxCaptureUiState.Analyzing)?.mode?.let { CaptureStep.getStepsForMode(it) } ?: emptyList()
+        val ingredientsIdx = steps.indexOf(CaptureStep.INGREDIENTS)
+        val instructionsIdx = steps.indexOf(CaptureStep.INSTRUCTIONS)
+
+        val ingredientsOcr = if (ingredientsIdx != -1 && ingredientsIdx in capturedUris.indices) {
+            val uri = capturedUris[ingredientsIdx]
+            if (uri.isNotBlank()) loadBitmapFromUri(Uri.parse(uri))?.let { localAnalyzer.extractText(it) } ?: "" else ""
+        } else ""
+
+        val instructionsOcr = if (instructionsIdx != -1 && instructionsIdx in capturedUris.indices) {
+            val uri = capturedUris[instructionsIdx]
+            if (uri.isNotBlank()) loadBitmapFromUri(Uri.parse(uri))?.let { localAnalyzer.extractText(it) } ?: "" else ""
+        } else ""
+
+        localIngredientsOcr = ingredientsOcr
+        localInstructionsOcr = instructionsOcr
+        
+        return OcrResults(ingredientsOcr, instructionsOcr)
+    }
+
+    private data class OcrResults(val ingredientsOcr: String, val instructionsOcr: String)
+
+    private fun extractBrandFromText(text: String): String? {
+        // Very simple heuristic: look for known brands or capitalized words at start
+        return if (text.isNotBlank()) text.split(" ").firstOrNull { it.length > 2 && it[0].isUpperCase() } else null
+    }
+
     private fun prepareReview(mode: CaptureMode) {
         viewModelScope.launch {
-            _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Performing Local OCR...")
+            _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Performing Local OCR...", mode)
             
-            // Re-map capturedUris to steps to find the right index
-            val steps = CaptureStep.getStepsForMode(mode)
-            val ingredientsIdx = steps.indexOf(CaptureStep.INGREDIENTS)
-            val instructionsIdx = steps.indexOf(CaptureStep.INSTRUCTIONS)
-
-            localIngredientsOcr = if (ingredientsIdx != -1 && ingredientsIdx in capturedUris.indices) {
-                val uri = capturedUris[ingredientsIdx]
-                if (uri.isNotBlank()) {
-                    loadBitmapFromUri(Uri.parse(uri))?.let { localAnalyzer.extractText(it) } ?: ""
-                } else ""
-            } else ""
-
-            localInstructionsOcr = if (instructionsIdx != -1 && instructionsIdx in capturedUris.indices) {
-                val uri = capturedUris[instructionsIdx]
-                if (uri.isNotBlank()) {
-                    loadBitmapFromUri(Uri.parse(uri))?.let { localAnalyzer.extractText(it) } ?: ""
-                } else ""
-            } else ""
+            performDeepOcr()
 
             _uiState.value = BoxCaptureUiState.Review(
                 capturedUris = capturedUris.toList(),
@@ -404,8 +431,9 @@ class BoxCaptureViewModel @Inject constructor(
                 return@launch
             }
 
-            _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Processing Images...")
-            sessionRepository.updateServiceStatus("gemini", ServiceStatus.ACCESSING)
+            _uiState.value = BoxCaptureUiState.AiAnalyzing(capturedUris.toList(), "Synthesizing with Gemini...")
+            sessionRepository.updateServiceStatus("gemini", ServiceStatus.ACCESSING, "Uploading snapshots...")
+            sessionRepository.updateServiceStatus("colorapi", ServiceStatus.IDLE)
             
             try {
                 val bitmaps = loadBitmaps()
@@ -501,34 +529,35 @@ class BoxCaptureViewModel @Inject constructor(
                 val jsonText = response.text
                 
                 if (jsonText != null) {
-                    sessionRepository.updateServiceStatus("gemini", ServiceStatus.SUCCESS)
+                    sessionRepository.updateServiceStatus("gemini", ServiceStatus.SUCCESS, "Deep analysis complete.")
                     Log.d(TAG, "Received response from Gemini: $jsonText")
                     var item = parseJsonToCosmeticItem(jsonText)
                     
                     // --- Makeup API Catalog check ---
                     viewModelScope.launch {
-                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.ACCESSING)
+                        sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.ACCESSING, "Verifying with catalog...")
                         val catalogResult = makeupRepository.searchProducts(brand = item.brand)
                         catalogResult.onSuccess {
-                            sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.SUCCESS)
+                            sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.SUCCESS, "Catalog match verified.")
                         }.onFailure {
-                            sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.FAILED)
+                            sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.FAILED, "Not in global catalog.")
                         }
                     }
 
-                    // --- Color API Enrichment ---
+                    // --- Color API Enrichment (Post-Gemini) ---
                     val colorToIdentify = item.colorHex ?: capturedColor
                     if (!colorToIdentify.isNullOrBlank()) {
-                        viewModelScope.launch {
-                            sessionRepository.updateServiceStatus("colorapi", ServiceStatus.ACCESSING)
-                            val nameResult = colorRepository.getColorName(colorToIdentify)
-                            nameResult.onSuccess { name ->
-                                sessionRepository.updateServiceStatus("colorapi", ServiceStatus.SUCCESS)
-                                // We could update the item name or shade name here if needed
-                            }.onFailure {
-                                sessionRepository.updateServiceStatus("colorapi", ServiceStatus.FAILED)
-                            }
+                        sessionRepository.updateServiceStatus("colorapi", ServiceStatus.ACCESSING, "Naming color: $colorToIdentify")
+                        val nameResult = colorRepository.getColorName(colorToIdentify)
+                        nameResult.onSuccess { name ->
+                            sessionRepository.updateServiceStatus("colorapi", ServiceStatus.SUCCESS, "Shade: $name")
+                            // Important: Finalize item with shade name
+                            updateSessionDraft { it.copy(shadeName = name) }
+                        }.onFailure {
+                            sessionRepository.updateServiceStatus("colorapi", ServiceStatus.FAILED, "Unnamed shade.")
                         }
+                    } else {
+                        sessionRepository.updateServiceStatus("colorapi", ServiceStatus.FAILED, "No color detected.")
                     }
 
                     // Pre-fill Front Image and ensure Barcode/Color is set
@@ -540,15 +569,15 @@ class BoxCaptureViewModel @Inject constructor(
                     )
 
                     sessionRepository.setCosmeticDraft(item)
-                    _uiState.value = BoxCaptureUiState.Success(item)
+                    // Staying on AI Analyzing screen until FINALIZE clicked
                 } else {
-                    sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED)
+                    sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED, "No text in AI response.")
                     Log.e(TAG, "Gemini returned null text in response.")
                     _uiState.value = BoxCaptureUiState.Error("Failed to extract data from images.")
                 }
 
             } catch (e: Exception) {
-                sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED)
+                sessionRepository.updateServiceStatus("gemini", ServiceStatus.FAILED, "AI connection error.")
                 Log.e(TAG, "Gemini Analysis Exception", e)
                 val errorMsg = when {
                     e.message?.contains("404") == true -> "The AI model is currently unavailable or the model name is incorrect. Switching to local analysis..."
@@ -562,6 +591,26 @@ class BoxCaptureViewModel @Inject constructor(
                 } else {
                     _uiState.value = BoxCaptureUiState.Error(errorMsg)
                 }
+            }
+        }
+    }
+
+    private fun updateSessionDraft(block: (CosmeticItem) -> CosmeticItem) {
+        val current = sessionRepository.cosmeticDraft.value ?: return
+        sessionRepository.setCosmeticDraft(block(current))
+    }
+
+    private fun finalizeProduct() {
+        val draft = sessionRepository.cosmeticDraft.value ?: return
+        _uiState.value = BoxCaptureUiState.FinalReview(draft)
+    }
+
+    fun saveAndFinish() {
+        val current = uiState.value
+        if (current is BoxCaptureUiState.FinalReview) {
+            viewModelScope.launch {
+                cosmeticRepository.saveCosmeticItem(current.item)
+                _uiState.value = BoxCaptureUiState.Success(current.item)
             }
         }
     }

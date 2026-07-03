@@ -44,7 +44,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.zoewave.probase.core.model.network.ServiceStatus
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.features.camera.productcapture.ui.AnalysisView
 import com.zoewave.probase.features.camera.productcapture.ui.CaptureStepConfig
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationUiState
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationView
@@ -68,6 +70,9 @@ sealed interface ClothingCaptureEvent {
     data class DeletePhoto(val index: Int) : ClothingCaptureEvent
     data object SubmitToAi : ClothingCaptureEvent
     data object SkipStep : ClothingCaptureEvent
+    data object ContinueToReview : ClothingCaptureEvent
+    data object FinalizeProduct : ClothingCaptureEvent
+    data object SaveProduct : ClothingCaptureEvent
     data class OnColorSelected(val hex: String) : ClothingCaptureEvent
     data object ConfirmColor : ClothingCaptureEvent
     data object ClearColor : ClothingCaptureEvent
@@ -156,7 +161,20 @@ internal fun ClothingCaptureScreen(
             )
         }
         is ClothingCaptureUiState.Analyzing -> {
-            DiscoveryStatusScreen(status = discoveryStatus)
+            DiscoveryStatusScreen(
+                status = discoveryStatus,
+                mode = com.zoewave.probase.features.camera.productcapture.ui.DiscoveryMode.DETERMINISTIC,
+                onBack = { onEvent(ClothingCaptureEvent.Retry) },
+                onNext = { onEvent(ClothingCaptureEvent.ContinueToReview) }
+            )
+        }
+        is ClothingCaptureUiState.AiAnalyzing -> {
+            DiscoveryStatusScreen(
+                status = discoveryStatus,
+                mode = com.zoewave.probase.features.camera.productcapture.ui.DiscoveryMode.AI_SYNTHESIS,
+                onBack = { onEvent(ClothingCaptureEvent.Retry) },
+                onNext = { onEvent(ClothingCaptureEvent.FinalizeProduct) }
+            )
         }
         is ClothingCaptureUiState.ColorConfirmation -> {
             ColorConfirmationView(
@@ -197,7 +215,85 @@ internal fun ClothingCaptureScreen(
         is ClothingCaptureUiState.Error -> {
             ErrorView(uiState.message, onRetry = { onEvent(ClothingCaptureEvent.Retry) })
         }
+        is ClothingCaptureUiState.FinalReview -> {
+            FinalClothingValidationView(
+                item = uiState.item,
+                onSave = { onEvent(ClothingCaptureEvent.SaveProduct) },
+                onCancel = { onEvent(ClothingCaptureEvent.Dismiss) }
+            )
+        }
         is ClothingCaptureUiState.Success -> {}
+    }
+}
+
+@Composable
+private fun FinalClothingValidationView(
+    item: com.zoewave.probase.core.model.ritual.ClothingItem,
+    onSave: () -> Unit,
+    onCancel: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0f172a))
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            "Style Synthesis",
+            color = Color.White,
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold,
+            fontFamily = androidx.compose.ui.text.font.FontFamily.Serif
+        )
+        Text(
+            "AI has refined your garment details",
+            color = Color.White.copy(alpha = 0.6f),
+            style = MaterialTheme.typography.bodyMedium
+        )
+        
+        Spacer(Modifier.height(48.dp))
+        
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color.White.copy(alpha = 0.05f),
+            shape = RoundedCornerShape(24.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(item.brand?.uppercase() ?: "UNKNOWN BRAND", color = Color(0xFFf472b6), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
+                Text(item.name, color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                
+                Spacer(Modifier.height(16.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .background(parseColor(item.colorHex ?: "#FFFFFF"), CircleShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text("Verified Color", color = Color.White, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+        }
+        
+        Spacer(Modifier.height(48.dp))
+        
+        Button(
+            onClick = onSave,
+            modifier = Modifier.fillMaxWidth().height(64.dp),
+            shape = RoundedCornerShape(32.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFf472b6))
+        ) {
+            Text("ADD TO WARDROBE", color = Color.Black, fontWeight = FontWeight.Bold)
+        }
+        
+        androidx.compose.material3.TextButton(onClick = onCancel, modifier = Modifier.padding(top = 16.dp)) {
+            Text("DISCARD", color = Color.Red.copy(alpha = 0.7f))
+        }
     }
 }
 
