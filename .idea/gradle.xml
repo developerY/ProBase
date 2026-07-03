@@ -200,6 +200,7 @@
             <option value="$PROJECT_DIR$/features/readers" />
             <option value="$PROJECT_DIR$/features/readers/barcode" />
             <option value="$PROJECT_DIR$/features/readers/nfc" />
+            <option value="$PROJECT_DIR$/features/readers/ocr" />
             <option value="$PROJECT_DIR$/features/readers/qrscanner" />
             <option value="$PROJECT_DIR$/features/weather" />
             <option value="$PROJECT_DIR$/features/xr" />

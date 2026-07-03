@@ -34,10 +34,10 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
+    implementation(project(":features:readers:ocr"))
     implementation(libs.kotlinx.serialization.json)
 
     // ML Kit
-    implementation(libs.mlkit.text.recognition)
     implementation(libs.gms.play.services.code.scanner)
     implementation(libs.kotlinx.coroutines.play.services)
 

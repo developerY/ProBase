@@ -1,42 +1,28 @@
 package com.zoewave.probase.kocolor.features.analyzer.data
 
 import android.graphics.Bitmap
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.zoewave.probase.core.model.ritual.*
-import kotlinx.coroutines.tasks.await
+import com.zoewave.probase.features.readers.ocr.data.LocalOcrEngine
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class LocalProductAnalyzer @Inject constructor() {
-
-    private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+class LocalProductAnalyzer @Inject constructor(
+    private val ocrEngine: LocalOcrEngine
+) {
 
     suspend fun analyze(bitmaps: List<Bitmap>): CosmeticItem {
-        val allText = mutableListOf<String>()
-
-        for (bitmap in bitmaps) {
-            allText.add(extractText(bitmap))
-        }
-
-        val combinedText = allText.joinToString("\n")
+        val combinedText = ocrEngine.extractTextFromBitmaps(bitmaps)
         return heuristicGuess(combinedText)
     }
 
     suspend fun extractText(bitmap: Bitmap): String {
-        val image = InputImage.fromBitmap(bitmap, 0)
-        return try {
-            val result = recognizer.process(image).await()
-            result.text
-        } catch (e: Exception) {
-            ""
-        }
+        return ocrEngine.extractText(bitmap)
     }
 
     /**
      * Extracts a palette of dominant colors from the bitmap.
+// ... (rest of the file remains similar but recognizer is removed)
      * Samples different regions to give the user better options.
      */
     fun extractColorPalette(bitmap: Bitmap): List<String> {

@@ -16,7 +16,7 @@ dependencies {
     implementation(project(":core:util"))
 
     // --- ML & AI ---
-    implementation(libs.mlkit.text.recognition)
+    implementation(project(":features:readers:ocr"))
     implementation(libs.google.generative.ai)
 
     // --- Feature Dependencies ---
