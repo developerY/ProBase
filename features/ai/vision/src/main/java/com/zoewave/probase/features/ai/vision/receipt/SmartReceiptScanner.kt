@@ -4,18 +4,15 @@ import android.graphics.Bitmap
 import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.zoewave.probase.features.readers.ocr.data.LocalOcrEngine
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
-class SmartReceiptScanner {
+class SmartReceiptScanner(
+    private val ocrEngine: LocalOcrEngine
+) {
 
-    private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-    
     // We use a separate model for Nano as requested, though API might vary by SDK version
     private val generativeModel = GenerativeModel(
         modelName = "gemini-nano",
@@ -25,14 +22,9 @@ class SmartReceiptScanner {
     private val json = Json { ignoreUnknownKeys = true }
 
     suspend fun scanReceipt(bitmap: Bitmap, userContext: String? = null): ReceiptResult = withContext(Dispatchers.Default) {
-        val image = InputImage.fromBitmap(bitmap, 0)
         
         // 1. ML Kit Text Extraction
-        val visionText = try {
-            recognizer.process(image).await().text
-        } catch (_: Exception) {
-            ""
-        }
+        val visionText = ocrEngine.extractText(bitmap)
 
         if (visionText.isBlank() && userContext == null) return@withContext ReceiptResult()
 

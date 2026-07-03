@@ -1,17 +1,14 @@
 package com.zoewave.probase.features.ai.vision.receipt.data
 
 import android.graphics.Bitmap
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptDiagnosticResult
 import com.zoewave.probase.features.ai.vision.receipt.ReceiptEngine
-import kotlinx.coroutines.tasks.await
+import com.zoewave.probase.features.readers.ocr.data.LocalOcrEngine
 import javax.inject.Inject
 
-class LocalReceiptEngine @Inject constructor() : ReceiptEngine {
-
-    private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+class LocalReceiptEngine @Inject constructor(
+    private val ocrEngine: LocalOcrEngine
+) : ReceiptEngine {
 
     override suspend fun processReceipt(
         bitmap: Bitmap,
@@ -20,10 +17,9 @@ class LocalReceiptEngine @Inject constructor() : ReceiptEngine {
         userContext: String?
     ): ReceiptDiagnosticResult {
         val logs = mutableListOf("Local Receipt AI initialized")
-        val image = InputImage.fromBitmap(bitmap, 0)
         
         val visionText = try {
-            val result = recognizer.process(image).await().text
+            val result = ocrEngine.extractText(bitmap)
             logs.add("ML Kit OCR successful")
             result
         } catch (e: Exception) {

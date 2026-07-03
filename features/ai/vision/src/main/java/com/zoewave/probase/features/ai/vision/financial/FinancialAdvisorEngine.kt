@@ -3,19 +3,16 @@ package com.zoewave.probase.features.ai.vision.financial
 import android.graphics.Bitmap
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.zoewave.probase.features.readers.ocr.data.LocalOcrEngine
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FinancialAdvisorEngine @Inject constructor() {
-
-    private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+class FinancialAdvisorEngine @Inject constructor(
+    private val ocrEngine: LocalOcrEngine
+) {
 
     suspend fun analyzeFinancialImpact(
         bitmap: Bitmap,
@@ -30,12 +27,7 @@ class FinancialAdvisorEngine @Inject constructor() {
             apiKey = apiKey
         )
 
-        val image = InputImage.fromBitmap(bitmap, 0)
-        val visionText = try {
-            recognizer.process(image).await().text
-        } catch (_: Exception) {
-            ""
-        }
+        val visionText = ocrEngine.extractText(bitmap)
 
         val prompt = """
             You are a helpful financial assistant on a $deviceBranding.

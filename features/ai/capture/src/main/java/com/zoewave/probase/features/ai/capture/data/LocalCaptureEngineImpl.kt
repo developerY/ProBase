@@ -1,24 +1,22 @@
 package com.zoewave.probase.features.ai.capture.data
 
 import android.graphics.Bitmap
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.zoewave.probase.core.model.tasks.SmartTaskDraft
 import com.zoewave.probase.features.ai.capture.domain.DiagnosticResult
 import com.zoewave.probase.features.ai.capture.domain.SmartCaptureEngine
-import kotlinx.coroutines.tasks.await
+import com.zoewave.probase.features.readers.ocr.data.LocalOcrEngine
 import javax.inject.Inject
 
 /**
- * Tier 2: Local Engine using Google ML Kit.
+ * Tier 2: Local Engine using ML Kit via standardized OCR module.
  * Extracts text and uses heuristics (Regex) to parse basic fields.
  */
-class LocalCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
-
-    private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+class LocalCaptureEngineImpl @Inject constructor(
+    private val ocrEngine: LocalOcrEngine
+) : SmartCaptureEngine {
 
     override suspend fun processImage(
+// ... (rest of the logic uses ocrEngine.extractText(bitmap))
         bitmap: Bitmap?,
         apiKey: String?,
         modelName: String?,
@@ -33,12 +31,11 @@ class LocalCaptureEngineImpl @Inject constructor() : SmartCaptureEngine {
         }
 
         onLog("Initializing Local AI...")
-        val image = InputImage.fromBitmap(bitmap, 0)
         logs.add("Vision analysis started (ML Kit)")
         onLog("Running Vision OCR (ML Kit)...")
         
         val visionText = try {
-            val result = recognizer.process(image).await().text
+            val result = ocrEngine.extractText(bitmap)
             logs.add("Local OCR successful: ${result.length} characters found")
             onLog("OCR successful! Analyzing content...")
             result

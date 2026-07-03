@@ -19,7 +19,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
 
     // ML
-    implementation(libs.mlkit.text.recognition)
+    implementation(project(":features:readers:ocr"))
     implementation(libs.google.ai.edge.aicore)
     implementation(libs.google.generative.ai)
     implementation(libs.kotlinx.serialization.json)

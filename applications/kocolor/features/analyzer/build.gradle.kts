@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":features:ai:configuration"))
     implementation(project(":features:ai:local"))
     implementation(project(":features:camera"))
+    implementation(project(":features:readers:ocr"))
     implementation(project(":features:graphics"))
 
     implementation(libs.google.generative.ai)
@@ -32,9 +33,9 @@ dependencies {
     implementation("androidx.palette:palette-ktx:1.0.0")
     implementation(libs.kotlinx.serialization.json)
 
-    // ML Kit
-    implementation(libs.mlkit.text.recognition)
-    implementation(libs.kotlinx.coroutines.play.services)
+    // ML Kit - Moved to :features:readers:ocr
+    // implementation(libs.mlkit.text.recognition)
+    // implementation(libs.kotlinx.coroutines.play.services)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
