@@ -10,6 +10,7 @@ data class ServiceHealth(
 )
 
 data class DiscoveryStatus(
+    val localAi: ServiceHealth = ServiceHealth(),
     val obf: ServiceHealth = ServiceHealth(),
     val fda: ServiceHealth = ServiceHealth(),
     val chemDb: ServiceHealth = ServiceHealth(),

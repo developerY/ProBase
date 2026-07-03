@@ -15,6 +15,7 @@ import com.zoewave.probase.core.model.network.ServiceStatus
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
+import com.zoewave.probase.features.ai.local.data.LocalAiEngine
 import com.zoewave.probase.kocolor.features.analyzer.data.LocalProductAnalyzer
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureStep
 import com.zoewave.probase.kocolor.features.clothingcapture.ui.state.ClothingCaptureUiState
@@ -50,6 +51,7 @@ class ClothingCaptureViewModel @Inject constructor(
     private val aiSettings: AiConfigurationSettings,
     private val sessionRepository: FashionSessionRepository,
     private val localAnalyzer: LocalProductAnalyzer,
+    private val localAi: LocalAiEngine,
     private val colorRepository: ColorRepository
 ) : ViewModel() {
 
@@ -197,6 +199,18 @@ class ClothingCaptureViewModel @Inject constructor(
                     loadBitmapFromUri(Uri.parse(uri))?.let { localAnalyzer.extractText(it) } ?: ""
                 } else ""
             } else ""
+
+            if (localLabelsOcr.isNotBlank()) {
+                sessionRepository.updateServiceStatus("localai", ServiceStatus.ACCESSING, "Synthesizing label text...")
+                val result = localAi.standardizeOcrText(localLabelsOcr)
+                if (!result.brand.isNullOrBlank()) {
+                    sessionRepository.updateServiceStatus("localai", ServiceStatus.SUCCESS, "Found: ${result.brand}")
+                } else {
+                    sessionRepository.updateServiceStatus("localai", ServiceStatus.FAILED, "No label data extracted.")
+                }
+            } else {
+                sessionRepository.updateServiceStatus("localai", ServiceStatus.FAILED, "No label photo.")
+            }
 
             _uiState.value = ClothingCaptureUiState.Review(
                 capturedUris = capturedUris.toList(),

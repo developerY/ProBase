@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":applications:kocolor:features:cosmetics"))
     implementation(project(":applications:kocolor:features:makeupapi"))
     implementation(project(":features:ai:configuration"))
+    implementation(project(":features:ai:local"))
     implementation(project(":features:camera:productcapture"))
     implementation(project(":features:graphics"))
     implementation(project(":applications:kocolor:features:chemicals"))

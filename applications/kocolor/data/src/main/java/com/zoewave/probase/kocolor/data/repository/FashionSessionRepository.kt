@@ -55,6 +55,7 @@ class FashionSessionRepository @Inject constructor() {
         _discoveryStatus.update { current ->
             val health = ServiceHealth(status, note)
             when (service.lowercase()) {
+                "localai" -> current.copy(localAi = health)
                 "obf" -> current.copy(obf = health)
                 "fda" -> current.copy(fda = health)
                 "chemdb" -> current.copy(chemDb = health)
