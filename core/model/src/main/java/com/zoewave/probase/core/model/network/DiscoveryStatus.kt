@@ -1,7 +1,7 @@
 package com.zoewave.probase.core.model.network
 
 enum class ServiceStatus {
-    IDLE, ACCESSING, SUCCESS, FAILED
+    IDLE, ACCESSING, SUCCESS, FAILED, UNSUPPORTED
 }
 
 data class ServiceHealth(

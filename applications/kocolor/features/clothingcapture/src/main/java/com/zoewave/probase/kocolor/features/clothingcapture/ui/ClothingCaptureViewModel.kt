@@ -202,11 +202,16 @@ class ClothingCaptureViewModel @Inject constructor(
 
             if (localLabelsOcr.isNotBlank()) {
                 sessionRepository.updateServiceStatus("localai", ServiceStatus.ACCESSING, "Synthesizing label text...")
-                val result = localAi.standardizeOcrText(localLabelsOcr)
-                if (!result.brand.isNullOrBlank()) {
-                    sessionRepository.updateServiceStatus("localai", ServiceStatus.SUCCESS, "Found: ${result.brand}")
-                } else {
-                    sessionRepository.updateServiceStatus("localai", ServiceStatus.FAILED, "No label data extracted.")
+                val localAiResult = localAi.standardizeOcrText(localLabelsOcr)
+                
+                localAiResult.onSuccess { data ->
+                    if (!data.brand.isNullOrBlank()) {
+                        sessionRepository.updateServiceStatus("localai", ServiceStatus.SUCCESS, "Found: ${data.brand}")
+                    } else {
+                        sessionRepository.updateServiceStatus("localai", ServiceStatus.FAILED, "No label data extracted.")
+                    }
+                }.onFailure {
+                    sessionRepository.updateServiceStatus("localai", ServiceStatus.UNSUPPORTED, "Hardware bypass active.")
                 }
             } else {
                 sessionRepository.updateServiceStatus("localai", ServiceStatus.FAILED, "No label photo.")

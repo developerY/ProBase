@@ -307,28 +307,36 @@ class BoxCaptureViewModel @Inject constructor(
                 sessionRepository.updateServiceStatus("obf", ServiceStatus.FAILED, "Barcode not in OBF.")
             }
 
-            // 2. Local AI Cleanup (Always run or only on OBF failure/incomplete?)
-            // Let's run it if OBF failed or data is thin
+            // 2. Local AI Cleanup
             if (brand.isNullOrBlank() || name.isNullOrBlank()) {
                 sessionRepository.updateServiceStatus("localai", ServiceStatus.ACCESSING, "Synthesizing OCR text...")
                 val ocrData = performDeepOcr()
                 val localAiResult = localAi.standardizeOcrText(ocrData.ingredientsOcr + "\n" + ocrData.instructionsOcr)
                 
-                if (!localAiResult.brand.isNullOrBlank()) {
-                    sessionRepository.updateServiceStatus("localai", ServiceStatus.SUCCESS, "Found: ${localAiResult.brand}")
-                    brand = localAiResult.brand
-                    name = localAiResult.productName
-                    topIngredient = localAiResult.ingredients.firstOrNull() ?: topIngredient
-                } else {
-                    sessionRepository.updateServiceStatus("localai", ServiceStatus.FAILED, "No brand identified.")
+                localAiResult.onSuccess { data ->
+                    if (!data.brand.isNullOrBlank()) {
+                        sessionRepository.updateServiceStatus("localai", ServiceStatus.SUCCESS, "Found: ${data.brand}")
+                        brand = data.brand
+                        name = data.productName
+                        topIngredient = data.ingredients.firstOrNull() ?: topIngredient
+                    } else {
+                        sessionRepository.updateServiceStatus("localai", ServiceStatus.FAILED, "No brand identified.")
+                    }
+                }.onFailure {
+                    // Hardware Bypass
+                    sessionRepository.updateServiceStatus("localai", ServiceStatus.UNSUPPORTED, "Hardware bypass active.")
+                    // Fallback to simple brand extraction if Nano is unsupported
+                    val fallbackBrand = extractBrandFromText(ocrData.ingredientsOcr + " " + ocrData.instructionsOcr)
+                    brand = fallbackBrand
                 }
             } else {
                 sessionRepository.updateServiceStatus("localai", ServiceStatus.SUCCESS, "Using OBF context.")
             }
 
             // 3. Parallel Server Enrichment
-            if (!brand.isNullOrBlank()) {
-                startBackgroundEnrichment(brand, name ?: "", code, topIngredient)
+            val finalBrand = brand
+            if (!finalBrand.isNullOrBlank()) {
+                startBackgroundEnrichment(finalBrand, name ?: "", code, topIngredient)
             } else {
                 // Final hard fail for others
                 sessionRepository.updateServiceStatus("fda", ServiceStatus.FAILED, "No product context.")
@@ -402,6 +410,10 @@ class BoxCaptureViewModel @Inject constructor(
     }
 
     private data class OcrResults(val ingredientsOcr: String, val instructionsOcr: String)
+
+    private fun extractBrandFromText(text: String): String? {
+        return if (text.isNotBlank()) text.split(" ").firstOrNull { it.length > 2 && it[0].isUpperCase() } else null
+    }
 
     private fun prepareReview(mode: CaptureMode) {
         viewModelScope.launch {

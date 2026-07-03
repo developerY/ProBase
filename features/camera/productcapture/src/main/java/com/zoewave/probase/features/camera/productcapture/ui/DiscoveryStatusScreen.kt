@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -70,9 +71,11 @@ fun DiscoveryStatusScreen(
         )
     }
 
-    // Check if all services in current mode have finished (Success or Failed)
+    // Check if all services in current mode have finished (Success, Failed, or Unsupported)
     val allFinished = services.all { 
-        it.health.status == ServiceStatus.SUCCESS || it.health.status == ServiceStatus.FAILED 
+        it.health.status == ServiceStatus.SUCCESS || 
+        it.health.status == ServiceStatus.FAILED ||
+        it.health.status == ServiceStatus.UNSUPPORTED
     }
 
     Box(
@@ -184,6 +187,7 @@ private fun ServiceStatusRow(service: ServiceInfo) {
         when (service.health.status) {
             ServiceStatus.SUCCESS -> Color(0xFF065f46)
             ServiceStatus.FAILED -> Color(0xFF7f1d1d)
+            ServiceStatus.UNSUPPORTED -> Color(0xFF1e293b).copy(alpha = 0.3f)
             ServiceStatus.ACCESSING -> Color(0xFF1e293b)
             ServiceStatus.IDLE -> Color(0xFF1e293b).copy(alpha = 0.5f)
         },
@@ -193,6 +197,7 @@ private fun ServiceStatusRow(service: ServiceInfo) {
     val iconColor = when (service.health.status) {
         ServiceStatus.SUCCESS -> Color(0xFF34d399)
         ServiceStatus.FAILED -> Color(0xFFf87171)
+        ServiceStatus.UNSUPPORTED -> Color.Gray.copy(alpha = 0.5f)
         ServiceStatus.ACCESSING -> Color(0xFF60a5fa)
         ServiceStatus.IDLE -> Color.Gray
     }
@@ -233,6 +238,14 @@ private fun ServiceStatusRow(service: ServiceInfo) {
                             Icon(Icons.Default.Close, null, tint = iconColor, modifier = Modifier.padding(4.dp))
                         }
                     }
+                    ServiceStatus.UNSUPPORTED -> {
+                        Icon(
+                            androidx.compose.material.icons.Icons.Default.Info, 
+                            null, 
+                            tint = iconColor, 
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                     ServiceStatus.ACCESSING -> {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
@@ -250,13 +263,13 @@ private fun ServiceStatusRow(service: ServiceInfo) {
                 Text(
                     service.name,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White,
+                    color = if (service.health.status == ServiceStatus.UNSUPPORTED) Color.Gray else Color.White,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     service.health.note ?: service.description,
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.8f)
+                    color = if (service.health.status == ServiceStatus.UNSUPPORTED) Color.Gray.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.8f)
                 )
             }
         }
