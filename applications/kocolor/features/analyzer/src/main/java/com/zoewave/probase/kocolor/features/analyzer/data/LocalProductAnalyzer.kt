@@ -1,6 +1,7 @@
 package com.zoewave.probase.kocolor.features.analyzer.data
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.features.readers.ocr.data.LocalOcrEngine
 import javax.inject.Inject
@@ -13,6 +14,7 @@ class LocalProductAnalyzer @Inject constructor(
 
     suspend fun analyze(bitmaps: List<Bitmap>): CosmeticItem {
         val combinedText = ocrEngine.extractTextFromBitmaps(bitmaps)
+        Log.d("LocalProductAnalyzer", "Heuristic Guessing from raw text:\n$combinedText")
         return heuristicGuess(combinedText)
     }
 

@@ -80,6 +80,7 @@ class LocalAiEngine @Inject constructor(
             }
 
             // Context Protection: Truncate to prevent token overflow
+            Log.d("LocalAiEngine", "INCOMING RAW OCR TEXT:\n$rawText")
             val safeRawText = rawText.take(4000)
             Log.d("LocalAiEngine", "Standardizing ${safeRawText.length} chars of OCR text...")
 
