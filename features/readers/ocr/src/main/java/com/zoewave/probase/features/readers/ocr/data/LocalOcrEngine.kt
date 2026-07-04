@@ -20,7 +20,8 @@ class LocalOcrEngine @Inject constructor() {
         return try {
             val result = recognizer.process(image).await()
             val duration = System.currentTimeMillis() - startTime
-            Log.d("LocalOcrEngine", "OCR successful: ${result.text.length} chars found in ${duration}ms")
+            Log.d("LocalOcrEngine", "OCR successful in ${duration}ms")
+            Log.d("LocalOcrEngine", "RAW TEXT: ${result.text}")
             result.text
         } catch (e: Exception) {
             Log.e("LocalOcrEngine", "OCR processing failed", e)
