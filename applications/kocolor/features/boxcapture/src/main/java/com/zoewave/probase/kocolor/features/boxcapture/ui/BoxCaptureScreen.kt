@@ -51,6 +51,8 @@ import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.db.entity.ProductEntity
 import com.zoewave.probase.features.camera.productcapture.ui.AnalysisView
 import com.zoewave.probase.features.camera.productcapture.ui.CaptureStepConfig
+import com.zoewave.probase.features.camera.productcapture.ui.ScannerOverlay
+import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationView
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationUiState
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationView
 import com.zoewave.probase.features.camera.productcapture.ui.DiscoveryStatusScreen
@@ -85,6 +87,7 @@ sealed interface BoxCaptureEvent {
     data object ClearColor : BoxCaptureEvent
     data object ConfirmPrice : BoxCaptureEvent
     data class OnPriceChanged(val price: Double) : BoxCaptureEvent
+    data class ScannerBoundsCalculated(val bounds: android.graphics.Rect) : BoxCaptureEvent
 }
 
 @Composable
@@ -141,6 +144,10 @@ internal fun BoxCaptureScreen(
                                             .background(uiState.extractedColorHex?.let { parseColor(it) } ?: Color.Transparent, CircleShape)
                                             .clip(CircleShape)
                                     )
+                                } else if (step != CaptureStep.BARCODE && step != CaptureStep.PRICE) {
+                                    ScannerOverlay(onBoundsCalculated = { bounds ->
+                                        onEvent(BoxCaptureEvent.ScannerBoundsCalculated(bounds))
+                                    })
                                 }
                             }
                         )
