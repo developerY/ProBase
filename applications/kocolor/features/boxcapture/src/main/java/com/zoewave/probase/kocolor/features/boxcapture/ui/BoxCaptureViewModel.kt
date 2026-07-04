@@ -19,6 +19,7 @@ import com.zoewave.probase.core.model.ritual.MicroCategory
 import com.zoewave.probase.features.ai.local.data.LocalAiEngine
 import com.zoewave.probase.features.ai.local.data.LocalStandardizedData
 import com.zoewave.probase.features.readers.ocr.data.LocalOcrEngine
+import com.zoewave.probase.features.readers.ocr.domain.model.BoxPanel
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.data.usecase.DeterministicApiMetadata
@@ -78,6 +79,7 @@ class BoxCaptureViewModel @Inject constructor(
     // Stage 3.5 & 3.75 Resolution Anchors
     private var localAiStandardizedData: LocalStandardizedData? = null
     private var deterministicApiMetadata = DeterministicApiMetadata()
+    private val panelOcrResults = mutableMapOf<BoxPanel, String>()
 
     private val _discoveryState = MutableStateFlow<DiscoveryState>(DiscoveryState.Processing)
     val discoveryState: StateFlow<DiscoveryState> = _discoveryState.asStateFlow()
@@ -172,12 +174,41 @@ class BoxCaptureViewModel @Inject constructor(
         Log.d(TAG, "Starting Local Discovery for mode: $mode")
         viewModelScope.launch {
             sessionRepository.updateServiceStatus("localai", ServiceStatus.ACCESSING, "Synthesizing OCR text...")
-            val bitmaps = loadBitmaps()
-            Log.d(TAG, "Running OCR on ${bitmaps.size} bitmaps...")
-            val ocrText = ocrEngine.extractTextFromBitmaps(bitmaps)
-            Log.d(TAG, "OCR complete. Total text length: ${ocrText.length}")
             
-            val localAiResult = localAi.standardizeOcrText(ocrText)
+            // Map captured photos to their panels
+            val steps = CaptureStep.getStepsForMode(mode)
+            val panelsToProcess = mutableMapOf<BoxPanel, Bitmap>()
+            
+            capturedUris.forEachIndexed { index, uri ->
+                if (uri.isNotBlank()) {
+                    val step = steps.getOrNull(index)
+                    val panel = when (step) {
+                        CaptureStep.FRONT -> BoxPanel.FRONT
+                        CaptureStep.BACK -> BoxPanel.INFO
+                        CaptureStep.INGREDIENTS -> BoxPanel.INGREDIENTS
+                        CaptureStep.INSTRUCTIONS -> BoxPanel.DIRECTIONS
+                        else -> null
+                    }
+                    if (panel != null && !panelOcrResults.containsKey(panel)) {
+                        loadBitmapFromUri(Uri.parse(uri))?.let { panelsToProcess[panel] = it }
+                    }
+                }
+            }
+
+            if (panelsToProcess.isNotEmpty()) {
+                Log.d(TAG, "Processing ${panelsToProcess.size} remaining panels...")
+                val newResults = ocrEngine.extractCategorizedText(panelsToProcess)
+                panelOcrResults.putAll(newResults)
+            } else {
+                Log.d(TAG, "All panels already processed in background.")
+            }
+            
+            // Final check: Ensure we have results for all captured panels
+            // aggregatedText should only include what was actually captured
+            val aggregatedText = panelOcrResults.values.joinToString("\n")
+            Log.d(TAG, "Final Aggregated OCR Text:\n$aggregatedText")
+            
+            val localAiResult = localAi.standardizeCategorizedText(panelOcrResults)
             
             localAiResult.onSuccess { data ->
                 Log.d(TAG, "Local AI Success. Brand: ${data.brand}, Name: ${data.productName}")
@@ -189,7 +220,7 @@ class BoxCaptureViewModel @Inject constructor(
             }.onFailure { e ->
                 Log.w(TAG, "Local AI Failed: ${e.message}")
                 sessionRepository.updateServiceStatus("localai", ServiceStatus.UNSUPPORTED, "Hardware bypass active.")
-                val fallbackBrand = extractBrandFromText(ocrText)
+                val fallbackBrand = extractBrandFromText(aggregatedText)
                 Log.d(TAG, "Heuristic fallback brand: $fallbackBrand")
                 localAiStandardizedData = LocalStandardizedData(brand = fallbackBrand)
                 if (!fallbackBrand.isNullOrBlank()) {
@@ -336,6 +367,27 @@ class BoxCaptureViewModel @Inject constructor(
         val current = (uiState.value as? BoxCaptureUiState.Idle) ?: return
         val mode = current.mode
         
+        // --- Background OCR Trigger ---
+        val step = current.currentStep
+        val panel = when (step) {
+            CaptureStep.FRONT -> BoxPanel.FRONT
+            CaptureStep.BACK -> BoxPanel.INFO
+            CaptureStep.INGREDIENTS -> BoxPanel.INGREDIENTS
+            CaptureStep.INSTRUCTIONS -> BoxPanel.DIRECTIONS
+            else -> null
+        }
+        
+        if (panel != null) {
+            viewModelScope.launch {
+                Log.d(TAG, "Triggering background OCR for panel: $panel")
+                loadBitmapFromUri(Uri.parse(uri))?.let { bitmap ->
+                    val text = ocrEngine.processSinglePanel(panel, bitmap)
+                    panelOcrResults[panel] = text
+                    Log.d(TAG, "Background OCR Complete for $panel. Output:\n$text")
+                }
+            }
+        }
+        
         if (current.currentStep == CaptureStep.COLOR) {
             // Auto-extract color palette from the photo
             viewModelScope.launch {
@@ -397,6 +449,7 @@ class BoxCaptureViewModel @Inject constructor(
         sessionManualPrice = null
         sessionManualColor = null
         localAiStandardizedData = null
+        panelOcrResults.clear()
         deterministicApiMetadata = DeterministicApiMetadata()
         sessionRepository.setDiscoveryStatus(DiscoveryStatus())
         _uiState.value = BoxCaptureUiState.Idle()

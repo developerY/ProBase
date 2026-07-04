@@ -10,6 +10,7 @@ android {
 
 dependencies {
     implementation(project(":core:util"))
+    implementation(project(":features:readers:ocr"))
     
     // THE TRUE ZERO-FOOTPRINT DEPENDENCY: Interfacing with Android System AICore
     implementation(libs.google.ai.edge.aicore)
