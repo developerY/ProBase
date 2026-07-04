@@ -145,9 +145,11 @@ internal fun BoxCaptureScreen(
                                             .clip(CircleShape)
                                     )
                                 } else if (step != CaptureStep.BARCODE && step != CaptureStep.PRICE) {
+                                    /* Bypassing ScannerOverlay for full-frame debugging
                                     ScannerOverlay(onBoundsCalculated = { bounds ->
                                         onEvent(BoxCaptureEvent.ScannerBoundsCalculated(bounds))
                                     })
+                                    */
                                 }
                             }
                         )
