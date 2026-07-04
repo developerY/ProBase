@@ -14,6 +14,7 @@ data class StructuredTextLine(
     val text: String,
     val isHeader: Boolean,
     val relativeTop: Float,
+    val relativeCenterX: Float, // Added for Horizontal Symmetry
     val elements: List<StructuredElement>,
     val boundingBox: Rect?
 ) {
@@ -28,17 +29,43 @@ data class StructuredTextLine(
                 text.contains("(TM)", ignoreCase = true)
 
     /**
+     * The "Sentence-Case Sinker": Penalyze marketing blurbs.
+     * Descriptions are usually lowercase/sentence-case, while branding is Title/All Caps.
+     */
+    val isSentenceCase: Boolean
+        get() {
+            val words = text.trim().split("\\s+".toRegex())
+            // Penalty applies to multi-word lines that start with a lowercase letter
+            // OR have very few uppercase letters relative to length.
+            return words.size > 2 && text.firstOrNull()?.isLowerCase() == true
+        }
+
+    /**
      * The "Gravity" Heuristic: Rank visual prominence by height and vertical placement.
-     * Important text (Brand, Name) is typically large and at the top.
-     * Marketing fluff is penalized the further down the package it appears.
+     * Boosted by Trademark and Horizontal Symmetry (Centered text in the bottom half).
+     * Sunk by Sentence-Case (Marketing descriptions).
      */
     val prominenceScore: Float
         get() {
             val height = boundingBox?.height() ?: 0
-            val baseScore = height.toFloat() * (1.0f - relativeTop)
+            var score = height.toFloat() * (1.0f - relativeTop)
             
-            // If it has a trademark, apply a 1.5x multiplier to guarantee it wins
-            return if (hasTrademark) baseScore * 1.5f else baseScore
+            // 1. Apply the Trademark Booster (1.5x)
+            if (hasTrademark) score *= 1.5f
+            
+            // 2. Apply the Horizontal Symmetry Lifeline (1.2x)
+            // Branding is almost universally center-aligned (0.35 - 0.65 range)
+            // Only reward horizontal symmetry if the text is in the bottom 50%
+            if (relativeTop > 0.5f && relativeCenterX in 0.35f..0.65f) {
+                score *= 1.2f
+            }
+
+            // 3. Apply the Sentence-Case Penalty (0.5x)
+            if (isSentenceCase) {
+                score *= 0.5f
+            }
+
+            return score
         }
 }
 
@@ -56,8 +83,9 @@ object GeometricOcrParser {
      * Converts raw ML Kit text into structured lines with geometric metadata.
      * @param visionText The raw result from ML Kit
      * @param imageHeight The height of the original bitmap to calculate relative vertical placement.
+     * @param imageWidth The width of the original bitmap to calculate horizontal symmetry.
      */
-    fun parse(visionText: Text, imageHeight: Int): List<StructuredTextLine> {
+    fun parse(visionText: Text, imageHeight: Int, imageWidth: Int): List<StructuredTextLine> {
         val allLines = visionText.textBlocks.flatMap { it.lines }
         if (allLines.isEmpty()) return emptyList()
 
@@ -95,6 +123,11 @@ object GeometricOcrParser {
                 lineBox.top.toFloat() / imageHeight.toFloat()
             } else 0f
 
+            // Calculate relative horizontal center (Symmetry calculation)
+            val relativeCenterX = if (lineBox != null && imageWidth > 0) {
+                lineBox.centerX().toFloat() / imageWidth.toFloat()
+            } else 0.5f
+
             val structuredElements = line.elements.mapIndexed { index, element ->
                 val box = element.boundingBox
                 
@@ -127,6 +160,7 @@ object GeometricOcrParser {
                 text = line.text,
                 isHeader = isHeader,
                 relativeTop = relativeTop,
+                relativeCenterX = relativeCenterX,
                 elements = structuredElements,
                 boundingBox = lineBox
             )
