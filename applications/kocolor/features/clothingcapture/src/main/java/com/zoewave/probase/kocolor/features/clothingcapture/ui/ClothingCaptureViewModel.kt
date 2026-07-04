@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
@@ -153,6 +154,18 @@ class ClothingCaptureViewModel @Inject constructor(
     private fun onPhotoCaptured(uri: String) {
         capturedUris.add(uri)
         val current = (uiState.value as? ClothingCaptureUiState.Idle) ?: return
+
+        // --- Background OCR Trigger (Label) ---
+        if (current.currentStep == ClothingCaptureStep.LABEL) {
+            viewModelScope.launch {
+                Log.d("ClothingCaptureVM", "Triggering background OCR for Label...")
+                loadBitmapFromUri(Uri.parse(uri))?.let { bitmap ->
+                    val text = localAnalyzer.extractText(bitmap)
+                    localLabelsOcr = text
+                    Log.d("ClothingCaptureVM", "Background Label OCR Complete. Output:\n$text")
+                }
+            }
+        }
         
         if (current.currentStep == ClothingCaptureStep.COLOR) {
             viewModelScope.launch {
@@ -192,13 +205,15 @@ class ClothingCaptureViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = ClothingCaptureUiState.Analyzing(capturedUris.toList(), "Performing Local OCR...")
             
-            val labelIdx = ClothingCaptureStep.ALL.indexOf(ClothingCaptureStep.LABEL)
-            localLabelsOcr = if (labelIdx != -1 && labelIdx in capturedUris.indices) {
-                val uri = capturedUris[labelIdx]
-                if (uri.isNotBlank()) {
-                    loadBitmapFromUri(Uri.parse(uri))?.let { localAnalyzer.extractText(it) } ?: ""
+            if (localLabelsOcr.isBlank()) {
+                val labelIdx = ClothingCaptureStep.ALL.indexOf(ClothingCaptureStep.LABEL)
+                localLabelsOcr = if (labelIdx != -1 && labelIdx in capturedUris.indices) {
+                    val uri = capturedUris[labelIdx]
+                    if (uri.isNotBlank()) {
+                        loadBitmapFromUri(Uri.parse(uri))?.let { localAnalyzer.extractText(it) } ?: ""
+                    } else ""
                 } else ""
-            } else ""
+            }
 
             if (localLabelsOcr.isNotBlank()) {
                 sessionRepository.updateServiceStatus("localai", ServiceStatus.ACCESSING, "Synthesizing label text...")

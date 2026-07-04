@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.google.ai.edge.aicore.GenerativeModel
 import com.google.ai.edge.aicore.generationConfig
+import com.zoewave.probase.features.readers.ocr.domain.model.BoxPanel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -64,35 +65,28 @@ class LocalAiEngine @Inject constructor(
     }
 
     /**
-     * Uses on-device LLM to standardize raw OCR text.
+     * Standardizes categorized OCR text using Gemini Nano on-device.
      * Implements silent hardware bypass via Result.failure.
      */
-    suspend fun standardizeOcrText(rawText: String): Result<LocalStandardizedData> = withContext(Dispatchers.Default) {
-        if (rawText.isBlank()) return@withContext Result.success(LocalStandardizedData())
+    suspend fun standardizeCategorizedText(categorizedText: Map<BoxPanel, String>): Result<LocalStandardizedData> = withContext(Dispatchers.Default) {
+        if (categorizedText.isEmpty()) return@withContext Result.success(LocalStandardizedData())
 
         val startTime = System.currentTimeMillis()
         try {
-            // Hardware Capability Check (Master Prompt Rule)
             val capability = checkCapability()
-            Log.d("LocalAiEngine", "Checking capability: $capability")
             if (capability != NanoState.Available) {
                 return@withContext Result.failure(UnsupportedOperationException("Gemini Nano not available: $capability"))
             }
 
-            // Context Protection: Truncate to prevent token overflow
-            Log.d("LocalAiEngine", "INCOMING RAW OCR TEXT:\n$rawText")
-            val safeRawText = rawText.take(4000)
-            Log.d("LocalAiEngine", "Standardizing ${safeRawText.length} chars of OCR text...")
+            // Build a perfectly segmented prompt (Architectural Win)
+            val segmentedContent = StringBuilder("Extract the canonical product data from the following categorized OCR text:\n")
+            categorizedText.forEach { (panel, text) ->
+                segmentedContent.append("**${panel.name} PANEL:** ${text.take(1000)}\n")
+            }
+            segmentedContent.append("\nReturn ONLY a raw JSON object with keys: brand, productName, category, size, ingredients, claims, directions.")
 
-            val prompt = """
-                Standardize the following cosmetic product OCR text into JSON.
-                Identify the Brand, Product Name, Category, Size, Ingredients, Claims, and Directions.
-                Return ONLY a raw JSON object with those keys.
-                If any field is missing, use null.
-                
-                OCR TEXT:
-                $safeRawText
-            """.trimIndent()
+            val prompt = segmentedContent.toString()
+            Log.d("LocalAiEngine", "Standardizing categorized text...")
 
             // Execution delegated to System NPU via Edge SDK
             val response = localModel.generateContent(prompt)
@@ -103,16 +97,24 @@ class LocalAiEngine @Inject constructor(
             val jsonRegex = Regex("""\{[\s\S]*\}""")
             val match = jsonRegex.find(jsonText) ?: return@withContext Result.failure(Exception("No JSON found in response"))
             val fullJson = match.value
-            
+
             val result = json.decodeFromString<LocalStandardizedData>(fullJson)
             val duration = System.currentTimeMillis() - startTime
             Log.d("LocalAiEngine", "Standardization complete in ${duration}ms. Brand: ${result.brand}")
 
             Result.success(result)
         } catch (e: Exception) {
-            // SILENT BYPASS: Gracefully return failure for progressive enhancement fallback
             Log.w("LocalAiEngine", "Local AI hardware bypass active: ${e.message}")
             Result.failure(e)
         }
+    }
+
+    /**
+     * Standardizes raw OCR text using Gemini Nano on-device.
+     * Implements silent hardware bypass via Result.failure.
+     */
+    suspend fun standardizeOcrText(rawText: String): Result<LocalStandardizedData> = withContext(Dispatchers.Default) {
+        // Delegate to categorized method with a generic FRONT panel for backward compatibility
+        standardizeCategorizedText(mapOf(BoxPanel.FRONT to rawText))
     }
 }
