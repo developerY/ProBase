@@ -47,6 +47,9 @@ class FashionSessionRepository @Inject constructor() {
     private val _cosmeticDraft = MutableStateFlow<com.zoewave.probase.core.model.ritual.CosmeticItem?>(null)
     val cosmeticDraft: StateFlow<com.zoewave.probase.core.model.ritual.CosmeticItem?> = _cosmeticDraft.asStateFlow()
 
+    private val _productDraft = MutableStateFlow<com.zoewave.probase.kocolor.db.entity.ProductEntity?>(null)
+    val productDraft: StateFlow<com.zoewave.probase.kocolor.db.entity.ProductEntity?> = _productDraft.asStateFlow()
+
     fun setDiscoveryStatus(status: DiscoveryStatus) {
         _discoveryStatus.value = status
     }
@@ -105,6 +108,11 @@ class FashionSessionRepository @Inject constructor() {
     fun setCosmeticDraft(item: com.zoewave.probase.core.model.ritual.CosmeticItem?) {
         Log.d("KoColorSession", "Setting Cosmetic Draft: ${item?.name}")
         _cosmeticDraft.value = item
+    }
+
+    fun setProductDraft(product: com.zoewave.probase.kocolor.db.entity.ProductEntity?) {
+        Log.d("KoColorSession", "Setting Product Draft: ${product?.productName}")
+        _productDraft.value = product
     }
 
     fun reset() {

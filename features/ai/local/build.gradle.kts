@@ -11,7 +11,7 @@ android {
 dependencies {
     implementation(project(":core:util"))
     
-    implementation(libs.google.generative.ai)
+    // THE TRUE ZERO-FOOTPRINT DEPENDENCY: Interfacing with Android System AICore
     implementation(libs.google.ai.edge.aicore)
     implementation(libs.kotlinx.serialization.json)
 }

@@ -8,12 +8,14 @@ import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
 import com.zoewave.probase.kocolor.db.dao.FashionProfileDao
 import com.zoewave.probase.kocolor.db.dao.InventoryDao
+import com.zoewave.probase.kocolor.db.dao.ProductDao
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.kocolor.db.dao.SavedSuggestionDao
 import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.db.entity.FashionProfileEntity
 import com.zoewave.probase.kocolor.db.entity.InventoryItemEntity
+import com.zoewave.probase.kocolor.db.entity.ProductEntity
 import com.zoewave.probase.kocolor.db.entity.RoutineEntity
 import com.zoewave.probase.kocolor.db.entity.SavedSuggestionEntity
 
@@ -24,9 +26,10 @@ import com.zoewave.probase.kocolor.db.entity.SavedSuggestionEntity
         InventoryItemEntity::class,
         RoutineEntity::class,
         CosmeticItemEntity::class,
-        ClothingItemEntity::class
+        ClothingItemEntity::class,
+        ProductEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 @ColumnTypeConverters(FashionConverters::class)
@@ -38,4 +41,5 @@ abstract class KoColorDatabase : RoomDatabase() {
     abstract val routineDao: RoutineDao
     abstract val cosmeticDao: CosmeticDao
     abstract val clothingDao: ClothingDao
+    abstract val productDao: ProductDao
 }

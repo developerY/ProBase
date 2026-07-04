@@ -2,6 +2,8 @@ package com.zoewave.probase.kocolor.features.boxcapture.ui.state
 
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.features.ai.local.data.LocalStandardizedData
+import com.zoewave.probase.kocolor.db.entity.ProductEntity
 
 sealed interface BoxCaptureUiState {
     data class Idle(
@@ -43,7 +45,7 @@ sealed interface BoxCaptureUiState {
     ) : BoxCaptureUiState
 
     data class FinalReview(
-        val item: CosmeticItem
+        val item: ProductEntity
     ) : BoxCaptureUiState
 
     data class Success(
@@ -58,6 +60,21 @@ sealed interface BoxCaptureUiState {
     data class Error(
         val message: String
     ) : BoxCaptureUiState
+}
+
+sealed interface DiscoveryState {
+    data object Processing : DiscoveryState
+    
+    // User sees: "✓ Product Identified. Attempting enrichment..."
+    data class LocalSuccess(val product: LocalStandardizedData) : DiscoveryState 
+    
+    // User sees: "✓ Product Identified. Additional intelligence unavailable offline."
+    data class EnrichmentDeferred(val product: LocalStandardizedData) : DiscoveryState 
+    
+    // User sees: "✓ Product Identified ✓ Intelligence Retrieved"
+    data class FullyEnriched(val item: ProductEntity) : DiscoveryState 
+    
+    data class Failed(val reason: String) : DiscoveryState
 }
 
 enum class CaptureMode {

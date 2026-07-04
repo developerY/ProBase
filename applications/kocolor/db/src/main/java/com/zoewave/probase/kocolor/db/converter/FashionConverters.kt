@@ -2,12 +2,33 @@ package com.zoewave.probase.kocolor.db.converter
 
 import androidx.room3.ColumnTypeConverter
 import com.zoewave.probase.kocolor.db.entity.InventoryType
+import com.zoewave.probase.kocolor.db.entity.EnrichmentStatus
 import com.zoewave.probase.core.model.ritual.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class FashionConverters {
     private val json = Json { ignoreUnknownKeys = true }
+
+    @ColumnTypeConverter
+    fun fromEnrichmentStatus(value: EnrichmentStatus): String = value.name
+
+    @ColumnTypeConverter
+    fun toEnrichmentStatus(value: String): EnrichmentStatus = try { 
+        EnrichmentStatus.valueOf(value) 
+    } catch (e: Exception) { 
+        EnrichmentStatus.PENDING 
+    }
+
+    @ColumnTypeConverter
+    fun fromStringMap(value: Map<String, String>): String = json.encodeToString(value)
+
+    @ColumnTypeConverter
+    fun toStringMap(value: String): Map<String, String> = try { 
+        json.decodeFromString<Map<String, String>>(value) 
+    } catch (e: Exception) { 
+        emptyMap() 
+    }
 
     @ColumnTypeConverter
     fun fromFashionAdvice(value: FashionAdvice): String = json.encodeToString(value)

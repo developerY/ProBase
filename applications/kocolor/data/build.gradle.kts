@@ -15,14 +15,18 @@ dependencies {
     api(project(":core:data"))
     implementation(project(":core:util"))
     implementation(project(":features:ai:configuration"))
+    implementation(project(":features:ai:local"))
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.google.generative.ai)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.work.runtime.ktx)
     implementation("androidx.palette:palette-ktx:1.0.0")
 
     implementation(libs.hilt.android)
+    implementation(libs.hilt.work)
     ksp(libs.hilt.android.compiler)
 
     testImplementation(libs.junit)

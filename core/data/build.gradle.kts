@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.security.crypto)
     implementation(libs.google.generative.ai)
+    implementation(libs.work.runtime.ktx)
 
     // --- External Utilities (Optional, based on your Repos) ---
     // If your repositories parse dates/times:
