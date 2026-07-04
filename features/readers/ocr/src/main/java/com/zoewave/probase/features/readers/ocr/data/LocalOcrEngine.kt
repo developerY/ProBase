@@ -82,43 +82,40 @@ class LocalOcrEngine @Inject constructor() {
             // Calculate relative vertical position (0.0 is top, 1.0 is bottom)
             val relativeTop = box.top.toFloat() / imageHeight.toFloat()
 
-            // --- RULE 1: The "Starburst" Filter (Top 15% of the bottle) ---
-            if (relativeTop < 0.15f) {
+            // --- RULE 1: Relaxed Starburst Filter (Top 10%) ---
+            if (relativeTop < 0.10f) {
                 val words = textLower.split("\\s+".toRegex())
                 val hasFluff = words.any { marketingFluff.contains(it) }
-                // If it's at the very top AND contains marketing words, destroy it.
-                if (hasFluff && block != heroBlock) {
+                // Only destroy if it's extreme marketing at the very peak
+                if (hasFluff && block != heroBlock && words.size < 3) {
                     continue 
                 }
             }
 
-            // --- RULE 2: Stop-Word Density Filter (Middle 65%) ---
-            if (relativeTop in 0.15f..0.80f) {
+            // --- RULE 2: Stop-Word Density Filter (Middle 80%) ---
+            if (relativeTop in 0.10f..0.90f) {
                 val words = textLower.split("\\s+".toRegex())
                 val fluffCount = words.count { marketingFluff.contains(it) }
                 
-                // If a block is densely packed with marketing buzzwords, drop it
-                // (Unless it's the Hero block, which we mathematically protect)
-                if (fluffCount >= 2 && block != heroBlock) {
+                // Loosened threshold: Drop only if it's almost entirely marketing speak
+                if (fluffCount >= 4 && block != heroBlock) {
                     continue
                 }
             }
 
-            // --- RULE 3: The Weight & Volume Filter (Bottom 20%) ---
-            if (relativeTop > 0.80f) {
+            // --- RULE 3: The Weight & Volume Filter (Bottom 10%) ---
+            if (relativeTop > 0.90f) {
                 // Check for standard cosmetic volume regex (e.g., "FL OZ", "mL", "Net Wt")
                 val volumeRegex = Regex("""(\d+(\.\d+)?\s*(fl\s*oz|ml|g|net\s*wt))""", RegexOption.IGNORE_CASE)
                 val match = volumeRegex.find(text)
                 
                 if (match != null) {
                     extractedVolume = match.value
-                    // We don't append this to the main builder; we isolate it.
                     continue 
                 }
                 
-                // The bottom 20% is usually company addresses and barcodes. 
-                // If it's not volume/weight, it's safe to drop to keep the payload pristine.
-                if (block != heroBlock) continue
+                // Allow some bottom text for now to avoid over-blocking
+                if (block != heroBlock && text.length < 5) continue
             }
 
             // If the block survived the spatial gauntlet, append it
