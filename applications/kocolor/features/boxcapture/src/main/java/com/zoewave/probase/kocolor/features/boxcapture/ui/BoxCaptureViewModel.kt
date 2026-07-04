@@ -334,9 +334,40 @@ class BoxCaptureViewModel @Inject constructor(
     private fun onPhotoCaptured(uri: String) {
         capturedUris.add(uri)
         val current = (uiState.value as? BoxCaptureUiState.Idle) ?: return
-        val nextStep = getNextStep(current.mode)
+        val mode = current.mode
+        
+        if (current.currentStep == CaptureStep.COLOR) {
+            // Auto-extract color palette from the photo
+            viewModelScope.launch {
+                val bitmap = loadBitmapFromUri(Uri.parse(uri))
+                val suggestedColors = if (bitmap != null) localAnalyzer.extractColorPalette(bitmap) else listOf("#808080")
+                _uiState.value = BoxCaptureUiState.ColorConfirmation(
+                    capturedUris = capturedUris.toList(),
+                    suggestedColors = suggestedColors,
+                    selectedColorHex = suggestedColors.firstOrNull() ?: "#808080",
+                    mode = mode
+                )
+            }
+            return
+        }
+
+        if (current.currentStep == CaptureStep.PRICE) {
+            // Auto-extract price from the photo
+            viewModelScope.launch {
+                val bitmap = loadBitmapFromUri(Uri.parse(uri))
+                val detectedPrice = if (bitmap != null) localAnalyzer.extractPrice(bitmap) ?: 0.0 else 0.0
+                _uiState.value = BoxCaptureUiState.PriceConfirmation(
+                    capturedUris = capturedUris.toList(),
+                    detectedPrice = detectedPrice,
+                    mode = mode
+                )
+            }
+            return
+        }
+
+        val nextStep = getNextStep(mode)
         if (nextStep != null) {
-            _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), nextStep, current.mode, sessionManualColor, sessionManualPrice)
+            _uiState.value = BoxCaptureUiState.Idle(capturedUris.toList(), nextStep, mode, sessionManualColor, sessionManualPrice)
         } else {
             startDiscovery(current.mode)
         }

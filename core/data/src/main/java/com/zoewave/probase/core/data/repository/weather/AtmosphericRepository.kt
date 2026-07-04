@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,6 +21,8 @@ class AtmosphericRepository @Inject constructor(
 ) {
     private val _atmosphericState = MutableStateFlow(AtmosphericState())
     val atmosphericState: StateFlow<AtmosphericState> = _atmosphericState.asStateFlow()
+
+    private val refreshMutex = Mutex()
 
     suspend fun fetchWeatherIfNeeded(forceRefresh: Boolean = false) {
         val current = _atmosphericState.value
@@ -34,40 +38,57 @@ class AtmosphericRepository @Inject constructor(
     }
 
     suspend fun refreshWeather() {
-        try {
-            Log.d("AtmosphericRepository", "Refreshing atmospheric data...")
-            val latLng = withTimeoutOrNull(5000) {
-                locationRepository.updateLocation()
-                locationRepository.currentLocation.first { it != null }
+        refreshMutex.withLock {
+            val current = _atmosphericState.value
+            val now = System.currentTimeMillis()
+            
+            // Check cache again inside the lock to handle concurrent hits
+            if (current.weather != null && (now - current.lastUpdated) < 1 * 60 * 1000) {
+                Log.d("AtmosphericRepository", "Recent refresh detected inside lock, skipping.")
+                return
             }
 
-            if (latLng != null) {
-                val response = weatherRepo.openCurrentWeatherByCoords(latLng.latitude, latLng.longitude)
-                val envContext = weatherRepo.getEnvironmentalContext(latLng.latitude, latLng.longitude)
-                
-                _atmosphericState.value = AtmosphericState(
-                    weather = response,
-                    environmentalContext = envContext,
-                    lastUpdated = System.currentTimeMillis(),
-                    isFallback = false
-                )
-            } else {
-                Log.d("AtmosphericRepository", "GPS timeout/unavailable. Falling back to Santa Barbara.")
-                val fallbackCity = "Santa Barbara, US"
-                val response = weatherRepo.openCurrentWeatherByCity(fallbackCity)
-                val envContext = response?.coord?.let { 
-                    weatherRepo.getEnvironmentalContext(it.lat, it.lon) 
+            try {
+                Log.d("AtmosphericRepository", "Refreshing atmospheric data...")
+                val latLng = withTimeoutOrNull(5000) {
+                    locationRepository.updateLocation()
+                    locationRepository.currentLocation.first { it != null }
                 }
-                
-                _atmosphericState.value = AtmosphericState(
-                    weather = response,
-                    environmentalContext = envContext,
-                    lastUpdated = System.currentTimeMillis(),
-                    isFallback = true
-                )
+
+                if (latLng != null) {
+                    val response = weatherRepo.openCurrentWeatherByCoords(latLng.latitude, latLng.longitude)
+                    val envContext = weatherRepo.getEnvironmentalContext(latLng.latitude, latLng.longitude)
+                    
+                    if (response != null && envContext != null) {
+                        _atmosphericState.value = AtmosphericState(
+                            weather = response,
+                            environmentalContext = envContext,
+                            lastUpdated = System.currentTimeMillis(),
+                            isFallback = false
+                        )
+                    } else {
+                        Log.w("AtmosphericRepository", "One of the weather calls returned null. Skipping state update.")
+                    }
+                } else {
+                    Log.d("AtmosphericRepository", "GPS timeout/unavailable. Falling back to Santa Barbara.")
+                    val fallbackCity = "Santa Barbara, US"
+                    val response = weatherRepo.openCurrentWeatherByCity(fallbackCity)
+                    val envContext = response?.coord?.let { 
+                        weatherRepo.getEnvironmentalContext(it.lat, it.lon) 
+                    }
+                    
+                    if (response != null && envContext != null) {
+                        _atmosphericState.value = AtmosphericState(
+                            weather = response,
+                            environmentalContext = envContext,
+                            lastUpdated = System.currentTimeMillis(),
+                            isFallback = true
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("AtmosphericRepository", "Error refreshing weather", e)
             }
-        } catch (e: Exception) {
-            Log.e("AtmosphericRepository", "Error refreshing weather", e)
         }
     }
 }
