@@ -158,8 +158,10 @@ class HomeViewModel @Inject constructor(
         val routines = routineEntities.map { it.toModel() }
         val activeRitual = getActiveRitualUseCase(routines)
         
-        val weather = atmosphericState.weather?.let {
-            LayeredWeatherMapper.mapToUiState(it, atmosphericState.environmentalContext!!, atmosphericState.isFallback)
+        val weather = atmosphericState.weather?.let { resp ->
+            atmosphericState.environmentalContext?.let { ctx ->
+                LayeredWeatherMapper.mapToUiState(resp, ctx, atmosphericState.isFallback)
+            }
         }
 
         // cosmetics.sortedByDescending { it.timestamp }.take(5).map { it.toModel() }
