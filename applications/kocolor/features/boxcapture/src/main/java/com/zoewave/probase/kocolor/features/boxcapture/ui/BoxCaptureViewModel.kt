@@ -28,7 +28,9 @@ import com.zoewave.probase.kocolor.data.worker.EnrichmentWorker
 import com.zoewave.probase.kocolor.db.dao.ProductDao
 import com.zoewave.probase.kocolor.db.entity.EnrichmentStatus
 import com.zoewave.probase.kocolor.db.entity.ProductEntity
+import com.zoewave.probase.core.util.SurgicalCropper
 import com.zoewave.probase.kocolor.features.analyzer.data.LocalProductAnalyzer
+import com.zoewave.probase.features.camera.productcapture.ui.ScannerOverlay
 import com.zoewave.probase.kocolor.features.boxcapture.ui.state.*
 import com.zoewave.probase.kocolor.features.chemicals.domain.repository.ChemicalRepository
 import com.zoewave.probase.kocolor.features.colors.domain.repository.ColorRepository
@@ -75,6 +77,7 @@ class BoxCaptureViewModel @Inject constructor(
     private var scannedBarcode: String? = null
     private var sessionManualPrice: Double? = null
     private var sessionManualColor: String? = null
+    private var scannerBounds: android.graphics.Rect? = null
 
     // Stage 3.5 & 3.75 Resolution Anchors
     private var localAiStandardizedData: LocalStandardizedData? = null
@@ -88,6 +91,9 @@ class BoxCaptureViewModel @Inject constructor(
         when (event) {
             is BoxCaptureEvent.Capture -> onPhotoCaptured(event.uri)
             is BoxCaptureEvent.BarcodeScanned -> onBarcodeScanned(event.code)
+            is BoxCaptureEvent.ScannerBoundsCalculated -> {
+                scannerBounds = event.bounds
+            }
             BoxCaptureEvent.Retry -> reset()
             BoxCaptureEvent.Dismiss -> { /* Handled in UI layer */ }
             is BoxCaptureEvent.Success -> { /* Handled in UI layer */ }
@@ -367,23 +373,44 @@ class BoxCaptureViewModel @Inject constructor(
         val current = (uiState.value as? BoxCaptureUiState.Idle) ?: return
         val mode = current.mode
         
-        // --- Background OCR Trigger ---
-        val step = current.currentStep
-        val panel = when (step) {
-            CaptureStep.FRONT -> BoxPanel.FRONT
-            CaptureStep.BACK -> BoxPanel.INFO
-            CaptureStep.INGREDIENTS -> BoxPanel.INGREDIENTS
-            CaptureStep.INSTRUCTIONS -> BoxPanel.DIRECTIONS
-            else -> null
-        }
-        
-        if (panel != null) {
-            viewModelScope.launch {
-                Log.d(TAG, "Triggering background OCR for panel: $panel")
-                loadBitmapFromUri(Uri.parse(uri))?.let { bitmap ->
-                    val text = ocrEngine.processSinglePanel(panel, bitmap)
+        // --- Surgical ROI Crop (12-Megapixel Diet) ---
+        viewModelScope.launch {
+            val rawBitmap = loadBitmapFromUri(Uri.parse(uri))
+            if (rawBitmap != null) {
+                // Determine if we should crop (Front, Info, Ingredients, Directions)
+                val step = current.currentStep
+                val panel = when (step) {
+                    CaptureStep.FRONT -> BoxPanel.FRONT
+                    CaptureStep.BACK -> BoxPanel.INFO
+                    CaptureStep.INGREDIENTS -> BoxPanel.INGREDIENTS
+                    CaptureStep.INSTRUCTIONS -> BoxPanel.DIRECTIONS
+                    else -> null
+                }
+
+                val processedBitmap = if (panel != null && scannerBounds != null) {
+                    Log.d(TAG, "Executing ROI Crop for $panel...")
+                    // We'll need the preview dimensions. For now, assuming standard full screen
+                    // In a production app, these would be passed via Event
+                    SurgicalCropper.cropToROI(
+                        rawBitmap = rawBitmap,
+                        uiRect = scannerBounds!!,
+                        previewWidth = context.resources.displayMetrics.widthPixels,
+                        previewHeight = context.resources.displayMetrics.heightPixels,
+                        rotationDegrees = 90 // Standard CameraX rotation
+                    )
+                } else rawBitmap
+
+                // --- Background OCR Trigger ---
+                if (panel != null) {
+                    Log.d(TAG, "Triggering background OCR for panel: $panel")
+                    val text = ocrEngine.processSinglePanel(panel, processedBitmap)
                     panelOcrResults[panel] = text
                     Log.d(TAG, "Background OCR Complete for $panel. Output:\n$text")
+                }
+
+                // Cleanup original if cropped
+                if (processedBitmap != rawBitmap) {
+                    rawBitmap.recycle()
                 }
             }
         }
