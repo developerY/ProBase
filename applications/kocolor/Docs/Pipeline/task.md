@@ -1,0 +1,15 @@
+- `[x]` Local AI Refinement (`:features:ai:local`)
+    - `[x]` Update `LocalAiEngine.kt` with `NanoState` machine
+    - `[x]` Enhance `LocalStandardizedData` schema
+    - `[x]` Implement Regex-based JSON extraction
+- `[x]` Data Layer Evolution (Room 3 & WorkManager)
+    - `[x]` Define `ProductEntity` and `ProductResolution`
+    - `[x]` Implement Room 3 `@ColumnTypeConverter` with `kotlinx.serialization`
+    - `[x]` Set up Room 3 database infrastructure
+    - `[x]` Create `EnrichmentWorker.kt`
+- `[x]` Orchestration & Use Cases
+    - `[x]` Implement `ResolveProductUseCase.kt`
+    - `[x]` Implement deterministic confidence calculation
+- `[x]` UI State Integration
+    - `[x]` Update `BoxCaptureViewModel` with `DiscoveryState`
+    - `[x]` Refactor UI for deferred/enriched states

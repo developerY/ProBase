@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.zoewave.probase.core.model.network.ServiceStatus
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.kocolor.db.entity.ProductEntity
 import com.zoewave.probase.features.camera.productcapture.ui.AnalysisView
 import com.zoewave.probase.features.camera.productcapture.ui.CaptureStepConfig
 import com.zoewave.probase.features.camera.productcapture.ui.ColorConfirmationUiState
@@ -234,7 +235,7 @@ internal fun BoxCaptureScreen(
 
 @Composable
 private fun FinalValidationView(
-    item: com.zoewave.probase.core.model.ritual.CosmeticItem,
+    item: ProductEntity,
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
@@ -269,7 +270,7 @@ private fun FinalValidationView(
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
                 Text(item.brand.uppercase(), color = Color(0xFF34d399), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
-                Text(item.name, color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Text(item.productName, color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 
                 Spacer(Modifier.height(16.dp))
                 
