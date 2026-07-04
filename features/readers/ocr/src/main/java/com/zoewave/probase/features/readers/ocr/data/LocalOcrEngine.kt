@@ -8,6 +8,7 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.zoewave.probase.features.readers.ocr.domain.model.BoxPanel
 import com.zoewave.probase.features.readers.ocr.domain.parser.GeometricOcrParser
+import com.zoewave.probase.features.readers.ocr.domain.parser.IngredientParser
 import com.zoewave.probase.features.readers.ocr.domain.parser.StructuredTextLine
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -56,19 +57,38 @@ class LocalOcrEngine @Inject constructor() {
             val image = InputImage.fromBitmap(bitmap, 0)
             val result = recognizer.process(image).await()
             
-            // Apply Geometric Parsing to identify headers/bolding with Gravity Heuristic
-            val structuredLines = GeometricOcrParser.parse(result, image.height)
+            // Apply Geometric Parsing to identify headers/bolding with Gravity and Symmetry Heuristics
+            val structuredLines = GeometricOcrParser.parse(result, image.height, image.width)
 
             when (panel) {
                 BoxPanel.FRONT -> processFrontPanel(structuredLines, image.height)
                 BoxPanel.INFO -> processInfoPanel(structuredLines)
-                BoxPanel.INGREDIENTS, BoxPanel.DIRECTIONS -> result.text
+                BoxPanel.INGREDIENTS -> processIngredientsPanel(result.text)
+                BoxPanel.DIRECTIONS -> result.text
             }
 
         } catch (e: Exception) {
             Log.e("LocalOcrEngine", "OCR processing failed for panel: $panel", e)
             ""
         }
+    }
+
+    private fun processIngredientsPanel(rawText: String): String {
+        val parsed = IngredientParser.parse(rawText)
+        val builder = StringBuilder()
+        
+        if (parsed.active.isNotEmpty()) {
+            builder.append("[ACTIVE INGREDIENTS]:\n")
+            parsed.active.forEach { builder.append("- $it\n") }
+            builder.append("\n")
+        }
+        
+        if (parsed.inactive.isNotEmpty()) {
+            builder.append("[INACTIVE INGREDIENTS]:\n")
+            parsed.inactive.forEach { builder.append("- $it\n") }
+        }
+        
+        return builder.toString().trim()
     }
 
     private fun processFrontPanel(lines: List<StructuredTextLine>, imageHeight: Int): String {
@@ -125,10 +145,12 @@ class LocalOcrEngine @Inject constructor() {
             // High-fidelity Logging for Debugging
             val ratio = if (avgHeight > 0) height / avgHeight else 1.0
             val pScore = line.prominenceScore
-            val boostTag = if (line.hasTrademark) "[BOOSTED] " else ""
-            val typeTag = if (line.isHeader) "HEADER" else "NORMAL"
+            val boostTag = if (line.hasTrademark) "B" else ""
+            val centerTag = if (line.relativeTop > 0.5f && line.relativeCenterX in 0.35f..0.65f) "C" else ""
+            val sinkTag = if (line.isSentenceCase) "S" else ""
+            val typeTag = if (line.isHeader) "H" else "N"
             
-            val tag = "[$boostTag$typeTag(h=$height, r=${"%.1f".format(ratio)}, p=${"%.0f".format(pScore)})] "
+            val tag = "[$boostTag$centerTag$sinkTag$typeTag(h=$height, r=${"%.1f".format(ratio)}, p=${"%.0f".format(pScore)})] "
             cleanedTextBuilder.append(tag).append(text).append("\n")
         }
 
