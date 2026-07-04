@@ -1,6 +1,7 @@
 package com.zoewave.probase.features.readers.ocr.data
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -14,12 +15,15 @@ class LocalOcrEngine @Inject constructor() {
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
     suspend fun extractText(bitmap: Bitmap): String {
+        val startTime = System.currentTimeMillis()
         val image = InputImage.fromBitmap(bitmap, 0)
         return try {
             val result = recognizer.process(image).await()
+            val duration = System.currentTimeMillis() - startTime
+            Log.d("LocalOcrEngine", "OCR successful: ${result.text.length} chars found in ${duration}ms")
             result.text
         } catch (e: Exception) {
-            android.util.Log.e("LocalOcrEngine", "OCR processing failed", e)
+            Log.e("LocalOcrEngine", "OCR processing failed", e)
             ""
         }
     }

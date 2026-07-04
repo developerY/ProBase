@@ -169,20 +169,28 @@ class BoxCaptureViewModel @Inject constructor(
     }
 
     private fun triggerLocalDiscovery(mode: CaptureMode) {
+        Log.d(TAG, "Starting Local Discovery for mode: $mode")
         viewModelScope.launch {
             sessionRepository.updateServiceStatus("localai", ServiceStatus.ACCESSING, "Synthesizing OCR text...")
-            val ocrText = ocrEngine.extractTextFromBitmaps(loadBitmaps())
+            val bitmaps = loadBitmaps()
+            Log.d(TAG, "Running OCR on ${bitmaps.size} bitmaps...")
+            val ocrText = ocrEngine.extractTextFromBitmaps(bitmaps)
+            Log.d(TAG, "OCR complete. Total text length: ${ocrText.length}")
+            
             val localAiResult = localAi.standardizeOcrText(ocrText)
             
             localAiResult.onSuccess { data ->
+                Log.d(TAG, "Local AI Success. Brand: ${data.brand}, Name: ${data.productName}")
                 localAiStandardizedData = data
                 sessionRepository.updateServiceStatus("localai", ServiceStatus.SUCCESS, "Found: ${data.brand}")
                 if (!data.brand.isNullOrBlank()) {
                     startBackgroundEnrichment(data.brand!!, data.productName ?: "", scannedBarcode ?: "", data.ingredients.firstOrNull())
                 }
-            }.onFailure {
+            }.onFailure { e ->
+                Log.w(TAG, "Local AI Failed: ${e.message}")
                 sessionRepository.updateServiceStatus("localai", ServiceStatus.UNSUPPORTED, "Hardware bypass active.")
                 val fallbackBrand = extractBrandFromText(ocrText)
+                Log.d(TAG, "Heuristic fallback brand: $fallbackBrand")
                 localAiStandardizedData = LocalStandardizedData(brand = fallbackBrand)
                 if (!fallbackBrand.isNullOrBlank()) {
                     startBackgroundEnrichment(fallbackBrand, "", scannedBarcode ?: "", null)
@@ -193,6 +201,7 @@ class BoxCaptureViewModel @Inject constructor(
 
     private fun onBarcodeScanned(code: String) {
         scannedBarcode = code
+        Log.d(TAG, "Barcode Scanned: $code. Triggering OBF lookup...")
         viewModelScope.launch {
             val mode = (uiState.value as? BoxCaptureUiState.Idle)?.mode ?: CaptureMode.BOX
             _uiState.value = BoxCaptureUiState.Analyzing(capturedUris.toList(), "Querying Database...", mode)
@@ -201,11 +210,13 @@ class BoxCaptureViewModel @Inject constructor(
             val obfResult = cosmeticRepository.fetchProductByBarcode(code)
             
             obfResult.onSuccess { obfItem ->
+                Log.d(TAG, "OBF Success: ${obfItem.name}. Brand: ${obfItem.brand}")
                 sessionRepository.updateServiceStatus("obf", ServiceStatus.SUCCESS, "Found: ${obfItem.name}")
                 deterministicApiMetadata = DeterministicApiMetadata(obfItem.brand, obfItem.name, obfItem.ingredients)
                 sessionRepository.updateServiceStatus("localai", ServiceStatus.SUCCESS, "Using OBF context.")
                 startBackgroundEnrichment(obfItem.brand, obfItem.name, code, obfItem.ingredients.firstOrNull())
             }.onFailure {
+                Log.d(TAG, "OBF Failure for $code. Falling back to Local AI...")
                 sessionRepository.updateServiceStatus("obf", ServiceStatus.FAILED, "Barcode not in OBF.")
                 triggerLocalDiscovery(mode)
             }
@@ -213,13 +224,16 @@ class BoxCaptureViewModel @Inject constructor(
     }
 
     private suspend fun resolveAndSave() {
+        Log.d(TAG, "Resolving and Saving product...")
         val localData = localAiStandardizedData ?: LocalStandardizedData()
         
         // Stage 3.5 & 3.75 Resolution
         val productEntity = resolveProductUseCase.execute(localData, deterministicApiMetadata)
+        Log.d(TAG, "Resolution complete. Final Brand: ${productEntity.brand}, Confidence: ${productEntity.deterministicConfidence}")
         
         // Stage 4: Room 3 Database Persistence
         val productId = productDao.insertProduct(productEntity)
+        Log.d(TAG, "Product saved to Room 3. ID: $productId. Queueing background enrichment...")
         
         // Stage 4: WorkManager Queue
         queueEnrichment(productId)
@@ -235,25 +249,44 @@ class BoxCaptureViewModel @Inject constructor(
     }
 
     private fun startBackgroundEnrichment(brand: String, name: String, barcode: String, topIngredient: String?) {
+        Log.d(TAG, "Starting parallel enrichment for Brand: $brand, Name: $name, Barcode: $barcode")
         viewModelScope.launch {
             sessionRepository.updateServiceStatus("fda", ServiceStatus.ACCESSING, "Checking clinical status...")
             val recall = fdaRepository.getRecalls(brand, name)
-            if (recall != null) sessionRepository.updateServiceStatus("fda", ServiceStatus.SUCCESS, "Safety data verified.")
-            else sessionRepository.updateServiceStatus("fda", ServiceStatus.FAILED, "No clinical data found.")
+            if (recall != null) {
+                Log.d(TAG, "FDA Success: Recall found.")
+                sessionRepository.updateServiceStatus("fda", ServiceStatus.SUCCESS, "Safety data verified.")
+            } else {
+                Log.d(TAG, "FDA: No recall found.")
+                sessionRepository.updateServiceStatus("fda", ServiceStatus.FAILED, "No clinical data found.")
+            }
         }
         viewModelScope.launch {
             if (topIngredient != null) {
                 sessionRepository.updateServiceStatus("chemdb", ServiceStatus.ACCESSING, "Analyzing $topIngredient...")
                 val chemicalInfo = chemicalRepository.getChemicalInfo(topIngredient).getOrNull()
-                if (chemicalInfo != null) sessionRepository.updateServiceStatus("chemdb", ServiceStatus.SUCCESS, "Hazards identified.")
-                else sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED, "Ingredient hazards unknown.")
-            } else sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED, "No context.")
+                if (chemicalInfo != null) {
+                    Log.d(TAG, "chemDB Success: Hazards found.")
+                    sessionRepository.updateServiceStatus("chemdb", ServiceStatus.SUCCESS, "Hazards identified.")
+                } else {
+                    Log.d(TAG, "chemDB: No hazard data.")
+                    sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED, "Ingredient hazards unknown.")
+                }
+            } else {
+                Log.d(TAG, "chemDB: No ingredient context.")
+                sessionRepository.updateServiceStatus("chemdb", ServiceStatus.FAILED, "No context.")
+            }
         }
         viewModelScope.launch {
             sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.ACCESSING, "Matching brand: $brand")
             val catalogResult = makeupRepository.searchProducts(brand = brand)
-            if (catalogResult.isSuccess) sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.SUCCESS, "Matched catalog.")
-            else sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.FAILED, "Brand not in catalog.")
+            if (catalogResult.isSuccess) {
+                Log.d(TAG, "MakeupAPI Success.")
+                sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.SUCCESS, "Matched catalog.")
+            } else {
+                Log.d(TAG, "MakeupAPI: Brand not found.")
+                sessionRepository.updateServiceStatus("makeupapi", ServiceStatus.FAILED, "Brand not in catalog.")
+            }
         }
     }
 
