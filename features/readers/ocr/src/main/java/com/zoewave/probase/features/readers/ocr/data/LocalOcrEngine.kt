@@ -4,10 +4,11 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.zoewave.probase.features.readers.ocr.domain.model.BoxPanel
+import com.zoewave.probase.features.readers.ocr.domain.parser.GeometricOcrParser
+import com.zoewave.probase.features.readers.ocr.domain.parser.StructuredTextLine
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -55,9 +56,12 @@ class LocalOcrEngine @Inject constructor() {
             val image = InputImage.fromBitmap(bitmap, 0)
             val result = recognizer.process(image).await()
             
+            // Apply Geometric Parsing to identify headers/bolding with Gravity Heuristic
+            val structuredLines = GeometricOcrParser.parse(result, image.height)
+
             when (panel) {
-                BoxPanel.FRONT -> processFrontPanel(result, image.height)
-                BoxPanel.INFO -> processInfoPanel(result)
+                BoxPanel.FRONT -> processFrontPanel(structuredLines, image.height)
+                BoxPanel.INFO -> processInfoPanel(structuredLines)
                 BoxPanel.INGREDIENTS, BoxPanel.DIRECTIONS -> result.text
             }
 
@@ -67,27 +71,29 @@ class LocalOcrEngine @Inject constructor() {
         }
     }
 
-    private fun processFrontPanel(visionText: Text, imageHeight: Int): String {
+    private fun processFrontPanel(lines: List<StructuredTextLine>, imageHeight: Int): String {
         val cleanedTextBuilder = StringBuilder()
         var extractedVolume: String? = null
 
-        // 1. Identify the Hero Text (The block with the largest physical height)
-        val heroBlock = visionText.textBlocks.maxByOrNull { it.boundingBox?.height() ?: 0 }
+        // Calculate avg height again locally for the tag, or I can pass it from Parser.
+        // Let's just use the Line metadata for now.
+        val avgHeight = lines.mapNotNull { it.boundingBox?.height() }.average()
 
-        for (block in visionText.textBlocks) {
-            val box: Rect = block.boundingBox ?: continue
-            val text = block.text
+        for (line in lines) {
+            val box: Rect = line.boundingBox ?: continue
+            val text = line.text
             val textLower = text.lowercase()
+            val height = box.height()
 
             // Calculate relative vertical position (0.0 is top, 1.0 is bottom)
             val relativeTop = box.top.toFloat() / imageHeight.toFloat()
 
-            // --- RULE 1: Relaxed Starburst Filter (Top 10%) ---
+            // --- RULE 1: The "Starburst" Filter (Top 10% of the bottle) ---
             if (relativeTop < 0.10f) {
                 val words = textLower.split("\\s+".toRegex())
                 val hasFluff = words.any { marketingFluff.contains(it) }
-                // Only destroy if it's extreme marketing at the very peak
-                if (hasFluff && block != heroBlock && words.size < 3) {
+                // Only destroy if it's fluff AND NOT a geometric header
+                if (hasFluff && !line.isHeader && words.size < 3) {
                     continue 
                 }
             }
@@ -97,15 +103,14 @@ class LocalOcrEngine @Inject constructor() {
                 val words = textLower.split("\\s+".toRegex())
                 val fluffCount = words.count { marketingFluff.contains(it) }
                 
-                // Loosened threshold: Drop only if it's almost entirely marketing speak
-                if (fluffCount >= 4 && block != heroBlock) {
+                // Drop only if it's marketing speak AND not a header
+                if (fluffCount >= 4 && !line.isHeader) {
                     continue
                 }
             }
 
             // --- RULE 3: The Weight & Volume Filter (Bottom 10%) ---
             if (relativeTop > 0.90f) {
-                // Check for standard cosmetic volume regex (e.g., "FL OZ", "mL", "Net Wt")
                 val volumeRegex = Regex("""(\d+(\.\d+)?\s*(fl\s*oz|ml|g|net\s*wt))""", RegexOption.IGNORE_CASE)
                 val match = volumeRegex.find(text)
                 
@@ -114,15 +119,19 @@ class LocalOcrEngine @Inject constructor() {
                     continue 
                 }
                 
-                // Allow some bottom text for now to avoid over-blocking
-                if (block != heroBlock && text.length < 5) continue
+                if (!line.isHeader && text.length < 5) continue
             }
 
-            // If the block survived the spatial gauntlet, append it
-            cleanedTextBuilder.append(text).append("\n")
+            // High-fidelity Logging for Debugging
+            val ratio = if (avgHeight > 0) height / avgHeight else 1.0
+            val pScore = line.prominenceScore
+            val boostTag = if (line.hasTrademark) "[BOOSTED] " else ""
+            val typeTag = if (line.isHeader) "HEADER" else "NORMAL"
+            
+            val tag = "[$boostTag$typeTag(h=$height, r=${"%.1f".format(ratio)}, p=${"%.0f".format(pScore)})] "
+            cleanedTextBuilder.append(tag).append(text).append("\n")
         }
 
-        // Append the perfectly extracted volume to the very end for consistent LLM parsing
         extractedVolume?.let {
             cleanedTextBuilder.append("\n[VOLUME: $it]")
         }
@@ -130,20 +139,22 @@ class LocalOcrEngine @Inject constructor() {
         return cleanedTextBuilder.toString().trim()
     }
 
-    private fun processInfoPanel(visionText: Text): String {
+    private fun processInfoPanel(lines: List<StructuredTextLine>): String {
         val cleanedTextBuilder = StringBuilder()
 
-        for (block in visionText.textBlocks) {
-            val textLower = block.text.lowercase()
+        for (line in lines) {
+            val textLower = line.text.lowercase()
             val words = textLower.split("\\s+".toRegex())
             val fluffCount = words.count { marketingFluff.contains(it) }
 
-            // Lighter filter for Info panel: only drop extremely high density fluff
-            if (fluffCount > 3) {
+            // Protect headers and bold terms in info panels
+            val hasBoldTerms = line.elements.any { it.isBold }
+            
+            if (fluffCount > 3 && !line.isHeader && !hasBoldTerms) {
                 continue
             }
 
-            cleanedTextBuilder.append(block.text).append("\n")
+            cleanedTextBuilder.append(line.text).append("\n")
         }
 
         return cleanedTextBuilder.toString().trim()

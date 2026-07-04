@@ -387,22 +387,23 @@ class BoxCaptureViewModel @Inject constructor(
                     else -> null
                 }
 
+                /* Bypassing Surgical ROI Crop for full-frame debugging
                 val processedBitmap = if (panel != null && scannerBounds != null) {
                     Log.d(TAG, "Executing ROI Crop for $panel...")
-                    // We'll need the preview dimensions. For now, assuming standard full screen
-                    // In a production app, these would be passed via Event
                     SurgicalCropper.cropToROI(
                         rawBitmap = rawBitmap,
                         uiRect = scannerBounds!!,
                         previewWidth = context.resources.displayMetrics.widthPixels,
                         previewHeight = context.resources.displayMetrics.heightPixels,
-                        rotationDegrees = 90 // Standard CameraX rotation
+                        rotationDegrees = 90
                     )
                 } else rawBitmap
+                */
+                val processedBitmap = rawBitmap
 
                 // --- Background OCR Trigger ---
                 if (panel != null) {
-                    Log.d(TAG, "Triggering background OCR for panel: $panel")
+                    Log.d(TAG, "Triggering background OCR (FULL FRAME) for panel: $panel")
                     val text = ocrEngine.processSinglePanel(panel, processedBitmap)
                     panelOcrResults[panel] = text
                     Log.d(TAG, "Background OCR Complete for $panel. Output:\n$text")
