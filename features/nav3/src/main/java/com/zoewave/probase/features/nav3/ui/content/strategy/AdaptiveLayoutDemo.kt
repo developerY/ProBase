@@ -93,7 +93,7 @@ fun AdaptiveLayoutDemo(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize(),
         // The onBack lambda now respects the keysToRemove count from the strategy.
         onBack = { backStack.removeLastOrNull() },
-        sceneStrategy = listDetailStrategy,
+        sceneStrategies = listOf(listDetailStrategy),
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator()

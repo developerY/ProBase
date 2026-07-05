@@ -1,5 +1,9 @@
 package com.zoewave.probase.features.nav3.ui
 
+// TODO: Ensure these Content composables are correctly referenced or moved/redefined in LeanNav.kt
+// For now, these imports will cause errors until LeanNav is set up.
+// If your Content composables (ContentOrange etc.) are in the feature.nav3.ui.content package,
+// the import should be: import com.zoewave.probase.feature.nav3.ui.content.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
@@ -45,10 +49,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.NavDisplay.transitionSpec
-// TODO: Ensure these Content composables are correctly referenced or moved/redefined in LeanNav.kt
-// For now, these imports will cause errors until LeanNav is set up.
-// If your Content composables (ContentOrange etc.) are in the feature.nav3.ui.content package,
-// the import should be: import com.zoewave.probase.feature.nav3.ui.content.*
 import com.zoewave.probase.features.nav3.ui.content.ContentGreen
 import com.zoewave.probase.features.nav3.ui.content.ContentMauve
 import com.zoewave.probase.features.nav3.ui.content.ContentOrange
@@ -231,7 +231,7 @@ fun Nav3MainExample(modifier: Modifier = Modifier) {
             backStack = backStack,
             onBack = { backStack.removeLastOrNull() },
             // Add the adaptive scene strategy to enable list-detail layouts.
-            sceneStrategy = listDetailStrategy,
+            sceneStrategies = listOf(listDetailStrategy),
             entryDecorators = listOf(
                 // This decorator sets up the scene for a composable.
                 // This decorator scopes the ViewModel to the NavEntry's lifecycle.

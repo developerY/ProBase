@@ -6,11 +6,15 @@ import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.content
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.kocolor.db.dao.ProductDao
 import com.zoewave.probase.kocolor.db.entity.EnrichmentStatus
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.withTimeout
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -44,7 +48,7 @@ class EnrichmentWorker @AssistedInject constructor(
         productDao.updateProduct(product.copy(enrichmentStatus = EnrichmentStatus.ENRICHING))
 
         try {
-            val apiKey = aiSettings.getGeminiApiKey() ?: return ListenableWorker.Result.retry()
+            val apiKey = aiSettings.getGeminiApiKey() ?: return ListenableWorker.Result.failure()
             val modelName = aiSettings.aiModelFlow.firstOrNull() ?: "gemini-1.5-flash"
             
             val model = GenerativeModel(modelName = modelName, apiKey = apiKey)
@@ -59,7 +63,11 @@ class EnrichmentWorker @AssistedInject constructor(
                 Return ONLY the raw JSON.
             """.trimIndent()
 
-            val response = model.generateContent(prompt)
+            // 1. DETERMINISTIC TIMEOUT BOUND (8 Seconds per user request)
+            val response = withTimeout(8000) {
+                model.generateContent(prompt)
+            }
+            
             val jsonText = response.text ?: return ListenableWorker.Result.failure()
             
             // Safe JSON Extraction
@@ -77,8 +85,17 @@ class EnrichmentWorker @AssistedInject constructor(
 
             return ListenableWorker.Result.success()
         } catch (e: Exception) {
-            android.util.Log.e("EnrichmentWorker", "Error enriching product: ${e.message}")
-            return ListenableWorker.Result.retry()
+            when (e) {
+                is UnknownHostException, is SocketTimeoutException -> {
+                    android.util.Log.w("EnrichmentWorker", "Network failure, retrying with backoff: ${e.message}")
+                    return ListenableWorker.Result.retry()
+                }
+                else -> {
+                    android.util.Log.e("EnrichmentWorker", "Critical enrichment failure: ${e.message}")
+                    productDao.updateProduct(product.copy(enrichmentStatus = EnrichmentStatus.FAILED))
+                    return ListenableWorker.Result.failure()
+                }
+            }
         }
     }
 }

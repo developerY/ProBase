@@ -51,7 +51,8 @@ fun FeatureInventoryScreen(
     onNavigateToCalendar: () -> Unit,
     onNavigateToSmartCapture: () -> Unit,
     onNavigateToGlassXR: () -> Unit,
-    onNavigateToFullXR: () -> Unit
+    onNavigateToFullXR: () -> Unit,
+    onNavigateToAiSandbox: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -154,6 +155,14 @@ fun FeatureInventoryScreen(
                     description = "Extract tasks from photos using AI.",
                     icon = Icons.Default.AutoAwesome,
                     onClick = onNavigateToSmartCapture
+                )
+            }
+            item {
+                FeatureCard(
+                    title = "AI Sandbox",
+                    description = "Local AI hardware and pipeline verification.",
+                    icon = Icons.Default.AutoAwesome,
+                    onClick = onNavigateToAiSandbox
                 )
             }
             item {

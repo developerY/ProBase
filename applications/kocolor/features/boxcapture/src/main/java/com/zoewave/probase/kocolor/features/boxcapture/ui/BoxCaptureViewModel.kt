@@ -7,9 +7,14 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.BackoffPolicy
 import androidx.work.Data
+import androidx.work.Constraints
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkRequest
 import androidx.work.WorkManager
+import java.util.concurrent.TimeUnit
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.core.model.network.DiscoveryStatus
 import com.zoewave.probase.core.model.network.ServiceStatus
@@ -281,7 +286,22 @@ class BoxCaptureViewModel @Inject constructor(
 
     private fun queueEnrichment(productId: Long) {
         val data = Data.Builder().putLong("product_id", productId).build()
-        val request = OneTimeWorkRequestBuilder<EnrichmentWorker>().setInputData(data).build()
+        
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        // 1. EXPONENTIAL BACKOFF: Critical for retail environments with flaky connectivity
+        val request = OneTimeWorkRequestBuilder<EnrichmentWorker>()
+            .setInputData(data)
+            .setConstraints(constraints)
+            .setBackoffCriteria(
+                BackoffPolicy.EXPONENTIAL,
+                WorkRequest.MIN_BACKOFF_MILLIS,
+                TimeUnit.MILLISECONDS
+            )
+            .build()
+        
         workManager.enqueue(request)
     }
 
@@ -407,9 +427,29 @@ class BoxCaptureViewModel @Inject constructor(
                     val text = ocrEngine.processSinglePanel(panel, processedBitmap)
                     panelOcrResults[panel] = text
                     Log.d(TAG, "Background OCR Complete for $panel. Output:\n$text")
+                    
+                    // --- [INCREMENTAL AI SYNTHESIS] ---
+                    // Trigger Gemini Nano immediately to update the "Identity Anchor" live
+                    Log.d(TAG, "Triggering Incremental AI Synthesis...")
+                    val localAiResult = localAi.standardizeCategorizedText(
+                        categorizedText = panelOcrResults,
+                        bitmap = if (panel == BoxPanel.FRONT) processedBitmap else null
+                    )
+                    localAiResult.onSuccess { data ->
+                        localAiStandardizedData = data
+                        Log.d(TAG, "Incremental AI Update (SUCCESS): $data")
+                        // Update session repository so UI can show "Potential Match"
+                        if (!data.brand.isNullOrBlank()) {
+                            sessionRepository.updateServiceStatus("localai", ServiceStatus.SUCCESS, "Identified: ${data.brand}")
+                        }
+                    }.onFailure { e ->
+                        Log.w(TAG, "Incremental AI Update (BYPASS): ${e.message}")
+                    }
                 }
 
-                // Cleanup original if cropped
+                // --- MEMORY ARMOR: Explicitly recycle large high-res bitmaps before suspension ---
+                // We've already extracted the text and got the AI result. The pixels are no longer needed.
+                processedBitmap.recycle()
                 if (processedBitmap != rawBitmap) {
                     rawBitmap.recycle()
                 }
@@ -420,7 +460,11 @@ class BoxCaptureViewModel @Inject constructor(
             // Auto-extract color palette from the photo
             viewModelScope.launch {
                 val bitmap = loadBitmapFromUri(Uri.parse(uri))
-                val suggestedColors = if (bitmap != null) localAnalyzer.extractColorPalette(bitmap) else listOf("#808080")
+                val suggestedColors = if (bitmap != null) {
+                    val palette = localAnalyzer.extractColorPalette(bitmap)
+                    bitmap.recycle() // MEMORY ARMOR
+                    palette
+                } else listOf("#808080")
                 _uiState.value = BoxCaptureUiState.ColorConfirmation(
                     capturedUris = capturedUris.toList(),
                     suggestedColors = suggestedColors,
@@ -435,7 +479,11 @@ class BoxCaptureViewModel @Inject constructor(
             // Auto-extract price from the photo
             viewModelScope.launch {
                 val bitmap = loadBitmapFromUri(Uri.parse(uri))
-                val detectedPrice = if (bitmap != null) localAnalyzer.extractPrice(bitmap) ?: 0.0 else 0.0
+                val detectedPrice = if (bitmap != null) {
+                    val price = localAnalyzer.extractPrice(bitmap) ?: 0.0
+                    bitmap.recycle() // MEMORY ARMOR
+                    price
+                } else 0.0
                 _uiState.value = BoxCaptureUiState.PriceConfirmation(
                     capturedUris = capturedUris.toList(),
                     detectedPrice = detectedPrice,

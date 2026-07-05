@@ -60,6 +60,7 @@ dependencies {
     implementation(project(":features:xr:xrglasses"))
     implementation(libs.androidx.projected)
     implementation(project(":features:ai:capture"))
+    implementation(project(":features:ai:local"))
     implementation(project(":features:ai:configuration"))
     implementation(project(":core:data"))
     implementation(project(":applications:photodo:features:smartadvice"))

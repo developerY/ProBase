@@ -98,8 +98,10 @@ playAgeSignals = "0.0.3"
 playServicesCoroutines = "1.11.0"
 mlkitTextRecognition = "16.0.1"
 googleAiEdgeAicore = "0.0.1-exp02"
+playServicesMlkitTextRecognition = "19.0.0"
+mlkitGenAiPrompt = "1.0.0-beta2"
 googleGenerativeAi = "0.9.0"
-mediaPipe = "0.10.14"
+mediaPipe = "0.20230731"
 playServicesCodeScanner = "16.1.0"
 playServicesWallet = "20.0.0"
 stripe = "23.11.0"
@@ -273,6 +275,8 @@ firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashly
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-installations = { group = "com.google.firebase", name = "firebase-installations" }
 mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitTextRecognition" }
+mlkit-gms-text-recognition = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition", version.ref = "playServicesMlkitTextRecognition" }
+mlkit-genai-prompt = { group = "com.google.mlkit", name = "genai-prompt", version.ref = "mlkitGenAiPrompt" }
 google-ai-edge-aicore = { group = "com.google.ai.edge.aicore", name = "aicore", version.ref = "googleAiEdgeAicore" }
 google-generative-ai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "googleGenerativeAi" }
 mediapipe-vision = { group = "com.google.mediapipe", name = "tasks-vision", version.ref = "mediaPipe" }
