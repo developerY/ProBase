@@ -407,6 +407,24 @@ class BoxCaptureViewModel @Inject constructor(
                     val text = ocrEngine.processSinglePanel(panel, processedBitmap)
                     panelOcrResults[panel] = text
                     Log.d(TAG, "Background OCR Complete for $panel. Output:\n$text")
+                    
+                    // --- [INCREMENTAL AI SYNTHESIS] ---
+                    // Trigger Gemini Nano immediately to update the "Identity Anchor" live
+                    Log.d(TAG, "Triggering Incremental AI Synthesis...")
+                    val localAiResult = localAi.standardizeCategorizedText(
+                        categorizedText = panelOcrResults,
+                        bitmap = if (panel == BoxPanel.FRONT) processedBitmap else null
+                    )
+                    localAiResult.onSuccess { data ->
+                        localAiStandardizedData = data
+                        Log.d(TAG, "Incremental AI Update (SUCCESS): $data")
+                        // Update session repository so UI can show "Potential Match"
+                        if (!data.brand.isNullOrBlank()) {
+                            sessionRepository.updateServiceStatus("localai", ServiceStatus.SUCCESS, "Identified: ${data.brand}")
+                        }
+                    }.onFailure { e ->
+                        Log.w(TAG, "Incremental AI Update (BYPASS): ${e.message}")
+                    }
                 }
 
                 // Cleanup original if cropped

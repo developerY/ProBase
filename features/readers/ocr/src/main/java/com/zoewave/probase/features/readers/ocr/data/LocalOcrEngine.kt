@@ -56,16 +56,24 @@ class LocalOcrEngine @Inject constructor() {
         return try {
             val image = InputImage.fromBitmap(bitmap, 0)
             val result = recognizer.process(image).await()
+            val rawText = result.text
             
             // Apply Geometric Parsing to identify headers/bolding with Gravity and Symmetry Heuristics
             val structuredLines = GeometricOcrParser.parse(result, image.height, image.width)
 
-            when (panel) {
+            val cleanedText = when (panel) {
                 BoxPanel.FRONT -> processFrontPanel(structuredLines, image.height)
                 BoxPanel.INFO -> processInfoPanel(structuredLines)
-                BoxPanel.INGREDIENTS -> processIngredientsPanel(result.text)
-                BoxPanel.DIRECTIONS -> result.text
+                BoxPanel.INGREDIENTS -> processIngredientsPanel(rawText)
+                BoxPanel.DIRECTIONS -> rawText
             }
+
+            Log.d("LocalOcrEngine", "--- [9a Machine Vision Cleanup: $panel] ---")
+            Log.d("LocalOcrEngine", "RAW OCR OUTPUT:\n$rawText")
+            Log.d("LocalOcrEngine", "CLEANED ARMOR PAYLOAD:\n$cleanedText")
+            Log.d("LocalOcrEngine", "-------------------------------------------")
+
+            cleanedText
 
         } catch (e: Exception) {
             Log.e("LocalOcrEngine", "OCR processing failed for panel: $panel", e)

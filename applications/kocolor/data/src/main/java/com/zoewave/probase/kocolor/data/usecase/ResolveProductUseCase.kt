@@ -1,8 +1,8 @@
 package com.zoewave.probase.kocolor.data.usecase
 
 import com.zoewave.probase.features.ai.local.data.LocalStandardizedData
-import com.zoewave.probase.kocolor.db.entity.ProductEntity
 import com.zoewave.probase.kocolor.db.entity.EnrichmentStatus
+import com.zoewave.probase.kocolor.db.entity.ProductEntity
 import javax.inject.Inject
 
 data class DeterministicApiMetadata(
@@ -29,7 +29,11 @@ class ResolveProductUseCase @Inject constructor() {
         // Canonical Resolution: API metadata wins if available
         val canonicalBrand = apiMetadata?.brand ?: localData.brand ?: "Unknown Brand"
         val canonicalName = apiMetadata?.name ?: localData.productName ?: "Unknown Product"
-        val ingredients = if (apiMetadata?.ingredients?.isNotEmpty() == true) apiMetadata.ingredients else localData.ingredients
+        val ingredients = if (apiMetadata?.ingredients?.isNotEmpty() == true) {
+            apiMetadata.ingredients 
+        } else {
+            localData.ingredients + localData.inactiveIngredients
+        }
 
         return ProductEntity(
             brand = canonicalBrand,

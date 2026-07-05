@@ -1,13 +1,21 @@
 package com.zoewave.probase.features.ai.local.data
 
-import android.content.Context
 import android.util.Log
-import com.google.ai.edge.aicore.GenerativeModel
-import com.google.ai.edge.aicore.generationConfig
+import com.google.mlkit.genai.common.DownloadStatus
+import com.google.mlkit.genai.prompt.Generation
+import com.google.mlkit.genai.prompt.GenerationConfig
+import com.google.mlkit.genai.prompt.GenerativeModel
+import com.google.mlkit.genai.prompt.ModelConfig
+import com.google.mlkit.genai.prompt.ModelPreference
+import com.google.mlkit.genai.prompt.ModelReleaseStage
+import com.google.mlkit.genai.prompt.generationConfig
+import com.zoewave.probase.features.ai.local.domain.router.GeminiPipelineRouter
+import com.zoewave.probase.features.ai.local.domain.router.RequiresCloudException
 import com.zoewave.probase.features.readers.ocr.domain.model.BoxPanel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -15,34 +23,40 @@ import javax.inject.Singleton
 
 @Serializable
 data class LocalStandardizedData(
-    val brand: String? = null,
-    val productName: String? = null,
+    @SerialName("brand_name") val brand: String? = null,
+    @SerialName("product_name") val productName: String? = null,
+    @SerialName("volume") val volume: String? = null,
+    @SerialName("active_ingredients") val ingredients: List<String> = emptyList(),
+    @SerialName("inactive_ingredients") val inactiveIngredients: List<String> = emptyList(),
+    // Optional fields preserved for pipeline integrity
     val category: String? = null,
     val size: String? = null,
-    val ingredients: List<String> = emptyList(),
     val claims: List<String> = emptyList(),
     val directions: String? = null
 )
 
 sealed interface NanoState {
     data object Available : NanoState
-    data object Downloading : NanoState
+    data object MultimodalAvailable : NanoState
+    data class Downloading(val progress: Int = 0) : NanoState
     data object Unsupported : NanoState
 }
 
 /**
  * Technical implementation of the On-Device AI Engine.
- * Corrected to use the Google AI Edge SDK interfacing with Android AICore.
+ * PIVOTED to use the production-ready ML Kit GenAI Prompt API for Pixel 9a compatibility.
+ * This resolves the "Required LLM feature not found" error in AICore Edge SDK.
  */
 @Singleton
-class LocalAiEngine @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
+class LocalAiEngine @Inject constructor() {
 
-    // System-Level Abstraction: No API Key, delegated to Android OS
-    private val localModel = GenerativeModel(
-        generationConfig = generationConfig {
-            context = this@LocalAiEngine.context
+    // Use the production-ready ML Kit client with FAST preference for A-series compatibility
+    private val localModel: GenerativeModel = Generation.getClient(
+        generationConfig {
+            modelConfig = ModelConfig.builder().apply {
+                releaseStage = ModelReleaseStage.PREVIEW
+                preference = ModelPreference.FAST
+            }.build()
         }
     )
 
@@ -50,71 +64,126 @@ class LocalAiEngine @Inject constructor(
 
     /**
      * Checks if the device hardware supports Gemini Nano and if the model is ready.
+     * Uses the ML Kit FeatureStatus API.
      */
     suspend fun checkCapability(): NanoState = withContext(Dispatchers.Default) {
         try {
-            localModel.prepareInferenceEngine()
-            NanoState.Available
-        } catch (e: Exception) {
-            val msg = e.message?.lowercase() ?: ""
-            when {
-                msg.contains("download") -> NanoState.Downloading
+            val status = localModel.checkStatus()
+            Log.d("LocalAiEngine", "ML Kit GenAI Status: $status")
+            
+            when (status) {
+                3 -> { // MODEL_AVAILABLE
+                    // Heuristic for multimodal check on 2026 flagships
+                    val isFlagship = android.os.Build.MODEL.contains("Pro", ignoreCase = true) || 
+                                     android.os.Build.MODEL.contains("Fold", ignoreCase = true)
+                    if (isFlagship) NanoState.MultimodalAvailable else NanoState.Available
+                }
+                2 -> NanoState.Downloading() // MODEL_DOWNLOADING
+                1 -> { // MODEL_DOWNLOADABLE
+                    Log.i("LocalAiEngine", "Model downloadable. Triggering background download...")
+                    triggerBackgroundDownload()
+                    NanoState.Downloading()
+                }
                 else -> NanoState.Unsupported
+            }
+        } catch (e: Exception) {
+            val msg = e.message ?: ""
+            if (msg.contains("606") || msg.contains("FEATURE_NOT_FOUND")) {
+                Log.w("LocalAiEngine", "Feature 636 missing. Attempting explicit download...")
+                triggerBackgroundDownload()
+                return@withContext NanoState.Downloading()
+            }
+            Log.e("LocalAiEngine", "ML Kit Status Check Failed: $msg")
+            NanoState.Unsupported
+        }
+    }
+
+    private suspend fun triggerBackgroundDownload() {
+        // Collect the flow to track progress in logs
+        withContext(Dispatchers.IO) {
+            try {
+                localModel.download().collect { status ->
+                    when (status) {
+                        is DownloadStatus.DownloadStarted -> {
+                            Log.d("LocalAiEngine", "Download Started: Total size ${status.bytesToDownload / 1024} KB")
+                        }
+                        is DownloadStatus.DownloadProgress -> {
+                            Log.v("LocalAiEngine", "Download Progress: ${status.totalBytesDownloaded / 1024} KB")
+                        }
+                        is DownloadStatus.DownloadCompleted -> {
+                            Log.i("LocalAiEngine", "Download Completed! Gemini Nano is ready.")
+                        }
+                        is DownloadStatus.DownloadFailed -> {
+                            Log.e("LocalAiEngine", "Download Failed", status.e)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("LocalAiEngine", "Error collecting download flow", e)
             }
         }
     }
 
     /**
-     * Standardizes categorized OCR text using Gemini Nano on-device.
-     * Implements silent hardware bypass via Result.failure.
+     * Standardizes categorized OCR text using the GeminiPipelineRouter via ML Kit.
      */
-    suspend fun standardizeCategorizedText(categorizedText: Map<BoxPanel, String>): Result<LocalStandardizedData> = withContext(Dispatchers.Default) {
-        if (categorizedText.isEmpty()) return@withContext Result.success(LocalStandardizedData())
+    suspend fun standardizeCategorizedText(
+        categorizedText: Map<BoxPanel, String>,
+        bitmap: android.graphics.Bitmap? = null
+    ): Result<LocalStandardizedData> = withContext(Dispatchers.Default) {
+        if (categorizedText.isEmpty() && bitmap == null) return@withContext Result.success(LocalStandardizedData())
 
         val startTime = System.currentTimeMillis()
         try {
             val capability = checkCapability()
-            if (capability != NanoState.Available) {
-                return@withContext Result.failure(UnsupportedOperationException("Gemini Nano not available: $capability"))
+            val isMultimodal = capability == NanoState.MultimodalAvailable
+            val isAvailable = capability == NanoState.Available || isMultimodal
+
+            if (!isAvailable) {
+                return@withContext Result.failure(RequiresCloudException("Local model not available (State: $capability)"))
             }
 
-            // Build a perfectly segmented prompt (Architectural Win)
-            val segmentedContent = StringBuilder("Extract the canonical product data from the following categorized OCR text:\n")
-            categorizedText.forEach { (panel, text) ->
-                segmentedContent.append("**${panel.name} PANEL:** ${text.take(1000)}\n")
-            }
-            segmentedContent.append("\nReturn ONLY a raw JSON object with keys: brand, productName, category, size, ingredients, claims, directions.")
+            val aggregatedOcr = categorizedText.values.joinToString("\n")
 
-            val prompt = segmentedContent.toString()
-            Log.d("LocalAiEngine", "Standardizing categorized text...")
+            // 1. Route the request (Hardware Aware + Script Aware)
+            val config = GeminiPipelineRouter.route(
+                ocrText = aggregatedOcr,
+                bitmap = bitmap,
+                isMultimodalSupported = isMultimodal,
+                isAicoreAvailable = true
+            )
 
-            // Execution delegated to System NPU via Edge SDK
-            val response = localModel.generateContent(prompt)
-            val jsonText = response.text ?: return@withContext Result.failure(Exception("Empty AI response"))
+            Log.d("LocalAiEngine", "Routing via ML Kit: ${config.path}")
+
+            // 2. Construct final prompt with JSON schema enforcement
+            val finalPrompt = "${config.prompt}\n\nSCHEMA:\n${config.jsonSchema}\n\nCONTENT:\n${config.inputOcrText ?: "[IMAGE DATA PROVIDED]"}"
+
+            // 3. Execution (Delegated to ML Kit Prompt API)
+            val response = localModel.generateContent(finalPrompt)
+            val jsonText = response.candidates.firstOrNull()?.text ?: return@withContext Result.failure(Exception("Empty AI response"))
             Log.d("LocalAiEngine", "Raw AI Response: $jsonText")
 
-            // Safe JSON Extraction via Regex (Bypassing LLM markdown artifacts)
+            // 4. Safe JSON Extraction
             val jsonRegex = Regex("""\{[\s\S]*\}""")
             val match = jsonRegex.find(jsonText) ?: return@withContext Result.failure(Exception("No JSON found in response"))
-            val fullJson = match.value
-
-            val result = json.decodeFromString<LocalStandardizedData>(fullJson)
+            
+            val result = json.decodeFromString<LocalStandardizedData>(match.value)
             val duration = System.currentTimeMillis() - startTime
-            Log.d("LocalAiEngine", "Standardization complete in ${duration}ms. Brand: ${result.brand}")
+            Log.d("LocalAiEngine", "Standardization complete in ${duration}ms. Path: ${config.path}")
+            Log.d("LocalAiEngine", "PARSED AI DATA: $result")
 
             Result.success(result)
+
         } catch (e: Exception) {
-            Log.w("LocalAiEngine", "Local AI hardware bypass active: ${e.message}")
+            Log.w("LocalAiEngine", "ML Kit AI hardware bypass active: ${e.message}")
             Result.failure(e)
         }
     }
 
     /**
      * Standardizes raw OCR text using Gemini Nano on-device.
-     * Implements silent hardware bypass via Result.failure.
      */
     suspend fun standardizeOcrText(rawText: String): Result<LocalStandardizedData> = withContext(Dispatchers.Default) {
-        // Delegate to categorized method with a generic FRONT panel for backward compatibility
         standardizeCategorizedText(mapOf(BoxPanel.FRONT to rawText))
     }
 }
