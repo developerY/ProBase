@@ -18,8 +18,8 @@ This is the top-level organizational unit in the application.
 ### File Content
 
 ```kotlin
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 
 @Entity(tableName = "categories")
 data class CategoryEntity(
@@ -51,10 +51,10 @@ To store the details of each individual to-do list, including its status, priori
 ### File Content
 
 ```kotlin
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.ForeignKey
+import androidx.room3.Index
+import androidx.room3.PrimaryKey
 
 @Entity(
     tableName = "task_lists",
@@ -108,9 +108,9 @@ To store the URI and metadata for each photo and link it to the task list it bel
 ### File Content
 
 ```kotlin
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.ForeignKey
+import androidx.room3.PrimaryKey
 
 @Entity(
     tableName = "photos",

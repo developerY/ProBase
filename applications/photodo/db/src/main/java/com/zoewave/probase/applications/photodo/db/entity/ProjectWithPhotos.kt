@@ -8,8 +8,8 @@ data class ProjectWithPhotos(
     val project: ProjectEntity,
 
     @Relation(
-        parentColumn = "projectId",
-        entityColumn = "projectId"
+        parentColumns = ["projectId"],
+        entityColumns = ["projectId"]
     )
     val photos: List<PhotoEntity>
 )

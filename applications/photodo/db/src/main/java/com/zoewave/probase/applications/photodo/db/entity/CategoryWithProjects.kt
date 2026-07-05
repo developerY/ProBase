@@ -8,8 +8,8 @@ data class CategoryWithProjects(
     val category: CategoryEntity,
 
     @Relation(
-        parentColumn = "categoryId",
-        entityColumn = "categoryId"
+        parentColumns = ["categoryId"],
+        entityColumns = ["categoryId"]
     )
     val projects: List<ProjectEntity>
 )

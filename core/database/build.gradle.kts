@@ -35,7 +35,6 @@ dependencies {
     // implementation(libs.material.legacy)
 
     // --- Hilt & Room ---
-    ksp(libs.androidx.room.common)
     // Dependencies are AUTOMATICALLY added by:
     // - id("composetemplate.android.hilt")
     // - id("composetemplate.android.room")

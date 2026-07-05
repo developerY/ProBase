@@ -9,8 +9,8 @@ data class CategoryWithProjectsAndTasks(
 
     @Relation(
         entity = ProjectEntity::class,
-        parentColumn = "categoryId",
-        entityColumn = "categoryId"
+        parentColumns = ["categoryId"],
+        entityColumns = ["categoryId"]
     )
     val projects: List<ProjectWithTasks>
 )

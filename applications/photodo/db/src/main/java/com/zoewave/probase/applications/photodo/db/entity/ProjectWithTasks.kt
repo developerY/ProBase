@@ -8,14 +8,14 @@ data class ProjectWithTasks(
     val project: ProjectEntity,
 
     @Relation(
-        parentColumn = "projectId",
-        entityColumn = "projectId"
+        parentColumns = ["projectId"],
+        entityColumns = ["projectId"]
     )
     val tasks: List<TaskEntity>,
 
     @Relation(
-        parentColumn = "projectId",
-        entityColumn = "projectId"
+        parentColumns = ["projectId"],
+        entityColumns = ["projectId"]
     )
     val photos: List<PhotoEntity> = emptyList()
 )
