@@ -3,7 +3,6 @@ package com.zoewave.probase.convention
 import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 
 class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
@@ -15,11 +14,6 @@ class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
 
             val extension = extensions.getByType<ApplicationExtension>()
             configureAndroidCompose(extension)
-
-            // Applications always need 'activity-compose' to set the content view.
-            dependencies {
-                add("implementation", libs.findLibrary("androidx-activity-compose").get())
-            }
         }
     }
 }

@@ -47,6 +47,9 @@ sealed interface FeatureInventory : NavKey {
     data object FullXR : FeatureInventory
 
     @Serializable
+    data object AiSandbox : FeatureInventory
+
+    @Serializable
     data object Settings : FeatureInventory
 
     @Serializable

@@ -24,6 +24,7 @@ internal fun Project.configureAndroidCompose(
             add("androidTestImplementation", platform(bom))
 
             // Core Compose UI dependencies
+            add("implementation", libs.findLibrary("androidx-activity-compose").get())
             add("implementation", libs.findLibrary("androidx-compose-ui").get())
             add("implementation", libs.findLibrary("androidx-compose-ui-graphics").get())
             add("implementation", libs.findLibrary("androidx-compose-ui-tooling-preview").get())

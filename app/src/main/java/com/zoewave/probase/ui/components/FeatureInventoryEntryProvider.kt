@@ -22,6 +22,7 @@ import com.zoewave.probase.features.readers.nfc.ui.NfcUiRoute
 import com.zoewave.probase.features.readers.qrscanner.ui.QRCodeScannerScreen
 import com.zoewave.probase.features.weather.ui.WeatherUiRoute
 import com.zoewave.probase.features.xr.glass.ui.GlassXRDemosPhoneRoute
+import com.zoewave.probase.features.ai.local.AiSandboxScreen
 import com.zoewave.probase.features.xr.xrglasses.XRGlassesActivity
 import com.zoewave.probase.features.xr.xrglasses.ui.FullXRApp
 import com.zoewave.probase.features.ai.configuration.ui.AiConfigurationCard
@@ -59,6 +60,7 @@ fun featureInventoryEntryProvider(
                     onNavigateToMicrophone = { navigateTo(FeatureInventory.Microphone) },
                     onNavigateToCalendar = { navigateTo(FeatureInventory.Calendar) },
                     onNavigateToSmartCapture = { navigateTo(FeatureInventory.SmartCapture) },
+                    onNavigateToAiSandbox = { navigateTo(FeatureInventory.AiSandbox) },
                     onNavigateToGlassXR = { navigateTo(FeatureInventory.GlassXR) },
                     onNavigateToFullXR = { 
                         val intent = Intent(context, XRGlassesActivity::class.java).apply {
@@ -169,6 +171,12 @@ fun featureInventoryEntryProvider(
                         projectId = key.projectId,
                         onDismiss = navigateBack
                     )
+                }
+            }
+
+            is FeatureInventory.AiSandbox -> {
+                FeatureScaffold(title = "AI Sandbox", onBack = navigateBack) {
+                    AiSandboxScreen(testBitmap = null) // Start with null for manual trigger
                 }
             }
 
