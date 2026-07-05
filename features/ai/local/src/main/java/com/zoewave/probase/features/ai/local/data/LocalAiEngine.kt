@@ -15,6 +15,7 @@ import com.zoewave.probase.features.readers.ocr.domain.model.BoxPanel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -158,8 +159,11 @@ class LocalAiEngine @Inject constructor() {
             // 2. Construct final prompt with JSON schema enforcement
             val finalPrompt = "${config.prompt}\n\nSCHEMA:\n${config.jsonSchema}\n\nCONTENT:\n${config.inputOcrText ?: "[IMAGE DATA PROVIDED]"}"
 
-            // 3. Execution (Delegated to ML Kit Prompt API)
-            val response = localModel.generateContent(finalPrompt)
+            // 3. Execution (Delegated to ML Kit Prompt API) with DETERMINISTIC TIMEOUT (8s)
+            val response = withTimeout(8000) {
+                localModel.generateContent(finalPrompt)
+            }
+            
             val jsonText = response.candidates.firstOrNull()?.text ?: return@withContext Result.failure(Exception("Empty AI response"))
             Log.d("LocalAiEngine", "Raw AI Response: $jsonText")
 
@@ -175,8 +179,9 @@ class LocalAiEngine @Inject constructor() {
             Result.success(result)
 
         } catch (e: Exception) {
-            Log.w("LocalAiEngine", "ML Kit AI hardware bypass active: ${e.message}")
-            Result.failure(e)
+            val reason = e.message ?: "Unknown local AI error"
+            Log.w("LocalAiEngine", "Local AI failed: $reason. Triggering Cloud Handoff.")
+            Result.failure(RequiresCloudException(reason))
         }
     }
 
