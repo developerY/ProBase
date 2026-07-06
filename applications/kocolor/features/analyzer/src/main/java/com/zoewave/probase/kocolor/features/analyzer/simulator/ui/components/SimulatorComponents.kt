@@ -3,7 +3,6 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -80,7 +79,7 @@ fun MessagingStep(
 
         // User Portrait Slot
         Card(
-            modifier = Modifier.fillMaxWidth().height(120.dp).clickable { onEvent(SimulatorEvent.CapturePortrait) },
+            modifier = Modifier.fillMaxWidth().height(120.dp),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
             border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
@@ -105,17 +104,32 @@ fun MessagingStep(
                     }
                 }
                 Spacer(Modifier.width(20.dp))
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = if (userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = if (userPortraitUri != null) "Tap to re-capture visual anchor" else "Tap to add visual context",
+                        text = if (userPortraitUri != null) "Tap to change visual anchor" else "Tap to add visual context",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
+                }
+                
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    IconButton(
+                        onClick = { onEvent(SimulatorEvent.CapturePortrait) },
+                        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                    ) {
+                        Icon(Icons.Default.PhotoCamera, null, tint = MaterialTheme.colorScheme.primary)
+                    }
+                    IconButton(
+                        onClick = { onEvent(SimulatorEvent.PickPortrait) },
+                        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                    ) {
+                        Icon(Icons.Default.Collections, null, tint = MaterialTheme.colorScheme.primary)
+                    }
                 }
             }
         }

@@ -23,7 +23,8 @@ class StyleSimulatorEngine @Inject constructor(
     private val BLUEPRINT_SCHEMA = """
         {
           "rationale": "string",
-          "selectedItemIds": ["Long", "Long", ...],
+          "selectedClothingIds": ["Long", "Long", "Long"],
+          "selectedCosmeticIds": ["Long", "Long", "Long"],
           "recommendedPalette": ["#HEX", "#HEX", "#HEX"]
         }
     """.trimIndent()
@@ -33,22 +34,18 @@ class StyleSimulatorEngine @Inject constructor(
         circadianContext: String,
         routineCompleted: Boolean,
         wellnessScore: Double,
+        weatherContext: String,
         availableWardrobe: List<ClothingItem>,
+        availableCosmetics: List<CosmeticItem>,
         fashionProfile: String? = null,
         userPortrait: android.graphics.Bitmap? = null,
         apiKey: String? = null,
         modelName: String = "gemini-1.5-flash"
     ): StyleBlueprint {
         val startTime = System.currentTimeMillis()
-        android.util.Log.d("StyleSimulatorEngine", "--- [STARTING STYLE SIMULATION] ---")
-        android.util.Log.d("StyleSimulatorEngine", "THINKING: Processing intent: '$userIntent'")
-        android.util.Log.d("StyleSimulatorEngine", "THINKING: Circadian Context: $circadianContext")
-        android.util.Log.d("StyleSimulatorEngine", "THINKING: Wellness Score: $wellnessScore, Routine Completed: $routineCompleted")
-        android.util.Log.d("StyleSimulatorEngine", "THINKING: Wardrobe Size: ${availableWardrobe.size} items")
-        android.util.Log.d("StyleSimulatorEngine", "THINKING: Visual Anchor Present: ${userPortrait != null}")
         
         val prompt = buildArchitectPrompt(
-            userIntent, circadianContext, routineCompleted, wellnessScore, availableWardrobe, fashionProfile
+            userIntent, circadianContext, routineCompleted, wellnessScore, weatherContext, availableWardrobe, availableCosmetics, fashionProfile
         )
 
         // Tier 1.5: Local LLM (Gemini Nano) - PREFERRED Tier for speed/cost
@@ -114,32 +111,49 @@ class StyleSimulatorEngine @Inject constructor(
         circadianContext: String,
         routineCompleted: Boolean,
         wellnessScore: Double,
+        weatherContext: String,
         availableWardrobe: List<ClothingItem>,
+        availableCosmetics: List<CosmeticItem>,
         fashionProfile: String?
     ): String {
         val wardrobeDescription = availableWardrobe.joinToString("\n") { 
-            "ID: ${it.id}, Name: ${it.name}, Category: ${it.category}, Color: ${it.colorHex ?: "Unknown"}"
+            "CLOTHING_ID: ${it.id}, Name: ${it.name}, Category: ${it.category}, Color: ${it.colorHex ?: "Unknown"}"
+        }
+        
+        val cosmeticsDescription = availableCosmetics.joinToString("\n") {
+            "COSMETIC_ID: ${it.id}, Name: ${it.name}, Brand: ${it.brand}, Category: ${it.microCategory}, Color: ${it.colorHex ?: "Unknown"}, Notes: ${it.notes ?: "None"}"
         }
 
         return """
             You are the KoColor Style Architect AI. Generate a "Style Blueprint".
             
             USER INTENT: $userIntent
-            BIOLOGICAL CONTEXT: $circadianContext
-            SKIN PROFILE (TEXT): ${fashionProfile ?: "Unknown"}
-            MORNING RITUAL COMPLETED: $routineCompleted
-            WELLNESS SCORE: ${"%.2f".format(wellnessScore)}
+            BIOLOGICAL CONTEXT: $circadianContext (Wellness: ${"%.2f".format(wellnessScore)}, Ritual Done: $routineCompleted)
+            WEATHER/ATMOSPHERIC: $weatherContext
+            SKIN PROFILE: ${fashionProfile ?: "Unknown"}
             
-            IMAGE DATA: I have provided a portrait of the user. Use this image as the PRIMARY source of truth for their complexion, eye color, and hair tone.
+            IMAGE DATA: I have provided a portrait of the user. Use this as the source of truth for their visual canvas.
             
-            AVAILABLE WARDROBE (PRE-FILTERED):
+            AVAILABLE VAULT (USE THESE EXACT ITEMS):
+            --- WARDROBE ---
             $wardrobeDescription
             
+            --- COSMETIC VANITY ---
+            $cosmeticsDescription
+            
             GOAL:
-            1. Select BEST 3 items (Top, Bottom, Shoes).
-            2. Recommend 2 Accessories.
-            3. Create a 3-color Palette (HEX codes) harmonizing with items and the user's VISUAL features.
-            4. Provide a brief rationale.
+            1. Select BEST 3 clothing items (Top, Bottom, Shoes).
+            2. Select BEST 3 makeup items from the COSMETIC VANITY that harmonize with the clothes, the user's skin profile, and the weather (e.g., prioritize high SPF or long-wear if weather/UV is extreme).
+            3. Create a 3-color Palette (HEX codes) harmonizing the entire look.
+            4. Provide a brief stylistic rationale.
+            
+            Respond ONLY with a valid JSON object matching this schema:
+            {
+              "rationale": "string",
+              "selectedClothingIds": [Long, Long, Long],
+              "selectedCosmeticIds": [Long, Long, Long],
+              "recommendedPalette": ["#HEX", "#HEX", "#HEX"]
+            }
         """.trimIndent()
     }
 
@@ -158,12 +172,11 @@ class StyleSimulatorEngine @Inject constructor(
     ): StyleBlueprint {
         val selectedItems = mutableListOf<ClothingItem>()
         
-        // 1. Simple heuristic selection based on categories
+        // Simple heuristic selection based on categories
         val tops = availableWardrobe.filter { it.category == ClothingCategory.TOPS }
         val bottoms = availableWardrobe.filter { it.category == ClothingCategory.BOTTOMS }
         val shoes = availableWardrobe.filter { it.category == ClothingCategory.SHOES }
         
-        // Try to match intent keywords with item names
         fun List<ClothingItem>.smartPick(): ClothingItem? {
             if (this.isEmpty()) return null
             val matches = this.filter { item ->
@@ -182,21 +195,18 @@ class StyleSimulatorEngine @Inject constructor(
         val accessories = availableWardrobe.filter { it.category == ClothingCategory.ACCESSORIES }.shuffled().take(2)
         selectedItems.addAll(accessories)
 
-        // 2. Generate palette from selected items
         val palette = selectedItems.mapNotNull { it.dominantHex }.distinct().toMutableList()
         if (palette.isEmpty()) palette.add("#FFFFFF")
         
-        // Pad with harmonized neutrals if needed
         while (palette.size < 3) {
             palette.add(listOf("#000000", "#808080", "#E0E0E0", "#333333").random())
         }
         val finalPalette = palette.take(3)
 
-        val itemsNames = selectedItems.joinToString(", ") { it.name }
-        
         return StyleBlueprint(
-            rationale = "Local Architect: Selected a curated set from your vault ($itemsNames) that best aligns with your stated intent. We've anchored the look with a balanced palette derived from your collection.",
-            selectedItemIds = selectedItems.map { it.id },
+            rationale = "Local Architect: Selected from your vault based on intent.",
+            selectedClothingIds = selectedItems.map { it.id },
+            selectedCosmeticIds = emptyList(),
             recommendedPalette = finalPalette
         )
     }
@@ -205,6 +215,7 @@ class StyleSimulatorEngine @Inject constructor(
 @Serializable
 data class StyleBlueprint(
     val rationale: String,
-    val selectedItemIds: List<Long>,
+    val selectedClothingIds: List<Long>,
+    val selectedCosmeticIds: List<Long>,
     val recommendedPalette: List<String>
 )

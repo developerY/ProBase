@@ -1,5 +1,8 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
@@ -27,12 +30,23 @@ fun StyleSimulatorScreen(
     onEvent: (SimulatorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let { onEvent(SimulatorEvent.OnPortraitSelected(it.toString())) }
+    }
+
     if (effect != null) {
         LaunchedEffect(Unit) {
             effect.collect { simulatorEffect ->
                 when (simulatorEffect) {
                     SimulatorEffect.NavigateToHistory -> navTo(KoColorRoute.Color)
                     is SimulatorEffect.NavigateToCamera -> navTo(KoColorRoute.Camera(simulatorEffect.target))
+                    SimulatorEffect.OpenGalleryPicker -> {
+                        galleryLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    }
                 }
             }
         }
