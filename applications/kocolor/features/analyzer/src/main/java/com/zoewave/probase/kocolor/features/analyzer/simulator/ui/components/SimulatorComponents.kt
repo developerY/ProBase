@@ -3,8 +3,11 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,6 +39,7 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulationStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
@@ -64,95 +68,217 @@ fun MagicBackground() {
 fun MessagingStep(
     userMessage: String,
     userPortraitUri: String?,
+    allClothing: List<ClothingItem> = emptyList(),
+    allCosmetics: List<CosmeticItem> = emptyList(),
+    anchoredClothing: List<ClothingItem> = emptyList(),
+    anchoredCosmetics: List<CosmeticItem> = emptyList(),
     onEvent: (SimulatorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(32.dp)) {
-        Spacer(Modifier.height(40.dp))
-        Text(
-            text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_title),
-            style = MaterialTheme.typography.displayMedium,
-            fontFamily = FontFamily.Serif,
-            fontWeight = FontWeight.Light,
-            lineHeight = 52.sp
-        )
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(32.dp),
+        contentPadding = PaddingValues(bottom = 32.dp)
+    ) {
+        item {
+            Spacer(Modifier.height(40.dp))
+            Text(
+                text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_title),
+                style = MaterialTheme.typography.displayMedium,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Light,
+                lineHeight = 52.sp
+            )
+        }
 
         // User Portrait Slot
-        Card(
-            modifier = Modifier.fillMaxWidth().height(120.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
-        ) {
-            Row(
-                modifier = Modifier.padding(16.dp).fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth().height(120.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
             ) {
-                Box(
-                    modifier = Modifier.size(80.dp).clip(CircleShape).background(Color.Gray.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
+                Row(
+                    modifier = Modifier.padding(16.dp).fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (userPortraitUri != null) {
-                        AsyncImage(
-                            model = userPortraitUri,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                    Box(
+                        modifier = Modifier.size(80.dp).clip(CircleShape).background(Color.Gray.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (userPortraitUri != null) {
+                            AsyncImage(
+                                model = userPortraitUri,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(Icons.Default.Person, null, modifier = Modifier.size(32.dp), tint = Color.White.copy(alpha = 0.5f))
+                        }
+                    }
+                    Spacer(Modifier.width(20.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = if (userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
                         )
-                    } else {
-                        Icon(Icons.Default.Person, null, modifier = Modifier.size(32.dp), tint = Color.White.copy(alpha = 0.5f))
+                        Text(
+                            text = if (userPortraitUri != null) "Tap to change visual anchor" else "Tap to add visual context",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
-                }
-                Spacer(Modifier.width(20.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = if (userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = if (userPortraitUri != null) "Tap to change visual anchor" else "Tap to add visual context",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    IconButton(
-                        onClick = { onEvent(SimulatorEvent.CapturePortrait) },
-                        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                    ) {
-                        Icon(Icons.Default.PhotoCamera, null, tint = MaterialTheme.colorScheme.primary)
-                    }
-                    IconButton(
-                        onClick = { onEvent(SimulatorEvent.PickPortrait) },
-                        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                    ) {
-                        Icon(Icons.Default.Collections, null, tint = MaterialTheme.colorScheme.primary)
+                    
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        IconButton(
+                            onClick = { onEvent(SimulatorEvent.CapturePortrait) },
+                            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        ) {
+                            Icon(Icons.Default.PhotoCamera, null, tint = MaterialTheme.colorScheme.primary)
+                        }
+                        IconButton(
+                            onClick = { onEvent(SimulatorEvent.PickPortrait) },
+                            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        ) {
+                            Icon(Icons.Default.Collections, null, tint = MaterialTheme.colorScheme.primary)
+                        }
                     }
                 }
             }
         }
-        
-        OutlinedTextField(
-            value = userMessage,
-            onValueChange = { onEvent(SimulatorEvent.UpdateMessage(it)) },
-            placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.alpha(0.4f)) },
-            modifier = Modifier.fillMaxWidth().height(200.dp),
-            shape = RoundedCornerShape(32.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                focusedBorderColor = MaterialTheme.colorScheme.primary
-            )
-        )
 
-        Button(
-            onClick = { onEvent(SimulatorEvent.StartSimulation) },
-            modifier = Modifier.fillMaxWidth().height(80.dp),
-            shape = RoundedCornerShape(24.dp),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+        // Must-Include Clothing
+        if (allClothing.isNotEmpty()) {
+            item {
+                SelectionArea(
+                    title = "Anchor Clothing",
+                    items = allClothing,
+                    selectedIds = anchoredClothing.map { it.id },
+                    onToggle = { onEvent(SimulatorEvent.ToggleAnchoredClothing(it)) },
+                    itemContent = { item ->
+                        InventoryThumbnail(item.imageUrl, item.colorHex)
+                    }
+                )
+            }
+        }
+
+        // Must-Include Cosmetics
+        if (allCosmetics.isNotEmpty()) {
+            item {
+                SelectionArea(
+                    title = "Anchor Makeup",
+                    items = allCosmetics,
+                    selectedIds = anchoredCosmetics.map { it.id },
+                    onToggle = { onEvent(SimulatorEvent.ToggleAnchoredCosmetic(it)) },
+                    itemContent = { item ->
+                        InventoryThumbnail(item.imageUrl, item.colorHex)
+                    }
+                )
+            }
+        }
+        
+        item {
+            OutlinedTextField(
+                value = userMessage,
+                onValueChange = { onEvent(SimulatorEvent.UpdateMessage(it)) },
+                placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.alpha(0.4f)) },
+                modifier = Modifier.fillMaxWidth().height(160.dp),
+                shape = RoundedCornerShape(32.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        }
+
+        item {
+            Button(
+                onClick = { onEvent(SimulatorEvent.StartSimulation) },
+                modifier = Modifier.fillMaxWidth().height(80.dp),
+                shape = RoundedCornerShape(24.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+            ) {
+                Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), style = MaterialTheme.typography.titleMedium, letterSpacing = 2.sp)
+            }
+        }
+    }
+}
+
+@Composable
+private fun <T> SelectionArea(
+    title: String,
+    items: List<T>,
+    selectedIds: List<Long>,
+    onToggle: (T) -> Unit,
+    itemContent: @Composable (T) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text(
+            text = title.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 2.sp,
+            color = MaterialTheme.colorScheme.primary
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp)
         ) {
-            Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), style = MaterialTheme.typography.titleMedium, letterSpacing = 2.sp)
+            items(items) { item ->
+                val id = when (item) {
+                    is ClothingItem -> item.id
+                    is CosmeticItem -> item.id
+                    else -> 0L
+                }
+                val isSelected = selectedIds.contains(id)
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
+                        .border(
+                            width = if (isSelected) 2.dp else 1.dp,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .clickable { onToggle(item) }
+                ) {
+                    itemContent(item)
+                    if (isSelected) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(4.dp)
+                                .size(20.dp)
+                                .background(MaterialTheme.colorScheme.primary, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.Check, null, modifier = Modifier.size(12.dp), tint = Color.White)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InventoryThumbnail(imageUrl: String?, colorHex: String?) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        if (imageUrl != null) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else if (colorHex != null) {
+            Box(modifier = Modifier.fillMaxSize().background(parseColor(colorHex)))
+        } else {
+            Icon(Icons.Default.Inventory2, null, tint = Color.White.copy(alpha = 0.2f))
         }
     }
 }
@@ -263,7 +389,8 @@ fun ResultStep(
             Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_chromatic_core), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    uiState.recommendedPalette.forEach { hex ->
+                    val palette = uiState.recommendedPalette
+                    palette.forEach { hex ->
                         Box(
                             modifier = Modifier.size(72.dp).clip(RoundedCornerShape(20.dp)).background(parseColor(hex))
                         )

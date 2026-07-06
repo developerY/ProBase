@@ -33,7 +33,11 @@ data class StyleSimulatorUiState(
     val userMessage: String = "",
     val rationale: String? = null,
     val isLocalResult: Boolean = false,
-    val userPortraitUri: String? = null
+    val userPortraitUri: String? = null,
+    val anchoredClothing: List<ClothingItem> = emptyList(),
+    val anchoredCosmetics: List<CosmeticItem> = emptyList(),
+    val fullClothingInventory: List<ClothingItem> = emptyList(),
+    val fullCosmeticInventory: List<CosmeticItem> = emptyList()
 )
 
 enum class SimulationStep {
@@ -48,6 +52,8 @@ sealed class SimulatorEvent {
     data object CapturePortrait : SimulatorEvent()
     data object PickPortrait : SimulatorEvent()
     data class OnPortraitSelected(val uri: String) : SimulatorEvent()
+    data class ToggleAnchoredClothing(val item: ClothingItem) : SimulatorEvent()
+    data class ToggleAnchoredCosmetic(val item: CosmeticItem) : SimulatorEvent()
 }
 
 sealed class SimulatorEffect {
@@ -78,6 +84,20 @@ class StyleSimulatorViewModel @Inject constructor(
     init {
         checkRoutineStatus()
         observePortrait()
+        loadInventory()
+    }
+
+    private fun loadInventory() {
+        viewModelScope.launch {
+            wardrobeRepository.getAllClothing().collect { list ->
+                _uiState.update { it.copy(fullClothingInventory = list) }
+            }
+        }
+        viewModelScope.launch {
+            cosmeticRepository.getAllCosmetics().collect { list ->
+                _uiState.update { it.copy(fullCosmeticInventory = list) }
+            }
+        }
     }
 
     private fun observePortrait() {
@@ -129,6 +149,26 @@ class StyleSimulatorViewModel @Inject constructor(
             is SimulatorEvent.OnPortraitSelected -> {
                 sessionRepository.setFaceUri(event.uri)
             }
+            is SimulatorEvent.ToggleAnchoredClothing -> {
+                _uiState.update { state ->
+                    val newList = if (state.anchoredClothing.any { it.id == event.item.id }) {
+                        state.anchoredClothing.filter { it.id != event.item.id }
+                    } else {
+                        state.anchoredClothing + event.item
+                    }
+                    state.copy(anchoredClothing = newList)
+                }
+            }
+            is SimulatorEvent.ToggleAnchoredCosmetic -> {
+                _uiState.update { state ->
+                    val newList = if (state.anchoredCosmetics.any { it.id == event.item.id }) {
+                        state.anchoredCosmetics.filter { it.id != event.item.id }
+                    } else {
+                        state.anchoredCosmetics + event.item
+                    }
+                    state.copy(anchoredCosmetics = newList)
+                }
+            }
         }
     }
 
@@ -177,6 +217,8 @@ class StyleSimulatorViewModel @Inject constructor(
                 availableCosmetics = allCosmetics,
                 fashionProfile = skinContext,
                 userPortrait = userPortrait,
+                anchoredClothing = uiState.value.anchoredClothing,
+                anchoredCosmetics = uiState.value.anchoredCosmetics,
                 apiKey = apiKey
             )
             

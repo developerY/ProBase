@@ -39,13 +39,16 @@ class StyleSimulatorEngine @Inject constructor(
         availableCosmetics: List<CosmeticItem>,
         fashionProfile: String? = null,
         userPortrait: android.graphics.Bitmap? = null,
+        anchoredClothing: List<ClothingItem> = emptyList(),
+        anchoredCosmetics: List<CosmeticItem> = emptyList(),
         apiKey: String? = null,
         modelName: String = "gemini-1.5-flash"
     ): StyleBlueprint {
         val startTime = System.currentTimeMillis()
         
         val prompt = buildArchitectPrompt(
-            userIntent, circadianContext, routineCompleted, wellnessScore, weatherContext, availableWardrobe, availableCosmetics, fashionProfile
+            userIntent, circadianContext, routineCompleted, wellnessScore, weatherContext, 
+            availableWardrobe, availableCosmetics, fashionProfile, anchoredClothing, anchoredCosmetics
         )
 
         // Tier 1.5: Local LLM (Gemini Nano) - PREFERRED Tier for speed/cost
@@ -114,7 +117,9 @@ class StyleSimulatorEngine @Inject constructor(
         weatherContext: String,
         availableWardrobe: List<ClothingItem>,
         availableCosmetics: List<CosmeticItem>,
-        fashionProfile: String?
+        fashionProfile: String?,
+        anchoredClothing: List<ClothingItem>,
+        anchoredCosmetics: List<CosmeticItem>
     ): String {
         val wardrobeDescription = availableWardrobe.joinToString("\n") { 
             "CLOTHING_ID: ${it.id}, Name: ${it.name}, Category: ${it.category}, Color: ${it.colorHex ?: "Unknown"}"
@@ -124,6 +129,16 @@ class StyleSimulatorEngine @Inject constructor(
             "COSMETIC_ID: ${it.id}, Name: ${it.name}, Brand: ${it.brand}, Category: ${it.microCategory}, Color: ${it.colorHex ?: "Unknown"}, Notes: ${it.notes ?: "None"}"
         }
 
+        val anchorContext = StringBuilder()
+        if (anchoredClothing.isNotEmpty()) {
+            anchorContext.append("\nUSER'S MUST-INCLUDE CLOTHING:\n")
+            anchoredClothing.forEach { anchorContext.append("- CLOTHING_ID: ${it.id}, Name: ${it.name}\n") }
+        }
+        if (anchoredCosmetics.isNotEmpty()) {
+            anchorContext.append("\nUSER'S MUST-INCLUDE COSMETICS:\n")
+            anchoredCosmetics.forEach { anchorContext.append("- COSMETIC_ID: ${it.id}, Name: ${it.name}\n") }
+        }
+
         return """
             You are the KoColor Style Architect AI. Generate a "Style Blueprint".
             
@@ -131,6 +146,8 @@ class StyleSimulatorEngine @Inject constructor(
             BIOLOGICAL CONTEXT: $circadianContext (Wellness: ${"%.2f".format(wellnessScore)}, Ritual Done: $routineCompleted)
             WEATHER/ATMOSPHERIC: $weatherContext
             SKIN PROFILE: ${fashionProfile ?: "Unknown"}
+            
+            $anchorContext
             
             IMAGE DATA: I have provided a portrait of the user. Use this as the source of truth for their visual canvas.
             
@@ -142,8 +159,8 @@ class StyleSimulatorEngine @Inject constructor(
             $cosmeticsDescription
             
             GOAL:
-            1. Select BEST 3 clothing items (Top, Bottom, Shoes).
-            2. Select BEST 3 makeup items from the COSMETIC VANITY that harmonize with the clothes, the user's skin profile, and the weather (e.g., prioritize high SPF or long-wear if weather/UV is extreme).
+            1. Select BEST 3 clothing items (Top, Bottom, Shoes). If the user provided MUST-INCLUDE CLOTHING, prioritize those.
+            2. Select BEST 3 makeup items from the COSMETIC VANITY that harmonize with the clothes, the user's skin profile, and the weather. If the user provided MUST-INCLUDE COSMETICS, prioritize those.
             3. Create a 3-color Palette (HEX codes) harmonizing the entire look.
             4. Provide a brief stylistic rationale.
             
