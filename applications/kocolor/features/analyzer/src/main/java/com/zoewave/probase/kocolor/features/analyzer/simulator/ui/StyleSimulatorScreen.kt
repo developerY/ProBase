@@ -87,6 +87,8 @@ fun StyleSimulatorScreen(
                             allCosmetics = uiState.fullCosmeticInventory,
                             anchoredClothing = uiState.anchoredClothing,
                             anchoredCosmetics = uiState.anchoredCosmetics,
+                            selectedClothingCategory = uiState.selectedClothingCategory,
+                            selectedCosmeticCategory = uiState.selectedCosmeticCategory,
                             onEvent = onEvent,
                             navTo = navTo
                         )

@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -40,6 +42,7 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulator
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.CosmeticItem
+import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
@@ -72,6 +75,8 @@ fun MessagingStep(
     allCosmetics: List<CosmeticItem> = emptyList(),
     anchoredClothing: List<ClothingItem> = emptyList(),
     anchoredCosmetics: List<CosmeticItem> = emptyList(),
+    selectedClothingCategory: ClothingCategory = ClothingCategory.TOPS,
+    selectedCosmeticCategory: MacroCategory = MacroCategory.LIPS,
     onEvent: (SimulatorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -150,33 +155,109 @@ fun MessagingStep(
             }
         }
 
-        // Must-Include Clothing
+        // Clothing Anchors
         if (allClothing.isNotEmpty()) {
             item {
-                SelectionArea(
-                    title = "Anchor Clothing",
-                    items = allClothing,
-                    selectedIds = anchoredClothing.map { it.id },
-                    onToggle = { onEvent(SimulatorEvent.ToggleAnchoredClothing(it)) },
-                    itemContent = { item ->
-                        InventoryThumbnail(item.imageUrl, item.colorHex)
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = "CLOTHING ANCHORS",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    val categories = listOf(
+                        Triple("Top", Icons.Default.Checkroom, ClothingCategory.TOPS),
+                        Triple("Bottom", Icons.Default.Layers, ClothingCategory.BOTTOMS),
+                        Triple("Shoes", Icons.AutoMirrored.Filled.DirectionsWalk, ClothingCategory.SHOES)
+                    )
+                    
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(32.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+                    ) {
+                        Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                categories.forEach { (name, icon, cat) ->
+                                    val isSelected = selectedClothingCategory == cat
+                                    CategoryTab(
+                                        label = name,
+                                        icon = icon,
+                                        isSelected = isSelected,
+                                        onClick = { onEvent(SimulatorEvent.SelectClothingCategory(cat)) },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+
+                            val itemsInSelectedCategory = allClothing.filter { it.category == selectedClothingCategory }
+                            AnchorItemRow(
+                                items = itemsInSelectedCategory,
+                                selectedIds = anchoredClothing.map { it.id },
+                                onToggle = { onEvent(SimulatorEvent.ToggleAnchoredClothing(it)) }
+                            )
+                        }
                     }
-                )
+                }
             }
         }
 
-        // Must-Include Cosmetics
+        // Makeup Anchors
         if (allCosmetics.isNotEmpty()) {
             item {
-                SelectionArea(
-                    title = "Anchor Makeup",
-                    items = allCosmetics,
-                    selectedIds = anchoredCosmetics.map { it.id },
-                    onToggle = { onEvent(SimulatorEvent.ToggleAnchoredCosmetic(it)) },
-                    itemContent = { item ->
-                        InventoryThumbnail(item.imageUrl, item.colorHex)
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = "MAKEUP ANCHORS",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    val categories = listOf(
+                        Triple("Eyes", Icons.Default.Visibility, MacroCategory.EYES),
+                        Triple("Cheeks", Icons.Default.FaceRetouchingNatural, MacroCategory.DIMENSION),
+                        Triple("Lips", Icons.Default.Face, MacroCategory.LIPS)
+                    )
+                    
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(32.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+                    ) {
+                        Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                categories.forEach { (name, icon, cat) ->
+                                    val isSelected = selectedCosmeticCategory == cat
+                                    CategoryTab(
+                                        label = name,
+                                        icon = icon,
+                                        isSelected = isSelected,
+                                        onClick = { onEvent(SimulatorEvent.SelectCosmeticCategory(cat)) },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+
+                            val itemsInSelectedCategory = allCosmetics.filter { it.macroCategory == selectedCosmeticCategory }
+                            AnchorItemRow(
+                                items = itemsInSelectedCategory,
+                                selectedIds = anchoredCosmetics.map { it.id },
+                                onToggle = { onEvent(SimulatorEvent.ToggleAnchoredCosmetic(it)) }
+                            )
+                        }
                     }
-                )
+                }
             }
         }
         
@@ -208,77 +289,102 @@ fun MessagingStep(
 }
 
 @Composable
-private fun <T> SelectionArea(
-    title: String,
-    items: List<T>,
-    selectedIds: List<Long>,
-    onToggle: (T) -> Unit,
-    itemContent: @Composable (T) -> Unit
+private fun CategoryTab(
+    label: String,
+    icon: ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(
-            text = title.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Black,
-            letterSpacing = 2.sp,
-            color = MaterialTheme.colorScheme.primary
-        )
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp)
+    Surface(
+        onClick = onClick,
+        modifier = modifier.height(56.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = if (isSelected) Color(0xFFE8E8FF) else Color(0xFFF3F2F8),
+        border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFCBCBFF)) else null
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(items) { item ->
-                val id = when (item) {
-                    is ClothingItem -> item.id
-                    is CosmeticItem -> item.id
-                    else -> 0L
-                }
-                val isSelected = selectedIds.contains(id)
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
-                        .border(
-                            width = if (isSelected) 2.dp else 1.dp,
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                        .clickable { onToggle(item) }
-                ) {
-                    itemContent(item)
-                    if (isSelected) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(4.dp)
-                                .size(20.dp)
-                                .background(MaterialTheme.colorScheme.primary, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(Icons.Default.Check, null, modifier = Modifier.size(12.dp), tint = Color.White)
-                        }
-                    }
-                }
-            }
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                color = if (isSelected) Color.Black else Color.Gray
+            )
         }
     }
 }
 
 @Composable
-private fun InventoryThumbnail(imageUrl: String?, colorHex: String?) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        if (imageUrl != null) {
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-        } else if (colorHex != null) {
-            Box(modifier = Modifier.fillMaxSize().background(parseColor(colorHex)))
-        } else {
-            Icon(Icons.Default.Inventory2, null, tint = Color.White.copy(alpha = 0.2f))
+private fun <T> AnchorItemRow(
+    items: List<T>,
+    selectedIds: List<Long>,
+    onToggle: (T) -> Unit
+) {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth().height(64.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        items(items) { item ->
+            val id = when (item) {
+                is ClothingItem -> item.id
+                is CosmeticItem -> item.id
+                else -> 0L
+            }
+            val colorHex = when (item) {
+                is ClothingItem -> item.colorHex
+                is CosmeticItem -> item.colorHex
+                else -> null
+            }
+            val imageUrl = when (item) {
+                is ClothingItem -> item.imageUrl
+                is CosmeticItem -> item.imageUrl
+                else -> null
+            }
+            val isSelected = selectedIds.contains(id)
+            
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(colorHex?.let { parseColor(it) } ?: Color.LightGray)
+                    .border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .clickable { onToggle(item) },
+                contentAlignment = Alignment.Center
+            ) {
+                if (imageUrl != null) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                
+                if (isSelected) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Default.Check, null, modifier = Modifier.size(20.dp), tint = Color.White)
+                    }
+                }
+            }
         }
     }
 }
@@ -404,7 +510,7 @@ fun ResultStep(
         }
 
         items(uiState.recommendedClothing) { item: ClothingItem ->
-            ResultCard(uiState = item, onEvent = {}, navTo = {})
+            ResultCard(uiState = item, onEvent = {}, navTo = navTo)
         }
         
         item {

@@ -37,7 +37,9 @@ data class StyleSimulatorUiState(
     val anchoredClothing: List<ClothingItem> = emptyList(),
     val anchoredCosmetics: List<CosmeticItem> = emptyList(),
     val fullClothingInventory: List<ClothingItem> = emptyList(),
-    val fullCosmeticInventory: List<CosmeticItem> = emptyList()
+    val fullCosmeticInventory: List<CosmeticItem> = emptyList(),
+    val selectedClothingCategory: ClothingCategory = ClothingCategory.TOPS,
+    val selectedCosmeticCategory: MacroCategory = MacroCategory.LIPS
 )
 
 enum class SimulationStep {
@@ -54,6 +56,8 @@ sealed class SimulatorEvent {
     data class OnPortraitSelected(val uri: String) : SimulatorEvent()
     data class ToggleAnchoredClothing(val item: ClothingItem) : SimulatorEvent()
     data class ToggleAnchoredCosmetic(val item: CosmeticItem) : SimulatorEvent()
+    data class SelectClothingCategory(val category: ClothingCategory) : SimulatorEvent()
+    data class SelectCosmeticCategory(val category: MacroCategory) : SimulatorEvent()
 }
 
 sealed class SimulatorEffect {
@@ -168,6 +172,12 @@ class StyleSimulatorViewModel @Inject constructor(
                     }
                     state.copy(anchoredCosmetics = newList)
                 }
+            }
+            is SimulatorEvent.SelectClothingCategory -> {
+                _uiState.update { it.copy(selectedClothingCategory = event.category) }
+            }
+            is SimulatorEvent.SelectCosmeticCategory -> {
+                _uiState.update { it.copy(selectedCosmeticCategory = event.category) }
             }
         }
     }
