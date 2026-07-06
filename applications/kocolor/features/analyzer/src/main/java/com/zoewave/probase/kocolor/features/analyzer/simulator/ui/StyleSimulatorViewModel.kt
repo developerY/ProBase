@@ -1,19 +1,23 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
 
+import android.content.Context
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
+import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleSimulatorEngine
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 
 data class StyleSimulatorUiState(
     val morningRoutineCompleted: Boolean = false,
@@ -26,7 +30,8 @@ data class StyleSimulatorUiState(
     val simulationStep: SimulationStep = SimulationStep.MESSAGING,
     val userMessage: String = "",
     val rationale: String? = null,
-    val isLocalResult: Boolean = false
+    val isLocalResult: Boolean = false,
+    val userPortraitUri: String? = null
 )
 
 enum class SimulationStep {
@@ -38,17 +43,21 @@ sealed class SimulatorEvent {
     data object StartSimulation : SimulatorEvent()
     data object SaveToPalette : SimulatorEvent()
     data object Reset : SimulatorEvent()
+    data object CapturePortrait : SimulatorEvent()
 }
 
 sealed class SimulatorEffect {
     data object NavigateToHistory : SimulatorEffect()
+    data class NavigateToCamera(val target: String) : SimulatorEffect()
 }
 
 @HiltViewModel
 class StyleSimulatorViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val routineDao: RoutineDao,
     private val wardrobeRepository: WardrobeRepository,
     private val fashionRepository: com.zoewave.probase.kocolor.data.FashionRepository,
+    private val sessionRepository: FashionSessionRepository,
     private val simulatorEngine: StyleSimulatorEngine,
     private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
@@ -61,6 +70,15 @@ class StyleSimulatorViewModel @Inject constructor(
 
     init {
         checkRoutineStatus()
+        observePortrait()
+    }
+
+    private fun observePortrait() {
+        viewModelScope.launch {
+            sessionRepository.faceUri.collect { uri ->
+                _uiState.update { it.copy(userPortraitUri = uri) }
+            }
+        }
     }
 
     private fun checkRoutineStatus() {
@@ -91,6 +109,11 @@ class StyleSimulatorViewModel @Inject constructor(
             SimulatorEvent.StartSimulation -> runSimulation()
             SimulatorEvent.SaveToPalette -> saveSelectionToColorTab()
             SimulatorEvent.Reset -> _uiState.value = StyleSimulatorUiState()
+            SimulatorEvent.CapturePortrait -> {
+                viewModelScope.launch {
+                    _effect.send(SimulatorEffect.NavigateToCamera("face_simulator"))
+                }
+            }
         }
     }
 
@@ -99,14 +122,24 @@ class StyleSimulatorViewModel @Inject constructor(
             val apiKey = aiSettings.getGeminiApiKey()
             val userIntent = uiState.value.userMessage
             
-            // 1. Manifest Pre-Filtering (Stage 2)
+            // 1. Manifest Pre-Filtering
+            Log.d("StyleSimulatorVM", "THINKING: Filtering wardrobe for intent: '$userIntent'")
             val filteredWardrobe = wardrobeRepository.getShortlistByIntent(userIntent).first()
+            Log.d("StyleSimulatorVM", "THINKING: Shortlist identified: ${filteredWardrobe.size} candidate items")
 
-            // 2. Biological Skin Anchoring (Stage 3)
+            // 2. Biological Skin Anchoring
             val profile = fashionRepository.getProfile().first()
             val skinContext = profile?.let { 
                 "Undertone: ${it.undertone}, Seasonal Type: ${it.seasonalType}"
             } ?: "Unknown"
+            Log.d("StyleSimulatorVM", "THINKING: Anchoring to Skin Profile: $skinContext")
+
+            // 3. User Portrait Retrieval (Multimodal Anchor)
+            val portraitUri = sessionRepository.faceUri.value
+            val userPortrait = portraitUri?.let { uri ->
+                Log.d("StyleSimulatorVM", "THINKING: Loading visual anchor from $uri")
+                loadBitmapFromUri(Uri.parse(uri))
+            }
 
             _uiState.update { it.copy(isAnalyzing = true, simulationStep = SimulationStep.BIO_MARKERS) }
             delay(1000)
@@ -121,11 +154,15 @@ class StyleSimulatorViewModel @Inject constructor(
                 wellnessScore = uiState.value.wellnessScore,
                 availableWardrobe = filteredWardrobe,
                 fashionProfile = skinContext,
+                userPortrait = userPortrait,
                 apiKey = apiKey
             )
             
             val isLocal = apiKey.isNullOrBlank() || blueprint.rationale.startsWith("Local Architect")
             val selectedItems = filteredWardrobe.filter { it.id in blueprint.selectedItemIds }
+
+            // Recycle portrait bitmap after AI analysis to save memory
+            userPortrait?.recycle()
 
             _uiState.update { state ->
                 state.copy(
@@ -139,6 +176,14 @@ class StyleSimulatorViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun loadBitmapFromUri(uri: Uri): android.graphics.Bitmap? {
+        return try {
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                android.graphics.BitmapFactory.decodeStream(inputStream)
+            }
+        } catch (e: Exception) { null }
     }
 
     private fun saveSelectionToColorTab() {
@@ -172,8 +217,8 @@ class StyleSimulatorViewModel @Inject constructor(
             val advice = FashionAdvice(
                 title = "The ${state.userMessage.take(15)} Collection",
                 summary = state.rationale ?: "AI optimized style blueprint.",
-                seasonalType = SeasonalType.WINTER,
-                undertone = Undertone.COOL,
+                seasonalType = (fashionRepository.getProfile().first()?.seasonalType) ?: SeasonalType.WINTER,
+                undertone = (fashionRepository.getProfile().first()?.undertone) ?: Undertone.COOL,
                 makeupSuggestions = listOf(
                     MakeupSuggestion(
                         category = "Lips",

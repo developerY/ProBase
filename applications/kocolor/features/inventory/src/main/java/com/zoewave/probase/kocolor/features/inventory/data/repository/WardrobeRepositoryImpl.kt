@@ -55,7 +55,7 @@ class WardrobeRepositoryImpl @Inject constructor(
         return when {
             lower.contains("negotiation") || lower.contains("boardroom") || lower.contains("professional") -> Formality.PROFESSIONAL
             lower.contains("gala") || lower.contains("wedding") || lower.contains("formal") -> Formality.FORMAL
-            lower.contains("interview") || lower.contains("presentation") -> Formality.SMART_CASUAL
+            lower.contains("interview") || lower.contains("presentation") || lower.contains("date") -> Formality.SMART_CASUAL
             lower.contains("chill") || lower.contains("home") || lower.contains("relax") -> Formality.LOUNGE
             else -> Formality.CASUAL
         }

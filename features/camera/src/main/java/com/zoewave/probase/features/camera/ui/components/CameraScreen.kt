@@ -9,7 +9,6 @@ import android.util.Log
 import android.view.OrientationEventListener
 import android.view.Surface
 import androidx.camera.compose.CameraXViewfinder
-import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
@@ -118,7 +117,7 @@ fun CameraScreen(
     }
 
     if (cameraPermissionState.status.isGranted) {
-        LaunchedEffect(lifecycleOwner) {
+        LaunchedEffect(lifecycleOwner, uiState.cameraSelector) {
             val cameraProvider = ProcessCameraProvider.awaitInstance(context)
             previewUseCase.surfaceProvider = null
             previewUseCase.setSurfaceProvider(ContextCompat.getMainExecutor(context)) { request ->
@@ -129,7 +128,7 @@ fun CameraScreen(
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
                     lifecycleOwner,
-                    CameraSelector.DEFAULT_BACK_CAMERA,
+                    uiState.cameraSelector,
                     previewUseCase,
                     imageCaptureUseCase
                 )

@@ -584,11 +584,12 @@ fun koColorNavEntryProvider(
         }
         is KoColorRoute.Camera -> NavEntry(route) {
             com.zoewave.probase.features.camera.ui.CameraUIRoute(
+                target = route.target,
                 navTo = { result ->
                     if (result.startsWith("result_ok:")) {
                         val uri = result.substringAfter("result_ok:")
                         when (route.target) {
-                            "face" -> onFaceCaptured(uri)
+                            "face", "face_simulator" -> onFaceCaptured(uri)
                             "hair" -> onHairCaptured(uri)
                             "shoes" -> onShoesCaptured(uri)
                             "clothes" -> onClothesCaptured(uri)

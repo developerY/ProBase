@@ -1,0 +1,13 @@
+- `[x]` 3-Tier Intelligence Strategy
+    - `[x]` Integrate `LocalAiEngine` into `StyleSimulatorEngine`
+    - `[x]` Implement Gemini Nano Tier 1.5 logic
+    - `[x]` Add `RequiresCloudException` for context overflow
+- `[x]` Manifest Pre-Filtering
+    - `[x]` Implement `getShortlistByIntent` in `WardrobeRepository`
+    - `[x]` Create Vibe-to-Formality mapping
+- `[x]` Biological Skin Anchoring
+    - `[x]` Integrate `FashionProfile` into `StyleSimulatorViewModel`
+    - `[x]` Inject undertone/season into AI prompts
+- `[x]` Verification & Testing
+    - `[x]` Verify 3-tier fallback sequence
+    - `[x]` Verify skin-tone mentioned in rationale

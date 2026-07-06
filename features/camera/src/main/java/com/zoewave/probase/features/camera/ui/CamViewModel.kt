@@ -1,6 +1,7 @@
 package com.zoewave.probase.features.camera.ui
 
 import android.util.Log
+import androidx.camera.core.CameraSelector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,26 @@ class CamViewModel @Inject constructor(
     // 1. Initialize the UI in the Active state so the Viewfinder opens immediately
     private val _uiState = MutableStateFlow<CamUIState>(CamUIState.Active())
     val uiState: StateFlow<CamUIState> = _uiState.asStateFlow()
+
+    fun setCameraTarget(target: String) {
+        val selector = when (target) {
+            "face", "face_simulator", "hair" -> CameraSelector.DEFAULT_FRONT_CAMERA
+            else -> {
+                if (target.startsWith("ritual_step:")) {
+                    CameraSelector.DEFAULT_FRONT_CAMERA
+                } else {
+                    CameraSelector.DEFAULT_BACK_CAMERA
+                }
+            }
+        }
+        _uiState.update { current ->
+            when (current) {
+                is CamUIState.Active -> current.copy(cameraSelector = selector)
+                is CamUIState.Loading -> current.copy(cameraSelector = selector)
+                is CamUIState.Error -> current.copy(cameraSelector = selector)
+            }
+        }
+    }
 
     // 🚀 1. The new One-Time Event Channel
     private val _uiEvent = Channel<String>()

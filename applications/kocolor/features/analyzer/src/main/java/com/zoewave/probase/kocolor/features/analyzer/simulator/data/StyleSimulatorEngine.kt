@@ -5,7 +5,6 @@ import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.features.ai.local.data.LocalAiEngine
-import com.zoewave.probase.features.ai.local.domain.router.RequiresCloudException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -36,42 +35,59 @@ class StyleSimulatorEngine @Inject constructor(
         wellnessScore: Double,
         availableWardrobe: List<ClothingItem>,
         fashionProfile: String? = null,
+        userPortrait: android.graphics.Bitmap? = null,
         apiKey: String? = null,
         modelName: String = "gemini-1.5-flash"
     ): StyleBlueprint {
+        val startTime = System.currentTimeMillis()
+        android.util.Log.d("StyleSimulatorEngine", "--- [STARTING STYLE SIMULATION] ---")
+        android.util.Log.d("StyleSimulatorEngine", "THINKING: Processing intent: '$userIntent'")
+        android.util.Log.d("StyleSimulatorEngine", "THINKING: Circadian Context: $circadianContext")
+        android.util.Log.d("StyleSimulatorEngine", "THINKING: Wellness Score: $wellnessScore, Routine Completed: $routineCompleted")
+        android.util.Log.d("StyleSimulatorEngine", "THINKING: Wardrobe Size: ${availableWardrobe.size} items")
+        android.util.Log.d("StyleSimulatorEngine", "THINKING: Visual Anchor Present: ${userPortrait != null}")
         
         val prompt = buildArchitectPrompt(
             userIntent, circadianContext, routineCompleted, wellnessScore, availableWardrobe, fashionProfile
         )
 
-        // Tier 1: Probabilistic (Cloud Gemini BYOK)
-        if (!apiKey.isNullOrBlank()) {
-            try {
-                val cloudResult = architectCloudBlueprint(prompt, apiKey, modelName)
-                if (cloudResult != null) return cloudResult
-            } catch (e: Exception) {
-                android.util.Log.w("StyleSimulatorEngine", "Tier 1 (Cloud) failed, falling back to Tier 1.5 (Nano)")
-            }
-        }
-
-        // Tier 1.5: Local LLM (Gemini Nano)
+        // Tier 1.5: Local LLM (Gemini Nano) - PREFERRED Tier for speed/cost
+        android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1.5 (On-Device Gemini Nano)...")
         try {
             val localAiResult = localAi.generateStructuredContent(prompt, BLUEPRINT_SCHEMA)
-            localAiResult.onSuccess { jsonText ->
+            if (localAiResult.isSuccess) {
+                val jsonText = localAiResult.getOrThrow()
+                android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1.5 in ${System.currentTimeMillis() - startTime}ms")
                 return sanitizeAndDecode(jsonText)
             }
-        } catch (e: RequiresCloudException) {
-            android.util.Log.d("StyleSimulatorEngine", "Tier 1.5 (Nano) bypass: ${e.message}")
         } catch (e: Exception) {
-            android.util.Log.e("StyleSimulatorEngine", "Tier 1.5 (Nano) failed", e)
+            android.util.Log.w("StyleSimulatorEngine", "THINKING: Tier 1.5 failed (${e.message}), checking Tier 1 fallback...")
         }
 
-        // Tier 2: Deterministic (Local Heuristics)
-        return architectLocalBlueprint(userIntent, availableWardrobe)
+        // Tier 1: Probabilistic (Cloud Gemini BYOK Multimodal) - FALLBACK for Nano failures
+        if (!apiKey.isNullOrBlank()) {
+            android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 1 (Cloud Gemini 1.5 Flash Fallback)...")
+            try {
+                val cloudResult = architectCloudBlueprint(prompt, userPortrait, apiKey, modelName)
+                if (cloudResult != null) {
+                    android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 1 in ${System.currentTimeMillis() - startTime}ms")
+                    return cloudResult
+                }
+            } catch (e: Exception) {
+                android.util.Log.w("StyleSimulatorEngine", "THINKING: Tier 1 fallback failed (${e.message})")
+            }
+        }
+
+        // Tier 2: Deterministic (Local Heuristics) - Final Safety Net
+        android.util.Log.d("StyleSimulatorEngine", "THINKING: Attempting Tier 2 (Local Heuristic Architect)...")
+        val localResult = architectLocalBlueprint(userIntent, availableWardrobe)
+        android.util.Log.d("StyleSimulatorEngine", "SUCCESS: Blueprint generated via Tier 2 in ${System.currentTimeMillis() - startTime}ms")
+        return localResult
     }
 
     private suspend fun architectCloudBlueprint(
         prompt: String,
+        userPortrait: android.graphics.Bitmap?,
         apiKey: String,
         modelName: String
     ): StyleBlueprint? {
@@ -83,7 +99,12 @@ class StyleSimulatorEngine @Inject constructor(
             }
         )
 
-        val response = generativeModel.generateContent(prompt)
+        val inputContent = content {
+            userPortrait?.let { image(it) }
+            text(prompt)
+        }
+
+        val response = generativeModel.generateContent(inputContent)
         val jsonText = response.text ?: return null
         return sanitizeAndDecode(jsonText)
     }
@@ -105,9 +126,11 @@ class StyleSimulatorEngine @Inject constructor(
             
             USER INTENT: $userIntent
             BIOLOGICAL CONTEXT: $circadianContext
-            SKIN PROFILE: ${fashionProfile ?: "Unknown"}
+            SKIN PROFILE (TEXT): ${fashionProfile ?: "Unknown"}
             MORNING RITUAL COMPLETED: $routineCompleted
             WELLNESS SCORE: ${"%.2f".format(wellnessScore)}
+            
+            IMAGE DATA: I have provided a portrait of the user. Use this image as the PRIMARY source of truth for their complexion, eye color, and hair tone.
             
             AVAILABLE WARDROBE (PRE-FILTERED):
             $wardrobeDescription
@@ -115,7 +138,7 @@ class StyleSimulatorEngine @Inject constructor(
             GOAL:
             1. Select BEST 3 items (Top, Bottom, Shoes).
             2. Recommend 2 Accessories.
-            3. Create a 3-color Palette (HEX codes) harmonizing with items and SKIN PROFILE.
+            3. Create a 3-color Palette (HEX codes) harmonizing with items and the user's VISUAL features.
             4. Provide a brief rationale.
         """.trimIndent()
     }

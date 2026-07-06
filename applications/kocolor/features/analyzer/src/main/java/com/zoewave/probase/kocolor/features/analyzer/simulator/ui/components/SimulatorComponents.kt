@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -62,7 +63,8 @@ fun MagicBackground() {
 
 @Composable
 fun MessagingStep(
-    uiState: String,
+    userMessage: String,
+    userPortraitUri: String?,
     onEvent: (SimulatorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -75,9 +77,51 @@ fun MessagingStep(
             fontWeight = FontWeight.Light,
             lineHeight = 52.sp
         )
+
+        // User Portrait Slot
+        Card(
+            modifier = Modifier.fillMaxWidth().height(120.dp).clickable { onEvent(SimulatorEvent.CapturePortrait) },
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp).fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier.size(80.dp).clip(CircleShape).background(Color.Gray.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (userPortraitUri != null) {
+                        AsyncImage(
+                            model = userPortraitUri,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(Icons.Default.Person, null, modifier = Modifier.size(32.dp), tint = Color.White.copy(alpha = 0.5f))
+                    }
+                }
+                Spacer(Modifier.width(20.dp))
+                Column {
+                    Text(
+                        text = if (userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = if (userPortraitUri != null) "Tap to re-capture visual anchor" else "Tap to add visual context",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
         
         OutlinedTextField(
-            value = uiState,
+            value = userMessage,
             onValueChange = { onEvent(SimulatorEvent.UpdateMessage(it)) },
             placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.alpha(0.4f)) },
             modifier = Modifier.fillMaxWidth().height(200.dp),
