@@ -36,6 +36,7 @@ class StyleSimulatorEngine @Inject constructor(
         wellnessScore: Double,
         availableWardrobe: List<ClothingItem>,
         fashionProfile: String? = null,
+        userPortrait: android.graphics.Bitmap? = null,
         apiKey: String? = null,
         modelName: String = "gemini-1.5-flash"
     ): StyleBlueprint {
@@ -44,10 +45,10 @@ class StyleSimulatorEngine @Inject constructor(
             userIntent, circadianContext, routineCompleted, wellnessScore, availableWardrobe, fashionProfile
         )
 
-        // Tier 1: Probabilistic (Cloud Gemini BYOK)
+        // Tier 1: Probabilistic (Cloud Gemini BYOK Multimodal)
         if (!apiKey.isNullOrBlank()) {
             try {
-                val cloudResult = architectCloudBlueprint(prompt, apiKey, modelName)
+                val cloudResult = architectCloudBlueprint(prompt, userPortrait, apiKey, modelName)
                 if (cloudResult != null) return cloudResult
             } catch (e: Exception) {
                 android.util.Log.w("StyleSimulatorEngine", "Tier 1 (Cloud) failed, falling back to Tier 1.5 (Nano)")
@@ -56,6 +57,7 @@ class StyleSimulatorEngine @Inject constructor(
 
         // Tier 1.5: Local LLM (Gemini Nano)
         try {
+            // Note: If userPortrait is present, Nano path may require multimodal-specific routing
             val localAiResult = localAi.generateStructuredContent(prompt, BLUEPRINT_SCHEMA)
             localAiResult.onSuccess { jsonText ->
                 return sanitizeAndDecode(jsonText)
@@ -72,6 +74,7 @@ class StyleSimulatorEngine @Inject constructor(
 
     private suspend fun architectCloudBlueprint(
         prompt: String,
+        userPortrait: android.graphics.Bitmap?,
         apiKey: String,
         modelName: String
     ): StyleBlueprint? {
@@ -83,7 +86,12 @@ class StyleSimulatorEngine @Inject constructor(
             }
         )
 
-        val response = generativeModel.generateContent(prompt)
+        val inputContent = content {
+            userPortrait?.let { image(it) }
+            text(prompt)
+        }
+
+        val response = generativeModel.generateContent(inputContent)
         val jsonText = response.text ?: return null
         return sanitizeAndDecode(jsonText)
     }
@@ -105,9 +113,11 @@ class StyleSimulatorEngine @Inject constructor(
             
             USER INTENT: $userIntent
             BIOLOGICAL CONTEXT: $circadianContext
-            SKIN PROFILE: ${fashionProfile ?: "Unknown"}
+            SKIN PROFILE (TEXT): ${fashionProfile ?: "Unknown"}
             MORNING RITUAL COMPLETED: $routineCompleted
             WELLNESS SCORE: ${"%.2f".format(wellnessScore)}
+            
+            IMAGE DATA: I have provided a portrait of the user. Use this image as the PRIMARY source of truth for their complexion, eye color, and hair tone.
             
             AVAILABLE WARDROBE (PRE-FILTERED):
             $wardrobeDescription
@@ -115,7 +125,7 @@ class StyleSimulatorEngine @Inject constructor(
             GOAL:
             1. Select BEST 3 items (Top, Bottom, Shoes).
             2. Recommend 2 Accessories.
-            3. Create a 3-color Palette (HEX codes) harmonizing with items and SKIN PROFILE.
+            3. Create a 3-color Palette (HEX codes) harmonizing with items and the user's VISUAL features.
             4. Provide a brief rationale.
         """.trimIndent()
     }

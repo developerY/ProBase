@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -70,6 +69,7 @@ fun QuickActions(
             onEvent = {}, 
             navTo = navTo
         )
+        /* Hide Capture Product for initial release
         QuickActionCard(
             uiState = QuickActionUiState(
                 stringResource(R.string.applications_kocolor_apps_mobile_features_home_capture_product), 
@@ -82,6 +82,7 @@ fun QuickActions(
             onEvent = {}, 
             navTo = navTo
         )
+        */
     }
 }
 

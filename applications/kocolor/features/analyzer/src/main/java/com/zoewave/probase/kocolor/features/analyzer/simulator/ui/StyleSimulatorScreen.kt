@@ -32,6 +32,7 @@ fun StyleSimulatorScreen(
             effect.collect { simulatorEffect ->
                 when (simulatorEffect) {
                     SimulatorEffect.NavigateToHistory -> navTo(KoColorRoute.Color)
+                    is SimulatorEffect.NavigateToCamera -> navTo(KoColorRoute.Camera(simulatorEffect.target))
                 }
             }
         }
@@ -66,7 +67,8 @@ fun StyleSimulatorScreen(
                 ) { step ->
                     when (step) {
                         SimulationStep.MESSAGING -> MessagingStep(
-                            uiState = uiState.userMessage,
+                            userMessage = uiState.userMessage,
+                            userPortraitUri = uiState.userPortraitUri,
                             onEvent = onEvent,
                             navTo = navTo
                         )
