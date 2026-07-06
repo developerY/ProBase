@@ -26,11 +26,22 @@ enum class ClothingCategory {
 }
 
 @Serializable
+enum class Formality(val rank: Int) {
+    LOUNGE(1), 
+    CASUAL(2), 
+    SMART_CASUAL(3), 
+    PROFESSIONAL(4), 
+    FORMAL(5), 
+    GALA(6)
+}
+
+@Serializable
 data class ClothingItem(
     val id: Long = 0,
     val name: String,
     val brand: String? = null,
     val category: ClothingCategory,
+    val formality: Formality = Formality.CASUAL,
     val colorHex: String? = null,
     val size: String? = null,
     val material: String? = null,

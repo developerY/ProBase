@@ -126,6 +126,38 @@ class LocalAiEngine @Inject constructor() {
     }
 
     /**
+     * Generic structured content generation via Gemini Nano.
+     * Uses deterministic timeouts and handles requires-cloud handoffs.
+     */
+    suspend fun generateStructuredContent(
+        prompt: String,
+        jsonSchema: String? = null
+    ): Result<String> = withContext(Dispatchers.Default) {
+        try {
+            val capability = checkCapability()
+            if (capability == NanoState.Unsupported) {
+                return@withContext Result.failure(RequiresCloudException("Hardware not supported"))
+            }
+
+            val finalPrompt = if (jsonSchema != null) {
+                "$prompt\n\nReturn ONLY a valid JSON object matching this schema:\n$jsonSchema"
+            } else prompt
+
+            val response = withTimeout(10000) {
+                localModel.generateContent(finalPrompt)
+            }
+            
+            val text = response.candidates.firstOrNull()?.text 
+                ?: return@withContext Result.failure(Exception("Empty AI response"))
+
+            Result.success(text)
+        } catch (e: Exception) {
+            val reason = e.message ?: "Local AI generation failed"
+            Result.failure(RequiresCloudException(reason))
+        }
+    }
+
+    /**
      * Standardizes categorized OCR text using the GeminiPipelineRouter via ML Kit.
      */
     suspend fun standardizeCategorizedText(

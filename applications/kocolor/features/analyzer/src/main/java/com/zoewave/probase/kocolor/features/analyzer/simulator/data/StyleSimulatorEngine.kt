@@ -4,18 +4,30 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.features.ai.local.data.LocalAiEngine
+import com.zoewave.probase.features.ai.local.domain.router.RequiresCloudException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class StyleSimulatorEngine @Inject constructor() {
+class StyleSimulatorEngine @Inject constructor(
+    private val localAi: LocalAiEngine
+) {
 
     private val json = Json { 
         ignoreUnknownKeys = true 
         coerceInputValues = true
     }
+
+    private val BLUEPRINT_SCHEMA = """
+        {
+          "rationale": "string",
+          "selectedItemIds": ["Long", "Long", ...],
+          "recommendedPalette": ["#HEX", "#HEX", "#HEX"]
+        }
+    """.trimIndent()
 
     suspend fun architectStyleBlueprint(
         userIntent: String,
@@ -23,9 +35,46 @@ class StyleSimulatorEngine @Inject constructor() {
         routineCompleted: Boolean,
         wellnessScore: Double,
         availableWardrobe: List<ClothingItem>,
-        apiKey: String,
+        fashionProfile: String? = null,
+        apiKey: String? = null,
         modelName: String = "gemini-1.5-flash"
     ): StyleBlueprint {
+        
+        val prompt = buildArchitectPrompt(
+            userIntent, circadianContext, routineCompleted, wellnessScore, availableWardrobe, fashionProfile
+        )
+
+        // Tier 1: Probabilistic (Cloud Gemini BYOK)
+        if (!apiKey.isNullOrBlank()) {
+            try {
+                val cloudResult = architectCloudBlueprint(prompt, apiKey, modelName)
+                if (cloudResult != null) return cloudResult
+            } catch (e: Exception) {
+                android.util.Log.w("StyleSimulatorEngine", "Tier 1 (Cloud) failed, falling back to Tier 1.5 (Nano)")
+            }
+        }
+
+        // Tier 1.5: Local LLM (Gemini Nano)
+        try {
+            val localAiResult = localAi.generateStructuredContent(prompt, BLUEPRINT_SCHEMA)
+            localAiResult.onSuccess { jsonText ->
+                return sanitizeAndDecode(jsonText)
+            }
+        } catch (e: RequiresCloudException) {
+            android.util.Log.d("StyleSimulatorEngine", "Tier 1.5 (Nano) bypass: ${e.message}")
+        } catch (e: Exception) {
+            android.util.Log.e("StyleSimulatorEngine", "Tier 1.5 (Nano) failed", e)
+        }
+
+        // Tier 2: Deterministic (Local Heuristics)
+        return architectLocalBlueprint(userIntent, availableWardrobe)
+    }
+
+    private suspend fun architectCloudBlueprint(
+        prompt: String,
+        apiKey: String,
+        modelName: String
+    ): StyleBlueprint? {
         val generativeModel = GenerativeModel(
             modelName = modelName,
             apiKey = apiKey,
@@ -34,48 +83,47 @@ class StyleSimulatorEngine @Inject constructor() {
             }
         )
 
+        val response = generativeModel.generateContent(prompt)
+        val jsonText = response.text ?: return null
+        return sanitizeAndDecode(jsonText)
+    }
+
+    private fun buildArchitectPrompt(
+        userIntent: String,
+        circadianContext: String,
+        routineCompleted: Boolean,
+        wellnessScore: Double,
+        availableWardrobe: List<ClothingItem>,
+        fashionProfile: String?
+    ): String {
         val wardrobeDescription = availableWardrobe.joinToString("\n") { 
             "ID: ${it.id}, Name: ${it.name}, Category: ${it.category}, Color: ${it.colorHex ?: "Unknown"}"
         }
 
-        val prompt = content {
-            text("""
-                You are the KoColor Style Architect AI. Your task is to generate a "Style Blueprint" for a user based on their intent, biological context, and available wardrobe.
-                
-                USER INTENT: $userIntent
-                CIRCADIAN CONTEXT: $circadianContext
-                MORNING RITUAL COMPLETED: $routineCompleted
-                WELLNESS SCORE: ${"%.2f".format(wellnessScore)}
-                
-                AVAILABLE WARDROBE:
-                $wardrobeDescription
-                
-                GOAL:
-                1. Select the BEST 3 items from the wardrobe (Top, Bottom, Shoes) that match the intent and context.
-                2. Recommend 2 Accessories from the available items.
-                3. Create a 3-color Palette (HEX codes) that harmonizes the selection.
-                4. Provide a brief stylistic rationale.
-                
-                Respond ONLY with a valid JSON object matching this exact schema:
-                {
-                  "rationale": "string",
-                  "selectedItemIds": ["Long", "Long", ...],
-                  "recommendedPalette": ["#HEX", "#HEX", "#HEX"]
-                }
-            """.trimIndent())
-        }
-
-        return try {
-            val response = generativeModel.generateContent(prompt)
-            val jsonText = response.text ?: throw IllegalStateException("Empty response from AI")
-            val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
-            val finalJson = "{$cleanedJson}"
+        return """
+            You are the KoColor Style Architect AI. Generate a "Style Blueprint".
             
-            json.decodeFromString<StyleBlueprint>(finalJson)
-        } catch (e: Exception) {
-            android.util.Log.e("StyleSimulatorEngine", "AI Simulation failed, falling back to local architect", e)
-            architectLocalBlueprint(userIntent, availableWardrobe)
-        }
+            USER INTENT: $userIntent
+            BIOLOGICAL CONTEXT: $circadianContext
+            SKIN PROFILE: ${fashionProfile ?: "Unknown"}
+            MORNING RITUAL COMPLETED: $routineCompleted
+            WELLNESS SCORE: ${"%.2f".format(wellnessScore)}
+            
+            AVAILABLE WARDROBE (PRE-FILTERED):
+            $wardrobeDescription
+            
+            GOAL:
+            1. Select BEST 3 items (Top, Bottom, Shoes).
+            2. Recommend 2 Accessories.
+            3. Create a 3-color Palette (HEX codes) harmonizing with items and SKIN PROFILE.
+            4. Provide a brief rationale.
+        """.trimIndent()
+    }
+
+    private fun sanitizeAndDecode(jsonText: String): StyleBlueprint {
+        val cleanedJson = jsonText.substringAfter("{").substringBeforeLast("}")
+        val finalJson = "{$cleanedJson}"
+        return json.decodeFromString<StyleBlueprint>(finalJson)
     }
 
     /**
