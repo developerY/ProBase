@@ -174,11 +174,11 @@ fun SettingsScreen(
                     Text("Developer Options", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = { onEvent(SettingsEvent.OnGenerateSampleCosmetics) },
+                        onClick = { onEvent(SettingsEvent.OnGenerateSampleData) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Text("Add 50 Sample Cosmetics")
+                        Text("Add Sample Portfolio Items")
                     }
                 }
             }

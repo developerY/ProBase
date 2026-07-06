@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.db.KoColorSettings
 import com.zoewave.probase.kocolor.db.dao.CosmeticDao
+import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
+import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
 import com.zoewave.probase.core.model.ritual.*
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,7 +45,7 @@ sealed class SettingsEvent {
     data class OnTempUnitChanged(val unit: String) : SettingsEvent()
     data class OnHydrationGoalChanged(val goal: Double) : SettingsEvent()
     data object OnResetHydrationProgress : SettingsEvent()
-    data object OnGenerateSampleCosmetics : SettingsEvent()
+    data object OnGenerateSampleData : SettingsEvent()
     data class InitializeWithSection(val section: String) : SettingsEvent()
 }
 
@@ -51,6 +53,7 @@ sealed class SettingsEvent {
 class SettingsViewModel @Inject constructor(
     private val koSettings: KoColorSettings,
     private val cosmeticDao: CosmeticDao,
+    private val clothingDao: ClothingDao,
     private val healthSessionManager: HealthSessionManager
 ) : ViewModel() {
 
@@ -132,8 +135,8 @@ class SettingsViewModel @Inject constructor(
                     healthSessionManager.deleteTodayHydration()
                 }
             }
-            SettingsEvent.OnGenerateSampleCosmetics -> {
-                generateSampleItems()
+            SettingsEvent.OnGenerateSampleData -> {
+                generateSampleData()
             }
             is SettingsEvent.InitializeWithSection -> {
                 if (event.section == "Hydration") {
@@ -143,16 +146,16 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun generateSampleItems() {
+    private fun generateSampleData() {
         viewModelScope.launch {
-            val brands = listOf("L'Oreal", "MAC", "Maybelline", "Chanel", "Dior", "Fenty Beauty", "Rare Beauty")
-            val productSuffixes = listOf("Glow", "Matte", "Gloss", "Cream", "Stick", "Powder", "Ink")
-            val colors = listOf("#FF0000", "#FFC0CB", "#800020", "#C71585", "#DB7093", "#FFA07A", "#FF7F50")
+            // 1. Generate 10 High-Fidelity Cosmetics
+            val cosmeticBrands = listOf("Chanel", "Dior", "Fenty Beauty", "Rare Beauty", "MAC", "Estée Lauder", "YSL", "NARS", "Guerlain", "Charlotte Tilbury")
+            val cosmeticColors = listOf("#8B0000", "#FFC0CB", "#D4AF37", "#2C2420", "#FDEEF4", "#E8F1FD", "#FEECEB", "#800020", "#C71585", "#DB7093")
             
-            repeat(50) { i ->
+            repeat(10) { i ->
                 val micro = MicroCategory.entries.toTypedArray().random()
-                val brand = brands.random()
-                val name = "${brand} ${productSuffixes.random()} ${i + 1}"
+                val brand = cosmeticBrands[i % cosmeticBrands.size]
+                val name = "$brand ${micro.displayName} Elite"
                 
                 cosmeticDao.insertCosmetic(
                     CosmeticItemEntity(
@@ -160,9 +163,33 @@ class SettingsViewModel @Inject constructor(
                         brand = brand,
                         macroCategory = micro.macro,
                         microCategory = micro,
-                        colorHex = colors.random(),
-                        shadeName = "Shade ${i + 1}",
-                        timestamp = System.currentTimeMillis() - (i * 1000 * 60 * 60) // Different times
+                        colorHex = cosmeticColors[i % cosmeticColors.size],
+                        shadeName = "Signature ${i + 1}",
+                        timestamp = System.currentTimeMillis() - (i * 3600000)
+                    )
+                )
+            }
+
+            // 2. Generate 10 High-Fidelity Clothing Items
+            val clothingBrands = listOf("Atelier", "Saint Laurent", "Celine", "Brunello Cucinelli", "Loro Piana", "Hermès", "The Row", "Prada", "Gucci", "Loewe")
+            val clothingColors = listOf("#222222", "#FFFFFF", "#F5F5DC", "#000080", "#355E3B", "#4A2C2A", "#708090", "#800000", "#FFD700", "#E1C16E")
+
+            repeat(10) { i ->
+                val category = ClothingCategory.entries.toTypedArray().random()
+                val brand = clothingBrands[i % clothingBrands.size]
+                val formality = if (i % 3 == 0) Formality.PROFESSIONAL else if (i % 5 == 0) Formality.FORMAL else Formality.CASUAL
+                
+                clothingDao.insertClothing(
+                    ClothingItemEntity(
+                        name = "$brand ${category.displayName} Piece",
+                        brand = brand,
+                        category = category,
+                        formality = formality,
+                        colorHex = clothingColors[i % clothingColors.size],
+                        dominantHex = clothingColors[i % clothingColors.size],
+                        material = "Premium Silk/Cashmere Blend",
+                        price = (200..2000).random().toDouble(),
+                        timestamp = System.currentTimeMillis() - (i * 7200000)
                     )
                 )
             }
