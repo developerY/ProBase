@@ -3,6 +3,7 @@ package com.zoewave.probase.kocolor.db.entity
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.Formality
 
 @Entity(tableName = "clothing_items")
 data class ClothingItemEntity(
@@ -10,6 +11,7 @@ data class ClothingItemEntity(
     val name: String,
     val brand: String? = null,
     val category: ClothingCategory,
+    val formality: Formality = Formality.CASUAL,
     val colorHex: String? = null,
     val size: String? = null,
     val material: String? = null,

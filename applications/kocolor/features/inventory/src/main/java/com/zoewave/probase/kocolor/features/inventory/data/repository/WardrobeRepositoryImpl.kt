@@ -11,6 +11,7 @@ import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.mobile.features.color.domain.engine.WardrobeColorEngine
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.Formality
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -37,6 +38,27 @@ class WardrobeRepositoryImpl @Inject constructor(
                 Log.e(TAG, "Error fetching all clothing items", e)
                 emit(emptyList())
             }
+    }
+
+    override fun getShortlistByIntent(intent: String): Flow<List<ClothingItem>> {
+        val minFormality = mapIntentToFormality(intent)
+        return clothingDao.getClothingByMinFormality(minFormality)
+            .map { entities -> entities.map { it.toModel() } }
+            .catch { e ->
+                Log.e(TAG, "Error fetching shortlist for intent: $intent", e)
+                emit(emptyList())
+            }
+    }
+
+    private fun mapIntentToFormality(intent: String): Formality {
+        val lower = intent.lowercase()
+        return when {
+            lower.contains("negotiation") || lower.contains("boardroom") || lower.contains("professional") -> Formality.PROFESSIONAL
+            lower.contains("gala") || lower.contains("wedding") || lower.contains("formal") -> Formality.FORMAL
+            lower.contains("interview") || lower.contains("presentation") -> Formality.SMART_CASUAL
+            lower.contains("chill") || lower.contains("home") || lower.contains("relax") -> Formality.LOUNGE
+            else -> Formality.CASUAL
+        }
     }
 
     override fun getClothingById(id: Long): Flow<ClothingItem?> {

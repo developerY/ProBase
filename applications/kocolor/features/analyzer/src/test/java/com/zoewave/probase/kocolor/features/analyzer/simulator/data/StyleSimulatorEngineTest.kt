@@ -3,11 +3,13 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.data
 import com.google.common.truth.Truth.assertThat
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import io.mockk.mockk
 import org.junit.Test
 
 class StyleSimulatorEngineTest {
 
-    private val engine = StyleSimulatorEngine()
+    private val localAi = mockk<com.zoewave.probase.features.ai.local.data.LocalAiEngine>()
+    private val engine = StyleSimulatorEngine(localAi)
 
     @Test
     fun `architectLocalBlueprint should select at least one item and generate palette`() {

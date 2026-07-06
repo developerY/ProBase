@@ -119,4 +119,10 @@ class FashionConverters {
 
     @ColumnTypeConverter
     fun toClothingCategory(value: String): ClothingCategory = try { ClothingCategory.valueOf(value) } catch (e: Exception) { ClothingCategory.OTHER }
+
+    @ColumnTypeConverter
+    fun fromFormality(value: Formality): String = value.name
+
+    @ColumnTypeConverter
+    fun toFormality(value: String): Formality = try { Formality.valueOf(value) } catch (e: Exception) { Formality.CASUAL }
 }

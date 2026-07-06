@@ -97,7 +97,16 @@ class StyleSimulatorViewModel @Inject constructor(
     private fun runSimulation() {
         viewModelScope.launch {
             val apiKey = aiSettings.getGeminiApiKey()
-            val allClothing = wardrobeRepository.getAllClothing().first()
+            val userIntent = uiState.value.userMessage
+            
+            // 1. Manifest Pre-Filtering (Stage 2)
+            val filteredWardrobe = wardrobeRepository.getShortlistByIntent(userIntent).first()
+
+            // 2. Biological Skin Anchoring (Stage 3)
+            val profile = fashionRepository.getProfile().first()
+            val skinContext = profile?.let { 
+                "Undertone: ${it.undertone}, Seasonal Type: ${it.seasonalType}"
+            } ?: "Unknown"
 
             _uiState.update { it.copy(isAnalyzing = true, simulationStep = SimulationStep.BIO_MARKERS) }
             delay(1000)
@@ -105,24 +114,18 @@ class StyleSimulatorViewModel @Inject constructor(
             delay(1000)
             _uiState.update { it.copy(simulationStep = SimulationStep.GENERATING) }
             
-            val blueprint = if (apiKey.isNullOrBlank()) {
-                simulatorEngine.architectLocalBlueprint(
-                    userIntent = uiState.value.userMessage,
-                    availableWardrobe = allClothing
-                )
-            } else {
-                simulatorEngine.architectStyleBlueprint(
-                    userIntent = uiState.value.userMessage,
-                    circadianContext = uiState.value.circadianContext,
-                    routineCompleted = uiState.value.morningRoutineCompleted,
-                    wellnessScore = uiState.value.wellnessScore,
-                    availableWardrobe = allClothing,
-                    apiKey = apiKey
-                )
-            }
+            val blueprint = simulatorEngine.architectStyleBlueprint(
+                userIntent = userIntent,
+                circadianContext = uiState.value.circadianContext,
+                routineCompleted = uiState.value.morningRoutineCompleted,
+                wellnessScore = uiState.value.wellnessScore,
+                availableWardrobe = filteredWardrobe,
+                fashionProfile = skinContext,
+                apiKey = apiKey
+            )
             
             val isLocal = apiKey.isNullOrBlank() || blueprint.rationale.startsWith("Local Architect")
-            val selectedItems = allClothing.filter { it.id in blueprint.selectedItemIds }
+            val selectedItems = filteredWardrobe.filter { it.id in blueprint.selectedItemIds }
 
             _uiState.update { state ->
                 state.copy(
