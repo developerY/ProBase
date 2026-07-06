@@ -12,11 +12,16 @@ import com.zoewave.probase.features.camera.ui.components.CameraScreen
 
 @Composable
 fun CameraUIRoute(
+    target: String = "back",
     navTo: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CamViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(target) {
+        viewModel.setCameraTarget(target)
+    }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { capturedUri ->

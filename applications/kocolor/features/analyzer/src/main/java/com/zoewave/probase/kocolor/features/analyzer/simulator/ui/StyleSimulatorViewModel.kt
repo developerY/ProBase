@@ -2,6 +2,7 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zoewave.probase.kocolor.db.dao.RoutineDao
@@ -122,17 +123,21 @@ class StyleSimulatorViewModel @Inject constructor(
             val userIntent = uiState.value.userMessage
             
             // 1. Manifest Pre-Filtering
+            Log.d("StyleSimulatorVM", "THINKING: Filtering wardrobe for intent: '$userIntent'")
             val filteredWardrobe = wardrobeRepository.getShortlistByIntent(userIntent).first()
+            Log.d("StyleSimulatorVM", "THINKING: Shortlist identified: ${filteredWardrobe.size} candidate items")
 
             // 2. Biological Skin Anchoring
             val profile = fashionRepository.getProfile().first()
             val skinContext = profile?.let { 
                 "Undertone: ${it.undertone}, Seasonal Type: ${it.seasonalType}"
             } ?: "Unknown"
+            Log.d("StyleSimulatorVM", "THINKING: Anchoring to Skin Profile: $skinContext")
 
             // 3. User Portrait Retrieval (Multimodal Anchor)
             val portraitUri = sessionRepository.faceUri.value
             val userPortrait = portraitUri?.let { uri ->
+                Log.d("StyleSimulatorVM", "THINKING: Loading visual anchor from $uri")
                 loadBitmapFromUri(Uri.parse(uri))
             }
 
@@ -175,8 +180,9 @@ class StyleSimulatorViewModel @Inject constructor(
 
     private fun loadBitmapFromUri(uri: Uri): android.graphics.Bitmap? {
         return try {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            android.graphics.BitmapFactory.decodeStream(inputStream)
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                android.graphics.BitmapFactory.decodeStream(inputStream)
+            }
         } catch (e: Exception) { null }
     }
 
