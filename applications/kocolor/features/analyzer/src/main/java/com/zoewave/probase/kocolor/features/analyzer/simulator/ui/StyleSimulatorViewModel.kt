@@ -9,6 +9,8 @@ import com.zoewave.probase.kocolor.db.dao.RoutineDao
 import com.zoewave.probase.core.data.repository.AiConfigurationSettings
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
+import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
+import com.zoewave.probase.core.data.repository.weather.AtmosphericRepository
 import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleSimulatorEngine
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -44,11 +46,14 @@ sealed class SimulatorEvent {
     data object SaveToPalette : SimulatorEvent()
     data object Reset : SimulatorEvent()
     data object CapturePortrait : SimulatorEvent()
+    data object PickPortrait : SimulatorEvent()
+    data class OnPortraitSelected(val uri: String) : SimulatorEvent()
 }
 
 sealed class SimulatorEffect {
     data object NavigateToHistory : SimulatorEffect()
     data class NavigateToCamera(val target: String) : SimulatorEffect()
+    data object OpenGalleryPicker : SimulatorEffect()
 }
 
 @HiltViewModel
@@ -56,9 +61,11 @@ class StyleSimulatorViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val routineDao: RoutineDao,
     private val wardrobeRepository: WardrobeRepository,
+    private val cosmeticRepository: CosmeticInventoryRepository,
     private val fashionRepository: com.zoewave.probase.kocolor.data.FashionRepository,
     private val sessionRepository: FashionSessionRepository,
     private val simulatorEngine: StyleSimulatorEngine,
+    private val atmosphericRepository: AtmosphericRepository,
     private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
@@ -114,6 +121,14 @@ class StyleSimulatorViewModel @Inject constructor(
                     _effect.send(SimulatorEffect.NavigateToCamera("face_simulator"))
                 }
             }
+            SimulatorEvent.PickPortrait -> {
+                viewModelScope.launch {
+                    _effect.send(SimulatorEffect.OpenGalleryPicker)
+                }
+            }
+            is SimulatorEvent.OnPortraitSelected -> {
+                sessionRepository.setFaceUri(event.uri)
+            }
         }
     }
 
@@ -125,14 +140,19 @@ class StyleSimulatorViewModel @Inject constructor(
             // 1. Manifest Pre-Filtering
             Log.d("StyleSimulatorVM", "THINKING: Filtering wardrobe for intent: '$userIntent'")
             val filteredWardrobe = wardrobeRepository.getShortlistByIntent(userIntent).first()
-            Log.d("StyleSimulatorVM", "THINKING: Shortlist identified: ${filteredWardrobe.size} candidate items")
+            val allCosmetics = cosmeticRepository.getAllCosmetics().first()
+            Log.d("StyleSimulatorVM", "THINKING: Shortlist identified: ${filteredWardrobe.size} clothing pieces and ${allCosmetics.size} cosmetics")
 
-            // 2. Biological Skin Anchoring
+            // 2. Biological & Atmospheric Anchoring
             val profile = fashionRepository.getProfile().first()
             val skinContext = profile?.let { 
                 "Undertone: ${it.undertone}, Seasonal Type: ${it.seasonalType}"
             } ?: "Unknown"
-            Log.d("StyleSimulatorVM", "THINKING: Anchoring to Skin Profile: $skinContext")
+            
+            val weather = atmosphericRepository.atmosphericState.value
+            val weatherContext = "UV: ${weather.environmentalContext?.uvIndex ?: "Unknown"}, Temp: ${weather.weather?.main?.temp ?: "Unknown"}C, Condition: ${weather.weather?.weather?.firstOrNull()?.main ?: "Clear"}"
+            
+            Log.d("StyleSimulatorVM", "THINKING: Weather Context: $weatherContext")
 
             // 3. User Portrait Retrieval (Multimodal Anchor)
             val portraitUri = sessionRepository.faceUri.value
@@ -152,14 +172,17 @@ class StyleSimulatorViewModel @Inject constructor(
                 circadianContext = uiState.value.circadianContext,
                 routineCompleted = uiState.value.morningRoutineCompleted,
                 wellnessScore = uiState.value.wellnessScore,
+                weatherContext = weatherContext,
                 availableWardrobe = filteredWardrobe,
+                availableCosmetics = allCosmetics,
                 fashionProfile = skinContext,
                 userPortrait = userPortrait,
                 apiKey = apiKey
             )
             
             val isLocal = apiKey.isNullOrBlank() || blueprint.rationale.startsWith("Local Architect")
-            val selectedItems = filteredWardrobe.filter { it.id in blueprint.selectedItemIds }
+            val selectedItems = filteredWardrobe.filter { it.id in blueprint.selectedClothingIds }
+            val selectedCosmetics = allCosmetics.filter { it.id in blueprint.selectedCosmeticIds }
 
             // Recycle portrait bitmap after AI analysis to save memory
             userPortrait?.recycle()
@@ -169,8 +192,10 @@ class StyleSimulatorViewModel @Inject constructor(
                     isAnalyzing = false,
                     simulationStep = SimulationStep.RESULT,
                     recommendedPalette = blueprint.recommendedPalette,
-                    recommendedClothing = selectedItems.filter { it.category != ClothingCategory.ACCESSORIES },
-                    recommendedAccessories = selectedItems.filter { it.category == ClothingCategory.ACCESSORIES },
+                    recommendedClothing = selectedItems,
+                    recommendedAccessories = selectedCosmetics.map { 
+                        ClothingItem(id = it.id, name = it.name, brand = it.brand, category = ClothingCategory.OTHER, colorHex = it.colorHex)
+                    },
                     rationale = blueprint.rationale,
                     isLocalResult = isLocal
                 )
