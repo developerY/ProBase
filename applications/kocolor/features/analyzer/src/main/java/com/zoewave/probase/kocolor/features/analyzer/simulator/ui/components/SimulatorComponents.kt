@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -54,11 +55,11 @@ fun MagicBackground() {
         label = "phase"
     )
 
-    Box(modifier = Modifier.fillMaxSize().alpha(0.1f).blur(100.dp)) {
+    Box(modifier = Modifier.fillMaxSize().alpha(0.08f).blur(100.dp)) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(Color(0xFF6200EE), Color.Transparent),
+                    colors = listOf(Color(0xFF6200EE), Color(0xFFD4AF37).copy(alpha = 0.5f), Color.Transparent),
                     center = center.copy(x = center.x * phase * 2, y = center.y * (1 - phase) * 2)
                 ),
                 radius = size.maxDimension
@@ -82,34 +83,41 @@ fun MessagingStep(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(32.dp),
+        verticalArrangement = Arrangement.spacedBy(28.dp),
         contentPadding = PaddingValues(bottom = 32.dp)
     ) {
         item {
-            Spacer(Modifier.height(40.dp))
+            Spacer(Modifier.height(32.dp))
             Text(
                 text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_title),
-                style = MaterialTheme.typography.displayMedium,
+                style = MaterialTheme.typography.displayMedium.copy(fontSize = 42.sp),
                 fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Light,
-                lineHeight = 52.sp
+                fontWeight = FontWeight.Normal,
+                lineHeight = 48.sp,
+                color = Color.Black
             )
         }
 
         // User Portrait Slot
         item {
             Card(
-                modifier = Modifier.fillMaxWidth().height(120.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp)
+                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp), ambientColor = Color.Black.copy(alpha = 0.1f)),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp).fillMaxSize(),
+                    modifier = Modifier.padding(12.dp).fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
-                        modifier = Modifier.size(80.dp).clip(CircleShape).background(Color.Gray.copy(alpha = 0.2f)),
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(CircleShape)
+                            .background(Color.White),
                         contentAlignment = Alignment.Center
                     ) {
                         if (userPortraitUri != null) {
@@ -120,35 +128,30 @@ fun MessagingStep(
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            Icon(Icons.Default.Person, null, modifier = Modifier.size(32.dp), tint = Color.White.copy(alpha = 0.5f))
+                            Icon(Icons.Default.Person, null, modifier = Modifier.size(28.dp), tint = Color.LightGray.copy(alpha = 0.5f))
                         }
                     }
-                    Spacer(Modifier.width(20.dp))
+                    Spacer(Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = if (userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black.copy(alpha = 0.8f)
                         )
                         Text(
                             text = if (userPortraitUri != null) "Tap to change visual anchor" else "Tap to add visual context",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
+                            color = Color.Gray.copy(alpha = 0.7f)
                         )
                     }
                     
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        IconButton(
-                            onClick = { onEvent(SimulatorEvent.CapturePortrait) },
-                            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        ) {
-                            Icon(Icons.Default.PhotoCamera, null, tint = MaterialTheme.colorScheme.primary)
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        IconButton(onClick = { onEvent(SimulatorEvent.CapturePortrait) }) {
+                            Icon(Icons.Default.PhotoCamera, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(22.dp))
                         }
-                        IconButton(
-                            onClick = { onEvent(SimulatorEvent.PickPortrait) },
-                            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        ) {
-                            Icon(Icons.Default.Collections, null, tint = MaterialTheme.colorScheme.primary)
+                        IconButton(onClick = { onEvent(SimulatorEvent.PickPortrait) }) {
+                            Icon(Icons.Default.Collections, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(22.dp))
                         }
                     }
                 }
@@ -158,13 +161,13 @@ fun MessagingStep(
         // Clothing Anchors
         if (allClothing.isNotEmpty()) {
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
                         text = "CLOTHING ANCHORS",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 2.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif,
+                        color = Color.Black
                     )
                     
                     val categories = listOf(
@@ -175,14 +178,14 @@ fun MessagingStep(
                     
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(32.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f)),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+                        shape = RoundedCornerShape(28.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
                     ) {
-                        Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 categories.forEach { (name, icon, cat) ->
                                     val isSelected = selectedClothingCategory == cat
@@ -211,13 +214,13 @@ fun MessagingStep(
         // Makeup Anchors
         if (allCosmetics.isNotEmpty()) {
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
                         text = "MAKEUP ANCHORS",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 2.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif,
+                        color = Color.Black
                     )
                     
                     val categories = listOf(
@@ -228,14 +231,14 @@ fun MessagingStep(
                     
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(32.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f)),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+                        shape = RoundedCornerShape(28.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
                     ) {
-                        Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 categories.forEach { (name, icon, cat) ->
                                     val isSelected = selectedCosmeticCategory == cat
@@ -262,27 +265,37 @@ fun MessagingStep(
         }
         
         item {
-            OutlinedTextField(
-                value = userMessage,
-                onValueChange = { onEvent(SimulatorEvent.UpdateMessage(it)) },
-                placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.alpha(0.4f)) },
-                modifier = Modifier.fillMaxWidth().height(160.dp),
-                shape = RoundedCornerShape(32.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    focusedBorderColor = MaterialTheme.colorScheme.primary
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(28.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.85f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+            ) {
+                OutlinedTextField(
+                    value = userMessage,
+                    onValueChange = { onEvent(SimulatorEvent.UpdateMessage(it)) },
+                    placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.alpha(0.5f)) },
+                    modifier = Modifier.fillMaxWidth().height(140.dp),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent
+                    )
                 )
-            )
+            }
         }
 
         item {
             Button(
                 onClick = { onEvent(SimulatorEvent.StartSimulation) },
-                modifier = Modifier.fillMaxWidth().height(80.dp),
-                shape = RoundedCornerShape(24.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                modifier = Modifier.fillMaxWidth().height(72.dp),
+                shape = RoundedCornerShape(36.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6750A4)),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
-                Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), style = MaterialTheme.typography.titleMedium, letterSpacing = 2.sp)
+                Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -298,26 +311,28 @@ private fun CategoryTab(
 ) {
     Surface(
         onClick = onClick,
-        modifier = modifier.height(56.dp),
+        modifier = modifier.height(52.dp),
         shape = RoundedCornerShape(16.dp),
-        color = if (isSelected) Color(0xFFE8E8FF) else Color(0xFFF3F2F8),
-        border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFCBCBFF)) else null
+        color = if (isSelected) Color(0xFFE8EAF6) else Color(0xFFEEEEEE).copy(alpha = 0.5f),
+        tonalElevation = if (isSelected) 4.dp else 0.dp,
+        border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFC5CAE9)) else null
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray
+                modifier = Modifier.size(18.dp),
+                tint = if (isSelected) Color(0xFF3F51B5) else Color.Gray
             )
+            Spacer(Modifier.width(8.dp))
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                 color = if (isSelected) Color.Black else Color.Gray
             )
         }
@@ -331,9 +346,9 @@ private fun <T> AnchorItemRow(
     onToggle: (T) -> Unit
 ) {
     LazyRow(
-        modifier = Modifier.fillMaxWidth().height(64.dp),
-        contentPadding = PaddingValues(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth().height(60.dp),
+        contentPadding = PaddingValues(horizontal = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         items(items) { item ->
@@ -356,13 +371,13 @@ private fun <T> AnchorItemRow(
             
             Box(
                 modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(colorHex?.let { parseColor(it) } ?: Color.LightGray)
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(colorHex?.let { parseColor(it) } ?: Color(0xFFF3F2F8))
                     .border(
                         width = 1.dp,
-                        color = Color.White.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(16.dp)
+                        color = Color.Black.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(14.dp)
                     )
                     .clickable { onToggle(item) },
                 contentAlignment = Alignment.Center
@@ -378,10 +393,10 @@ private fun <T> AnchorItemRow(
                 
                 if (isSelected) {
                     Box(
-                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)),
+                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Check, null, modifier = Modifier.size(20.dp), tint = Color.White)
+                        Icon(Icons.Default.Check, null, modifier = Modifier.size(20.dp), tint = Color.White.copy(alpha = 0.8f))
                     }
                 }
             }
