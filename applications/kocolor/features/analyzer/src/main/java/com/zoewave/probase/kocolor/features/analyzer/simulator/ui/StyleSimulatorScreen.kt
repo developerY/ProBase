@@ -3,22 +3,41 @@ package com.zoewave.probase.kocolor.features.analyzer.simulator.ui
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.kocolor.features.analyzer.R
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.*
-import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.AnalysisStep
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.MagicBackground
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.MessagingStep
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components.ResultStep
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,14 +100,7 @@ fun StyleSimulatorScreen(
                 ) { step ->
                     when (step) {
                         SimulationStep.MESSAGING -> MessagingStep(
-                            userMessage = uiState.userMessage,
-                            userPortraitUri = uiState.userPortraitUri,
-                            allClothing = uiState.fullClothingInventory,
-                            allCosmetics = uiState.fullCosmeticInventory,
-                            anchoredClothing = uiState.anchoredClothing,
-                            anchoredCosmetics = uiState.anchoredCosmetics,
-                            selectedClothingCategory = uiState.selectedClothingCategory,
-                            selectedCosmeticCategory = uiState.selectedCosmeticCategory,
+                            uiState = uiState,
                             onEvent = onEvent,
                             navTo = navTo
                         )

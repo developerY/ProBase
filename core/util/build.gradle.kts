@@ -17,6 +17,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:model"))
     implementation(libs.androidx.core.ktx)
     // Hilt is already added by the plugin
 

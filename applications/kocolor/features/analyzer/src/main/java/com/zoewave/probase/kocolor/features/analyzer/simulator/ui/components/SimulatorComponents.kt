@@ -1,28 +1,11 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -30,31 +13,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Checkroom
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.FaceRetouchingNatural
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Grain
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -75,15 +35,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.zoewave.probase.core.model.ritual.ClothingCategory
-import com.zoewave.probase.core.model.ritual.ClothingItem
-import com.zoewave.probase.core.model.ritual.CosmeticItem
-import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.features.graphics.colorpicker.util.parseColor
 import com.zoewave.probase.kocolor.features.analyzer.R
-import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulationStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulatorEvent
+import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulationStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
+import com.zoewave.probase.core.model.ritual.ClothingCategory
+import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.MacroCategory
+import com.zoewave.probase.core.model.ritual.ColorFamily
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
 @Composable
@@ -109,14 +69,7 @@ fun MagicBackground() {
 
 @Composable
 fun MessagingStep(
-    userMessage: String,
-    userPortraitUri: String?,
-    allClothing: List<ClothingItem> = emptyList(),
-    allCosmetics: List<CosmeticItem> = emptyList(),
-    anchoredClothing: List<ClothingItem> = emptyList(),
-    anchoredCosmetics: List<CosmeticItem> = emptyList(),
-    selectedClothingCategory: ClothingCategory = ClothingCategory.TOPS,
-    selectedCosmeticCategory: MacroCategory = MacroCategory.LIPS,
+    uiState: StyleSimulatorUiState,
     onEvent: (SimulatorEvent) -> Unit,
     navTo: (KoColorRoute) -> Unit
 ) {
@@ -125,9 +78,7 @@ fun MessagingStep(
         verticalArrangement = Arrangement.spacedBy(24.dp),
         contentPadding = PaddingValues(bottom = 32.dp)
     ) {
-
-        // No Title for init launch. Will add back later
-        /*item {
+        item {
             Spacer(Modifier.height(24.dp))
             Text(
                 text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_title),
@@ -137,7 +88,7 @@ fun MessagingStep(
                 lineHeight = 52.sp,
                 color = Color.Black
             )
-        }*/
+        }
 
         // User Portrait Slot
         item {
@@ -145,10 +96,10 @@ fun MessagingStep(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp)
-                    .shadow(elevation = 6.dp, shape = RoundedCornerShape(24.dp), ambientColor = Color.Black.copy(alpha = 0.05f)),
+                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp), ambientColor = Color.Black.copy(alpha = 0.1f)),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
             ) {
                 Row(
                     modifier = Modifier.padding(12.dp).fillMaxSize(),
@@ -158,40 +109,41 @@ fun MessagingStep(
                         modifier = Modifier
                             .size(64.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFF5F5F5)),
+                            .background(Color.White),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (userPortraitUri != null) {
+                        if (uiState.userPortraitUri != null) {
                             AsyncImage(
-                                model = userPortraitUri,
+                                model = uiState.userPortraitUri,
                                 contentDescription = null,
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            Icon(Icons.Default.Person, null, modifier = Modifier.size(24.dp), tint = Color.LightGray)
+                            Icon(Icons.Default.Person, null, modifier = Modifier.size(28.dp), tint = Color.LightGray.copy(alpha = 0.5f))
                         }
                     }
                     Spacer(Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                            text = if (uiState.userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
                             color = Color.Black.copy(alpha = 0.8f)
                         )
                         Text(
                             text = "Tap to change visual anchor",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray
+                            color = Color.Gray.copy(alpha = 0.7f)
                         )
                     }
                     
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         IconButton(onClick = { onEvent(SimulatorEvent.CapturePortrait) }) {
-                            Icon(Icons.Default.PhotoCamera, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.PhotoCamera, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(22.dp))
                         }
                         IconButton(onClick = { onEvent(SimulatorEvent.PickPortrait) }) {
-                            Icon(Icons.Default.Image, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.Collections, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(22.dp))
                         }
                     }
                 }
@@ -199,39 +151,39 @@ fun MessagingStep(
         }
 
         // Clothing Anchors
-        if (allClothing.isNotEmpty()) {
+        if (uiState.fullClothingInventory.isNotEmpty()) {
             item {
                 AnchorSection(
-                    title = "CLOTHING ANCHORS",
+                    title = stringResource(R.string.applications_kocolor_features_analyzer_simulator_clothing_anchors),
                     categories = listOf(
                         Triple("Top", Icons.Default.Checkroom, ClothingCategory.TOPS),
                         Triple("Bottom", Icons.Default.Layers, ClothingCategory.BOTTOMS),
                         Triple("Shoes", Icons.AutoMirrored.Filled.DirectionsWalk, ClothingCategory.SHOES)
                     ),
-                    selectedCategory = selectedClothingCategory,
+                    selectedCategory = uiState.selectedClothingCategory,
                     onCategorySelect = { onEvent(SimulatorEvent.SelectClothingCategory(it as ClothingCategory)) },
-                    items = allClothing.filter { it.category == selectedClothingCategory },
-                    selectedIds = anchoredClothing.map { it.id },
-                    onItemToggle = { onEvent(SimulatorEvent.ToggleAnchoredClothing(it as ClothingItem)) }
+                    families = uiState.clothingFamilies,
+                    anchoredFamily = uiState.anchoredClothingFamilies[uiState.selectedClothingCategory],
+                    onToggle = { onEvent(SimulatorEvent.ToggleClothingFamily(uiState.selectedClothingCategory, it)) }
                 )
             }
         }
 
         // Makeup Anchors
-        if (allCosmetics.isNotEmpty()) {
+        if (uiState.fullCosmeticInventory.isNotEmpty()) {
             item {
                 AnchorSection(
-                    title = "MAKEUP ANCHORS",
+                    title = stringResource(R.string.applications_kocolor_features_analyzer_simulator_makeup_anchors),
                     categories = listOf(
                         Triple("Eyes", Icons.Default.Visibility, MacroCategory.EYES),
                         Triple("Cheeks", Icons.Default.FaceRetouchingNatural, MacroCategory.DIMENSION),
                         Triple("Lips", Icons.Default.Face, MacroCategory.LIPS)
                     ),
-                    selectedCategory = selectedCosmeticCategory,
+                    selectedCategory = uiState.selectedCosmeticCategory,
                     onCategorySelect = { onEvent(SimulatorEvent.SelectCosmeticCategory(it as MacroCategory)) },
-                    items = allCosmetics.filter { it.macroCategory == selectedCosmeticCategory },
-                    selectedIds = anchoredCosmetics.map { it.id },
-                    onItemToggle = { onEvent(SimulatorEvent.ToggleAnchoredCosmetic(it as CosmeticItem)) }
+                    families = uiState.cosmeticFamilies,
+                    anchoredFamily = uiState.anchoredCosmeticFamilies[uiState.selectedCosmeticCategory],
+                    onToggle = { onEvent(SimulatorEvent.ToggleCosmeticFamily(uiState.selectedCosmeticCategory, it)) }
                 )
             }
         }
@@ -240,13 +192,13 @@ fun MessagingStep(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.85f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
             ) {
                 OutlinedTextField(
-                    value = userMessage,
+                    value = uiState.userMessage,
                     onValueChange = { onEvent(SimulatorEvent.UpdateMessage(it)) },
-                    placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.alpha(0.4f)) },
+                    placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.alpha(0.5f)) },
                     modifier = Modifier.fillMaxWidth().height(140.dp),
                     shape = RoundedCornerShape(24.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -279,9 +231,9 @@ private fun AnchorSection(
     categories: List<Triple<String, ImageVector, Any>>,
     selectedCategory: Any,
     onCategorySelect: (Any) -> Unit,
-    items: List<Any>,
-    selectedIds: List<Long>,
-    onItemToggle: (Any) -> Unit
+    families: Map<ColorFamily, Any>,
+    anchoredFamily: ColorFamily?,
+    onToggle: (ColorFamily) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
@@ -295,13 +247,13 @@ private fun AnchorSection(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.6f)),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
             border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
         ) {
             Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     categories.forEach { (name, icon, cat) ->
                         val isSelected = selectedCategory == cat
@@ -315,11 +267,55 @@ private fun AnchorSection(
                     }
                 }
 
-                AnchorScrollRow(
-                    items = items,
-                    selectedIds = selectedIds,
-                    onToggle = onItemToggle
-                )
+                // Perceptual Color Buckets Row
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Only show families that have items in the current category
+                    ColorFamily.entries.filter { families.containsKey(it) }.forEach { family ->
+                        val isSelected = anchoredFamily == family
+
+                        item {
+                            ColorFamilySwatch(
+                                family = family,
+                                isSelected = isSelected,
+                                onClick = { onToggle(family) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ColorFamilySwatch(
+    family: ColorFamily,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(parseColor(family.hex))
+            .border(
+                width = 1.dp,
+                color = if (isSelected) Color.Black.copy(alpha = 0.2f) else Color.Black.copy(alpha = 0.05f),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        if (isSelected) {
+            Box(
+                modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp), tint = Color.White)
             }
         }
     }
@@ -358,70 +354,6 @@ private fun CategoryPill(
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                 color = if (isSelected) Color.Black else Color.Gray
             )
-        }
-    }
-}
-
-@Composable
-private fun AnchorScrollRow(
-    items: List<Any>,
-    selectedIds: List<Long>,
-    onToggle: (Any) -> Unit
-) {
-    LazyRow(
-        modifier = Modifier.fillMaxWidth().height(52.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        items(items) { item ->
-            val id = when (item) {
-                is ClothingItem -> item.id
-                is CosmeticItem -> item.id
-                else -> 0L
-            }
-            val colorHex = when (item) {
-                is ClothingItem -> item.colorHex
-                is CosmeticItem -> item.colorHex
-                else -> null
-            }
-            val imageUrl = when (item) {
-                is ClothingItem -> item.imageUrl
-                is CosmeticItem -> item.imageUrl
-                else -> null
-            }
-            val isSelected = selectedIds.contains(id)
-            
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(colorHex?.let { parseColor(it) } ?: Color(0xFFF5F5F5))
-                    .border(
-                        width = 1.dp,
-                        color = if (isSelected) Color.Black.copy(alpha = 0.2f) else Color.Black.copy(alpha = 0.05f),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .clickable { onToggle(item) },
-                contentAlignment = Alignment.Center
-            ) {
-                if (imageUrl != null) {
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                
-                if (isSelected) {
-                    Box(
-                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.15f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp), tint = Color.White)
-                    }
-                }
-            }
         }
     }
 }

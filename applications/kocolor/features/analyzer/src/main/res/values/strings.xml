@@ -49,4 +49,7 @@
     <string name="applications_kocolor_features_analyzer_simulator_vault_selections">VAULT SELECTIONS</string>
     <string name="applications_kocolor_features_analyzer_simulator_lock_palette">Save Advice to Collection</string>
     <string name="applications_kocolor_features_analyzer_simulator_bespoke">Bespoke</string>
+    <string name="applications_kocolor_features_analyzer_simulator_clothing_anchors">CLOTHING ANCHORS</string>
+    <string name="applications_kocolor_features_analyzer_simulator_makeup_anchors">MAKEUP ANCHORS</string>
+    <string name="applications_kocolor_features_analyzer_simulator_tap_to_anchor">Select color families to anchor your look</string>
 </resources>

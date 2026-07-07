@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.inventory.data.repository
 
+import com.zoewave.probase.core.util.color.ColorQuantizer
 import com.zoewave.probase.kocolor.features.obf.data.repository.ObfRepository
 import com.zoewave.probase.kocolor.data.mapper.toEntity
 import com.zoewave.probase.kocolor.data.mapper.toModel
@@ -29,11 +30,14 @@ class CosmeticInventoryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveCosmeticItem(item: CosmeticItem): Long {
-        return if (item.id == 0L) {
-            cosmeticDao.insertCosmetic(item.toEntity())
+        val bucketedItem = item.copy(
+            colorFamily = ColorQuantizer.snapToFamily(item.colorHex)
+        )
+        return if (bucketedItem.id == 0L) {
+            cosmeticDao.insertCosmetic(bucketedItem.toEntity())
         } else {
-            cosmeticDao.updateCosmetic(item.toEntity())
-            item.id
+            cosmeticDao.updateCosmetic(bucketedItem.toEntity())
+            bucketedItem.id
         }
     }
 
