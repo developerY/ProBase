@@ -9,14 +9,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -24,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.zoewave.probase.kocolor.mobile.features.home.R
 import com.zoewave.probase.kocolor.model.KoColorRoute
 
@@ -46,7 +50,8 @@ data class QuickActionUiState(
     val subtitle: String, 
     val icon: ImageVector, 
     val color: Color, 
-    val route: KoColorRoute
+    val route: KoColorRoute,
+    val isExperimental: Boolean = false
 )
 
 @Composable
@@ -63,7 +68,8 @@ fun QuickActions(
                 stringResource(R.string.applications_kocolor_apps_mobile_features_home_ai_visual_analysis), 
                 Icons.Default.AutoAwesome, 
                 MaterialTheme.colorScheme.primary, 
-                KoColorRoute.StyleSimulator
+                KoColorRoute.StyleSimulator,
+                isExperimental = true
             ), 
             modifier = Modifier.weight(1f), 
             onEvent = {}, 
@@ -95,14 +101,50 @@ fun QuickActionCard(
 ) {
     ElevatedCard(
         onClick = { navTo(uiState.route) }, 
-        modifier = modifier, 
-        shape = RoundedCornerShape(24.dp)
+        modifier = modifier.height(100.dp), 
+        shape = RoundedCornerShape(28.dp)
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Icon(uiState.icon, null, tint = uiState.color, modifier = Modifier.size(28.dp))
-            Spacer(Modifier.height(12.dp))
-            Text(text = uiState.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(text = uiState.subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = uiState.icon, 
+                contentDescription = null, 
+                tint = uiState.color, 
+                modifier = Modifier.size(36.dp)
+            )
+            
+            Spacer(Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = uiState.title, 
+                    style = MaterialTheme.typography.titleMedium, 
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Text(
+                    text = uiState.subtitle, 
+                    style = MaterialTheme.typography.labelSmall, 
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (uiState.isExperimental) {
+                Surface(
+                    color = Color(0xFF6750A4),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.applications_kocolor_apps_mobile_features_home_experimental),
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                        fontWeight = FontWeight.Black,
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
         }
     }
 }

@@ -42,4 +42,5 @@
     <string name="applications_kocolor_apps_mobile_features_home_hub_wardrobe_title">The Wardrobe</string>
     <string name="applications_kocolor_apps_mobile_features_home_hub_items_tracked">items tracked</string>
     <string name="applications_kocolor_apps_mobile_features_home_hub_pieces_curated">pieces curated</string>
+    <string name="applications_kocolor_apps_mobile_features_home_experimental">EXPERIMENTAL</string>
 </resources>
