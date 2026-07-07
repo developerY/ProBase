@@ -43,6 +43,7 @@ data class ClothingItem(
     val category: ClothingCategory,
     val formality: Formality = Formality.CASUAL,
     val colorHex: String? = null,
+    val colorFamily: ColorFamily = ColorFamily.UNKNOWN,
     val size: String? = null,
     val material: String? = null,
     val price: Double? = null,

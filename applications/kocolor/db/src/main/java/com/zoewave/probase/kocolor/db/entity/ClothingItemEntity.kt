@@ -4,6 +4,7 @@ import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.Formality
+import com.zoewave.probase.core.model.ritual.ColorFamily
 
 @Entity(tableName = "clothing_items")
 data class ClothingItemEntity(
@@ -13,6 +14,7 @@ data class ClothingItemEntity(
     val category: ClothingCategory,
     val formality: Formality = Formality.CASUAL,
     val colorHex: String? = null,
+    val colorFamily: ColorFamily = ColorFamily.UNKNOWN,
     val size: String? = null,
     val material: String? = null,
     val price: Double? = null,

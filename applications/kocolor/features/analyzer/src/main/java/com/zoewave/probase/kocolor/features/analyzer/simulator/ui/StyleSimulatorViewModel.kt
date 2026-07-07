@@ -34,12 +34,18 @@ data class StyleSimulatorUiState(
     val rationale: String? = null,
     val isLocalResult: Boolean = false,
     val userPortraitUri: String? = null,
-    val anchoredClothing: List<ClothingItem> = emptyList(),
-    val anchoredCosmetics: List<CosmeticItem> = emptyList(),
     val fullClothingInventory: List<ClothingItem> = emptyList(),
     val fullCosmeticInventory: List<CosmeticItem> = emptyList(),
     val selectedClothingCategory: ClothingCategory = ClothingCategory.TOPS,
-    val selectedCosmeticCategory: MacroCategory = MacroCategory.LIPS
+    val selectedCosmeticCategory: MacroCategory = MacroCategory.LIPS,
+    
+    // Grouped items by color family
+    val clothingFamilies: Map<ColorFamily, List<ClothingItem>> = emptyMap(),
+    val cosmeticFamilies: Map<ColorFamily, List<CosmeticItem>> = emptyMap(),
+    
+    // Family-based anchors (Constraint set by user)
+    val anchoredClothingFamilies: Map<ClothingCategory, ColorFamily> = emptyMap(),
+    val anchoredCosmeticFamilies: Map<MacroCategory, ColorFamily> = emptyMap()
 )
 
 enum class SimulationStep {
@@ -54,8 +60,8 @@ sealed class SimulatorEvent {
     data object CapturePortrait : SimulatorEvent()
     data object PickPortrait : SimulatorEvent()
     data class OnPortraitSelected(val uri: String) : SimulatorEvent()
-    data class ToggleAnchoredClothing(val item: ClothingItem) : SimulatorEvent()
-    data class ToggleAnchoredCosmetic(val item: CosmeticItem) : SimulatorEvent()
+    data class ToggleClothingFamily(val category: ClothingCategory, val family: ColorFamily) : SimulatorEvent()
+    data class ToggleCosmeticFamily(val category: MacroCategory, val family: ColorFamily) : SimulatorEvent()
     data class SelectClothingCategory(val category: ClothingCategory) : SimulatorEvent()
     data class SelectCosmeticCategory(val category: MacroCategory) : SimulatorEvent()
 }
@@ -93,14 +99,32 @@ class StyleSimulatorViewModel @Inject constructor(
 
     private fun loadInventory() {
         viewModelScope.launch {
-            wardrobeRepository.getAllClothing().collect { list ->
-                _uiState.update { it.copy(fullClothingInventory = list) }
-            }
+            combine(
+                wardrobeRepository.getAllClothing(),
+                _uiState.map { it.selectedClothingCategory }.distinctUntilChanged()
+            ) { list, category ->
+                val grouped = list.filter { it.category == category }
+                    .groupBy { it.colorFamily }
+                
+                _uiState.update { it.copy(
+                    fullClothingInventory = list,
+                    clothingFamilies = grouped
+                ) }
+            }.collect()
         }
         viewModelScope.launch {
-            cosmeticRepository.getAllCosmetics().collect { list ->
-                _uiState.update { it.copy(fullCosmeticInventory = list) }
-            }
+            combine(
+                cosmeticRepository.getAllCosmetics(),
+                _uiState.map { it.selectedCosmeticCategory }.distinctUntilChanged()
+            ) { list, category ->
+                val grouped = list.filter { it.macroCategory == category }
+                    .groupBy { it.colorFamily }
+
+                _uiState.update { it.copy(
+                    fullCosmeticInventory = list,
+                    cosmeticFamilies = grouped
+                ) }
+            }.collect()
         }
     }
 
@@ -153,24 +177,28 @@ class StyleSimulatorViewModel @Inject constructor(
             is SimulatorEvent.OnPortraitSelected -> {
                 sessionRepository.setFaceUri(event.uri)
             }
-            is SimulatorEvent.ToggleAnchoredClothing -> {
+            is SimulatorEvent.ToggleClothingFamily -> {
                 _uiState.update { state ->
-                    val newList = if (state.anchoredClothing.any { it.id == event.item.id }) {
-                        state.anchoredClothing.filter { it.id != event.item.id }
+                    val current = state.anchoredClothingFamilies[event.category]
+                    val nextMap = state.anchoredClothingFamilies.toMutableMap()
+                    if (current == event.family) {
+                        nextMap.remove(event.category)
                     } else {
-                        state.anchoredClothing + event.item
+                        nextMap[event.category] = event.family
                     }
-                    state.copy(anchoredClothing = newList)
+                    state.copy(anchoredClothingFamilies = nextMap)
                 }
             }
-            is SimulatorEvent.ToggleAnchoredCosmetic -> {
+            is SimulatorEvent.ToggleCosmeticFamily -> {
                 _uiState.update { state ->
-                    val newList = if (state.anchoredCosmetics.any { it.id == event.item.id }) {
-                        state.anchoredCosmetics.filter { it.id != event.item.id }
+                    val current = state.anchoredCosmeticFamilies[event.category]
+                    val nextMap = state.anchoredCosmeticFamilies.toMutableMap()
+                    if (current == event.family) {
+                        nextMap.remove(event.category)
                     } else {
-                        state.anchoredCosmetics + event.item
+                        nextMap[event.category] = event.family
                     }
-                    state.copy(anchoredCosmetics = newList)
+                    state.copy(anchoredCosmeticFamilies = nextMap)
                 }
             }
             is SimulatorEvent.SelectClothingCategory -> {
@@ -191,7 +219,6 @@ class StyleSimulatorViewModel @Inject constructor(
             Log.d("StyleSimulatorVM", "THINKING: Filtering wardrobe for intent: '$userIntent'")
             val filteredWardrobe = wardrobeRepository.getShortlistByIntent(userIntent).first()
             val allCosmetics = cosmeticRepository.getAllCosmetics().first()
-            Log.d("StyleSimulatorVM", "THINKING: Shortlist identified: ${filteredWardrobe.size} clothing pieces and ${allCosmetics.size} cosmetics")
 
             // 2. Biological & Atmospheric Anchoring
             val profile = fashionRepository.getProfile().first()
@@ -211,6 +238,14 @@ class StyleSimulatorViewModel @Inject constructor(
                 loadBitmapFromUri(Uri.parse(uri))
             }
 
+            // 4. Anchor Mapping (Families -> Items)
+            val anchoredClothing = uiState.value.anchoredClothingFamilies.flatMap { (cat, family) ->
+                uiState.value.fullClothingInventory.filter { it.category == cat && it.colorFamily == family }
+            }
+            val anchoredCosmetics = uiState.value.anchoredCosmeticFamilies.flatMap { (cat, family) ->
+                uiState.value.fullCosmeticInventory.filter { it.macroCategory == cat && it.colorFamily == family }
+            }
+
             _uiState.update { it.copy(isAnalyzing = true, simulationStep = SimulationStep.BIO_MARKERS) }
             delay(1000)
             _uiState.update { it.copy(simulationStep = SimulationStep.ROUTINE) }
@@ -227,8 +262,8 @@ class StyleSimulatorViewModel @Inject constructor(
                 availableCosmetics = allCosmetics,
                 fashionProfile = skinContext,
                 userPortrait = userPortrait,
-                anchoredClothing = uiState.value.anchoredClothing,
-                anchoredCosmetics = uiState.value.anchoredCosmetics,
+                anchoredClothing = anchoredClothing,
+                anchoredCosmetics = anchoredCosmetics,
                 apiKey = apiKey
             )
             

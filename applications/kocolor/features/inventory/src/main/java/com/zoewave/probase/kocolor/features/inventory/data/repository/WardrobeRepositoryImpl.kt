@@ -10,6 +10,7 @@ import com.zoewave.probase.kocolor.data.mapper.toModel
 import com.zoewave.probase.kocolor.data.repository.WardrobeRepository
 import com.zoewave.probase.kocolor.db.dao.ClothingDao
 import com.zoewave.probase.kocolor.mobile.features.color.domain.engine.WardrobeColorEngine
+import com.zoewave.probase.core.util.color.ColorQuantizer
 import com.zoewave.probase.core.model.ritual.ClothingItem
 import com.zoewave.probase.core.model.ritual.Formality
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -84,7 +85,12 @@ class WardrobeRepositoryImpl @Inject constructor(
                     analyzeGarment(item)
                 } else item
 
-                clothingDao.insertClothing(analyzedItem.toEntity())
+                // Snap to perceptual color family
+                val bucketedItem = analyzedItem.copy(
+                    colorFamily = ColorQuantizer.snapToFamily(analyzedItem.colorHex)
+                )
+
+                clothingDao.insertClothing(bucketedItem.toEntity())
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to save clothing item: ${item.name}", e)
             }

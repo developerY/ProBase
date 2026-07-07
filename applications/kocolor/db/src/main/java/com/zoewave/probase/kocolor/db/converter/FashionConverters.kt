@@ -125,4 +125,10 @@ class FashionConverters {
 
     @ColumnTypeConverter
     fun toFormality(value: String): Formality = try { Formality.valueOf(value) } catch (e: Exception) { Formality.CASUAL }
+
+    @ColumnTypeConverter
+    fun fromColorFamily(value: ColorFamily): String = value.name
+
+    @ColumnTypeConverter
+    fun toColorFamily(value: String): ColorFamily = try { ColorFamily.valueOf(value) } catch (e: Exception) { ColorFamily.UNKNOWN }
 }
