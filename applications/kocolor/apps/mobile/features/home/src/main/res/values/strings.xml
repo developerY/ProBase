@@ -21,8 +21,8 @@
     <string name="applications_kocolor_apps_mobile_features_home_vitals">Vitals</string>
     <string name="applications_kocolor_apps_mobile_features_home_optimal">Optimal</string>
     <string name="applications_kocolor_apps_mobile_features_home_alerts_format">%1$d Alerts</string>
-    <string name="applications_kocolor_apps_mobile_features_home_analyze_style">Analyze Style</string>
-    <string name="applications_kocolor_apps_mobile_features_home_ai_visual_analysis">AI Visual Analysis</string>
+    <string name="applications_kocolor_apps_mobile_features_home_analyze_style">Fashion Advisor</string>
+    <string name="applications_kocolor_apps_mobile_features_home_ai_visual_analysis">AI Visual Styling</string>
     <string name="applications_kocolor_apps_mobile_features_home_capture_product">Capture Product</string>
     <string name="applications_kocolor_apps_mobile_features_home_gemini_scanner">Gemini Scanner</string>
     <string name="applications_kocolor_apps_mobile_features_home_meals_ritual">Meals Ritual</string>

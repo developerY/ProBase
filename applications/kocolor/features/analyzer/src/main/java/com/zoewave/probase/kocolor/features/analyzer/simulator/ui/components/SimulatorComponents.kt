@@ -51,18 +51,17 @@ fun MagicBackground() {
     val infiniteTransition = rememberInfiniteTransition(label = "magic")
     val phase by infiniteTransition.animateFloat(
         initialValue = 0f, targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(10000, easing = LinearEasing), RepeatMode.Reverse),
+        animationSpec = infiniteRepeatable(tween(12000, easing = LinearEasing), RepeatMode.Reverse),
         label = "phase"
     )
 
-    Box(modifier = Modifier.fillMaxSize().alpha(0.08f).blur(100.dp)) {
+    Box(modifier = Modifier.fillMaxSize().alpha(0.05f).blur(80.dp)) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            drawCircle(
+            drawRect(
                 brush = Brush.radialGradient(
-                    colors = listOf(Color(0xFF6200EE), Color(0xFFD4AF37).copy(alpha = 0.5f), Color.Transparent),
-                    center = center.copy(x = center.x * phase * 2, y = center.y * (1 - phase) * 2)
-                ),
-                radius = size.maxDimension
+                    colors = listOf(Color(0xFFE8EAF6), Color(0xFFF3E5F5), Color.White),
+                    center = center.copy(x = center.x * phase * 1.5f, y = center.y * (1 - phase) * 1.5f)
+                )
             )
         }
     }
@@ -83,17 +82,17 @@ fun MessagingStep(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(28.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
         contentPadding = PaddingValues(bottom = 32.dp)
     ) {
         item {
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(24.dp))
             Text(
                 text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_title),
-                style = MaterialTheme.typography.displayMedium.copy(fontSize = 42.sp),
+                style = MaterialTheme.typography.displayMedium.copy(fontSize = 44.sp),
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.Normal,
-                lineHeight = 48.sp,
+                lineHeight = 52.sp,
                 color = Color.Black
             )
         }
@@ -103,11 +102,11 @@ fun MessagingStep(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(110.dp)
-                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp), ambientColor = Color.Black.copy(alpha = 0.1f)),
+                    .height(100.dp)
+                    .shadow(elevation = 6.dp, shape = RoundedCornerShape(24.dp), ambientColor = Color.Black.copy(alpha = 0.05f)),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
             ) {
                 Row(
                     modifier = Modifier.padding(12.dp).fillMaxSize(),
@@ -115,9 +114,9 @@ fun MessagingStep(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(72.dp)
+                            .size(64.dp)
                             .clip(CircleShape)
-                            .background(Color.White),
+                            .background(Color(0xFFF5F5F5)),
                         contentAlignment = Alignment.Center
                     ) {
                         if (userPortraitUri != null) {
@@ -128,30 +127,29 @@ fun MessagingStep(
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            Icon(Icons.Default.Person, null, modifier = Modifier.size(28.dp), tint = Color.LightGray.copy(alpha = 0.5f))
+                            Icon(Icons.Default.Person, null, modifier = Modifier.size(24.dp), tint = Color.LightGray)
                         }
                     }
                     Spacer(Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = if (userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = Color.Black.copy(alpha = 0.8f)
                         )
                         Text(
-                            text = if (userPortraitUri != null) "Tap to change visual anchor" else "Tap to add visual context",
+                            text = "Tap to change visual anchor",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray.copy(alpha = 0.7f)
+                            color = Color.Gray
                         )
                     }
                     
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         IconButton(onClick = { onEvent(SimulatorEvent.CapturePortrait) }) {
-                            Icon(Icons.Default.PhotoCamera, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(22.dp))
+                            Icon(Icons.Default.PhotoCamera, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
                         }
                         IconButton(onClick = { onEvent(SimulatorEvent.PickPortrait) }) {
-                            Icon(Icons.Default.Collections, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(22.dp))
+                            Icon(Icons.Default.Image, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
                         }
                     }
                 }
@@ -161,122 +159,54 @@ fun MessagingStep(
         // Clothing Anchors
         if (allClothing.isNotEmpty()) {
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        text = "CLOTHING ANCHORS",
-                        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Serif,
-                        color = Color.Black
-                    )
-                    
-                    val categories = listOf(
+                AnchorSection(
+                    title = "CLOTHING ANCHORS",
+                    categories = listOf(
                         Triple("Top", Icons.Default.Checkroom, ClothingCategory.TOPS),
                         Triple("Bottom", Icons.Default.Layers, ClothingCategory.BOTTOMS),
                         Triple("Shoes", Icons.AutoMirrored.Filled.DirectionsWalk, ClothingCategory.SHOES)
-                    )
-                    
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(28.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                categories.forEach { (name, icon, cat) ->
-                                    val isSelected = selectedClothingCategory == cat
-                                    CategoryTab(
-                                        label = name,
-                                        icon = icon,
-                                        isSelected = isSelected,
-                                        onClick = { onEvent(SimulatorEvent.SelectClothingCategory(cat)) },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                            }
-
-                            val itemsInSelectedCategory = allClothing.filter { it.category == selectedClothingCategory }
-                            AnchorItemRow(
-                                items = itemsInSelectedCategory,
-                                selectedIds = anchoredClothing.map { it.id },
-                                onToggle = { onEvent(SimulatorEvent.ToggleAnchoredClothing(it)) }
-                            )
-                        }
-                    }
-                }
+                    ),
+                    selectedCategory = selectedClothingCategory,
+                    onCategorySelect = { onEvent(SimulatorEvent.SelectClothingCategory(it as ClothingCategory)) },
+                    items = allClothing.filter { it.category == selectedClothingCategory },
+                    selectedIds = anchoredClothing.map { it.id },
+                    onItemToggle = { onEvent(SimulatorEvent.ToggleAnchoredClothing(it as ClothingItem)) }
+                )
             }
         }
 
         // Makeup Anchors
         if (allCosmetics.isNotEmpty()) {
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        text = "MAKEUP ANCHORS",
-                        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Serif,
-                        color = Color.Black
-                    )
-                    
-                    val categories = listOf(
+                AnchorSection(
+                    title = "MAKEUP ANCHORS",
+                    categories = listOf(
                         Triple("Eyes", Icons.Default.Visibility, MacroCategory.EYES),
                         Triple("Cheeks", Icons.Default.FaceRetouchingNatural, MacroCategory.DIMENSION),
                         Triple("Lips", Icons.Default.Face, MacroCategory.LIPS)
-                    )
-                    
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(28.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                categories.forEach { (name, icon, cat) ->
-                                    val isSelected = selectedCosmeticCategory == cat
-                                    CategoryTab(
-                                        label = name,
-                                        icon = icon,
-                                        isSelected = isSelected,
-                                        onClick = { onEvent(SimulatorEvent.SelectCosmeticCategory(cat)) },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                            }
-
-                            val itemsInSelectedCategory = allCosmetics.filter { it.macroCategory == selectedCosmeticCategory }
-                            AnchorItemRow(
-                                items = itemsInSelectedCategory,
-                                selectedIds = anchoredCosmetics.map { it.id },
-                                onToggle = { onEvent(SimulatorEvent.ToggleAnchoredCosmetic(it)) }
-                            )
-                        }
-                    }
-                }
+                    ),
+                    selectedCategory = selectedCosmeticCategory,
+                    onCategorySelect = { onEvent(SimulatorEvent.SelectCosmeticCategory(it as MacroCategory)) },
+                    items = allCosmetics.filter { it.macroCategory == selectedCosmeticCategory },
+                    selectedIds = anchoredCosmetics.map { it.id },
+                    onItemToggle = { onEvent(SimulatorEvent.ToggleAnchoredCosmetic(it as CosmeticItem)) }
+                )
             }
         }
         
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.85f)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
             ) {
                 OutlinedTextField(
                     value = userMessage,
                     onValueChange = { onEvent(SimulatorEvent.UpdateMessage(it)) },
-                    placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.alpha(0.5f)) },
+                    placeholder = { Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_intent_placeholder), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.alpha(0.4f)) },
                     modifier = Modifier.fillMaxWidth().height(140.dp),
-                    shape = RoundedCornerShape(28.dp),
+                    shape = RoundedCornerShape(24.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -290,19 +220,71 @@ fun MessagingStep(
         item {
             Button(
                 onClick = { onEvent(SimulatorEvent.StartSimulation) },
-                modifier = Modifier.fillMaxWidth().height(72.dp),
-                shape = RoundedCornerShape(36.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6750A4)),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                modifier = Modifier.fillMaxWidth().height(64.dp),
+                shape = RoundedCornerShape(32.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
             ) {
-                Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_begin_action), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
     }
 }
 
 @Composable
-private fun CategoryTab(
+private fun AnchorSection(
+    title: String,
+    categories: List<Triple<String, ImageVector, Any>>,
+    selectedCategory: Any,
+    onCategorySelect: (Any) -> Unit,
+    items: List<Any>,
+    selectedIds: List<Long>,
+    onItemToggle: (Any) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.2.sp),
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Serif,
+            color = Color.Black
+        )
+        
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.6f)),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
+        ) {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    categories.forEach { (name, icon, cat) ->
+                        val isSelected = selectedCategory == cat
+                        CategoryPill(
+                            label = name,
+                            icon = icon,
+                            isSelected = isSelected,
+                            onClick = { onCategorySelect(cat) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                AnchorScrollRow(
+                    items = items,
+                    selectedIds = selectedIds,
+                    onToggle = onItemToggle
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryPill(
     label: String,
     icon: ImageVector,
     isSelected: Boolean,
@@ -311,11 +293,10 @@ private fun CategoryTab(
 ) {
     Surface(
         onClick = onClick,
-        modifier = modifier.height(52.dp),
-        shape = RoundedCornerShape(16.dp),
-        color = if (isSelected) Color(0xFFE8EAF6) else Color(0xFFEEEEEE).copy(alpha = 0.5f),
-        tonalElevation = if (isSelected) 4.dp else 0.dp,
-        border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFC5CAE9)) else null
+        modifier = modifier.height(48.dp),
+        shape = RoundedCornerShape(14.dp),
+        color = if (isSelected) Color(0xFFE8EAF6) else Color(0xFFF5F5F5),
+        border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFC5CAE9)) else androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
     ) {
         Row(
             modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
@@ -325,13 +306,13 @@ private fun CategoryTab(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(16.dp),
                 tint = if (isSelected) Color(0xFF3F51B5) else Color.Gray
             )
             Spacer(Modifier.width(8.dp))
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                 color = if (isSelected) Color.Black else Color.Gray
             )
@@ -340,14 +321,13 @@ private fun CategoryTab(
 }
 
 @Composable
-private fun <T> AnchorItemRow(
-    items: List<T>,
+private fun AnchorScrollRow(
+    items: List<Any>,
     selectedIds: List<Long>,
-    onToggle: (T) -> Unit
+    onToggle: (Any) -> Unit
 ) {
     LazyRow(
-        modifier = Modifier.fillMaxWidth().height(60.dp),
-        contentPadding = PaddingValues(horizontal = 4.dp),
+        modifier = Modifier.fillMaxWidth().height(52.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -371,13 +351,13 @@ private fun <T> AnchorItemRow(
             
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(colorHex?.let { parseColor(it) } ?: Color(0xFFF3F2F8))
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(colorHex?.let { parseColor(it) } ?: Color(0xFFF5F5F5))
                     .border(
                         width = 1.dp,
-                        color = Color.Black.copy(alpha = 0.05f),
-                        shape = RoundedCornerShape(14.dp)
+                        color = if (isSelected) Color.Black.copy(alpha = 0.2f) else Color.Black.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(12.dp)
                     )
                     .clickable { onToggle(item) },
                 contentAlignment = Alignment.Center
@@ -393,10 +373,10 @@ private fun <T> AnchorItemRow(
                 
                 if (isSelected) {
                     Box(
-                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f)),
+                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Check, null, modifier = Modifier.size(20.dp), tint = Color.White.copy(alpha = 0.8f))
+                        Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp), tint = Color.White)
                     }
                 }
             }
@@ -417,19 +397,19 @@ fun AnalysisStep(
     ) {
         val infiniteTransition = rememberInfiniteTransition(label = "pulse")
         val scale by infiniteTransition.animateFloat(
-            initialValue = 0.9f, targetValue = 1.1f,
-            animationSpec = infiniteRepeatable(tween(2000), RepeatMode.Reverse),
+            initialValue = 0.95f, targetValue = 1.05f,
+            animationSpec = infiniteRepeatable(tween(2500), RepeatMode.Reverse),
             label = "scale"
         )
 
         Box(
-            modifier = Modifier.size(200.dp).graphicsLayer(scaleX = scale, scaleY = scale),
+            modifier = Modifier.size(180.dp).graphicsLayer(scaleX = scale, scaleY = scale),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.fillMaxSize(),
-                strokeWidth = 2.dp,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                strokeWidth = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
             )
             Icon(
                 imageVector = when (uiState.simulationStep) {
@@ -438,7 +418,7 @@ fun AnalysisStep(
                     else -> Icons.Default.Grain
                 },
                 contentDescription = null,
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(40.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -462,7 +442,7 @@ fun AnalysisStep(
         Text(
             text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_synthesizing),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             modifier = Modifier.width(280.dp),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
@@ -477,7 +457,8 @@ fun ResultStep(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(40.dp)
+        verticalArrangement = Arrangement.spacedBy(32.dp),
+        contentPadding = PaddingValues(bottom = 32.dp)
     ) {
         item {
             Column {
@@ -499,21 +480,21 @@ fun ResultStep(
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                        lineHeight = 22.sp
+                        color = Color.Black.copy(alpha = 0.7f),
+                        lineHeight = 24.sp
                     )
                 }
             }
         }
 
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_chromatic_core), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     val palette = uiState.recommendedPalette
                     palette.forEach { hex ->
                         Box(
-                            modifier = Modifier.size(72.dp).clip(RoundedCornerShape(20.dp)).background(parseColor(hex))
+                            modifier = Modifier.size(64.dp).clip(RoundedCornerShape(16.dp)).background(parseColor(hex)).border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
                         )
                     }
                 }
@@ -531,12 +512,12 @@ fun ResultStep(
         item {
             Button(
                 onClick = { onEvent(SimulatorEvent.SaveToPalette) },
-                modifier = Modifier.fillMaxWidth().height(80.dp),
-                shape = RoundedCornerShape(24.dp)
+                modifier = Modifier.fillMaxWidth().height(64.dp),
+                shape = RoundedCornerShape(32.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
             ) {
-                Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_lock_palette), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_lock_palette), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
-            Spacer(Modifier.height(40.dp))
         }
     }
 }
@@ -549,25 +530,26 @@ fun ResultCard(
 ) {
     val item = uiState
     Card(
-        modifier = Modifier.fillMaxWidth().height(160.dp),
-        shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+        modifier = Modifier.fillMaxWidth().height(140.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier.fillMaxHeight().width(140.dp).background(item.colorHex?.let { parseColor(it) } ?: Color.Gray),
+                modifier = Modifier.fillMaxHeight().width(120.dp).background(item.colorHex?.let { parseColor(it) } ?: Color(0xFFF5F5F5)),
                 contentAlignment = Alignment.Center
             ) {
                 if (item.imageUrl != null) {
                     AsyncImage(model = item.imageUrl, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 } else {
-                    Icon(Icons.Default.Inventory2, null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(40.dp))
+                    Icon(Icons.Default.Inventory2, null, tint = Color.Black.copy(alpha = 0.1f), modifier = Modifier.size(32.dp))
                 }
             }
-            Column(modifier = Modifier.padding(24.dp)) {
-                Text(text = item.category.name, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                Text(text = item.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
-                Text(text = item.brand ?: stringResource(R.string.applications_kocolor_features_analyzer_simulator_bespoke), style = MaterialTheme.typography.bodySmall, modifier = Modifier.alpha(0.6f))
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(text = item.category.name, style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
+                Text(text = item.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Serif)
+                Text(text = item.brand ?: stringResource(R.string.applications_kocolor_features_analyzer_simulator_bespoke), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             }
         }
     }
