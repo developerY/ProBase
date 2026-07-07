@@ -24,7 +24,7 @@ class StyleSimulatorEngine @Inject constructor(
         {
           "rationale": "string",
           "selectedClothingIds": ["Long", "Long", "Long"],
-          "selectedCosmeticIds": ["Long", "Long", "Long"],
+          "selectedCosmeticIds": ["Long", "Long", "Long", "..."],
           "recommendedPalette": ["#HEX", "#HEX", "#HEX"]
         }
     """.trimIndent()
@@ -140,7 +140,7 @@ class StyleSimulatorEngine @Inject constructor(
         }
 
         return """
-            You are the KoColor Style Architect AI. Generate a "Style Blueprint".
+            You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and biologically protective.
             
             USER INTENT: $userIntent
             BIOLOGICAL CONTEXT: $circadianContext (Wellness: ${"%.2f".format(wellnessScore)}, Ritual Done: $routineCompleted)
@@ -159,16 +159,19 @@ class StyleSimulatorEngine @Inject constructor(
             $cosmeticsDescription
             
             GOAL:
-            1. Select BEST 3 clothing items (Top, Bottom, Shoes). If the user provided MUST-INCLUDE CLOTHING, prioritize those.
-            2. Select BEST 3 makeup items from the COSMETIC VANITY that harmonize with the clothes, the user's skin profile, and the weather. If the user provided MUST-INCLUDE COSMETICS, prioritize those.
-            3. Create a 3-color Palette (HEX codes) harmonizing the entire look.
-            4. Provide a brief stylistic rationale.
+            1. Select BEST 3 clothing items (Top, Bottom, Shoes). Prioritize user anchors.
+            2. Select exactly 3 PIGMENT items (1 Eye, 1 Cheek, 1 Lip) from the COSMETIC VANITY. Prioritize user anchors.
+            3. Select 1-2 DEFENSIVE items (Complexion/Skincare) from the COSMETIC VANITY based strictly on the WEATHER/ATMOSPHERIC data. 
+               - If UV is high, select an SPF product.
+               - If humidity/heat is high, select a matte/long-wear foundation or primer.
+            4. Create a 3-color Palette (HEX codes) harmonizing the whole look.
+            5. Provide a brief rationale. Mention WHY you selected the specific DEFENSIVE items for the current weather.
             
             Respond ONLY with a valid JSON object matching this schema:
             {
               "rationale": "string",
               "selectedClothingIds": [Long, Long, Long],
-              "selectedCosmeticIds": [Long, Long, Long],
+              "selectedCosmeticIds": [Long, Long, Long, ...],
               "recommendedPalette": ["#HEX", "#HEX", "#HEX"]
             }
         """.trimIndent()
