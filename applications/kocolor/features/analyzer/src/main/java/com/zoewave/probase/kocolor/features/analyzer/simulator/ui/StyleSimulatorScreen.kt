@@ -83,6 +83,12 @@ fun StyleSimulatorScreen(
                         SimulationStep.MESSAGING -> MessagingStep(
                             userMessage = uiState.userMessage,
                             userPortraitUri = uiState.userPortraitUri,
+                            allClothing = uiState.fullClothingInventory,
+                            allCosmetics = uiState.fullCosmeticInventory,
+                            anchoredClothing = uiState.anchoredClothing,
+                            anchoredCosmetics = uiState.anchoredCosmetics,
+                            selectedClothingCategory = uiState.selectedClothingCategory,
+                            selectedCosmeticCategory = uiState.selectedCosmeticCategory,
                             onEvent = onEvent,
                             navTo = navTo
                         )
