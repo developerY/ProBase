@@ -24,7 +24,7 @@ class StyleSimulatorEngine @Inject constructor(
         {
           "rationale": "string",
           "selectedClothingIds": ["Long", "Long", "Long"],
-          "selectedCosmeticIds": ["Long", "Long", "Long", "..."],
+          "selectedCosmeticIds": ["Long", "Long", "Long", ...],
           "recommendedPalette": ["#HEX", "#HEX", "#HEX"]
         }
     """.trimIndent()
@@ -46,9 +46,14 @@ class StyleSimulatorEngine @Inject constructor(
     ): StyleBlueprint {
         val startTime = System.currentTimeMillis()
         
+        // 1. Manifest Minification (Cloud-Optimization)
+        val minifiedManifest = minifyManifest(
+            availableWardrobe, availableCosmetics, anchoredClothing, anchoredCosmetics
+        )
+
         val prompt = buildArchitectPrompt(
             userIntent, circadianContext, routineCompleted, wellnessScore, weatherContext, 
-            availableWardrobe, availableCosmetics, fashionProfile, anchoredClothing, anchoredCosmetics
+            minifiedManifest, fashionProfile
         )
 
         // Tier 1.5: Local LLM (Gemini Nano) - PREFERRED Tier for speed/cost
@@ -109,36 +114,52 @@ class StyleSimulatorEngine @Inject constructor(
         return sanitizeAndDecode(jsonText)
     }
 
+    private fun minifyManifest(
+        wardrobe: List<ClothingItem>,
+        cosmetics: List<CosmeticItem>,
+        anchoredWardrobe: List<ClothingItem>,
+        anchoredCosmetics: List<CosmeticItem>
+    ): String {
+        // Pruning: If a category is anchored, only include those items.
+        val anchoredCategories = anchoredWardrobe.map { it.category }.toSet()
+        val prunedWardrobe = wardrobe.filter { item ->
+            if (anchoredCategories.contains(item.category)) {
+                anchoredWardrobe.any { it.id == item.id }
+            } else true
+        }
+
+        val anchoredCosmeticMacros = anchoredCosmetics.map { it.macroCategory }.toSet()
+        val prunedCosmetics = cosmetics.filter { item ->
+            if (anchoredCosmeticMacros.contains(item.macroCategory)) {
+                anchoredCosmetics.any { it.id == item.id }
+            } else true
+        }
+
+        // Mapping to Lightweight DTOs
+        val minWardrobe = prunedWardrobe.groupBy { it.category.name.lowercase() }
+            .mapValues { (_, items) ->
+                items.distinctBy { "${it.category}_${it.colorFamily}" } // Deduplication
+                    .map { MinifiedClothing(it.id.toString(), it.name.lowercase(), it.colorHex ?: "unknown", it.formality.name.lowercase()) }
+            }
+
+        val minCosmetics = prunedCosmetics.groupBy { it.macroCategory.name.lowercase() }
+            .mapValues { (_, items) ->
+                items.distinctBy { "${it.microCategory}_${it.colorFamily}" }
+                    .map { MinifiedCosmetic(it.id.toString(), it.name.lowercase(), it.colorHex ?: "unknown") }
+            }
+
+        return json.encodeToString(CloudManifest(minWardrobe, minCosmetics))
+    }
+
     private fun buildArchitectPrompt(
         userIntent: String,
         circadianContext: String,
         routineCompleted: Boolean,
         wellnessScore: Double,
         weatherContext: String,
-        availableWardrobe: List<ClothingItem>,
-        availableCosmetics: List<CosmeticItem>,
-        fashionProfile: String?,
-        anchoredClothing: List<ClothingItem>,
-        anchoredCosmetics: List<CosmeticItem>
+        minifiedManifest: String,
+        fashionProfile: String?
     ): String {
-        val wardrobeDescription = availableWardrobe.joinToString("\n") { 
-            "CLOTHING_ID: ${it.id}, Name: ${it.name}, Category: ${it.category}, Color: ${it.colorHex ?: "Unknown"}"
-        }
-        
-        val cosmeticsDescription = availableCosmetics.joinToString("\n") {
-            "COSMETIC_ID: ${it.id}, Name: ${it.name}, Brand: ${it.brand}, Category: ${it.microCategory}, Color: ${it.colorHex ?: "Unknown"}, Notes: ${it.notes ?: "None"}"
-        }
-
-        val anchorContext = StringBuilder()
-        if (anchoredClothing.isNotEmpty()) {
-            anchorContext.append("\nUSER'S MUST-INCLUDE CLOTHING:\n")
-            anchoredClothing.forEach { anchorContext.append("- CLOTHING_ID: ${it.id}, Name: ${it.name}\n") }
-        }
-        if (anchoredCosmetics.isNotEmpty()) {
-            anchorContext.append("\nUSER'S MUST-INCLUDE COSMETICS:\n")
-            anchoredCosmetics.forEach { anchorContext.append("- COSMETIC_ID: ${it.id}, Name: ${it.name}\n") }
-        }
-
         return """
             You are the KoColor Style Architect AI. Generate a "Style Blueprint" that is both stylistically harmonic and biologically protective.
             
@@ -147,21 +168,15 @@ class StyleSimulatorEngine @Inject constructor(
             WEATHER/ATMOSPHERIC: $weatherContext
             SKIN PROFILE: ${fashionProfile ?: "Unknown"}
             
-            $anchorContext
-            
             IMAGE DATA: I have provided a portrait of the user. Use this as the source of truth for their visual canvas.
             
-            AVAILABLE VAULT (USE THESE EXACT ITEMS):
-            --- WARDROBE ---
-            $wardrobeDescription
-            
-            --- COSMETIC VANITY ---
-            $cosmeticsDescription
+            AVAILABLE VAULT (MINIFIED MANIFEST):
+            $minifiedManifest
             
             GOAL:
-            1. Select BEST 3 clothing items (Top, Bottom, Shoes). Prioritize user anchors.
-            2. Select exactly 3 PIGMENT items (1 Eye, 1 Cheek, 1 Lip) from the COSMETIC VANITY. Prioritize user anchors.
-            3. Select 1-2 DEFENSIVE items (Complexion/Skincare) from the COSMETIC VANITY based strictly on the WEATHER/ATMOSPHERIC data. 
+            1. Select BEST 3 clothing items (Top, Bottom, Shoes) from the manifest.
+            2. Select exactly 3 PIGMENT makeup items (1 Eye, 1 Cheek, 1 Lip) from the manifest.
+            3. Select 1-2 DEFENSIVE items (Complexion/Skincare) from the manifest based strictly on the WEATHER/ATMOSPHERIC data. 
                - If UV is high, select an SPF product.
                - If humidity/heat is high, select a matte/long-wear foundation or primer.
             4. Create a 3-color Palette (HEX codes) harmonizing the whole look.
@@ -238,4 +253,25 @@ data class StyleBlueprint(
     val selectedClothingIds: List<Long>,
     val selectedCosmeticIds: List<Long>,
     val recommendedPalette: List<String>
+)
+
+@Serializable
+private data class MinifiedClothing(
+    val id: String,
+    val type: String,
+    val hex: String,
+    val vibe: String
+)
+
+@Serializable
+private data class MinifiedCosmetic(
+    val id: String,
+    val type: String,
+    val hex: String
+)
+
+@Serializable
+private data class CloudManifest(
+    val wardrobe: Map<String, List<MinifiedClothing>>,
+    val cosmetics: Map<String, List<MinifiedCosmetic>>
 )
