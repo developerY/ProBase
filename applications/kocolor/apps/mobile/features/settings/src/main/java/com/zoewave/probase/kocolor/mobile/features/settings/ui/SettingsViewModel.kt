@@ -9,6 +9,7 @@ import com.zoewave.probase.kocolor.db.entity.CosmeticItemEntity
 import com.zoewave.probase.kocolor.db.entity.ClothingItemEntity
 import com.zoewave.probase.core.data.service.health.HealthSessionManager
 import com.zoewave.probase.core.model.ritual.*
+import com.zoewave.probase.core.util.color.ColorQuantizer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -148,47 +149,75 @@ class SettingsViewModel @Inject constructor(
 
     private fun generateSampleData() {
         viewModelScope.launch {
-            // 1. Generate 10 High-Fidelity Cosmetics
-            val cosmeticBrands = listOf("Chanel", "Dior", "Fenty Beauty", "Rare Beauty", "MAC", "Estée Lauder", "YSL", "NARS", "Guerlain", "Charlotte Tilbury")
-            val cosmeticColors = listOf("#8B0000", "#FFC0CB", "#D4AF37", "#2C2420", "#FDEEF4", "#E8F1FD", "#FEECEB", "#800020", "#C71585", "#DB7093")
+            // Realistic Color Palettes
+            val lipColors = listOf("#8B0000", "#FFC0CB", "#E9967A", "#D8BFD8", "#FA8072", "#C71585", "#DB7093", "#FF69B4", "#B03060", "#DC143C")
+            val cheekColors = listOf("#FFB6C1", "#FFDAB9", "#CD7F32", "#BC8F8F", "#FF7F50", "#DB7093", "#E9967A", "#F08080")
+            val eyeColors = listOf("#3E2723", "#F5DEB3", "#B87333", "#808080", "#2F4F4F", "#000080", "#556B2F", "#D2691E", "#A0522D")
+            val complexColors = listOf("#F5F5DC", "#FFE4C4", "#DEB887", "#F3E5AB", "#ECE2C6", "#FDF5E6", "#FAEBD7")
+            val neutralClothing = listOf("#000000", "#FFFFFF", "#000080", "#808080", "#B38B6D", "#F5F5DC", "#2F4F4F", "#355E3B")
+            val classicClothing = listOf("#800000", "#50C878", "#FFD700", "#E1C16E", "#708090", "#4A2C2A", "#1E3A8A", "#B91C1C")
+
+            val cosmeticBrands = listOf("Chanel", "Dior", "Fenty Beauty", "Rare Beauty", "MAC", "Estée Lauder", "YSL", "NARS", "Guerlain", "Charlotte Tilbury", "Pat McGrath", "Hourglass")
             
-            repeat(10) { i ->
-                val micro = MicroCategory.entries.toTypedArray().random()
-                val brand = cosmeticBrands[i % cosmeticBrands.size]
-                val name = "$brand ${micro.displayName} Elite"
+            // 1. Generate 50 High-Fidelity Cosmetics
+            repeat(50) { i ->
+                val micro = MicroCategory.entries.toTypedArray().filter { it.macro in listOf(MacroCategory.LIPS, MacroCategory.EYES, MacroCategory.DIMENSION, MacroCategory.COMPLEXION) }.random()
+                val brand = cosmeticBrands.random()
+                val name = "$brand ${micro.displayName} Pro"
                 
+                val colors = when(micro.macro) {
+                    MacroCategory.LIPS -> lipColors
+                    MacroCategory.EYES -> eyeColors
+                    MacroCategory.DIMENSION -> cheekColors
+                    MacroCategory.COMPLEXION -> complexColors
+                    else -> complexColors
+                }
+                
+                val hex = colors.random()
                 cosmeticDao.insertCosmetic(
                     CosmeticItemEntity(
                         name = name,
                         brand = brand,
                         macroCategory = micro.macro,
                         microCategory = micro,
-                        colorHex = cosmeticColors[i % cosmeticColors.size],
-                        shadeName = "Signature ${i + 1}",
+                        colorHex = hex,
+                        colorFamily = ColorQuantizer.snapToFamily(hex),
+                        shadeName = "Artist Edition ${i + 1}",
+                        notes = if (i % 5 == 0) "Long-wear high SPF formula" else "Professional pigment",
+                        price = (25..85).random().toDouble(),
                         timestamp = System.currentTimeMillis() - (i * 3600000)
                     )
                 )
             }
 
-            // 2. Generate 10 High-Fidelity Clothing Items
-            val clothingBrands = listOf("Atelier", "Saint Laurent", "Celine", "Brunello Cucinelli", "Loro Piana", "Hermès", "The Row", "Prada", "Gucci", "Loewe")
-            val clothingColors = listOf("#222222", "#FFFFFF", "#F5F5DC", "#000080", "#355E3B", "#4A2C2A", "#708090", "#800000", "#FFD700", "#E1C16E")
-
-            repeat(10) { i ->
-                val category = ClothingCategory.entries.toTypedArray().random()
-                val brand = clothingBrands[i % clothingBrands.size]
-                val formality = if (i % 3 == 0) Formality.PROFESSIONAL else if (i % 5 == 0) Formality.FORMAL else Formality.CASUAL
+            // 2. Generate 50 High-Fidelity Clothing Items
+            val clothingBrands = listOf("Atelier", "Saint Laurent", "Celine", "Brunello Cucinelli", "Loro Piana", "Hermès", "The Row", "Prada", "Gucci", "Loewe", "Tom Ford", "Zegna")
+            
+            repeat(50) { i ->
+                val category = ClothingCategory.entries.toTypedArray().filter { it != ClothingCategory.OTHER }.random()
+                val brand = clothingBrands.random()
+                val formality = when {
+                    i % 4 == 0 -> Formality.PROFESSIONAL
+                    i % 6 == 0 -> Formality.FORMAL
+                    i % 10 == 0 -> Formality.GALA
+                    else -> Formality.CASUAL
+                }
+                
+                val colors = if (i % 2 == 0) neutralClothing else classicClothing
+                val hex = colors.random()
                 
                 clothingDao.insertClothing(
                     ClothingItemEntity(
-                        name = "$brand ${category.displayName} Piece",
+                        name = "$brand ${category.displayName} Select",
                         brand = brand,
                         category = category,
                         formality = formality,
-                        colorHex = clothingColors[i % clothingColors.size],
-                        dominantHex = clothingColors[i % clothingColors.size],
-                        material = "Premium Silk/Cashmere Blend",
-                        price = (200..2000).random().toDouble(),
+                        colorHex = hex,
+                        colorFamily = ColorQuantizer.snapToFamily(hex),
+                        dominantHex = hex,
+                        material = if (i % 3 == 0) "Premium Silk/Cashmere Blend" else "High-Thread Performance Cotton",
+                        price = (150..3500).random().toDouble(),
+                        notes = "Archived from seasonal lookbook.",
                         timestamp = System.currentTimeMillis() - (i * 7200000)
                     )
                 )

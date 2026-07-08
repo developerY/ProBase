@@ -31,6 +31,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,6 +43,7 @@ import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.SimulationStep
 import com.zoewave.probase.kocolor.features.analyzer.simulator.ui.StyleSimulatorUiState
 import com.zoewave.probase.core.model.ritual.ClothingCategory
 import com.zoewave.probase.core.model.ritual.ClothingItem
+import com.zoewave.probase.core.model.ritual.CosmeticItem
 import com.zoewave.probase.core.model.ritual.MacroCategory
 import com.zoewave.probase.core.model.ritual.ColorFamily
 import com.zoewave.probase.kocolor.model.KoColorRoute
@@ -120,15 +122,14 @@ fun MessagingStep(
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            Icon(Icons.Default.Person, null, modifier = Modifier.size(28.dp), tint = Color.LightGray.copy(alpha = 0.5f))
+                            Icon(Icons.Default.Person, null, modifier = Modifier.size(24.dp), tint = Color.LightGray.copy(alpha = 0.5f))
                         }
                     }
                     Spacer(Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = if (uiState.userPortraitUri != null) "Visual Identity Active" else "No Portrait Detected",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = Color.Black.copy(alpha = 0.8f)
                         )
                         Text(
@@ -151,41 +152,39 @@ fun MessagingStep(
         }
 
         // Clothing Anchors
-        if (uiState.fullClothingInventory.isNotEmpty()) {
-            item {
-                AnchorSection(
-                    title = stringResource(R.string.applications_kocolor_features_analyzer_simulator_clothing_anchors),
-                    categories = listOf(
-                        Triple("Top", Icons.Default.Checkroom, ClothingCategory.TOPS),
-                        Triple("Bottom", Icons.Default.Layers, ClothingCategory.BOTTOMS),
-                        Triple("Shoes", Icons.AutoMirrored.Filled.DirectionsWalk, ClothingCategory.SHOES)
-                    ),
-                    selectedCategory = uiState.selectedClothingCategory,
-                    onCategorySelect = { onEvent(SimulatorEvent.SelectClothingCategory(it as ClothingCategory)) },
-                    families = uiState.clothingFamilies,
-                    anchoredFamily = uiState.anchoredClothingFamilies[uiState.selectedClothingCategory],
-                    onToggle = { onEvent(SimulatorEvent.ToggleClothingFamily(uiState.selectedClothingCategory, it)) }
-                )
-            }
+        item {
+            AnchorSection(
+                title = stringResource(R.string.applications_kocolor_features_analyzer_simulator_clothing_anchors),
+                categories = listOf(
+                    Triple("Top", Icons.Default.Checkroom, ClothingCategory.TOPS),
+                    Triple("Bottom", Icons.Default.Layers, ClothingCategory.BOTTOMS),
+                    Triple("Shoes", Icons.AutoMirrored.Filled.DirectionsWalk, ClothingCategory.SHOES)
+                ),
+                selectedCategory = uiState.selectedClothingCategory,
+                onCategorySelect = { onEvent(SimulatorEvent.SelectClothingCategory(it as ClothingCategory)) },
+                families = uiState.clothingFamilies,
+                anchoredFamily = uiState.anchoredClothingFamilies[uiState.selectedClothingCategory],
+                onToggle = { onEvent(SimulatorEvent.ToggleClothingFamily(uiState.selectedClothingCategory, it)) },
+                emptyMessage = "No clothes in this category. Tap + in Collection to add pieces."
+            )
         }
 
         // Makeup Anchors
-        if (uiState.fullCosmeticInventory.isNotEmpty()) {
-            item {
-                AnchorSection(
-                    title = stringResource(R.string.applications_kocolor_features_analyzer_simulator_makeup_anchors),
-                    categories = listOf(
-                        Triple("Eyes", Icons.Default.Visibility, MacroCategory.EYES),
-                        Triple("Cheeks", Icons.Default.FaceRetouchingNatural, MacroCategory.DIMENSION),
-                        Triple("Lips", Icons.Default.Face, MacroCategory.LIPS)
-                    ),
-                    selectedCategory = uiState.selectedCosmeticCategory,
-                    onCategorySelect = { onEvent(SimulatorEvent.SelectCosmeticCategory(it as MacroCategory)) },
-                    families = uiState.cosmeticFamilies,
-                    anchoredFamily = uiState.anchoredCosmeticFamilies[uiState.selectedCosmeticCategory],
-                    onToggle = { onEvent(SimulatorEvent.ToggleCosmeticFamily(uiState.selectedCosmeticCategory, it)) }
-                )
-            }
+        item {
+            AnchorSection(
+                title = stringResource(R.string.applications_kocolor_features_analyzer_simulator_makeup_anchors),
+                categories = listOf(
+                    Triple("Eyes", Icons.Default.Visibility, MacroCategory.EYES),
+                    Triple("Cheeks", Icons.Default.FaceRetouchingNatural, MacroCategory.DIMENSION),
+                    Triple("Lips", Icons.Default.Face, MacroCategory.LIPS)
+                ),
+                selectedCategory = uiState.selectedCosmeticCategory,
+                onCategorySelect = { onEvent(SimulatorEvent.SelectCosmeticCategory(it as MacroCategory)) },
+                families = uiState.cosmeticFamilies,
+                anchoredFamily = uiState.anchoredCosmeticFamilies[uiState.selectedCosmeticCategory],
+                onToggle = { onEvent(SimulatorEvent.ToggleCosmeticFamily(uiState.selectedCosmeticCategory, it)) },
+                emptyMessage = "No makeup in this category. Tap + in Collection to add products."
+            )
         }
         
         item {
@@ -226,14 +225,15 @@ fun MessagingStep(
 }
 
 @Composable
-private fun AnchorSection(
+private fun <T> AnchorSection(
     title: String,
     categories: List<Triple<String, ImageVector, Any>>,
     selectedCategory: Any,
     onCategorySelect: (Any) -> Unit,
-    families: Map<ColorFamily, Any>,
+    families: Map<ColorFamily, List<T>>,
     anchoredFamily: ColorFamily?,
-    onToggle: (ColorFamily) -> Unit
+    onToggle: (ColorFamily) -> Unit,
+    emptyMessage: String
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
@@ -267,22 +267,37 @@ private fun AnchorSection(
                     }
                 }
 
-                // Perceptual Color Buckets Row
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Only show families that have items in the current category
-                    ColorFamily.entries.filter { families.containsKey(it) }.forEach { family ->
-                        val isSelected = anchoredFamily == family
+                if (families.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = emptyMessage,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray.copy(alpha = 0.6f),
+                            textAlign = TextAlign.Center,
+                            lineHeight = 14.sp
+                        )
+                    }
+                } else {
+                    // Perceptual Color Buckets Row
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Only show families that have items in the current category
+                        ColorFamily.entries.filter { families.containsKey(it) }.forEach { family ->
+                            val isSelected = anchoredFamily == family
 
-                        item {
-                            ColorFamilySwatch(
-                                family = family,
-                                isSelected = isSelected,
-                                onClick = { onToggle(family) }
-                            )
+                            item {
+                                ColorFamilySwatch(
+                                    family = family,
+                                    isSelected = isSelected,
+                                    onClick = { onToggle(family) }
+                                )
+                            }
                         }
                     }
                 }

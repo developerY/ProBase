@@ -12,6 +12,7 @@ import com.zoewave.probase.kocolor.data.repository.FashionSessionRepository
 import com.zoewave.probase.kocolor.data.repository.CosmeticInventoryRepository
 import com.zoewave.probase.core.data.repository.weather.AtmosphericRepository
 import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleSimulatorEngine
+import com.zoewave.probase.kocolor.features.analyzer.simulator.data.StyleBlueprint
 import com.zoewave.probase.core.model.ritual.*
 import com.zoewave.probase.kocolor.model.KoColorRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -85,55 +86,74 @@ class StyleSimulatorViewModel @Inject constructor(
     private val aiSettings: AiConfigurationSettings
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(StyleSimulatorUiState())
-    val uiState: StateFlow<StyleSimulatorUiState> = _uiState.asStateFlow()
+    private val _selectedClothingCategory = MutableStateFlow(ClothingCategory.TOPS)
+    private val _selectedCosmeticCategory = MutableStateFlow(MacroCategory.LIPS)
+    private val _userMessage = MutableStateFlow("")
+    private val _anchoredClothingFamilies = MutableStateFlow<Map<ClothingCategory, ColorFamily>>(emptyMap())
+    private val _anchoredCosmeticFamilies = MutableStateFlow<Map<MacroCategory, ColorFamily>>(emptyMap())
+    private val _simulationStep = MutableStateFlow(SimulationStep.MESSAGING)
+    private val _simulationResult = MutableStateFlow<StyleBlueprint?>(null)
+
+    val uiState: StateFlow<StyleSimulatorUiState> = combine(
+        sessionRepository.faceUri,
+        wardrobeRepository.getAllClothing(),
+        cosmeticRepository.getAllCosmetics(),
+        _selectedClothingCategory,
+        _selectedCosmeticCategory,
+        _userMessage,
+        _anchoredClothingFamilies,
+        _anchoredCosmeticFamilies,
+        _simulationStep,
+        _simulationResult
+    ) { array ->
+        val faceUri = array[0] as String?
+        val allClothing = array[1] as List<ClothingItem>
+        val allCosmetics = array[2] as List<CosmeticItem>
+        val selectedClothingCat = array[3] as ClothingCategory
+        val selectedCosmeticCat = array[4] as MacroCategory
+        val userMsg = array[5] as String
+        val anchoredClothing = array[6] as Map<ClothingCategory, ColorFamily>
+        val anchoredCosmetics = array[7] as Map<MacroCategory, ColorFamily>
+        val step = array[8] as SimulationStep
+        val result = array[9] as StyleBlueprint?
+
+        val clothingFamilies = allClothing.filter { it.category == selectedClothingCat }
+            .groupBy { it.colorFamily }
+        
+        val cosmeticFamilies = allCosmetics.filter { it.macroCategory == selectedCosmeticCat }
+            .groupBy { it.colorFamily }
+
+        StyleSimulatorUiState(
+            userPortraitUri = faceUri,
+            fullClothingInventory = allClothing,
+            fullCosmeticInventory = allCosmetics,
+            selectedClothingCategory = selectedClothingCat,
+            selectedCosmeticCategory = selectedCosmeticCat,
+            userMessage = userMsg,
+            anchoredClothingFamilies = anchoredClothing,
+            anchoredCosmeticFamilies = anchoredCosmetics,
+            clothingFamilies = clothingFamilies,
+            cosmeticFamilies = cosmeticFamilies,
+            simulationStep = step,
+            rationale = result?.rationale,
+            recommendedPalette = result?.recommendedPalette ?: emptyList(),
+            recommendedClothing = allClothing.filter { it.id in (result?.selectedClothingIds ?: emptyList()) },
+            recommendedAccessories = allCosmetics.filter { it.id in (result?.selectedCosmeticIds ?: emptyList()) }.map { 
+                ClothingItem(id = it.id, name = it.name, brand = it.brand, category = ClothingCategory.OTHER, colorHex = it.colorHex)
+            },
+            isLocalResult = result?.rationale?.startsWith("Local Architect") ?: false
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = StyleSimulatorUiState()
+    )
 
     private val _effect = kotlinx.coroutines.channels.Channel<SimulatorEffect>()
     val effect = _effect.receiveAsFlow()
 
     init {
         checkRoutineStatus()
-        observePortrait()
-        loadInventory()
-    }
-
-    private fun loadInventory() {
-        viewModelScope.launch {
-            combine(
-                wardrobeRepository.getAllClothing(),
-                _uiState.map { it.selectedClothingCategory }.distinctUntilChanged()
-            ) { list, category ->
-                val grouped = list.filter { it.category == category }
-                    .groupBy { it.colorFamily }
-                
-                _uiState.update { it.copy(
-                    fullClothingInventory = list,
-                    clothingFamilies = grouped
-                ) }
-            }.collect()
-        }
-        viewModelScope.launch {
-            combine(
-                cosmeticRepository.getAllCosmetics(),
-                _uiState.map { it.selectedCosmeticCategory }.distinctUntilChanged()
-            ) { list, category ->
-                val grouped = list.filter { it.macroCategory == category }
-                    .groupBy { it.colorFamily }
-
-                _uiState.update { it.copy(
-                    fullCosmeticInventory = list,
-                    cosmeticFamilies = grouped
-                ) }
-            }.collect()
-        }
-    }
-
-    private fun observePortrait() {
-        viewModelScope.launch {
-            sessionRepository.faceUri.collect { uri ->
-                _uiState.update { it.copy(userPortraitUri = uri) }
-            }
-        }
     }
 
     private fun checkRoutineStatus() {
@@ -143,7 +163,6 @@ class StyleSimulatorViewModel @Inject constructor(
                 .map { routines ->
                     routines.find { it.time == RoutineTime.MORNING }?.steps?.all { it.isCompleted } ?: false
                 }.collect { completed ->
-                    _uiState.update { it.copy(morningRoutineCompleted = completed) }
                 }
         }
     }
@@ -160,10 +179,16 @@ class StyleSimulatorViewModel @Inject constructor(
 
     fun onEvent(event: SimulatorEvent) {
         when (event) {
-            is SimulatorEvent.UpdateMessage -> _uiState.update { it.copy(userMessage = event.message) }
+            is SimulatorEvent.UpdateMessage -> _userMessage.value = event.message
             SimulatorEvent.StartSimulation -> runSimulation()
             SimulatorEvent.SaveToPalette -> saveSelectionToColorTab()
-            SimulatorEvent.Reset -> _uiState.value = StyleSimulatorUiState()
+            SimulatorEvent.Reset -> {
+                _userMessage.value = ""
+                _anchoredClothingFamilies.value = emptyMap()
+                _anchoredCosmeticFamilies.value = emptyMap()
+                _simulationStep.value = SimulationStep.MESSAGING
+                _simulationResult.value = null
+            }
             SimulatorEvent.CapturePortrait -> {
                 viewModelScope.launch {
                     _effect.send(SimulatorEffect.NavigateToCamera("face_simulator"))
@@ -178,34 +203,30 @@ class StyleSimulatorViewModel @Inject constructor(
                 sessionRepository.setFaceUri(event.uri)
             }
             is SimulatorEvent.ToggleClothingFamily -> {
-                _uiState.update { state ->
-                    val current = state.anchoredClothingFamilies[event.category]
-                    val nextMap = state.anchoredClothingFamilies.toMutableMap()
-                    if (current == event.family) {
-                        nextMap.remove(event.category)
-                    } else {
-                        nextMap[event.category] = event.family
-                    }
-                    state.copy(anchoredClothingFamilies = nextMap)
+                val current = _anchoredClothingFamilies.value[event.category]
+                val nextMap = _anchoredClothingFamilies.value.toMutableMap()
+                if (current == event.family) {
+                    nextMap.remove(event.category)
+                } else {
+                    nextMap[event.category] = event.family
                 }
+                _anchoredClothingFamilies.value = nextMap
             }
             is SimulatorEvent.ToggleCosmeticFamily -> {
-                _uiState.update { state ->
-                    val current = state.anchoredCosmeticFamilies[event.category]
-                    val nextMap = state.anchoredCosmeticFamilies.toMutableMap()
-                    if (current == event.family) {
-                        nextMap.remove(event.category)
-                    } else {
-                        nextMap[event.category] = event.family
-                    }
-                    state.copy(anchoredCosmeticFamilies = nextMap)
+                val current = _anchoredCosmeticFamilies.value[event.category]
+                val nextMap = _anchoredCosmeticFamilies.value.toMutableMap()
+                if (current == event.family) {
+                    nextMap.remove(event.category)
+                } else {
+                    nextMap[event.category] = event.family
                 }
+                _anchoredCosmeticFamilies.value = nextMap
             }
             is SimulatorEvent.SelectClothingCategory -> {
-                _uiState.update { it.copy(selectedClothingCategory = event.category) }
+                _selectedClothingCategory.value = event.category
             }
             is SimulatorEvent.SelectCosmeticCategory -> {
-                _uiState.update { it.copy(selectedCosmeticCategory = event.category) }
+                _selectedCosmeticCategory.value = event.category
             }
         }
     }
@@ -213,50 +234,43 @@ class StyleSimulatorViewModel @Inject constructor(
     private fun runSimulation() {
         viewModelScope.launch {
             val apiKey = aiSettings.getGeminiApiKey()
-            val userIntent = uiState.value.userMessage
+            val state = uiState.value
+            val userIntent = state.userMessage
             
-            // 1. Manifest Pre-Filtering
-            Log.d("StyleSimulatorVM", "THINKING: Filtering wardrobe for intent: '$userIntent'")
             val filteredWardrobe = wardrobeRepository.getShortlistByIntent(userIntent).first()
-            val allCosmetics = cosmeticRepository.getAllCosmetics().first()
+            val allCosmetics = state.fullCosmeticInventory
 
-            // 2. Biological & Atmospheric Anchoring
             val profile = fashionRepository.getProfile().first()
             val skinContext = profile?.let { 
                 "Undertone: ${it.undertone}, Seasonal Type: ${it.seasonalType}"
             } ?: "Unknown"
             
             val weather = atmosphericRepository.atmosphericState.value
-            val weatherContext = "UV: ${weather.environmentalContext?.uvIndex ?: "Unknown"}, Temp: ${weather.weather?.main?.temp ?: "Unknown"}C, Condition: ${weather.weather?.weather?.firstOrNull()?.main ?: "Clear"}"
-            
-            Log.d("StyleSimulatorVM", "THINKING: Weather Context: $weatherContext")
+            val weatherContext = "UV: ${weather.environmentalContext?.uvIndex ?: "Unknown"}, Temp: ${weather.weather?.main?.temp ?: "Unknown"}C"
 
-            // 3. User Portrait Retrieval (Multimodal Anchor)
             val portraitUri = sessionRepository.faceUri.value
             val userPortrait = portraitUri?.let { uri ->
-                Log.d("StyleSimulatorVM", "THINKING: Loading visual anchor from $uri")
                 loadBitmapFromUri(Uri.parse(uri))
             }
 
-            // 4. Anchor Mapping (Families -> Items)
-            val anchoredClothing = uiState.value.anchoredClothingFamilies.flatMap { (cat, family) ->
-                uiState.value.fullClothingInventory.filter { it.category == cat && it.colorFamily == family }
+            val anchoredClothing = state.anchoredClothingFamilies.flatMap { (cat, family) ->
+                state.fullClothingInventory.filter { it.category == cat && it.colorFamily == family }
             }
-            val anchoredCosmetics = uiState.value.anchoredCosmeticFamilies.flatMap { (cat, family) ->
-                uiState.value.fullCosmeticInventory.filter { it.macroCategory == cat && it.colorFamily == family }
+            val anchoredCosmetics = state.anchoredCosmeticFamilies.flatMap { (cat, family) ->
+                state.fullCosmeticInventory.filter { it.macroCategory == cat && it.colorFamily == family }
             }
 
-            _uiState.update { it.copy(isAnalyzing = true, simulationStep = SimulationStep.BIO_MARKERS) }
+            _simulationStep.value = SimulationStep.BIO_MARKERS
             delay(1000)
-            _uiState.update { it.copy(simulationStep = SimulationStep.ROUTINE) }
+            _simulationStep.value = SimulationStep.ROUTINE
             delay(1000)
-            _uiState.update { it.copy(simulationStep = SimulationStep.GENERATING) }
+            _simulationStep.value = SimulationStep.GENERATING
             
             val blueprint = simulatorEngine.architectStyleBlueprint(
                 userIntent = userIntent,
-                circadianContext = uiState.value.circadianContext,
-                routineCompleted = uiState.value.morningRoutineCompleted,
-                wellnessScore = uiState.value.wellnessScore,
+                circadianContext = "Defense & Protection",
+                routineCompleted = false,
+                wellnessScore = 0.85,
                 weatherContext = weatherContext,
                 availableWardrobe = filteredWardrobe,
                 availableCosmetics = allCosmetics,
@@ -267,26 +281,9 @@ class StyleSimulatorViewModel @Inject constructor(
                 apiKey = apiKey
             )
             
-            val isLocal = apiKey.isNullOrBlank() || blueprint.rationale.startsWith("Local Architect")
-            val selectedItems = filteredWardrobe.filter { it.id in blueprint.selectedClothingIds }
-            val selectedCosmetics = allCosmetics.filter { it.id in blueprint.selectedCosmeticIds }
-
-            // Recycle portrait bitmap after AI analysis to save memory
             userPortrait?.recycle()
-
-            _uiState.update { state ->
-                state.copy(
-                    isAnalyzing = false,
-                    simulationStep = SimulationStep.RESULT,
-                    recommendedPalette = blueprint.recommendedPalette,
-                    recommendedClothing = selectedItems,
-                    recommendedAccessories = selectedCosmetics.map { 
-                        ClothingItem(id = it.id, name = it.name, brand = it.brand, category = ClothingCategory.OTHER, colorHex = it.colorHex)
-                    },
-                    rationale = blueprint.rationale,
-                    isLocalResult = isLocal
-                )
-            }
+            _simulationResult.value = blueprint
+            _simulationStep.value = SimulationStep.RESULT
         }
     }
 
@@ -316,7 +313,6 @@ class StyleSimulatorViewModel @Inject constructor(
                         isOwned = true
                     )
                 } + listOf(
-                    // Add a "Dream" item to show the power of the engine
                     SuggestedPiece(
                         name = "Atelier Silk Scarf",
                         category = "ACCESSORIES",
