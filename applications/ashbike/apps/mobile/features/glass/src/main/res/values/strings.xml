@@ -35,4 +35,5 @@
     <string name="applications_ashbike_apps_mobile_features_glass_gear_label">Gear %1$d</string>
     <string name="applications_ashbike_apps_mobile_features_glass_active">Active</string>
     <string name="applications_ashbike_apps_mobile_features_glass_selected">Selected</string>
+    <string name="applications_ashbike_apps_mobile_features_glass_label">AshBike Glass</string>
 </resources>
