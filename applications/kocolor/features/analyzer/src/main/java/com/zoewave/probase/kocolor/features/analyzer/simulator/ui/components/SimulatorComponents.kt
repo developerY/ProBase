@@ -1,6 +1,9 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -327,15 +330,24 @@ private fun ColorFamilySwatch(
                 color = if (isSelected) Color.Black.copy(alpha = 0.2f) else Color.Black.copy(alpha = 0.05f),
                 shape = RoundedCornerShape(12.dp)
             )
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
+            .clickable { onClick() }
     ) {
         if (isSelected) {
             Box(
-                modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.15f)),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(2.dp)
+                    .size(16.dp)
+                    .background(Color.White, CircleShape)
+                    .border(1.dp, Color.Black.copy(alpha = 0.1f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp), tint = Color.White)
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(10.dp),
+                    tint = Color.Black
+                )
             }
         }
     }
@@ -679,43 +691,59 @@ fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
             Icon(Icons.Default.Accessibility, null, modifier = Modifier.fillMaxSize(), tint = Color.Black)
         }
 
-        // Callout Lines & Cards
+        // Callout Lines
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2, size.height / 2)
             val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
-            // Top Callout (Left)
+            // Top (Left)
             drawLine(
                 color = Color.LightGray,
                 start = Offset(center.x - 30.dp.toPx(), center.y - 80.dp.toPx()),
-                end = Offset(center.x - 100.dp.toPx(), center.y - 120.dp.toPx()),
+                end = Offset(center.x - 80.dp.toPx(), center.y - 140.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
 
-            // Bottom Callout (Right)
+            // Bottom (Right)
             drawLine(
                 color = Color.LightGray,
                 start = Offset(center.x + 40.dp.toPx(), center.y + 40.dp.toPx()),
-                end = Offset(center.x + 100.dp.toPx(), center.y + 20.dp.toPx()),
+                end = Offset(center.x + 80.dp.toPx(), center.y + 60.dp.toPx()),
+                pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
+            )
+
+            // Shoes (Bottom Left)
+            drawLine(
+                color = Color.LightGray,
+                start = Offset(center.x - 20.dp.toPx(), center.y + 160.dp.toPx()),
+                end = Offset(center.x - 80.dp.toPx(), center.y + 180.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
         }
 
         val topItem = uiState.recommendedClothing.find { it.category == ClothingCategory.TOPS }
         val bottomItem = uiState.recommendedClothing.find { it.category == ClothingCategory.BOTTOMS }
+        val shoeItem = uiState.recommendedClothing.find { it.category == ClothingCategory.SHOES }
 
         BlueprintCallout(
             label = "TOP",
             productName = topItem?.name ?: "Pending...",
             colorHex = topItem?.colorHex,
-            modifier = Modifier.align(Alignment.TopStart)
+            modifier = Modifier.align(Alignment.TopStart).padding(top = 20.dp)
         )
 
         BlueprintCallout(
             label = "BOTTOM",
             productName = bottomItem?.name ?: "Pending...",
             colorHex = bottomItem?.colorHex,
-            modifier = Modifier.align(Alignment.CenterEnd).padding(bottom = 60.dp)
+            modifier = Modifier.align(Alignment.CenterEnd).padding(bottom = 40.dp)
+        )
+
+        BlueprintCallout(
+            label = "SHOES",
+            productName = shoeItem?.name ?: "Pending...",
+            colorHex = shoeItem?.colorHex,
+            modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 20.dp)
         )
     }
 }
@@ -728,28 +756,19 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Central Face Anchor
+        // Central Face Anchor (Always use Line-Art for Blueprint feel)
         Box(
             modifier = Modifier
-                .size(240.dp)
+                .size(260.dp)
                 .clip(CircleShape)
-                .background(Color.White)
+                .background(Color.White.copy(alpha = 0.5f))
         ) {
-            if (uiState.userPortraitUri != null) {
-                AsyncImage(
-                    model = uiState.userPortraitUri,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Image(
-                    painter = painterResource(id = R.drawable.applications_kocolor_features_analyzer_face),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize().alpha(0.2f),
-                    contentScale = ContentScale.Fit
-                )
-            }
+            Image(
+                painter = painterResource(id = R.drawable.applications_kocolor_features_analyzer_face),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize().alpha(0.4f),
+                contentScale = ContentScale.Fit
+            )
         }
 
         // Callout Lines
@@ -761,7 +780,15 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             drawLine(
                 color = Color.LightGray,
                 start = Offset(center.x - 40.dp.toPx(), center.y - 40.dp.toPx()),
-                end = Offset(center.x - 100.dp.toPx(), center.y - 120.dp.toPx()),
+                end = Offset(center.x - 80.dp.toPx(), center.y - 120.dp.toPx()),
+                pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
+            )
+
+            // Cheeks (Mid Left)
+            drawLine(
+                color = Color.LightGray,
+                start = Offset(center.x - 60.dp.toPx(), center.y + 10.dp.toPx()),
+                end = Offset(center.x - 80.dp.toPx(), center.y + 60.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
 
@@ -769,26 +796,34 @@ fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
             drawLine(
                 color = Color.LightGray,
                 start = Offset(center.x + 20.dp.toPx(), center.y + 60.dp.toPx()),
-                end = Offset(center.x + 100.dp.toPx(), center.y + 140.dp.toPx()),
+                end = Offset(center.x + 80.dp.toPx(), center.y + 140.dp.toPx()),
                 pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
             )
         }
 
         val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
+        val cheeksItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.DIMENSION }
         val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
 
         BlueprintCallout(
             label = "EYES",
             productName = eyesItem?.name ?: "Pending...",
             colorHex = eyesItem?.colorHex,
-            modifier = Modifier.align(Alignment.TopStart)
+            modifier = Modifier.align(Alignment.TopStart).padding(top = 20.dp)
+        )
+
+        BlueprintCallout(
+            label = "CHEEKS",
+            productName = cheeksItem?.name ?: "Pending...",
+            colorHex = cheeksItem?.colorHex,
+            modifier = Modifier.align(Alignment.CenterStart).padding(top = 100.dp)
         )
 
         BlueprintCallout(
             label = "LIPS",
             productName = lipsItem?.name ?: "Pending...",
             colorHex = lipsItem?.colorHex,
-            modifier = Modifier.align(Alignment.BottomEnd)
+            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 20.dp)
         )
     }
 }
@@ -800,29 +835,59 @@ fun BlueprintCallout(
     colorHex: String?,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier.width(130.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(text = label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.Gray)
-            Text(
-                text = productName,
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                fontWeight = FontWeight.Medium
-            )
-            
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(if (colorHex != null) parseColor(colorHex) else Color(0xFFF3F2F8))
-                    .border(1.dp, Color.Black.copy(alpha = 0.05f), CircleShape)
-            )
+    var isExpanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        Card(
+            modifier = Modifier
+                .width(if (isExpanded) 130.dp else 85.dp)
+                .clickable { isExpanded = !isExpanded },
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.98f)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                    fontWeight = FontWeight.Black,
+                    color = Color.Gray,
+                    letterSpacing = 0.5.sp
+                )
+
+                if (isExpanded) {
+                    Text(
+                        text = productName,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+                        maxLines = 2,
+                        fontWeight = FontWeight.Medium,
+                        lineHeight = 11.sp
+                    )
+                } else {
+                    Text(
+                        text = "Details",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                    )
+                }
+            }
         }
+
+        // Floating Color Indicator (The "Pin")
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = 6.dp, y = (-6).dp)
+                .size(20.dp)
+                .clip(CircleShape)
+                .background(if (colorHex != null) parseColor(colorHex) else Color(0xFFF3F2F8))
+                .border(1.5.dp, Color.White, CircleShape)
+                .shadow(2.dp, CircleShape)
+        )
     }
 }
 
