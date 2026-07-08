@@ -1,5 +1,6 @@
 package com.zoewave.probase.kocolor.features.analyzer.simulator.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -23,12 +24,15 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -142,7 +146,7 @@ fun MessagingStep(
                     
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         IconButton(onClick = { onEvent(SimulatorEvent.CapturePortrait) }) {
-                            Icon(Icons.Default.PhotoCamera, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.PhotoCamera, null, tint = Color.DarkGray.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
                         }
                         IconButton(onClick = { onEvent(SimulatorEvent.PickPortrait) }) {
                             Icon(Icons.Default.Image, null, tint = Color.Black.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
@@ -447,74 +451,115 @@ fun ResultStep(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(32.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
         contentPadding = PaddingValues(bottom = 32.dp)
     ) {
+        // 1. Header & Rationale
         item {
             Column {
-                Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_blueprint), style = MaterialTheme.typography.displaySmall, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
+                Text(
+                    text = stringResource(R.string.applications_kocolor_features_analyzer_simulator_blueprint),
+                    style = MaterialTheme.typography.displaySmall,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(if (uiState.isLocalResult) Color.Gray else Color.Green))
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(if (uiState.isLocalResult) Color.Gray else Color.Green)
+                    )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = if (uiState.isLocalResult) stringResource(R.string.applications_kocolor_features_analyzer_simulator_local_calc) else stringResource(R.string.applications_kocolor_features_analyzer_simulator_ai_optimized), 
-                        style = MaterialTheme.typography.labelSmall, 
-                        fontWeight = FontWeight.Black, 
+                        text = if (uiState.isLocalResult) stringResource(R.string.applications_kocolor_features_analyzer_simulator_local_calc) else stringResource(R.string.applications_kocolor_features_analyzer_simulator_ai_optimized),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
                         letterSpacing = 1.sp
                     )
                 }
-                
+
                 uiState.rationale?.let {
                     Spacer(Modifier.height(16.dp))
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Black.copy(alpha = 0.7f),
-                        lineHeight = 24.sp
+                        lineHeight = 22.sp
                     )
                 }
             }
         }
 
+        // 2. The Visual Blueprint (Side-by-Side)
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_chromatic_core), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    val palette = uiState.recommendedPalette
-                    palette.forEach { hex ->
-                        Box(
-                            modifier = Modifier.size(64.dp).clip(RoundedCornerShape(16.dp)).background(parseColor(hex)).border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(480.dp)
+                    .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(32.dp))
+                    .border(1.dp, Color(0xFFEEEEEE), RoundedCornerShape(32.dp))
+            ) {
+                // Left Column: Chromatic Core & Toggle
+                Column(
+                    modifier = Modifier
+                        .width(140.dp)
+                        .fillMaxHeight()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text(
+                            text = "CHROMATIC CORE",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.primary
                         )
+                        uiState.recommendedPalette.forEach { hex ->
+                            Box(
+                                modifier = Modifier
+                                    .size(width = 100.dp, height = 60.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(parseColor(hex))
+                                    .border(1.dp, Color.Black.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                            )
+                        }
+                    }
+
+                    ResultTabToggle(
+                        selectedTab = uiState.selectedResultTab,
+                        onTabSelected = { onEvent(SimulatorEvent.SelectResultTab(it)) }
+                    )
+                }
+
+                // Right Column: Blueprint View
+                Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                    if (uiState.selectedResultTab == ResultTab.FACE) {
+                        FaceBlueprintView(uiState)
+                    } else {
+                        ClothingBlueprintView(uiState)
                     }
                 }
             }
         }
 
+        // 3. The Atelier List
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                ResultTabPill(
-                    label = "Face",
-                    isSelected = uiState.selectedResultTab == ResultTab.FACE,
-                    onClick = { onEvent(SimulatorEvent.SelectResultTab(ResultTab.FACE)) },
-                    modifier = Modifier.weight(1f)
-                )
-                ResultTabPill(
-                    label = "Clothes",
-                    isSelected = uiState.selectedResultTab == ResultTab.CLOTHES,
-                    onClick = { onEvent(SimulatorEvent.SelectResultTab(ResultTab.CLOTHES)) },
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            val label = if (uiState.selectedResultTab == ResultTab.FACE) "COSMETIC ATELIER" else "CLOTHING ATELIER"
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp),
+                fontWeight = FontWeight.Black,
+                color = Color.Black.copy(alpha = 0.8f)
+            )
         }
 
         if (uiState.selectedResultTab == ResultTab.CLOTHES) {
             if (uiState.recommendedClothing.isEmpty()) {
                 items(3) { i ->
-                    PlaceholderResultCard(label = when(i) {
+                    PlaceholderResultCard(label = when (i) {
                         0 -> "Top"
                         1 -> "Bottom"
                         else -> "Shoes"
@@ -528,7 +573,7 @@ fun ResultStep(
         } else {
             if (uiState.recommendedCosmetics.isEmpty()) {
                 items(3) { i ->
-                    PlaceholderResultCard(label = when(i) {
+                    PlaceholderResultCard(label = when (i) {
                         0 -> "Eyes"
                         1 -> "Cheeks"
                         else -> "Lips"
@@ -540,64 +585,242 @@ fun ResultStep(
                 }
             }
         }
-        
+
         item {
             Button(
                 onClick = { onEvent(SimulatorEvent.SaveToPalette) },
-                modifier = Modifier.fillMaxWidth().height(64.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
                 shape = RoundedCornerShape(32.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
             ) {
-                Text(stringResource(R.string.applications_kocolor_features_analyzer_simulator_lock_palette), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.applications_kocolor_features_analyzer_simulator_lock_palette),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
 }
 
 @Composable
-private fun PlaceholderResultCard(label: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth().height(140.dp).alpha(0.5f),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(IntrinsicSize.Min)) {
-            Box(
-                modifier = Modifier.fillMaxHeight().width(120.dp).background(Color(0xFFF9F9F9)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.Inventory2, null, tint = Color.Black.copy(alpha = 0.05f), modifier = Modifier.size(32.dp))
-            }
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(text = label.uppercase(), style = MaterialTheme.typography.labelSmall, color = Color.LightGray, fontWeight = FontWeight.Bold)
-                Text(text = "Pending Selection", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Serif, color = Color.LightGray)
-                Text(text = "AI Curation in Progress", style = MaterialTheme.typography.bodySmall, color = Color.LightGray.copy(alpha = 0.5f))
-            }
-        }
-    }
-}
-
-@Composable
-private fun ResultTabPill(
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+private fun ResultTabToggle(
+    selectedTab: ResultTab,
+    onTabSelected: (ResultTab) -> Unit
 ) {
     Surface(
-        onClick = onClick,
-        modifier = modifier.height(48.dp),
-        shape = RoundedCornerShape(24.dp),
-        color = if (isSelected) Color.Black else Color(0xFFF3F2F8),
-        shadowElevation = if (isSelected) 4.dp else 0.dp
+        modifier = Modifier
+            .width(110.dp)
+            .height(56.dp),
+        shape = RoundedCornerShape(28.dp),
+        color = Color(0xFFF3F2F8)
     ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier.fillMaxSize().padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clip(CircleShape)
+                    .background(if (selectedTab == ResultTab.FACE) Color.Black else Color.Transparent)
+                    .clickable { onTabSelected(ResultTab.FACE) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "FACE",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    color = if (selectedTab == ResultTab.FACE) Color.White else Color.Gray,
+                    fontSize = 10.sp
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clip(CircleShape)
+                    .background(if (selectedTab == ResultTab.CLOTHES) Color.Black else Color.Transparent)
+                    .clickable { onTabSelected(ResultTab.CLOTHES) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "OUT",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    color = if (selectedTab == ResultTab.CLOTHES) Color.White else Color.Gray,
+                    fontSize = 10.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ClothingBlueprintView(uiState: StyleSimulatorUiState) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Central Silhouette Anchor
+        Box(
+            modifier = Modifier
+                .width(160.dp)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(32.dp))
+                .alpha(0.08f),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Default.Accessibility, null, modifier = Modifier.fillMaxSize(), tint = Color.Black)
+        }
+
+        // Callout Lines & Cards
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2, size.height / 2)
+            val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+
+            // Top Callout (Left)
+            drawLine(
+                color = Color.LightGray,
+                start = Offset(center.x - 30.dp.toPx(), center.y - 80.dp.toPx()),
+                end = Offset(center.x - 100.dp.toPx(), center.y - 120.dp.toPx()),
+                pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
+            )
+
+            // Bottom Callout (Right)
+            drawLine(
+                color = Color.LightGray,
+                start = Offset(center.x + 40.dp.toPx(), center.y + 40.dp.toPx()),
+                end = Offset(center.x + 100.dp.toPx(), center.y + 20.dp.toPx()),
+                pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
+            )
+        }
+
+        val topItem = uiState.recommendedClothing.find { it.category == ClothingCategory.TOPS }
+        val bottomItem = uiState.recommendedClothing.find { it.category == ClothingCategory.BOTTOMS }
+
+        BlueprintCallout(
+            label = "TOP",
+            productName = topItem?.name ?: "Pending...",
+            colorHex = topItem?.colorHex,
+            modifier = Modifier.align(Alignment.TopStart)
+        )
+
+        BlueprintCallout(
+            label = "BOTTOM",
+            productName = bottomItem?.name ?: "Pending...",
+            colorHex = bottomItem?.colorHex,
+            modifier = Modifier.align(Alignment.CenterEnd).padding(bottom = 60.dp)
+        )
+    }
+}
+
+@Composable
+fun FaceBlueprintView(uiState: StyleSimulatorUiState) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Central Face Anchor
+        Box(
+            modifier = Modifier
+                .size(240.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+        ) {
+            if (uiState.userPortraitUri != null) {
+                AsyncImage(
+                    model = uiState.userPortraitUri,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.applications_kocolor_features_analyzer_face),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize().alpha(0.2f),
+                    contentScale = ContentScale.Fit
+                )
+            }
+        }
+
+        // Callout Lines
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2, size.height / 2)
+            val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+
+            // Eyes (Top Left)
+            drawLine(
+                color = Color.LightGray,
+                start = Offset(center.x - 40.dp.toPx(), center.y - 40.dp.toPx()),
+                end = Offset(center.x - 100.dp.toPx(), center.y - 120.dp.toPx()),
+                pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
+            )
+
+            // Lips (Bottom Right)
+            drawLine(
+                color = Color.LightGray,
+                start = Offset(center.x + 20.dp.toPx(), center.y + 60.dp.toPx()),
+                end = Offset(center.x + 100.dp.toPx(), center.y + 140.dp.toPx()),
+                pathEffect = dashEffect, strokeWidth = 1.dp.toPx()
+            )
+        }
+
+        val eyesItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.EYES }
+        val lipsItem = uiState.recommendedCosmetics.find { it.macroCategory == MacroCategory.LIPS }
+
+        BlueprintCallout(
+            label = "EYES",
+            productName = eyesItem?.name ?: "Pending...",
+            colorHex = eyesItem?.colorHex,
+            modifier = Modifier.align(Alignment.TopStart)
+        )
+
+        BlueprintCallout(
+            label = "LIPS",
+            productName = lipsItem?.name ?: "Pending...",
+            colorHex = lipsItem?.colorHex,
+            modifier = Modifier.align(Alignment.BottomEnd)
+        )
+    }
+}
+
+@Composable
+fun BlueprintCallout(
+    label: String,
+    productName: String,
+    colorHex: String?,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.width(130.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(text = label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.Gray)
             Text(
-                text = label.uppercase(),
-                style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-                fontWeight = FontWeight.Black,
-                color = if (isSelected) Color.White else Color.Gray
+                text = productName,
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1,
+                fontWeight = FontWeight.Medium
+            )
+            
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(if (colorHex != null) parseColor(colorHex) else Color(0xFFF3F2F8))
+                    .border(1.dp, Color.Black.copy(alpha = 0.05f), CircleShape)
             )
         }
     }
@@ -637,6 +860,30 @@ fun ResultCard(
                 Text(text = category, style = MaterialTheme.typography.labelSmall, color = Color.Gray, fontWeight = FontWeight.Bold)
                 Text(text = name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Serif)
                 Text(text = brand, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlaceholderResultCard(label: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth().height(140.dp).alpha(0.5f),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(IntrinsicSize.Min)) {
+            Box(
+                modifier = Modifier.fillMaxHeight().width(120.dp).background(Color(0xFFF9F9F9)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.Inventory2, null, tint = Color.Black.copy(alpha = 0.05f), modifier = Modifier.size(32.dp))
+            }
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(text = label.uppercase(), style = MaterialTheme.typography.labelSmall, color = Color.LightGray, fontWeight = FontWeight.Bold)
+                Text(text = "Pending Selection", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Serif, color = Color.LightGray)
+                Text(text = "AI Curation in Progress", style = MaterialTheme.typography.bodySmall, color = Color.LightGray.copy(alpha = 0.5f))
             }
         }
     }
